@@ -62,12 +62,12 @@ impl<T: Config> ExtrinsicParams<T> for CustomExtrinsicParams<T> {
     // Gather together all of the params we will need to encode:
     fn new<Client: OfflineClientT<T>>(
         client: Client,
-        other_params: Self::Params,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(Self {
             genesis_hash: client.genesis_hash(),
-            tip: other_params.tip,
-            foo: other_params.foo,
+            tip: params.tip,
+            foo: params.foo,
         })
     }
 }

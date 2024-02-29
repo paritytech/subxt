@@ -62,7 +62,7 @@ impl<T: Config> ExtrinsicParams<T> for CustomSignedExtension {
 
     fn new<Client: OfflineClientT<T>>(
         _client: Client,
-        _other_params: Self::Params,
+        _params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CustomSignedExtension)
     }

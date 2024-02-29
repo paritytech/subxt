@@ -138,7 +138,7 @@
 //! ]);
 //!
 //! // Construct the tx but don't sign it. The account nonce here defaults to 0.
-//! // You Can use `create_partial_signed` to fetch the correct nonce.
+//! // You can use `create_partial_signed` to fetch the correct nonce.
 //! let partial_tx = client.tx().create_partial_signed_offline(
 //!     &payload,
 //!     Default::default()

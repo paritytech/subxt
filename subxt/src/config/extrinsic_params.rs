@@ -60,7 +60,7 @@ pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + 'static {
     /// Construct a new instance of our [`ExtrinsicParams`].
     fn new<Client: OfflineClientT<T>>(
         client: Client,
-        other_params: Self::Params,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError>;
 }
 

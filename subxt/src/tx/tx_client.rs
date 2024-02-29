@@ -7,7 +7,10 @@ use std::borrow::Cow;
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header, RefineParams},
+    config::{
+        Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header, RefineParams,
+        RefineParamsData,
+    },
     error::{BlockError, Error, MetadataError},
     tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::{Encoded, PhantomDataSendSync},
@@ -104,9 +107,8 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 
     /// Create a partial extrinsic.
     ///
-    /// Note: This function will **not** refine the params to use the latest account nonce and the latest block hash/number.
-    /// Instead your call will get default values of nonce = 0 and mortality = Immortal for the signed extensions, if the params
-    /// have not been 'refined' before.
+    /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
+    /// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
     pub fn create_partial_signed_offline<Call>(
         &self,
         call: &Call,
@@ -136,9 +138,8 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 
     /// Creates a signed extrinsic without submitting it.
     ///
-    /// Note: This function will **not** refine the params to use the latest account nonce and the latest block hash/number.
-    /// Instead your call will get default values `nonce = 0` and `mortality = Immortal` for the signed extensions, if the
-    /// params have not been manually set or 'refined' before.
+    /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
+    /// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
     pub fn create_signed_offline<Call, Signer>(
         &self,
         call: &Call,
@@ -168,7 +169,7 @@ where
     C: OnlineClientT<T>,
 {
     /// Fetch the latest block header and account nonce from the backend and use them to refine [`ExtrinsicParams::Params`].
-    pub async fn refine_params(
+    async fn refine_params(
         &self,
         account_id: &T::AccountId,
         params: &mut <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
@@ -183,11 +184,11 @@ where
         let account_nonce =
             crate::blocks::get_account_nonce(&self.client, account_id, block_ref.hash()).await?;
 
-        params.refine(
+        params.refine(&RefineParamsData::new(
             account_nonce,
             block_header.number().into(),
             block_header.hash(),
-        );
+        ));
         Ok(())
     }
 

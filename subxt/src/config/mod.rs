@@ -10,9 +10,9 @@
 
 mod default_extrinsic_params;
 mod extrinsic_params;
+mod refine_params;
 
 pub mod polkadot;
-pub mod refine_params;
 pub mod signed_extensions;
 pub mod substrate;
 
@@ -26,7 +26,7 @@ use serde::{de::DeserializeOwned, Serialize};
 pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
 pub use extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
 pub use polkadot::{PolkadotConfig, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder};
-pub use refine_params::RefineParams;
+pub use refine_params::{RefineParams, RefineParamsData};
 pub use signed_extensions::SignedExtension;
 pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder};
 

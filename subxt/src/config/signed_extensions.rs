@@ -8,6 +8,7 @@
 //! when interacting with a chain.
 
 use super::extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+use super::refine_params::RefineParamsData;
 use super::RefineParams;
 use crate::utils::Era;
 use crate::{client::OfflineClientT, Config};
@@ -42,7 +43,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
 
     fn new<Client: OfflineClientT<T>>(
         client: Client,
-        _other_params: Self::Params,
+        _params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckSpecVersion(client.runtime_version().spec_version))
     }
@@ -95,9 +96,9 @@ impl<T: Config> SignedExtension<T> for CheckNonce {
 pub struct CheckNonceParams(pub Option<u64>);
 
 impl<T: Config> RefineParams<T> for CheckNonceParams {
-    fn refine(&mut self, account_nonce: u64, _block_number: u64, _block_hash: T::Hash) {
+    fn refine(&mut self, data: &RefineParamsData<T>) {
         if self.0.is_none() {
-            self.0 = Some(account_nonce);
+            self.0 = Some(data.account_nonce());
         }
     }
 }
@@ -110,7 +111,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
 
     fn new<Client: OfflineClientT<T>>(
         client: Client,
-        _other_params: Self::Params,
+        _params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckTxVersion(client.runtime_version().transaction_version))
     }
@@ -137,7 +138,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
 
     fn new<Client: OfflineClientT<T>>(
         client: Client,
-        _other_params: Self::Params,
+        _params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckGenesis(client.genesis_hash()))
     }
@@ -176,11 +177,12 @@ impl<T: Config> Default for CheckMortalityParams<T> {
 }
 
 impl<T: Config> RefineParams<T> for CheckMortalityParams<T> {
-    fn refine(&mut self, _account_nonce: u64, block_number: u64, block_hash: T::Hash) {
+    fn refine(&mut self, data: &RefineParamsData<T>) {
         if self.0.is_none() {
             // By default we refine the params to have a mortal transaction valid for 32 blocks.
             const TX_VALID_FOR: u64 = 32;
-            *self = CheckMortalityParams::mortal(TX_VALID_FOR, block_number, block_hash);
+            *self =
+                CheckMortalityParams::mortal(TX_VALID_FOR, data.block_number(), data.block_hash());
         }
     }
 }
@@ -210,9 +212,9 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
 
     fn new<Client: OfflineClientT<T>>(
         client: Client,
-        other_params: Self::Params,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
-        let check_mortality = if let Some(params) = other_params.0 {
+        let check_mortality = if let Some(params) = params.0 {
             CheckMortality {
                 era: params.era,
                 checkpoint: params.checkpoint.unwrap_or(client.genesis_hash()),
@@ -308,11 +310,11 @@ impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
 
     fn new<Client: OfflineClientT<T>>(
         _client: Client,
-        other_params: Self::Params,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeAssetTxPayment {
-            tip: Compact(other_params.tip),
-            asset_id: other_params.asset_id,
+            tip: Compact(params.tip),
+            asset_id: params.asset_id,
         })
     }
 }
@@ -367,10 +369,10 @@ impl<T: Config> ExtrinsicParams<T> for ChargeTransactionPayment {
 
     fn new<Client: OfflineClientT<T>>(
         _client: Client,
-        other_params: Self::Params,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeTransactionPayment {
-            tip: Compact(other_params.tip),
+            tip: Compact(params.tip),
         })
     }
 }
@@ -412,7 +414,7 @@ macro_rules! impl_tuples {
 
             fn new<Client: OfflineClientT<T>>(
                 client: Client,
-                other_params: Self::Params,
+                params: Self::Params,
             ) -> Result<Self, ExtrinsicParamsError> {
                 let metadata = client.metadata();
                 let types = metadata.types();
@@ -428,7 +430,7 @@ macro_rules! impl_tuples {
                         }
                         // Break and record as soon as we find a match:
                         if $ident::matches(e.identifier(), e.extra_ty(), types) {
-                            let ext = $ident::new(client.clone(), other_params.$index)?;
+                            let ext = $ident::new(client.clone(), params.$index)?;
                             let boxed_ext: Box<dyn ExtrinsicParamsEncoder> = Box::new(ext);
                             exts_by_index.insert(idx, boxed_ext);
                             break

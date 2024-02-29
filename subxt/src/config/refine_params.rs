@@ -6,11 +6,43 @@
 
 use crate::Config;
 
+/// Data that can be used to refine the params of signed extensions.
+pub struct RefineParamsData<T: Config> {
+    account_nonce: u64,
+    block_number: u64,
+    block_hash: T::Hash,
+}
+
+impl<T: Config> RefineParamsData<T> {
+    pub(crate) fn new(account_nonce: u64, block_number: u64, block_hash: T::Hash) -> Self {
+        RefineParamsData {
+            account_nonce,
+            block_number,
+            block_hash,
+        }
+    }
+
+    /// account nonce for extrinsic author
+    pub fn account_nonce(&self) -> u64 {
+        self.account_nonce
+    }
+
+    /// latest finalized block number
+    pub fn block_number(&self) -> u64 {
+        self.block_number
+    }
+
+    /// latest finalized block hash
+    pub fn block_hash(&self) -> T::Hash {
+        self.block_hash
+    }
+}
+
 /// Types implementing [`RefineParams`] can be modified to reflect live information from the chain.
 pub trait RefineParams<T: Config> {
     /// Refine params to an extrinsic. There is usually some notion of 'the param is already set/unset' in types implementing this trait.
     /// The refinement should most likely not affect cases where a param is in a 'is already set by the user' state.
-    fn refine(&mut self, _account_nonce: u64, _block_number: u64, _block_hash: T::Hash) {}
+    fn refine(&mut self, _data: &RefineParamsData<T>) {}
 }
 
 impl<T: Config> RefineParams<T> for () {}
@@ -19,8 +51,8 @@ macro_rules! impl_tuples {
     ($($ident:ident $index:tt),+) => {
 
         impl <T: Config, $($ident : RefineParams<T>),+> RefineParams<T> for ($($ident,)+){
-            fn refine(&mut self, account_nonce: u64, block_number: u64, block_hash: T::Hash) {
-                $(self.$index.refine(account_nonce, block_number, block_hash);)+
+            fn refine(&mut self, data: &RefineParamsData<T>) {
+                $(self.$index.refine(data);)+
             }
 
         }
