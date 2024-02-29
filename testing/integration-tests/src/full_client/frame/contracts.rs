@@ -9,10 +9,10 @@ use crate::{
         runtime_types::{pallet_contracts::wasm::Determinism, sp_weights::weight_v2::Weight},
         system,
     },
-    test_context, TestContext,
+    test_context, TestClient, TestConfig, TestContext,
 };
 use subxt::ext::futures::StreamExt;
-use subxt::{tx::TxProgress, utils::MultiAddress, Config, Error, OnlineClient, SubstrateConfig};
+use subxt::{tx::TxProgress, utils::MultiAddress, Config, Error};
 use subxt_signer::sr25519::{self, dev};
 
 struct ContractsTestContext {
@@ -20,8 +20,8 @@ struct ContractsTestContext {
     signer: sr25519::Keypair,
 }
 
-type Hash = <SubstrateConfig as Config>::Hash;
-type AccountId = <SubstrateConfig as Config>::AccountId;
+type Hash = <TestConfig as Config>::Hash;
+type AccountId = <TestConfig as Config>::AccountId;
 
 /// A dummy contract which does nothing at all.
 const CONTRACT: &str = r#"
@@ -42,7 +42,7 @@ impl ContractsTestContext {
         Self { cxt, signer }
     }
 
-    fn client(&self) -> OnlineClient<SubstrateConfig> {
+    fn client(&self) -> TestClient {
         self.cxt.client()
     }
 
@@ -147,7 +147,7 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<TxProgress<SubstrateConfig, OnlineClient<SubstrateConfig>>, Error> {
+    ) -> Result<TxProgress<TestConfig, TestClient>, Error> {
         tracing::info!("call: {:?}", contract);
         let call_tx = node_runtime::tx().contracts().call(
             MultiAddress::Id(contract),

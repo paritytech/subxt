@@ -16,6 +16,10 @@ use subxt::{
     },
     utils::AccountId32,
 };
+
+#[cfg(lightclient)]
+use subxt::client::OfflineClientT;
+
 use subxt_signer::sr25519::dev;
 
 #[tokio::test]
@@ -215,6 +219,7 @@ async fn chainhead_unstable_unpin() {
     assert!(rpc.chainhead_unstable_unpin(sub_id, hash).await.is_err());
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn chainspec_v1_genesishash() {
     let ctx = test_context().await;
@@ -227,6 +232,7 @@ async fn chainspec_v1_genesishash() {
     assert_eq!(a, b);
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn chainspec_v1_chainname() {
     let ctx = test_context().await;
@@ -239,6 +245,7 @@ async fn chainspec_v1_chainname() {
     assert_eq!(a, b);
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn chainspec_v1_properties() {
     let ctx = test_context().await;
@@ -251,6 +258,7 @@ async fn chainspec_v1_properties() {
     assert_eq!(a, b);
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn transaction_unstable_submit_and_watch() {
     let ctx = test_context().await;

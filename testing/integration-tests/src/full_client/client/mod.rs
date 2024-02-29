@@ -7,7 +7,13 @@ use crate::{
     utils::{node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};
+
+#[cfg(fullclient)]
 use futures::StreamExt;
+
+#[cfg(lightclient)]
+use subxt::client::OnlineClientT;
+
 use subxt::{
     backend::BackendExt,
     error::{DispatchError, Error},
@@ -18,6 +24,7 @@ use subxt_signer::sr25519::dev;
 mod legacy_rpcs;
 mod unstable_rpcs;
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn storage_fetch_raw_keys() {
     let ctx = test_context().await;
@@ -39,6 +46,7 @@ async fn storage_fetch_raw_keys() {
     assert_eq!(len, 13)
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn storage_iter() {
     let ctx = test_context().await;
@@ -63,6 +71,7 @@ async fn storage_iter() {
     assert_eq!(len, 13);
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn storage_child_values_same_across_backends() {
     let ctx = test_context().await;
@@ -204,6 +213,7 @@ async fn external_signing() {
         .unwrap();
 }
 
+#[cfg(fullclient)]
 // TODO: Investigate and fix this test failure when using the UnstableBackend.
 // (https://github.com/paritytech/subxt/issues/1308)
 #[cfg(not(feature = "unstable-backend-client"))]

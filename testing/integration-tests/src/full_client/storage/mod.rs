@@ -90,6 +90,7 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
     Ok(())
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
@@ -126,6 +127,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;

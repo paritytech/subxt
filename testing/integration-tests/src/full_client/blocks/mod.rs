@@ -5,13 +5,23 @@
 use crate::{test_context, utils::node_runtime};
 use codec::{Compact, Encode};
 use futures::StreamExt;
+
+#[cfg(lightclient)]
+use subxt::client::OnlineClientT;
+
+#[cfg(fullclient)]
 use subxt::config::signed_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce};
+#[cfg(fullclient)]
 use subxt::config::DefaultExtrinsicParamsBuilder;
+#[cfg(fullclient)]
 use subxt::config::SubstrateConfig;
+#[cfg(fullclient)]
 use subxt::utils::Era;
+
 use subxt_metadata::Metadata;
 use subxt_signer::sr25519::dev;
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn block_subscriptions_are_consistent_with_eachother() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
@@ -163,6 +173,7 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     Ok(())
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn fetch_block_and_decode_extrinsic_details() {
     let ctx = test_context().await;
@@ -232,6 +243,7 @@ async fn fetch_block_and_decode_extrinsic_details() {
     assert!(tx.is_signed());
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn decode_signed_extensions_from_blocks() {
     let ctx = test_context().await;

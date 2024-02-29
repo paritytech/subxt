@@ -14,6 +14,9 @@ use scale_info::{
 };
 use subxt::{Metadata, OfflineClient, SubstrateConfig};
 
+#[cfg(lightclient)]
+use subxt::client::OfflineClientT;
+
 async fn metadata_to_api(metadata: Metadata, ctx: &TestContext) -> OfflineClient<SubstrateConfig> {
     OfflineClient::new(
         ctx.client().genesis_hash(),

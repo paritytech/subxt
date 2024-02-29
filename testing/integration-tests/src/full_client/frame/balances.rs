@@ -13,6 +13,9 @@ use subxt::{
 };
 use subxt_signer::sr25519::dev;
 
+#[cfg(lightclient)]
+use subxt::client::OfflineClientT;
+
 #[tokio::test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let alice = dev::alice();
