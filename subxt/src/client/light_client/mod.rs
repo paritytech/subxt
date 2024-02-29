@@ -93,29 +93,7 @@ impl RawLightClient {
     ) -> Result<LightClient<TChainConfig>, crate::Error> {
         let raw_rpc = self.raw_rpc.for_chain(chain_id);
         let rpc_client = RpcClient::new(raw_rpc.clone());
-
-        use crate::backend::unstable::UnstableBackend;
-        use std::sync::Arc;
-        let (backend, mut driver) = UnstableBackend::builder().build(rpc_client);
-        let future = async move {
-            use futures::StreamExt;
-            while let Some(val) = driver.next().await {
-                if let Err(e) = val {
-                    // This is a test; bail if something does wrong and try to
-                    // ensure that the message makes it to some logs.
-                    eprintln!("Error driving unstable backend in tests (will panic): {e}");
-                    panic!("Error driving unstable backend in tests: {e}");
-                }
-            }
-        };
-        // The unstable backend needs driving:
-        #[cfg(feature = "native")]
-        tokio::spawn(future);
-        #[cfg(feature = "web")]
-        wasm_bindgen_futures::spawn_local(future);
-        let client = OnlineClient::from_backend(Arc::new(backend))
-            .await
-            .map_err(|e| format!("Cannot construct OnlineClient from backend: {e}"))?;
+        let client = OnlineClient::<TChainConfig>::from_rpc_client(rpc_client).await?;
 
         Ok(LightClient { client, chain_id })
     }
