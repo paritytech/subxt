@@ -169,7 +169,6 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     let mut approvals = Vec::new();
     while let Some(Ok(kv)) = results.next().await {
         assert!(kv.key_bytes.starts_with(&addr_bytes));
-        assert_eq!(kv.keys, ()); // this just checks this is the unit type.
         approvals.push(kv.value);
     }
     assert_eq!(approvals.len(), assets.len());

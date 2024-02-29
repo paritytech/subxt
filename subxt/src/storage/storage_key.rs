@@ -313,7 +313,7 @@ mod tests {
     use scale_info::{meta_type, PortableRegistry, Registry, TypeInfo};
     use subxt_metadata::StorageHasher;
 
-    use crate::{metadata::EncodeWithMetadata, utils::Era};
+    use crate::utils::Era;
 
     use super::{StaticStorageKey, StorageKey};
 
@@ -336,7 +336,7 @@ mod tests {
             let id = self.registry.register_type(&meta_type::<T>()).id;
 
             self.hashers_and_ty_ids.push((hasher, id));
-            for i in 0..hasher.len_excluding_key() {
+            for _i in 0..hasher.len_excluding_key() {
                 self.bytes.push(0);
             }
             value.encode_to(&mut self.bytes);
