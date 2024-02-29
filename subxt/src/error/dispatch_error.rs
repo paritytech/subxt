@@ -8,7 +8,7 @@
 use crate::metadata::{DecodeWithMetadata, Metadata};
 use core::fmt::Debug;
 use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, TypeResolver};
-use scale_info::PortableRegistry;
+
 use std::{borrow::Cow, marker::PhantomData};
 
 use super::{Error, MetadataError};

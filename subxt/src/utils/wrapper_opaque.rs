@@ -7,7 +7,6 @@ use codec::{Compact, Decode, DecodeAll, Encode};
 use derivative::Derivative;
 use scale_decode::{ext::scale_type_resolver::visitor, IntoVisitor, TypeResolver, Visitor};
 use scale_encode::EncodeAsType;
-use scale_info::PortableRegistry;
 
 /// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
 /// [`WrapperKeepOpaque`] stores the type only in its opaque format, aka as a `Vec<u8>`. To
@@ -90,15 +89,14 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
                 expected_id: format!("{:?}", type_id),
             }))
         })
-        .visit_composite(|out, fields| {
+        .visit_composite(|out, _fields| {
             self.data.encode_to(out);
             Ok(())
         });
 
-        let res = types
+        types
             .resolve_type(type_id, visitor)
-            .map_err(|_| Error::new(ErrorKind::TypeNotFound(format!("{:?}", type_id))))?;
-        res
+            .map_err(|_| Error::new(ErrorKind::TypeNotFound(format!("{:?}", type_id))))?
     }
 }
 

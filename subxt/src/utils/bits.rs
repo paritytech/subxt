@@ -10,7 +10,7 @@ use scale_bits::{
     Bits,
 };
 use scale_decode::{IntoVisitor, TypeResolver};
-use scale_info::PortableRegistry;
+
 use std::marker::PhantomData;
 
 /// Associates `bitvec::store::BitStore` trait with corresponding, type-erased `scale_bits::StoreFormat` enum.

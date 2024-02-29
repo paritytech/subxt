@@ -4542,6 +4542,7 @@ dependencies = [
  "subxt-lightclient",
  "subxt-macro",
  "subxt-metadata",
+ "subxt-signer",
  "thiserror",
  "tokio",
  "tokio-stream",

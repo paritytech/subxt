@@ -5,7 +5,6 @@
 use codec::{Decode, Encode};
 use scale_decode::{visitor::DecodeAsTypeResult, IntoVisitor, TypeResolver, Visitor};
 use scale_encode::EncodeAsType;
-use scale_info::PortableRegistry;
 
 /// If the type inside this implements [`Encode`], this will implement [`scale_encode::EncodeAsType`].
 /// If the type inside this implements [`Decode`], this will implement [`scale_decode::DecodeAsType`].

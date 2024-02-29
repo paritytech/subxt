@@ -13,7 +13,6 @@ use std::marker::PhantomData;
 
 use codec::{Decode, Encode};
 use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, IntoVisitor, TypeResolver, Visitor};
-use scale_info::PortableRegistry;
 
 use super::{Encoded, Static};
 

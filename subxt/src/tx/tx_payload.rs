@@ -14,7 +14,7 @@ use codec::Encode;
 use derivative::Derivative;
 use scale_encode::EncodeAsFields;
 use scale_value::{Composite, ValueDef, Variant};
-use std::{borrow::Cow, sync::Arc};
+use std::borrow::Cow;
 
 /// This represents a transaction payload that can be submitted
 /// to a node.
