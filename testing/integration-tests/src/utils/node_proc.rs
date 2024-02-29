@@ -201,7 +201,7 @@ async fn build_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
 async fn build_legacy_client<T: Config>(
     rpc_client: rpc::RpcClient,
 ) -> Result<OnlineClient<T>, String> {
-    let backend = legacy::LegacyBackend::new(rpc_client);
+    let backend = legacy::LegacyBackend::builder().build(rpc_client);
     let client = OnlineClient::from_backend(Arc::new(backend))
         .await
         .map_err(|e| format!("Cannot construct OnlineClient from backend: {e}"))?;
