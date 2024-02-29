@@ -45,7 +45,7 @@ pub enum CodegenError {
     #[error("Extrinsic call type could not be found. Make sure you are providing a valid substrate-based metadata")]
     MissingCallType,
     /// There are too many or too few hashers.
-    #[error("Could not Generate functions for storage entry {storage_entry_name}. There are {key_count} keys, but only {hasher_count} hashers. The number of hashers must equal the number of keys or be exactly 1.")]
+    #[error("Could not generate functions for storage entry {storage_entry_name}. There are {key_count} keys, but only {hasher_count} hashers. The number of hashers must equal the number of keys or be exactly 1.")]
     InvalidStorageHasherCount {
         /// The name of the storage entry
         storage_entry_name: String,
