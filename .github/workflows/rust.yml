@@ -366,7 +366,7 @@ jobs:
 
   light_client_long_running_tests:
     name: "Test (Light Client Long Running)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-16-cores
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 60
     steps:
