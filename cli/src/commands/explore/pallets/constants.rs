@@ -65,7 +65,7 @@ pub fn explore_constants(
 
     // value
     let value =
-        scale_value::scale::decode_as_type(&mut constant.value(), constant.ty(), metadata.types())?;
+        scale_value::scale::decode_as_type(&mut constant.value(), &constant.ty(), metadata.types())?;
     let value = format_scale_value(&value).indent(4);
 
     writedoc!(

@@ -14,7 +14,7 @@ use crate::{
 };
 use codec::{Compact, Decode};
 use derivative::Derivative;
-use scale_decode::DecodeAsType;
+use scale_decode::{DecodeAsFields, DecodeAsType};
 use std::sync::Arc;
 
 /// A collection of events obtained from a block, bundled with the necessary
@@ -321,7 +321,7 @@ impl<T: Config> EventDetails<T> {
 
     /// Decode and provide the event fields back in the form of a [`scale_value::Composite`]
     /// type which represents the named or unnamed fields that were present in the event.
-    pub fn field_values(&self) -> Result<scale_value::Composite<u32>, Error> {
+    pub fn field_values(&self) -> Result<scale_value::Composite<()>, Error> {
         let bytes = &mut self.field_bytes();
         let event_metadata = self.event_metadata();
 
@@ -331,8 +331,7 @@ impl<T: Config> EventDetails<T> {
             .iter()
             .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
 
-        use scale_decode::DecodeAsFields;
-        let decoded = <scale_value::Composite<u32>>::decode_as_fields(
+        let decoded = scale_value::Composite::<()>::decode_as_fields(
             bytes,
             &mut fields,
             self.metadata.types(),

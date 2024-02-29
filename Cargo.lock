@@ -3471,17 +3471,6 @@ dependencies = [
 
 [[package]]
 name = "scale-bits"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "036575c29af9b6e4866ffb7fa055dbf623fe7a9cc159b33786de6013a6969d89"
-dependencies = [
- "parity-scale-codec",
- "scale-info",
- "serde",
-]
-
-[[package]]
-name = "scale-bits"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "662d10dcd57b1c2a3c41c9cf68f71fb09747ada1ea932ad961aca7e2ca28315f"
@@ -3494,19 +3483,6 @@ dependencies = [
 
 [[package]]
 name = "scale-decode"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7caaf753f8ed1ab4752c6afb20174f03598c664724e0e32628e161c21000ff76"
-dependencies = [
- "derive_more",
- "parity-scale-codec",
- "scale-bits 0.4.0",
- "scale-info",
- "smallvec",
-]
-
-[[package]]
-name = "scale-decode"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "afc79ba56a1c742f5aeeed1f1801f3edf51f7e818f0a54582cac6f131364ea7b"
@@ -3514,7 +3490,7 @@ dependencies = [
  "derive_more",
  "parity-scale-codec",
  "primitive-types",
- "scale-bits 0.5.0",
+ "scale-bits",
  "scale-decode-derive",
  "scale-type-resolver",
  "smallvec",
@@ -3534,19 +3510,6 @@ dependencies = [
 
 [[package]]
 name = "scale-encode"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d70cb4b29360105483fac1ed567ff95d65224a14dd275b6303ed0a654c78de5"
-dependencies = [
- "derive_more",
- "parity-scale-codec",
- "scale-bits 0.4.0",
- "scale-info",
- "smallvec",
-]
-
-[[package]]
-name = "scale-encode"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "628800925a33794fb5387781b883b5e14d130fece9af5a63613867b8de07c5c7"
@@ -3554,7 +3517,7 @@ dependencies = [
  "derive_more",
  "parity-scale-codec",
  "primitive-types",
- "scale-bits 0.5.0",
+ "scale-bits",
  "scale-encode-derive",
  "scale-type-resolver",
  "smallvec",
@@ -3611,9 +3574,9 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00860983481ac590ac87972062909bef0d6a658013b592ccc0f2feb272feab11"
+checksum = "7e986e3a75a88c8e354c6fed3dfa0db1b2a99c5ae26cce28db50330d4c99b3fa"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3624,9 +3587,9 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen-description"
-version = "0.1.0"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae69c1dfd81e9859a5fb42c1b560369e6ed82d2c5b5cb4cac3bba1962a73f017"
+checksum = "91d6b7b4e0a9dec3fcae98c17ccf85b8dbee51156c81e0d66109159c432cf262"
 dependencies = [
  "anyhow",
  "peekmore",
@@ -3636,28 +3599,8 @@ dependencies = [
  "rand_chacha",
  "scale-info",
  "scale-typegen",
- "scale-value 0.13.0",
+ "scale-value",
  "smallvec",
-]
-
-[[package]]
-name = "scale-value"
-version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "58223c7691bf0bd46b43c9aea6f0472d1067f378d574180232358d7c6e0a8089"
-dependencies = [
- "base58",
- "blake2",
- "derive_more",
- "either",
- "frame-metadata 15.1.0",
- "parity-scale-codec",
- "scale-bits 0.4.0",
- "scale-decode 0.10.0",
- "scale-encode 0.5.0",
- "scale-info",
- "serde",
- "yap",
 ]
 
 [[package]]
@@ -3672,9 +3615,9 @@ dependencies = [
  "either",
  "frame-metadata 15.1.0",
  "parity-scale-codec",
- "scale-bits 0.5.0",
- "scale-decode 0.11.1",
- "scale-encode 0.6.0",
+ "scale-bits",
+ "scale-decode",
+ "scale-encode",
  "scale-info",
  "scale-type-resolver",
  "serde",
@@ -4585,11 +4528,11 @@ dependencies = [
  "parity-scale-codec",
  "primitive-types",
  "reconnecting-jsonrpsee-ws-client",
- "scale-bits 0.5.0",
- "scale-decode 0.11.1",
- "scale-encode 0.6.0",
+ "scale-bits",
+ "scale-decode",
+ "scale-encode",
  "scale-info",
- "scale-value 0.14.0",
+ "scale-value",
  "serde",
  "serde_json",
  "sp-core",
@@ -4624,7 +4567,7 @@ dependencies = [
  "quote",
  "scale-info",
  "scale-typegen-description",
- "scale-value 0.14.0",
+ "scale-value",
  "serde",
  "serde_json",
  "smoldot",

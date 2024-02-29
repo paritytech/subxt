@@ -84,38 +84,21 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
         use scale_encode::error::{Error, ErrorKind, Kind};
 
         let visitor = visitor::new(out, |_, _| {
+            // Check that the target shape lines up: any other shape but composite it wrong.
             Err(Error::new(ErrorKind::WrongShape {
                 actual: Kind::Struct,
                 expected_id: format!("{:?}", type_id),
             }))
         })
-        .visit_composite(|| {});
+        .visit_composite(|out, fields| {
+            self.data.encode_to(out);
+            Ok(())
+        });
 
-        types.resolve_type(type_id, visitor);
-
-        let Some(ty) = types.resolve(type_id) else {
-            return;
-        };
-
-        // Do a basic check that the target shape lines up.
-        let scale_info::TypeDef::Composite(_) = &ty.type_def else {
-            return Err(Error::new(ErrorKind::WrongShape {
-                actual: Kind::Struct,
-                expected_id: format!("{:?}", type_id),
-            }));
-        };
-
-        // Check that the name also lines up.
-        if ty.path.ident().as_deref() != Some("WrapperKeepOpaque") {
-            return Err(Error::new(ErrorKind::WrongShape {
-                actual: Kind::Struct,
-                expected_id: format!("{:?}", type_id),
-            }));
-        }
-
-        // Just blat the bytes out.
-        self.data.encode_to(out);
-        Ok(())
+        let res = types
+            .resolve_type(type_id, visitor)
+            .map_err(|_| Error::new(ErrorKind::TypeNotFound(format!("{:?}", type_id))))?;
+        res
     }
 }
 
@@ -132,11 +115,6 @@ impl<T, R: TypeResolver> Visitor for WrapperKeepOpaqueVisitor<T, R> {
     ) -> Result<Self::Value<'scale, 'info>, Self::Error> {
         use scale_decode::error::{Error, ErrorKind};
 
-        if value.path().ident().as_deref() != Some("WrapperKeepOpaque") {
-            return Err(Error::custom_str(
-                "Type to decode is not 'WrapperTypeKeepOpaque'",
-            ));
-        }
         if value.remaining() != 2 {
             return Err(Error::new(ErrorKind::WrongLength {
                 actual_len: value.remaining(),

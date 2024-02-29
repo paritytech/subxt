@@ -68,11 +68,12 @@ impl DecodedValueThunk {
     }
     /// Decode the SCALE encoded storage entry into a dynamic [`DecodedValue`] type.
     pub fn to_value(&self) -> Result<DecodedValue, Error> {
-        let val = DecodedValue::decode_as_type(
+        let val = scale_value::scale::decode_as_type(
             &mut &*self.scale_bytes,
-            self.type_id,
+            &self.type_id,
             self.metadata.types(),
-        )?;
+        )
+        .map_err(|e| Error::Decode(e.into()))?;
         Ok(val)
     }
     /// decode the `DecodedValueThunk` into a concrete type.
