@@ -364,6 +364,37 @@ jobs:
       - if: "failure()"
         uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
 
+  light_client_long_running_tests:
+    name: "Test (Light Client Long Running)"
+    runs-on: ubuntu-latest
+    needs: [clippy, wasm_clippy, check, wasm_check, docs]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1.0.3
+        with:
+          command: test
+          args: --release --package integration-tests --features unstable-light-client-long-running
+
+      - if: "failure()"
+        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+
   wasm_tests:
     name: Test (WASM)
     runs-on: ubuntu-latest
