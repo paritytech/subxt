@@ -6,6 +6,12 @@ pub(crate) use crate::{node_runtime, utils::TestNodeProcess};
 
 use subxt::SubstrateConfig;
 
+#[cfg(lightclient)]
+use subxt::client::LightClient;
+
+#[cfg(fullclient)]
+use subxt::client::OnlineClient;
+
 /// `substrate-node` should be installed on the $PATH. We fall back
 /// to also checking for an older `substrate` binary.
 const SUBSTRATE_NODE_PATHS: &str = "substrate-node,substrate";
@@ -20,7 +26,15 @@ pub async fn test_context_with(authority: String) -> TestContext {
     proc.spawn::<SubstrateConfig>().await.unwrap()
 }
 
+pub type TestConfig = SubstrateConfig;
+
 pub type TestContext = TestNodeProcess<SubstrateConfig>;
+
+#[cfg(fullclient)]
+pub type TestClient = OnlineClient<SubstrateConfig>;
+
+#[cfg(lightclient)]
+pub type TestClient = LightClient<SubstrateConfig>;
 
 pub async fn test_context() -> TestContext {
     test_context_with("alice".to_string()).await

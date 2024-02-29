@@ -11,7 +11,7 @@ use subxt::{
     Config, OnlineClient,
 };
 
-#[cfg(feature = "unstable-light-client")]
+#[cfg(lightclient)]
 use subxt::client::{LightClient, LightClientBuilder};
 
 /// Spawn a local substrate node for testing subxt.
@@ -25,10 +25,10 @@ pub struct TestNodeProcess<R: Config> {
 
     rpc_client: rpc::RpcClient,
 
-    #[cfg(not(feature = "unstable-light-client"))]
+    #[cfg(fullclient)]
     client: OnlineClient<R>,
 
-    #[cfg(feature = "unstable-light-client")]
+    #[cfg(lightclient)]
     client: LightClient<R>,
 }
 
@@ -92,13 +92,13 @@ where
     /// will use the legacy backend by default or the unstable backend if the
     /// "unstable-backend-client" feature is enabled, so that we can run each
     /// test against both.
-    #[cfg(not(feature = "unstable-light-client"))]
+    #[cfg(fullclient)]
     pub fn client(&self) -> OnlineClient<R> {
         self.client.clone()
     }
 
     /// Returns the subxt client connected to the running node.
-    #[cfg(feature = "unstable-light-client")]
+    #[cfg(lightclient)]
     pub fn client(&self) -> LightClient<R> {
         self.client.clone()
     }
@@ -160,7 +160,7 @@ impl TestNodeProcessBuilder {
         #[allow(unused_assignments, unused_mut)]
         let mut legacy_client = None;
 
-        #[cfg(feature = "unstable-light-client")]
+        #[cfg(lightclient)]
         let client = build_light_client(&proc).await?;
 
         #[cfg(feature = "unstable-backend-client")]
@@ -170,10 +170,7 @@ impl TestNodeProcessBuilder {
             client
         };
 
-        #[cfg(all(
-            not(feature = "unstable-light-client"),
-            not(feature = "unstable-backend-client")
-        ))]
+        #[cfg(all(not(lightclient), not(feature = "unstable-backend-client")))]
         let client = {
             let client = build_legacy_client(rpc_client.clone()).await?;
             legacy_client = Some(client.clone());
@@ -234,7 +231,7 @@ async fn build_unstable_client<T: Config>(
     Ok(client)
 }
 
-#[cfg(feature = "unstable-light-client")]
+#[cfg(lightclient)]
 async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<LightClient<T>, String> {
     // RPC endpoint.
     let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
