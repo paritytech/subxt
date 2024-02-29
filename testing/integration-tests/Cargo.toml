@@ -18,6 +18,9 @@ default = []
 # Enable to run the tests with Light Client support.
 unstable-light-client = ["subxt/unstable-light-client"]
 
+# Enable to run the full-client tests with Light Client support.
+unstable-light-client-long-running = ["subxt/unstable-light-client"]
+
 # Enable this to use the unstable backend in tests _instead of_
 # the default one which relies on the "old" RPC methods.
 unstable-backend-client = []
@@ -43,3 +46,6 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 wabt = { workspace = true }
 substrate-runner = { workspace = true }
+
+[build-dependencies]
+cfg_aliases = "0.2.0"
