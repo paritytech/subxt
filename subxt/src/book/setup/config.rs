@@ -71,7 +71,7 @@
 //!
 //! The `ExtrinsicParams` config type expects to be given an implementation of the [`crate::config::ExtrinsicParams`] trait.
 //! Implementations of the [`crate::config::ExtrinsicParams`] trait are handed some parameters from Subxt itself, and can
-//! accept arbitrary `OtherParams` from users, and are then expected to provide this "extra" and "additional" data when asked
+//! accept arbitrary other `Params` from users, and are then expected to provide this "extra" and "additional" data when asked
 //! via the required [`crate::config::ExtrinsicParamsEncoder`] impl.
 //!
 //! **In most cases, the default [crate::config::DefaultExtrinsicParams] type will work**: it understands the "standard"
