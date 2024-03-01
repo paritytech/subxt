@@ -6,6 +6,7 @@ members = [
     "testing/substrate-runner",
     "testing/test-runtime",
     "testing/integration-tests",
+    "testing/integration-tests/proc-macro",
     "testing/ui-tests",
     "testing/generate-custom-metadata",
     "macro",
