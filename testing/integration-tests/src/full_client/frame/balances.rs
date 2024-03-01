@@ -88,6 +88,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     Ok(())
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     use subxt::ext::scale_value::{At, Composite, Value};
