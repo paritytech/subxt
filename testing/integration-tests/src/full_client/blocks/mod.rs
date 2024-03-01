@@ -2,13 +2,15 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{test_context, utils::node_runtime};
+use crate::test_context;
 use codec::{Compact, Encode};
 use futures::StreamExt;
 
 #[cfg(lightclient)]
 use subxt::client::OnlineClientT;
 
+#[cfg(fullclient)]
+use crate::utils::node_runtime;
 #[cfg(fullclient)]
 use subxt::config::signed_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce};
 #[cfg(fullclient)]
@@ -17,9 +19,10 @@ use subxt::config::DefaultExtrinsicParamsBuilder;
 use subxt::config::SubstrateConfig;
 #[cfg(fullclient)]
 use subxt::utils::Era;
+#[cfg(fullclient)]
+use subxt_signer::sr25519::dev;
 
 use subxt_metadata::Metadata;
-use subxt_signer::sr25519::dev;
 
 #[cfg(fullclient)]
 #[tokio::test]

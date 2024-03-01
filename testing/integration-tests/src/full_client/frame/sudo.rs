@@ -8,7 +8,7 @@ use crate::{
         runtime_types::{self, sp_weights::weight_v2::Weight},
         sudo,
     },
-    test_context,
+    submit_tx_wait_for_finalized_success, test_context,
 };
 use subxt_signer::sr25519::dev;
 
@@ -29,11 +29,12 @@ async fn test_sudo() -> Result<(), subxt::Error> {
     });
     let tx = node_runtime::tx().sudo().sudo(call);
 
-    let found_event = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
-        .await?
-        .wait_for_finalized_success()
+        .create_signed(&tx, &alice, Default::default())
+        .await?;
+
+    let found_event = submit_tx_wait_for_finalized_success(&signed_extrinsic)
         .await?
         .has::<sudo::events::Sudid>()?;
 
@@ -61,11 +62,12 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
         },
     );
 
-    let found_event = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
-        .await?
-        .wait_for_finalized_success()
+        .create_signed(&tx, &alice, Default::default())
+        .await?;
+
+    let found_event = submit_tx_wait_for_finalized_success(&signed_extrinsic)
         .await?
         .has::<sudo::events::Sudid>()?;
 

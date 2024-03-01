@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    test_context,
+    submit_tx_wait_for_finalized_success, test_context,
     utils::{node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};
@@ -137,11 +137,7 @@ async fn transaction_validation() {
         .await
         .expect("validation failed");
 
-    signed_extrinsic
-        .submit_and_watch()
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
+    submit_tx_wait_for_finalized_success(&signed_extrinsic)
         .await
         .unwrap();
 }
@@ -204,11 +200,7 @@ async fn external_signing() {
         .sign_with_address_and_signature(&alice.public_key().into(), &signature.into());
 
     // And now submit it.
-    extrinsic
-        .submit_and_watch()
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
+    submit_tx_wait_for_finalized_success(&extrinsic)
         .await
         .unwrap();
 }
@@ -258,12 +250,13 @@ async fn decode_a_module_error() {
     // "unknown" module error from the assets pallet.
     let freeze_unknown_asset = node_runtime::tx().assets().freeze(1, alice_addr);
 
-    let err = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&freeze_unknown_asset, &alice)
+        .create_signed(&freeze_unknown_asset, &alice, Default::default())
         .await
-        .unwrap()
-        .wait_for_finalized_success()
+        .unwrap();
+
+    let err = submit_tx_wait_for_finalized_success(&signed_extrinsic)
         .await
         .expect_err("an 'unknown asset' error");
 

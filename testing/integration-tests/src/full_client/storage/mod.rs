@@ -3,7 +3,10 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, test_context, utils::wait_for_blocks};
+
+#[cfg(fullclient)]
 use subxt::utils::AccountId32;
+#[cfg(fullclient)]
 use subxt_signer::sr25519::dev;
 
 #[tokio::test]
@@ -27,6 +30,7 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
+#[cfg(fullclient)]
 #[tokio::test]
 async fn storage_map_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
@@ -60,6 +64,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
 // Here we create a key that looks a bit like a StorageNMap key, but should in fact be
 // treated as a StorageKey (ie we should hash both values together with one hasher, rather
 // than hash both values separately, or ignore the second value).
+#[cfg(fullclient)]
 #[tokio::test]
 async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> {
     use codec::Encode;
