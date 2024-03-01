@@ -241,7 +241,10 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<LightClie
         .await
         .map_err(|err| format!("Failed to connect to node rpc at {ws_url}: {err}"))?;
 
-    super::wait_for_blocks(&client).await;
+    // Wait for at least 3 blocks before starting the light client.
+    // Otherwise, the lightclient might error with
+    // `"Error when retrieving the call proof: No node available for call proof query"`.
+    super::wait_for_number_of_blocks(&client, 3).await;
 
     // Step 2. Construct the light client.
     // P2p bootnode.

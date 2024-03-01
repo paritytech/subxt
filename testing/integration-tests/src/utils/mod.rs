@@ -10,4 +10,4 @@ mod wait_for_blocks;
 pub use context::*;
 pub use node_proc::TestNodeProcess;
 pub use tx_retries::*;
-pub use wait_for_blocks::wait_for_blocks;
+pub use wait_for_blocks::*;
