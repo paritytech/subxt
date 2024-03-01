@@ -25,7 +25,7 @@ use subxt_signer::sr25519::dev;
 use subxt_metadata::Metadata;
 
 #[cfg(fullclient)]
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn block_subscriptions_are_consistent_with_eachother() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -89,7 +89,7 @@ async fn block_subscriptions_are_consistent_with_eachother() -> Result<(), subxt
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -106,7 +106,7 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
     use subxt::backend::legacy;
 
@@ -151,7 +151,7 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
 }
 
 // Check that we can subscribe to non-finalized blocks.
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn runtime_api_call() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -177,7 +177,7 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
 }
 
 #[cfg(fullclient)]
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn fetch_block_and_decode_extrinsic_details() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -247,7 +247,7 @@ async fn fetch_block_and_decode_extrinsic_details() {
 }
 
 #[cfg(fullclient)]
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn decode_signed_extensions_from_blocks() {
     let ctx = test_context().await;
     let api = ctx.client();

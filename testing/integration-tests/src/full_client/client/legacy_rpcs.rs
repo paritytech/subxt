@@ -7,7 +7,7 @@
 
 use crate::test_context;
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn chain_get_block_hash() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -15,7 +15,7 @@ async fn chain_get_block_hash() {
     rpc.chain_get_block_hash(None).await.unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn chain_get_block() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -24,7 +24,7 @@ async fn chain_get_block() {
     rpc.chain_get_block(hash).await.unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn chain_get_finalized_head() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -32,7 +32,7 @@ async fn chain_get_finalized_head() {
     rpc.chain_get_finalized_head().await.unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn chain_subscribe_all_heads() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -41,7 +41,7 @@ async fn chain_subscribe_all_heads() {
     let _block_header = sub.next().await.unwrap().unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn chain_subscribe_finalized_heads() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -50,7 +50,7 @@ async fn chain_subscribe_finalized_heads() {
     let _block_header = sub.next().await.unwrap().unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn chain_subscribe_new_heads() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -59,7 +59,7 @@ async fn chain_subscribe_new_heads() {
     let _block_header = sub.next().await.unwrap().unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn genesis_hash() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -67,7 +67,7 @@ async fn genesis_hash() {
     let _genesis_hash = rpc.genesis_hash().await.unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn state_get_metadata() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -75,7 +75,7 @@ async fn state_get_metadata() {
     let _metadata = rpc.state_get_metadata(None).await.unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn state_call() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -86,7 +86,7 @@ async fn state_call() {
         .unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn system_health() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -94,7 +94,7 @@ async fn system_health() {
     let _ = rpc.system_health().await.unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn system_chain() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -102,7 +102,7 @@ async fn system_chain() {
     let _ = rpc.system_chain().await.unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn system_name() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -110,7 +110,7 @@ async fn system_name() {
     let _ = rpc.system_name().await.unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn system_version() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -118,7 +118,7 @@ async fn system_version() {
     let _ = rpc.system_version().await.unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn system_properties() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;

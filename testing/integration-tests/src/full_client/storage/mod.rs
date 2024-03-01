@@ -9,7 +9,7 @@ use subxt::utils::AccountId32;
 #[cfg(fullclient)]
 use subxt_signer::sr25519::dev;
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn storage_plain_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -31,7 +31,7 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error> {
 }
 
 #[cfg(fullclient)]
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn storage_map_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -65,7 +65,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
 // treated as a StorageKey (ie we should hash both values together with one hasher, rather
 // than hash both values separately, or ignore the second value).
 #[cfg(fullclient)]
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> {
     use codec::Encode;
     use node_runtime::runtime_types::sp_core::crypto::KeyTypeId;
@@ -96,7 +96,7 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
 }
 
 #[cfg(fullclient)]
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -133,7 +133,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
 }
 
 #[cfg(fullclient)]
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -206,7 +206,7 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn storage_runtime_wasm_code() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -215,7 +215,7 @@ async fn storage_runtime_wasm_code() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn storage_pallet_storage_version() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();

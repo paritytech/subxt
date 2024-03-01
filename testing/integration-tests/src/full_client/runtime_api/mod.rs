@@ -7,7 +7,7 @@ use codec::Encode;
 use subxt::utils::AccountId32;
 use subxt_signer::sr25519::dev;
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn account_nonce() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -49,7 +49,7 @@ async fn account_nonce() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn unchecked_extrinsic_encoding() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();

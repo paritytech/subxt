@@ -4,7 +4,7 @@
 
 use crate::{node_runtime, test_context};
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn storage_get_current_timestamp() {
     let ctx = test_context().await;
     let api = ctx.client();

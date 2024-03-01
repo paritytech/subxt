@@ -27,7 +27,7 @@ mod legacy_rpcs;
 mod unstable_rpcs;
 
 #[cfg(fullclient)]
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn storage_fetch_raw_keys() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -49,7 +49,7 @@ async fn storage_fetch_raw_keys() {
 }
 
 #[cfg(fullclient)]
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn storage_iter() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -74,7 +74,7 @@ async fn storage_iter() {
 }
 
 #[cfg(fullclient)]
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn storage_child_values_same_across_backends() {
     let ctx = test_context().await;
 
@@ -114,7 +114,7 @@ async fn storage_child_values_same_across_backends() {
     }
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn transaction_validation() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -144,7 +144,7 @@ async fn transaction_validation() {
         .unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn validation_fails() {
     use std::str::FromStr;
     use subxt_signer::{sr25519::Keypair, SecretUri};
@@ -178,7 +178,7 @@ async fn validation_fails() {
     );
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn external_signing() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -211,7 +211,7 @@ async fn external_signing() {
 // TODO: Investigate and fix this test failure when using the UnstableBackend.
 // (https://github.com/paritytech/subxt/issues/1308)
 #[cfg(not(feature = "unstable-backend-client"))]
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn submit_large_extrinsic() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -238,7 +238,7 @@ async fn submit_large_extrinsic() {
         .unwrap();
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn decode_a_module_error() {
     use node_runtime::runtime_types::pallet_assets::pallet as assets;
 
@@ -276,7 +276,7 @@ async fn decode_a_module_error() {
     );
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -304,7 +304,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     assert_eq!(actual_tx_bytes, expected_tx_bytes);
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn extrinsic_hash_is_same_as_returned() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -356,7 +356,7 @@ pub struct InclusionFee {
     pub adjusted_weight_fee: u128,
 }
 
-#[tokio::test]
+#[subxt_test(timeout = 800)]
 async fn partial_fee_estimate_correct() {
     let ctx = test_context().await;
     let api = ctx.client();
