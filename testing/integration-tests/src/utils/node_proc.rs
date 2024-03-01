@@ -244,7 +244,7 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<LightClie
     // Wait for at least 3 blocks before starting the light client.
     // Otherwise, the lightclient might error with
     // `"Error when retrieving the call proof: No node available for call proof query"`.
-    super::wait_for_number_of_blocks(&client, 3).await;
+    super::wait_for_number_of_blocks(&client, 4).await;
 
     // Step 2. Construct the light client.
     // P2p bootnode.
@@ -254,9 +254,27 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<LightClie
         proc.p2p_address()
     );
 
-    LightClientBuilder::new()
+    let mut result = LightClientBuilder::new()
         .bootnodes([bootnode.as_str()])
         .build_from_url(ws_url.as_str())
         .await
-        .map_err(|e| format!("Failed to construct light client {}", e))
+        .map_err(|e| format!("Failed to construct light client {}", e));
+
+    for _ in 0..3 {
+        if let Err(e) = &result {
+            if e.contains("Error when retrieving the call proof") {
+                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+
+                result = LightClientBuilder::new()
+                    .bootnodes([bootnode.as_str()])
+                    .build_from_url(ws_url.as_str())
+                    .await
+                    .map_err(|e| format!("Failed to construct light client {}", e));
+            }
+        } else {
+            break;
+        }
+    }
+
+    result
 }
