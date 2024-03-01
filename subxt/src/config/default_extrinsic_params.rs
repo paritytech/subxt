@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use super::signed_extensions::CheckNonceParams;
 use super::{signed_extensions, ExtrinsicParams};
 use super::{Config, Header};
 
@@ -20,12 +21,14 @@ pub type DefaultExtrinsicParams<T> = signed_extensions::AnyOf<
     ),
 >;
 
-/// A builder that outputs the set of [`super::ExtrinsicParams::OtherParams`] required for
+/// A builder that outputs the set of [`super::ExtrinsicParams::Params`] required for
 /// [`DefaultExtrinsicParams`]. This may expose methods that aren't applicable to the current
 /// chain; such values will simply be ignored if so.
 pub struct DefaultExtrinsicParamsBuilder<T: Config> {
     /// `None` means the tx will be immortal.
     mortality: Option<Mortality<T::Hash>>,
+    /// `None` means the nonce will be automatically set.
+    nonce: Option<u64>,
     /// `None` means we'll use the native token.
     tip_of_asset_id: Option<T::AssetId>,
     tip: u128,
@@ -49,6 +52,7 @@ impl<T: Config> Default for DefaultExtrinsicParamsBuilder<T> {
             tip: 0,
             tip_of: 0,
             tip_of_asset_id: None,
+            nonce: None,
         }
     }
 }
@@ -69,6 +73,12 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
             checkpoint_number: from_block.number().into(),
             period: for_n_blocks,
         });
+        self
+    }
+
+    /// Provide a specific nonce for the submitter of the extrinsic
+    pub fn nonce(mut self, nonce: u64) -> Self {
+        self.nonce = Some(nonce);
         self
     }
 
@@ -111,7 +121,7 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
     }
 
     /// Build the extrinsic parameters.
-    pub fn build(self) -> <DefaultExtrinsicParams<T> as ExtrinsicParams<T>>::OtherParams {
+    pub fn build(self) -> <DefaultExtrinsicParams<T> as ExtrinsicParams<T>>::Params {
         let check_mortality_params = if let Some(mortality) = self.mortality {
             signed_extensions::CheckMortalityParams::mortal(
                 mortality.period,
@@ -131,10 +141,12 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
         let charge_transaction_params =
             signed_extensions::ChargeTransactionPaymentParams::tip(self.tip);
 
+        let check_nonce_params = CheckNonceParams(self.nonce);
+
         (
             (),
             (),
-            (),
+            check_nonce_params,
             (),
             check_mortality_params,
             charge_asset_tx_params,
