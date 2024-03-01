@@ -21,7 +21,9 @@ use subxt::{
 };
 use subxt_signer::sr25519::dev;
 
+#[cfg(fullclient)]
 mod legacy_rpcs;
+
 mod unstable_rpcs;
 
 #[cfg(fullclient)]
