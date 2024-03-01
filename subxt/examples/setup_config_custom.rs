@@ -1,7 +1,9 @@
 #![allow(missing_docs)]
 use codec::Encode;
 use subxt::client::OfflineClientT;
-use subxt::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError};
+use subxt::config::{
+    Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError, RefineParams,
+};
 use subxt_signer::sr25519::dev;
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
@@ -51,23 +53,26 @@ impl CustomExtrinsicParamsBuilder {
     }
 }
 
+impl<T: Config> RefineParams<T> for CustomExtrinsicParamsBuilder {}
+
 // Describe how to fetch and then encode the params:
 impl<T: Config> ExtrinsicParams<T> for CustomExtrinsicParams<T> {
-    type OtherParams = CustomExtrinsicParamsBuilder;
+    type Params = CustomExtrinsicParamsBuilder;
 
     // Gather together all of the params we will need to encode:
     fn new<Client: OfflineClientT<T>>(
-        _nonce: u64,
         client: Client,
-        other_params: Self::OtherParams,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(Self {
             genesis_hash: client.genesis_hash(),
-            tip: other_params.tip,
-            foo: other_params.foo,
+            tip: params.tip,
+            foo: params.foo,
         })
     }
 }
+
+impl<T: Config> RefineParams<T> for CustomExtrinsicParams<T> {}
 
 // Encode the relevant params when asked:
 impl<T: Config> ExtrinsicParamsEncoder for CustomExtrinsicParams<T> {
@@ -86,7 +91,7 @@ async fn main() {
 
     let tx_payload = runtime::tx().system().remark(b"Hello".to_vec());
 
-    // Build your custom "OtherParams":
+    // Build your custom "Params":
     let tx_config = CustomExtrinsicParamsBuilder::new().tip(1234).enable_foo();
 
     // And provide them when submitting a transaction:
