@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use super::storage_address::{StorageAddress, Yes};
+use super::storage_key::StorageHashersIter;
 use super::StorageKey;
 
 use crate::{
@@ -233,11 +234,10 @@ where
             let entry = entry.entry_type();
 
             let return_type_id = entry.value_ty();
-            let hasher_type_id_pairs = storage_hasher_type_id_pairs(entry, &metadata)?;
+            let mut hashers = StorageHashersIter::new(entry, metadata.types())?;
 
             // The address bytes of this entry:
             let address_bytes = super::utils::storage_address_bytes(&address, &metadata)?;
-
             let s = client
                 .backend()
                 .storage_fetch_descendant_values(address_bytes, block_ref.hash())
@@ -256,11 +256,14 @@ where
                     let key_bytes = kv.key;
                     let cursor = &mut &key_bytes[..];
                     strip_storage_addess_root_bytes(cursor)?;
-                    let keys = <Address::Keys as StorageKey>::decode_from_bytes(
+
+                    hashers.reset();
+                    let keys = <Address::Keys as StorageKey>::decode(
                         cursor,
-                        &mut &hasher_type_id_pairs[..],
+                        &mut hashers,
                         metadata.types(),
                     )?;
+
                     Ok(StorageKeyValuePair::<Address> {
                         keys,
                         key_bytes,
@@ -307,53 +310,6 @@ where
         self.fetch_raw(CODE.as_bytes()).await?.ok_or_else(|| {
             format!("Unexpected: entry for well known key \"{CODE}\" not found").into()
         })
-    }
-}
-
-/// Return a vec of hashers and the associated type IDs for the keys that are hashed.
-fn storage_hasher_type_id_pairs(
-    entry: &StorageEntryType,
-    metadata: &Metadata,
-) -> Result<Vec<(StorageHasher, u32)>, Error> {
-    match entry {
-        StorageEntryType::Plain(_) => Ok(vec![]),
-        StorageEntryType::Map {
-            hashers, key_ty, ..
-        } => {
-            let ty = metadata
-                .types()
-                .resolve(*key_ty)
-                .ok_or(MetadataError::TypeNotFound(*key_ty))?;
-            match &ty.type_def {
-                TypeDef::Tuple(tuple) => {
-                    if hashers.len() < tuple.fields.len() {
-                        return Err(StorageAddressError::WrongNumberOfHashers {
-                            hashers: hashers.len(),
-                            fields: tuple.fields.len(),
-                        }
-                        .into());
-                    }
-                    let pairs: Vec<(StorageHasher, u32)> = tuple
-                        .fields
-                        .iter()
-                        .zip(hashers.iter())
-                        .map(|(e, h)| (*h, e.id))
-                        .collect();
-
-                    Ok(pairs)
-                }
-                _other => {
-                    if hashers.is_empty() {
-                        return Err(StorageAddressError::WrongNumberOfHashers {
-                            hashers: 0,
-                            fields: 1,
-                        }
-                        .into());
-                    }
-                    Ok(vec![(hashers[0], *key_ty)])
-                }
-            }
-        }
     }
 }
 

@@ -13,7 +13,7 @@ use scale_info::TypeDef;
 use std::borrow::Cow;
 use subxt_metadata::{StorageEntryType, StorageHasher};
 
-use super::StorageKey;
+use super::{storage_key::StorageHashersIter, StorageKey};
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
@@ -166,62 +166,8 @@ where
             .entry_by_name(self.entry_name())
             .ok_or_else(|| MetadataError::StorageEntryNotFound(self.entry_name().to_owned()))?;
 
-        let keys_iter = self.keys.keys_iter();
-        let keys_len = self.keys.keys_len();
-
-        if keys_len == 0 {
-            return Ok(());
-        }
-
-        let StorageEntryType::Map {
-            hashers, key_ty, ..
-        } = entry.entry_type()
-        else {
-            // Plain entries are only okay, if keys_len == 0, see early return above.
-            return Err(StorageAddressError::WrongNumberOfKeys {
-                expected: 0,
-                actual: keys_len,
-            }
-            .into());
-        };
-
-        let ty = metadata
-            .types()
-            .resolve(*key_ty)
-            .ok_or(MetadataError::TypeNotFound(*key_ty))?;
-
-        // If the key is a tuple, we encode each value to the corresponding tuple type.
-        // If the key is not a tuple, encode a single value to the key type.
-        let type_ids = if let TypeDef::Tuple(tuple) = &ty.type_def {
-            either::Either::Left(tuple.fields.iter().map(|f| f.id))
-        } else {
-            either::Either::Right(std::iter::once(*key_ty))
-        };
-
-        if hashers.len() == 1 {
-            // One hasher; hash a tuple of all SCALE encoded bytes with the one hash function.
-            let mut input = Vec::new();
-            let iter = keys_iter.zip(type_ids);
-            for (key, type_id) in iter {
-                key.encode_with_metadata(type_id, metadata, &mut input)?;
-            }
-            hash_bytes(&input, &hashers[0], bytes);
-        } else if hashers.len() >= type_ids.len() {
-            // A hasher per field; encode and hash each field independently.
-            let iter = keys_iter.zip(type_ids).zip(hashers);
-            for ((key, type_id), hasher) in iter {
-                let mut input = Vec::new();
-                key.encode_with_metadata(type_id, metadata, &mut input)?;
-                hash_bytes(&input, hasher, bytes);
-            }
-        } else {
-            // Provided more fields than hashers.
-            return Err(StorageAddressError::WrongNumberOfHashers {
-                hashers: hashers.len(),
-                fields: type_ids.len(),
-            }
-            .into());
-        }
+        let mut hashers = StorageHashersIter::new(entry.entry_type(), metadata.types())?;
+        self.keys.encode_to(bytes, &mut hashers, metadata.types())?;
 
         Ok(())
     }
@@ -238,23 +184,4 @@ pub fn dynamic<Keys: StorageKey>(
     storage_entry_keys: Keys,
 ) -> DynamicAddress<Keys> {
     DynamicAddress::new(pallet_name, entry_name, storage_entry_keys)
-}
-
-/// Take some SCALE encoded bytes and a [`StorageHasher`] and hash the bytes accordingly.
-fn hash_bytes(input: &[u8], hasher: &StorageHasher, bytes: &mut Vec<u8>) {
-    match hasher {
-        StorageHasher::Identity => bytes.extend(input),
-        StorageHasher::Blake2_128 => bytes.extend(sp_core_hashing::blake2_128(input)),
-        StorageHasher::Blake2_128Concat => {
-            bytes.extend(sp_core_hashing::blake2_128(input));
-            bytes.extend(input);
-        }
-        StorageHasher::Blake2_256 => bytes.extend(sp_core_hashing::blake2_256(input)),
-        StorageHasher::Twox128 => bytes.extend(sp_core_hashing::twox_128(input)),
-        StorageHasher::Twox256 => bytes.extend(sp_core_hashing::twox_256(input)),
-        StorageHasher::Twox64Concat => {
-            bytes.extend(sp_core_hashing::twox_64(input));
-            bytes.extend(input);
-        }
-    }
 }

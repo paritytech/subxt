@@ -188,9 +188,6 @@ pub enum TransactionError {
 #[derive(Clone, Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum StorageAddressError {
-    /// Storage map type must be a composite type.
-    #[error("Storage map type must be a composite type")]
-    MapTypeMustBeTuple,
     /// Storage lookup does not have the expected number of keys.
     #[error("Storage lookup requires {expected} keys but got {actual} keys")]
     WrongNumberOfKeys {

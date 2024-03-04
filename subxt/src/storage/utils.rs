@@ -6,6 +6,8 @@
 //! aren't things that should ever be overridden, and so don't exist on
 //! the trait itself.
 
+use subxt_metadata::StorageHasher;
+
 use super::StorageAddress;
 use crate::{error::Error, metadata::Metadata};
 
@@ -36,4 +38,23 @@ pub fn storage_address_root_bytes<Address: StorageAddress>(addr: &Address) -> Ve
     let mut bytes = Vec::new();
     write_storage_address_root_bytes(addr, &mut bytes);
     bytes
+}
+
+/// Take some SCALE encoded bytes and a [`StorageHasher`] and hash the bytes accordingly.
+pub fn hash_bytes(input: &[u8], hasher: StorageHasher, bytes: &mut Vec<u8>) {
+    match hasher {
+        StorageHasher::Identity => bytes.extend(input),
+        StorageHasher::Blake2_128 => bytes.extend(sp_core_hashing::blake2_128(input)),
+        StorageHasher::Blake2_128Concat => {
+            bytes.extend(sp_core_hashing::blake2_128(input));
+            bytes.extend(input);
+        }
+        StorageHasher::Blake2_256 => bytes.extend(sp_core_hashing::blake2_256(input)),
+        StorageHasher::Twox128 => bytes.extend(sp_core_hashing::twox_128(input)),
+        StorageHasher::Twox256 => bytes.extend(sp_core_hashing::twox_256(input)),
+        StorageHasher::Twox64Concat => {
+            bytes.extend(sp_core_hashing::twox_64(input));
+            bytes.extend(input);
+        }
+    }
 }
