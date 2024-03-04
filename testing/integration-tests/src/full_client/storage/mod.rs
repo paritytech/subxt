@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, test_context, utils::wait_for_blocks};
+use crate::{node_runtime, subxt_test, test_context, utils::wait_for_blocks};
 
 #[cfg(fullclient)]
 use subxt::utils::AccountId32;

@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    submit_tx_wait_for_finalized_success, test_context,
+    submit_tx_wait_for_finalized_success, subxt_test, test_context,
     utils::{node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};

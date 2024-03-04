@@ -4,7 +4,7 @@
 
 use crate::{
     node_runtime::{self, balances, runtime_types, system},
-    submit_tx_wait_for_finalized_success, test_context,
+    submit_tx_wait_for_finalized_success, subxt_test, test_context,
 };
 use codec::Decode;
 use subxt::{

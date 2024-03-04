@@ -8,7 +8,7 @@ use crate::{
         runtime_types::{self, sp_weights::weight_v2::Weight},
         sudo,
     },
-    submit_tx_wait_for_finalized_success, test_context,
+    submit_tx_wait_for_finalized_success, subxt_test, test_context,
 };
 use subxt_signer::sr25519::dev;
 

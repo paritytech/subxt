@@ -9,7 +9,8 @@ use crate::{
         runtime_types::{pallet_contracts::wasm::Determinism, sp_weights::weight_v2::Weight},
         system,
     },
-    submit_tx_wait_for_finalized_success, test_context, TestClient, TestConfig, TestContext,
+    submit_tx_wait_for_finalized_success, subxt_test, test_context, TestClient, TestConfig,
+    TestContext,
 };
 use subxt::ext::futures::StreamExt;
 use subxt::{tx::TxProgress, utils::MultiAddress, Config, Error};

@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, submit_tx_wait_for_finalized_success, test_context};
+use crate::{node_runtime, submit_tx_wait_for_finalized_success, subxt_test, test_context};
 use codec::Encode;
 use subxt::utils::AccountId32;
 use subxt_signer::sr25519::dev;

@@ -28,21 +28,21 @@ pub fn subxt_test(attr: TokenStream, item: TokenStream) -> TokenStream {
     let func_vis = &func.vis;
     let func_sig = &func.sig;
     let func_block = &func.block;
-    let func_output = &func.sig.output;
 
-    let func_name = &func.sig.ident;
-    let inner_func_name = format_ident!("{}_inner", func_name);
+    let mut inner_func_sig = func.sig.clone();
+    inner_func_sig.ident = format_ident!("{}_inner", inner_func_sig.ident);
+    let inner_func_name = &inner_func_sig.ident;
 
     let result = quote! {
         #[tokio::test]
         #( #func_attrs )*
-        #func_vis #func_sig #func_output {
-            async fn #inner_func_name() #func_output
+        #func_vis #func_sig {
+            #func_vis #inner_func_sig
             #func_block
 
             tokio::time::timeout(std::time::Duration::from_secs(#timeout_duration), #inner_func_name())
                 .await
-                .expect("Test timedout");
+                .expect("Test timedout")
         }
     };
     result.into()

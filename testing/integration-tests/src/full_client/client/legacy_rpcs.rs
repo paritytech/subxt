@@ -5,7 +5,7 @@
 //! Just sanity checking some of the legacy RPC methods to make
 //! sure they don't error out and can decode their results OK.
 
-use crate::test_context;
+use crate::{subxt_test, test_context};
 
 #[subxt_test(timeout = 800)]
 async fn chain_get_block_hash() {

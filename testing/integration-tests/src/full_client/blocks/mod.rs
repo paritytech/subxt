@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::test_context;
+use crate::{subxt_test, test_context};
 use codec::{Compact, Encode};
 use futures::StreamExt;
 

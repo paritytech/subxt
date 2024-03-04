@@ -4,7 +4,7 @@
 
 use crate::{
     node_runtime::{self, system},
-    submit_tx_wait_for_finalized_success, test_context,
+    submit_tx_wait_for_finalized_success, subxt_test, test_context,
 };
 use assert_matches::assert_matches;
 use subxt_signer::sr25519::dev;
