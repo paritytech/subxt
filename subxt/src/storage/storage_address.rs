@@ -4,14 +4,12 @@
 
 use crate::{
     dynamic::DecodedValueThunk,
-    error::{Error, MetadataError, StorageAddressError},
-    metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
+    error::{Error, MetadataError},
+    metadata::{DecodeWithMetadata, Metadata},
 };
 use derivative::Derivative;
 
-use scale_info::TypeDef;
 use std::borrow::Cow;
-use subxt_metadata::{StorageEntryType, StorageHasher};
 
 use super::{storage_key::StorageHashersIter, StorageKey};
 

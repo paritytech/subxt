@@ -16,9 +16,9 @@ use crate::{
 use codec::Decode;
 use derivative::Derivative;
 use futures::StreamExt;
-use scale_info::TypeDef;
+
 use std::{future::Future, marker::PhantomData};
-use subxt_metadata::StorageHasher;
+
 use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageEntryType};
 
 /// This is returned from a couple of storage functions.

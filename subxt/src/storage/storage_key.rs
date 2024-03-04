@@ -1,6 +1,5 @@
 use crate::{
     error::{Error, MetadataError, StorageAddressError},
-    metadata::EncodeWithMetadata,
     utils::{Encoded, Static},
 };
 use scale_decode::{visitor::IgnoreVisitor, DecodeAsType};
@@ -18,7 +17,7 @@ pub struct StorageHashersIter {
     idx: usize,
 }
 
-impl<'a> StorageHashersIter {
+impl StorageHashersIter {
     pub fn new(storage_entry: &StorageEntryType, types: &PortableRegistry) -> Result<Self, Error> {
         let mut hashers_and_ty_ids = vec![];
 
@@ -252,7 +251,7 @@ impl StorageKey for Vec<scale_value::Value> {
         Self: Sized + 'static,
     {
         let mut result: Vec<scale_value::Value> = vec![];
-        while let Some((hasher, ty_id)) = hashers.next() {
+        for (hasher, ty_id) in hashers.by_ref() {
             match consume_hash_returning_key_bytes(bytes, hasher, ty_id, types)? {
                 Some(value_bytes) => {
                     let value = Value::decode_as_type(&mut &*value_bytes, ty_id, types)?;
@@ -438,22 +437,19 @@ mod tests {
                             .add(era, h3)
                             .build();
 
-                        let mut iter = super::StorageHashersIter{ hashers_and_ty_ids, idx: 0 };
-                        let keys_a =
-                            T4A::decode(&mut &bytes[..], &mut iter, &types)
-                                .unwrap();
+                        let mut iter = super::StorageHashersIter {
+                            hashers_and_ty_ids,
+                            idx: 0,
+                        };
+                        let keys_a = T4A::decode(&mut &bytes[..], &mut iter, &types).unwrap();
 
                         iter.reset();
 
-                        let keys_b =
-                            T4B::decode(&mut &bytes[..], &mut iter, &types)
-                                .unwrap();
+                        let keys_b = T4B::decode(&mut &bytes[..], &mut iter, &types).unwrap();
 
                         iter.reset();
 
-                        let keys_c =
-                            T4C::decode(&mut &bytes[..], &mut iter, &types)
-                                .unwrap();
+                        let keys_c = T4C::decode(&mut &bytes[..], &mut iter, &types).unwrap();
 
                         assert_eq!(keys_a.1.decoded().unwrap(), 13);
                         assert_eq!(keys_b.1 .0.decoded().unwrap(), 13);
