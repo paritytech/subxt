@@ -12,12 +12,15 @@ use derivative::Derivative;
 
 use super::utils::hash_bytes;
 
+// An iterator over all type ids of the key and the respective hashers.
 pub struct StorageHashersIter {
     hashers_and_ty_ids: Vec<(StorageHasher, u32)>,
     idx: usize,
 }
 
 impl StorageHashersIter {
+    /// Creates a new [`StorageHashersIter`]. Looks at the [`StorageEntryType`] and
+    /// assigns a hasher to each type id that makes up the key.
     pub fn new(storage_entry: &StorageEntryType, types: &PortableRegistry) -> Result<Self, Error> {
         let mut hashers_and_ty_ids = vec![];
 
@@ -116,17 +119,9 @@ pub trait StorageKey {
     ) -> Result<(), Error>;
 
     /// Attempts to decode the StorageKey given some bytes and a set of hashers and type IDs that they are meant to represent.
-    ///
-    /// Example: Imagine The `StorageKey` is a tuple `(A,B)` and the hashers are `[Blake2_128Concat, Twox64Concat]`.
-    /// Then the memory layout of the storage address is:
-    ///
-    /// ```txt
-    /// | 16 byte hash of A | n bytes for SCALE encoded A | 8 byte hash of B | n bytes for SCALE encoded B |
-    /// ```
-    ///
-    /// Implementations of this must advance the `bytes` and `hashers_and_ty_ids` cursors to consume any that they are using, or
-    /// return an error if they cannot appropriately do so. When a tuple of such implementations is given, each implementation
-    /// in the tuple receives the remaining un-consumed bytes and hashers from the previous ones.
+    /// The bytes passed to `decode` should start with:
+    /// - 1. some fixed size hash (for all hashers except `Identity`)
+    /// - 2. the plain key value itself (for `Identity`, `Blake2_128Concat` and `Twox64Concat` hashers)
     fn decode(
         bytes: &mut &[u8],
         hashers: &mut StorageHashersIter,
@@ -302,15 +297,7 @@ fn consume_hash_returning_key_bytes<'a>(
     }
 }
 
-/// Generates StorageKey implementations for tuples, e.g.
-/// ```rs,no_run
-/// impl<A: EncodeAsType, B: EncodeAsType> StorageKey for (StorageKey<A>, StorageKey<B>) {
-///     fn keys_iter(&self) -> impl ExactSizeIterator<Item = &dyn EncodeAsType> {
-///         let arr = [&self.0 as &dyn EncodeAsType, &self.1 as &dyn EncodeAsType];
-///         arr.into_iter()
-///     }
-/// }
-/// ```
+/// Generates StorageKey implementations for tuples
 macro_rules! impl_tuples {
     ($($ty:ident $n:tt),+) => {{
         impl<$($ty: StorageKey),+> StorageKey for ($( $ty ),+) {
@@ -444,11 +431,9 @@ mod tests {
                         let keys_a = T4A::decode(&mut &bytes[..], &mut iter, &types).unwrap();
 
                         iter.reset();
-
                         let keys_b = T4B::decode(&mut &bytes[..], &mut iter, &types).unwrap();
 
                         iter.reset();
-
                         let keys_c = T4C::decode(&mut &bytes[..], &mut iter, &types).unwrap();
 
                         assert_eq!(keys_a.1.decoded().unwrap(), 13);

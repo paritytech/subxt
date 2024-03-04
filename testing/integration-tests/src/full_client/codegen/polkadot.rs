@@ -4839,7 +4839,7 @@ pub mod api {
                 pub fn inherents_applied(
                     &self,
                 ) -> ::subxt::storage::address::Address<
-                    ::subxt::storage::address::StaticStorageMapKey,
+                    (),
                     types::inherents_applied::InherentsApplied,
                     ::subxt::storage::address::Yes,
                     ::subxt::storage::address::Yes,
@@ -4848,7 +4848,7 @@ pub mod api {
                     ::subxt::storage::address::Address::new_static(
                         "System",
                         "InherentsApplied",
-                        vec![],
+                        (),
                         [
                             132u8, 249u8, 142u8, 252u8, 8u8, 103u8, 80u8, 120u8, 50u8, 6u8, 188u8,
                             223u8, 101u8, 55u8, 165u8, 189u8, 172u8, 249u8, 165u8, 230u8, 183u8,
