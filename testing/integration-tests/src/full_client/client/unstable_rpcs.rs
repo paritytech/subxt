@@ -261,7 +261,7 @@ async fn transaction_unstable_submit_and_watch() {
     let tx_bytes = ctx
         .client()
         .tx()
-        .create_signed_with_nonce(&payload, &dev::alice(), 0, Default::default())
+        .create_signed_offline(&payload, &dev::alice(), Default::default())
         .unwrap()
         .into_encoded();
 
