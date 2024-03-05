@@ -61,7 +61,7 @@ unstable-metadata = []
 
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
-unstable-light-client = ["subxt-lightclient", "tokio-stream", "tokio"]
+unstable-light-client = ["subxt-lightclient", "tokio-stream"]
 
 [dependencies]
 async-trait = { workspace = true }
@@ -117,7 +117,6 @@ getrandom = { workspace = true, optional = true }
 
 # Included if "native" feature is enabled
 tokio-util = { workspace = true, features = ["compat"], optional = true }
-tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread"], optional = true }
 
 [dev-dependencies]
 bitvec = { workspace = true }
@@ -129,6 +128,7 @@ sp-keyring = { workspace = true }
 sp-runtime = { workspace = true }
 assert_matches = { workspace = true }
 subxt-signer = { path = "../signer" }
+wasm-bindgen-futures = { workspace = true }
 # Tracing subscriber is useful for light-client examples to ensure that
 # the `bootNodes` and chain spec are configured correctly. If all is fine, then
 # the light-client wlll emit INFO logs with
