@@ -1,5 +1,5 @@
 [package]
-name = "integration-tests-proc-macro"
+name = "subxt-test-proc-macro"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

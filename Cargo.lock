@@ -2266,7 +2266,6 @@ dependencies = [
  "frame-metadata 16.0.0",
  "futures",
  "hex",
- "integration-tests-proc-macro",
  "parity-scale-codec",
  "regex",
  "scale-info",
@@ -2277,21 +2276,13 @@ dependencies = [
  "subxt-codegen",
  "subxt-metadata",
  "subxt-signer",
+ "subxt-test-proc-macro",
  "syn 2.0.48",
  "test-runtime",
  "tokio",
  "tracing",
  "tracing-subscriber 0.3.18",
  "wabt",
-]
-
-[[package]]
-name = "integration-tests-proc-macro"
-version = "0.34.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.48",
 ]
 
 [[package]]
@@ -4682,6 +4673,15 @@ dependencies = [
  "subxt",
  "thiserror",
  "zeroize",
+]
+
+[[package]]
+name = "subxt-test-proc-macro"
+version = "0.34.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.48",
 ]
 
 [[package]]

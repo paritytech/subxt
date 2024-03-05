@@ -46,7 +46,7 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 wabt = { workspace = true }
 substrate-runner = { workspace = true }
-integration-tests-proc-macro = { path = "proc-macro" }
+subxt-test-proc-macro = { path = "proc-macro" }
 
 [build-dependencies]
 cfg_aliases = "0.2.0"
