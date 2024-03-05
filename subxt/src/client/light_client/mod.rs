@@ -103,7 +103,6 @@ impl RawLightClient {
                 if let Err(e) = val {
                     // This is a test; bail if something does wrong and try to
                     // ensure that the message makes it to some logs.
-                    eprintln!("Error driving unstable backend in tests (will panic): {e}");
                     panic!("Error driving unstable backend in tests: {e}");
                 }
             }
