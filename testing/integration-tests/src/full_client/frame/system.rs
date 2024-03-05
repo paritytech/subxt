@@ -9,7 +9,7 @@ use crate::{
 use assert_matches::assert_matches;
 use subxt_signer::sr25519::dev;
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn storage_account() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -31,7 +31,7 @@ async fn storage_account() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn tx_remark_with_event() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();

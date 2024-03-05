@@ -100,7 +100,7 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> Metadata {
     ))
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn full_metadata_check() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -117,7 +117,7 @@ async fn full_metadata_check() {
     assert!(!node_runtime::is_codegen_valid_for(&metadata));
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn constant_values_are_not_validated() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -149,7 +149,7 @@ async fn constant_values_are_not_validated() {
     assert!(api.constants().at(&deposit_addr).is_ok());
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn calls_check() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -235,7 +235,7 @@ async fn calls_check() {
     assert!(api.tx().validate(&withdraw_unbonded_addr).is_ok());
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn storage_check() {
     let ctx = test_context().await;
     let api = ctx.client();

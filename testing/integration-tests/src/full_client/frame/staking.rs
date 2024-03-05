@@ -34,7 +34,7 @@ fn default_validator_prefs() -> ValidatorPrefs {
     }
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn validate_with_stash_account() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -55,7 +55,7 @@ async fn validate_with_stash_account() {
         .expect("should be successful");
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn validate_not_possible_for_controller_account() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -80,7 +80,7 @@ async fn validate_not_possible_for_controller_account() -> Result<(), Error> {
     Ok(())
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn nominate_with_stash_account() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -102,7 +102,7 @@ async fn nominate_with_stash_account() {
         .expect("should be successful");
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn nominate_not_possible_for_controller_account() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -129,7 +129,7 @@ async fn nominate_not_possible_for_controller_account() -> Result<(), Error> {
     Ok(())
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn chill_works_for_stash_only() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -188,7 +188,7 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
     Ok(())
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn tx_bond() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -221,7 +221,7 @@ async fn tx_bond() -> Result<(), Error> {
     Ok(())
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn storage_history_depth() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -231,7 +231,7 @@ async fn storage_history_depth() -> Result<(), Error> {
     Ok(())
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn storage_current_era() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -246,7 +246,7 @@ async fn storage_current_era() -> Result<(), Error> {
     Ok(())
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn storage_era_reward_points() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();

@@ -169,7 +169,7 @@ impl ContractsTestContext {
     }
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn tx_instantiate_with_code() {
     let ctx = ContractsTestContext::init().await;
     let result = ctx.instantiate_with_code().await;
@@ -180,7 +180,7 @@ async fn tx_instantiate_with_code() {
     );
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn tx_instantiate() {
     let ctx = ContractsTestContext::init().await;
     let code_hash = ctx.upload_code().await.unwrap();
@@ -193,7 +193,7 @@ async fn tx_instantiate() {
     );
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn tx_call() {
     let cxt = ContractsTestContext::init().await;
     let (_, contract) = cxt.instantiate_with_code().await.unwrap();

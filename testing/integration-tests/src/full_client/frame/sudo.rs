@@ -15,7 +15,7 @@ use subxt_signer::sr25519::dev;
 type Call = runtime_types::kitchensink_runtime::RuntimeCall;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn test_sudo() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -42,7 +42,7 @@ async fn test_sudo() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();

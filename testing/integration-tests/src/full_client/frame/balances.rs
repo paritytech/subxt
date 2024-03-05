@@ -16,7 +16,7 @@ use subxt_signer::sr25519::dev;
 #[cfg(lightclient)]
 use subxt::client::OfflineClientT;
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let alice = dev::alice();
     let bob = dev::bob();
@@ -89,7 +89,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 }
 
 #[cfg(fullclient)]
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     use subxt::ext::scale_value::{At, Composite, Value};
 
@@ -211,7 +211,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
     let alice = dev::alice();
     let bob = dev::bob();
@@ -255,7 +255,7 @@ async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn storage_total_issuance() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -272,7 +272,7 @@ async fn storage_total_issuance() {
     assert_ne!(total_issuance, 0);
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let bob_signer = dev::bob();
     let bob: AccountId32 = dev::bob().public_key().into();
@@ -314,7 +314,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn transfer_error() {
     let alice = dev::alice();
     let alice_addr = alice.public_key().into();
@@ -360,7 +360,7 @@ async fn transfer_error() {
     );
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn transfer_implicit_subscription() {
     let alice = dev::alice();
     let bob: AccountId32 = dev::bob().public_key().into();
@@ -394,7 +394,7 @@ async fn transfer_implicit_subscription() {
     );
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn constant_existential_deposit() {
     let ctx = test_context().await;
     let api = ctx.client();

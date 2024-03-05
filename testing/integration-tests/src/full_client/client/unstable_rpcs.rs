@@ -22,7 +22,7 @@ use subxt::client::OfflineClientT;
 
 use subxt_signer::sr25519::dev;
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn chainhead_unstable_follow() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
@@ -62,7 +62,7 @@ async fn chainhead_unstable_follow() {
     );
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn chainhead_unstable_body() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
@@ -90,7 +90,7 @@ async fn chainhead_unstable_body() {
     );
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn chainhead_unstable_header() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
@@ -118,7 +118,7 @@ async fn chainhead_unstable_header() {
     assert_eq!(new_header, old_header);
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn chainhead_unstable_storage() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -164,7 +164,7 @@ async fn chainhead_unstable_storage() {
     assert_matches!(event, FollowEvent::OperationStorageDone(res) if res.operation_id == operation_id);
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn chainhead_unstable_call() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
@@ -201,7 +201,7 @@ async fn chainhead_unstable_call() {
     );
 }
 
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn chainhead_unstable_unpin() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
@@ -220,7 +220,7 @@ async fn chainhead_unstable_unpin() {
 }
 
 #[cfg(fullclient)]
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn chainspec_v1_genesishash() {
     let ctx = test_context().await;
     let old_rpc = ctx.legacy_rpc_methods().await;
@@ -233,7 +233,7 @@ async fn chainspec_v1_genesishash() {
 }
 
 #[cfg(fullclient)]
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn chainspec_v1_chainname() {
     let ctx = test_context().await;
     let old_rpc = ctx.legacy_rpc_methods().await;
@@ -246,7 +246,7 @@ async fn chainspec_v1_chainname() {
 }
 
 #[cfg(fullclient)]
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn chainspec_v1_properties() {
     let ctx = test_context().await;
     let old_rpc = ctx.legacy_rpc_methods().await;
@@ -259,7 +259,7 @@ async fn chainspec_v1_properties() {
 }
 
 #[cfg(fullclient)]
-#[subxt_test(timeout = 800)]
+#[subxt_test]
 async fn transaction_unstable_submit_and_watch() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
