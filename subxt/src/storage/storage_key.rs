@@ -34,15 +34,22 @@ impl StorageHashersIter {
                 .ok_or(MetadataError::TypeNotFound(*key_ty))?;
 
             if let TypeDef::Tuple(tuple) = &ty.type_def {
-                if tuple.fields.len() != hashers.len() {
+                if hashers.len() == 1 {
+                    // use the same hasher for all fields, if only 1 hasher present:
+                    let hasher = hashers[0];
+                    for f in tuple.fields.iter() {
+                        hashers_and_ty_ids.push((hasher, f.id));
+                    }
+                } else if hashers.len() < tuple.fields.len() {
                     return Err(StorageAddressError::WrongNumberOfHashers {
                         hashers: hashers.len(),
                         fields: tuple.fields.len(),
                     }
                     .into());
-                }
-                for (i, f) in tuple.fields.iter().enumerate() {
-                    hashers_and_ty_ids.push((hashers[i], f.id));
+                } else {
+                    for (i, f) in tuple.fields.iter().enumerate() {
+                        hashers_and_ty_ids.push((hashers[i], f.id));
+                    }
                 }
             } else {
                 if hashers.len() != 1 {
@@ -120,12 +127,11 @@ pub trait StorageKey {
 impl StorageKey for () {
     fn encode_storage_key(
         &self,
-        bytes: &mut Vec<u8>,
+        _bytes: &mut Vec<u8>,
         hashers: &mut StorageHashersIter,
         _types: &PortableRegistry,
     ) -> Result<(), Error> {
-        let (hasher, _ty) = hashers.next_or_err()?;
-        hash_bytes(&[], hasher, bytes);
+        _ = hashers.next_or_err();
         Ok(())
     }
 
@@ -134,7 +140,11 @@ impl StorageKey for () {
         hashers: &mut StorageHashersIter,
         types: &PortableRegistry,
     ) -> Result<Self, Error> {
-        let (hasher, ty_id) = hashers.next_or_err()?;
+        let (hasher, ty_id) = match hashers.next_or_err() {
+            Ok((hasher, ty_id)) => (hasher, ty_id),
+            Err(_) if bytes.len() == 0 => return Ok(()),
+            Err(err) => return Err(err),
+        };
         consume_hash_returning_key_bytes(bytes, hasher, ty_id, types)?;
         Ok(())
     }
@@ -182,6 +192,7 @@ impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
         hashers: &mut StorageHashersIter,
         types: &PortableRegistry,
     ) -> Result<(), Error> {
+        println!("{:?}", hashers);
         let (hasher, ty_id) = hashers.next_or_err()?;
         let encoded_value = self.bytes.encode_as_type(ty_id, types)?;
         hash_bytes(&encoded_value, hasher, bytes);
