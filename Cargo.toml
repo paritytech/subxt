@@ -81,7 +81,7 @@ proc-macro2 = "1.0.78"
 quote = "1.0.35"
 regex = "1.10.3"
 scale-info = { version = "2.10.0", default-features = false }
-scale-value = "0.14.0"
+scale-value = "0.14.1"
 scale-bits = "0.5.0"
 scale-decode = "0.11.1"
 scale-encode = "0.6.0"

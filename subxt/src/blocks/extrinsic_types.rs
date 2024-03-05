@@ -420,7 +420,7 @@ where
 
     /// Decode and provide the extrinsic fields back in the form of a [`scale_value::Composite`]
     /// type which represents the named or unnamed fields that were present in the extrinsic.
-    pub fn field_values(&self) -> Result<scale_value::Composite<()>, Error> {
+    pub fn field_values(&self) -> Result<scale_value::Composite<u32>, Error> {
         let bytes = &mut self.field_bytes();
         let extrinsic_metadata = self.extrinsic_metadata()?;
 
@@ -429,11 +429,8 @@ where
             .fields
             .iter()
             .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
-        let decoded = <scale_value::Composite<()>>::decode_as_fields(
-            bytes,
-            &mut fields,
-            self.metadata.types(),
-        )?;
+        let decoded =
+            scale_value::scale::decode_as_fields(bytes, &mut fields, self.metadata.types())?;
 
         Ok(decoded)
     }
@@ -750,8 +747,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
             &mut &self.bytes[..],
             &self.ty_id,
             self.metadata.types(),
-        )
-        .map_err(|e| Error::Decode(e.into()))?;
+        )?;
         Ok(value)
     }
 

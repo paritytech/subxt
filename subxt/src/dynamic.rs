@@ -72,8 +72,7 @@ impl DecodedValueThunk {
             &mut &*self.scale_bytes,
             &self.type_id,
             self.metadata.types(),
-        )
-        .map_err(|e| Error::Decode(e.into()))?;
+        )?;
         Ok(val)
     }
     /// decode the `DecodedValueThunk` into a concrete type.
