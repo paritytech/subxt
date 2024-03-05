@@ -95,7 +95,7 @@ impl ExactSizeIterator for StorageHashersIter {
 /// This trait should be implemented by anything that can be used as one or multiple storage keys.
 pub trait StorageKey {
     /// Encodes the storage key into some bytes
-    fn encode_to(
+    fn encode_storage_key(
         &self,
         bytes: &mut Vec<u8>,
         hashers: &mut StorageHashersIter,
@@ -106,7 +106,7 @@ pub trait StorageKey {
     /// The bytes passed to `decode` should start with:
     /// - 1. some fixed size hash (for all hashers except `Identity`)
     /// - 2. the plain key value itself (for `Identity`, `Blake2_128Concat` and `Twox64Concat` hashers)
-    fn decode(
+    fn decode_storage_key(
         bytes: &mut &[u8],
         hashers: &mut StorageHashersIter,
         types: &PortableRegistry,
@@ -118,7 +118,7 @@ pub trait StorageKey {
 /// Implement `StorageKey` for `()` which can be used for keyless storage entries,
 /// or to otherwise just ignore some entry.
 impl StorageKey for () {
-    fn encode_to(
+    fn encode_storage_key(
         &self,
         bytes: &mut Vec<u8>,
         hashers: &mut StorageHashersIter,
@@ -129,7 +129,7 @@ impl StorageKey for () {
         Ok(())
     }
 
-    fn decode(
+    fn decode_storage_key(
         bytes: &mut &[u8],
         hashers: &mut StorageHashersIter,
         types: &PortableRegistry,
@@ -176,7 +176,7 @@ impl<K: ?Sized> StaticStorageKey<K> {
 
 // Note: The ?Sized bound is necessary to support e.g. `StorageKey<[u8]>`.
 impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
-    fn encode_to(
+    fn encode_storage_key(
         &self,
         bytes: &mut Vec<u8>,
         hashers: &mut StorageHashersIter,
@@ -188,7 +188,7 @@ impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
         Ok(())
     }
 
-    fn decode(
+    fn decode_storage_key(
         bytes: &mut &[u8],
         hashers: &mut StorageHashersIter,
         types: &PortableRegistry,
@@ -214,7 +214,7 @@ impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
 }
 
 impl StorageKey for Vec<scale_value::Value> {
-    fn encode_to(
+    fn encode_storage_key(
         &self,
         bytes: &mut Vec<u8>,
         hashers: &mut StorageHashersIter,
@@ -228,7 +228,7 @@ impl StorageKey for Vec<scale_value::Value> {
         Ok(())
     }
 
-    fn decode(
+    fn decode_storage_key(
         bytes: &mut &[u8],
         hashers: &mut StorageHashersIter,
         types: &PortableRegistry,
@@ -292,17 +292,17 @@ fn consume_hash_returning_key_bytes<'a>(
 macro_rules! impl_tuples {
     ($($ty:ident $n:tt),+) => {{
         impl<$($ty: StorageKey),+> StorageKey for ($( $ty ),+) {
-            fn encode_to(
+            fn encode_storage_key(
                 &self,
                 bytes: &mut Vec<u8>,
                 hashers: &mut StorageHashersIter,
                 types: &PortableRegistry,
             ) -> Result<(), Error> {
-                $(    self.$n.encode_to(bytes, hashers, types)?;    )+
+                $(    self.$n.encode_storage_key(bytes, hashers, types)?;    )+
                 Ok(())
             }
 
-            fn decode(
+            fn decode_storage_key(
                 bytes: &mut &[u8],
                 hashers: &mut StorageHashersIter,
                 types: &PortableRegistry,
@@ -310,7 +310,7 @@ macro_rules! impl_tuples {
             where
                 Self: Sized + 'static,
             {
-                Ok( ( $(    $ty::decode(bytes, hashers, types)?,    )+ ) )
+                Ok( ( $(    $ty::decode_storage_key(bytes, hashers, types)?,    )+ ) )
             }
         }
     }};
@@ -419,13 +419,16 @@ mod tests {
                             hashers_and_ty_ids,
                             idx: 0,
                         };
-                        let keys_a = T4A::decode(&mut &bytes[..], &mut iter, &types).unwrap();
+                        let keys_a =
+                            T4A::decode_storage_key(&mut &bytes[..], &mut iter, &types).unwrap();
 
                         iter.reset();
-                        let keys_b = T4B::decode(&mut &bytes[..], &mut iter, &types).unwrap();
+                        let keys_b =
+                            T4B::decode_storage_key(&mut &bytes[..], &mut iter, &types).unwrap();
 
                         iter.reset();
-                        let keys_c = T4C::decode(&mut &bytes[..], &mut iter, &types).unwrap();
+                        let keys_c =
+                            T4C::decode_storage_key(&mut &bytes[..], &mut iter, &types).unwrap();
 
                         assert_eq!(keys_a.1.decoded().unwrap(), 13);
                         assert_eq!(keys_b.1 .0.decoded().unwrap(), 13);

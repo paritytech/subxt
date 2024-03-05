@@ -258,7 +258,7 @@ where
                     strip_storage_addess_root_bytes(cursor)?;
 
                     hashers.reset();
-                    let keys = <Address::Keys as StorageKey>::decode(
+                    let keys = <Address::Keys as StorageKey>::decode_storage_key(
                         cursor,
                         &mut hashers,
                         metadata.types(),

@@ -165,8 +165,8 @@ where
             .ok_or_else(|| MetadataError::StorageEntryNotFound(self.entry_name().to_owned()))?;
 
         let mut hashers = StorageHashersIter::new(entry.entry_type(), metadata.types())?;
-        self.keys.encode_to(bytes, &mut hashers, metadata.types())?;
-
+        self.keys
+            .encode_storage_key(bytes, &mut hashers, metadata.types())?;
         Ok(())
     }
 
