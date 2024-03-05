@@ -12,6 +12,7 @@ use derivative::Derivative;
 
 use super::utils::hash_bytes;
 
+#[derive(Debug, Clone)]
 // An iterator over all type ids of the key and the respective hashers.
 pub struct StorageHashersIter {
     hashers_and_ty_ids: Vec<(StorageHasher, u32)>,
@@ -61,27 +62,10 @@ impl StorageHashersIter {
         })
     }
 
-    pub fn encode_next<E: EncodeAsType>(
-        &mut self,
-        value: &E,
-        bytes: &mut Vec<u8>,
-        types: &PortableRegistry,
-        storage_key_fields: usize,
-    ) -> Result<(), Error> {
-        let (hasher, ty) = self.next_or_err(storage_key_fields)?;
-        let input = value.encode_as_type(ty, types)?;
-        hash_bytes(&input, hasher, bytes);
-        Ok(())
-    }
-
-    pub fn next_or_err(
-        &mut self,
-        storage_key_fields: usize,
-    ) -> Result<(StorageHasher, u32), Error> {
+    pub fn next_or_err(&mut self) -> Result<(StorageHasher, u32), Error> {
         self.next().ok_or_else(|| {
-            StorageAddressError::WrongNumberOfHashers {
-                hashers: self.hashers_and_ty_ids.len(),
-                fields: storage_key_fields,
+            StorageAddressError::TooManyKeys {
+                expected: self.hashers_and_ty_ids.len(),
             }
             .into()
         })
@@ -138,9 +122,11 @@ impl StorageKey for () {
         &self,
         bytes: &mut Vec<u8>,
         hashers: &mut StorageHashersIter,
-        types: &PortableRegistry,
+        _types: &PortableRegistry,
     ) -> Result<(), Error> {
-        hashers.encode_next(&(), bytes, types, 1)
+        let (hasher, _ty) = hashers.next_or_err()?;
+        hash_bytes(&[], hasher, bytes);
+        Ok(())
     }
 
     fn decode(
@@ -148,7 +134,7 @@ impl StorageKey for () {
         hashers: &mut StorageHashersIter,
         types: &PortableRegistry,
     ) -> Result<Self, Error> {
-        let (hasher, ty_id) = hashers.next_or_err(1)?;
+        let (hasher, ty_id) = hashers.next_or_err()?;
         consume_hash_returning_key_bytes(bytes, hasher, ty_id, types)?;
         Ok(())
     }
@@ -196,7 +182,10 @@ impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
         hashers: &mut StorageHashersIter,
         types: &PortableRegistry,
     ) -> Result<(), Error> {
-        hashers.encode_next(&self.bytes, bytes, types, 1)
+        let (hasher, ty_id) = hashers.next_or_err()?;
+        let encoded_value = self.bytes.encode_as_type(ty_id, types)?;
+        hash_bytes(&encoded_value, hasher, bytes);
+        Ok(())
     }
 
     fn decode(
@@ -207,7 +196,7 @@ impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
     where
         Self: Sized + 'static,
     {
-        let (hasher, ty_id) = hashers.next_or_err(1)?;
+        let (hasher, ty_id) = hashers.next_or_err()?;
         let key_bytes = consume_hash_returning_key_bytes(bytes, hasher, ty_id, types)?;
 
         // if the hasher had no key appended, we can't decode it into a `StaticStorageKey`.
@@ -232,7 +221,9 @@ impl StorageKey for Vec<scale_value::Value> {
         types: &PortableRegistry,
     ) -> Result<(), Error> {
         for value in self.iter() {
-            hashers.encode_next(value, bytes, types, self.len())?;
+            let (hasher, ty_id) = hashers.next_or_err()?;
+            let encoded_value = value.encode_as_type(ty_id, types)?;
+            hash_bytes(&encoded_value, hasher, bytes);
         }
         Ok(())
     }

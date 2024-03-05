@@ -189,10 +189,8 @@ pub enum TransactionError {
 #[non_exhaustive]
 pub enum StorageAddressError {
     /// Storage lookup does not have the expected number of keys.
-    #[error("Storage lookup requires {expected} keys but got {actual} keys")]
-    WrongNumberOfKeys {
-        /// The actual number of keys needed, based on the metadata.
-        actual: usize,
+    #[error("Storage lookup requires {expected} keys but more keys have been provided.")]
+    TooManyKeys {
         /// The number of keys provided in the storage address.
         expected: usize,
     },
