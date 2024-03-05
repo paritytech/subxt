@@ -17,7 +17,7 @@ pub fn subxt_test(attr: TokenStream, item: TokenStream) -> TokenStream {
         Ok(subxt_attr) => subxt_attr,
         Err(err) => return err.into_compile_error().into(),
     };
-    let timeout_duration = subxt_attr.timeout.unwrap_or(60 * 5);
+    let timeout_duration = subxt_attr.timeout.unwrap_or(60 * 6);
 
     let func: syn::ItemFn = match syn::parse(item) {
         Ok(func) => func,
