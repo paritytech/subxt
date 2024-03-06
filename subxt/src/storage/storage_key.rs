@@ -202,7 +202,6 @@ impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
         hashers: &mut StorageHashersIter,
         types: &PortableRegistry,
     ) -> Result<(), Error> {
-        println!("{:?}", hashers);
         let (hasher, ty_id) = hashers.next_or_err()?;
         let encoded_value = self.bytes.encode_as_type(ty_id, types)?;
         hash_bytes(&encoded_value, hasher, bytes);
