@@ -369,6 +369,10 @@ jobs:
     runs-on: ubuntu-latest-16-cores
     # needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 60
+    env:
+      # Set timeout for subxt tests. Light client needs to syncup properly.
+      # Per test we timeout after 15mins, more than enough for a single test.
+      SUBXT_TEST_TIMEOUT: 900
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
