@@ -12,19 +12,18 @@ use derivative::Derivative;
 
 use super::utils::hash_bytes;
 
-#[derive(Debug, Clone)]
-// An iterator over all type ids of the key and the respective hashers.
-pub struct StorageHashersIter {
+/// A collection of storage hashers paired with the type ids of the types they should hash.
+/// Can be created for each storage entry in the metadata via [`StorageHashers::new()`].
+#[derive(Debug)]
+pub(crate) struct StorageHashers {
     hashers_and_ty_ids: Vec<(StorageHasher, u32)>,
-    idx: usize,
 }
 
-impl StorageHashersIter {
-    /// Creates a new [`StorageHashersIter`]. Looks at the [`StorageEntryType`] and
+impl StorageHashers {
+    /// Creates new [`StorageHashers`] from a storage entry. Looks at the [`StorageEntryType`] and
     /// assigns a hasher to each type id that makes up the key.
     pub fn new(storage_entry: &StorageEntryType, types: &PortableRegistry) -> Result<Self, Error> {
         let mut hashers_and_ty_ids = vec![];
-
         if let StorageEntryType::Map {
             hashers, key_ty, ..
         } = storage_entry
@@ -63,39 +62,50 @@ impl StorageHashersIter {
             };
         }
 
-        Ok(Self {
-            hashers_and_ty_ids,
-            idx: 0,
-        })
+        Ok(Self { hashers_and_ty_ids })
     }
 
-    pub fn next_or_err(&mut self) -> Result<(StorageHasher, u32), Error> {
+    /// Creates an iterator over the storage hashers and type ids.
+    pub fn iter(&self) -> StorageHashersIter<'_> {
+        StorageHashersIter {
+            hashers: self,
+            idx: 0,
+        }
+    }
+}
+
+/// An iterator over all type ids of the key and the respective hashers.
+/// See [`StorageHashers::iter()`].
+#[derive(Debug)]
+pub struct StorageHashersIter<'a> {
+    hashers: &'a StorageHashers,
+    idx: usize,
+}
+
+impl<'a> StorageHashersIter<'a> {
+    fn next_or_err(&mut self) -> Result<(StorageHasher, u32), Error> {
         self.next().ok_or_else(|| {
             StorageAddressError::TooManyKeys {
-                expected: self.hashers_and_ty_ids.len(),
+                expected: self.hashers.hashers_and_ty_ids.len(),
             }
             .into()
         })
     }
-
-    pub fn reset(&mut self) {
-        self.idx = 0;
-    }
 }
 
-impl Iterator for StorageHashersIter {
+impl<'a> Iterator for StorageHashersIter<'a> {
     type Item = (StorageHasher, u32);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let item = self.hashers_and_ty_ids.get(self.idx).copied()?;
+        let item = self.hashers.hashers_and_ty_ids.get(self.idx).copied()?;
         self.idx += 1;
         Some(item)
     }
 }
 
-impl ExactSizeIterator for StorageHashersIter {
+impl<'a> ExactSizeIterator for StorageHashersIter<'a> {
     fn len(&self) -> usize {
-        self.hashers_and_ty_ids.len() - self.idx
+        self.hashers.hashers_and_ty_ids.len() - self.idx
     }
 }
 
@@ -142,7 +152,7 @@ impl StorageKey for () {
     ) -> Result<Self, Error> {
         let (hasher, ty_id) = match hashers.next_or_err() {
             Ok((hasher, ty_id)) => (hasher, ty_id),
-            Err(_) if bytes.len() == 0 => return Ok(()),
+            Err(_) if bytes.is_empty() => return Ok(()),
             Err(err) => return Err(err),
         };
         consume_hash_returning_key_bytes(bytes, hasher, ty_id, types)?;
@@ -426,20 +436,18 @@ mod tests {
                             .add(era, h3)
                             .build();
 
-                        let mut iter = super::StorageHashersIter {
-                            hashers_and_ty_ids,
-                            idx: 0,
-                        };
+                        let mut hashers = super::StorageHashers { hashers_and_ty_ids };
                         let keys_a =
-                            T4A::decode_storage_key(&mut &bytes[..], &mut iter, &types).unwrap();
+                            T4A::decode_storage_key(&mut &bytes[..], &mut hashers.iter(), &types)
+                                .unwrap();
 
-                        iter.reset();
                         let keys_b =
-                            T4B::decode_storage_key(&mut &bytes[..], &mut iter, &types).unwrap();
+                            T4B::decode_storage_key(&mut &bytes[..], &mut hashers.iter(), &types)
+                                .unwrap();
 
-                        iter.reset();
                         let keys_c =
-                            T4C::decode_storage_key(&mut &bytes[..], &mut iter, &types).unwrap();
+                            T4C::decode_storage_key(&mut &bytes[..], &mut hashers.iter(), &types)
+                                .unwrap();
 
                         assert_eq!(keys_a.1.decoded().unwrap(), 13);
                         assert_eq!(keys_b.1 .0.decoded().unwrap(), 13);

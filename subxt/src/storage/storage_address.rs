@@ -11,7 +11,7 @@ use derivative::Derivative;
 
 use std::borrow::Cow;
 
-use super::{storage_key::StorageHashersIter, StorageKey};
+use super::{storage_key::StorageHashers, StorageKey};
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
@@ -164,9 +164,9 @@ where
             .entry_by_name(self.entry_name())
             .ok_or_else(|| MetadataError::StorageEntryNotFound(self.entry_name().to_owned()))?;
 
-        let mut hashers = StorageHashersIter::new(entry.entry_type(), metadata.types())?;
+        let hashers = StorageHashers::new(entry.entry_type(), metadata.types())?;
         self.keys
-            .encode_storage_key(bytes, &mut hashers, metadata.types())?;
+            .encode_storage_key(bytes, &mut hashers.iter(), metadata.types())?;
         Ok(())
     }
 

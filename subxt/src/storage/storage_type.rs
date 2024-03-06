@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::storage_address::{StorageAddress, Yes};
-use super::storage_key::StorageHashersIter;
+use super::storage_key::StorageHashers;
 use super::StorageKey;
 
 use crate::{
@@ -234,7 +234,7 @@ where
             let entry = entry.entry_type();
 
             let return_type_id = entry.value_ty();
-            let mut hashers = StorageHashersIter::new(entry, metadata.types())?;
+            let hashers = StorageHashers::new(entry, metadata.types())?;
 
             // The address bytes of this entry:
             let address_bytes = super::utils::storage_address_bytes(&address, &metadata)?;
@@ -257,10 +257,9 @@ where
                     let cursor = &mut &key_bytes[..];
                     strip_storage_addess_root_bytes(cursor)?;
 
-                    hashers.reset();
                     let keys = <Address::Keys as StorageKey>::decode_storage_key(
                         cursor,
-                        &mut hashers,
+                        &mut hashers.iter(),
                         metadata.types(),
                     )?;
 
