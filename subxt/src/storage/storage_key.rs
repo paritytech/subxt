@@ -436,7 +436,7 @@ mod tests {
                             .add(era, h3)
                             .build();
 
-                        let mut hashers = super::StorageHashers { hashers_and_ty_ids };
+                        let hashers = super::StorageHashers { hashers_and_ty_ids };
                         let keys_a =
                             T4A::decode_storage_key(&mut &bytes[..], &mut hashers.iter(), &types)
                                 .unwrap();
