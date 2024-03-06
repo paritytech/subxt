@@ -22,6 +22,8 @@ where
             .await
     };
 
+    const RETRY_TIME: u64 = 5;
+
     #[cfg(lightclient)]
     for _ in 0..2 {
         let result = submit().await;
@@ -29,8 +31,17 @@ where
         match result {
             Ok(tx_in_block) => return Ok(tx_in_block),
             Err(subxt::Error::Transaction(subxt::error::TransactionError::Dropped(_))) => {
+                tracing::info!("Transaction was dropped, retrying...");
                 // Retry if the transaction was dropped.
-                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                tokio::time::sleep(std::time::Duration::from_secs(RETRY_TIME)).await;
+            }
+            Err(subxt::Error::Rpc(subxt::error::RpcError::ClientError(err)))
+                if err.to_string().contains("No node available") =>
+            {
+                tracing::info!("Transaction error: {}, retrying...", err.to_string());
+
+                // Retry if the client is not connected.
+                tokio::time::sleep(std::time::Duration::from_secs(RETRY_TIME)).await;
             }
             Err(other) => return Err(other),
         }
