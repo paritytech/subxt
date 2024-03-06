@@ -38,11 +38,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Get back an iterator of results.
     let mut results = api.storage().at_latest().await?.iter(storage_query).await?;
 
-    while let Some(Ok((key, value))) = results.next().await {
-        println!("Key: 0x{}", hex::encode(&key));
-        println!("Value: {:?}", value);
+    while let Some(Ok(kv)) = results.next().await {
+        println!("Keys decoded: {:?}", kv.keys);
+        println!("Key: 0x{}", hex::encode(&kv.key_bytes));
+        println!("Value: {:?}", kv.value);
     }
-
     Ok(())
 }
 

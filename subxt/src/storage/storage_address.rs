@@ -4,20 +4,22 @@
 
 use crate::{
     dynamic::DecodedValueThunk,
-    error::{Error, MetadataError, StorageAddressError},
-    metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata},
-    utils::{Encoded, Static},
+    error::{Error, MetadataError},
+    metadata::{DecodeWithMetadata, Metadata},
 };
 use derivative::Derivative;
-use scale_info::TypeDef;
+
 use std::borrow::Cow;
-use subxt_metadata::{StorageEntryType, StorageHasher};
+
+use super::{storage_key::StorageHashers, StorageKey};
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
 pub trait StorageAddress {
     /// The target type of the value that lives at this address.
     type Target: DecodeWithMetadata;
+    /// The keys type used to construct this address.
+    type Keys: StorageKey;
     /// Can an entry be fetched from this address?
     /// Set this type to [`Yes`] to enable the corresponding calls to be made.
     type IsFetchable;
@@ -54,64 +56,69 @@ pub struct Yes;
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
 #[derive(Derivative)]
 #[derivative(
-    Clone(bound = "StorageKey: Clone"),
-    Debug(bound = "StorageKey: std::fmt::Debug"),
-    Eq(bound = "StorageKey: std::cmp::Eq"),
-    Ord(bound = "StorageKey: std::cmp::Ord"),
-    PartialEq(bound = "StorageKey: std::cmp::PartialEq"),
-    PartialOrd(bound = "StorageKey: std::cmp::PartialOrd")
+    Clone(bound = "Keys: Clone"),
+    Debug(bound = "Keys: std::fmt::Debug"),
+    Eq(bound = "Keys: std::cmp::Eq"),
+    Ord(bound = "Keys: std::cmp::Ord"),
+    PartialEq(bound = "Keys: std::cmp::PartialEq"),
+    PartialOrd(bound = "Keys: std::cmp::PartialOrd")
 )]
-pub struct Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
+pub struct Address<Keys: StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
     entry_name: Cow<'static, str>,
-    storage_entry_keys: Vec<StorageKey>,
+    keys: Keys,
     validation_hash: Option<[u8; 32]>,
     _marker: std::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
 }
 
 /// A typical storage address constructed at runtime rather than via the `subxt` macro; this
 /// has no restriction on what it can be used for (since we don't statically know).
-pub type DynamicAddress<StorageKey> = Address<StorageKey, DecodedValueThunk, Yes, Yes, Yes>;
+pub type DynamicAddress<Keys> = Address<Keys, DecodedValueThunk, Yes, Yes, Yes>;
 
-impl<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
-    Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
-where
-    StorageKey: EncodeWithMetadata,
-    ReturnTy: DecodeWithMetadata,
-{
-    /// Create a new [`Address`] to use to access a storage entry.
-    pub fn new(
-        pallet_name: impl Into<String>,
-        entry_name: impl Into<String>,
-        storage_entry_keys: Vec<StorageKey>,
-    ) -> Self {
+impl<Keys: StorageKey> DynamicAddress<Keys> {
+    /// Creates a new dynamic address. As `Keys` you can use a `Vec<scale_value::Value>`
+    pub fn new(pallet_name: impl Into<String>, entry_name: impl Into<String>, keys: Keys) -> Self {
         Self {
             pallet_name: Cow::Owned(pallet_name.into()),
             entry_name: Cow::Owned(entry_name.into()),
-            storage_entry_keys: storage_entry_keys.into_iter().collect(),
+            keys,
             validation_hash: None,
             _marker: std::marker::PhantomData,
         }
     }
+}
 
+impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+    Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+where
+    Keys: StorageKey,
+    ReturnTy: DecodeWithMetadata,
+{
     /// Create a new [`Address`] using static strings for the pallet and call name.
     /// This is only expected to be used from codegen.
     #[doc(hidden)]
     pub fn new_static(
         pallet_name: &'static str,
         entry_name: &'static str,
-        storage_entry_keys: Vec<StorageKey>,
+        keys: Keys,
         hash: [u8; 32],
     ) -> Self {
         Self {
             pallet_name: Cow::Borrowed(pallet_name),
             entry_name: Cow::Borrowed(entry_name),
-            storage_entry_keys: storage_entry_keys.into_iter().collect(),
+            keys,
             validation_hash: Some(hash),
             _marker: std::marker::PhantomData,
         }
     }
+}
 
+impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+    Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+where
+    Keys: StorageKey,
+    ReturnTy: DecodeWithMetadata,
+{
     /// Do not validate this storage entry prior to accessing it.
     pub fn unvalidated(self) -> Self {
         Self {
@@ -128,13 +135,14 @@ where
     }
 }
 
-impl<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> StorageAddress
-    for Address<StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
+impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable> StorageAddress
+    for Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
 where
-    StorageKey: EncodeWithMetadata,
+    Keys: StorageKey,
     ReturnTy: DecodeWithMetadata,
 {
     type Target = ReturnTy;
+    type Keys = Keys;
     type IsFetchable = Fetchable;
     type IsDefaultable = Defaultable;
     type IsIterable = Iterable;
@@ -156,78 +164,10 @@ where
             .entry_by_name(self.entry_name())
             .ok_or_else(|| MetadataError::StorageEntryNotFound(self.entry_name().to_owned()))?;
 
-        match entry.entry_type() {
-            StorageEntryType::Plain(_) => {
-                if !self.storage_entry_keys.is_empty() {
-                    Err(StorageAddressError::WrongNumberOfKeys {
-                        expected: 0,
-                        actual: self.storage_entry_keys.len(),
-                    }
-                    .into())
-                } else {
-                    Ok(())
-                }
-            }
-            StorageEntryType::Map {
-                hashers, key_ty, ..
-            } => {
-                let ty = metadata
-                    .types()
-                    .resolve(*key_ty)
-                    .ok_or(MetadataError::TypeNotFound(*key_ty))?;
-
-                // If the provided keys are empty, the storage address must be
-                // equal to the storage root address.
-                if self.storage_entry_keys.is_empty() {
-                    return Ok(());
-                }
-
-                // If the key is a tuple, we encode each value to the corresponding tuple type.
-                // If the key is not a tuple, encode a single value to the key type.
-                let type_ids = match &ty.type_def {
-                    TypeDef::Tuple(tuple) => {
-                        either::Either::Left(tuple.fields.iter().map(|f| f.id))
-                    }
-                    _other => either::Either::Right(std::iter::once(*key_ty)),
-                };
-
-                if type_ids.len() < self.storage_entry_keys.len() {
-                    // Provided more keys than fields.
-                    return Err(StorageAddressError::WrongNumberOfKeys {
-                        expected: type_ids.len(),
-                        actual: self.storage_entry_keys.len(),
-                    }
-                    .into());
-                }
-
-                if hashers.len() == 1 {
-                    // One hasher; hash a tuple of all SCALE encoded bytes with the one hash function.
-                    let mut input = Vec::new();
-                    let iter = self.storage_entry_keys.iter().zip(type_ids);
-                    for (key, type_id) in iter {
-                        key.encode_with_metadata(type_id, metadata, &mut input)?;
-                    }
-                    hash_bytes(&input, &hashers[0], bytes);
-                    Ok(())
-                } else if hashers.len() >= type_ids.len() {
-                    let iter = self.storage_entry_keys.iter().zip(type_ids).zip(hashers);
-                    // A hasher per field; encode and hash each field independently.
-                    for ((key, type_id), hasher) in iter {
-                        let mut input = Vec::new();
-                        key.encode_with_metadata(type_id, metadata, &mut input)?;
-                        hash_bytes(&input, hasher, bytes);
-                    }
-                    Ok(())
-                } else {
-                    // Provided more fields than hashers.
-                    Err(StorageAddressError::WrongNumberOfHashers {
-                        hashers: hashers.len(),
-                        fields: type_ids.len(),
-                    }
-                    .into())
-                }
-            }
-        }
+        let hashers = StorageHashers::new(entry.entry_type(), metadata.types())?;
+        self.keys
+            .encode_storage_key(bytes, &mut hashers.iter(), metadata.types())?;
+        Ok(())
     }
 
     fn validation_hash(&self) -> Option<[u8; 32]> {
@@ -235,40 +175,11 @@ where
     }
 }
 
-/// A static storage key; this is some pre-encoded bytes
-/// likely provided by the generated interface.
-pub type StaticStorageMapKey = Static<Encoded>;
-
-// Used in codegen to construct the above.
-#[doc(hidden)]
-pub fn make_static_storage_map_key<T: codec::Encode>(t: T) -> StaticStorageMapKey {
-    Static(Encoded(t.encode()))
-}
-
 /// Construct a new dynamic storage lookup.
-pub fn dynamic<StorageKey: EncodeWithMetadata>(
+pub fn dynamic<Keys: StorageKey>(
     pallet_name: impl Into<String>,
     entry_name: impl Into<String>,
-    storage_entry_keys: Vec<StorageKey>,
-) -> DynamicAddress<StorageKey> {
+    storage_entry_keys: Keys,
+) -> DynamicAddress<Keys> {
     DynamicAddress::new(pallet_name, entry_name, storage_entry_keys)
-}
-
-/// Take some SCALE encoded bytes and a [`StorageHasher`] and hash the bytes accordingly.
-fn hash_bytes(input: &[u8], hasher: &StorageHasher, bytes: &mut Vec<u8>) {
-    match hasher {
-        StorageHasher::Identity => bytes.extend(input),
-        StorageHasher::Blake2_128 => bytes.extend(sp_core_hashing::blake2_128(input)),
-        StorageHasher::Blake2_128Concat => {
-            bytes.extend(sp_core_hashing::blake2_128(input));
-            bytes.extend(input);
-        }
-        StorageHasher::Blake2_256 => bytes.extend(sp_core_hashing::blake2_256(input)),
-        StorageHasher::Twox128 => bytes.extend(sp_core_hashing::twox_128(input)),
-        StorageHasher::Twox256 => bytes.extend(sp_core_hashing::twox_256(input)),
-        StorageHasher::Twox64Concat => {
-            bytes.extend(sp_core_hashing::twox_64(input));
-            bytes.extend(input);
-        }
-    }
 }

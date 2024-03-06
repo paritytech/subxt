@@ -14,6 +14,7 @@ crate::macros::cfg_unstable_light_client! {
 pub use dispatch_error::{
     ArithmeticError, DispatchError, ModuleError, TokenError, TransactionalError,
 };
+use subxt_metadata::StorageHasher;
 
 // Re-expose the errors we use from other crates here:
 pub use crate::config::ExtrinsicParamsError;
@@ -193,14 +194,9 @@ pub enum TransactionError {
 #[derive(Clone, Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum StorageAddressError {
-    /// Storage map type must be a composite type.
-    #[error("Storage map type must be a composite type")]
-    MapTypeMustBeTuple,
     /// Storage lookup does not have the expected number of keys.
-    #[error("Storage lookup requires {expected} keys but got {actual} keys")]
-    WrongNumberOfKeys {
-        /// The actual number of keys needed, based on the metadata.
-        actual: usize,
+    #[error("Storage lookup requires {expected} keys but more keys have been provided.")]
+    TooManyKeys {
         /// The number of keys provided in the storage address.
         expected: usize,
     },
@@ -211,6 +207,23 @@ pub enum StorageAddressError {
         hashers: usize,
         /// The number of fields in the metadata for this storage entry.
         fields: usize,
+    },
+    /// We weren't given enough bytes to decode the storage address/key.
+    #[error("Not enough remaining bytes to decode the storage address/key")]
+    NotEnoughBytes,
+    /// We have leftover bytes after decoding the storage address.
+    #[error("We have leftover bytes after decoding the storage address")]
+    TooManyBytes,
+    /// The bytes of a storage address are not the expected address for decoding the storage keys of the address.
+    #[error("Storage address bytes are not the expected format. Addresses need to be at least 16 bytes (pallet ++ entry) and follow a structure given by the hashers defined in the metadata")]
+    UnexpectedAddressBytes,
+    /// An invalid hasher was used to reconstruct a value from a chunk of bytes that is part of a storage address. Hashers where the hash does not contain the original value are invalid for this purpose.
+    #[error("An invalid hasher was used to reconstruct a value with type ID {ty_id} from a hash formed by a {hasher:?} hasher. This is only possible for concat-style hashers or the identity hasher")]
+    HasherCannotReconstructKey {
+        /// Type id of the key's type.
+        ty_id: u32,
+        /// The invalid hasher that caused this error.
+        hasher: StorageHasher,
     },
 }
 
