@@ -3,18 +3,22 @@
 // see LICENSE for license details.
 
 use super::storage_address::{StorageAddress, Yes};
+use super::storage_key::StorageHashers;
+use super::StorageKey;
 
 use crate::{
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
-    error::{Error, MetadataError},
+    error::{Error, MetadataError, StorageAddressError},
     metadata::{DecodeWithMetadata, Metadata},
     Config,
 };
 use codec::Decode;
 use derivative::Derivative;
 use futures::StreamExt;
+
 use std::{future::Future, marker::PhantomData};
+
 use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageEntryType};
 
 /// This is returned from a couple of storage functions.
@@ -197,18 +201,19 @@ where
     ///     .await
     ///     .unwrap();
     ///
-    /// while let Some(Ok((key, value))) = iter.next().await {
-    ///     println!("Key: 0x{}", hex::encode(&key));
-    ///     println!("Value: {}", value);
+    /// while let Some(Ok(kv)) = iter.next().await {
+    ///     println!("Key bytes: 0x{}", hex::encode(&kv.key_bytes));
+    ///     println!("Value: {}", kv.value);
     /// }
     /// # }
     /// ```
     pub fn iter<Address>(
         &self,
         address: Address,
-    ) -> impl Future<Output = Result<StreamOfResults<(Vec<u8>, Address::Target)>, Error>> + 'static
+    ) -> impl Future<Output = Result<StreamOfResults<StorageKeyValuePair<Address>>, Error>> + 'static
     where
         Address: StorageAddress<IsIterable = Yes> + 'static,
+        Address::Keys: 'static + Sized,
     {
         let client = self.client.clone();
         let block_ref = self.block_ref.clone();
@@ -226,11 +231,13 @@ where
             // Look up the return type for flexible decoding. Do this once here to avoid
             // potentially doing it every iteration if we used `decode_storage_with_metadata`
             // in the iterator.
-            let return_type_id = return_type_from_storage_entry_type(entry.entry_type());
+            let entry = entry.entry_type();
+
+            let return_type_id = entry.value_ty();
+            let hashers = StorageHashers::new(entry, metadata.types())?;
 
             // The address bytes of this entry:
             let address_bytes = super::utils::storage_address_bytes(&address, &metadata)?;
-
             let s = client
                 .backend()
                 .storage_fetch_descendant_values(address_bytes, block_ref.hash())
@@ -240,12 +247,27 @@ where
                         Ok(kv) => kv,
                         Err(e) => return Err(e),
                     };
-                    let val = Address::Target::decode_with_metadata(
+                    let value = Address::Target::decode_with_metadata(
                         &mut &*kv.value,
                         return_type_id,
                         &metadata,
                     )?;
-                    Ok((kv.key, val))
+
+                    let key_bytes = kv.key;
+                    let cursor = &mut &key_bytes[..];
+                    strip_storage_addess_root_bytes(cursor)?;
+
+                    let keys = <Address::Keys as StorageKey>::decode_storage_key(
+                        cursor,
+                        &mut hashers.iter(),
+                        metadata.types(),
+                    )?;
+
+                    Ok(StorageKeyValuePair::<Address> {
+                        keys,
+                        key_bytes,
+                        value,
+                    })
                 });
 
             let s = StreamOfResults::new(Box::pin(s));
@@ -288,6 +310,28 @@ where
             format!("Unexpected: entry for well known key \"{CODE}\" not found").into()
         })
     }
+}
+
+/// Strips the first 16 bytes (8 for the pallet hash, 8 for the entry hash) off some storage address bytes.
+fn strip_storage_addess_root_bytes(address_bytes: &mut &[u8]) -> Result<(), StorageAddressError> {
+    if address_bytes.len() >= 16 {
+        *address_bytes = &address_bytes[16..];
+        Ok(())
+    } else {
+        Err(StorageAddressError::UnexpectedAddressBytes)
+    }
+}
+
+/// A pair of keys and values together with all the bytes that make up the storage address.
+/// `keys` is `None` if non-concat hashers are used. In this case the keys could not be extracted back from the key_bytes.
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub struct StorageKeyValuePair<T: StorageAddress> {
+    /// The bytes that make up the address of the storage entry.
+    pub key_bytes: Vec<u8>,
+    /// The keys that can be used to construct the address of this storage entry.
+    pub keys: T::Keys,
+    /// The value of the storage entry.
+    pub value: T::Target,
 }
 
 /// Validate a storage address against the metadata.

@@ -316,9 +316,7 @@ fn generate_outer_enums(
 ) -> Result<v15::OuterEnums<scale_info::form::PortableForm>, TryFromError> {
     let find_type = |name: &str| {
         metadata.types.types.iter().find_map(|ty| {
-            let Some(ident) = ty.ty.path.ident() else {
-                return None;
-            };
+            let ident = ty.ty.path.ident()?;
 
             if ident != name {
                 return None;
@@ -368,9 +366,7 @@ fn generate_outer_error_enum_type(
         .pallets
         .iter()
         .filter_map(|pallet| {
-            let Some(error) = &pallet.error else {
-                return None;
-            };
+            let error = pallet.error.as_ref()?;
 
             // Note:  using the `alloc::format!` macro like in `let path = format!("{}Error", pallet.name);`
             // leads to linker errors about extern function `_Unwind_Resume` not being defined.
