@@ -4,6 +4,9 @@ use subxt_metadata::StorageHasher;
 
 #[derive(Debug, Display, From)]
 pub enum Error {
+    /// Codec error.
+    #[display(fmt = "Scale codec error: {_0}")]
+    Codec(codec::Error),
     #[display(fmt = "Metadata Error: {_0}")]
     Metadata(MetadataError),
     #[display(fmt = "Storage Error: {_0}")]
@@ -17,6 +20,12 @@ pub enum Error {
     /// Error constructing the appropriate extrinsic params.
     #[display(fmt = "Extrinsic params error: {_0}")]
     ExtrinsicParams(ExtrinsicParamsError),
+}
+
+impl From<scale_decode::visitor::DecodeError> for Error {
+    fn from(value: scale_decode::visitor::DecodeError) -> Self {
+        Error::Decode(value.into())
+    }
 }
 
 #[cfg(feature = "std")]

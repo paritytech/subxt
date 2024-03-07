@@ -14,7 +14,7 @@ pub trait DecodeWithMetadata: Sized {
         bytes: &mut &[u8],
         type_id: u32,
         metadata: &Metadata,
-    ) -> Result<Self, Error>;
+    ) -> Result<Self, scale_decode::Error>;
 }
 
 impl<T: scale_decode::DecodeAsType> DecodeWithMetadata for T {
@@ -22,7 +22,7 @@ impl<T: scale_decode::DecodeAsType> DecodeWithMetadata for T {
         bytes: &mut &[u8],
         type_id: u32,
         metadata: &Metadata,
-    ) -> Result<T, Error> {
+    ) -> Result<T, scale_decode::Error> {
         let val = T::decode_as_type(bytes, &type_id, metadata.types())?;
         Ok(val)
     }
@@ -36,7 +36,7 @@ pub trait EncodeWithMetadata {
         type_id: u32,
         metadata: &Metadata,
         bytes: &mut Vec<u8>,
-    ) -> Result<(), Error>;
+    ) -> Result<(), scale_encode::Error>;
 }
 
 impl<T: scale_encode::EncodeAsType> EncodeWithMetadata for T {
@@ -46,7 +46,7 @@ impl<T: scale_encode::EncodeAsType> EncodeWithMetadata for T {
         type_id: u32,
         metadata: &Metadata,
         bytes: &mut Vec<u8>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), scale_encode::Error> {
         self.encode_as_type_to(&type_id, metadata.types(), bytes)?;
         Ok(())
     }

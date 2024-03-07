@@ -11,9 +11,16 @@ extern crate alloc;
 
 pub mod client;
 pub mod config;
+pub mod constants;
+pub mod dynamic;
 mod error;
 pub mod metadata;
 pub mod utils;
+pub mod runtime_api;
+pub mod tx;
+pub mod signer;
+pub mod custom_values;
+pub mod storage;
 
 pub use client::{ClientMetadata, RuntimeVersion};
 pub use config::{
@@ -23,6 +30,7 @@ pub use config::{
 pub use error::{Error, ExtrinsicParamsError, MetadataError, StorageAddressError};
 pub use metadata::Metadata;
 pub use utils::{to_hex, AccountId32, MultiAddress, MultiSignature, Yes, H160, H256, H512};
+pub use signer::Signer;
 
 #[macro_use]
 mod macros;
