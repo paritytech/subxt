@@ -15,7 +15,7 @@ description = "Sign extrinsics to be submitted by Subxt"
 keywords = ["parity", "subxt", "extrinsic", "no-std"]
 
 [features]
-default = ["std"]
+default = []                                                                                                                                      # "std"
 std = ["scale-info/std", "scale-value/std", "scale-bits/std", "scale-decode/std", "scale-encode/std", "frame-metadata/std", "subxt-metadata/std"]
 substrate-compat = ["sp-core", "sp-runtime"]
 
@@ -34,6 +34,8 @@ derive_more = { workspace = true }
 hex = { workspace = true, default-features = false, features = ["alloc"] }
 serde = { workspace = true, default-features = false, features = ["derive"] }
 serde_json = { workspace = true, default-features = false, features = ["raw_value", "alloc"] }
+hashbrown = { workspace = true }
+
 
 # For ss58 encoding AccountId32 to serialize them properly:
 base58 = { workspace = true }

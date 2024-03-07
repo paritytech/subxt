@@ -128,7 +128,7 @@ sp-core = { workspace = true }
 sp-keyring = { workspace = true }
 sp-runtime = { workspace = true }
 assert_matches = { workspace = true }
-subxt-signer = { path = "../signer" }
+# subxt-signer = { path = "../signer" }
 # Tracing subscriber is useful for light-client examples to ensure that
 # the `bootNodes` and chain spec are configured correctly. If all is fine, then
 # the light-client wlll emit INFO logs with
