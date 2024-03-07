@@ -1,0 +1,65 @@
+[package]
+name = "subxt-core"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = true
+
+license.workspace = true
+readme = "README.md"
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+description = "Sign extrinsics to be submitted by Subxt"
+keywords = ["parity", "subxt", "extrinsic", "no-std"]
+
+[features]
+default = ["std"]
+std = ["scale-info/std", "scale-value/std", "scale-bits/std", "scale-decode/std", "scale-encode/std", "frame-metadata/std", "subxt-metadata/std"]
+substrate-compat = ["sp-core", "sp-runtime"]
+
+[dependencies]
+
+codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
+scale-info = { workspace = true, default-features = false, features = ["bit-vec"] }
+scale-value = { workspace = true, default-features = false }
+scale-bits = { workspace = true, default-features = false }
+scale-decode = { workspace = true, default-features = false, features = ["derive", "primitive-types"] }
+scale-encode = { workspace = true, default-features = false, features = ["derive", "primitive-types", "bits"] }
+frame-metadata = { workspace = true, default-features = false }
+subxt-metadata = { workspace = true, default-features = false }
+derivative = { workspace = true, features = ["use_core"] }
+derive_more = { workspace = true }
+hex = { workspace = true, default-features = false, features = ["alloc"] }
+serde = { workspace = true, default-features = false, features = ["derive"] }
+serde_json = { workspace = true, default-features = false, features = ["raw_value", "alloc"] }
+
+# For ss58 encoding AccountId32 to serialize them properly:
+base58 = { workspace = true }
+blake2 = { workspace = true }
+
+# Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
+impl-serde = { workspace = true, default-features = false }
+primitive-types = { workspace = true, default-features = false, features = ["codec", "serde_no_std", "scale-info"] }
+sp-core-hashing = { workspace = true }
+
+# Included if the "substrate-compat" feature is enabled.
+sp-core = { workspace = true, optional = true }
+sp-runtime = { workspace = true, optional = true }
+either = { workspace = true }
+
+[dev-dependencies]
+bitvec = { workspace = true }
+codec = { workspace = true, features = ["derive", "bit-vec"] }
+sp-core = { workspace = true }
+sp-keyring = { workspace = true }
+sp-runtime = { workspace = true }
+
+
+[package.metadata.docs.rs]
+defalt-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.playground]
+defalt-features = true

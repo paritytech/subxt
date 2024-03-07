@@ -4539,6 +4539,7 @@ dependencies = [
  "sp-core-hashing",
  "sp-keyring",
  "sp-runtime",
+ "subxt-core",
  "subxt-lightclient",
  "subxt-macro",
  "subxt-metadata",
@@ -4599,6 +4600,35 @@ dependencies = [
  "syn 2.0.48",
  "thiserror",
  "tokio",
+]
+
+[[package]]
+name = "subxt-core"
+version = "0.34.0"
+dependencies = [
+ "base58",
+ "bitvec",
+ "blake2",
+ "derivative",
+ "derive_more",
+ "either",
+ "frame-metadata 16.0.0",
+ "hex",
+ "impl-serde",
+ "parity-scale-codec",
+ "primitive-types",
+ "scale-bits",
+ "scale-decode",
+ "scale-encode",
+ "scale-info",
+ "scale-value",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "sp-core-hashing",
+ "sp-keyring",
+ "sp-runtime",
+ "subxt-metadata",
 ]
 
 [[package]]
