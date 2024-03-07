@@ -3,7 +3,6 @@
 // see LICENSE for license details.
 
 use super::Metadata;
-use crate::error::Error;
 
 use alloc::vec::Vec;
 

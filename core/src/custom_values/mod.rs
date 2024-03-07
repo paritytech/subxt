@@ -77,6 +77,10 @@ mod tests {
     use scale_info::form::PortableForm;
     use scale_info::TypeInfo;
 
+    use alloc::borrow::ToOwned;
+    use alloc::string::String;
+    use alloc::vec;
+
     use crate::custom_values::get_custom_value;
     use crate::Metadata;
 
@@ -124,7 +128,7 @@ mod tests {
                 error_enum_ty: unit_id,
             },
             custom: frame_metadata::v15::CustomMetadata {
-                map: BTreeMap::from_iter([("Mr. Robot".to_string(), person_value_metadata)]),
+                map: BTreeMap::from_iter([("Mr. Robot".to_owned(), person_value_metadata)]),
             },
         };
 

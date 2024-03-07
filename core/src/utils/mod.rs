@@ -14,9 +14,9 @@ mod unchecked_extrinsic;
 mod wrapper_opaque;
 
 use alloc::borrow::ToOwned;
+use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
-use alloc::format;
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 
@@ -86,5 +86,5 @@ pub struct Yes;
 
 /// A quick helper to encode some bytes to hex.
 pub fn to_hex(bytes: impl AsRef<[u8]>) -> String {
-   format!("0x{}", hex::encode(bytes.as_ref()))
+    format!("0x{}", hex::encode(bytes.as_ref()))
 }

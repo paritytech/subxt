@@ -365,6 +365,10 @@ mod tests {
 
     use crate::utils::Era;
 
+    use alloc::string::String;
+    use alloc::vec;
+    use alloc::vec::Vec;
+
     use super::{StaticStorageKey, StorageKey};
 
     struct KeyBuilder {

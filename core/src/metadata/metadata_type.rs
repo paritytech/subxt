@@ -74,7 +74,6 @@ impl codec::Decode for Metadata {
     }
 }
 
-
 pub trait MetadatExt {
     fn pallet_by_name_err(
         &self,

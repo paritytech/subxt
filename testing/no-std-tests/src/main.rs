@@ -34,14 +34,15 @@ extern crate alloc;
 /// Including code here makes sure it is not pruned.
 /// We want all code included to compile fine for the `thumbv7em-none-eabi` target.
 fn compile_test() {
-    subxt_metadata_compiles();
-}
-
-fn subxt_metadata_compiles() {
+    // Subxt Metadata compiles:
     use codec::Decode;
     let bytes: alloc::vec::Vec<u8> = alloc::vec![0, 1, 2, 3, 4];
     subxt_metadata::Metadata::decode(&mut &bytes[..]).expect_err("invalid byte sequence");
 
     const METADATA: &[u8] = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
     subxt_metadata::Metadata::decode(&mut &METADATA[..]).expect("should be valid metadata");
+
+    // Subxt Core compiles:
+
+    let era = subxt_core::utils::Era::Immortal;
 }

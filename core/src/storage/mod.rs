@@ -6,7 +6,7 @@
 
 mod storage_address;
 mod storage_key;
-mod utils;
+pub mod utils;
 
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.

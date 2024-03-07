@@ -6,13 +6,13 @@
 //! This doesn't contain much functionality itself, but is easy to convert to/from an `sp_core::AccountId32`
 //! for instance, to gain functionality without forcing a dependency on Substrate crates here.
 
+use alloc::format;
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
 use codec::{Decode, Encode};
 use derive_more::Display;
 use serde::{Deserialize, Serialize};
-use alloc::string::String;
-use alloc::vec::Vec;
-use alloc::vec;
-use alloc::format;
 
 /// A 32-byte cryptographic identifier. This is a simplified version of Substrate's
 /// `sp_core::crypto::AccountId32`. To obtain more functionality, convert this into

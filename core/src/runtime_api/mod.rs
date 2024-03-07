@@ -15,7 +15,7 @@ use crate::dynamic::DecodedValueThunk;
 use crate::error::MetadataError;
 use crate::Error;
 
-use crate::metadata::{DecodeWithMetadata, MetadatExt, Metadata};
+use crate::metadata::{DecodeWithMetadata, Metadata};
 
 /// This represents a runtime API payload that can call into the runtime of node.
 ///

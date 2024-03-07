@@ -13,6 +13,7 @@ use super::RefineParams;
 use crate::utils::Era;
 use crate::{ClientMetadata, Config};
 use crate::{ExtrinsicParamsEncoder, ExtrinsicParamsError};
+use alloc::borrow::ToOwned;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
 use codec::{Compact, Encode};
@@ -21,7 +22,6 @@ use derivative::Derivative;
 use hashbrown::HashMap;
 use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
-use alloc::borrow::ToOwned;
 
 /// A single [`SignedExtension`] has a unique name, but is otherwise the
 /// same as [`ExtrinsicParams`] in describing how to encode the extra and

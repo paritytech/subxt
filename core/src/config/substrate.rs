@@ -5,10 +5,10 @@
 //! Substrate specific configuration
 
 use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, Hasher, Header};
+use alloc::format;
+use alloc::vec::Vec;
 use codec::{Decode, Encode};
 use serde::{Deserialize, Serialize};
-use alloc::vec::Vec;
-use alloc::format;
 
 pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
 pub use primitive_types::{H256, U256};

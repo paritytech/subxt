@@ -8,8 +8,8 @@ use derivative::Derivative;
 use scale_decode::{ext::scale_type_resolver::visitor, IntoVisitor, TypeResolver, Visitor};
 use scale_encode::EncodeAsType;
 
-use alloc::vec::Vec;
 use alloc::format;
+use alloc::vec::Vec;
 
 /// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
 /// [`WrapperKeepOpaque`] stores the type only in its opaque format, aka as a `Vec<u8>`. To
@@ -151,6 +151,8 @@ impl<T> IntoVisitor for WrapperKeepOpaque<T> {
 #[cfg(test)]
 mod test {
     use scale_decode::DecodeAsType;
+
+    use alloc::vec;
 
     use super::*;
 

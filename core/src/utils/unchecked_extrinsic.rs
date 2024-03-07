@@ -116,6 +116,8 @@ impl<Address, Call, Signature, Extra> IntoVisitor
 pub mod tests {
     use super::*;
 
+    use alloc::vec;
+
     #[test]
     fn unchecked_extrinsic_encoding() {
         // A tx is basically some bytes with a compact length prefix; ie an encoded vec:
