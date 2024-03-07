@@ -15,7 +15,8 @@ description = "Sign extrinsics to be submitted by Subxt"
 keywords = ["parity", "subxt", "extrinsic", "signer"]
 
 [features]
-default = ["sr25519", "ecdsa", "subxt", "native"]
+default = ["sr25519", "ecdsa", "subxt", "std"]
+std = []
 
 # Pick the signer implementation(s) you need by enabling the
 # corresponding features. Note: I had more difficulties getting
@@ -26,34 +27,35 @@ ecdsa = ["secp256k1"]
 
 # Make the keypair algorithms here compatible with Subxt's Signer trait,
 # so that they can be used to sign transactions for compatible chains.
-subxt = ["dep:subxt"]
+subxt = ["dep:subxt-core"]
 
 # The getrandom package is used via schnorrkel. We need to enable the JS
 # feature on it if compiling for the web.
-web = ["getrandom/js", "subxt?/web"]
-native = ["subxt?/native"]
+web = ["getrandom/js"]
 
 [dependencies]
-subxt = { workspace = true, optional = true, default-features = false }
-regex = { workspace = true }
+subxt-core = { workspace = true, optional = true, default-features = false }
+regex = { workspace = true, default-features = false }
 hex = { workspace = true }
+cfg-if = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
-sp-core-hashing = { workspace = true }
-thiserror = { workspace = true }
-pbkdf2 = { workspace = true }
-sha2 = { workspace = true }
-hmac = { workspace = true }
+sp-core-hashing = { workspace = true, default-features = false }
+derive_more = { workspace = true }
+pbkdf2 = { workspace = true, default-features = false }
+sha2 = { workspace = true, default-features = false }
+hmac = { workspace = true, default-features = false }
 zeroize = { workspace = true }
-bip39 = { workspace = true }
-schnorrkel = { workspace = true, optional = true }
-secp256k1 = { workspace = true, features = ["recovery", "global-context"], optional = true }
+bip39 = { workspace = true, default-features = false }
+schnorrkel = { workspace = true, optional = true, default-features = false }
+secp256k1 = { workspace = true, optional = true, default-features = false, features = ["alloc", "recovery"] } # features = ["recovery", "global-context"], 
 secrecy = { workspace = true }
+
 
 # We only pull this in to enable the JS flag for schnorrkel to use.
 getrandom = { workspace = true, optional = true }
 
 [dev-dependencies]
-sp-core = { workspace = true, features = ["std"] }
+sp-core = { workspace = true, default-features = false }
 sp-keyring = { workspace = true }
 
 [package.metadata.cargo-machete]

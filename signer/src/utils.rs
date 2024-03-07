@@ -17,10 +17,19 @@
 macro_rules! once_static {
     ($($(#[$attr:meta])* $vis:vis fn $name:ident() -> $ty:ty { $expr:expr } )+) => {
         $(
-            $(#[$attr])*
-            $vis fn $name() -> &'static $ty {
-                static VAR: std::sync::OnceLock<$ty> = std::sync::OnceLock::new();
-                VAR.get_or_init(|| { $expr })
+            cfg_if::cfg_if! {
+                if #[cfg(feature = "std")] {
+                    $(#[$attr])*
+                    $vis fn $name() -> &'static $ty {
+                        static VAR: std::sync::OnceLock<$ty> = std::sync::OnceLock::new();
+                        VAR.get_or_init(|| { $expr })
+                    }
+                } else {
+                    $(#[$attr])*
+                    $vis fn $name() -> $ty {
+                        $expr
+                    }
+                }
             }
         )+
     };
@@ -33,8 +42,14 @@ macro_rules! once_static_cloned {
         $(
             $(#[$attr])*
             $vis fn $name() -> $ty {
-                static VAR: std::sync::OnceLock<$ty> = std::sync::OnceLock::new();
-                VAR.get_or_init(|| { $expr }).clone()
+                cfg_if::cfg_if! {
+                    if #[cfg(feature = "std")] {
+                        static VAR: std::sync::OnceLock<$ty> = std::sync::OnceLock::new();
+                        VAR.get_or_init(|| { $expr }).clone()
+                    } else {
+                        { $expr }
+                    }
+                }
             }
         )+
     };
