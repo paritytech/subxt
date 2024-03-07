@@ -24,8 +24,9 @@ pub mod utils;
 
 pub use client::{ClientMetadata, RuntimeVersion};
 pub use config::{
-    BlockHash, Config, ExtrinsicParams, ExtrinsicParamsEncoder, PolkadotConfig,
-    PolkadotExtrinsicParams, SubstrateConfig, SubstrateExtrinsicParams,
+    BlockHash, Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header, PolkadotConfig,
+    PolkadotExtrinsicParams, RefineParams, RefineParamsData, SubstrateConfig,
+    SubstrateExtrinsicParams,
 };
 pub use error::{Error, ExtrinsicParamsError, MetadataError, StorageAddressError};
 pub use metadata::Metadata;

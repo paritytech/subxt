@@ -9,8 +9,8 @@ use crate::{
     Config, Metadata,
 };
 use derivative::Derivative;
-
 use std::sync::Arc;
+use subxt_core::client::ClientMetadata;
 
 /// A trait representing a client that can perform
 /// offline-only actions.
@@ -63,15 +63,7 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
 pub struct OfflineClient<T: Config> {
-    inner: Arc<Inner<T>>,
-}
-
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""), Clone(bound = ""))]
-struct Inner<T: Config> {
-    genesis_hash: T::Hash,
-    runtime_version: RuntimeVersion,
-    metadata: Metadata,
+    inner: Arc<ClientMetadata<T>>,
 }
 
 impl<T: Config> OfflineClient<T> {
@@ -83,11 +75,11 @@ impl<T: Config> OfflineClient<T> {
         metadata: impl Into<Metadata>,
     ) -> OfflineClient<T> {
         OfflineClient {
-            inner: Arc::new(Inner {
+            inner: Arc::new(ClientMetadata::new(
                 genesis_hash,
                 runtime_version,
-                metadata: metadata.into(),
-            }),
+                metadata.into(),
+            )),
         }
     }
 

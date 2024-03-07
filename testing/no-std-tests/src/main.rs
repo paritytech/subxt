@@ -43,6 +43,5 @@ fn compile_test() {
     subxt_metadata::Metadata::decode(&mut &METADATA[..]).expect("should be valid metadata");
 
     // Subxt Core compiles:
-
-    let era = subxt_core::utils::Era::Immortal;
+    let _era = subxt_core::utils::Era::Immortal;
 }

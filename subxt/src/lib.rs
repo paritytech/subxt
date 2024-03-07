@@ -28,7 +28,7 @@ pub mod book;
 // only used in example code snippets at the time of writing.
 #[cfg(test)]
 mod only_used_in_docs_or_tests {
-    use subxt_signer as _;
+    // use subxt_signer as _;
     use tokio as _;
 }
 
@@ -45,7 +45,6 @@ pub use getrandom as _;
 pub mod backend;
 pub mod blocks;
 pub mod client;
-pub mod config;
 pub mod constants;
 pub mod custom_values;
 pub mod dynamic;
@@ -56,6 +55,14 @@ pub mod runtime_api;
 pub mod storage;
 pub mod tx;
 pub mod utils;
+
+pub mod config {
+    pub use subxt_core::config::{
+        BlockHash, Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header, PolkadotConfig,
+        PolkadotExtrinsicParams, RefineParams, RefineParamsData, SubstrateConfig,
+        SubstrateExtrinsicParams,
+    };
+}
 
 // Internal helper macros
 #[macro_use]

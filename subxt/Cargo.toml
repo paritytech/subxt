@@ -24,23 +24,11 @@ default = ["jsonrpsee", "native"]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
-native = [
-    "jsonrpsee?/async-client", 
-    "jsonrpsee?/client-ws-transport-native-tls", 
-    "subxt-lightclient?/native", 
-    "tokio-util"
-]
+native = ["jsonrpsee?/async-client", "jsonrpsee?/client-ws-transport-native-tls", "subxt-lightclient?/native", "tokio-util"]
 
 # Enable this for web/wasm builds.
 # Exactly 1 of "web" and "native" is expected.
-web = [
-    "jsonrpsee?/async-wasm-client", 
-    "jsonrpsee?/client-web-transport", 
-    "getrandom/js", 
-    "subxt-lightclient?/web", 
-    "subxt-macro/web", 
-    "instant/wasm-bindgen"
-]
+web = ["jsonrpsee?/async-wasm-client", "jsonrpsee?/client-web-transport", "getrandom/js", "subxt-lightclient?/web", "subxt-macro/web", "instant/wasm-bindgen"]
 
 # Enable this to use the reconnecting rpc client
 unstable-reconnecting-rpc-client = ["dep:reconnecting-jsonrpsee-ws-client"]
@@ -71,7 +59,6 @@ scale-value = { workspace = true, features = ["default"] }
 scale-bits = { workspace = true, features = ["default"] }
 scale-decode = { workspace = true, features = ["default"] }
 scale-encode = { workspace = true, features = ["default"] }
-subxt-core = { workspace = true, features = ["std"] }
 futures = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
@@ -85,7 +72,7 @@ instant = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }
-primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"]  }
+primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"] }
 sp-core-hashing = { workspace = true }
 
 # For ss58 encoding AccountId32 to serialize them properly:
@@ -101,6 +88,7 @@ sp-runtime = { workspace = true, optional = true }
 
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
+subxt-core = { workspace = true }
 subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 
