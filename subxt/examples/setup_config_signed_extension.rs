@@ -8,6 +8,7 @@ use subxt::config::{
     Config, DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder,
     ExtrinsicParamsError,
 };
+use subxt::client::ClientMetadata;
 use subxt_signer::sr25519::dev;
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
@@ -60,8 +61,8 @@ impl<T: Config> signed_extensions::SignedExtension<T> for CustomSignedExtension 
 impl<T: Config> ExtrinsicParams<T> for CustomSignedExtension {
     type Params = ();
 
-    fn new<Client: OfflineClientT<T>>(
-        _client: Client,
+    fn new(
+        _client: &ClientMetadata<T>,
         _params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
         Ok(CustomSignedExtension)

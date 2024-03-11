@@ -4,17 +4,15 @@
 
 //! A representation of a block of events.
 
-use super::{Phase, StaticEvent, EventDetails};
+use super::{StaticEvent, EventDetails};
 use crate::{
     client::OnlineClientT,
-    error::{Error, MetadataError},
+    error::{Error},
     events::events_client::get_event_bytes,
-    metadata::types::PalletMetadata,
     Config, Metadata,
 };
 use codec::{Compact, Decode};
 use derivative::Derivative;
-use scale_decode::DecodeAsType;
 use std::sync::Arc;
 
 /// A collection of events obtained from a block, bundled with the necessary
@@ -176,6 +174,7 @@ impl<T: Config> Events<T> {
 #[cfg(test)]
 pub(crate) mod test_utils {
     use super::*;
+    use crate::events::Phase;
     use crate::{Config, SubstrateConfig};
     use codec::Encode;
     use frame_metadata::{
@@ -333,13 +332,15 @@ pub(crate) mod test_utils {
 mod tests {
     use super::{
         test_utils::{event_record, events, events_raw, AllEvents, EventRecord},
-        *,
+        *, 
     };
+    use crate::events::Phase;
     use crate::SubstrateConfig;
     use codec::Encode;
     use primitive_types::H256;
     use scale_info::TypeInfo;
     use scale_value::Value;
+    
 
     /// Build a fake wrapped metadata.
     fn metadata<E: TypeInfo + 'static>() -> Metadata {

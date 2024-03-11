@@ -169,7 +169,7 @@ fn generate_storage_entry_fns(
         .unwrap_or_default();
 
     let is_defaultable_type = match storage_entry.modifier() {
-        StorageEntryModifier::Default => quote!(#crate_path::storage::address::Yes),
+        StorageEntryModifier::Default => quote!(#crate_path::utils::Yes),
         StorageEntryModifier::Optional => quote!(()),
     };
 
@@ -191,10 +191,10 @@ fn generate_storage_entry_fns(
             (fn_name, false, true)
         };
         let is_fetchable_type = is_fetchable
-            .then_some(quote!(#crate_path::storage::address::Yes))
+            .then_some(quote!(#crate_path::utils::Yes))
             .unwrap_or(quote!(()));
         let is_iterable_type = is_iterable
-            .then_some(quote!(#crate_path::storage::address::Yes))
+            .then_some(quote!(#crate_path::utils::Yes))
             .unwrap_or(quote!(()));
 
         let (keys, keys_type) = match keys_slice.len() {

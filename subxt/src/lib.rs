@@ -28,7 +28,7 @@ pub mod book;
 // only used in example code snippets at the time of writing.
 #[cfg(test)]
 mod only_used_in_docs_or_tests {
-    // use subxt_signer as _;
+    use subxt_signer as _;
     use tokio as _;
 }
 
@@ -61,10 +61,11 @@ pub mod utils;
 /// Polkadot node.
 pub mod config {
     pub use subxt_core::config::{
-        signed_extensions, substrate, BlockHash, Config, ExtrinsicParams, ExtrinsicParamsEncoder,
+        signed_extensions, substrate, polkadot, BlockHash, Config, ExtrinsicParams, ExtrinsicParamsEncoder,
         Hasher, Header, PolkadotConfig, PolkadotExtrinsicParams, RefineParams, RefineParamsData,
-        SignedExtension, SubstrateConfig, SubstrateExtrinsicParams,
+        SignedExtension, SubstrateConfig, SubstrateExtrinsicParams, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder,
     };
+    pub use subxt_core::ExtrinsicParamsError;
 }
 
 /// Types representing the metadata obtained from a node.
@@ -77,7 +78,7 @@ pub mod metadata {
 /// Submit dynamic transactions.
 pub mod dynamic {
     pub use subxt_core::dynamic::{
-        constant, runtime_api_call, storage, tx, DecodedValue, DecodedValueThunk,
+        constant, runtime_api_call, storage, tx, DecodedValue as Value, DecodedValueThunk, At,
     };
 }
 

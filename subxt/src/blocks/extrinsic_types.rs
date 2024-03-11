@@ -17,7 +17,7 @@ use crate::config::signed_extensions::{
     ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
 };
 use crate::config::SignedExtension;
-use crate::dynamic::DecodedValue;
+use crate::dynamic::Value;
 use crate::utils::strip_compact_prefix;
 use codec::Decode;
 use derivative::Derivative;
@@ -743,7 +743,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     }
 
     /// Signed Extension as a [`scale_value::Value`]
-    pub fn value(&self) -> Result<DecodedValue, Error> {
+    pub fn value(&self) -> Result<Value, Error> {
         let value = scale_value::scale::decode_as_type(
             &mut &self.bytes[..],
             &self.ty_id,

@@ -61,7 +61,7 @@ fn generate_custom_value_fn(
             .resolve_type_path(custom_value.type_id())
             .expect("type is in metadata; qed")
             .to_token_stream();
-        let decodable = quote!(#crate_path::custom_values::Yes);
+        let decodable = quote!(#crate_path::utils::Yes);
         (return_ty, decodable)
     } else {
         // if type registry does not contain the type, we can just return the Encoded scale bytes.

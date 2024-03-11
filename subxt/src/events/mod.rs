@@ -9,9 +9,9 @@
 mod events_client;
 mod events_type;
 
-use codec::{Decode, Encode};
+
 pub use events_client::EventsClient;
 pub use events_type::{Events};
-use scale_decode::DecodeAsFields;
+
 
 pub use subxt_core::events::{StaticEvent, EventDetails, Phase};

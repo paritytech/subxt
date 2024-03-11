@@ -291,7 +291,7 @@ impl<T: Config> OnlineClient<T> {
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
         let inner = self.inner.read().expect("shouldn't be poisoned");
-        inner.runtime_version.clone()
+        inner.runtime_version
     }
 
     /// Change the [`RuntimeVersion`] used in this client.
@@ -315,7 +315,7 @@ impl<T: Config> OnlineClient<T> {
         let inner = self.inner.read().expect("shouldn't be poisoned");
         OfflineClient::new(
             inner.genesis_hash,
-            inner.runtime_version.clone(),
+            inner.runtime_version,
             inner.metadata.clone(),
         )
     }
