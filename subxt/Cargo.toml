@@ -63,7 +63,7 @@ unstable-metadata = []
 
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
-unstable-light-client = ["subxt-lightclient", "tokio-stream"]
+unstable-light-client = ["subxt-lightclient"]
 
 [dependencies]
 async-trait = { workspace = true }
@@ -104,9 +104,6 @@ sp-runtime = { workspace = true, optional = true }
 subxt-macro = { workspace = true }
 subxt-metadata = { workspace = true }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
-
-# Light client support:
-tokio-stream = { workspace = true, optional = true }
 
 # Reconnecting jsonrpc ws client
 reconnecting-jsonrpsee-ws-client = { version = "0.3", optional = true }
