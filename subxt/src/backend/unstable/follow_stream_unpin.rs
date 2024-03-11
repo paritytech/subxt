@@ -115,15 +115,20 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                 }
                 FollowStreamMsg::Event(FollowEvent::Initialized(details)) => {
                     // The first finalized block gets the starting block_num.
-                    let rel_block_num = this.rel_block_num;
-                    // Pin this block, but note that it can be unpinned any time since it won't show up again (except
-                    // as a parent block, which we are ignoring at the moment).
+                    let mut rel_block_num = this.rel_block_num;
 
-                    let finalized_block_hashes = details
-                        .finalized_block_hashes
-                        .iter()
-                        .map(|h| this.pin_unpinnable_block_at(rel_block_num, *h))
-                        .collect();
+                    let mut finalized_block_hashes =
+                        Vec::with_capacity(details.finalized_block_hashes.len());
+
+                    for finalized_block in &details.finalized_block_hashes {
+                        // Pin this block, but note that it can be unpinned any time since it won't show up again (except
+                        // as a parent block, which we are ignoring at the moment).
+                        let block_ref =
+                            this.pin_unpinnable_block_at(rel_block_num, *finalized_block);
+
+                        finalized_block_hashes.push(block_ref);
+                        rel_block_num += 1;
+                    }
 
                     FollowStreamMsg::Event(FollowEvent::Initialized(Initialized {
                         finalized_block_hashes,

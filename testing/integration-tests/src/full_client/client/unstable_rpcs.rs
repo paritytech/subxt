@@ -65,17 +65,14 @@ async fn chainhead_unstable_body() {
 
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
-    let hashes = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes,
+    let hash = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
 
     // Fetch the block's body.
-    let response = rpc
-        .chainhead_unstable_body(sub_id, hashes[0])
-        .await
-        .unwrap();
+    let response = rpc.chainhead_unstable_body(sub_id, hash).await.unwrap();
     let operation_id = match response {
         MethodResponse::Started(started) => started.operation_id,
         MethodResponse::LimitReached => panic!("Expected started response"),
@@ -97,12 +94,11 @@ async fn chainhead_unstable_header() {
 
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
-    let hashes = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes,
+    let hash = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
-    let hash = hashes[0];
 
     let new_header = legacy_rpc
         .chain_get_header(Some(hash))
@@ -126,12 +122,11 @@ async fn chainhead_unstable_storage() {
 
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
-    let hashes = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes,
+    let hash = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
-    let hash = hashes[0];
 
     let alice: AccountId32 = dev::alice().public_key().into();
     let addr = node_runtime::storage().system().account(alice);
@@ -172,12 +167,11 @@ async fn chainhead_unstable_call() {
 
     let mut blocks = rpc.chainhead_unstable_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
-    let hashes = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes,
+    let hash = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
-    let hash = hashes[0];
 
     let alice_id = dev::alice().public_key().to_account_id();
     // Runtime API call.
@@ -210,12 +204,11 @@ async fn chainhead_unstable_unpin() {
 
     let mut blocks = rpc.chainhead_unstable_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
-    let hashes = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes,
+    let hash = match event {
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
-    let hash = hashes[0];
 
     assert!(rpc.chainhead_unstable_unpin(sub_id, hash).await.is_ok());
     // The block was already unpinned.
