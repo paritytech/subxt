@@ -57,6 +57,7 @@ pub enum Message {
 }
 
 /// A handle to communicate with the background task.
+#[derive(Clone, Debug)]
 pub struct BackgroundTaskHandle {
     to_backend: mpsc::UnboundedSender<Message>,
 }

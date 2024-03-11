@@ -167,6 +167,7 @@ impl LightClient {
 
 /// This represents a single RPC connection to a specific chain, and is constructed by calling
 /// one of the methods on [`LightClient`]. Using this, you can make RPC requests to the chain.
+#[derive(Clone, Debug)]
 pub struct LightClientRpc {
     handle: BackgroundTaskHandle,
 }
