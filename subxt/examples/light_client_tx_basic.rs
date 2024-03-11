@@ -1,5 +1,10 @@
 #![allow(missing_docs)]
-use subxt::{client::LightClient, PolkadotConfig};
+use subxt::utils::fetch_chainspec_from_rpc_node;
+use subxt::{
+    client::OnlineClient,
+    lightclient::{ChainConfig, LightClient},
+    PolkadotConfig,
+};
 use subxt_signer::sr25519::dev;
 
 // Generate an interface that we can use from the node's metadata.
@@ -11,19 +16,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The smoldot logs are informative:
     tracing_subscriber::fmt::init();
 
-    // Create a light client by fetching the chain spec of a local running node.
-    // In this case, because we start one single node, the bootnodes must be overwritten
-    // for the light client to connect to the local node.
+    // Use a utility function to obtain a chain spec from a locally running node:
+    let chain_spec = fetch_chainspec_from_rpc_node("ws://127.0.0.1:9944").await?;
+
+    // Configure the bootnodes of this chain spec. In this case, because we start one
+    // single node, the bootnodes must be overwritten for the light client to connect
+    // to the local node.
     //
     // The `12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp` is the P2P address
     // from a local polkadot node starting with
     // `--node-key 0000000000000000000000000000000000000000000000000000000000000001`
-    let api = LightClient::<PolkadotConfig>::builder()
-        .bootnodes([
-            "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp",
-        ])
-        .build_from_url("ws://127.0.0.1:9944")
-        .await?;
+    let chain_config = ChainConfig::chain_spec(chain_spec.get()).set_bootnodes([
+        "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp",
+    ]);
+
+    // Start the light client up, establishing a connection to the local node.
+    let (light_client, chain_rpc) = LightClient::relay_chain(chain_config).await?;
+    let api = OnlineClient::<PolkadotConfig>::from_rpc_client(chain_rpc).await?;
 
     // Build a balance transfer extrinsic.
     let dest = dev::bob().public_key().into();

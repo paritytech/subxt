@@ -84,7 +84,10 @@ impl<T: Config> OnlineClient<T> {
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] by providing an [`RpcClient`] to drive the connection.
     /// This will use the current default [`Backend`], which may change in future releases.
-    pub async fn from_rpc_client(rpc_client: RpcClient) -> Result<OnlineClient<T>, Error> {
+    pub async fn from_rpc_client(
+        rpc_client: impl Into<RpcClient>,
+    ) -> Result<OnlineClient<T>, Error> {
+        let rpc_client = rpc_client.into();
         let backend = Arc::new(LegacyBackend::builder().build(rpc_client));
         OnlineClient::from_backend(backend).await
     }
@@ -106,8 +109,9 @@ impl<T: Config> OnlineClient<T> {
         genesis_hash: T::Hash,
         runtime_version: RuntimeVersion,
         metadata: impl Into<Metadata>,
-        rpc_client: RpcClient,
+        rpc_client: impl Into<RpcClient>,
     ) -> Result<OnlineClient<T>, Error> {
+        let rpc_client = rpc_client.into();
         let backend = Arc::new(LegacyBackend::builder().build(rpc_client));
         OnlineClient::from_backend_with(genesis_hash, runtime_version, metadata, backend)
     }

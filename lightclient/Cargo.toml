@@ -56,7 +56,7 @@ web = [
 ]
 
 [dependencies]
-futures = { workspace = true }
+futures = { workspace = true, features = ["async-await"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, features = ["raw_value"] }
 thiserror = { workspace = true }

@@ -7,6 +7,7 @@
 mod account_id;
 pub mod bits;
 mod era;
+mod fetch_chain_spec;
 mod multi_address;
 mod multi_signature;
 mod static_type;
@@ -21,6 +22,7 @@ use url::Url;
 
 pub use account_id::AccountId32;
 pub use era::Era;
+pub use fetch_chain_spec::{fetch_chainspec_from_rpc_node, FetchChainspecError};
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
 pub use static_type::Static;

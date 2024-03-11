@@ -75,9 +75,12 @@ impl<T: Config> UnstableBackendBuilder<T> {
     /// Given an [`RpcClient`] to use to make requests, this returns a tuple of an [`UnstableBackend`],
     /// which implements the [`Backend`] trait, and an [`UnstableBackendDriver`] which must be polled in
     /// order for the backend to make progress.
-    pub fn build(self, client: RpcClient) -> (UnstableBackend<T>, UnstableBackendDriver<T>) {
+    pub fn build(
+        self,
+        client: impl Into<RpcClient>,
+    ) -> (UnstableBackend<T>, UnstableBackendDriver<T>) {
         // Construct the underlying follow_stream layers:
-        let rpc_methods = UnstableRpcMethods::new(client);
+        let rpc_methods = UnstableRpcMethods::new(client.into());
         let follow_stream =
             follow_stream::FollowStream::<T::Hash>::from_methods(rpc_methods.clone());
         let follow_stream_unpin = follow_stream_unpin::FollowStreamUnpin::<T::Hash>::from_methods(

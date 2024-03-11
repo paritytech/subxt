@@ -1,3 +1,7 @@
+// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
+
 //! A wrapper around [`smoldot_light`] which provides an light client capable of connecting
 //! to Substrate based chains.
 
@@ -7,6 +11,7 @@ mod platform;
 mod shared_client;
 // mod receiver;
 mod background;
+mod chain_config;
 mod rpc;
 
 use background::{BackgroundTask, BackgroundTaskHandle};
@@ -17,7 +22,10 @@ use shared_client::SharedClient;
 use std::future::Future;
 use tokio::sync::mpsc;
 
+pub use chain_config::{ChainConfig, ChainConfigError};
+
 /// Things that can go wrong when constructing the [`LightClient`].
+#[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
 pub enum LightClientError {
     /// Error encountered while adding the chain to the light-client.
@@ -26,6 +34,7 @@ pub enum LightClientError {
 }
 
 /// Things that can go wrong calling methods of [`LightClientRpc`].
+#[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
 pub enum LightClientRpcError {
     /// Error response from the JSON-RPC server.
@@ -70,8 +79,12 @@ impl LightClient {
     ///
     /// If smoldot panics, then the promise created will be leaked. For more details, see
     /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
-    pub fn relay_chain(chain_spec: &str) -> Result<(Self, LightClientRpc), LightClientError> {
+    pub fn relay_chain<'a>(
+        chain_config: impl Into<ChainConfig<'a>>,
+    ) -> Result<(Self, LightClientRpc), LightClientError> {
         let mut client = smoldot_light::Client::new(platform::build_platform());
+        let chain_config = chain_config.into();
+        let chain_spec = chain_config.as_chain_spec();
 
         let config = smoldot_light::AddChainConfig {
             specification: chain_spec,
@@ -118,7 +131,13 @@ impl LightClient {
     ///
     /// If smoldot panics, then the promise created will be leaked. For more details, see
     /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
-    pub fn parachain(&self, chain_spec: &str) -> Result<LightClientRpc, LightClientError> {
+    pub fn parachain<'a>(
+        &self,
+        chain_config: impl Into<ChainConfig<'a>>,
+    ) -> Result<LightClientRpc, LightClientError> {
+        let chain_config = chain_config.into();
+        let chain_spec = chain_config.as_chain_spec();
+
         let config = smoldot_light::AddChainConfig {
             specification: chain_spec,
             json_rpc: smoldot_light::AddChainConfigJsonRpc::Enabled {

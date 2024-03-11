@@ -1,10 +1,6 @@
 #![allow(missing_docs)]
 use futures::StreamExt;
-use std::{iter, num::NonZeroU32};
-use subxt::{
-    client::{LightClient, RawLightClient},
-    PolkadotConfig,
-};
+use subxt::{client::OnlineClient, lightclient::LightClient, PolkadotConfig};
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
@@ -16,70 +12,19 @@ const ASSET_HUB_SPEC: &str =
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // The smoldot logs are informative:
+    // The lightclient logs are informative:
     tracing_subscriber::fmt::init();
 
-    // Connecting to a parachain is a multi step process.
+    // Instantiate a light client with the Polkadot relay chain,
+    // and connect it to Asset Hub, too.
+    let (lightclient, polkadot_rpc) = LightClient::relay_chain(POLKADOT_SPEC)?;
+    let asset_hub_rpc = lightclient.parachain(ASSET_HUB_SPEC)?;
 
-    // Step 1. Construct a new smoldot client.
-    let mut client =
-        subxt_lightclient::smoldot::Client::new(subxt_lightclient::smoldot::DefaultPlatform::new(
-            "subxt-example-light-client".into(),
-            "version-0".into(),
-        ));
+    // Create Subxt clients from these Smoldot backed RPC clients.
+    let polkadot_api = OnlineClient::from_rpc_client(polkadot_rpc).await?;
+    let asset_hub_api = OnlineClient::from_rpc_client(asset_hub_rpc).await?;
 
-    // Step 2. Connect to the relay chain of the parachain. For this example, the Polkadot relay chain.
-    let polkadot_connection = client
-        .add_chain(subxt_lightclient::smoldot::AddChainConfig {
-            specification: POLKADOT_SPEC,
-            json_rpc: subxt_lightclient::smoldot::AddChainConfigJsonRpc::Enabled {
-                max_pending_requests: NonZeroU32::new(128).unwrap(),
-                max_subscriptions: 1024,
-            },
-            potential_relay_chains: iter::empty(),
-            database_content: "",
-            user_data: (),
-        })
-        .expect("Light client chain added with valid spec; qed");
-    let polkadot_json_rpc_responses = polkadot_connection
-        .json_rpc_responses
-        .expect("Light client configured with json rpc enabled; qed");
-    let polkadot_chain_id = polkadot_connection.chain_id;
-
-    // Step 3. Connect to the parachain. For this example, the Asset hub parachain.
-    let assethub_connection = client
-        .add_chain(subxt_lightclient::smoldot::AddChainConfig {
-            specification: ASSET_HUB_SPEC,
-            json_rpc: subxt_lightclient::smoldot::AddChainConfigJsonRpc::Enabled {
-                max_pending_requests: NonZeroU32::new(128).unwrap(),
-                max_subscriptions: 1024,
-            },
-            // The chain specification of the asset hub parachain mentions that the identifier
-            // of its relay chain is `polkadot`.
-            potential_relay_chains: [polkadot_chain_id].into_iter(),
-            database_content: "",
-            user_data: (),
-        })
-        .expect("Light client chain added with valid spec; qed");
-    let parachain_json_rpc_responses = assethub_connection
-        .json_rpc_responses
-        .expect("Light client configured with json rpc enabled; qed");
-    let parachain_chain_id = assethub_connection.chain_id;
-
-    // Step 4. Turn the smoldot client into a raw client.
-    let raw_light_client = RawLightClient::builder()
-        .add_chain(polkadot_chain_id, polkadot_json_rpc_responses)
-        .add_chain(parachain_chain_id, parachain_json_rpc_responses)
-        .build(client)
-        .await?;
-
-    // Step 5. Obtain a client to target the relay chain and the parachain.
-    let polkadot_api: LightClient<PolkadotConfig> =
-        raw_light_client.for_chain(polkadot_chain_id).await?;
-    let parachain_api: LightClient<PolkadotConfig> =
-        raw_light_client.for_chain(parachain_chain_id).await?;
-
-    // Step 6. Subscribe to the finalized blocks of the chains.
+    // Use them!
     let polkadot_sub = polkadot_api
         .blocks()
         .subscribe_finalized()
@@ -90,11 +35,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .subscribe_finalized()
         .await?
         .map(|block| ("AssetHub", block));
+
     let mut stream_combinator = futures::stream::select(polkadot_sub, parachain_sub);
 
     while let Some((chain, block)) = stream_combinator.next().await {
         let block = block?;
-
         println!("     Chain {:?} hash={:?}", chain, block.hash());
     }
 
