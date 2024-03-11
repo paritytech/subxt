@@ -106,7 +106,7 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
             };
 
             // React to any actual FollowEvent we get back.
-            let ev: FollowStreamMsg<BlockRef<Hash>> = match ev {
+            let ev = match ev {
                 FollowStreamMsg::Ready(subscription_id) => {
                     // update the subscription ID we'll use to unpin things.
                     this.subscription_id = Some(subscription_id.clone().into());

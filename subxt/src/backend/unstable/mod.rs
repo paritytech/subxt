@@ -355,8 +355,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             .filter_map(move |ev| {
                 let output = match ev {
                     FollowEvent::Initialized(ev) => {
-                        for b in ev.finalized_block_hashes {
-                            runtimes.remove(&b.hash());
+                        for finalized_block in ev.finalized_block_hashes {
+                            runtimes.remove(&finalized_block.hash());
                         }
 
                         ev.finalized_block_runtime
