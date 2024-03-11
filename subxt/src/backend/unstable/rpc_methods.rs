@@ -359,8 +359,8 @@ pub enum FollowEvent<Hash> {
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Initialized<Hash> {
-    /// The hash of the latest finalized block.
-    pub finalized_block_hash: Hash,
+    /// The hashes of the last finalized blocks.
+    pub finalized_block_hashes: Vec<Hash>,
     /// The runtime version of the finalized block.
     ///
     /// # Note

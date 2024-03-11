@@ -10,6 +10,7 @@ use crate::backend::unstable::rpc_methods::{
 use crate::config::{BlockHash, Config};
 use crate::error::Error;
 use futures::stream::{FuturesUnordered, Stream, StreamExt};
+
 use std::collections::{HashMap, HashSet};
 use std::future::Future;
 use std::pin::Pin;
@@ -105,7 +106,7 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
             };
 
             // React to any actual FollowEvent we get back.
-            let ev = match ev {
+            let ev: FollowStreamMsg<BlockRef<Hash>> = match ev {
                 FollowStreamMsg::Ready(subscription_id) => {
                     // update the subscription ID we'll use to unpin things.
                     this.subscription_id = Some(subscription_id.clone().into());
@@ -117,11 +118,15 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
                     let rel_block_num = this.rel_block_num;
                     // Pin this block, but note that it can be unpinned any time since it won't show up again (except
                     // as a parent block, which we are ignoring at the moment).
-                    let block_ref =
-                        this.pin_unpinnable_block_at(rel_block_num, details.finalized_block_hash);
+
+                    let finalized_block_hashes = details
+                        .finalized_block_hashes
+                        .iter()
+                        .map(|h| this.pin_unpinnable_block_at(rel_block_num, *h))
+                        .collect();
 
                     FollowStreamMsg::Event(FollowEvent::Initialized(Initialized {
-                        finalized_block_hash: block_ref,
+                        finalized_block_hashes,
                         finalized_block_runtime: details.finalized_block_runtime,
                     }))
                 }
@@ -502,7 +507,7 @@ pub(super) mod test_utils {
     /// An initialized event containing a BlockRef (useful for comparisons)
     pub fn ev_initialized_ref(n: u64) -> FollowEvent<BlockRef<H256>> {
         FollowEvent::Initialized(Initialized {
-            finalized_block_hash: BlockRef::new(H256::from_low_u64_le(n)),
+            finalized_block_hashes: vec![BlockRef::new(H256::from_low_u64_le(n))],
             finalized_block_runtime: None,
         })
     }
