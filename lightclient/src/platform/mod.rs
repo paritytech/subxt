@@ -11,16 +11,19 @@ mod wasm_platform;
 #[cfg(feature = "web")]
 mod wasm_socket;
 
-pub use helpers::build_platform;
+pub use helpers::{
+    build_platform,
+    DefaultPlatform,
+};
 
 #[cfg(feature = "native")]
 mod helpers {
     use smoldot_light::platform::default::DefaultPlatform as Platform;
     use std::sync::Arc;
 
-    pub type PlatformType = Arc<Platform>;
+    pub type DefaultPlatform = Arc<Platform>;
 
-    pub fn build_platform() -> PlatformType {
+    pub fn build_platform() -> DefaultPlatform {
         Platform::new(
             "subxt-light-client".into(),
             env!("CARGO_PKG_VERSION").into(),
@@ -32,9 +35,9 @@ mod helpers {
 mod helpers {
     use super::wasm_platform::SubxtPlatform as Platform;
 
-    pub type PlatformType = Platform;
+    pub type DefaultPlatform = Platform;
 
-    pub fn build_platform() -> PlatformType {
+    pub fn build_platform() -> DefaultPlatform {
         Platform::new()
     }
 }

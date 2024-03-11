@@ -4617,32 +4617,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "subxt-lightclient2"
-version = "0.34.0"
-dependencies = [
- "either",
- "futures",
- "futures-timer",
- "futures-util",
- "getrandom",
- "instant",
- "js-sys",
- "pin-project",
- "send_wrapper 0.6.0",
- "serde",
- "serde_json",
- "smoldot",
- "smoldot-light",
- "thiserror",
- "tokio",
- "tokio-stream",
- "tracing",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
 name = "subxt-macro"
 version = "0.34.0"
 dependencies = [

@@ -7,7 +7,7 @@
 mod dispatch_error;
 
 crate::macros::cfg_unstable_light_client! {
-    pub use crate::client::LightClientError;
+    pub use subxt_lightclient::LightClientError;
 }
 
 // Re-export dispatch error types:
