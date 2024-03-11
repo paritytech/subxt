@@ -2,9 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::storage_address::{StorageAddress, Yes};
-use super::storage_key::StorageHashers;
-use super::StorageKey;
+use subxt_core::storage::address::{StorageAddress, StorageHashers, StorageKey};
+use subxt_core::Yes;
 
 use crate::{
     backend::{BackendExt, BlockRef},
@@ -136,7 +135,8 @@ where
             validate_storage_address(address, pallet)?;
 
             // Look up the return type ID to enable DecodeWithMetadata:
-            let lookup_bytes = super::utils::storage_address_bytes(address, &metadata)?;
+            let lookup_bytes =
+                subxt_core::storage::utils::storage_address_bytes(address, &metadata)?;
             if let Some(data) = client.fetch_raw(lookup_bytes).await? {
                 let val =
                     decode_storage_with_metadata::<Address::Target>(&mut &*data, &metadata, entry)?;
@@ -237,7 +237,8 @@ where
             let hashers = StorageHashers::new(entry, metadata.types())?;
 
             // The address bytes of this entry:
-            let address_bytes = super::utils::storage_address_bytes(&address, &metadata)?;
+            let address_bytes =
+                subxt_core::storage::utils::storage_address_bytes(&address, &metadata)?;
             let s = client
                 .backend()
                 .storage_fetch_descendant_values(address_bytes, block_ref.hash())

@@ -4,13 +4,13 @@
 
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    backend::RuntimeVersion, blocks::BlocksClient, constants::ConstantsClient,
-    events::EventsClient, runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient,
-    Config, Metadata,
+    blocks::BlocksClient, constants::ConstantsClient, events::EventsClient,
+    runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient, Config, Metadata,
 };
+
 use derivative::Derivative;
 use std::sync::Arc;
-use subxt_core::client::ClientMetadata;
+use subxt_core::client::{ClientMetadata, RuntimeVersion};
 
 /// A trait representing a client that can perform
 /// offline-only actions.
@@ -21,6 +21,8 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     fn genesis_hash(&self) -> T::Hash;
     /// Return the provided [`RuntimeVersion`].
     fn runtime_version(&self) -> RuntimeVersion;
+    /// Return the Client Metadata.
+    fn client_metadata(&self) -> ClientMetadata<T>;
 
     /// Work with transactions.
     fn tx(&self) -> TxClient<T, Self> {
@@ -98,6 +100,15 @@ impl<T: Config> OfflineClient<T> {
         self.inner.metadata.clone()
     }
 
+    /// Returns a [`subxt_core::client::ClientMetadata`] that serves as a least common denominator of what data a client should expose.
+    pub fn client_metadata(&self) -> ClientMetadata<T> {
+        ClientMetadata::new(
+            self.inner.genesis_hash,
+            self.inner.runtime_version,
+            self.inner.metadata.clone(),
+        )
+    }
+
     // Just a copy of the most important trait methods so that people
     // don't need to import the trait for most things:
 
@@ -136,6 +147,9 @@ impl<T: Config> OfflineClientT<T> for OfflineClient<T> {
     }
     fn metadata(&self) -> Metadata {
         self.metadata()
+    }
+    fn client_metadata(&self) -> ClientMetadata<T> {
+        self.client_metadata()
     }
 }
 

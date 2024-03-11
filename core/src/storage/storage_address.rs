@@ -6,12 +6,14 @@ use crate::{
     dynamic::DecodedValueThunk,
     error::{Error, MetadataError},
     metadata::{DecodeWithMetadata, Metadata},
+    Yes
 };
 use derivative::Derivative;
 
 use alloc::borrow::{Cow, ToOwned};
 use alloc::string::String;
 use alloc::vec::Vec;
+
 
 use super::{storage_key::StorageHashers, StorageKey};
 
@@ -49,10 +51,6 @@ pub trait StorageAddress {
         None
     }
 }
-
-/// Used to signal whether a [`StorageAddress`] can be iterated,
-/// fetched and returned with a default value in the type system.
-pub struct Yes;
 
 /// A concrete storage address. This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].

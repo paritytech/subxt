@@ -15,7 +15,7 @@ description = "Sign extrinsics to be submitted by Subxt"
 keywords = ["parity", "subxt", "extrinsic", "no-std"]
 
 [features]
-default = []                                                                                                                                      # "std"
+default = ["std"]                                                                                                                                 # "std"
 std = ["scale-info/std", "scale-value/std", "scale-bits/std", "scale-decode/std", "scale-encode/std", "frame-metadata/std", "subxt-metadata/std"]
 substrate-compat = ["sp-core", "sp-runtime"]
 

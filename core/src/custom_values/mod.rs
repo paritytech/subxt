@@ -6,7 +6,8 @@
 
 mod custom_value_address;
 
-pub use custom_value_address::{CustomValueAddress, StaticAddress, Yes};
+use crate::Yes;
+pub use custom_value_address::{CustomValueAddress, StaticAddress};
 
 use crate::{
     metadata::{DecodeWithMetadata, MetadatExt},

@@ -47,20 +47,37 @@ pub mod blocks;
 pub mod client;
 pub mod constants;
 pub mod custom_values;
-pub mod dynamic;
 pub mod error;
 pub mod events;
-pub mod metadata;
 pub mod runtime_api;
 pub mod storage;
 pub mod tx;
 pub mod utils;
 
+/// This module provides a [`Config`] type, which is used to define various
+/// types that are important in order to speak to a particular chain.
+/// [`SubstrateConfig`] provides a default set of these types suitable for the
+/// default Substrate node implementation, and [`PolkadotConfig`] for a
+/// Polkadot node.
 pub mod config {
     pub use subxt_core::config::{
-        BlockHash, Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header, PolkadotConfig,
-        PolkadotExtrinsicParams, RefineParams, RefineParamsData, SubstrateConfig,
-        SubstrateExtrinsicParams,
+        signed_extensions, substrate, BlockHash, Config, ExtrinsicParams, ExtrinsicParamsEncoder,
+        Hasher, Header, PolkadotConfig, PolkadotExtrinsicParams, RefineParams, RefineParamsData,
+        SignedExtension, SubstrateConfig, SubstrateExtrinsicParams,
+    };
+}
+
+/// Types representing the metadata obtained from a node.
+pub mod metadata {
+    pub use subxt_core::metadata::{DecodeWithMetadata, EncodeWithMetadata, MetadatExt, Metadata};
+    // Expose metadata types under a sub module in case somebody needs to reference them:
+    pub use subxt_metadata as types;
+}
+
+/// Submit dynamic transactions.
+pub mod dynamic {
+    pub use subxt_core::dynamic::{
+        constant, runtime_api_call, storage, tx, DecodedValue, DecodedValueThunk,
     };
 }
 

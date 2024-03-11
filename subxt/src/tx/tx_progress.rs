@@ -321,6 +321,8 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
 
 #[cfg(test)]
 mod test {
+    use subxt_core::RuntimeVersion;
+
     use crate::{
         backend::{StreamOfResults, TransactionStatus},
         client::{OfflineClientT, OnlineClientT},
@@ -345,7 +347,11 @@ mod test {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
 
-        fn runtime_version(&self) -> crate::backend::RuntimeVersion {
+        fn runtime_version(&self) -> RuntimeVersion {
+            unimplemented!("just a mock impl to satisfy trait bounds")
+        }
+
+        fn client_metadata(&self) -> subxt_core::ClientMetadata<SubstrateConfig> {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
     }

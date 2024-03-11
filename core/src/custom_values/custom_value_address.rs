@@ -2,6 +2,7 @@ use derivative::Derivative;
 
 use crate::dynamic::DecodedValueThunk;
 use crate::metadata::DecodeWithMetadata;
+use crate::Yes;
 
 /// This represents the address of a custom value in in the metadata.
 /// Anything, that implements the [CustomValueAddress] trait can be used, to fetch
@@ -31,9 +32,6 @@ impl CustomValueAddress for str {
         self
     }
 }
-
-/// Used to signal whether a [`CustomValueAddress`] can be decoded.
-pub struct Yes;
 
 /// A static address to a custom value.
 #[derive(Derivative)]

@@ -4,8 +4,7 @@
 
 //! Types associated with accessing custom types
 
-mod custom_value_address;
 mod custom_values_client;
 
-pub use custom_value_address::{CustomValueAddress, StaticAddress, Yes};
 pub use custom_values_client::CustomValuesClient;
+pub use subxt_core::custom_values::{CustomValueAddress, StaticAddress};

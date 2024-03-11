@@ -18,7 +18,7 @@ use super::utils::hash_bytes;
 /// A collection of storage hashers paired with the type ids of the types they should hash.
 /// Can be created for each storage entry in the metadata via [`StorageHashers::new()`].
 #[derive(Debug)]
-pub(crate) struct StorageHashers {
+pub struct StorageHashers {
     hashers_and_ty_ids: Vec<(StorageHasher, u32)>,
 }
 

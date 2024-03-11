@@ -770,7 +770,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{backend::RuntimeVersion, OfflineClient, PolkadotConfig};
+    use crate::{OfflineClient, PolkadotConfig};
     use assert_matches::assert_matches;
     use codec::{Decode, Encode};
     use frame_metadata::v15::{CustomMetadata, OuterEnums};
@@ -781,6 +781,7 @@ mod tests {
     use primitive_types::H256;
     use scale_info::{meta_type, TypeInfo};
     use scale_value::Value;
+    use subxt_core::RuntimeVersion;
 
     // Extrinsic needs to contain at least the generic type parameter "Call"
     // for the metadata to be valid.

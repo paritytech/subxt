@@ -11,8 +11,8 @@ pub mod utils;
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.
 pub mod address {
-    pub use super::storage_address::{dynamic, Address, DynamicAddress, StorageAddress, Yes};
-    pub use super::storage_key::{StaticStorageKey, StorageKey};
+    pub use super::storage_address::{dynamic, Address, DynamicAddress, StorageAddress};
+    pub use super::storage_key::{StaticStorageKey, StorageHashers, StorageKey};
 }
 
 pub use storage_key::StorageKey;

@@ -4,7 +4,7 @@
 
 use super::{
     storage_type::{validate_storage_address, Storage},
-    utils, StorageAddress,
+    StorageAddress,
 };
 use crate::{
     backend::BlockRef,
@@ -51,7 +51,7 @@ where
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
     /// to retrieve the entries at the root of the associated address.
     pub fn address_root_bytes<Address: StorageAddress>(&self, address: &Address) -> Vec<u8> {
-        utils::storage_address_root_bytes(address)
+        subxt_core::storage::utils::storage_address_root_bytes(address)
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
@@ -63,7 +63,8 @@ where
         &self,
         address: &Address,
     ) -> Result<Vec<u8>, Error> {
-        utils::storage_address_bytes(address, &self.client.metadata())
+        subxt_core::storage::utils::storage_address_bytes(address, &self.client.metadata())
+            .map_err(Into::into)
     }
 }
 

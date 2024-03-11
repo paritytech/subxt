@@ -5,9 +5,7 @@
 use super::{OfflineClient, OfflineClientT};
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    backend::{
-        legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, RuntimeVersion, StreamOfResults,
-    },
+    backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, StreamOfResults},
     blocks::{BlockRef, BlocksClient},
     constants::ConstantsClient,
     error::Error,
@@ -20,6 +18,7 @@ use crate::{
 use derivative::Derivative;
 use futures::future;
 use std::sync::{Arc, RwLock};
+use subxt_core::{ClientMetadata, RuntimeVersion};
 
 /// A trait representing a client that can perform
 /// online actions.
@@ -78,6 +77,16 @@ impl<T: Config> OnlineClient<T> {
         let client = RpcClient::from_insecure_url(url).await?;
         let backend = LegacyBackend::builder().build(client);
         OnlineClient::from_backend(Arc::new(backend)).await
+    }
+
+    /// Returns a [`subxt_core::client::ClientMetadata`] that serves as a least common denominator of what data a client should expose.
+    pub fn client_metadata(&self) -> ClientMetadata<T> {
+        let inner = self.inner.read().expect("shouldn't be poisoned");
+        ClientMetadata::new(
+            inner.genesis_hash,
+            inner.runtime_version,
+            inner.metadata.clone(),
+        )
     }
 }
 
@@ -360,6 +369,10 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     fn runtime_version(&self) -> RuntimeVersion {
         self.runtime_version()
     }
+
+    fn client_metadata(&self) -> ClientMetadata<T> {
+        self.client_metadata()
+    }
 }
 
 impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
@@ -521,7 +534,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
 
         let scale_val = match chunk.to_value() {
             Ok(v) => v,
-            Err(e) => return Some(Err(e)),
+            Err(e) => return Some(Err(e.into())),
         };
 
         let Some(Ok(spec_version)) = scale_val
