@@ -88,7 +88,7 @@ sp-runtime = { workspace = true, optional = true }
 
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
-subxt-core = { workspace = true }
+subxt-core = { workspace = true, features = ["std"] }
 subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 

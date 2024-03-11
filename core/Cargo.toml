@@ -15,8 +15,17 @@ description = "Sign extrinsics to be submitted by Subxt"
 keywords = ["parity", "subxt", "extrinsic", "no-std"]
 
 [features]
-default = ["std"]                                                                                                                                 # "std"
-std = ["scale-info/std", "scale-value/std", "scale-bits/std", "scale-decode/std", "scale-encode/std", "frame-metadata/std", "subxt-metadata/std"]
+default = ["std"]                                                                                                                                                # "std"
+std = [
+    "scale-info/std", 
+    "scale-value/std", 
+    "scale-bits/std", 
+    "scale-decode/std", 
+    "scale-encode/std", 
+    "frame-metadata/std", 
+    "subxt-metadata/std", 
+    "tracing/std"
+]
 substrate-compat = ["sp-core", "sp-runtime"]
 
 [dependencies]
@@ -50,6 +59,7 @@ sp-core-hashing = { workspace = true }
 sp-core = { workspace = true, optional = true }
 sp-runtime = { workspace = true, optional = true }
 either = { workspace = true }
+tracing = { workspace = true, default-features = false }
 
 [dev-dependencies]
 bitvec = { workspace = true }

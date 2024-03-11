@@ -1,6 +1,4 @@
 use crate::client::OfflineClientT;
-use crate::error::MetadataError;
-use crate::metadata::DecodeWithMetadata;
 use crate::{Config, Error};
 use derivative::Derivative;
 

@@ -15,6 +15,7 @@ pub mod constants;
 pub mod custom_values;
 pub mod dynamic;
 mod error;
+pub mod events;
 pub mod metadata;
 pub mod runtime_api;
 pub mod signer;
@@ -29,9 +30,14 @@ pub use config::{
     SubstrateExtrinsicParams,
 };
 pub use error::{Error, ExtrinsicParamsError, MetadataError, StorageAddressError};
+pub use events::{EventDetails, Phase, StaticEvent};
 pub use metadata::Metadata;
 pub use signer::Signer;
-pub use utils::{to_hex, AccountId32, MultiAddress, MultiSignature, Yes, H160, H256, H512};
+
+pub use utils::{
+    to_hex, AccountId32, Encoded, Era, MultiAddress, MultiSignature, Static, UncheckedExtrinsic,
+    WrapperKeepOpaque, Yes, H160, H256, H512,
+};
 
 #[macro_use]
 mod macros;
