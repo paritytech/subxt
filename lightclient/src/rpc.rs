@@ -1,5 +1,5 @@
-use serde_json::value::RawValue;
 use serde::Deserialize;
+use serde_json::value::RawValue;
 
 /// The RPC response from the light-client.
 /// This can either be a response of a method, or a notification from a subscription.
@@ -116,7 +116,7 @@ impl std::str::FromStr for RpcResponse {
             return Ok(RpcResponse::NotificationError {
                 method: response.method,
                 subscription_id: response.params.subscription,
-                error: response.params.error
+                error: response.params.error,
             });
         }
 

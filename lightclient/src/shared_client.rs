@@ -1,19 +1,23 @@
-use std::sync::{Arc, Mutex};
 use smoldot_light as sl;
+use std::sync::{Arc, Mutex};
 
 /// This wraps [`smoldot_light::Client`] so that it can be cloned and shared.
 #[derive(Clone)]
 pub struct SharedClient<TPlat: sl::platform::PlatformRef, TChain = ()> {
-    client: Arc<Mutex<sl::Client<TPlat, TChain>>>
+    client: Arc<Mutex<sl::Client<TPlat, TChain>>>,
 }
 
-impl <TPlat: sl::platform::PlatformRef, TChain> From<sl::Client<TPlat, TChain>> for SharedClient<TPlat, TChain> {
+impl<TPlat: sl::platform::PlatformRef, TChain> From<sl::Client<TPlat, TChain>>
+    for SharedClient<TPlat, TChain>
+{
     fn from(client: sl::Client<TPlat, TChain>) -> Self {
-        SharedClient { client: Arc::new(Mutex::new(client)) }
+        SharedClient {
+            client: Arc::new(Mutex::new(client)),
+        }
     }
 }
 
-impl <TPlat: sl::platform::PlatformRef, TChain> SharedClient<TPlat, TChain> {
+impl<TPlat: sl::platform::PlatformRef, TChain> SharedClient<TPlat, TChain> {
     /// Delegates to [`smoldot_light::Client::json_rpc_request()`].
     pub(crate) fn json_rpc_request(
         &self,

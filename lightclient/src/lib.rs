@@ -9,13 +9,13 @@ mod shared_client;
 mod background;
 mod rpc;
 
-use std::future::Future;
+use background::{BackgroundTask, BackgroundTaskHandle};
 use futures::Stream;
+use platform::DefaultPlatform;
 use serde_json::value::RawValue;
 use shared_client::SharedClient;
+use std::future::Future;
 use tokio::sync::mpsc;
-use platform::DefaultPlatform;
-use background::{ BackgroundTask, BackgroundTaskHandle };
 
 /// Things that can go wrong when constructing the [`LightClient`].
 #[derive(Debug, thiserror::Error)]
@@ -49,12 +49,12 @@ pub struct JsonRpcError(Box<RawValue>);
 /// it with [`LightClient::relay_chain()`] to communicate with a relay chain, and
 /// then call [`LightClient::parachain()`] to establish connections to parachains.
 #[derive(Clone)]
-pub struct LightClient<TPlat: smoldot_light::platform::PlatformRef> {
-    client: SharedClient<TPlat>,
+pub struct LightClient {
+    client: SharedClient<DefaultPlatform>,
     relay_chain_id: smoldot_light::ChainId,
 }
 
-impl LightClient<DefaultPlatform> {
+impl LightClient {
     /// Given a chain spec, establish a connection to a relay chain. Any subsequent calls to
     /// [`LightClient::parachain()`] will set this as the relay chain.
     ///
@@ -89,26 +89,16 @@ impl LightClient<DefaultPlatform> {
             .map_err(|err| LightClientError::AddChainError(err.to_string()))?;
 
         let relay_chain_id = added_chain.chain_id;
-        let rpc_responses = added_chain.json_rpc_responses.expect("Light client RPC configured; qed");
+        let rpc_responses = added_chain
+            .json_rpc_responses
+            .expect("Light client RPC configured; qed");
         let shared_client: SharedClient<_> = client.into();
 
-        let (background_task, background_handle) = BackgroundTask::new(
-            shared_client.clone(),
-            relay_chain_id,
-            rpc_responses
-        );
-
-        // For now we spawn the background task internally, but later we can expose
-        // methods to give this back to the user so that they can exert backpressure.
-        spawn(async move { background_task.run().await });
-
+        let light_client_rpc =
+            LightClientRpc::new_raw(shared_client.clone(), relay_chain_id, rpc_responses);
         let light_client = Self {
             client: shared_client,
-            relay_chain_id
-        };
-
-        let light_client_rpc = LightClientRpc {
-            handle: background_handle
+            relay_chain_id,
         };
 
         Ok((light_client, light_client_rpc))
@@ -140,42 +130,70 @@ impl LightClient<DefaultPlatform> {
             user_data: (),
         };
 
-        let added_chain = self.client
+        let added_chain = self
+            .client
             .add_chain(config)
             .map_err(|err| LightClientError::AddChainError(err.to_string()))?;
 
         let chain_id = added_chain.chain_id;
-        let rpc_responses = added_chain.json_rpc_responses.expect("Light client RPC configured; qed");
+        let rpc_responses = added_chain
+            .json_rpc_responses
+            .expect("Light client RPC configured; qed");
 
-        let (background_task, background_handle) = BackgroundTask::new(
+        Ok(LightClientRpc::new_raw(
             self.client.clone(),
             chain_id,
-            rpc_responses
-        );
-
-        // For now we spawn the background task internally, but later we can expose
-        // methods to give this back to the user so that they can exert backpressure.
-        spawn(async move { background_task.run().await });
-
-        Ok(LightClientRpc {
-            handle: background_handle
-        })
+            rpc_responses,
+        ))
     }
 }
 
 /// This represents a single RPC connection to a specific chain, and is constructed by calling
 /// one of the methods on [`LightClient`]. Using this, you can make RPC requests to the chain.
 pub struct LightClientRpc {
-    handle: BackgroundTaskHandle
+    handle: BackgroundTaskHandle,
 }
 
 impl LightClientRpc {
+    // Dev note: this would provide a "low leveL" interface if one is needed.
+    // Do we actually need to provide this, or can we entirely hide Smoldot?
+    pub(crate) fn new_raw<TPlat, TChain>(
+        client: impl Into<SharedClient<TPlat, TChain>>,
+        chain_id: smoldot_light::ChainId,
+        rpc_responses: smoldot_light::JsonRpcResponses,
+    ) -> Self
+    where
+        TPlat: smoldot_light::platform::PlatformRef + Send + 'static,
+        TChain: Send + 'static,
+    {
+        let (background_task, background_handle) =
+            BackgroundTask::new(client.into(), chain_id, rpc_responses);
+
+        // For now we spawn the background task internally, but later we can expose
+        // methods to give this back to the user so that they can exert backpressure.
+        spawn(async move { background_task.run().await });
+
+        LightClientRpc {
+            handle: background_handle,
+        }
+    }
+
     /// Make an RPC request to a chain, getting back a result.
-    pub async fn request(&self, method: String, params: Option<Box<RawValue>>) -> Result<Box<RawValue>, LightClientRpcError> {
+    pub async fn request(
+        &self,
+        method: String,
+        params: Option<Box<RawValue>>,
+    ) -> Result<Box<RawValue>, LightClientRpcError> {
         self.handle.request(method, params).await
     }
+
     /// Subscribe to some RPC method, getting back a stream of notifications.
-    pub async fn subscribe(&self, method: String, params: Option<Box<RawValue>>, unsub: String) -> Result<LightClientRpcSubscription, LightClientRpcError> {
+    pub async fn subscribe(
+        &self,
+        method: String,
+        params: Option<Box<RawValue>>,
+        unsub: String,
+    ) -> Result<LightClientRpcSubscription, LightClientRpcError> {
         let (id, notifications) = self.handle.subscribe(method, params, unsub).await?;
         Ok(LightClientRpcSubscription { id, notifications })
     }
@@ -196,7 +214,10 @@ impl LightClientRpcSubscription {
 
 impl Stream for LightClientRpcSubscription {
     type Item = Result<Box<RawValue>, JsonRpcError>;
-    fn poll_next(mut self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Option<Self::Item>> {
+    fn poll_next(
+        mut self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
         self.notifications.poll_recv(cx)
     }
 }
@@ -204,7 +225,11 @@ impl Stream for LightClientRpcSubscription {
 /// A quick helper to spawn a task that works for WASM.
 fn spawn<F: Future + Send + 'static>(future: F) {
     #[cfg(feature = "native")]
-    tokio::spawn(async move { future.await; });
+    tokio::spawn(async move {
+        future.await;
+    });
     #[cfg(feature = "web")]
-    wasm_bindgen_futures::spawn_local(async move { future.await; });
+    wasm_bindgen_futures::spawn_local(async move {
+        future.await;
+    });
 }
