@@ -25,7 +25,6 @@ use tokio::sync::mpsc;
 pub use chain_config::{ChainConfig, ChainConfigError};
 
 /// Things that can go wrong when constructing the [`LightClient`].
-#[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
 pub enum LightClientError {
     /// Error encountered while adding the chain to the light-client.
@@ -34,7 +33,6 @@ pub enum LightClientError {
 }
 
 /// Things that can go wrong calling methods of [`LightClientRpc`].
-#[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
 pub enum LightClientRpcError {
     /// Error response from the JSON-RPC server.

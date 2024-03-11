@@ -28,10 +28,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // `--node-key 0000000000000000000000000000000000000000000000000000000000000001`
     let chain_config = ChainConfig::chain_spec(chain_spec.get()).set_bootnodes([
         "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp",
-    ]);
+    ])?;
 
     // Start the light client up, establishing a connection to the local node.
-    let (light_client, chain_rpc) = LightClient::relay_chain(chain_config).await?;
+    let (_light_client, chain_rpc) = LightClient::relay_chain(chain_config)?;
     let api = OnlineClient::<PolkadotConfig>::from_rpc_client(chain_rpc).await?;
 
     // Build a balance transfer extrinsic.
