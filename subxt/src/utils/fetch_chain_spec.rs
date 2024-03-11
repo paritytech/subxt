@@ -104,7 +104,7 @@ cfg_jsonrpsee_web! {
         pub async fn client(url: &str) -> Result<Client, FetchChainspecError> {
             let (sender, receiver) = web::connect(url)
                 .await
-                .map_err(|_| FetchChainspecError::Handshake)?;
+                .map_err(|_| FetchChainspecError::HandshakeError)?;
 
             Ok(ClientBuilder::default()
                 .max_buffer_capacity_per_subscription(4096)
