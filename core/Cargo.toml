@@ -58,7 +58,6 @@ sp-core-hashing = { workspace = true }
 # Included if the "substrate-compat" feature is enabled.
 sp-core = { workspace = true, optional = true }
 sp-runtime = { workspace = true, optional = true }
-either = { workspace = true }
 tracing = { workspace = true, default-features = false }
 
 [dev-dependencies]
