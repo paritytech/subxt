@@ -1,10 +1,7 @@
 #![cfg(target_arch = "wasm32")]
 
 use futures_util::StreamExt;
-use subxt::{
-    client::{LightClient, LightClientBuilder},
-    config::PolkadotConfig,
-};
+use subxt::{client::OnlineClient, config::PolkadotConfig, lightclient::LightClient};
 use wasm_bindgen_test::*;
 
 wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
@@ -49,15 +46,25 @@ async fn light_client_works() {
 /// We connect to an RPC node because the light client can struggle to sync in
 /// time to a new local node for some reason. Because this can be brittle (eg RPC nodes can
 /// go down or have network issues), we try a few RPC nodes until we find one that works.
-async fn connect_to_rpc_node() -> LightClient<PolkadotConfig> {
+async fn connect_to_rpc_node() -> OnlineClient<PolkadotConfig> {
     let rpc_node_urls = [
         "wss://rpc.polkadot.io",
         "wss://1rpc.io/dot",
         "wss://polkadot-public-rpc.blockops.network/ws",
     ];
 
+    async fn do_connect(
+        url: &str,
+    ) -> Result<OnlineClient<PolkadotConfig>, Box<dyn std::error::Error + Send + Sync + 'static>>
+    {
+        let chainspec = subxt::utils::fetch_chainspec_from_rpc_node(url).await?;
+        let (_lc, rpc) = LightClient::relay_chain(chainspec.get())?;
+        let api = OnlineClient::from_rpc_client(rpc).await?;
+        Ok(api)
+    }
+
     for url in rpc_node_urls {
-        let res = LightClientBuilder::new().build_from_url(url).await;
+        let res = do_connect(url).await;
 
         match res {
             Ok(api) => return api,
