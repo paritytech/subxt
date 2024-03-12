@@ -128,8 +128,13 @@ impl<T: Config> LightClient<T> {
     }
 
     /// Return the runtime version.
-    fn runtime_version(&self) -> crate::backend::RuntimeVersion {
+    fn runtime_version(&self) -> crate::client::RuntimeVersion {
         self.client.runtime_version()
+    }
+
+    /// Return the inner client metadata.
+    fn client_metadata(&self) -> crate::client::ClientMetadata<T> {
+        self.client.client_metadata()
     }
 
     /// Work with transactions.
@@ -188,7 +193,11 @@ impl<T: Config> OfflineClientT<T> for LightClient<T> {
         self.genesis_hash()
     }
 
-    fn runtime_version(&self) -> crate::backend::RuntimeVersion {
+    fn runtime_version(&self) -> crate::client::RuntimeVersion {
         self.runtime_version()
+    }
+
+    fn client_metadata(&self) -> crate::client::ClientMetadata<T> {
+        self.client_metadata()
     }
 }

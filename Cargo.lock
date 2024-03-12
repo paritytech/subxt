@@ -4513,9 +4513,7 @@ version = "0.34.0"
 dependencies = [
  "assert_matches",
  "async-trait",
- "base58",
  "bitvec",
- "blake2",
  "derivative",
  "either",
  "frame-metadata 16.0.0",
@@ -4611,7 +4609,6 @@ dependencies = [
  "blake2",
  "derivative",
  "derive_more",
- "either",
  "frame-metadata 16.0.0",
  "hashbrown 0.14.3",
  "hex",
