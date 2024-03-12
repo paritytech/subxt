@@ -32,7 +32,7 @@ async fn chainhead_unstable_follow() {
     assert_eq!(
         event,
         FollowEvent::Initialized(Initialized {
-            finalized_block_hash,
+            finalized_block_hashes: vec![finalized_block_hash],
             finalized_block_runtime: None,
         })
     );
@@ -47,7 +47,7 @@ async fn chainhead_unstable_follow() {
     assert_matches!(
         event,
         FollowEvent::Initialized(init) => {
-            assert_eq!(init.finalized_block_hash, finalized_block_hash);
+            assert_eq!(init.finalized_block_hashes, vec![finalized_block_hash]);
             if let Some(RuntimeEvent::Valid(RuntimeVersionEvent { spec })) = init.finalized_block_runtime {
                 assert_eq!(spec.spec_version, runtime_version.spec_version);
                 assert_eq!(spec.transaction_version, runtime_version.transaction_version);
@@ -66,7 +66,7 @@ async fn chainhead_unstable_body() {
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -95,7 +95,7 @@ async fn chainhead_unstable_header() {
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -123,7 +123,7 @@ async fn chainhead_unstable_storage() {
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -168,7 +168,7 @@ async fn chainhead_unstable_call() {
     let mut blocks = rpc.chainhead_unstable_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -205,7 +205,7 @@ async fn chainhead_unstable_unpin() {
     let mut blocks = rpc.chainhead_unstable_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
