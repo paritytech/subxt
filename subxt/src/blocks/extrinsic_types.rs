@@ -743,7 +743,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     }
 
     /// Signed Extension as a [`scale_value::Value`]
-    pub fn value(&self) -> Result<Value, Error> {
+    pub fn value(&self) -> Result<Value<u32>, Error> {
         let value = scale_value::scale::decode_as_type(
             &mut &self.bytes[..],
             &self.ty_id,

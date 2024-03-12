@@ -7,14 +7,14 @@
 
 use crate::Error;
 use crate::MetadataError;
-use crate::{dynamic::Value, metadata::Metadata};
+use crate::{metadata::Metadata};
 use alloc::borrow::{Cow, ToOwned};
 use alloc::string::String;
 
 use alloc::vec::Vec;
 use codec::Encode;
 use scale_encode::EncodeAsFields;
-use scale_value::{Composite, ValueDef, Variant};
+use scale_value::{Composite, ValueDef, Variant, Value};
 
 /// This represents a transaction payload that can be submitted
 /// to a node.

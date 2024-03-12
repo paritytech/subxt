@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 use codec::Encode;
-use subxt::client::{OfflineClientT, ClientMetadata};
+use subxt::client::{ClientMetadata};
 use subxt::config::{
     Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError, RefineParams,
 };

@@ -12,7 +12,7 @@ pub use scale_value::{At, Value};
 
 /// A [`scale_value::Value`] type endowed with contextual information
 /// regarding what type was used to decode each part of it. This implements
-/// [`subxt_core::metadata::DecodeWithMetadata`], and is used as a return type
+/// [`crate::metadata::DecodeWithMetadata`], and is used as a return type
 /// for dynamic requests.
 pub type DecodedValue = scale_value::Value<u32>;
 
@@ -63,7 +63,7 @@ impl DecodedValueThunk {
     pub fn encoded(&self) -> &[u8] {
         &self.scale_bytes
     }
-    /// Decode the SCALE encoded storage entry into a dynamic [`DecodedValue`] type.
+    /// Decode the SCALE encoded storage Value into a dynamic [`DecodedValue`] type.
     pub fn to_value(&self) -> Result<DecodedValue, scale_decode::Error> {
         let val = scale_value::scale::decode_as_type(
             &mut &*self.scale_bytes,
