@@ -7,7 +7,6 @@
 mod account_id;
 pub mod bits;
 mod era;
-mod fetch_chain_spec;
 mod multi_address;
 mod multi_signature;
 mod static_type;
@@ -30,6 +29,7 @@ pub use unchecked_extrinsic::UncheckedExtrinsic;
 pub use wrapper_opaque::WrapperKeepOpaque;
 
 cfg_jsonrpsee! {
+    mod fetch_chain_spec;
     pub use fetch_chain_spec::{fetch_chainspec_from_rpc_node, FetchChainspecError};
 }
 
