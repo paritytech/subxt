@@ -7,11 +7,10 @@ use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Hasher},
     error::{BlockError, Error, MetadataError},
+    events,
     metadata::types::PalletMetadata,
     Metadata,
-    events,
 };
-
 
 use crate::config::signed_extensions::{
     ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,

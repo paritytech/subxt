@@ -9,8 +9,9 @@ use url::Url;
 use crate::{error::RpcError, Error};
 
 pub use subxt_core::utils::{
-    strip_compact_prefix, to_hex, AccountId32, Encoded, Era, MultiAddress, MultiSignature,
-    PhantomDataSendSync, Static, UncheckedExtrinsic, WrapperKeepOpaque, Yes, H160, H256, H512, KeyedVec, bits,
+    bits, strip_compact_prefix, to_hex, AccountId32, Encoded, Era, KeyedVec, MultiAddress,
+    MultiSignature, PhantomDataSendSync, Static, UncheckedExtrinsic, WrapperKeepOpaque, Yes, H160,
+    H256, H512,
 };
 
 /// A URL is considered secure if it uses a secure scheme ("https" or "wss") or is referring to localhost.

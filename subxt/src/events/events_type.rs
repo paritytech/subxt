@@ -4,12 +4,9 @@
 
 //! A representation of a block of events.
 
-use super::{StaticEvent, EventDetails};
+use super::{EventDetails, StaticEvent};
 use crate::{
-    client::OnlineClientT,
-    error::{Error},
-    events::events_client::get_event_bytes,
-    Config, Metadata,
+    client::OnlineClientT, error::Error, events::events_client::get_event_bytes, Config, Metadata,
 };
 use codec::{Compact, Decode};
 use derivative::Derivative;
@@ -332,7 +329,7 @@ pub(crate) mod test_utils {
 mod tests {
     use super::{
         test_utils::{event_record, events, events_raw, AllEvents, EventRecord},
-        *, 
+        *,
     };
     use crate::events::Phase;
     use crate::SubstrateConfig;
@@ -340,7 +337,6 @@ mod tests {
     use primitive_types::H256;
     use scale_info::TypeInfo;
     use scale_value::Value;
-    
 
     /// Build a fake wrapped metadata.
     fn metadata<E: TypeInfo + 'static>() -> Metadata {

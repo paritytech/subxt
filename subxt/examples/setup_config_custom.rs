@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 use codec::Encode;
-use subxt::client::{ClientMetadata};
+use subxt::client::ClientMetadata;
 use subxt::config::{
     Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError, RefineParams,
 };
@@ -60,10 +60,7 @@ impl<T: Config> ExtrinsicParams<T> for CustomExtrinsicParams<T> {
     type Params = CustomExtrinsicParamsBuilder;
 
     // Gather together all of the params we will need to encode:
-    fn new(
-        client: &ClientMetadata<T>,
-        params: Self::Params,
-    ) -> Result<Self, ExtrinsicParamsError> {
+    fn new(client: &ClientMetadata<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(Self {
             genesis_hash: client.genesis_hash(),
             tip: params.tip,

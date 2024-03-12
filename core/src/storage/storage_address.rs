@@ -6,14 +6,13 @@ use crate::{
     dynamic::DecodedValueThunk,
     error::{Error, MetadataError},
     metadata::{DecodeWithMetadata, Metadata},
-    Yes
+    Yes,
 };
 use derivative::Derivative;
 
 use alloc::borrow::{Cow, ToOwned};
 use alloc::string::String;
 use alloc::vec::Vec;
-
 
 use super::{storage_key::StorageHashers, StorageKey};
 

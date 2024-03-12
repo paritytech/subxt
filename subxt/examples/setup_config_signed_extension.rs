@@ -2,12 +2,12 @@
 use codec::Encode;
 use scale_encode::EncodeAsType;
 use scale_info::PortableRegistry;
+use subxt::client::ClientMetadata;
 use subxt::config::signed_extensions;
 use subxt::config::{
     Config, DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder,
     ExtrinsicParamsError,
 };
-use subxt::client::ClientMetadata;
 use subxt_signer::sr25519::dev;
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]

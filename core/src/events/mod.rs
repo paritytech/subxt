@@ -5,6 +5,8 @@ use subxt_metadata::PalletMetadata;
 
 use crate::{Config, Error, Metadata, MetadataError};
 
+use alloc::vec::Vec;
+
 /// Trait to uniquely identify the events's identity from the runtime metadata.
 ///
 /// Generated API structures that represent an event implement this trait.

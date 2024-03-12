@@ -9,9 +9,7 @@
 mod events_client;
 mod events_type;
 
-
 pub use events_client::EventsClient;
-pub use events_type::{Events};
+pub use events_type::Events;
 
-
-pub use subxt_core::events::{StaticEvent, EventDetails, Phase};
+pub use subxt_core::events::{EventDetails, Phase, StaticEvent};
