@@ -243,7 +243,7 @@ pub(super) mod test_utils {
     /// An initialized event
     pub fn ev_initialized(n: u64) -> FollowEvent<H256> {
         FollowEvent::Initialized(Initialized {
-            finalized_block_hash: H256::from_low_u64_le(n),
+            finalized_block_hashes: vec![H256::from_low_u64_le(n)],
             finalized_block_runtime: None,
         })
     }
