@@ -15,6 +15,7 @@ mod unchecked_extrinsic;
 mod wrapper_opaque;
 
 use crate::error::RpcError;
+use crate::macros::cfg_jsonrpsee;
 use crate::Error;
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
@@ -22,12 +23,15 @@ use url::Url;
 
 pub use account_id::AccountId32;
 pub use era::Era;
-pub use fetch_chain_spec::{fetch_chainspec_from_rpc_node, FetchChainspecError};
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
 pub use static_type::Static;
 pub use unchecked_extrinsic::UncheckedExtrinsic;
 pub use wrapper_opaque::WrapperKeepOpaque;
+
+cfg_jsonrpsee! {
+    pub use fetch_chain_spec::{fetch_chainspec_from_rpc_node, FetchChainspecError};
+}
 
 // Used in codegen
 #[doc(hidden)]

@@ -14,11 +14,10 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 
 const LOG_TARGET: &str = "subxt-light-client-background-task";
 
-/// The response of an RPC method.
+/// Response from [`BackgroundTaskHandle::request()`].
 pub type MethodResponse = Result<Box<RawValue>, LightClientRpcError>;
 
-/// The response back from an RPC subscription call; a subscription ID and channel that
-/// subscription notifications will be received on.
+/// Response from [`BackgroundTaskHandle::subscribe()`].
 pub type SubscriptionResponse = Result<
     (
         SubscriptionId,
@@ -31,9 +30,10 @@ pub type SubscriptionResponse = Result<
 pub type SubscriptionId = String;
 
 /// Message protocol between the front-end client that submits the RPC requests
-/// and the background task which fetches responses from Smoldot.
+/// and the background task which fetches responses from Smoldot. Hidden behind
+/// the [`BackgroundTaskHandle`].
 #[derive(Debug)]
-pub enum Message {
+enum Message {
     /// The RPC method request.
     Request {
         /// The method of the request.

@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::macros::{cfg_jsonrpsee, cfg_jsonrpsee_native, cfg_jsonrpsee_web};
+use crate::macros::{cfg_jsonrpsee_native, cfg_jsonrpsee_web};
 use serde_json::value::RawValue;
 
 /// Possible errors encountered trying to fetch a chain spec from an RPC node.
@@ -19,40 +19,39 @@ pub enum FetchChainspecError {
     HandshakeError,
 }
 
-cfg_jsonrpsee! {
-    /// Fetch a chain spec from an RPC node at the given URL.
-    pub async fn fetch_chainspec_from_rpc_node(url: impl AsRef<str>) -> Result<Box<RawValue>, FetchChainspecError> {
-        use jsonrpsee::core::client::{ClientT, SubscriptionClientT};
-        use jsonrpsee::rpc_params;
-        use serde_json::value::RawValue;
+/// Fetch a chain spec from an RPC node at the given URL.
+pub async fn fetch_chainspec_from_rpc_node(
+    url: impl AsRef<str>,
+) -> Result<Box<RawValue>, FetchChainspecError> {
+    use jsonrpsee::core::client::{ClientT, SubscriptionClientT};
+    use jsonrpsee::rpc_params;
 
-        let client = jsonrpsee_helpers::client(url.as_ref()).await?;
+    let client = jsonrpsee_helpers::client(url.as_ref()).await?;
 
-        let result = client
-            .request("sync_state_genSyncSpec", jsonrpsee::rpc_params![true])
-            .await
-            .map_err(|err| FetchChainspecError::RpcError(err.to_string()))?;
-
-        // Subscribe to the finalized heads of the chain.
-        let mut subscription = SubscriptionClientT::subscribe::<Box<RawValue>, _>(
-            &client,
-            "chain_subscribeFinalizedHeads",
-            rpc_params![],
-            "chain_unsubscribeFinalizedHeads",
-        )
+    let result = client
+        .request("sync_state_genSyncSpec", jsonrpsee::rpc_params![true])
         .await
         .map_err(|err| FetchChainspecError::RpcError(err.to_string()))?;
 
-        // We must ensure that the finalized block of the chain is not the block included
-        // in the chainSpec.
-        // This is a temporary workaround for: https://github.com/smol-dot/smoldot/issues/1562.
-        // The first finalized block that is received might by the finalized block could be the one
-        // included in the chainSpec. Decoding the chainSpec for this purpose is too complex.
-        let _ = subscription.next().await;
-        let _ = subscription.next().await;
+    // Subscribe to the finalized heads of the chain.
+    let mut subscription = SubscriptionClientT::subscribe::<Box<RawValue>, _>(
+        &client,
+        "chain_subscribeFinalizedHeads",
+        rpc_params![],
+        "chain_unsubscribeFinalizedHeads",
+    )
+    .await
+    .map_err(|err| FetchChainspecError::RpcError(err.to_string()))?;
 
-        Ok(result)
-    }
+    // We must ensure that the finalized block of the chain is not the block included
+    // in the chainSpec.
+    // This is a temporary workaround for: https://github.com/smol-dot/smoldot/issues/1562.
+    // The first finalized block that is received might by the finalized block could be the one
+    // included in the chainSpec. Decoding the chainSpec for this purpose is too complex.
+    let _ = subscription.next().await;
+    let _ = subscription.next().await;
+
+    Ok(result)
 }
 
 cfg_jsonrpsee_native! {
