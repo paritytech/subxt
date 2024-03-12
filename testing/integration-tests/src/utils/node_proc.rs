@@ -11,9 +11,6 @@ use subxt::{
     Config, OnlineClient,
 };
 
-#[cfg(feature = "unstable-light-client")]
-use subxt::client::{LightClient, LightClientBuilder};
-
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
     // Keep a handle to the node; once it's dropped the node is killed.
@@ -24,12 +21,7 @@ pub struct TestNodeProcess<R: Config> {
     legacy_client: RefCell<Option<OnlineClient<R>>>,
 
     rpc_client: rpc::RpcClient,
-
-    #[cfg(not(feature = "unstable-light-client"))]
     client: OnlineClient<R>,
-
-    #[cfg(feature = "unstable-light-client")]
-    client: LightClient<R>,
 }
 
 impl<R> TestNodeProcess<R>
@@ -92,14 +84,7 @@ where
     /// will use the legacy backend by default or the unstable backend if the
     /// "unstable-backend-client" feature is enabled, so that we can run each
     /// test against both.
-    #[cfg(not(feature = "unstable-light-client"))]
     pub fn client(&self) -> OnlineClient<R> {
-        self.client.clone()
-    }
-
-    /// Returns the subxt client connected to the running node.
-    #[cfg(feature = "unstable-light-client")]
-    pub fn client(&self) -> LightClient<R> {
         self.client.clone()
     }
 }
@@ -235,28 +220,41 @@ async fn build_unstable_client<T: Config>(
 }
 
 #[cfg(feature = "unstable-light-client")]
-async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<LightClient<T>, String> {
+async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineClient<T>, String> {
+    use subxt::lightclient::{ChainConfig, LightClient};
+
     // RPC endpoint.
     let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
 
-    // Step 1. Wait for a few blocks to be produced using the subxt client.
+    // Wait for a few blocks to be produced using the subxt client.
     let client = OnlineClient::<T>::from_url(ws_url.clone())
         .await
         .map_err(|err| format!("Failed to connect to node rpc at {ws_url}: {err}"))?;
-
     super::wait_for_blocks(&client).await;
 
-    // Step 2. Construct the light client.
-    // P2p bootnode.
+    // Now, configure a light client; fetch the chain spec and modify the bootnodes.
     let bootnode = format!(
         "/ip4/127.0.0.1/tcp/{}/p2p/{}",
         proc.p2p_port(),
         proc.p2p_address()
     );
 
-    LightClientBuilder::new()
-        .bootnodes([bootnode.as_str()])
-        .build_from_url(ws_url.as_str())
+    let chain_spec = subxt::utils::fetch_chainspec_from_rpc_node(ws_url.as_str())
         .await
-        .map_err(|e| format!("Failed to construct light client {}", e))
+        .map_err(|e| format!("Failed to obtain chain spec from local machine: {e}"))?;
+
+    let chain_config = ChainConfig::chain_spec(chain_spec.get())
+        .set_bootnodes([bootnode.as_str()])
+        .map_err(|e| format!("Light client: cannot update boot nodes: {e}"))?;
+
+    // Instantiate the light client.
+    let (_lightclient, rpc) = LightClient::relay_chain(chain_config)
+        .map_err(|e| format!("Light client: cannot add relay chain: {e}"))?;
+
+    // Instantiate subxt client from this.
+    let api = OnlineClient::from_rpc_client(rpc)
+        .await
+        .map_err(|e| format!("Failed to build OnlineClient from light client RPC: {e}"))?;
+
+    Ok(api)
 }

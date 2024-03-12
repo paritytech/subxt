@@ -29,13 +29,10 @@
 
 use crate::utils::node_runtime;
 use codec::Compact;
-use subxt::{
-    client::{LightClient, LightClientBuilder, OnlineClientT},
-    config::PolkadotConfig,
-};
+use subxt::{client::OnlineClient, config::PolkadotConfig, lightclient::LightClient};
 use subxt_metadata::Metadata;
 
-type Client = LightClient<PolkadotConfig>;
+type Client = OnlineClient<PolkadotConfig>;
 
 // Check that we can subscribe to non-finalized blocks.
 async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
@@ -119,9 +116,11 @@ async fn dynamic_events(api: &Client) -> Result<(), subxt::Error> {
 
 #[tokio::test]
 async fn light_client_testing() -> Result<(), subxt::Error> {
-    let api: LightClient<PolkadotConfig> = LightClientBuilder::new()
-        .build_from_url("wss://rpc.polkadot.io:443")
-        .await?;
+    let chainspec = subxt::utils::fetch_chainspec_from_rpc_node("wss://rpc.polkadot.io:443")
+        .await
+        .unwrap();
+    let (_lc, rpc) = LightClient::relay_chain(chainspec.get())?;
+    let api = Client::from_rpc_client(rpc).await?;
 
     non_finalized_headers_subscription(&api).await?;
     finalized_headers_subscription(&api).await?;
