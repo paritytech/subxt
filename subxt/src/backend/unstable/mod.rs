@@ -324,7 +324,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             .events()
             .filter_map(|ev| {
                 let out = match ev {
-                    FollowEvent::Initialized(init) => Some(init.finalized_block_hash.into()),
+                    FollowEvent::Initialized(init) => {
+                        init.finalized_block_hashes.last().map(|b| b.clone().into())
+                    }
                     _ => None,
                 };
                 std::future::ready(out)
@@ -356,7 +358,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             .filter_map(move |ev| {
                 let output = match ev {
                     FollowEvent::Initialized(ev) => {
-                        runtimes.remove(&ev.finalized_block_hash.hash());
+                        for finalized_block in ev.finalized_block_hashes {
+                            runtimes.remove(&finalized_block.hash());
+                        }
+
                         ev.finalized_block_runtime
                     }
                     FollowEvent::NewBlock(ev) => {
@@ -425,9 +430,11 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         self.stream_headers(|ev| match ev {
-            FollowEvent::Initialized(ev) => Some(ev.finalized_block_hash),
-            FollowEvent::NewBlock(ev) => Some(ev.block_hash),
-            _ => None,
+            FollowEvent::Initialized(init) => init.finalized_block_hashes,
+            FollowEvent::NewBlock(ev) => {
+                vec![ev.block_hash]
+            }
+            _ => vec![],
         })
         .await
     }
@@ -436,9 +443,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         self.stream_headers(|ev| match ev {
-            FollowEvent::Initialized(ev) => Some(ev.finalized_block_hash),
-            FollowEvent::BestBlockChanged(ev) => Some(ev.best_block_hash),
-            _ => None,
+            FollowEvent::Initialized(init) => init.finalized_block_hashes,
+            FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
+            _ => vec![],
         })
         .await
     }
@@ -447,9 +454,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         self.stream_headers(|ev| match ev {
-            FollowEvent::Initialized(ev) => {
-                vec![ev.finalized_block_hash]
-            }
+            FollowEvent::Initialized(init) => init.finalized_block_hashes,
             FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
             _ => vec![],
         })
