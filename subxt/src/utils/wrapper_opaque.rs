@@ -83,7 +83,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
         use scale_encode::error::{Error, ErrorKind, Kind};
 
         let visitor = visitor::new(out, |_, _| {
-            // Check that the target shape lines up: any other shape but composite it wrong.
+            // Check that the target shape lines up: any other shape but the composite is wrong.
             Err(Error::new(ErrorKind::WrongShape {
                 actual: Kind::Struct,
                 expected_id: format!("{:?}", type_id),
@@ -112,6 +112,8 @@ impl<T, R: TypeResolver> Visitor for WrapperKeepOpaqueVisitor<T, R> {
         _type_id: &R::TypeId,
     ) -> Result<Self::Value<'scale, 'info>, Self::Error> {
         use scale_decode::error::{Error, ErrorKind};
+
+        // TODO: When `scale-type-resolver` [provides struct names](https://github.com/paritytech/scale-type-resolver/issues/4), check that this struct name is `WrapperKeepOpaque`
 
         if value.remaining() != 2 {
             return Err(Error::new(ErrorKind::WrongLength {
