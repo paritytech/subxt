@@ -406,7 +406,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     Some(ev) => ev,
                 };
 
-                      let runtime_details = match runtime_event {
+                let runtime_details = match runtime_event {
                     RuntimeEvent::Invalid(err) => {
                         return std::future::ready(Some(Err(Error::Other(err.error))))
                     }

@@ -132,9 +132,9 @@ impl<T: Config> LightClient<T> {
         self.client.runtime_version()
     }
 
-    /// Return the inner client metadata.
-    fn client_metadata(&self) -> crate::client::ClientState<T> {
-        self.client.client_metadata()
+    /// Return the inner client state.
+    fn client_state(&self) -> crate::client::ClientState<T> {
+        self.client.client_state()
     }
 
     /// Work with transactions.
@@ -197,7 +197,7 @@ impl<T: Config> OfflineClientT<T> for LightClient<T> {
         self.runtime_version()
     }
 
-    fn client_metadata(&self) -> crate::client::ClientState<T> {
-        self.client_metadata()
+    fn client_state(&self) -> crate::client::ClientState<T> {
+        self.client_state()
     }
 }

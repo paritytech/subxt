@@ -125,10 +125,8 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         let call_data = self.call_data(call)?;
 
         // 3. Construct our custom additional/extra params.
-        let additional_and_extra_params = <T::ExtrinsicParams as ExtrinsicParams<T>>::new(
-            &self.client.client_metadata(),
-            params,
-        )?;
+        let additional_and_extra_params =
+            <T::ExtrinsicParams as ExtrinsicParams<T>>::new(&self.client.client_state(), params)?;
 
         // Return these details, ready to construct a signed extrinsic from.
         Ok(PartialExtrinsic {

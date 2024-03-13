@@ -351,7 +351,7 @@ mod test {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
 
-        fn client_metadata(&self) -> subxt_core::ClientState<SubstrateConfig> {
+        fn client_state(&self) -> subxt_core::ClientState<SubstrateConfig> {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
     }

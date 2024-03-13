@@ -80,7 +80,7 @@ impl<T: Config> OnlineClient<T> {
     }
 
     /// Returns a [`subxt_core::client::ClientState`] that serves as a least common denominator of what data a client should expose.
-    pub fn client_metadata(&self) -> ClientState<T> {
+    pub fn client_state(&self) -> ClientState<T> {
         let inner = self.inner.read().expect("shouldn't be poisoned");
         ClientState::new(
             inner.genesis_hash,
@@ -370,8 +370,8 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
         self.runtime_version()
     }
 
-    fn client_metadata(&self) -> ClientState<T> {
-        self.client_metadata()
+    fn client_state(&self) -> ClientState<T> {
+        self.client_state()
     }
 }
 
