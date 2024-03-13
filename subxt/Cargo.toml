@@ -66,15 +66,15 @@ unstable-light-client = ["subxt-lightclient", "tokio-stream"]
 [dependencies]
 async-trait = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
-scale-info = { workspace = true }
-scale-value = { workspace = true }
-scale-bits = { workspace = true }
-scale-decode = { workspace = true }
-scale-encode = { workspace = true }
+scale-info = { workspace = true, features = ["default"] }
+scale-value = { workspace = true, features = ["default"] }
+scale-bits = { workspace = true, features = ["default"] }
+scale-decode = { workspace = true, features = ["default"] }
+scale-encode = { workspace = true, features = ["default"] }
 futures = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true, features = ["raw_value"] }
+serde_json = { workspace = true, features = ["default", "raw_value"] }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
@@ -84,7 +84,7 @@ instant = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }
-primitive-types = { workspace = true }
+primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"] }
 sp-core-hashing = { workspace = true }
 
 # For ss58 encoding AccountId32 to serialize them properly:
@@ -100,7 +100,7 @@ sp-runtime = { workspace = true, optional = true }
 
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
-subxt-metadata = { workspace = true }
+subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 
 # Light client support:

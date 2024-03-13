@@ -7,8 +7,9 @@
 
 use crate::metadata::{DecodeWithMetadata, Metadata};
 use core::fmt::Debug;
-use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType};
-use std::borrow::Cow;
+use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, TypeResolver};
+
+use std::{borrow::Cow, marker::PhantomData};
 
 use super::{Error, MetadataError};
 
@@ -209,7 +210,7 @@ impl ModuleError {
     pub fn as_root_error<E: DecodeAsType>(&self) -> Result<E, Error> {
         let decoded = E::decode_as_type(
             &mut &self.bytes[..],
-            self.metadata.outer_enums().error_enum_ty(),
+            &self.metadata.outer_enums().error_enum_ty(),
             self.metadata.types(),
         )?;
 
@@ -262,24 +263,27 @@ impl DispatchError {
         // a legacy format of 2 bytes, or a newer format of 5 bytes. So, just grab the bytes
         // out when decoding to manually work with them.
         struct DecodedModuleErrorBytes(Vec<u8>);
-        struct DecodedModuleErrorBytesVisitor;
-        impl scale_decode::Visitor for DecodedModuleErrorBytesVisitor {
+        struct DecodedModuleErrorBytesVisitor<R: TypeResolver>(PhantomData<R>);
+        impl<R: TypeResolver> scale_decode::Visitor for DecodedModuleErrorBytesVisitor<R> {
             type Error = scale_decode::Error;
             type Value<'scale, 'info> = DecodedModuleErrorBytes;
+            type TypeResolver = R;
+
             fn unchecked_decode_as_type<'scale, 'info>(
                 self,
                 input: &mut &'scale [u8],
-                _type_id: scale_decode::visitor::TypeId,
-                _types: &'info scale_info::PortableRegistry,
+                _type_id: &R::TypeId,
+                _types: &'info R,
             ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'info>, Self::Error>>
             {
                 DecodeAsTypeResult::Decoded(Ok(DecodedModuleErrorBytes(input.to_vec())))
             }
         }
+
         impl scale_decode::IntoVisitor for DecodedModuleErrorBytes {
-            type Visitor = DecodedModuleErrorBytesVisitor;
-            fn into_visitor() -> Self::Visitor {
-                DecodedModuleErrorBytesVisitor
+            type AnyVisitor<R: TypeResolver> = DecodedModuleErrorBytesVisitor<R>;
+            fn into_visitor<R: TypeResolver>() -> DecodedModuleErrorBytesVisitor<R> {
+                DecodedModuleErrorBytesVisitor(PhantomData)
             }
         }
 

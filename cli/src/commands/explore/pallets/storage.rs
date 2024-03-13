@@ -169,7 +169,7 @@ pub async fn explore_storage(
             {value_str}
             "}?;
 
-            let key_bytes = value.encode_as_type(type_id, metadata.types())?;
+            let key_bytes = value.encode_as_type(&type_id, metadata.types())?;
             let bytes_composite = Value::from_bytes(key_bytes);
             vec![bytes_composite]
         }

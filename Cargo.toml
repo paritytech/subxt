@@ -57,6 +57,7 @@ base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
 clap = { version = "4.5.2", features = ["derive", "cargo"] }
+cfg-if = "1.0.0"
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.6.9", default-features = false }
 color-eyre = "0.6.1"
@@ -64,33 +65,33 @@ console_error_panic_hook = "0.1.7"
 darling = "0.20.8"
 derivative = "2.2.0"
 derive_more = "0.99.17"
-either = "1.10.0"
+either = { version = "1.10.0", default-features = false }
 frame-metadata = { version = "16.0.0", default-features = false }
 futures = { version = "0.3.30", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
 hashbrown = "0.14.3"
-hex = "0.4.3"
+hex = { version = "0.4.3", default-features = false }
 heck = "0.4.1"
-impl-serde = { version = "0.4.0" }
+impl-serde = { version = "0.4.0", default-features = false }
 indoc = "2"
 jsonrpsee = { version = "0.22" }
 pretty_assertions = "1.4.0"
-primitive-types = { version = "0.12.2", default-features = false, features = ["codec", "scale-info", "serde"] }
+primitive-types = { version = "0.12.2", default-features = false }
 proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.78"
 quote = "1.0.35"
-regex = "1.10.3"
+regex = { version = "1.10.3", default-features = false }
 scale-info = { version = "2.10.0", default-features = false }
-scale-value = "0.13.0"
-scale-bits = "0.4.0"
-scale-decode = "0.10.0"
-scale-encode = "0.5.0"
-serde = { version = "1.0.197" }
-serde_json = { version = "1.0.114" }
+scale-value = { version = "0.14.1", default-features = false }
+scale-bits = { version = "0.5.0", default-features = false }
+scale-decode = { version = "0.11.1", default-features = false }
+scale-encode = { version = "0.6.0", default-features = false }
+serde = { version = "1.0.197", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.114", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.57"
 tokio = { version = "1.36", default-features = false }
-tracing = "0.1.40"
+tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
 tracing-subscriber = "0.3.18"
 trybuild = "1.0.89"
@@ -98,8 +99,8 @@ url = "2.5.0"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "5.0.0"
-scale-typegen-description = "0.1.0"
-scale-typegen = "0.1.1"
+scale-typegen-description = "0.2.0"
+scale-typegen = "0.2.0"
 strip-ansi-escapes = "0.2.0"
 
 # Light client support:
@@ -129,21 +130,21 @@ sp-keyring = "31.0.0"
 # Subxt workspace crates:
 subxt = { version = "0.34.0", path = "subxt", default-features = false }
 subxt-macro = { version = "0.34.0", path = "macro" }
-subxt-metadata = { version = "0.34.0", path = "metadata" }
+subxt-metadata = { version = "0.34.0", path = "metadata", default-features = false }
 subxt-codegen = { version = "0.34.0", path = "codegen" }
-subxt-signer = { version = "0.34.0", path = "signer" }
+subxt-signer = { version = "0.34.0", path = "signer", default-features = false }
 subxt-lightclient = { version = "0.34.0", path = "lightclient", default-features = false }
 test-runtime = { path = "testing/test-runtime" }
 substrate-runner = { path = "testing/substrate-runner" }
 
 # subxt-signer deps that I expect aren't useful anywhere else:
-bip39 = "2.0.0"
-hmac = "0.12.1"
+bip39 = { version = "2.0.0", default-features = false }
+hmac = { version = "0.12.1", default-features = false }
 pbkdf2 = { version = "0.12.2", default-features = false }
-schnorrkel = "0.11.4"
-secp256k1 = "0.28.2"
+schnorrkel = { version = "0.11.4", default-features = false }
+secp256k1 = { version = "0.28.2", default-features = false }
 secrecy = "0.8.0"
-sha2 = "0.10.8"
+sha2 = { version = "0.10.8", default-features = false }
 zeroize = { version = "1", default-features = false }
 
 [profile.dev.package.smoldot-light]
