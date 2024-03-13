@@ -18,7 +18,7 @@ use crate::{
 use derivative::Derivative;
 use futures::future;
 use std::sync::{Arc, RwLock};
-use subxt_core::{ClientMetadata, RuntimeVersion};
+use subxt_core::{ClientState, RuntimeVersion};
 
 /// A trait representing a client that can perform
 /// online actions.
@@ -79,10 +79,10 @@ impl<T: Config> OnlineClient<T> {
         OnlineClient::from_backend(Arc::new(backend)).await
     }
 
-    /// Returns a [`subxt_core::client::ClientMetadata`] that serves as a least common denominator of what data a client should expose.
-    pub fn client_metadata(&self) -> ClientMetadata<T> {
+    /// Returns a [`subxt_core::client::ClientState`] that serves as a least common denominator of what data a client should expose.
+    pub fn client_metadata(&self) -> ClientState<T> {
         let inner = self.inner.read().expect("shouldn't be poisoned");
-        ClientMetadata::new(
+        ClientState::new(
             inner.genesis_hash,
             inner.runtime_version,
             inner.metadata.clone(),
@@ -370,7 +370,7 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
         self.runtime_version()
     }
 
-    fn client_metadata(&self) -> ClientMetadata<T> {
+    fn client_metadata(&self) -> ClientState<T> {
         self.client_metadata()
     }
 }

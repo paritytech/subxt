@@ -133,7 +133,7 @@ impl<T: Config> LightClient<T> {
     }
 
     /// Return the inner client metadata.
-    fn client_metadata(&self) -> crate::client::ClientMetadata<T> {
+    fn client_metadata(&self) -> crate::client::ClientState<T> {
         self.client.client_metadata()
     }
 
@@ -197,7 +197,7 @@ impl<T: Config> OfflineClientT<T> for LightClient<T> {
         self.runtime_version()
     }
 
-    fn client_metadata(&self) -> crate::client::ClientMetadata<T> {
+    fn client_metadata(&self) -> crate::client::ClientState<T> {
         self.client_metadata()
     }
 }

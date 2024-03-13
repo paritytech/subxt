@@ -10,7 +10,7 @@ use crate::{
 
 use derivative::Derivative;
 use std::sync::Arc;
-use subxt_core::client::{ClientMetadata, RuntimeVersion};
+use subxt_core::client::{ClientState, RuntimeVersion};
 
 /// A trait representing a client that can perform
 /// offline-only actions.
@@ -22,7 +22,7 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Return the provided [`RuntimeVersion`].
     fn runtime_version(&self) -> RuntimeVersion;
     /// Return the Client Metadata.
-    fn client_metadata(&self) -> ClientMetadata<T>;
+    fn client_metadata(&self) -> ClientState<T>;
 
     /// Work with transactions.
     fn tx(&self) -> TxClient<T, Self> {
@@ -65,7 +65,7 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
 pub struct OfflineClient<T: Config> {
-    inner: Arc<ClientMetadata<T>>,
+    inner: Arc<ClientState<T>>,
 }
 
 impl<T: Config> OfflineClient<T> {
@@ -77,7 +77,7 @@ impl<T: Config> OfflineClient<T> {
         metadata: impl Into<Metadata>,
     ) -> OfflineClient<T> {
         OfflineClient {
-            inner: Arc::new(ClientMetadata::new(
+            inner: Arc::new(ClientState::new(
                 genesis_hash,
                 runtime_version,
                 metadata.into(),
@@ -100,9 +100,9 @@ impl<T: Config> OfflineClient<T> {
         self.inner.metadata()
     }
 
-    /// Returns a [`subxt_core::client::ClientMetadata`] that serves as a least common denominator of what data a client should expose.
-    pub fn client_metadata(&self) -> ClientMetadata<T> {
-        ClientMetadata::new(
+    /// Returns a [`subxt_core::client::ClientState`] that serves as a least common denominator of what data a client should expose.
+    pub fn client_metadata(&self) -> ClientState<T> {
+        ClientState::new(
             self.inner.genesis_hash(),
             self.inner.runtime_version(),
             self.inner.metadata(),
@@ -148,7 +148,7 @@ impl<T: Config> OfflineClientT<T> for OfflineClient<T> {
     fn metadata(&self) -> Metadata {
         self.metadata()
     }
-    fn client_metadata(&self) -> ClientMetadata<T> {
+    fn client_metadata(&self) -> ClientState<T> {
         self.client_metadata()
     }
 }

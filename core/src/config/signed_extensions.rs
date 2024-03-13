@@ -11,7 +11,7 @@ use super::extrinsic_params::ExtrinsicParams;
 use super::refine_params::RefineParamsData;
 use super::RefineParams;
 use crate::utils::Era;
-use crate::{ClientMetadata, Config};
+use crate::{ClientState, Config};
 use crate::{ExtrinsicParamsEncoder, ExtrinsicParamsError};
 use alloc::borrow::ToOwned;
 use alloc::boxed::Box;
@@ -44,10 +44,7 @@ pub struct CheckSpecVersion(u32);
 impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
     type Params = ();
 
-    fn new(
-        client: &ClientMetadata<T>,
-        _params: Self::Params,
-    ) -> Result<Self, ExtrinsicParamsError> {
+    fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckSpecVersion(client.runtime_version().spec_version()))
     }
 }
@@ -71,10 +68,7 @@ pub struct CheckNonce(Compact<u64>);
 impl<T: Config> ExtrinsicParams<T> for CheckNonce {
     type Params = CheckNonceParams;
 
-    fn new(
-        _client: &ClientMetadata<T>,
-        params: Self::Params,
-    ) -> Result<Self, ExtrinsicParamsError> {
+    fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         // If no nonce is set (nor by user nor refinement), use a nonce of 0.
         let nonce = params.0.unwrap_or(0);
         Ok(CheckNonce(Compact(nonce)))
@@ -112,11 +106,10 @@ pub struct CheckTxVersion(u32);
 impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
     type Params = ();
 
-    fn new(
-        client: &ClientMetadata<T>,
-        _params: Self::Params,
-    ) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckTxVersion(client.runtime_version().transaction_version()))
+    fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+        Ok(CheckTxVersion(
+            client.runtime_version().transaction_version(),
+        ))
     }
 }
 
@@ -139,10 +132,7 @@ pub struct CheckGenesis<T: Config>(T::Hash);
 impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
     type Params = ();
 
-    fn new(
-        client: &ClientMetadata<T>,
-        _params: Self::Params,
-    ) -> Result<Self, ExtrinsicParamsError> {
+    fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckGenesis(client.genesis_hash()))
     }
 }
@@ -213,7 +203,7 @@ impl<T: Config> CheckMortalityParams<T> {
 impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
     type Params = CheckMortalityParams<T>;
 
-    fn new(client: &ClientMetadata<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+    fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         let check_mortality = if let Some(params) = params.0 {
             CheckMortality {
                 era: params.era,
@@ -308,10 +298,7 @@ impl<T: Config> ChargeAssetTxPaymentParams<T> {
 impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
     type Params = ChargeAssetTxPaymentParams<T>;
 
-    fn new(
-        _client: &ClientMetadata<T>,
-        params: Self::Params,
-    ) -> Result<Self, ExtrinsicParamsError> {
+    fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeAssetTxPayment {
             tip: Compact(params.tip),
             asset_id: params.asset_id,
@@ -367,10 +354,7 @@ impl ChargeTransactionPaymentParams {
 impl<T: Config> ExtrinsicParams<T> for ChargeTransactionPayment {
     type Params = ChargeTransactionPaymentParams;
 
-    fn new(
-        _client: &ClientMetadata<T>,
-        params: Self::Params,
-    ) -> Result<Self, ExtrinsicParamsError> {
+    fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(ChargeTransactionPayment {
             tip: Compact(params.tip),
         })
@@ -413,7 +397,7 @@ macro_rules! impl_tuples {
             type Params = ($($ident::Params,)+);
 
             fn new(
-                client: &ClientMetadata<T>,
+                client: &ClientState<T>,
                 params: Self::Params,
             ) -> Result<Self, ExtrinsicParamsError> {
                 let metadata = client.metadata();

@@ -23,7 +23,7 @@ pub mod storage;
 pub mod tx;
 pub mod utils;
 
-pub use client::{ClientMetadata, RuntimeVersion};
+pub use client::{ClientState, RuntimeVersion};
 pub use config::{
     BlockHash, Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header, PolkadotConfig,
     PolkadotExtrinsicParams, RefineParams, RefineParamsData, SubstrateConfig,

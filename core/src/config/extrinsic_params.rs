@@ -7,7 +7,7 @@
 //! [`crate::config::DefaultExtrinsicParams`] provides a general-purpose
 //! implementation of this that will work in many cases.
 
-use crate::{client::ClientMetadata, Config, ExtrinsicParamsError};
+use crate::{client::ClientState, Config, ExtrinsicParamsError};
 use alloc::vec::Vec;
 
 use super::refine_params::RefineParams;
@@ -21,7 +21,7 @@ pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + 'static {
     type Params: RefineParams<T>;
 
     /// Construct a new instance of our [`ExtrinsicParams`].
-    fn new(client: &ClientMetadata<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError>;
+    fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError>;
 }
 
 /// This trait is expected to be implemented for any [`ExtrinsicParams`], and
