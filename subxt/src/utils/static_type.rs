@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use codec::{Decode, Encode};
-use scale_decode::{visitor::DecodeAsTypeResult, IntoVisitor, Visitor};
+use scale_decode::{visitor::DecodeAsTypeResult, IntoVisitor, TypeResolver, Visitor};
 use scale_encode::EncodeAsType;
 
 /// If the type inside this implements [`Encode`], this will implement [`scale_encode::EncodeAsType`].
@@ -18,10 +18,10 @@ use scale_encode::EncodeAsType;
 pub struct Static<T>(pub T);
 
 impl<T: Encode> EncodeAsType for Static<T> {
-    fn encode_as_type_to(
+    fn encode_as_type_to<R: TypeResolver>(
         &self,
-        _type_id: u32,
-        _types: &scale_decode::PortableRegistry,
+        _type_id: &R::TypeId,
+        _types: &R,
         out: &mut Vec<u8>,
     ) -> Result<(), scale_encode::Error> {
         self.0.encode_to(out);
@@ -29,17 +29,18 @@ impl<T: Encode> EncodeAsType for Static<T> {
     }
 }
 
-pub struct StaticDecodeAsTypeVisitor<T>(std::marker::PhantomData<T>);
+pub struct StaticDecodeAsTypeVisitor<T, R>(std::marker::PhantomData<(T, R)>);
 
-impl<T: Decode> Visitor for StaticDecodeAsTypeVisitor<T> {
+impl<T: Decode, R: TypeResolver> Visitor for StaticDecodeAsTypeVisitor<T, R> {
     type Value<'scale, 'info> = Static<T>;
     type Error = scale_decode::Error;
+    type TypeResolver = R;
 
     fn unchecked_decode_as_type<'scale, 'info>(
         self,
         input: &mut &'scale [u8],
-        _type_id: scale_decode::visitor::TypeId,
-        _types: &'info scale_info::PortableRegistry,
+        _type_id: &R::TypeId,
+        _types: &'info R,
     ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'info>, Self::Error>> {
         use scale_decode::{visitor::DecodeError, Error};
         let decoded = T::decode(input)
@@ -50,8 +51,8 @@ impl<T: Decode> Visitor for StaticDecodeAsTypeVisitor<T> {
 }
 
 impl<T: Decode> IntoVisitor for Static<T> {
-    type Visitor = StaticDecodeAsTypeVisitor<T>;
-    fn into_visitor() -> Self::Visitor {
+    type AnyVisitor<R: TypeResolver> = StaticDecodeAsTypeVisitor<T, R>;
+    fn into_visitor<R: TypeResolver>() -> StaticDecodeAsTypeVisitor<T, R> {
         StaticDecodeAsTypeVisitor(std::marker::PhantomData)
     }
 }

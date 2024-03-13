@@ -21,7 +21,7 @@ impl<T: scale_decode::DecodeAsType> DecodeWithMetadata for T {
         type_id: u32,
         metadata: &Metadata,
     ) -> Result<T, Error> {
-        let val = T::decode_as_type(bytes, type_id, metadata.types())?;
+        let val = T::decode_as_type(bytes, &type_id, metadata.types())?;
         Ok(val)
     }
 }
@@ -45,7 +45,7 @@ impl<T: scale_encode::EncodeAsType> EncodeWithMetadata for T {
         metadata: &Metadata,
         bytes: &mut Vec<u8>,
     ) -> Result<(), Error> {
-        self.encode_as_type_to(type_id, metadata.types(), bytes)?;
+        self.encode_as_type_to(&type_id, metadata.types(), bytes)?;
         Ok(())
     }
 }

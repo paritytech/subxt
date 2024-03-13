@@ -18,7 +18,14 @@ members = [
 # We exclude any crates that would depend on non mutually
 # exclusive feature flags and thus can't compile with the
 # workspace:
-exclude = ["testing/no-std-tests", "testing/wasm-rpc-tests", "testing/wasm-lightclient-tests", "signer/wasm-tests", "examples/wasm-example", "examples/parachain-example"]
+exclude = [
+    "testing/no-std-tests",
+    "testing/wasm-rpc-tests",
+    "testing/wasm-lightclient-tests",
+    "signer/wasm-tests",
+    "examples/wasm-example",
+    "examples/parachain-example"
+]
 resolver = "2"
 
 [workspace.package]
@@ -81,10 +88,10 @@ proc-macro2 = "1.0.78"
 quote = "1.0.35"
 regex = "1.10.3"
 scale-info = { version = "2.10.0", default-features = false }
-scale-value = "0.13.0"
-scale-bits = "0.4.0"
-scale-decode = "0.10.0"
-scale-encode = "0.5.0"
+scale-value = "0.14.1"
+scale-bits = "0.5.0"
+scale-decode = "0.11.1"
+scale-encode = "0.6.0"
 serde = { version = "1.0.197" }
 serde_json = { version = "1.0.114" }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
@@ -98,8 +105,8 @@ url = "2.5.0"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "5.0.0"
-scale-typegen-description = "0.1.0"
-scale-typegen = "0.1.1"
+scale-typegen-description = "0.2.0"
+scale-typegen = "0.2.0"
 strip-ansi-escapes = "0.2.0"
 
 # Light client support:
