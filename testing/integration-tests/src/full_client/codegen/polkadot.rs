@@ -451,9 +451,10 @@ pub mod api {
                         "apply_extrinsic",
                         types::ApplyExtrinsic { extrinsic },
                         [
-                            72u8, 54u8, 139u8, 3u8, 118u8, 136u8, 65u8, 47u8, 6u8, 105u8, 125u8,
-                            223u8, 160u8, 29u8, 103u8, 74u8, 79u8, 149u8, 48u8, 90u8, 237u8, 2u8,
-                            97u8, 201u8, 123u8, 34u8, 167u8, 37u8, 187u8, 35u8, 176u8, 97u8,
+                            119u8, 150u8, 250u8, 167u8, 191u8, 251u8, 112u8, 205u8, 40u8, 18u8,
+                            97u8, 199u8, 147u8, 238u8, 199u8, 51u8, 241u8, 37u8, 192u8, 206u8,
+                            89u8, 168u8, 252u8, 234u8, 129u8, 58u8, 61u8, 52u8, 92u8, 41u8, 226u8,
+                            14u8,
                         ],
                     )
                 }
@@ -639,9 +640,9 @@ pub mod api {
                             block_hash,
                         },
                         [
-                            196u8, 50u8, 90u8, 49u8, 109u8, 251u8, 200u8, 35u8, 23u8, 150u8, 140u8,
-                            143u8, 232u8, 164u8, 133u8, 89u8, 32u8, 240u8, 115u8, 39u8, 95u8, 70u8,
-                            162u8, 76u8, 122u8, 73u8, 151u8, 144u8, 234u8, 120u8, 100u8, 29u8,
+                            235u8, 222u8, 8u8, 154u8, 179u8, 166u8, 234u8, 29u8, 236u8, 33u8, 31u8,
+                            143u8, 137u8, 187u8, 5u8, 34u8, 217u8, 75u8, 237u8, 190u8, 236u8, 76u8,
+                            243u8, 16u8, 163u8, 25u8, 99u8, 34u8, 72u8, 228u8, 150u8, 173u8,
                         ],
                     )
                 }
@@ -3439,13 +3440,13 @@ pub mod api {
         pub mod genesis_builder {
             use super::root_mod;
             use super::runtime_types;
-            #[doc = " API to interact with GenesisConfig for the runtime"]
+            #[doc = " API to interact with RuntimeGenesisConfig for the runtime"]
             pub struct GenesisBuilder;
             impl GenesisBuilder {
-                #[doc = " Creates the default `GenesisConfig` and returns it as a JSON blob."]
+                #[doc = " Creates the default `RuntimeGenesisConfig` and returns it as a JSON blob."]
                 #[doc = ""]
-                #[doc = " This function instantiates the default `GenesisConfig` struct for the runtime and serializes it into a JSON"]
-                #[doc = " blob. It returns a `Vec<u8>` containing the JSON representation of the default `GenesisConfig`."]
+                #[doc = " This function instantiates the default `RuntimeGenesisConfig` struct for the runtime and serializes it into a JSON"]
+                #[doc = " blob. It returns a `Vec<u8>` containing the JSON representation of the default `RuntimeGenesisConfig`."]
                 pub fn create_default_config(
                     &self,
                 ) -> ::subxt::runtime_api::Payload<
@@ -3463,13 +3464,13 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Build `GenesisConfig` from a JSON blob not using any defaults and store it in the storage."]
+                #[doc = " Build `RuntimeGenesisConfig` from a JSON blob not using any defaults and store it in the storage."]
                 #[doc = ""]
-                #[doc = " This function deserializes the full `GenesisConfig` from the given JSON blob and puts it into the storage."]
+                #[doc = " This function deserializes the full `RuntimeGenesisConfig` from the given JSON blob and puts it into the storage."]
                 #[doc = " If the provided JSON blob is incorrect or incomplete or the deserialization fails, an error is returned."]
                 #[doc = " It is recommended to log any errors encountered during the process."]
                 #[doc = ""]
-                #[doc = " Please note that provided json blob must contain all `GenesisConfig` fields, no defaults will be used."]
+                #[doc = " Please note that provided json blob must contain all `RuntimeGenesisConfig` fields, no defaults will be used."]
                 pub fn build_config(
                     &self,
                     json: types::build_config::Json,
@@ -4008,9 +4009,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                156u8, 238u8, 89u8, 253u8, 131u8, 142u8, 74u8, 227u8, 39u8, 8u8, 168u8, 223u8,
-                105u8, 129u8, 225u8, 253u8, 181u8, 1u8, 91u8, 107u8, 103u8, 177u8, 147u8, 165u8,
-                10u8, 219u8, 72u8, 215u8, 120u8, 62u8, 229u8, 179u8,
+                207u8, 245u8, 15u8, 185u8, 222u8, 184u8, 8u8, 57u8, 116u8, 4u8, 188u8, 174u8, 89u8,
+                125u8, 183u8, 99u8, 96u8, 209u8, 149u8, 19u8, 90u8, 184u8, 164u8, 245u8, 65u8,
+                86u8, 244u8, 191u8, 30u8, 101u8, 221u8, 209u8,
             ]
     }
     pub mod system {
@@ -15766,7 +15767,7 @@ pub mod api {
                 #[doc = "Attest to a statement, needed to finalize the claims process."]
                 #[doc = ""]
                 #[doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a"]
-                #[doc = "`SignedExtension`."]
+                #[doc = "`TransactionExtension`."]
                 #[doc = ""]
                 #[doc = "Unsigned Validation:"]
                 #[doc = "A call to attest is deemed valid if the sender has a `Preclaim` registered"]
@@ -15954,7 +15955,7 @@ pub mod api {
                 #[doc = "Attest to a statement, needed to finalize the claims process."]
                 #[doc = ""]
                 #[doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a"]
-                #[doc = "`SignedExtension`."]
+                #[doc = "`TransactionExtension`."]
                 #[doc = ""]
                 #[doc = "Unsigned Validation:"]
                 #[doc = "A call to attest is deemed valid if the sender has a `Preclaim` registered"]
@@ -57896,7 +57897,7 @@ pub mod api {
                         #[doc = "Attest to a statement, needed to finalize the claims process."]
                         #[doc = ""]
                         #[doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a"]
-                        #[doc = "`SignedExtension`."]
+                        #[doc = "`TransactionExtension`."]
                         #[doc = ""]
                         #[doc = "Unsigned Validation:"]
                         #[doc = "A call to attest is deemed valid if the sender has a `Preclaim` registered"]
@@ -62162,6 +62163,8 @@ pub mod api {
                     MandatoryValidation,
                     #[codec(index = 10)]
                     BadSigner,
+                    #[codec(index = 11)]
+                    IndeterminateImplicit,
                 }
                 #[derive(
                     :: subxt :: ext :: codec :: Decode,
