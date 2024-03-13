@@ -16,7 +16,7 @@ keywords = ["parity", "subxt", "extrinsic", "signer"]
 
 [features]
 default = ["sr25519", "ecdsa", "subxt", "std", "native"]
-std = []
+std = ["regex/std", "sp-core-hashing/std", "pbkdf2/std", "sha2/std", "hmac/std", "bip39/std", "schnorrkel/std", "secp256k1/std", "sp-core/std"]
 
 # Pick the signer implementation(s) you need by enabling the
 # corresponding features. Note: I had more difficulties getting
@@ -35,20 +35,20 @@ web = ["getrandom/js", "subxt?/web"]
 native = ["subxt?/native"]
 
 [dependencies]
-subxt = { workspace = true, optional = true, default-features = false }
-regex = { workspace = true, default-features = false }
+subxt = { workspace = true, optional = true }
+regex = { workspace = true }
 hex = { workspace = true }
 cfg-if = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
-sp-core-hashing = { workspace = true, default-features = false }
+sp-core-hashing = { workspace = true }
 derive_more = { workspace = true }
-pbkdf2 = { workspace = true, default-features = false }
-sha2 = { workspace = true, default-features = false }
-hmac = { workspace = true, default-features = false }
+pbkdf2 = { workspace = true }
+sha2 = { workspace = true }
+hmac = { workspace = true }
 zeroize = { workspace = true }
-bip39 = { workspace = true, default-features = false }
-schnorrkel = { workspace = true, optional = true, default-features = false }
-secp256k1 = { workspace = true, optional = true, default-features = false, features = ["alloc", "recovery"] }
+bip39 = { workspace = true }
+schnorrkel = { workspace = true, optional = true }
+secp256k1 = { workspace = true, optional = true, features = ["alloc", "recovery"] }
 secrecy = { workspace = true }
 
 
@@ -56,7 +56,7 @@ secrecy = { workspace = true }
 getrandom = { workspace = true, optional = true }
 
 [dev-dependencies]
-sp-core = { workspace = true, default-features = false }
+sp-core = { workspace = true }
 sp-keyring = { workspace = true }
 
 [package.metadata.cargo-machete]

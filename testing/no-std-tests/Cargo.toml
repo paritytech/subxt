@@ -7,7 +7,7 @@ resolver = "2"
 
 [dependencies]
 subxt-metadata = { path = "../../metadata", default-features = false }
-subxt-signer = { path = "../../signer", default-features = false, features = ["sr25519"] }
+subxt-signer = { path = "../../signer", default-features = false, features = ["sr25519"] }                     # Note: feature "ecdsa" does not compile to `no-std` right now
 codec = { package = "parity-scale-codec", version = "3.6.9", default-features = false, features = ["derive"] }
 libc_alloc = { version = "1.0.6" }
 

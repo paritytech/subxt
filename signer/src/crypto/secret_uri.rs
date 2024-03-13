@@ -124,7 +124,7 @@ pub enum SecretUriError {
     InvalidFormat,
 }
 
-once_static! {
+once_static_cloned! {
     /// Interpret a phrase like:
     ///
     /// ```text
