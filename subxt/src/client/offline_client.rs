@@ -87,25 +87,25 @@ impl<T: Config> OfflineClient<T> {
 
     /// Return the genesis hash.
     pub fn genesis_hash(&self) -> T::Hash {
-        self.inner.genesis_hash
+        self.inner.genesis_hash()
     }
 
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
-        self.inner.runtime_version
+        self.inner.runtime_version()
     }
 
     /// Return the [`Metadata`] used in this client.
     pub fn metadata(&self) -> Metadata {
-        self.inner.metadata.clone()
+        self.inner.metadata()
     }
 
     /// Returns a [`subxt_core::client::ClientMetadata`] that serves as a least common denominator of what data a client should expose.
     pub fn client_metadata(&self) -> ClientMetadata<T> {
         ClientMetadata::new(
-            self.inner.genesis_hash,
-            self.inner.runtime_version,
-            self.inner.metadata.clone(),
+            self.inner.genesis_hash(),
+            self.inner.runtime_version(),
+            self.inner.metadata(),
         )
     }
 

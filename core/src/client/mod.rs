@@ -6,13 +6,12 @@ use crate::{config::Config, metadata::Metadata};
 /// - runtime version
 /// - genesis hash
 /// - metadata
-
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
 pub struct ClientMetadata<C: Config> {
-    pub genesis_hash: C::Hash,
-    pub runtime_version: RuntimeVersion,
-    pub metadata: Metadata,
+    genesis_hash: C::Hash,
+    runtime_version: RuntimeVersion,
+    metadata: Metadata,
 }
 
 impl<C: Config> ClientMetadata<C> {
@@ -40,10 +39,24 @@ impl<C: Config> ClientMetadata<C> {
 /// Runtime version information needed to submit transactions.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RuntimeVersion {
+    spec_version: u32,
+    transaction_version: u32,
+}
+
+
+impl RuntimeVersion{
+
+    pub fn new( spec_version: u32,
+        transaction_version: u32,) -> Self{
+            RuntimeVersion{spec_version,  transaction_version }
+        }
+
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
     /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    pub spec_version: u32,
+    pub fn spec_version(&self) -> u32{
+        self.spec_version
+    }
 
     /// All existing dispatches are fully compatible when this number doesn't change. If this
     /// number changes, then `spec_version` must change, also.
@@ -54,5 +67,7 @@ pub struct RuntimeVersion {
     /// dispatchable/module changing its index.
     ///
     /// It need *not* change when a new module is added or when a dispatchable is added.
-    pub transaction_version: u32,
+    pub fn transaction_version(&self) -> u32{
+        self.transaction_version
+    }
 }

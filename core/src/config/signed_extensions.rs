@@ -48,7 +48,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
         client: &ClientMetadata<T>,
         _params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckSpecVersion(client.runtime_version().spec_version))
+        Ok(CheckSpecVersion(client.runtime_version().spec_version()))
     }
 }
 
@@ -116,7 +116,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
         client: &ClientMetadata<T>,
         _params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckTxVersion(client.runtime_version().transaction_version))
+        Ok(CheckTxVersion(client.runtime_version().transaction_version()))
     }
 }
 

@@ -236,7 +236,7 @@ impl<T: Config> OnlineClient<T> {
     ///     let mut update_stream = updater.runtime_updates().await.unwrap();
     ///
     ///     while let Some(Ok(update)) = update_stream.next().await {
-    ///         let version = update.runtime_version().spec_version;
+    ///         let version = update.runtime_version().spec_version();
     ///
     ///         match updater.apply_update(update) {
     ///             Ok(()) => {
@@ -549,7 +549,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
 
         // We are waiting for the chain to have the same spec version
         // as sent out via the runtime subscription.
-        if spec_version == runtime_version.spec_version {
+        if spec_version == runtime_version.spec_version() {
             break block_ref;
         }
     };

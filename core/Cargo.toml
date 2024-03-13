@@ -11,20 +11,26 @@ readme = "README.md"
 repository.workspace = true
 documentation.workspace = true
 homepage.workspace = true
-description = "Sign extrinsics to be submitted by Subxt"
+description = "A no-std compatible subset of Subxt's functionality"
 keywords = ["parity", "subxt", "extrinsic", "no-std"]
 
 [features]
-default = ["std"]                                                                                                                                                # "std"
+default = ["std"]
 std = [
-    "scale-info/std", 
-    "scale-value/std", 
-    "scale-bits/std", 
-    "scale-decode/std", 
-    "scale-encode/std", 
-    "frame-metadata/std", 
-    "subxt-metadata/std", 
-    "tracing/std"
+    "codec/std",
+    "scale-info/std",
+    "scale-value/std",
+    "scale-bits/std",
+    "scale-decode/std",
+    "scale-encode/std",
+    "frame-metadata/std",
+    "subxt-metadata/std",
+    "hex/std",
+    "serde/std",
+    "serde_json/std",
+    "tracing/std",
+    "impl-serde/std",
+    "primitive-types/std",
 ]
 substrate-compat = ["sp-core", "sp-runtime"]
 
