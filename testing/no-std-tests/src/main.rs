@@ -42,6 +42,9 @@ fn compile_test() {
     const METADATA: &[u8] = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
     subxt_metadata::Metadata::decode(&mut &METADATA[..]).expect("should be valid metadata");
 
+    // Subxt Signer compiles:
+    let _alice = subxt_signer::sr25519::dev::alice();
+
     // Subxt Core compiles:
     let _era = subxt_core::utils::Era::Immortal;
 }
