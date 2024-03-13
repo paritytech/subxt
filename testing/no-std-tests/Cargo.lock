@@ -694,7 +694,6 @@ dependencies = [
  "blake2",
  "derivative",
  "derive_more",
- "either",
  "frame-metadata 16.0.0",
  "hashbrown",
  "hex",

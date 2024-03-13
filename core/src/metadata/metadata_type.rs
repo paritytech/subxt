@@ -74,7 +74,8 @@ impl codec::Decode for Metadata {
     }
 }
 
-pub trait MetadatExt {
+/// Some extension methods on [`subxt_metadata::Metadata`] that return Errors instead of Options.
+pub trait MetadataExt {
     fn pallet_by_name_err(
         &self,
         name: &str,
@@ -96,7 +97,7 @@ pub trait MetadatExt {
     ) -> Result<subxt_metadata::CustomValueMetadata, MetadataError>;
 }
 
-impl MetadatExt for subxt_metadata::Metadata {
+impl MetadataExt for subxt_metadata::Metadata {
     /// Identical to `metadata.pallet_by_name()`, but returns an error if the pallet is not found.
     fn pallet_by_name_err(
         &self,

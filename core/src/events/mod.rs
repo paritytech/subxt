@@ -148,12 +148,12 @@ impl<T: Config> EventDetails<T> {
 
     /// The name of the pallet from whence the Event originated.
     pub fn pallet_name(&self) -> &str {
-        self.event_metadata().pallet.name()
+        self.event_metadata().pallet().name()
     }
 
     /// The name of the event (ie the name of the variant that it corresponds to).
     pub fn variant_name(&self) -> &str {
-        &self.event_metadata().variant.name
+        &self.event_metadata().variant().name
     }
 
     /// Fetch details from the metadata for this event.
@@ -242,6 +242,15 @@ impl<T: Config> EventDetails<T> {
 
 /// Details for the given event plucked from the metadata.
 pub struct EventMetadataDetails<'a> {
-    pub pallet: PalletMetadata<'a>,
-    pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
+    pallet: PalletMetadata<'a>,
+    variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
+}
+
+impl<'a> EventMetadataDetails<'a> {
+    pub fn pallet(&self) -> PalletMetadata<'a> {
+        self.pallet
+    }
+    pub fn variant(&self) -> &'a scale_info::Variant<scale_info::form::PortableForm> {
+        self.variant
+    }
 }

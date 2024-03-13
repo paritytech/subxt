@@ -6,7 +6,7 @@
 //! aren't things that should ever be overridden, and so don't exist on
 //! the trait itself.
 
-use crate::metadata::{DecodeWithMetadata, MetadatExt};
+use crate::metadata::{DecodeWithMetadata, MetadataExt};
 use crate::MetadataError;
 use alloc::vec::Vec;
 use subxt_metadata::PalletMetadata;

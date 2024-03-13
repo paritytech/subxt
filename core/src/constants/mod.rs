@@ -11,7 +11,7 @@ pub use constant_address::{dynamic, Address, ConstantAddress, DynamicAddress};
 use alloc::borrow::ToOwned;
 
 use crate::{
-    metadata::{DecodeWithMetadata, MetadatExt},
+    metadata::{DecodeWithMetadata, MetadataExt},
     Error, Metadata, MetadataError,
 };
 

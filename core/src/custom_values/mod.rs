@@ -10,7 +10,7 @@ use crate::Yes;
 pub use custom_value_address::{CustomValueAddress, StaticAddress};
 
 use crate::{
-    metadata::{DecodeWithMetadata, MetadatExt},
+    metadata::{DecodeWithMetadata, MetadataExt},
     Error, Metadata, MetadataError,
 };
 use alloc::vec::Vec;
