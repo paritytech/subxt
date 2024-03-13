@@ -221,6 +221,9 @@ pub enum Error {
     Hex(hex::FromHexError),
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
+
 /// Dev accounts, helpful for testing but not to be used in production,
 /// since the secret keys are known.
 pub mod dev {
