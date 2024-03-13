@@ -18,7 +18,14 @@ members = [
 # We exclude any crates that would depend on non mutually
 # exclusive feature flags and thus can't compile with the
 # workspace:
-exclude = ["testing/no-std-tests", "testing/wasm-rpc-tests", "testing/wasm-lightclient-tests", "signer/wasm-tests", "examples/wasm-example", "examples/parachain-example"]
+exclude = [
+    "testing/no-std-tests",
+    "testing/wasm-rpc-tests",
+    "testing/wasm-lightclient-tests",
+    "signer/wasm-tests",
+    "examples/wasm-example",
+    "examples/parachain-example"
+]
 resolver = "2"
 
 [workspace.package]
