@@ -134,13 +134,13 @@ subxt-signer = { path = "../signer" }
 tracing-subscriber = { workspace = true }
 
 [[example]]
-name = "light_client_tx_basic"
-path = "examples/light_client_tx_basic.rs"
+name = "light_client_basic"
+path = "examples/light_client_basic.rs"
 required-features = ["unstable-light-client", "jsonrpsee"]
 
 [[example]]
-name = "light_client_parachains"
-path = "examples/light_client_parachains.rs"
+name = "light_client_local_node"
+path = "examples/light_client_local_node.rs"
 required-features = ["unstable-light-client", "jsonrpsee", "native"]
 
 [[example]]
