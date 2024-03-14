@@ -4,7 +4,11 @@
 
 //! An sr25519 keypair implementation.
 
+use core::str::FromStr;
+
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
+
+use derive_more::{Display, From};
 use hex::FromHex;
 use schnorrkel::{
     derive::{ChainCode, Derivation},
@@ -72,7 +76,7 @@ impl Keypair {
             let seed = Seed::from_hex(hex_str)?;
             Self::from_seed(seed)?
         } else {
-            let phrase = bip39::Mnemonic::parse(phrase.expose_secret().as_str())?;
+            let phrase = bip39::Mnemonic::from_str(phrase.expose_secret().as_str())?;
             let pass_str = password.as_ref().map(|p| p.expose_secret().as_str());
             Self::from_phrase(&phrase, pass_str)?
         };
@@ -95,8 +99,9 @@ impl Keypair {
     /// keypair.sign(b"Hello world!");
     /// ```
     pub fn from_phrase(mnemonic: &bip39::Mnemonic, password: Option<&str>) -> Result<Self, Error> {
-        let big_seed = seed_from_entropy(&mnemonic.to_entropy(), password.unwrap_or(""))
-            .ok_or(Error::InvalidSeed)?;
+        let (arr, len) = mnemonic.to_entropy_array();
+        let big_seed =
+            seed_from_entropy(&arr[0..len], password.unwrap_or("")).ok_or(Error::InvalidSeed)?;
 
         let seed: Seed = big_seed[..SEED_LENGTH]
             .try_into()
@@ -187,24 +192,28 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Display, From)]
 pub enum Error {
     /// Invalid seed.
-    #[error("Invalid seed (was it the wrong length?)")]
+    #[display(fmt = "Invalid seed (was it the wrong length?)")]
+    #[from(ignore)]
     InvalidSeed,
     /// Invalid phrase.
-    #[error("Cannot parse phrase: {0}")]
-    Phrase(#[from] bip39::Error),
+    #[display(fmt = "Cannot parse phrase: {_0}")]
+    Phrase(bip39::Error),
     /// Invalid hex.
-    #[error("Cannot parse hex string: {0}")]
-    Hex(#[from] hex::FromHexError),
+    #[display(fmt = "Cannot parse hex string: {_0}")]
+    Hex(hex::FromHexError),
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
 
 /// Dev accounts, helpful for testing but not to be used in production,
 /// since the secret keys are known.
 pub mod dev {
     use super::*;
-    use std::str::FromStr;
+    use core::str::FromStr;
 
     once_static_cloned! {
         /// Equivalent to `{DEV_PHRASE}//Alice`.
