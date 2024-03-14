@@ -121,10 +121,7 @@ mod tests {
     fn test_decoding() {
         let client = OfflineClient::<SubstrateConfig>::new(
             Default::default(),
-            RuntimeVersion {
-                spec_version: 0,
-                transaction_version: 0,
-            },
+            RuntimeVersion::new(0, 0),
             mock_metadata(),
         );
         let custom_value_client = CustomValuesClient::new(client);

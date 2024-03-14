@@ -903,10 +903,7 @@ mod tests {
     /// Build an offline client to work with the test metadata.
     fn client(metadata: Metadata) -> OfflineClient<PolkadotConfig> {
         // Create the encoded extrinsic bytes.
-        let rt_version = RuntimeVersion {
-            spec_version: 1,
-            transaction_version: 4,
-        };
+        let rt_version = RuntimeVersion::new(1, 4);
         let block_hash = H256::random();
         OfflineClient::new(block_hash, rt_version, metadata)
     }
