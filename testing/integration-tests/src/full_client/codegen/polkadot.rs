@@ -4778,8 +4778,8 @@ pub mod api {
                     (),
                     types::account::Account,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "System",
@@ -4799,8 +4799,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::account::Param0>,
                     types::account::Account,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -4820,7 +4820,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::extrinsic_count::ExtrinsicCount,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -4842,8 +4842,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::inherents_applied::InherentsApplied,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -4863,8 +4863,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::block_weight::BlockWeight,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -4884,7 +4884,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::all_extrinsics_len::AllExtrinsicsLen,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -4907,8 +4907,8 @@ pub mod api {
                     (),
                     types::block_hash::BlockHash,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "System",
@@ -4929,8 +4929,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::block_hash::Param0>,
                     types::block_hash::BlockHash,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -4952,8 +4952,8 @@ pub mod api {
                     (),
                     types::extrinsic_data::ExtrinsicData,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "System",
@@ -4973,8 +4973,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::extrinsic_data::Param0>,
                     types::extrinsic_data::ExtrinsicData,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -4994,8 +4994,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::number::Number,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5015,8 +5015,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::parent_hash::ParentHash,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5036,8 +5036,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::digest::Digest,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5063,8 +5063,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::events::Events,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5085,8 +5085,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::event_count::EventCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5117,8 +5117,8 @@ pub mod api {
                     (),
                     types::event_topics::EventTopics,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "System",
@@ -5147,8 +5147,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::event_topics::Param0>,
                     types::event_topics::EventTopics,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5168,7 +5168,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::last_runtime_upgrade::LastRuntimeUpgrade,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -5189,8 +5189,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::upgraded_to_u32_ref_count::UpgradedToU32RefCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5211,8 +5211,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::upgraded_to_triple_ref_count::UpgradedToTripleRefCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5233,7 +5233,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::execution_phase::ExecutionPhase,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -5254,7 +5254,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::authorized_upgrade::AuthorizedUpgrade,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -5660,8 +5660,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::epoch_index::EpochIndex,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5682,8 +5682,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::authorities::Authorities,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5705,8 +5705,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::genesis_slot::GenesisSlot,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5727,8 +5727,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::current_slot::CurrentSlot,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5758,8 +5758,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::randomness::Randomness,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5780,7 +5780,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::pending_epoch_config_change::PendingEpochConfigChange,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -5801,8 +5801,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::next_randomness::NextRandomness,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5822,8 +5822,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::next_authorities::NextAuthorities,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5852,8 +5852,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::segment_index::SegmentIndex,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5875,8 +5875,8 @@ pub mod api {
                     (),
                     types::under_construction::UnderConstruction,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Babe",
@@ -5896,8 +5896,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::under_construction::Param0>,
                     types::under_construction::UnderConstruction,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5918,7 +5918,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::initialized::Initialized,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -5943,8 +5943,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::author_vrf_randomness::AuthorVrfRandomness,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5969,8 +5969,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::epoch_start::EpochStart,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -5995,8 +5995,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::lateness::Lateness,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -6018,7 +6018,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::epoch_config::EpochConfig,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -6041,7 +6041,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::next_epoch_config::NextEpochConfig,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -6070,8 +6070,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::skipped_epochs::SkippedEpochs,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -6269,8 +6269,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::now::Now,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -6293,8 +6293,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::did_update::DidUpdate,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -6767,7 +6767,7 @@ pub mod api {
                     types::accounts::Accounts,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Indices",
@@ -6788,7 +6788,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::accounts::Param0>,
                     types::accounts::Accounts,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -7868,8 +7868,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::total_issuance::TotalIssuance,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -7890,8 +7890,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::inactive_issuance::InactiveIssuance,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -7935,8 +7935,8 @@ pub mod api {
                     (),
                     types::account::Account,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Balances",
@@ -7979,8 +7979,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::account::Param0>,
                     types::account::Account,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8002,8 +8002,8 @@ pub mod api {
                     (),
                     types::locks::Locks,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Balances",
@@ -8024,8 +8024,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::locks::Param0>,
                     types::locks::Locks,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8046,8 +8046,8 @@ pub mod api {
                     (),
                     types::reserves::Reserves,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Balances",
@@ -8067,8 +8067,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::reserves::Param0>,
                     types::reserves::Reserves,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8089,8 +8089,8 @@ pub mod api {
                     (),
                     types::holds::Holds,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Balances",
@@ -8111,8 +8111,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::holds::Param0>,
                     types::holds::Holds,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8134,8 +8134,8 @@ pub mod api {
                     (),
                     types::freezes::Freezes,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Balances",
@@ -8155,8 +8155,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::freezes::Param0>,
                     types::freezes::Freezes,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8296,8 +8296,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::next_fee_multiplier::NextFeeMultiplier,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8317,8 +8317,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::storage_version::StorageVersion,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8397,7 +8397,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::author::Author,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -8479,7 +8479,7 @@ pub mod api {
                     types::reports::Reports,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Offences",
@@ -8500,7 +8500,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::reports::Param0>,
                     types::reports::Reports,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -8523,8 +8523,8 @@ pub mod api {
                     (),
                     types::concurrent_reports_index::ConcurrentReportsIndex,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Offences",
@@ -8548,8 +8548,8 @@ pub mod api {
                     >,
                     types::concurrent_reports_index::ConcurrentReportsIndex,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Offences",
@@ -8578,8 +8578,8 @@ pub mod api {
                         >,
                     ),
                     types::concurrent_reports_index::ConcurrentReportsIndex,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8627,7 +8627,7 @@ pub mod api {
                     types::historical_sessions::HistoricalSessions,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Historical",
@@ -8648,7 +8648,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::historical_sessions::Param0>,
                     types::historical_sessions::HistoricalSessions,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -8670,7 +8670,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::stored_range::StoredRange,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -8891,8 +8891,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::validators::Validators,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8913,8 +8913,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::current_index::CurrentIndex,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8936,8 +8936,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::queued_changed::QueuedChanged,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8959,8 +8959,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::queued_keys::QueuedKeys,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -8985,8 +8985,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::disabled_validators::DisabledValidators,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -9008,7 +9008,7 @@ pub mod api {
                     types::next_keys::NextKeys,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Session",
@@ -9029,7 +9029,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::next_keys::Param0>,
                     types::next_keys::NextKeys,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -9053,7 +9053,7 @@ pub mod api {
                     types::key_owner::KeyOwner,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Session",
@@ -9076,7 +9076,7 @@ pub mod api {
                     types::key_owner::KeyOwner,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Session",
@@ -9101,7 +9101,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::key_owner::Param1>,
                     ),
                     types::key_owner::KeyOwner,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -9437,8 +9437,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::state::State,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -9458,7 +9458,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::pending_change::PendingChange,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -9480,7 +9480,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::next_forced::NextForced,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -9501,7 +9501,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::stalled::Stalled,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -9523,8 +9523,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::current_set_id::CurrentSetId,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -9556,7 +9556,7 @@ pub mod api {
                     types::set_id_session::SetIdSession,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Grandpa",
@@ -9585,7 +9585,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::set_id_session::Param0>,
                     types::set_id_session::SetIdSession,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -9606,8 +9606,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::authorities::Authorities,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -9711,8 +9711,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::keys::Keys,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -9733,8 +9733,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::next_keys::NextKeys,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -10851,8 +10851,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::proposal_count::ProposalCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -10874,7 +10874,7 @@ pub mod api {
                     types::proposals::Proposals,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Treasury",
@@ -10895,7 +10895,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::proposals::Param0>,
                     types::proposals::Proposals,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -10917,8 +10917,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::deactivated::Deactivated,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -10939,8 +10939,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::approvals::Approvals,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -10960,8 +10960,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::spend_count::SpendCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -10984,7 +10984,7 @@ pub mod api {
                     types::spends::Spends,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Treasury",
@@ -11005,7 +11005,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::spends::Param0>,
                     types::spends::Spends,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -11703,8 +11703,8 @@ pub mod api {
                     (),
                     types::voting_for::VotingFor,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ConvictionVoting",
@@ -11726,8 +11726,8 @@ pub mod api {
                     ::subxt::storage::address::StaticStorageKey<types::voting_for::Param0>,
                     types::voting_for::VotingFor,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ConvictionVoting",
@@ -11752,8 +11752,8 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::voting_for::Param1>,
                     ),
                     types::voting_for::VotingFor,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -11779,8 +11779,8 @@ pub mod api {
                     (),
                     types::class_locks_for::ClassLocksFor,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ConvictionVoting",
@@ -11802,8 +11802,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::class_locks_for::Param0>,
                     types::class_locks_for::ClassLocksFor,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -12810,8 +12810,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::referendum_count::ReferendumCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -12834,7 +12834,7 @@ pub mod api {
                     types::referendum_info_for::ReferendumInfoFor,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Referenda",
@@ -12855,7 +12855,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::referendum_info_for::Param0>,
                     types::referendum_info_for::ReferendumInfoFor,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -12881,8 +12881,8 @@ pub mod api {
                     (),
                     types::track_queue::TrackQueue,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Referenda",
@@ -12905,8 +12905,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::track_queue::Param0>,
                     types::track_queue::TrackQueue,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -12927,8 +12927,8 @@ pub mod api {
                     (),
                     types::deciding_count::DecidingCount,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Referenda",
@@ -12949,8 +12949,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::deciding_count::Param0>,
                     types::deciding_count::DecidingCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -12978,7 +12978,7 @@ pub mod api {
                     types::metadata_of::MetadataOf,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Referenda",
@@ -13004,7 +13004,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::metadata_of::Param0>,
                     types::metadata_of::MetadataOf,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -13682,8 +13682,8 @@ pub mod api {
                     (),
                     types::member_count::MemberCount,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
@@ -13704,8 +13704,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::member_count::Param0>,
                     types::member_count::MemberCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -13727,7 +13727,7 @@ pub mod api {
                     types::members::Members,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
@@ -13748,7 +13748,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::members::Param0>,
                     types::members::Members,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -13772,7 +13772,7 @@ pub mod api {
                     types::id_to_index::IdToIndex,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
@@ -13794,7 +13794,7 @@ pub mod api {
                     types::id_to_index::IdToIndex,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
@@ -13818,7 +13818,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::id_to_index::Param1>,
                     ),
                     types::id_to_index::IdToIndex,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -13845,7 +13845,7 @@ pub mod api {
                     types::index_to_id::IndexToId,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
@@ -13869,7 +13869,7 @@ pub mod api {
                     types::index_to_id::IndexToId,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
@@ -13895,7 +13895,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::index_to_id::Param1>,
                     ),
                     types::index_to_id::IndexToId,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -13922,7 +13922,7 @@ pub mod api {
                     types::voting::Voting,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
@@ -13945,7 +13945,7 @@ pub mod api {
                     types::voting::Voting,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
@@ -13970,7 +13970,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::voting::Param1>,
                     ),
                     types::voting::Voting,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -13996,7 +13996,7 @@ pub mod api {
                     types::voting_cleanup::VotingCleanup,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipCollective",
@@ -14015,7 +14015,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::voting_cleanup::Param0>,
                     types::voting_cleanup::VotingCleanup,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -14975,8 +14975,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::referendum_count::ReferendumCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -14999,7 +14999,7 @@ pub mod api {
                     types::referendum_info_for::ReferendumInfoFor,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipReferenda",
@@ -15020,7 +15020,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::referendum_info_for::Param0>,
                     types::referendum_info_for::ReferendumInfoFor,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -15046,8 +15046,8 @@ pub mod api {
                     (),
                     types::track_queue::TrackQueue,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipReferenda",
@@ -15071,8 +15071,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::track_queue::Param0>,
                     types::track_queue::TrackQueue,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -15094,8 +15094,8 @@ pub mod api {
                     (),
                     types::deciding_count::DecidingCount,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipReferenda",
@@ -15116,8 +15116,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::deciding_count::Param0>,
                     types::deciding_count::DecidingCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -15145,7 +15145,7 @@ pub mod api {
                     types::metadata_of::MetadataOf,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "FellowshipReferenda",
@@ -15171,7 +15171,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::metadata_of::Param0>,
                     types::metadata_of::MetadataOf,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -15555,7 +15555,7 @@ pub mod api {
                     types::whitelisted_call::WhitelistedCall,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Whitelist",
@@ -15574,7 +15574,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::whitelisted_call::Param0>,
                     types::whitelisted_call::WhitelistedCall,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -16090,7 +16090,7 @@ pub mod api {
                     types::claims::Claims,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Claims",
@@ -16110,7 +16110,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::claims::Param0>,
                     types::claims::Claims,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -16131,8 +16131,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::total::Total,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -16158,7 +16158,7 @@ pub mod api {
                     types::vesting::Vesting,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Claims",
@@ -16182,7 +16182,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::vesting::Param0>,
                     types::vesting::Vesting,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -16206,7 +16206,7 @@ pub mod api {
                     types::signing::Signing,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Claims",
@@ -16226,7 +16226,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::signing::Param0>,
                     types::signing::Signing,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -16249,7 +16249,7 @@ pub mod api {
                     types::preclaims::Preclaims,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Claims",
@@ -16270,7 +16270,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::preclaims::Param0>,
                     types::preclaims::Preclaims,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -18555,7 +18555,7 @@ pub mod api {
                     types::identity_of::IdentityOf,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
@@ -18578,7 +18578,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::identity_of::Param0>,
                     types::identity_of::IdentityOf,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -18602,7 +18602,7 @@ pub mod api {
                     types::super_of::SuperOf,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
@@ -18623,7 +18623,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::super_of::Param0>,
                     types::super_of::SuperOf,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -18649,8 +18649,8 @@ pub mod api {
                     (),
                     types::subs_of::SubsOf,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
@@ -18675,8 +18675,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::subs_of::Param0>,
                     types::subs_of::SubsOf,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -18700,8 +18700,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::registrars::Registrars,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -18724,7 +18724,7 @@ pub mod api {
                     types::username_authorities::UsernameAuthorities,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
@@ -18746,7 +18746,7 @@ pub mod api {
                         types::username_authorities::Param0,
                     >,
                     types::username_authorities::UsernameAuthorities,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -18773,7 +18773,7 @@ pub mod api {
                     types::account_of_username::AccountOfUsername,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
@@ -18798,7 +18798,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::account_of_username::Param0>,
                     types::account_of_username::AccountOfUsername,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -18827,7 +18827,7 @@ pub mod api {
                     types::pending_usernames::PendingUsernames,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Identity",
@@ -18853,7 +18853,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::pending_usernames::Param0>,
                     types::pending_usernames::PendingUsernames,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -20548,7 +20548,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::parameters::Parameters,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -20570,8 +20570,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::pot::Pot,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -20591,7 +20591,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::founder::Founder,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -20612,7 +20612,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::head::Head,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -20634,7 +20634,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::rules::Rules,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -20658,7 +20658,7 @@ pub mod api {
                     types::members::Members,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
@@ -20678,7 +20678,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::members::Param0>,
                     types::members::Members,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -20700,8 +20700,8 @@ pub mod api {
                     (),
                     types::payouts::Payouts,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
@@ -20721,8 +20721,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::payouts::Param0>,
                     types::payouts::Payouts,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -20742,8 +20742,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::member_count::MemberCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -20767,7 +20767,7 @@ pub mod api {
                     types::member_by_index::MemberByIndex,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
@@ -20789,7 +20789,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::member_by_index::Param0>,
                     types::member_by_index::MemberByIndex,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -20813,7 +20813,7 @@ pub mod api {
                     types::suspended_members::SuspendedMembers,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
@@ -20834,7 +20834,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::suspended_members::Param0>,
                     types::suspended_members::SuspendedMembers,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -20856,8 +20856,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::round_count::RoundCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -20878,8 +20878,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::bids::Bids,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -20900,7 +20900,7 @@ pub mod api {
                     types::candidates::Candidates,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
@@ -20919,7 +20919,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::candidates::Param0>,
                     types::candidates::Candidates,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -20940,7 +20940,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::skeptic::Skeptic,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -20964,7 +20964,7 @@ pub mod api {
                     types::votes::Votes,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
@@ -20987,7 +20987,7 @@ pub mod api {
                     types::votes::Votes,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
@@ -21012,7 +21012,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::votes::Param1>,
                     ),
                     types::votes::Votes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -21039,7 +21039,7 @@ pub mod api {
                     types::vote_clear_cursor::VoteClearCursor,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
@@ -21060,7 +21060,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::vote_clear_cursor::Param0>,
                     types::vote_clear_cursor::VoteClearCursor,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -21084,7 +21084,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::next_head::NextHead,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -21105,8 +21105,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::challenge_round_count::ChallengeRoundCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -21126,7 +21126,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::defending::Defending,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -21149,7 +21149,7 @@ pub mod api {
                     types::defender_votes::DefenderVotes,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
@@ -21172,7 +21172,7 @@ pub mod api {
                     types::defender_votes::DefenderVotes,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Society",
@@ -21197,7 +21197,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::defender_votes::Param1>,
                     ),
                     types::defender_votes::DefenderVotes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -22092,7 +22092,7 @@ pub mod api {
                     types::recoverable::Recoverable,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Recovery",
@@ -22112,7 +22112,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::recoverable::Param0>,
                     types::recoverable::Recoverable,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -22138,7 +22138,7 @@ pub mod api {
                     types::active_recoveries::ActiveRecoveries,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Recovery",
@@ -22164,7 +22164,7 @@ pub mod api {
                     types::active_recoveries::ActiveRecoveries,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Recovery",
@@ -22196,7 +22196,7 @@ pub mod api {
                         >,
                     ),
                     types::active_recoveries::ActiveRecoveries,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -22225,7 +22225,7 @@ pub mod api {
                     types::proxy::Proxy,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Recovery",
@@ -22247,7 +22247,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::proxy::Param0>,
                     types::proxy::Proxy,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -22831,7 +22831,7 @@ pub mod api {
                     types::vesting::Vesting,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Vesting",
@@ -22852,7 +22852,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::vesting::Param0>,
                     types::vesting::Vesting,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -22876,8 +22876,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::storage_version::StorageVersion,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -23742,7 +23742,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::incomplete_since::IncompleteSince,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -23764,8 +23764,8 @@ pub mod api {
                     (),
                     types::agenda::Agenda,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Scheduler",
@@ -23785,8 +23785,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::agenda::Param0>,
                     types::agenda::Agenda,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -23808,7 +23808,7 @@ pub mod api {
                     types::retries::Retries,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Scheduler",
@@ -23831,7 +23831,7 @@ pub mod api {
                     types::retries::Retries,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Scheduler",
@@ -23856,7 +23856,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::retries::Param1>,
                     ),
                     types::retries::Retries,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -23886,7 +23886,7 @@ pub mod api {
                     types::lookup::Lookup,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Scheduler",
@@ -23909,7 +23909,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::lookup::Param0>,
                     types::lookup::Lookup,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -24838,8 +24838,8 @@ pub mod api {
                     (),
                     types::proxies::Proxies,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Proxy",
@@ -24860,8 +24860,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::proxies::Param0>,
                     types::proxies::Proxies,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -24882,8 +24882,8 @@ pub mod api {
                     (),
                     types::announcements::Announcements,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Proxy",
@@ -24904,8 +24904,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::announcements::Param0>,
                     types::announcements::Announcements,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -25599,7 +25599,7 @@ pub mod api {
                     types::multisigs::Multisigs,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Multisig",
@@ -25621,7 +25621,7 @@ pub mod api {
                     types::multisigs::Multisigs,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Multisig",
@@ -25645,7 +25645,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::multisigs::Param1>,
                     ),
                     types::multisigs::Multisigs,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -26072,7 +26072,7 @@ pub mod api {
                     types::status_for::StatusFor,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Preimage",
@@ -26093,7 +26093,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::status_for::Param0>,
                     types::status_for::StatusFor,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -26117,7 +26117,7 @@ pub mod api {
                     types::request_status_for::RequestStatusFor,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Preimage",
@@ -26137,7 +26137,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::request_status_for::Param0>,
                     types::request_status_for::RequestStatusFor,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -26159,7 +26159,7 @@ pub mod api {
                     types::preimage_for::PreimageFor,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Preimage",
@@ -26181,7 +26181,7 @@ pub mod api {
                     types::preimage_for::PreimageFor,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Preimage",
@@ -26205,7 +26205,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::preimage_for::Param1>,
                     ),
                     types::preimage_for::PreimageFor,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -26496,7 +26496,7 @@ pub mod api {
                     types::conversion_rate_to_native::ConversionRateToNative,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "AssetRate",
@@ -26521,7 +26521,7 @@ pub mod api {
                         types::conversion_rate_to_native::Param0,
                     >,
                     types::conversion_rate_to_native::ConversionRateToNative,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -27391,8 +27391,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::bounty_count::BountyCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -27415,7 +27415,7 @@ pub mod api {
                     types::bounties::Bounties,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Bounties",
@@ -27436,7 +27436,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::bounties::Param0>,
                     types::bounties::Bounties,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -27460,7 +27460,7 @@ pub mod api {
                     types::bounty_descriptions::BountyDescriptions,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Bounties",
@@ -27480,7 +27480,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::bounty_descriptions::Param0>,
                     types::bounty_descriptions::BountyDescriptions,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -27501,8 +27501,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::bounty_approvals::BountyApprovals,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -28448,8 +28448,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::child_bounty_count::ChildBountyCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -28471,8 +28471,8 @@ pub mod api {
                     (),
                     types::parent_child_bounties::ParentChildBounties,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ChildBounties",
@@ -28495,8 +28495,8 @@ pub mod api {
                         types::parent_child_bounties::Param0,
                     >,
                     types::parent_child_bounties::ParentChildBounties,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -28518,7 +28518,7 @@ pub mod api {
                     types::child_bounties::ChildBounties,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ChildBounties",
@@ -28541,7 +28541,7 @@ pub mod api {
                     types::child_bounties::ChildBounties,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ChildBounties",
@@ -28566,7 +28566,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::child_bounties::Param1>,
                     ),
                     types::child_bounties::ChildBounties,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -28593,7 +28593,7 @@ pub mod api {
                     types::child_bounty_descriptions::ChildBountyDescriptions,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ChildBounties",
@@ -28615,7 +28615,7 @@ pub mod api {
                         types::child_bounty_descriptions::Param0,
                     >,
                     types::child_bounty_descriptions::ChildBountyDescriptions,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -28637,8 +28637,8 @@ pub mod api {
                     (),
                     types::children_curator_fees::ChildrenCuratorFees,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ChildBounties",
@@ -28660,8 +28660,8 @@ pub mod api {
                         types::children_curator_fees::Param0,
                     >,
                     types::children_curator_fees::ChildrenCuratorFees,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -29315,8 +29315,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::queue_totals::QueueTotals,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -29337,8 +29337,8 @@ pub mod api {
                     (),
                     types::queues::Queues,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Nis",
@@ -29359,8 +29359,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::queues::Param0>,
                     types::queues::Queues,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -29381,8 +29381,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::summary::Summary,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -29405,7 +29405,7 @@ pub mod api {
                     types::receipts::Receipts,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Nis",
@@ -29425,7 +29425,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::receipts::Param0>,
                     types::receipts::Receipts,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -30654,8 +30654,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::total_issuance::TotalIssuance,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -30676,8 +30676,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::inactive_issuance::InactiveIssuance,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -30721,8 +30721,8 @@ pub mod api {
                     (),
                     types::account::Account,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "NisCounterpartBalances",
@@ -30765,8 +30765,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::account::Param0>,
                     types::account::Account,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -30788,8 +30788,8 @@ pub mod api {
                     (),
                     types::locks::Locks,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "NisCounterpartBalances",
@@ -30810,8 +30810,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::locks::Param0>,
                     types::locks::Locks,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -30832,8 +30832,8 @@ pub mod api {
                     (),
                     types::reserves::Reserves,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "NisCounterpartBalances",
@@ -30853,8 +30853,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::reserves::Param0>,
                     types::reserves::Reserves,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -30875,8 +30875,8 @@ pub mod api {
                     (),
                     types::holds::Holds,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "NisCounterpartBalances",
@@ -30897,8 +30897,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::holds::Param0>,
                     types::holds::Holds,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -30920,8 +30920,8 @@ pub mod api {
                     (),
                     types::freezes::Freezes,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "NisCounterpartBalances",
@@ -30941,8 +30941,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::freezes::Param0>,
                     types::freezes::Freezes,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -32955,8 +32955,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::active_config::ActiveConfig,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -32983,8 +32983,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::pending_configs::PendingConfigs,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -33005,8 +33005,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::bypass_consistency_check::BypassConsistencyCheck,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -33071,8 +33071,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::current_session_index::CurrentSessionIndex,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -33094,8 +33094,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::active_validator_indices::ActiveValidatorIndices,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -33116,8 +33116,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::active_validator_keys::ActiveValidatorKeys,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -33138,8 +33138,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::allowed_relay_parents::AllowedRelayParents,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -33324,7 +33324,7 @@ pub mod api {
                     types::availability_bitfields::AvailabilityBitfields,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParaInclusion",
@@ -33346,7 +33346,7 @@ pub mod api {
                         types::availability_bitfields::Param0,
                     >,
                     types::availability_bitfields::AvailabilityBitfields,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -33369,7 +33369,7 @@ pub mod api {
                     types::pending_availability::PendingAvailability,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParaInclusion",
@@ -33391,7 +33391,7 @@ pub mod api {
                         types::pending_availability::Param0,
                     >,
                     types::pending_availability::PendingAvailability,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -33414,7 +33414,7 @@ pub mod api {
                     types::pending_availability_commitments::PendingAvailabilityCommitments,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParaInclusion",
@@ -33436,7 +33436,7 @@ pub mod api {
                         types::pending_availability_commitments::Param0,
                     >,
                     types::pending_availability_commitments::PendingAvailabilityCommitments,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -33542,7 +33542,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::included::Included,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -33563,7 +33563,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::on_chain_votes::OnChainVotes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -33626,8 +33626,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::validator_groups::ValidatorGroups,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -33654,8 +33654,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::availability_cores::AvailabilityCores,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -33682,8 +33682,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::session_start_block::SessionStartBlock,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -33705,8 +33705,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::claim_queue::ClaimQueue,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -34486,7 +34486,7 @@ pub mod api {
                     types::pvf_active_vote_map::PvfActiveVoteMap,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -34509,7 +34509,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::pvf_active_vote_map::Param0>,
                     types::pvf_active_vote_map::PvfActiveVoteMap,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -34530,8 +34530,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::pvf_active_vote_list::PvfActiveVoteList,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -34554,8 +34554,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::parachains::Parachains,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -34578,7 +34578,7 @@ pub mod api {
                     types::para_lifecycles::ParaLifecycles,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -34599,7 +34599,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::para_lifecycles::Param0>,
                     types::para_lifecycles::ParaLifecycles,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -34623,7 +34623,7 @@ pub mod api {
                     types::heads::Heads,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -34643,7 +34643,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::heads::Param0>,
                     types::heads::Heads,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -34666,7 +34666,7 @@ pub mod api {
                     types::most_recent_context::MostRecentContext,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -34686,7 +34686,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::most_recent_context::Param0>,
                     types::most_recent_context::MostRecentContext,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -34711,7 +34711,7 @@ pub mod api {
                     types::current_code_hash::CurrentCodeHash,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -34734,7 +34734,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::current_code_hash::Param0>,
                     types::current_code_hash::CurrentCodeHash,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -34761,7 +34761,7 @@ pub mod api {
                     types::past_code_hash::PastCodeHash,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -34786,7 +34786,7 @@ pub mod api {
                     types::past_code_hash::PastCodeHash,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -34813,7 +34813,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::past_code_hash::Param1>,
                     ),
                     types::past_code_hash::PastCodeHash,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -34840,8 +34840,8 @@ pub mod api {
                     (),
                     types::past_code_meta::PastCodeMeta,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -34863,8 +34863,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::past_code_meta::Param0>,
                     types::past_code_meta::PastCodeMeta,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -34889,8 +34889,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::past_code_pruning::PastCodePruning,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -34914,7 +34914,7 @@ pub mod api {
                     types::future_code_upgrades::FutureCodeUpgrades,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -34938,7 +34938,7 @@ pub mod api {
                         types::future_code_upgrades::Param0,
                     >,
                     types::future_code_upgrades::FutureCodeUpgrades,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -34963,7 +34963,7 @@ pub mod api {
                     types::future_code_hash::FutureCodeHash,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -34985,7 +34985,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::future_code_hash::Param0>,
                     types::future_code_hash::FutureCodeHash,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -35017,7 +35017,7 @@ pub mod api {
                     types::upgrade_go_ahead_signal::UpgradeGoAheadSignal,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -35049,7 +35049,7 @@ pub mod api {
                         types::upgrade_go_ahead_signal::Param0,
                     >,
                     types::upgrade_go_ahead_signal::UpgradeGoAheadSignal,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -35081,7 +35081,7 @@ pub mod api {
                     types::upgrade_restriction_signal::UpgradeRestrictionSignal,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -35112,7 +35112,7 @@ pub mod api {
                         types::upgrade_restriction_signal::Param0,
                     >,
                     types::upgrade_restriction_signal::UpgradeRestrictionSignal,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -35136,8 +35136,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::upgrade_cooldowns::UpgradeCooldowns,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -35161,8 +35161,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::upcoming_upgrades::UpcomingUpgrades,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -35183,8 +35183,8 @@ pub mod api {
                     (),
                     types::actions_queue::ActionsQueue,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -35204,8 +35204,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::actions_queue::Param0>,
                     types::actions_queue::ActionsQueue,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -35230,7 +35230,7 @@ pub mod api {
                     types::upcoming_paras_genesis::UpcomingParasGenesis,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -35256,7 +35256,7 @@ pub mod api {
                         types::upcoming_paras_genesis::Param0,
                     >,
                     types::upcoming_paras_genesis::UpcomingParasGenesis,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -35279,8 +35279,8 @@ pub mod api {
                     (),
                     types::code_by_hash_refs::CodeByHashRefs,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -35301,8 +35301,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::code_by_hash_refs::Param0>,
                     types::code_by_hash_refs::CodeByHashRefs,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -35328,7 +35328,7 @@ pub mod api {
                     types::code_by_hash::CodeByHash,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Paras",
@@ -35351,7 +35351,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::code_by_hash::Param0>,
                     types::code_by_hash::CodeByHash,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -35476,7 +35476,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::has_initialized::HasInitialized,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -35503,8 +35503,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::buffered_session_changes::BufferedSessionChanges,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -35558,8 +35558,8 @@ pub mod api {
                     (),
                     types::downward_message_queues::DownwardMessageQueues,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Dmp",
@@ -35582,8 +35582,8 @@ pub mod api {
                         types::downward_message_queues::Param0,
                     >,
                     types::downward_message_queues::DownwardMessageQueues,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -35611,8 +35611,8 @@ pub mod api {
                     (),
                     types::downward_message_queue_heads::DownwardMessageQueueHeads,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Dmp",
@@ -35640,8 +35640,8 @@ pub mod api {
                         types::downward_message_queue_heads::Param0,
                     >,
                     types::downward_message_queue_heads::DownwardMessageQueueHeads,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -35662,8 +35662,8 @@ pub mod api {
                     (),
                     types::delivery_fee_factor::DeliveryFeeFactor,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Dmp",
@@ -35683,8 +35683,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::delivery_fee_factor::Param0>,
                     types::delivery_fee_factor::DeliveryFeeFactor,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -36577,7 +36577,7 @@ pub mod api {
                     types::hrmp_open_channel_requests::HrmpOpenChannelRequests,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
@@ -36605,7 +36605,7 @@ pub mod api {
                         types::hrmp_open_channel_requests::Param0,
                     >,
                     types::hrmp_open_channel_requests::HrmpOpenChannelRequests,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -36626,8 +36626,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::hrmp_open_channel_requests_list::HrmpOpenChannelRequestsList,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -36651,8 +36651,8 @@ pub mod api {
                     (),
                     types::hrmp_open_channel_request_count::HrmpOpenChannelRequestCount,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
@@ -36677,8 +36677,8 @@ pub mod api {
                         types::hrmp_open_channel_request_count::Param0,
                     >,
                     types::hrmp_open_channel_request_count::HrmpOpenChannelRequestCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -36702,8 +36702,8 @@ pub mod api {
                     (),
                     types::hrmp_accepted_channel_request_count::HrmpAcceptedChannelRequestCount,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
@@ -36728,8 +36728,8 @@ pub mod api {
                         types::hrmp_accepted_channel_request_count::Param0,
                     >,
                     types::hrmp_accepted_channel_request_count::HrmpAcceptedChannelRequestCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -36758,7 +36758,7 @@ pub mod api {
                     types::hrmp_close_channel_requests::HrmpCloseChannelRequests,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
@@ -36787,7 +36787,7 @@ pub mod api {
                         types::hrmp_close_channel_requests::Param0,
                     >,
                     types::hrmp_close_channel_requests::HrmpCloseChannelRequests,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -36808,8 +36808,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::hrmp_close_channel_requests_list::HrmpCloseChannelRequestsList,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -36834,7 +36834,7 @@ pub mod api {
                     types::hrmp_watermarks::HrmpWatermarks,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
@@ -36857,7 +36857,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::hrmp_watermarks::Param0>,
                     types::hrmp_watermarks::HrmpWatermarks,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -36882,7 +36882,7 @@ pub mod api {
                     types::hrmp_channels::HrmpChannels,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
@@ -36905,7 +36905,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::hrmp_channels::Param0>,
                     types::hrmp_channels::HrmpChannels,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -36940,8 +36940,8 @@ pub mod api {
                     (),
                     types::hrmp_ingress_channels_index::HrmpIngressChannelsIndex,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
@@ -36976,8 +36976,8 @@ pub mod api {
                         types::hrmp_ingress_channels_index::Param0,
                     >,
                     types::hrmp_ingress_channels_index::HrmpIngressChannelsIndex,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -36998,8 +36998,8 @@ pub mod api {
                     (),
                     types::hrmp_egress_channels_index::HrmpEgressChannelsIndex,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
@@ -37020,8 +37020,8 @@ pub mod api {
                         types::hrmp_egress_channels_index::Param0,
                     >,
                     types::hrmp_egress_channels_index::HrmpEgressChannelsIndex,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -37043,8 +37043,8 @@ pub mod api {
                     (),
                     types::hrmp_channel_contents::HrmpChannelContents,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
@@ -37068,8 +37068,8 @@ pub mod api {
                         types::hrmp_channel_contents::Param0,
                     >,
                     types::hrmp_channel_contents::HrmpChannelContents,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -37096,8 +37096,8 @@ pub mod api {
                     (),
                     types::hrmp_channel_digests::HrmpChannelDigests,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Hrmp",
@@ -37124,8 +37124,8 @@ pub mod api {
                         types::hrmp_channel_digests::Param0,
                     >,
                     types::hrmp_channel_digests::HrmpChannelDigests,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -37186,8 +37186,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::assignment_keys_unsafe::AssignmentKeysUnsafe,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -37207,8 +37207,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::earliest_stored_session::EarliestStoredSession,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -37232,7 +37232,7 @@ pub mod api {
                     types::sessions::Sessions,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParaSessionInfo",
@@ -37255,7 +37255,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::sessions::Param0>,
                     types::sessions::Sessions,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -37279,7 +37279,7 @@ pub mod api {
                     types::account_keys::AccountKeys,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParaSessionInfo",
@@ -37300,7 +37300,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::account_keys::Param0>,
                     types::account_keys::AccountKeys,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -37324,7 +37324,7 @@ pub mod api {
                     types::session_executor_params::SessionExecutorParams,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParaSessionInfo",
@@ -37346,7 +37346,7 @@ pub mod api {
                         types::session_executor_params::Param0,
                     >,
                     types::session_executor_params::SessionExecutorParams,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -37531,7 +37531,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::last_pruned_session::LastPrunedSession,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -37555,7 +37555,7 @@ pub mod api {
                     types::disputes::Disputes,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParasDisputes",
@@ -37578,7 +37578,7 @@ pub mod api {
                     types::disputes::Disputes,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParasDisputes",
@@ -37603,7 +37603,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::disputes::Param1>,
                     ),
                     types::disputes::Disputes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -37631,7 +37631,7 @@ pub mod api {
                     types::backers_on_disputes::BackersOnDisputes,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParasDisputes",
@@ -37655,7 +37655,7 @@ pub mod api {
                     types::backers_on_disputes::BackersOnDisputes,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParasDisputes",
@@ -37685,7 +37685,7 @@ pub mod api {
                         >,
                     ),
                     types::backers_on_disputes::BackersOnDisputes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -37713,7 +37713,7 @@ pub mod api {
                     types::included::Included,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParasDisputes",
@@ -37737,7 +37737,7 @@ pub mod api {
                     types::included::Included,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParasDisputes",
@@ -37763,7 +37763,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::included::Param1>,
                     ),
                     types::included::Included,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -37791,8 +37791,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::frozen::Frozen,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -37901,7 +37901,7 @@ pub mod api {
                     types::unapplied_slashes::UnappliedSlashes,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParasSlashing",
@@ -37924,7 +37924,7 @@ pub mod api {
                     types::unapplied_slashes::UnappliedSlashes,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParasSlashing",
@@ -37953,7 +37953,7 @@ pub mod api {
                         >,
                     ),
                     types::unapplied_slashes::UnappliedSlashes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -37980,7 +37980,7 @@ pub mod api {
                     types::validator_set_counts::ValidatorSetCounts,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "ParasSlashing",
@@ -38002,7 +38002,7 @@ pub mod api {
                         types::validator_set_counts::Param0,
                     >,
                     types::validator_set_counts::ValidatorSetCounts,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -38305,8 +38305,8 @@ pub mod api {
                     (),
                     types::book_state_for::BookStateFor,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "MessageQueue",
@@ -38327,8 +38327,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::book_state_for::Param0>,
                     types::book_state_for::BookStateFor,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -38349,7 +38349,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::service_head::ServiceHead,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -38373,7 +38373,7 @@ pub mod api {
                     types::pages::Pages,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "MessageQueue",
@@ -38396,7 +38396,7 @@ pub mod api {
                     types::pages::Pages,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "MessageQueue",
@@ -38421,7 +38421,7 @@ pub mod api {
                         ::subxt::storage::address::StaticStorageKey<types::pages::Param1>,
                     ),
                     types::pages::Pages,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -38749,8 +38749,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::spot_traffic::SpotTraffic,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -38771,8 +38771,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::on_demand_queue::OnDemandQueue,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -38797,7 +38797,7 @@ pub mod api {
                     types::para_id_affinity::ParaIdAffinity,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "OnDemandAssignmentProvider",
@@ -38819,7 +38819,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::para_id_affinity::ParaIdAffinity,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -38897,7 +38897,7 @@ pub mod api {
                     types::core_schedules::CoreSchedules,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "CoretimeAssignmentProvider",
@@ -38922,7 +38922,7 @@ pub mod api {
                     types::core_schedules::CoreSchedules,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "CoretimeAssignmentProvider",
@@ -38946,7 +38946,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ((), ()),
                     types::core_schedules::CoreSchedules,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -38971,8 +38971,8 @@ pub mod api {
                     (),
                     types::core_descriptors::CoreDescriptors,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "CoretimeAssignmentProvider",
@@ -38995,8 +38995,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::core_descriptors::CoreDescriptors,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -39675,7 +39675,7 @@ pub mod api {
                     types::pending_swap::PendingSwap,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Registrar",
@@ -39696,7 +39696,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::pending_swap::Param0>,
                     types::pending_swap::PendingSwap,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -39723,7 +39723,7 @@ pub mod api {
                     types::paras::Paras,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Registrar",
@@ -39746,7 +39746,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::paras::Param0>,
                     types::paras::Paras,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -39767,8 +39767,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::next_free_para_id::NextFreeParaId,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -40092,8 +40092,8 @@ pub mod api {
                     (),
                     types::leases::Leases,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Slots",
@@ -40129,8 +40129,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::leases::Param0>,
                     types::leases::Leases,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -40600,8 +40600,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::auction_counter::AuctionCounter,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -40625,7 +40625,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::auction_info::AuctionInfo,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -40649,7 +40649,7 @@ pub mod api {
                     types::reserved_amounts::ReservedAmounts,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Auctions",
@@ -40673,7 +40673,7 @@ pub mod api {
                     types::reserved_amounts::ReservedAmounts,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Auctions",
@@ -40703,7 +40703,7 @@ pub mod api {
                         >,
                     ),
                     types::reserved_amounts::ReservedAmounts,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -40732,7 +40732,7 @@ pub mod api {
                     types::winning::Winning,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Auctions",
@@ -40754,7 +40754,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::winning::Param0>,
                     types::winning::Winning,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -41626,7 +41626,7 @@ pub mod api {
                     types::funds::Funds,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Crowdloan",
@@ -41647,7 +41647,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::funds::Param0>,
                     types::funds::Funds,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -41670,8 +41670,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::new_raise::NewRaise,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -41692,8 +41692,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::endings_count::EndingsCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -41713,8 +41713,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::next_fund_index::NextFundIndex,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -43654,8 +43654,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::query_counter::QueryCounter,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -43678,7 +43678,7 @@ pub mod api {
                     types::queries::Queries,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -43699,7 +43699,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::queries::Param0>,
                     types::queries::Queries,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -43725,8 +43725,8 @@ pub mod api {
                     (),
                     types::asset_traps::AssetTraps,
                     (),
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -43749,8 +43749,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::asset_traps::Param0>,
                     types::asset_traps::AssetTraps,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -43771,7 +43771,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::safe_xcm_version::SafeXcmVersion,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -43795,7 +43795,7 @@ pub mod api {
                     types::supported_version::SupportedVersion,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -43818,7 +43818,7 @@ pub mod api {
                     types::supported_version::SupportedVersion,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -43847,7 +43847,7 @@ pub mod api {
                         >,
                     ),
                     types::supported_version::SupportedVersion,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -43874,7 +43874,7 @@ pub mod api {
                     types::version_notifiers::VersionNotifiers,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -43897,7 +43897,7 @@ pub mod api {
                     types::version_notifiers::VersionNotifiers,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -43926,7 +43926,7 @@ pub mod api {
                         >,
                     ),
                     types::version_notifiers::VersionNotifiers,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -43954,7 +43954,7 @@ pub mod api {
                     types::version_notify_targets::VersionNotifyTargets,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -43979,7 +43979,7 @@ pub mod api {
                     types::version_notify_targets::VersionNotifyTargets,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -44008,7 +44008,7 @@ pub mod api {
                         >,
                     ),
                     types::version_notify_targets::VersionNotifyTargets,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -44034,8 +44034,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::version_discovery_queue::VersionDiscoveryQueue,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -44056,7 +44056,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::current_migration::CurrentMigration,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -44079,7 +44079,7 @@ pub mod api {
                     types::remote_locked_fungibles::RemoteLockedFungibles,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -44104,7 +44104,7 @@ pub mod api {
                     types::remote_locked_fungibles::RemoteLockedFungibles,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -44135,7 +44135,7 @@ pub mod api {
                     types::remote_locked_fungibles::RemoteLockedFungibles,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -44171,7 +44171,7 @@ pub mod api {
                         >,
                     ),
                     types::remote_locked_fungibles::RemoteLockedFungibles,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -44199,7 +44199,7 @@ pub mod api {
                     types::locked_fungibles::LockedFungibles,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "XcmPallet",
@@ -44219,7 +44219,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::locked_fungibles::Param0>,
                     types::locked_fungibles::LockedFungibles,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -44240,8 +44240,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::xcm_execution_suspended::XcmExecutionSuspended,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -44484,8 +44484,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::authorities::Authorities,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -44505,8 +44505,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::validator_set_id::ValidatorSetId,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -44527,8 +44527,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::next_authorities::NextAuthorities,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -44559,7 +44559,7 @@ pub mod api {
                     types::set_id_session::SetIdSession,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Beefy",
@@ -44588,7 +44588,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::set_id_session::Param0>,
                     types::set_id_session::SetIdSession,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -44611,8 +44611,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::genesis_block::GenesisBlock,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -44714,8 +44714,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::root_hash::RootHash,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -44735,8 +44735,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::number_of_leaves::NumberOfLeaves,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -44761,7 +44761,7 @@ pub mod api {
                     types::nodes::Nodes,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "Mmr",
@@ -44784,7 +44784,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::nodes::Param0>,
                     types::nodes::Nodes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -44832,8 +44832,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::beefy_authorities::BeefyAuthorities,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -44856,8 +44856,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::beefy_next_authorities::BeefyNextAuthorities,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -45676,7 +45676,7 @@ pub mod api {
                     types::permanent_slots::PermanentSlots,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "AssignedSlots",
@@ -45697,7 +45697,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::permanent_slots::Param0>,
                     types::permanent_slots::PermanentSlots,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -45719,8 +45719,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::permanent_slot_count::PermanentSlotCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -45742,7 +45742,7 @@ pub mod api {
                     types::temporary_slots::TemporarySlots,
                     (),
                     (),
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                 > {
                     ::subxt::storage::address::Address::new_static(
                         "AssignedSlots",
@@ -45763,7 +45763,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     ::subxt::storage::address::StaticStorageKey<types::temporary_slots::Param0>,
                     types::temporary_slots::TemporarySlots,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -45785,8 +45785,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::temporary_slot_count::TemporarySlotCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -45806,8 +45806,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::active_temporary_slot_count::ActiveTemporarySlotCount,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -45828,8 +45828,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::max_temporary_slots::MaxTemporarySlots,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -45850,8 +45850,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::max_permanent_slots::MaxPermanentSlots,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -46088,8 +46088,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::validators_to_retire::ValidatorsToRetire,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -46109,8 +46109,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::validators_to_add::ValidatorsToAdd,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -46615,8 +46615,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::migration_process::MigrationProcess,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -46638,8 +46638,8 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::auto_limits::AutoLimits,
-                    ::subxt::storage::address::Yes,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
+                    ::subxt::utils::Yes,
                     (),
                 > {
                     ::subxt::storage::address::Address::new_static(
@@ -46661,7 +46661,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::signed_migration_max_limits::SignedMigrationMaxLimits,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
@@ -47163,7 +47163,7 @@ pub mod api {
                 ) -> ::subxt::storage::address::Address<
                     (),
                     types::key::Key,
-                    ::subxt::storage::address::Yes,
+                    ::subxt::utils::Yes,
                     (),
                     (),
                 > {
