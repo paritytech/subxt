@@ -28,6 +28,6 @@ pub use self::{
         PartialExtrinsic, SubmittableExtrinsic, TransactionInvalid, TransactionUnknown, TxClient,
         ValidationResult,
     },
-    tx_payload::{dynamic, BoxedPayload, DynamicPayload, Payload, TxPayload},
+    tx_payload::{dynamic, DynamicPayload, Payload, TxPayload},
     tx_progress::{TxInBlock, TxProgress, TxStatus},
 };

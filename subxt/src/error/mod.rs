@@ -99,6 +99,12 @@ impl From<std::convert::Infallible> for Error {
     }
 }
 
+impl From<scale_decode::visitor::DecodeError> for Error {
+    fn from(value: scale_decode::visitor::DecodeError) -> Self {
+        Error::Decode(value.into())
+    }
+}
+
 impl Error {
     /// Checks whether the error was caused by a RPC re-connection.
     pub fn is_disconnected_will_reconnect(&self) -> bool {

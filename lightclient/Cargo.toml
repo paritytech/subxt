@@ -49,7 +49,7 @@ web = [
 [dependencies]
 futures = { workspace = true, features = ["async-await"] }
 serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true, features = ["raw_value"] }
+serde_json = { workspace = true, features = ["default", "raw_value"] }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 smoldot-light = { workspace = true }
