@@ -6,6 +6,13 @@
 //! to Substrate based chains.
 
 #![deny(missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
+#[cfg(any(
+    all(feature = "web", feature = "native"),
+    not(any(feature = "web", feature = "native"))
+))]
+compile_error!("subxt-lightclient: exactly one of the 'web' and 'native' features should be used.");
 
 mod platform;
 mod shared_client;
