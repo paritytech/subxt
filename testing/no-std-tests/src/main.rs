@@ -43,8 +43,22 @@ fn compile_test() {
     subxt_metadata::Metadata::decode(&mut &METADATA[..]).expect("should be valid metadata");
 
     // Subxt Signer compiles:
-    let _alice = subxt_signer::sr25519::dev::alice();
+    use subxt_signer::sr25519;
+    let keypair = sr25519::dev::alice();
+    let message = b"Hello!";
+    let _signature = keypair.sign(message);
+    let _public_key = keypair.public_key();
+
+    // Note: `ecdsa` is not compiling for the `thumbv7em-none-eabi` target.
+    //
+    // use subxt_signer::ecdsa;
+    // let keypair = ecdsa::dev::alice();
+    // let message = b"Hello!";
+    // let _signature = keypair.sign(message);
+    // let _public_key = keypair.public_key();
+    //
 
     // Subxt Core compiles:
     let _era = subxt_core::utils::Era::Immortal;
+    
 }

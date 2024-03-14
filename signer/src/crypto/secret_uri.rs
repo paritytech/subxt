@@ -124,7 +124,10 @@ pub enum SecretUriError {
     InvalidFormat,
 }
 
-once_static! {
+#[cfg(feature = "std")]
+impl std::error::Error for SecretUriError {}
+
+once_static_cloned! {
     /// Interpret a phrase like:
     ///
     /// ```text
