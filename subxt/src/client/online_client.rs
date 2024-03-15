@@ -78,16 +78,6 @@ impl<T: Config> OnlineClient<T> {
         let backend = LegacyBackend::builder().build(client);
         OnlineClient::from_backend(Arc::new(backend)).await
     }
-
-    /// Returns a [`subxt_core::client::ClientState`] that serves as a least common denominator of what data a client should expose.
-    pub fn client_state(&self) -> ClientState<T> {
-        let inner = self.inner.read().expect("shouldn't be poisoned");
-        ClientState::new(
-            inner.genesis_hash,
-            inner.runtime_version,
-            inner.metadata.clone(),
-        )
-    }
 }
 
 impl<T: Config> OnlineClient<T> {
@@ -292,6 +282,16 @@ impl<T: Config> OnlineClient<T> {
     pub fn runtime_version(&self) -> RuntimeVersion {
         let inner = self.inner.read().expect("shouldn't be poisoned");
         inner.runtime_version
+    }
+
+    /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
+    pub fn client_state(&self) -> ClientState<T> {
+        let inner = self.inner.read().expect("shouldn't be poisoned");
+        ClientState::new(
+            inner.genesis_hash,
+            inner.runtime_version,
+            inner.metadata.clone(),
+        )
     }
 
     /// Change the [`RuntimeVersion`] used in this client.

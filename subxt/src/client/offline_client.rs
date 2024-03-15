@@ -21,7 +21,7 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     fn genesis_hash(&self) -> T::Hash;
     /// Return the provided [`RuntimeVersion`].
     fn runtime_version(&self) -> RuntimeVersion;
-    /// Return the client state.
+    /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
     fn client_state(&self) -> ClientState<T>;
 
     /// Work with transactions.
@@ -100,7 +100,7 @@ impl<T: Config> OfflineClient<T> {
         self.inner.metadata()
     }
 
-    /// Returns a [`subxt_core::client::ClientState`] that serves as a least common denominator of what data a client should expose.
+    /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
     pub fn client_state(&self) -> ClientState<T> {
         ClientState::new(
             self.inner.genesis_hash(),
