@@ -53,10 +53,10 @@ impl<T: Config> LegacyBackendBuilder<T> {
 
     /// Given an [`RpcClient`] to use to make requests, this returns a [`LegacyBackend`],
     /// which implements the [`Backend`] trait.
-    pub fn build(self, client: RpcClient) -> LegacyBackend<T> {
+    pub fn build(self, client: impl Into<RpcClient>) -> LegacyBackend<T> {
         LegacyBackend {
             storage_page_size: self.storage_page_size,
-            methods: LegacyRpcMethods::new(client),
+            methods: LegacyRpcMethods::new(client.into()),
         }
     }
 }

@@ -79,6 +79,12 @@ impl RpcClient {
     }
 }
 
+impl<C: RpcClientT> From<C> for RpcClient {
+    fn from(client: C) -> Self {
+        RpcClient::new(client)
+    }
+}
+
 impl std::fmt::Debug for RpcClient {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("RpcClient").finish()
