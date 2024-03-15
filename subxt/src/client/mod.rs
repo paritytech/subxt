@@ -11,14 +11,6 @@
 mod offline_client;
 mod online_client;
 
-crate::macros::cfg_unstable_light_client! {
-    mod light_client;
-
-    pub use light_client::{
-        LightClient, LightClientBuilder, LightClientError, RawLightClient, RawLightClientBuilder,
-    };
-}
-
 pub use offline_client::{OfflineClient, OfflineClientT};
 pub use online_client::{
     ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream, Update, UpgradeError,

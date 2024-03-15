@@ -4556,7 +4556,6 @@ dependencies = [
  "subxt-signer",
  "thiserror",
  "tokio",
- "tokio-stream",
  "tokio-util",
  "tracing",
  "tracing-subscriber 0.3.18",
@@ -4646,7 +4645,6 @@ dependencies = [
 name = "subxt-lightclient"
 version = "0.34.0"
 dependencies = [
- "either",
  "futures",
  "futures-timer",
  "futures-util",
