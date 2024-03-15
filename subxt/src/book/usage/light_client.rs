@@ -14,7 +14,7 @@
 //! known as a _chain spec_. One way to obtain this is by making a `sync_state_genSyncSpec` RPC call to a
 //! trusted node belonging to the chain that you wish to interact with.
 //!
-//! Subxt exposes a utility method to obtain the chain spec: [`subxt::utils::fetch_chainspec_from_rpc_node()`].
+//! Subxt exposes a utility method to obtain the chain spec: [`crate::utils::fetch_chainspec_from_rpc_node()`].
 //! Alternately, you can manually make an RPC call to `sync_state_genSyncSpec` like do (assuming a node running
 //! locally on port 9933):
 //!
