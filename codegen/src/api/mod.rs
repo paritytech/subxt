@@ -44,7 +44,7 @@ impl RuntimeGenerator {
     ///
     /// Supported versions: v14 and v15.
     pub fn new(mut metadata: Metadata) -> Self {
-        metadata.ensure_unique_type_paths();
+        scale_typegen::utils::ensure_unique_type_paths(metadata.types_mut());
         RuntimeGenerator { metadata }
     }
 
