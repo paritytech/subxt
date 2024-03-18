@@ -7,13 +7,13 @@
 //! the trait itself.
 
 use crate::metadata::{DecodeWithMetadata, MetadataExt};
-use crate::MetadataError;
+use crate::error::MetadataError;
 use alloc::vec::Vec;
 use subxt_metadata::PalletMetadata;
 use subxt_metadata::{StorageEntryMetadata, StorageHasher};
 
 use super::StorageAddress;
-use crate::alloc::borrow::ToOwned;
+use alloc::borrow::ToOwned;
 use crate::{error::Error, metadata::Metadata};
 
 /// Return the root of a given [`StorageAddress`]: hash the pallet name and entry name

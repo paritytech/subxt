@@ -7,7 +7,7 @@
 
 use crate::metadata::Metadata;
 use crate::Error;
-use crate::MetadataError;
+use crate::error::MetadataError;
 use alloc::borrow::{Cow, ToOwned};
 use alloc::string::String;
 

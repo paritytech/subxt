@@ -12,7 +12,7 @@ use alloc::borrow::ToOwned;
 
 use crate::{
     metadata::{DecodeWithMetadata, MetadataExt},
-    Error, Metadata, MetadataError,
+    Error, Metadata, error::MetadataError,
 };
 
 /// Run validation logic against some constant address you'd like to access. Returns `Ok(())`

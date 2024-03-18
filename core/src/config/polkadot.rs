@@ -7,7 +7,7 @@
 use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
 
 pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
-use crate::SubstrateConfig;
+use crate::config::SubstrateConfig;
 pub use primitive_types::{H256, U256};
 
 /// Default set of commonly used types by Polkadot nodes.

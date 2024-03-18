@@ -6,7 +6,7 @@ use crate::{
     dynamic::DecodedValueThunk,
     error::{Error, MetadataError},
     metadata::{DecodeWithMetadata, Metadata},
-    Yes,
+    utils::Yes,
 };
 use derivative::Derivative;
 

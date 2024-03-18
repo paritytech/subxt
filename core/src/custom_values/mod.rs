@@ -6,12 +6,12 @@
 
 mod custom_value_address;
 
-use crate::Yes;
+use crate::utils::Yes;
 pub use custom_value_address::{CustomValueAddress, StaticAddress};
 
 use crate::{
     metadata::{DecodeWithMetadata, MetadataExt},
-    Error, Metadata, MetadataError,
+    Error, Metadata, error::MetadataError,
 };
 use alloc::vec::Vec;
 
