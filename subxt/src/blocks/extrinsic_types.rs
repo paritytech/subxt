@@ -779,7 +779,7 @@ mod tests {
     use primitive_types::H256;
     use scale_info::{meta_type, TypeInfo};
     use scale_value::Value;
-    use subxt_core::RuntimeVersion;
+    use subxt_core::client::RuntimeVersion;
 
     // Extrinsic needs to contain at least the generic type parameter "Call"
     // for the metadata to be valid.

@@ -63,7 +63,7 @@ mod tests {
     use scale_info::form::PortableForm;
     use scale_info::TypeInfo;
     use std::collections::BTreeMap;
-    use subxt_core::RuntimeVersion;
+    use subxt_core::client::RuntimeVersion;
 
     #[derive(Debug, Clone, PartialEq, Eq, Encode, TypeInfo, DecodeAsType)]
     pub struct Person {
