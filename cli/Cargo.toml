@@ -13,7 +13,7 @@ homepage.workspace = true
 description = "Command line utilities for working with subxt codegen"
 
 [[bin]]
-name = "subxt"
+name = "subxt-cli"
 path = "src/main.rs"
 
 [lints]
