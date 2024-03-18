@@ -123,7 +123,7 @@ web-sys = { version = "0.3.67", features = ["BinaryType", "CloseEvent", "Message
 wasm-bindgen = "0.2.92"
 send_wrapper = "0.6.0"
 js-sys = "0.3.69"
-wasm-bindgen-futures = "0.4.38"
+wasm-bindgen-futures = "0.4.42"
 futures-timer = "3"
 instant = { version = "0.1.12", default-features = false }
 tokio-util = "0.7.10"
