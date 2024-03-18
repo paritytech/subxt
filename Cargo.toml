@@ -88,7 +88,7 @@ proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.78"
 quote = "1.0.35"
 regex = { version = "1.10.3", default-features = false }
-scale-info = { version = "2.10.0", default-features = false }
+scale-info = { version = "2.11.0", default-features = false }
 scale-value = { version = "0.14.1", default-features = false }
 scale-bits = { version = "0.5.0", default-features = false }
 scale-decode = { version = "0.11.1", default-features = false }
