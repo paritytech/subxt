@@ -4,15 +4,20 @@
 
 //! Miscellaneous utility helpers.
 
-use url::Url;
-
+use crate::macros::cfg_jsonrpsee;
 use crate::{error::RpcError, Error};
+use url::Url;
 
 pub use subxt_core::utils::{
     bits, strip_compact_prefix, to_hex, AccountId32, Encoded, Era, KeyedVec, MultiAddress,
     MultiSignature, PhantomDataSendSync, Static, UncheckedExtrinsic, WrapperKeepOpaque, Yes, H160,
     H256, H512,
 };
+
+cfg_jsonrpsee! {
+    mod fetch_chain_spec;
+    pub use fetch_chain_spec::{fetch_chainspec_from_rpc_node, FetchChainspecError};
+}
 
 /// A URL is considered secure if it uses a secure scheme ("https" or "wss") or is referring to localhost.
 ///
