@@ -10,11 +10,11 @@
 use super::extrinsic_params::ExtrinsicParams;
 use super::refine_params::RefineParamsData;
 use super::RefineParams;
-use crate::utils::Era;
-use crate::client::{ClientState};
-use crate::Config;
-use crate::config::{ExtrinsicParamsEncoder};
+use crate::client::ClientState;
+use crate::config::ExtrinsicParamsEncoder;
 use crate::error::ExtrinsicParamsError;
+use crate::utils::Era;
+use crate::Config;
 use alloc::borrow::ToOwned;
 use alloc::boxed::Box;
 use alloc::vec::Vec;

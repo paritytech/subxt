@@ -113,8 +113,7 @@ pub mod ext {
     pub use subxt_core;
 
     cfg_substrate_compat! {
-        pub use sp_runtime;
-        pub use sp_core;
+        pub use subxt_core::ext::{sp_runtime, sp_core};
     }
 }
 

@@ -25,8 +25,15 @@ pub mod utils;
 
 pub use config::Config;
 pub use error::Error;
-pub use signer::Signer;
 pub use metadata::Metadata;
+pub use signer::Signer;
 
 #[macro_use]
 mod macros;
+
+pub mod ext {
+    cfg_substrate_compat! {
+        pub use sp_runtime;
+        pub use sp_core;
+    }
+}

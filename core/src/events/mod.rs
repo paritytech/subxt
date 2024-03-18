@@ -5,7 +5,7 @@ use derivative::Derivative;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_metadata::PalletMetadata;
 
-use crate::{Config, Error, Metadata, error::MetadataError};
+use crate::{error::MetadataError, Config, Error, Metadata};
 
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
@@ -13,20 +13,19 @@ use crate::{Config, Error, Metadata, error::MetadataError};
 #[derivative(Clone(bound = ""))]
 pub struct Events<T: Config> {
     metadata: Metadata,
-    block_hash: T::Hash,
     // Note; raw event bytes are prefixed with a Compact<u32> containing
     // the number of events to be decoded. The start_idx reflects that, so
     // that we can skip over those bytes when decoding them
     event_bytes: Arc<[u8]>,
     start_idx: usize,
     num_events: u32,
+    marker: core::marker::PhantomData<T>,
 }
 
 // Ignore the Metadata when debug-logging events; it's big and distracting.
 impl<T: Config> core::fmt::Debug for Events<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("Events")
-            .field("block_hash", &self.block_hash)
             .field("event_bytes", &self.event_bytes)
             .field("start_idx", &self.start_idx)
             .field("num_events", &self.num_events)
@@ -35,9 +34,8 @@ impl<T: Config> core::fmt::Debug for Events<T> {
 }
 
 impl<T: Config> Events<T> {
-
-    /// Create a new [`Events`] instance.
-    pub fn new(metadata: Metadata, block_hash: T::Hash, event_bytes: Vec<u8>) -> Self {
+    /// Create a new [`Events`] instance from the given bytes.
+    pub fn decode_from(metadata: Metadata, event_bytes: Vec<u8>) -> Self {
         // event_bytes is a SCALE encoded vector of events. So, pluck the
         // compact encoded length from the front, leaving the remaining bytes
         // for our iterating to decode.
@@ -52,10 +50,10 @@ impl<T: Config> Events<T> {
 
         Self {
             metadata,
-            block_hash,
             event_bytes: event_bytes.into(),
             start_idx,
             num_events,
+            marker: core::marker::PhantomData,
         }
     }
 
@@ -68,11 +66,6 @@ impl<T: Config> Events<T> {
     // Note: mainly here to satisfy clippy.
     pub fn is_empty(&self) -> bool {
         self.num_events == 0
-    }
-
-    /// Return the block hash that these events are from.
-    pub fn block_hash(&self) -> T::Hash {
-        self.block_hash
     }
 
     /// Iterate over all of the events, using metadata to dynamically
@@ -390,8 +383,6 @@ impl<'a> EventMetadataDetails<'a> {
         self.variant
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {

@@ -7,10 +7,10 @@
 //! [`crate::config::DefaultExtrinsicParams`] provides a general-purpose
 //! implementation of this that will work in many cases.
 
-use crate::{client::ClientState, Config, error::ExtrinsicParamsError};
+use super::refine_params::RefineParams;
+use crate::{client::ClientState, error::ExtrinsicParamsError, Config};
 use alloc::vec::Vec;
 
-use super::refine_params::RefineParams;
 /// This trait allows you to configure the "signed extra" and
 /// "additional" parameters that are a part of the transaction payload
 /// or the signer payload respectively.

@@ -11,8 +11,9 @@ pub use constant_address::{dynamic, Address, ConstantAddress, DynamicAddress};
 use alloc::borrow::ToOwned;
 
 use crate::{
+    error::MetadataError,
     metadata::{DecodeWithMetadata, MetadataExt},
-    Error, Metadata, error::MetadataError,
+    Error, Metadata,
 };
 
 /// Run validation logic against some constant address you'd like to access. Returns `Ok(())`

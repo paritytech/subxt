@@ -547,11 +547,6 @@ impl<T: Config> ExtrinsicEvents<T> {
         }
     }
 
-    /// Return the hash of the block that the extrinsic is in.
-    pub fn block_hash(&self) -> T::Hash {
-        self.events.block_hash()
-    }
-
     /// The index of the extrinsic that these events are produced from.
     pub fn extrinsic_index(&self) -> u32 {
         self.idx
@@ -572,11 +567,14 @@ impl<T: Config> ExtrinsicEvents<T> {
     /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
     pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails<T>, Error>> + '_ {
-        self.events.iter().filter(|ev| {
-            ev.as_ref()
-                .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))
-                .unwrap_or(true) // Keep any errors.
-        }).map(|e| e.map_err(Error::from))
+        self.events
+            .iter()
+            .filter(|ev| {
+                ev.as_ref()
+                    .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))
+                    .unwrap_or(true) // Keep any errors.
+            })
+            .map(|e| e.map_err(Error::from))
     }
 
     /// Find all of the transaction events matching the event type provided as a generic parameter.

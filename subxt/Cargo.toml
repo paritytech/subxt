@@ -53,7 +53,7 @@ jsonrpsee = [
 # Enable this to pull in extra Substrate dependencies which make it possible to
 # use the `sp_core::crypto::Pair` Signer implementation, as well as adding some
 # `From` impls for types like `AccountId32`. Cannot be used with "web".
-substrate-compat = ["sp-core", "sp-runtime", "subxt-core/substrate-compat"]
+substrate-compat = ["subxt-core/substrate-compat"]
 
 # Enable this to fetch and utilize the latest unstable metadata from a node.
 # The unstable metadata is subject to breaking changes and the subxt might
@@ -91,10 +91,6 @@ sp-core-hashing = { workspace = true }
 
 # Included if the "jsonrpsee" feature is enabled.
 jsonrpsee = { workspace = true, optional = true, features = ["jsonrpsee-types"] }
-
-# Included if the "substrate-compat" feature is enabled.
-sp-core = { workspace = true, optional = true }
-sp-runtime = { workspace = true, optional = true }
 
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }

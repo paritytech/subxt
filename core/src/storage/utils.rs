@@ -6,15 +6,15 @@
 //! aren't things that should ever be overridden, and so don't exist on
 //! the trait itself.
 
-use crate::metadata::{DecodeWithMetadata, MetadataExt};
 use crate::error::MetadataError;
+use crate::metadata::{DecodeWithMetadata, MetadataExt};
 use alloc::vec::Vec;
 use subxt_metadata::PalletMetadata;
 use subxt_metadata::{StorageEntryMetadata, StorageHasher};
 
 use super::StorageAddress;
-use alloc::borrow::ToOwned;
 use crate::{error::Error, metadata::Metadata};
+use alloc::borrow::ToOwned;
 
 /// Return the root of a given [`StorageAddress`]: hash the pallet name and entry name
 /// and append those bytes to the output.
