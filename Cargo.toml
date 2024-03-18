@@ -68,7 +68,7 @@ clap = { version = "4.5.2", features = ["derive", "cargo"] }
 cfg-if = "1.0.0"
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.6.9", default-features = false }
-color-eyre = "0.6.1"
+color-eyre = "0.6.3"
 console_error_panic_hook = "0.1.7"
 darling = "0.20.8"
 derivative = "2.2.0"
@@ -86,10 +86,10 @@ jsonrpsee = { version = "0.22" }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.2", default-features = false }
 proc-macro-error = "1.0.4"
-proc-macro2 = "1.0.78"
+proc-macro2 = "1.0.79"
 quote = "1.0.35"
 regex = { version = "1.10.3", default-features = false }
-scale-info = { version = "2.10.0", default-features = false }
+scale-info = { version = "2.11.0", default-features = false }
 scale-value = { version = "0.14.1", default-features = false }
 scale-bits = { version = "0.5.0", default-features = false }
 scale-decode = { version = "0.11.1", default-features = false }
@@ -102,7 +102,7 @@ tokio = { version = "1.36", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
 tracing-subscriber = "0.3.18"
-trybuild = "1.0.89"
+trybuild = "1.0.90"
 url = "2.5.0"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
