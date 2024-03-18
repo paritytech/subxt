@@ -131,7 +131,7 @@ pub enum StorageAddressError {
 #[cfg(feature = "std")]
 impl std::error::Error for StorageAddressError {}
 
-/// An error that can be emitted when trying to construct an instance of [`crate::ExtrinsicParams`],
+/// An error that can be emitted when trying to construct an instance of [`crate::config::ExtrinsicParams`],
 /// encode data from the instance, or match on signed extensions.
 #[derive(Display, Debug)]
 #[non_exhaustive]
