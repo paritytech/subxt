@@ -66,7 +66,7 @@ pub mod config {
         PolkadotConfig, PolkadotExtrinsicParams, RefineParams, RefineParamsData, SignedExtension,
         SubstrateConfig, SubstrateExtrinsicParams,
     };
-    pub use subxt_core::ExtrinsicParamsError;
+    pub use subxt_core::error::ExtrinsicParamsError;
 }
 
 /// Types representing the metadata obtained from a node.
@@ -110,6 +110,7 @@ pub mod ext {
     pub use scale_decode;
     pub use scale_encode;
     pub use scale_value;
+    pub use subxt_core;
 
     cfg_substrate_compat! {
         pub use sp_runtime;

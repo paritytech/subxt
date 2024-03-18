@@ -576,7 +576,7 @@ impl<T: Config> ExtrinsicEvents<T> {
             ev.as_ref()
                 .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))
                 .unwrap_or(true) // Keep any errors.
-        })
+        }).map(|e| e.map_err(Error::from))
     }
 
     /// Find all of the transaction events matching the event type provided as a generic parameter.

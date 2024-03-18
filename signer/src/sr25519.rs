@@ -258,7 +258,7 @@ pub mod dev {
 mod subxt_compat {
     use super::*;
 
-    use subxt_core::{AccountId32, Config, MultiAddress, MultiSignature, Signer as SignerT};
+    use subxt_core::{utils::{AccountId32, MultiAddress, MultiSignature}, Config, Signer as SignerT};
 
     impl From<Signature> for MultiSignature {
         fn from(value: Signature) -> Self {

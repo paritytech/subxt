@@ -25,6 +25,7 @@ pub mod utils;
 
 pub use config::Config;
 pub use error::Error;
+pub use signer::Signer;
 pub use metadata::Metadata;
 
 #[macro_use]

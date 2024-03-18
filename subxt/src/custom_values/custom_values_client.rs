@@ -5,7 +5,7 @@ use derivative::Derivative;
 use subxt_core::custom_values::{
     get_custom_value, get_custom_value_bytes, validate_custom_value, CustomValueAddress,
 };
-use subxt_core::Yes;
+use subxt_core::utils::Yes;
 
 /// A client for accessing custom values stored in the metadata.
 #[derive(Derivative)]

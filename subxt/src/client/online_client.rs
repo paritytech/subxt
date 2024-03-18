@@ -18,7 +18,7 @@ use crate::{
 use derivative::Derivative;
 use futures::future;
 use std::sync::{Arc, RwLock};
-use subxt_core::{ClientState, RuntimeVersion};
+use subxt_core::client::{ClientState, RuntimeVersion};
 
 /// A trait representing a client that can perform
 /// online actions.

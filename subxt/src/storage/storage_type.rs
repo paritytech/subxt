@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use subxt_core::storage::address::{StorageAddress, StorageHashers, StorageKey};
-use subxt_core::Yes;
+use subxt_core::utils::Yes;
 
 use crate::{
     backend::{BackendExt, BlockRef},

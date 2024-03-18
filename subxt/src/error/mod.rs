@@ -19,7 +19,7 @@ pub use dispatch_error::{
 pub use crate::metadata::Metadata;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
-pub use subxt_core::{ExtrinsicParamsError, MetadataError, StorageAddressError};
+pub use subxt_core::error::{ExtrinsicParamsError, MetadataError, StorageAddressError};
 pub use subxt_metadata::TryFromError as MetadataTryFromError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
