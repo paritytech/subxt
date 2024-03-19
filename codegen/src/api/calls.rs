@@ -16,7 +16,7 @@ use subxt_metadata::PalletMetadata;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the calls are generated.
-/// - `crate_path` - The crate path under which subxt is located, e.g. `::subxt` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
 pub fn generate_calls(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -43,7 +43,7 @@ pub fn generate_calls(
                         // Note: fn_arg_type this is relative the type path of the type alias when prefixed with `types::`, e.g. `set_max_code_size::New`
                         let fn_arg_type = &field.type_path;
                         let call_arg = if field.is_boxed {
-                            quote! { #name: ::std::boxed::Box::new(#name) }
+                            quote! { #name: #crate_path::Box::new(#name) }
                         } else {
                             quote! { #name }
                         };

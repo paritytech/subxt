@@ -7,6 +7,24 @@ use subxt_metadata::PalletMetadata;
 
 use crate::{error::MetadataError, Config, Error, Metadata};
 
+/// Trait to uniquely identify the events's identity from the runtime metadata.
+///
+/// Generated API structures that represent an event implement this trait.
+///
+/// The trait is utilized to decode emitted events from a block, via obtaining the
+/// form of the `Event` from the metadata.
+pub trait StaticEvent: DecodeAsFields {
+    /// Pallet name.
+    const PALLET: &'static str;
+    /// Event name.
+    const EVENT: &'static str;
+
+    /// Returns true if the given pallet and event names match this event.
+    fn is_event(pallet: &str, event: &str) -> bool {
+        Self::PALLET == pallet && Self::EVENT == event
+    }
+}
+
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
 #[derive(Derivative)]
@@ -133,24 +151,6 @@ impl<T: Config> Events<T> {
     /// Find an event that decodes to the type provided. Returns true if it was found.
     pub fn has<Ev: StaticEvent>(&self) -> Result<bool, Error> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
-    }
-}
-
-/// Trait to uniquely identify the events's identity from the runtime metadata.
-///
-/// Generated API structures that represent an event implement this trait.
-///
-/// The trait is utilized to decode emitted events from a block, via obtaining the
-/// form of the `Event` from the metadata.
-pub trait StaticEvent: DecodeAsFields {
-    /// Pallet name.
-    const PALLET: &'static str;
-    /// Event name.
-    const EVENT: &'static str;
-
-    /// Returns true if the given pallet and event names match this event.
-    fn is_event(pallet: &str, event: &str) -> bool {
-        Self::PALLET == pallet && Self::EVENT == event
     }
 }
 

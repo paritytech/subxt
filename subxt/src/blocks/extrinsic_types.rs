@@ -20,27 +20,10 @@ use crate::dynamic::Value;
 use crate::utils::strip_compact_prefix;
 use codec::Decode;
 use derivative::Derivative;
-use scale_decode::{DecodeAsFields, DecodeAsType};
+use scale_decode::DecodeAsType;
 
 use std::sync::Arc;
-
-/// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
-///
-/// Generated API structures that represent an extrinsic implement this trait.
-///
-/// The trait is utilized to decode emitted extrinsics from a block, via obtaining the
-/// form of the `Extrinsic` from the metadata.
-pub trait StaticExtrinsic: DecodeAsFields {
-    /// Pallet name.
-    const PALLET: &'static str;
-    /// Call name.
-    const CALL: &'static str;
-
-    /// Returns true if the given pallet and call names match this extrinsic.
-    fn is_extrinsic(pallet: &str, call: &str) -> bool {
-        Self::PALLET == pallet && Self::CALL == call
-    }
-}
+pub use subxt_core::blocks::StaticExtrinsic;
 
 /// The body of a block.
 pub struct Extrinsics<T: Config, C> {

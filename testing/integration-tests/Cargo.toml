@@ -34,7 +34,7 @@ scale-info = { workspace = true, features = ["bit-vec"] }
 sp-core = { workspace = true }
 syn = { workspace = true }
 subxt = { workspace = true, features = ["unstable-metadata", "native", "jsonrpsee", "substrate-compat"] }
-subxt-signer = { workspace = true }
+subxt-signer = { workspace = true, features = ["sr25519", "ecdsa", "subxt", "std"] }
 subxt-codegen = { workspace = true }
 subxt-metadata = { workspace = true }
 test-runtime = { workspace = true }

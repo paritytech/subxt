@@ -20,7 +20,7 @@ use super::CodegenError;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the storage items are generated.
-/// - `crate_path` - The crate path under which subxt is located, e.g. `::subxt` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
 pub fn generate_storage(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -247,7 +247,7 @@ fn generate_storage_entry_fns(
                  arg_name,
                  alias_type_path,
                  ..
-             }| quote!( #arg_name: impl ::std::borrow::Borrow<#alias_type_path> ),
+             }| quote!( #arg_name: impl ::core::borrow::Borrow<#alias_type_path> ),
         );
 
         quote!(
@@ -424,7 +424,7 @@ mod tests {
             let expected_storage_constructor = quote!(
                 fn #name_ident(
                     &self,
-                    _0: impl ::std::borrow::Borrow<types::#name_ident::Param0>,
+                    _0: impl ::core::borrow::Borrow<types::#name_ident::Param0>,
                 )
             );
             dbg!(&generated_str);
