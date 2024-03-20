@@ -62,3 +62,11 @@ fn compile_test() {
     let _era = subxt_core::utils::Era::Immortal;
     
 }
+
+// Todo: Currently does not compile, we need changes in scale-typegen to make all paths no-std compatible. 
+//
+// #[subxt_macro::subxt(
+//     runtime_metadata_path = "../../artifacts/polkadot_metadata_full.scale",
+//     crate="::subxt_core"
+// )]
+// pub mod polkadot{}

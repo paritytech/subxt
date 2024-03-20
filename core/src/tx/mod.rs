@@ -13,6 +13,7 @@ use alloc::string::String;
 
 use alloc::vec::Vec;
 use codec::Encode;
+use derivative::Derivative;
 use scale_encode::EncodeAsFields;
 use scale_value::{Composite, Value, ValueDef, Variant};
 
@@ -49,7 +50,15 @@ pub struct ValidationDetails<'a> {
 }
 
 /// A transaction payload containing some generic `CallData`.
-#[derive(Clone, Debug)]
+#[derive(Derivative)]
+#[derivative(
+    Clone(bound = "CallData: Clone"),
+    Debug(bound = "CallData: std::fmt::Debug"),
+    Eq(bound = "CallData: std::cmp::Eq"),
+    Ord(bound = "CallData: std::cmp::Ord"),
+    PartialEq(bound = "CallData: std::cmp::PartialEq"),
+    PartialOrd(bound = "CallData: std::cmp::PartialOrd")
+)]
 pub struct Payload<CallData> {
     pallet_name: Cow<'static, str>,
     call_name: Cow<'static, str>,

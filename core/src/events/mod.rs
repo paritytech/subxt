@@ -188,7 +188,7 @@ pub struct EventDetails<T: Config> {
 
 impl<T: Config> EventDetails<T> {
     /// Attempt to dynamically decode a single event from our events input.
-    pub fn decode_from(
+    fn decode_from(
         metadata: Metadata,
         all_bytes: Arc<[u8]>,
         start_idx: usize,

@@ -35,7 +35,13 @@ impl CustomValueAddress for str {
 
 /// A static address to a custom value.
 #[derive(Derivative)]
-#[derivative(Clone(bound = ""), Debug(bound = ""))]
+#[derivative(
+    Clone(bound = ""),
+    Debug(bound = ""),
+    PartialOrd(bound = ""),
+    PartialEq(bound = ""),
+    Eq(bound = "")
+)]
 pub struct StaticAddress<ReturnTy, IsDecodable> {
     name: &'static str,
     hash: Option<[u8; 32]>,

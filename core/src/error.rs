@@ -152,13 +152,20 @@ pub enum ExtrinsicParamsError {
     UnknownSignedExtension(String),
     /// Some custom error.
     #[display(fmt = "Error constructing extrinsic parameters: {_0}")]
-    #[cfg(feature = "std")]
-    Custom(CustomExtrinsicParamsError),
+    Custom(Box<dyn CustomError>),
 }
 
-/// A custom error.
+/// Anything implementing this trait can be used in [`ExtrinsicParamsError::Custom`].
 #[cfg(feature = "std")]
-pub type CustomExtrinsicParamsError = Box<dyn std::error::Error + Send + Sync + 'static>;
+pub trait CustomError: std::error::Error + Send + Sync + 'static {}
+#[cfg(feature = "std")]
+impl<T: std::error::Error + Send + Sync + 'static> CustomError for T {}
+
+/// Anything implementing this trait can be used in [`ExtrinsicParamsError::Custom`].
+#[cfg(not(feature = "std"))]
+pub trait CustomError: core::fmt::Debug + core::fmt::Display + Send + Sync + 'static {}
+#[cfg(not(feature = "std"))]
+impl<T: core::fmt::Debug + core::fmt::Display + Send + Sync + 'static> CustomError for T {}
 
 #[cfg(feature = "std")]
 impl std::error::Error for ExtrinsicParamsError {}
@@ -169,9 +176,8 @@ impl From<core::convert::Infallible> for ExtrinsicParamsError {
     }
 }
 
-#[cfg(feature = "std")]
-impl From<CustomExtrinsicParamsError> for ExtrinsicParamsError {
-    fn from(value: CustomExtrinsicParamsError) -> Self {
+impl From<Box<dyn CustomError>> for ExtrinsicParamsError {
+    fn from(value: Box<dyn CustomError>) -> Self {
         ExtrinsicParamsError::Custom(value)
     }
 }

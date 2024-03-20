@@ -14,6 +14,8 @@ pub struct RefineParamsData<T: Config> {
 }
 
 impl<T: Config> RefineParamsData<T> {
+    #[doc(hidden)]
+    /// Creates a new [`RefineParamsData`] instance. Called from `subxt` when refining signed extensions.
     pub fn new(account_nonce: u64, block_number: u64, block_hash: T::Hash) -> Self {
         RefineParamsData {
             account_nonce,

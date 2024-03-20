@@ -34,7 +34,7 @@ pub use primitive_types::{H160, H256, H512};
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct Encoded(pub Vec<u8>);
 
 impl codec::Encode for Encoded {
