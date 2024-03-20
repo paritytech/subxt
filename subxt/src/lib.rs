@@ -153,15 +153,15 @@ pub mod ext {
 ///
 /// ## `crate = "..."`
 ///
-/// Use this attribute to specify a custom path to the `subxt` crate:
+/// Use this attribute to specify a custom path to the `subxt_core` crate:
 ///
 /// ```rust
-/// # pub extern crate subxt;
-/// # pub mod path { pub mod to { pub use subxt; } }
+/// # pub extern crate subxt_core;
+/// # pub mod path { pub mod to { pub use subxt_core; } }
 /// # fn main() {}
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
-///     crate = "crate::path::to::subxt"
+///     crate = "crate::path::to::subxt_core"
 /// )]
 /// mod polkadot {}
 /// ```
