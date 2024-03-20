@@ -7,7 +7,7 @@
 //! `#[no_std]` compatible core crate for subxt.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-extern crate alloc;
+pub extern crate alloc;
 
 pub mod blocks;
 pub mod client;
@@ -28,9 +28,6 @@ pub use config::Config;
 pub use error::Error;
 pub use metadata::Metadata;
 pub use signer::Signer;
-
-pub use alloc::boxed::Box;
-pub use alloc::vec::Vec;
 
 #[macro_use]
 mod macros;

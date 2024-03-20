@@ -5885,7 +5885,7 @@ pub mod api {
                         "Babe",
                         "report_equivocation",
                         types::ReportEquivocation {
-                            equivocation_proof: ::subxt::ext::subxt_core::Box::new(
+                            equivocation_proof: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
                                 equivocation_proof,
                             ),
                             key_owner_proof,
@@ -5916,7 +5916,7 @@ pub mod api {
                         "Babe",
                         "report_equivocation_unsigned",
                         types::ReportEquivocationUnsigned {
-                            equivocation_proof: ::subxt::ext::subxt_core::Box::new(
+                            equivocation_proof: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
                                 equivocation_proof,
                             ),
                             key_owner_proof,
@@ -9846,7 +9846,7 @@ pub mod api {
                         "Grandpa",
                         "report_equivocation",
                         types::ReportEquivocation {
-                            equivocation_proof: ::subxt::ext::subxt_core::Box::new(
+                            equivocation_proof: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
                                 equivocation_proof,
                             ),
                             key_owner_proof,
@@ -9877,7 +9877,7 @@ pub mod api {
                         "Grandpa",
                         "report_equivocation_unsigned",
                         types::ReportEquivocationUnsigned {
-                            equivocation_proof: ::subxt::ext::subxt_core::Box::new(
+                            equivocation_proof: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
                                 equivocation_proof,
                             ),
                             key_owner_proof,
@@ -10987,9 +10987,13 @@ pub mod api {
                         "Treasury",
                         "spend",
                         types::Spend {
-                            asset_kind: ::subxt::ext::subxt_core::Box::new(asset_kind),
+                            asset_kind: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                asset_kind,
+                            ),
                             amount,
-                            beneficiary: ::subxt::ext::subxt_core::Box::new(beneficiary),
+                            beneficiary: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                beneficiary,
+                            ),
                             valid_from,
                         },
                         [
@@ -12913,7 +12917,9 @@ pub mod api {
                         "Referenda",
                         "submit",
                         types::Submit {
-                            proposal_origin: ::subxt::ext::subxt_core::Box::new(proposal_origin),
+                            proposal_origin: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                proposal_origin,
+                            ),
                             proposal,
                             enactment_moment,
                         },
@@ -15246,7 +15252,9 @@ pub mod api {
                         "FellowshipReferenda",
                         "submit",
                         types::Submit {
-                            proposal_origin: ::subxt::ext::subxt_core::Box::new(proposal_origin),
+                            proposal_origin: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                proposal_origin,
+                            ),
                             proposal,
                             enactment_moment,
                         },
@@ -16411,7 +16419,7 @@ pub mod api {
                         "Whitelist",
                         "dispatch_whitelisted_call_with_preimage",
                         types::DispatchWhitelistedCallWithPreimage {
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             5u8, 34u8, 158u8, 60u8, 245u8, 185u8, 170u8, 44u8, 214u8, 208u8, 88u8,
@@ -17610,7 +17618,7 @@ pub mod api {
                         "as_derivative",
                         types::AsDerivative {
                             index,
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             42u8, 102u8, 244u8, 61u8, 176u8, 104u8, 53u8, 138u8, 130u8, 222u8, 2u8,
@@ -17663,8 +17671,8 @@ pub mod api {
                         "Utility",
                         "dispatch_as",
                         types::DispatchAs {
-                            as_origin: ::subxt::ext::subxt_core::Box::new(as_origin),
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            as_origin: ::subxt::ext::subxt_core::alloc::boxed::Box::new(as_origin),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             26u8, 137u8, 228u8, 222u8, 250u8, 111u8, 29u8, 31u8, 210u8, 156u8, 9u8,
@@ -17717,7 +17725,7 @@ pub mod api {
                         "Utility",
                         "with_weight",
                         types::WithWeight {
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                             weight,
                         },
                         [
@@ -18703,7 +18711,7 @@ pub mod api {
                         "Identity",
                         "set_identity",
                         types::SetIdentity {
-                            info: ::subxt::ext::subxt_core::Box::new(info),
+                            info: ::subxt::ext::subxt_core::alloc::boxed::Box::new(info),
                         },
                         [
                             18u8, 86u8, 67u8, 10u8, 116u8, 254u8, 94u8, 95u8, 166u8, 30u8, 204u8,
@@ -23091,7 +23099,7 @@ pub mod api {
                         "as_recovered",
                         types::AsRecovered {
                             account,
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             135u8, 12u8, 48u8, 186u8, 171u8, 82u8, 254u8, 243u8, 245u8, 181u8,
@@ -24770,7 +24778,7 @@ pub mod api {
                             when,
                             maybe_periodic,
                             priority,
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             177u8, 175u8, 49u8, 206u8, 0u8, 101u8, 223u8, 105u8, 237u8, 222u8,
@@ -24815,7 +24823,7 @@ pub mod api {
                             when,
                             maybe_periodic,
                             priority,
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             164u8, 136u8, 103u8, 178u8, 45u8, 181u8, 133u8, 195u8, 92u8, 93u8,
@@ -24855,7 +24863,7 @@ pub mod api {
                             after,
                             maybe_periodic,
                             priority,
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             236u8, 195u8, 150u8, 165u8, 194u8, 42u8, 187u8, 43u8, 80u8, 229u8,
@@ -24883,7 +24891,7 @@ pub mod api {
                             after,
                             maybe_periodic,
                             priority,
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             28u8, 81u8, 177u8, 155u8, 39u8, 10u8, 188u8, 144u8, 52u8, 208u8, 6u8,
@@ -25978,7 +25986,7 @@ pub mod api {
                         types::Proxy {
                             real,
                             force_proxy_type,
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             253u8, 236u8, 54u8, 144u8, 19u8, 103u8, 190u8, 174u8, 231u8, 154u8,
@@ -26262,7 +26270,7 @@ pub mod api {
                             delegate,
                             real,
                             force_proxy_type,
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             5u8, 32u8, 80u8, 204u8, 70u8, 82u8, 22u8, 142u8, 13u8, 189u8, 204u8,
@@ -26933,7 +26941,7 @@ pub mod api {
                         "as_multi_threshold_1",
                         types::AsMultiThreshold1 {
                             other_signatories,
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             223u8, 197u8, 77u8, 59u8, 210u8, 4u8, 228u8, 221u8, 213u8, 150u8,
@@ -26997,7 +27005,7 @@ pub mod api {
                             threshold,
                             other_signatories,
                             maybe_timepoint,
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                             max_weight,
                         },
                         [
@@ -28064,7 +28072,9 @@ pub mod api {
                         "AssetRate",
                         "create",
                         types::Create {
-                            asset_kind: ::subxt::ext::subxt_core::Box::new(asset_kind),
+                            asset_kind: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                asset_kind,
+                            ),
                             rate,
                         },
                         [
@@ -28087,7 +28097,9 @@ pub mod api {
                         "AssetRate",
                         "update",
                         types::Update {
-                            asset_kind: ::subxt::ext::subxt_core::Box::new(asset_kind),
+                            asset_kind: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                asset_kind,
+                            ),
                             rate,
                         },
                         [
@@ -28109,7 +28121,9 @@ pub mod api {
                         "AssetRate",
                         "remove",
                         types::Remove {
-                            asset_kind: ::subxt::ext::subxt_core::Box::new(asset_kind),
+                            asset_kind: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                asset_kind,
+                            ),
                         },
                         [
                             205u8, 34u8, 63u8, 131u8, 204u8, 76u8, 186u8, 233u8, 160u8, 45u8,
@@ -39940,7 +39954,7 @@ pub mod api {
                 }
                 pub mod backers_on_disputes {
                     use super::runtime_types;
-                    pub type BackersOnDisputes = ::subxt::ext::subxt_core::Vec<
+                    pub type BackersOnDisputes = ::subxt::ext::subxt_core::alloc::vec::Vec<
                         runtime_types::polkadot_primitives::v6::ValidatorIndex,
                     >;
                     pub type Param0 = ::core::primitive::u32;
@@ -40333,7 +40347,9 @@ pub mod api {
                         "ParasSlashing",
                         "report_dispute_lost_unsigned",
                         types::ReportDisputeLostUnsigned {
-                            dispute_proof: ::subxt::ext::subxt_core::Box::new(dispute_proof),
+                            dispute_proof: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                dispute_proof,
+                            ),
                             key_owner_proof,
                         },
                         [
@@ -45229,8 +45245,8 @@ pub mod api {
                         "XcmPallet",
                         "send",
                         types::Send {
-                            dest: ::subxt::ext::subxt_core::Box::new(dest),
-                            message: ::subxt::ext::subxt_core::Box::new(message),
+                            dest: ::subxt::ext::subxt_core::alloc::boxed::Box::new(dest),
+                            message: ::subxt::ext::subxt_core::alloc::boxed::Box::new(message),
                         },
                         [
                             47u8, 63u8, 128u8, 176u8, 10u8, 137u8, 124u8, 238u8, 155u8, 37u8,
@@ -45269,9 +45285,11 @@ pub mod api {
                         "XcmPallet",
                         "teleport_assets",
                         types::TeleportAssets {
-                            dest: ::subxt::ext::subxt_core::Box::new(dest),
-                            beneficiary: ::subxt::ext::subxt_core::Box::new(beneficiary),
-                            assets: ::subxt::ext::subxt_core::Box::new(assets),
+                            dest: ::subxt::ext::subxt_core::alloc::boxed::Box::new(dest),
+                            beneficiary: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                beneficiary,
+                            ),
+                            assets: ::subxt::ext::subxt_core::alloc::boxed::Box::new(assets),
                             fee_asset_item,
                         },
                         [
@@ -45323,9 +45341,11 @@ pub mod api {
                         "XcmPallet",
                         "reserve_transfer_assets",
                         types::ReserveTransferAssets {
-                            dest: ::subxt::ext::subxt_core::Box::new(dest),
-                            beneficiary: ::subxt::ext::subxt_core::Box::new(beneficiary),
-                            assets: ::subxt::ext::subxt_core::Box::new(assets),
+                            dest: ::subxt::ext::subxt_core::alloc::boxed::Box::new(dest),
+                            beneficiary: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                beneficiary,
+                            ),
+                            assets: ::subxt::ext::subxt_core::alloc::boxed::Box::new(assets),
                             fee_asset_item,
                         },
                         [
@@ -45353,7 +45373,7 @@ pub mod api {
                         "XcmPallet",
                         "execute",
                         types::Execute {
-                            message: ::subxt::ext::subxt_core::Box::new(message),
+                            message: ::subxt::ext::subxt_core::alloc::boxed::Box::new(message),
                             max_weight,
                         },
                         [
@@ -45379,7 +45399,7 @@ pub mod api {
                         "XcmPallet",
                         "force_xcm_version",
                         types::ForceXcmVersion {
-                            location: ::subxt::ext::subxt_core::Box::new(location),
+                            location: ::subxt::ext::subxt_core::alloc::boxed::Box::new(location),
                             version,
                         },
                         [
@@ -45424,7 +45444,7 @@ pub mod api {
                         "XcmPallet",
                         "force_subscribe_version_notify",
                         types::ForceSubscribeVersionNotify {
-                            location: ::subxt::ext::subxt_core::Box::new(location),
+                            location: ::subxt::ext::subxt_core::alloc::boxed::Box::new(location),
                         },
                         [
                             203u8, 171u8, 70u8, 130u8, 46u8, 63u8, 76u8, 50u8, 105u8, 23u8, 249u8,
@@ -45448,7 +45468,7 @@ pub mod api {
                         "XcmPallet",
                         "force_unsubscribe_version_notify",
                         types::ForceUnsubscribeVersionNotify {
-                            location: ::subxt::ext::subxt_core::Box::new(location),
+                            location: ::subxt::ext::subxt_core::alloc::boxed::Box::new(location),
                         },
                         [
                             6u8, 113u8, 168u8, 215u8, 233u8, 202u8, 249u8, 134u8, 131u8, 8u8,
@@ -45500,9 +45520,11 @@ pub mod api {
                         "XcmPallet",
                         "limited_reserve_transfer_assets",
                         types::LimitedReserveTransferAssets {
-                            dest: ::subxt::ext::subxt_core::Box::new(dest),
-                            beneficiary: ::subxt::ext::subxt_core::Box::new(beneficiary),
-                            assets: ::subxt::ext::subxt_core::Box::new(assets),
+                            dest: ::subxt::ext::subxt_core::alloc::boxed::Box::new(dest),
+                            beneficiary: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                beneficiary,
+                            ),
+                            assets: ::subxt::ext::subxt_core::alloc::boxed::Box::new(assets),
                             fee_asset_item,
                             weight_limit,
                         },
@@ -45545,9 +45567,11 @@ pub mod api {
                         "XcmPallet",
                         "limited_teleport_assets",
                         types::LimitedTeleportAssets {
-                            dest: ::subxt::ext::subxt_core::Box::new(dest),
-                            beneficiary: ::subxt::ext::subxt_core::Box::new(beneficiary),
-                            assets: ::subxt::ext::subxt_core::Box::new(assets),
+                            dest: ::subxt::ext::subxt_core::alloc::boxed::Box::new(dest),
+                            beneficiary: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                beneficiary,
+                            ),
+                            assets: ::subxt::ext::subxt_core::alloc::boxed::Box::new(assets),
                             fee_asset_item,
                             weight_limit,
                         },
@@ -45622,9 +45646,11 @@ pub mod api {
                         "XcmPallet",
                         "transfer_assets",
                         types::TransferAssets {
-                            dest: ::subxt::ext::subxt_core::Box::new(dest),
-                            beneficiary: ::subxt::ext::subxt_core::Box::new(beneficiary),
-                            assets: ::subxt::ext::subxt_core::Box::new(assets),
+                            dest: ::subxt::ext::subxt_core::alloc::boxed::Box::new(dest),
+                            beneficiary: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                beneficiary,
+                            ),
+                            assets: ::subxt::ext::subxt_core::alloc::boxed::Box::new(assets),
                             fee_asset_item,
                             weight_limit,
                         },
@@ -45651,8 +45677,10 @@ pub mod api {
                         "XcmPallet",
                         "claim_assets",
                         types::ClaimAssets {
-                            assets: ::subxt::ext::subxt_core::Box::new(assets),
-                            beneficiary: ::subxt::ext::subxt_core::Box::new(beneficiary),
+                            assets: ::subxt::ext::subxt_core::alloc::boxed::Box::new(assets),
+                            beneficiary: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
+                                beneficiary,
+                            ),
                         },
                         [
                             155u8, 23u8, 166u8, 172u8, 251u8, 171u8, 136u8, 240u8, 253u8, 51u8,
@@ -47187,7 +47215,7 @@ pub mod api {
                         "Beefy",
                         "report_equivocation",
                         types::ReportEquivocation {
-                            equivocation_proof: ::subxt::ext::subxt_core::Box::new(
+                            equivocation_proof: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
                                 equivocation_proof,
                             ),
                             key_owner_proof,
@@ -47219,7 +47247,7 @@ pub mod api {
                         "Beefy",
                         "report_equivocation_unsigned",
                         types::ReportEquivocationUnsigned {
-                            equivocation_proof: ::subxt::ext::subxt_core::Box::new(
+                            equivocation_proof: ::subxt::ext::subxt_core::alloc::boxed::Box::new(
                                 equivocation_proof,
                             ),
                             key_owner_proof,
@@ -48139,7 +48167,7 @@ pub mod api {
                         "sudo_queue_downward_xcm",
                         types::SudoQueueDownwardXcm {
                             id,
-                            xcm: ::subxt::ext::subxt_core::Box::new(xcm),
+                            xcm: ::subxt::ext::subxt_core::alloc::boxed::Box::new(xcm),
                         },
                         [
                             35u8, 59u8, 126u8, 248u8, 211u8, 246u8, 239u8, 67u8, 252u8, 100u8,
@@ -49943,7 +49971,7 @@ pub mod api {
                         "Sudo",
                         "sudo",
                         types::Sudo {
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             182u8, 237u8, 136u8, 248u8, 26u8, 98u8, 159u8, 249u8, 13u8, 148u8,
@@ -49968,7 +49996,7 @@ pub mod api {
                         "Sudo",
                         "sudo_unchecked_weight",
                         types::SudoUncheckedWeight {
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                             weight,
                         },
                         [
@@ -50009,7 +50037,7 @@ pub mod api {
                         "sudo_as",
                         types::SudoAs {
                             who,
-                            call: ::subxt::ext::subxt_core::Box::new(call),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
                             74u8, 180u8, 112u8, 113u8, 184u8, 0u8, 87u8, 59u8, 130u8, 8u8, 222u8,

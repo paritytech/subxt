@@ -43,7 +43,7 @@ pub fn generate_calls(
                         // Note: fn_arg_type this is relative the type path of the type alias when prefixed with `types::`, e.g. `set_max_code_size::New`
                         let fn_arg_type = &field.type_path;
                         let call_arg = if field.is_boxed {
-                            quote! { #name: #crate_path::Box::new(#name) }
+                            quote! { #name: #crate_path::alloc::boxed::Box::new(#name) }
                         } else {
                             quote! { #name }
                         };
