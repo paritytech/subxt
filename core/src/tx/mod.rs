@@ -53,11 +53,11 @@ pub struct ValidationDetails<'a> {
 #[derive(Derivative)]
 #[derivative(
     Clone(bound = "CallData: Clone"),
-    Debug(bound = "CallData: std::fmt::Debug"),
-    Eq(bound = "CallData: std::cmp::Eq"),
-    Ord(bound = "CallData: std::cmp::Ord"),
-    PartialEq(bound = "CallData: std::cmp::PartialEq"),
-    PartialOrd(bound = "CallData: std::cmp::PartialOrd")
+    Debug(bound = "CallData: core::fmt::Debug"),
+    Eq(bound = "CallData: core::cmp::Eq"),
+    Ord(bound = "CallData: core::cmp::Ord"),
+    PartialEq(bound = "CallData: core::cmp::PartialEq"),
+    PartialOrd(bound = "CallData: core::cmp::PartialOrd")
 )]
 pub struct Payload<CallData> {
     pallet_name: Cow<'static, str>,
