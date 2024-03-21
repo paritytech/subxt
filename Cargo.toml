@@ -31,7 +31,7 @@ resolver = "2"
 [workspace.package]
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
-version = "0.34.0"
+version = "0.35.0"
 rust-version = "1.74.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
@@ -135,12 +135,12 @@ sp-runtime = "31.0.0"
 sp-keyring = "31.0.0"
 
 # Subxt workspace crates:
-subxt = { version = "0.34.0", path = "subxt", default-features = false }
-subxt-macro = { version = "0.34.0", path = "macro" }
-subxt-metadata = { version = "0.34.0", path = "metadata", default-features = false }
-subxt-codegen = { version = "0.34.0", path = "codegen" }
-subxt-signer = { version = "0.34.0", path = "signer", default-features = false }
-subxt-lightclient = { version = "0.34.0", path = "lightclient", default-features = false }
+subxt = { version = "0.35.0", path = "subxt", default-features = false }
+subxt-macro = { version = "0.35.0", path = "macro" }
+subxt-metadata = { version = "0.35.0", path = "metadata", default-features = false }
+subxt-codegen = { version = "0.35.0", path = "codegen" }
+subxt-signer = { version = "0.35.0", path = "signer", default-features = false }
+subxt-lightclient = { version = "0.35.0", path = "lightclient", default-features = false }
 test-runtime = { path = "testing/test-runtime" }
 substrate-runner = { path = "testing/substrate-runner" }
 

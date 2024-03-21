@@ -4,8 +4,116 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.35.0] - 2024-03-21
+
+This release contains several fixes, adds `no_std` support to a couple of crates (`subxt-signer` and `subxt-metadata`) and introduces a few quality of life improvements, which I'll quickly cover:
+
+### Reworked light client ([#1475](https://github.com/paritytech/subxt/pull/1475))
+
+This PR reworks the light client interface. The "basic" usage of connecting to a parachain now looks like this:
+
+```rust
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
+pub mod polkadot {}
+
+use subxt::lightclient::LightClient;
+
+// Instantiate a light client with the Polkadot relay chain given its chain spec.
+let (lightclient, polkadot_rpc) = LightClient::relay_chain(POLKADOT_SPEC)?;
+// Connect the light client to some parachain by giving a chain spec for it.
+let asset_hub_rpc = lightclient.parachain(ASSET_HUB_SPEC)?;
+
+// Now, we can create Subxt clients from these Smoldot backed RPC clients:
+let polkadot_api = OnlineClient::<PolkadotConfig>::from_rpc_client(polkadot_rpc).await?;
+let asset_hub_api = OnlineClient::<PolkadotConfig>::from_rpc_client(asset_hub_rpc).await?;
+```
+
+This interface mirrors the requirement that we must connect to a relay chain before we can connect to a parachain. It also moves the light client specific logic into an `RpcClientT` implementation, rather than exposing it as a `subxt::client::LightClient`.
+
+### Typed Storage Keys ([#1419](https://github.com/paritytech/subxt/pull/1419))
+
+This PR changes the storage interface so that, where possible, we now also decode the storage keys as well as the values when iterating over storage entries:
+
+```rust
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
+pub mod polkadot {}
+
+// Create a new API client, configured to talk to Polkadot nodes.
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+// Build a storage query to iterate over account information.
+let storage_query = polkadot::storage().system().account_iter();
+
+// Get back an iterator of results (here, we are fetching 10 items at
+// a time from the node, but we always iterate over one at a time).
+let mut results = api.storage().at_latest().await?.iter(storage_query).await?;
+
+while let Some(Ok(kv)) = results.next().await {
+    // We used to get a tuple of key bytes + value. Now we get back a
+    // `kv` struct containing the bytes and value as well as the actual
+    // decoded keys:
+    println!("Decoded key(s): {:?}", kv.keys);
+    println!("Key bytes: 0x{}", hex::encode(&kv.key_bytes));
+    println!("Value: {:?}", kv.value);
+}
+```
+
+When using the static interface, keys come back as a tuple of values corresponding to the different hashers used in constructing the key. When using a dynamic interface, keys will be encoded/decoded from the type given so long as it implements `subxt::storage::StorageKey`, eg `Vec<scale_value::Value>`.
+
+### Extrinsic Params Refinement ([#1439](https://github.com/paritytech/subxt/pull/1439))
+
+Prior to this PR, one could configure extrinsic signed extensions by providing some params like so:
+
+```rust
+// Configure the transaction parameters; we give a small tip and set the
+// transaction to live for 32 blocks from the `latest_block` above:
+let tx_params = Params::new()
+    .tip(1_000)
+    .mortal(latest_block.header(), 32)
+    .build();
+
+let hash = api.tx().sign_and_submit(&tx, &from, tx_params).await?;
+```
+
+If you want to customize the account nonce, you'd use a different call like `create_signed_with_nonce` instead.
+
+One of the downsides of the above approach is that, if you don't provide any explicit params, transactions will be immortal by default (because the signed extensions didn't have the information to do any better).
+
+Now, with the help of a `RefineParams` trait, transactions will default to being mortal and living for 32 blocks unless an explicit mortality is provided as above.
+
+One notable change is that the offline-only `create_signed_with_nonce` and `create_partial_signed_with_nonce` functions have lost the `_with_nonce` suffix. Since we can't discover nonce/mortality settings offline, you should now provide `Params` and set an explicit nonce (and mortality, if you like) when using these calls, otherwise the nonce will be set to 0 and the mortality to `Immortal`.
+
+For a full list of changes, please see the following:
+
+### Added
+
+- Reworked light client ([#1475](https://github.com/paritytech/subxt/pull/1475))
+- `no_std` compatibility for `subxt-signer` ([#1477](https://github.com/paritytech/subxt/pull/1477))
+- Typed Storage Keys ([#1419](https://github.com/paritytech/subxt/pull/1419))
+- Extrinsic Params Refinement ([#1439](https://github.com/paritytech/subxt/pull/1439))
+- Make storage_page_size for the LegacyBackend configurable ([#1458](https://github.com/paritytech/subxt/pull/1458))
+- `no_std` compatibility for `subxt-metadata` ([#1401](https://github.com/paritytech/subxt/pull/1401))
+- Experimental `reconnecting-rpc-client` ([#1396](https://github.com/paritytech/subxt/pull/1396))
+
+### Changed
+
+- `scale-type-resolver` integration ([#1460](https://github.com/paritytech/subxt/pull/1460))
+- subxt: Derive `std::cmp` traits for subxt payloads and addresses ([#1429](https://github.com/paritytech/subxt/pull/1429))
+- CLI: Return error on wrongly specified type paths ([#1397](https://github.com/paritytech/subxt/pull/1397))
+- rpc v2: chainhead support multiple finalized block hashes in `FollowEvent::Initialized` ([#1476](https://github.com/paritytech/subxt/pull/1476))
+- rpc v2: rename transaction to transactionWatch ([#1399](https://github.com/paritytech/subxt/pull/1399))
+
+### Fixed
+
+- Avoid a panic in case we try decoding naff bytes ([#1444](https://github.com/paritytech/subxt/pull/1444))
+- Fix error mapping to wrong transaction status ([#1445](https://github.com/paritytech/subxt/pull/1445))
+- Update DispatchError to match latest in polkadot-sdk ([#1442](https://github.com/paritytech/subxt/pull/1442))
+- Handle errors when fetching storage keys from Unstablebackend ([#1440](https://github.com/paritytech/subxt/pull/1440))
+- Swap type aliases around to be semantically correct ([#1441](https://github.com/paritytech/subxt/pull/1441))
+
+
 ## [0.34.0] - 2024-01-23
- 
+
 This release introduces a bunch of features that make subxt easier to use. Let's look at a few of them.
 
 ### Codegen - Integrating [`scale-typegen`](https://github.com/paritytech/scale-typegen) and adding type aliases ([#1249](https://github.com/paritytech/subxt/pull/1249))
@@ -23,7 +131,7 @@ If you provide an invalid type path, the macro will tell you so. It also suggest
 
 ```rust
 #[subxt::subxt(
-    runtime_metadata_path = "metadata.scale", 
+    runtime_metadata_path = "metadata.scale",
     derive_for_type(path = "Junctions", derive = "Clone")
 )]
 pub mod polkadot {}
@@ -34,7 +142,7 @@ This gives you a compile-time error like this:
 ```md
 Type `Junctions` does not exist at path `Junctions`
 
-A type with the same name is present at: 
+A type with the same name is present at:
 xcm::v3::junctions::Junctions
 xcm::v2::multilocation::Junctions
 ```
@@ -78,7 +186,7 @@ Our CLI tool now allows you to explore runtime APIs and events ([#1290](https://
 # Show details about a runtime API call:
 subxt explore --url wss://westend-rpc.polkadot.io api StakingAPI nominations_quota
 # Execute a runtime API call from the CLI:
-subxt explore --url wss://westend-rpc.polkadot.io api core version -e 
+subxt explore --url wss://westend-rpc.polkadot.io api core version -e
 # Discover what events a pallet can emit:
 subxt explore --url wss://westend-rpc.polkadot.io pallet Balances events
 ```

@@ -533,7 +533,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "derive_more",
  "frame-metadata",
@@ -545,7 +545,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "bip39",
  "cfg-if",
