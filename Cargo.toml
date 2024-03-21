@@ -58,7 +58,7 @@ type_complexity = "allow"
 all = "deny"
 
 [workspace.dependencies]
-async-trait = "0.1.74"
+async-trait = "0.1.78"
 assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
