@@ -295,11 +295,9 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// Returns an operation ID that can be used to stop the broadcasting process.
     /// Returns `None` if the server cannot handle the request at the moment.
     pub async fn transaction_unstable_broadcast(&self, tx: &[u8]) -> Result<Option<String>, Error> {
-        let operation_id = self
-            .client
+        self.client
             .request("transaction_unstable_broadcast", rpc_params![to_hex(tx)])
-            .await?;
-        Ok(operation_id)
+            .await
     }
 
     /// Stop the broadcasting process of the transaction.
@@ -308,11 +306,9 @@ impl<T: Config> UnstableRpcMethods<T> {
     ///
     /// Returns an error if the operation ID does not correspond to any active transaction for this connection.
     pub async fn transaction_unstable_stop(&self, operation_id: &str) -> Result<(), Error> {
-        let operation_id = self
-            .client
+        self.client
             .request("transaction_unstable_stop", rpc_params![operation_id])
-            .await?;
-        Ok(operation_id)
+            .await
     }
 }
 
