@@ -14,7 +14,7 @@ use subxt::{
         FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
         StorageQueryType,
     },
-    utils::AccountId32,
+    utils::{AccountId32, MultiAddress},
 };
 use subxt_signer::sr25519::dev;
 
@@ -312,7 +312,6 @@ async fn next_operation_event<
 
 #[tokio::test]
 async fn transaction_unstable_broadcast() {
-    let alice = dev::alice();
     let bob = dev::bob();
     let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
 
@@ -327,7 +326,7 @@ async fn transaction_unstable_broadcast() {
     let tx_bytes = ctx
         .client()
         .tx()
-        .create_signed_offline(&payload, &dev::alice(), Default::default())
+        .create_signed_offline(&tx, &dev::alice(), Default::default())
         .unwrap()
         .into_encoded();
 
@@ -337,7 +336,7 @@ async fn transaction_unstable_broadcast() {
     let mut num_blocks: usize = 5;
 
     // Submit the transaction.
-    let operation_id = rpc
+    let _operation_id = rpc
         .transaction_unstable_broadcast(&tx_bytes)
         .await
         .unwrap()
@@ -347,12 +346,12 @@ async fn transaction_unstable_broadcast() {
         let finalized = finalized.unwrap();
 
         // Started with positive, should not overflow.
-        num_blocks.saturating_sub(1);
+        num_blocks = num_blocks.saturating_sub(1);
         if num_blocks == 0 {
             panic!("Did not find the tx in due time");
         }
 
-        let extrinsics = block.extrinsics().await.unwrap();
+        let extrinsics = finalized.extrinsics().await.unwrap();
         let block_extrinsics = extrinsics
             .iter()
             .map(|res| res.unwrap())
