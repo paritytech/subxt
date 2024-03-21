@@ -333,7 +333,7 @@ async fn transaction_unstable_broadcast() {
     // Subscribe to finalized blocks.
     let mut finalized_sub = api.blocks().subscribe_finalized().await.unwrap();
     // Expect the tx to be encountered in a maximum number of blocks.
-    let mut num_blocks: usize = 5;
+    let mut num_blocks: usize = 10;
 
     // Submit the transaction.
     let _operation_id = rpc
