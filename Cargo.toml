@@ -96,7 +96,7 @@ scale-encode = { version = "0.6.0", default-features = false }
 serde = { version = "1.0.197", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.114", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
-thiserror = "1.0.57"
+thiserror = "1.0.58"
 tokio = { version = "1.36", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
