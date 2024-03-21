@@ -496,7 +496,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp-core-hashing"
+name = "sp-crypto-hashing"
 version = "15.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e0f4990add7b2cefdeca883c0efa99bb4d912cb2196120e1500c0cc099553b0"
@@ -540,7 +540,7 @@ dependencies = [
  "hashbrown",
  "parity-scale-codec",
  "scale-info",
- "sp-core-hashing",
+ "sp-crypto-hashing",
 ]
 
 [[package]]
@@ -558,7 +558,7 @@ dependencies = [
  "schnorrkel",
  "secrecy",
  "sha2",
- "sp-core-hashing",
+ "sp-crypto-hashing",
  "zeroize",
 ]
 
