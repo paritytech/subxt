@@ -2499,7 +2499,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "subxt"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "async-trait",
  "base58",
@@ -2533,7 +2533,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "getrandom",
@@ -2553,7 +2553,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "futures",
  "futures-timer",
@@ -2578,7 +2578,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "darling",
  "parity-scale-codec",
@@ -2591,7 +2591,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "derive_more",
  "frame-metadata 16.0.0",
