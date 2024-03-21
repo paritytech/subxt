@@ -87,7 +87,7 @@ instant = { workspace = true }
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }
 primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"] }
-sp-core-hashing = { workspace = true }
+sp-crypto-hashing = { workspace = true }
 
 # For ss58 encoding AccountId32 to serialize them properly:
 base58 = { workspace = true }

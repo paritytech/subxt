@@ -17,8 +17,8 @@ pub fn write_storage_address_root_bytes<Address: StorageAddress>(
     addr: &Address,
     out: &mut Vec<u8>,
 ) {
-    out.extend(sp_core_hashing::twox_128(addr.pallet_name().as_bytes()));
-    out.extend(sp_core_hashing::twox_128(addr.entry_name().as_bytes()));
+    out.extend(sp_crypto_hashing::twox_128(addr.pallet_name().as_bytes()));
+    out.extend(sp_crypto_hashing::twox_128(addr.entry_name().as_bytes()));
 }
 
 /// Outputs the [`storage_address_root_bytes`] as well as any additional bytes that represent
@@ -44,16 +44,16 @@ pub fn storage_address_root_bytes<Address: StorageAddress>(addr: &Address) -> Ve
 pub fn hash_bytes(input: &[u8], hasher: StorageHasher, bytes: &mut Vec<u8>) {
     match hasher {
         StorageHasher::Identity => bytes.extend(input),
-        StorageHasher::Blake2_128 => bytes.extend(sp_core_hashing::blake2_128(input)),
+        StorageHasher::Blake2_128 => bytes.extend(sp_crypto_hashing::blake2_128(input)),
         StorageHasher::Blake2_128Concat => {
-            bytes.extend(sp_core_hashing::blake2_128(input));
+            bytes.extend(sp_crypto_hashing::blake2_128(input));
             bytes.extend(input);
         }
-        StorageHasher::Blake2_256 => bytes.extend(sp_core_hashing::blake2_256(input)),
-        StorageHasher::Twox128 => bytes.extend(sp_core_hashing::twox_128(input)),
-        StorageHasher::Twox256 => bytes.extend(sp_core_hashing::twox_256(input)),
+        StorageHasher::Blake2_256 => bytes.extend(sp_crypto_hashing::blake2_256(input)),
+        StorageHasher::Twox128 => bytes.extend(sp_crypto_hashing::twox_128(input)),
+        StorageHasher::Twox256 => bytes.extend(sp_crypto_hashing::twox_256(input)),
         StorageHasher::Twox64Concat => {
-            bytes.extend(sp_core_hashing::twox_64(input));
+            bytes.extend(sp_crypto_hashing::twox_64(input));
             bytes.extend(input);
         }
     }

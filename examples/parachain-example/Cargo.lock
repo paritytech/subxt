@@ -2512,7 +2512,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp-core-hashing"
+name = "sp-crypto-hashing"
 version = "13.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb8524f01591ee58b46cd83c9dbc0fcffd2fd730dabec4f59326cd58a00f17e2"
@@ -2573,7 +2573,7 @@ dependencies = [
  "scale-value",
  "serde",
  "serde_json",
- "sp-core-hashing",
+ "sp-crypto-hashing",
  "subxt-lightclient",
  "subxt-macro",
  "subxt-metadata",
@@ -2637,7 +2637,7 @@ dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
  "scale-info",
- "sp-core-hashing",
+ "sp-crypto-hashing",
  "thiserror",
 ]
 
@@ -2655,7 +2655,7 @@ dependencies = [
  "secp256k1",
  "secrecy",
  "sha2 0.10.8",
- "sp-core-hashing",
+ "sp-crypto-hashing",
  "subxt",
  "thiserror",
  "zeroize",

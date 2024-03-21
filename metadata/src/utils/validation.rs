@@ -35,7 +35,7 @@ enum TypeBeingHashed {
 
 /// Hashing function utilized internally.
 fn hash(data: &[u8]) -> Hash {
-    sp_core_hashing::twox_256(data)
+    sp_crypto_hashing::twox_256(data)
 }
 
 /// XOR two hashes together. Only use this when you don't care about the order

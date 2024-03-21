@@ -144,7 +144,7 @@ impl Keypair {
                 DeriveJunction::Soft(_) => return Err(Error::SoftJunction),
                 DeriveJunction::Hard(junction_bytes) => {
                     acc = ("Secp256k1HDKD", acc, junction_bytes)
-                        .using_encoded(sp_core_hashing::blake2_256)
+                        .using_encoded(sp_crypto_hashing::blake2_256)
                 }
             }
         }
@@ -161,7 +161,7 @@ impl Keypair {
     /// Sign some message. These bytes can be used directly in a Substrate `MultiSignature::Ecdsa(..)`.
     pub fn sign(&self, message: &[u8]) -> Signature {
         // From sp_core::ecdsa::sign:
-        let message_hash = sp_core_hashing::blake2_256(message);
+        let message_hash = sp_crypto_hashing::blake2_256(message);
         // From sp_core::ecdsa::sign_prehashed:
         let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
         let recsig: RecoverableSignature =
@@ -194,7 +194,7 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
     let Ok(public) = secp256k1::PublicKey::from_slice(&pubkey.0) else {
         return false;
     };
-    let message_hash = sp_core_hashing::blake2_256(message.as_ref());
+    let message_hash = sp_crypto_hashing::blake2_256(message.as_ref());
     let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
 
     Secp256k1::verification_only()
@@ -299,7 +299,7 @@ mod subxt_compat {
         /// We often want this type, and using this method avoids any
         /// ambiguous type resolution issues.
         pub fn to_account_id(self) -> AccountId32 {
-            AccountId32(sp_core_hashing::blake2_256(&self.0))
+            AccountId32(sp_crypto_hashing::blake2_256(&self.0))
         }
         /// A shortcut to obtain a [`MultiAddress`] from a [`PublicKey`].
         /// We often want this type, and using this method avoids any
