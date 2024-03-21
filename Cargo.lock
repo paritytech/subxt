@@ -3577,22 +3577,19 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0d6108609f017741c78d35967c7afe4aeaa3999b848282581041428e10d23b63"
+version = "0.3.0"
 dependencies = [
  "proc-macro2",
  "quote",
  "scale-info",
+ "smallvec",
  "syn 2.0.48",
  "thiserror",
 ]
 
 [[package]]
 name = "scale-typegen-description"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "479f0b8b0d75cce8d284ace5a9b7f5a12c523c94387c710835695e8b194a17bb"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "peekmore",
