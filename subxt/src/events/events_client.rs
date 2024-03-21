@@ -76,8 +76,8 @@ where
 
 // The storage key needed to access events.
 fn system_events_key() -> [u8; 32] {
-    let a = sp_core_hashing::twox_128(b"System");
-    let b = sp_core_hashing::twox_128(b"Events");
+    let a = sp_crypto_hashing::twox_128(b"System");
+    let b = sp_crypto_hashing::twox_128(b"Events");
     let mut res = [0; 32];
     res[0..16].clone_from_slice(&a);
     res[16..32].clone_from_slice(&b);
