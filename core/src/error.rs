@@ -1,3 +1,4 @@
+use alloc::boxed::Box;
 use alloc::string::String;
 use derive_more::{Display, From};
 use subxt_metadata::StorageHasher;
