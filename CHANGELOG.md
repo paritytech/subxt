@@ -111,7 +111,6 @@ For a full list of changes, please see the following:
 - Handle errors when fetching storage keys from Unstablebackend ([#1440](https://github.com/paritytech/subxt/pull/1440))
 - Swap type aliases around to be semantically correct ([#1441](https://github.com/paritytech/subxt/pull/1441))
 
-
 ## [0.34.0] - 2024-01-23
 
 This release introduces a bunch of features that make subxt easier to use. Let's look at a few of them.
