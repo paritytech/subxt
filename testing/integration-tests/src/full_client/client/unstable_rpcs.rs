@@ -309,3 +309,66 @@ async fn next_operation_event<
 
     panic!("Cannot find operation related event after {NUM_EVENTS} produced events");
 }
+
+#[tokio::test]
+async fn transaction_unstable_broadcast() {
+    let alice = dev::alice();
+    let bob = dev::bob();
+    let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
+
+    let ctx = test_context().await;
+    let api = ctx.client();
+    let rpc = ctx.unstable_rpc_methods().await;
+
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer_allow_death(bob_address.clone(), 10_001);
+
+    let tx_bytes = ctx
+        .client()
+        .tx()
+        .create_signed_offline(&payload, &dev::alice(), Default::default())
+        .unwrap()
+        .into_encoded();
+
+    // Subscribe to finalized blocks.
+    let mut finalized_sub = api.blocks().subscribe_finalized().await.unwrap();
+    // Expect the tx to be encountered in a maximum number of blocks.
+    let mut num_blocks: usize = 5;
+
+    // Submit the transaction.
+    let operation_id = rpc
+        .transaction_unstable_broadcast(&tx_bytes)
+        .await
+        .unwrap()
+        .expect("Server is not overloaded by 1 tx; qed");
+
+    while let Some(finalized) = finalized_sub.next().await {
+        let finalized = finalized.unwrap();
+
+        // Started with positive, should not overflow.
+        num_blocks.saturating_sub(1);
+        if num_blocks == 0 {
+            panic!("Did not find the tx in due time");
+        }
+
+        let extrinsics = block.extrinsics().await.unwrap();
+        let block_extrinsics = extrinsics
+            .iter()
+            .map(|res| res.unwrap())
+            .collect::<Vec<_>>();
+
+        // All blocks must contain the timestamp, we expect the next extrinsics to be our own.
+        let Some(tx) = block_extrinsics.get(1) else {
+            continue;
+        };
+
+        let ext = tx
+            .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
+            .unwrap()
+            .unwrap();
+        assert_eq!(ext.value, 10_001);
+        assert!(tx.is_signed());
+        return;
+    }
+}
