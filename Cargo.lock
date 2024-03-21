@@ -4151,6 +4151,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "sp-crypto-hashing"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc9927a7f81334ed5b8a98a4a978c81324d12bd9713ec76b5c68fd410174c5eb"
+dependencies = [
+ "blake2b_simd",
+ "byteorder",
+ "digest 0.10.7",
+ "sha2 0.10.8",
+ "sha3",
+ "twox-hash",
+]
+
+[[package]]
 name = "sp-debug-derive"
 version = "14.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4539,7 +4553,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sp-core",
- "sp-core-hashing",
+ "sp-crypto-hashing",
  "sp-keyring",
  "sp-runtime",
  "subxt-lightclient",
@@ -4653,7 +4667,7 @@ dependencies = [
  "hashbrown 0.14.3",
  "parity-scale-codec",
  "scale-info",
- "sp-core-hashing",
+ "sp-crypto-hashing",
 ]
 
 [[package]]
@@ -4674,7 +4688,7 @@ dependencies = [
  "secrecy",
  "sha2 0.10.8",
  "sp-core",
- "sp-core-hashing",
+ "sp-crypto-hashing",
  "sp-keyring",
  "subxt",
  "zeroize",
