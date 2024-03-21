@@ -22,7 +22,9 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Return the provided [`RuntimeVersion`].
     fn runtime_version(&self) -> RuntimeVersion;
     /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
-    fn client_state(&self) -> ClientState<T>;
+    fn client_state(&self) -> ClientState<T> {
+        ClientState::new(self.genesis_hash(), self.runtime_version(), self.metadata())
+    }
 
     /// Work with transactions.
     fn tx(&self) -> TxClient<T, Self> {

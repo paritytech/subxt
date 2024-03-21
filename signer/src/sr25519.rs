@@ -259,8 +259,9 @@ mod subxt_compat {
     use super::*;
 
     use subxt_core::{
+        tx::Signer as SignerT,
         utils::{AccountId32, MultiAddress, MultiSignature},
-        Config, Signer as SignerT,
+        Config,
     };
 
     impl From<Signature> for MultiSignature {

@@ -16,16 +16,16 @@ pub use scale_value::{At, Value};
 /// for dynamic requests.
 pub type DecodedValue = scale_value::Value<u32>;
 
-/// Submit dynamic transactions.
+// Submit dynamic transactions.
 pub use crate::tx::dynamic as tx;
 
-/// Lookup constants dynamically.
+// Lookup constants dynamically.
 pub use crate::constants::dynamic as constant;
 
-/// Lookup storage values dynamically.
+// Lookup storage values dynamically.
 pub use crate::storage::dynamic as storage;
 
-/// Execute runtime API function call dynamically.
+// Execute runtime API function call dynamically.
 pub use crate::runtime_api::dynamic as runtime_api_call;
 
 /// This is the result of making a dynamic request to a node. From this,
@@ -63,7 +63,7 @@ impl DecodedValueThunk {
     pub fn encoded(&self) -> &[u8] {
         &self.scale_bytes
     }
-    /// Decode the SCALE encoded storage Value into a dynamic [`DecodedValue`] type.
+    /// Decode the SCALE encoded storage entry into a dynamic [`DecodedValue`] type.
     pub fn to_value(&self) -> Result<DecodedValue, scale_decode::Error> {
         let val = scale_value::scale::decode_as_type(
             &mut &*self.scale_bytes,

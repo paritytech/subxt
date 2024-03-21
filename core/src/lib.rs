@@ -19,7 +19,6 @@ pub mod error;
 pub mod events;
 pub mod metadata;
 pub mod runtime_api;
-pub mod signer;
 pub mod storage;
 pub mod tx;
 pub mod utils;
@@ -27,7 +26,6 @@ pub mod utils;
 pub use config::Config;
 pub use error::Error;
 pub use metadata::Metadata;
-pub use signer::Signer;
 
 #[macro_use]
 mod macros;

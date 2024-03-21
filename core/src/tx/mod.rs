@@ -17,6 +17,9 @@ use derivative::Derivative;
 use scale_encode::EncodeAsFields;
 use scale_value::{Composite, Value, ValueDef, Variant};
 
+pub mod signer;
+pub use signer::Signer;
+
 /// This represents a transaction payload that can be submitted
 /// to a node.
 pub trait TxPayload {

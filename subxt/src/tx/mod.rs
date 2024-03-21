@@ -14,13 +14,13 @@ use crate::macros::cfg_substrate_compat;
 mod tx_client;
 mod tx_progress;
 
-pub use subxt_core::signer;
 pub use subxt_core::tx as tx_payload;
+pub use subxt_core::tx::signer;
 
 // The PairSigner impl currently relies on Substrate bits and pieces, so make it an optional
 // feature if we want to avoid needing sp_core and sp_runtime.
 cfg_substrate_compat! {
-    pub use self::signer::PairSigner;
+    pub use signer::PairSigner;
 }
 
 pub use self::{

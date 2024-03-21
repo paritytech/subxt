@@ -118,6 +118,9 @@ pub enum FromSs58Error {
     InvalidPrefix,
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for FromSs58Error {}
+
 // We do this just to get a checksum to help verify the validity of the address in to_ss58check
 fn ss58hash(data: &[u8]) -> Vec<u8> {
     use blake2::{Blake2b512, Digest};
