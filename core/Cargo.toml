@@ -59,7 +59,7 @@ blake2 = { workspace = true }
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true, default-features = false }
 primitive-types = { workspace = true, default-features = false, features = ["codec", "serde_no_std", "scale-info"] }
-sp-core-hashing = { workspace = true }
+sp-crypto-hashing = { workspace = true }
 
 # Included if the "substrate-compat" feature is enabled.
 sp-core = { workspace = true, optional = true }

@@ -16,7 +16,7 @@ keywords = ["parity", "subxt", "extrinsic", "signer"]
 
 [features]
 default = ["sr25519", "ecdsa", "subxt", "std"]
-std = ["regex/std", "sp-core-hashing/std", "pbkdf2/std", "sha2/std", "hmac/std", "bip39/std", "schnorrkel/std", "secp256k1/std", "sp-core/std"]
+std = ["regex/std", "sp-crypto-hashing/std", "pbkdf2/std", "sha2/std", "hmac/std", "bip39/std", "schnorrkel/std", "secp256k1/std", "sp-core/std"]
 
 # Pick the signer implementation(s) you need by enabling the
 # corresponding features. Note: I had more difficulties getting

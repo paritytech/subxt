@@ -4695,7 +4695,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-core"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "base58",
  "bitvec",
@@ -4716,7 +4716,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sp-core",
- "sp-core-hashing",
+ "sp-crypto-hashing",
  "sp-keyring",
  "sp-runtime",
  "subxt-metadata",
