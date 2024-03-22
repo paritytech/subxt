@@ -25,6 +25,7 @@ use getrandom as _;
 
 use api::RuntimeGenerator;
 use proc_macro2::TokenStream as TokenStream2;
+use scale_typegen::typegen::settings::AllocCratePath;
 use scale_typegen::{
     typegen::settings::substitutes::absolute_path, DerivesRegistry, TypeGeneratorSettings,
     TypeSubstitutes, TypegenError,
@@ -316,6 +317,7 @@ fn subxt_type_gen_settings(
         compact_as_type_path: Some(parse_quote!(#crate_path::ext::codec::CompactAs)),
         compact_type_path: Some(parse_quote!(#crate_path::ext::codec::Compact)),
         insert_codec_attributes: true,
+        alloc_crate_path: AllocCratePath::Custom(parse_quote!(#crate_path::alloc)),
     }
 }
 

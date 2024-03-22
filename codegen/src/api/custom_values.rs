@@ -3,12 +3,13 @@
 // see LICENSE for license details.
 
 use heck::ToSnakeCase as _;
+use scale_typegen::typegen::ir::ToTokensWithSettings;
 use scale_typegen::TypeGenerator;
 use std::collections::HashSet;
 use subxt_metadata::{CustomValueMetadata, Metadata};
 
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
+use quote::quote;
 
 /// Generate the custom values mod, if there are any custom values in the metadata. Else returns None.
 pub fn generate_custom_values(
@@ -60,7 +61,7 @@ fn generate_custom_value_fn(
         let return_ty = type_gen
             .resolve_type_path(custom_value.type_id())
             .expect("type is in metadata; qed")
-            .to_token_stream();
+            .to_token_stream(type_gen.settings());
         let decodable = quote!(#crate_path::utils::Yes);
         (return_ty, decodable)
     } else {

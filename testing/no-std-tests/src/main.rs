@@ -63,10 +63,8 @@ fn compile_test() {
     
 }
 
-// TODO: Currently does not compile, we need changes in scale-typegen to make all paths no-std compatible. 
-//
-// #[subxt_macro::subxt(
-//     runtime_metadata_path = "../../artifacts/polkadot_metadata_full.scale",
-//     crate="::subxt_core"
-// )]
-// pub mod polkadot{}
+#[subxt_macro::subxt(
+    runtime_metadata_path = "../../artifacts/polkadot_metadata_full.scale",
+    crate="::subxt_core"
+)]
+pub mod polkadot{}

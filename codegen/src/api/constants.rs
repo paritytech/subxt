@@ -5,6 +5,7 @@
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
+use scale_typegen::typegen::ir::ToTokensWithSettings;
 use scale_typegen::TypeGenerator;
 use subxt_metadata::PalletMetadata;
 
@@ -55,7 +56,9 @@ pub fn generate_constants(
                 ));
             };
 
-            let return_ty = type_gen.resolve_type_path(constant.ty())?;
+            let return_ty = type_gen
+                .resolve_type_path(constant.ty())?
+                .to_token_stream(type_gen.settings());
             let docs = constant.docs();
             let docs = type_gen
                 .settings()

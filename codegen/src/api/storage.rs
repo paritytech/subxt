@@ -13,6 +13,8 @@ use subxt_metadata::{
 
 use super::CodegenError;
 
+use scale_typegen::typegen::ir::ToTokensWithSettings;
+
 /// Generate functions which create storage addresses from the provided pallet's metadata.
 /// These addresses can be used to access and iterate over storage values.
 ///
@@ -69,7 +71,8 @@ fn generate_storage_entry_fns(
     let storage_entry_ty = storage_entry.entry_type().value_ty();
     let storage_entry_value_ty = type_gen
         .resolve_type_path(storage_entry_ty)
-        .expect("storage type is in metadata; qed");
+        .expect("storage type is in metadata; qed")
+        .to_token_stream(type_gen.settings());
 
     let alias_name = format_ident!("{}", storage_entry.name().to_upper_camel_case());
     let alias_module_name = format_ident!("{snake_case_name}");
@@ -89,7 +92,7 @@ fn generate_storage_entry_fns(
             .expect("type is in metadata; qed");
 
         let alias_name = format_ident!("Param{}", idx);
-        let alias_type = primitive_type_alias(&ty_path);
+        let alias_type = primitive_type_alias(&ty_path, type_gen.settings());
 
         let alias_type_def = quote!( pub type #alias_name = #alias_type; );
         let alias_type_path = quote!( types::#alias_module_name::#alias_name );
@@ -297,16 +300,20 @@ fn generate_storage_entry_fns(
     ))
 }
 
-fn primitive_type_alias(type_path: &TypePath) -> TokenStream {
+fn primitive_type_alias(
+    type_path: &TypePath,
+    settings: &scale_typegen::TypeGeneratorSettings,
+) -> TokenStream {
     // Vec<T> is cast to [T]
     if let Some(ty) = type_path.vec_type_param() {
+        let ty = ty.to_token_stream(settings);
         return quote!([#ty]);
     }
     // String is cast to str
     if type_path.is_string() {
         return quote!(::core::primitive::str);
     }
-    quote!(#type_path)
+    type_path.to_token_stream(settings)
 }
 
 #[cfg(test)]
