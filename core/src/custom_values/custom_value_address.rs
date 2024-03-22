@@ -39,6 +39,7 @@ impl CustomValueAddress for str {
     Clone(bound = ""),
     Debug(bound = ""),
     PartialOrd(bound = ""),
+    Ord(bound = ""),
     PartialEq(bound = ""),
     Eq(bound = "")
 )]

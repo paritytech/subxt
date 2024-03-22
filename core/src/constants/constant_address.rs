@@ -34,6 +34,7 @@ pub trait ConstantAddress {
     Clone(bound = ""),
     Debug(bound = ""),
     PartialOrd(bound = ""),
+    Ord(bound = ""),
     PartialEq(bound = ""),
     Eq(bound = "")
 )]

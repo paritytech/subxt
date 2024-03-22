@@ -107,8 +107,8 @@ url = "2.5.0"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "5.0.0"
-scale-typegen-description = "0.4.0"
-scale-typegen = "0.4.0"
+scale-typegen-description = "0.4.1"
+scale-typegen = "0.4.1"
 strip-ansi-escapes = "0.2.0"
 
 # Light client support:
