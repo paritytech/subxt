@@ -44,7 +44,7 @@ pub struct BlakeTwo256;
 impl Hasher for BlakeTwo256 {
     type Output = H256;
     fn hash(s: &[u8]) -> Self::Output {
-        sp_core_hashing::blake2_256(s).into()
+        sp_crypto_hashing::blake2_256(s).into()
     }
 }
 

@@ -288,8 +288,10 @@ where
         // construct the storage key. This is done similarly in `frame_support::traits::metadata::StorageVersion::storage_key()`.
         pub const STORAGE_VERSION_STORAGE_KEY_POSTFIX: &[u8] = b":__STORAGE_VERSION__:";
         let mut key_bytes: Vec<u8> = vec![];
-        key_bytes.extend(&sp_core_hashing::twox_128(pallet_name.as_ref().as_bytes()));
-        key_bytes.extend(&sp_core_hashing::twox_128(
+        key_bytes.extend(&sp_crypto_hashing::twox_128(
+            pallet_name.as_ref().as_bytes(),
+        ));
+        key_bytes.extend(&sp_crypto_hashing::twox_128(
             STORAGE_VERSION_STORAGE_KEY_POSTFIX,
         ));
 

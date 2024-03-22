@@ -17,7 +17,7 @@ use crate::{
 };
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
-use sp_core_hashing::blake2_256;
+use sp_crypto_hashing::blake2_256;
 
 /// A client for working with transactions.
 #[derive(Derivative)]

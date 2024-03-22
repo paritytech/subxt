@@ -2460,7 +2460,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "sp-core-hashing"
+name = "sp-crypto-hashing"
 version = "15.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e0f4990add7b2cefdeca883c0efa99bb4d912cb2196120e1500c0cc099553b0"
@@ -2499,7 +2499,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "subxt"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "async-trait",
  "derivative",
@@ -2520,8 +2520,7 @@ dependencies = [
  "scale-value",
  "serde",
  "serde_json",
- "sp-core-hashing",
- "subxt-core",
+ "sp-crypto-hashing",
  "subxt-lightclient",
  "subxt-macro",
  "subxt-metadata",
@@ -2532,7 +2531,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "getrandom",
@@ -2578,7 +2577,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "futures",
  "futures-timer",
@@ -2603,7 +2602,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "darling",
  "parity-scale-codec",
@@ -2616,14 +2615,14 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.34.0"
+version = "0.35.0"
 dependencies = [
  "derive_more",
  "frame-metadata 16.0.0",
  "hashbrown 0.14.3",
  "parity-scale-codec",
  "scale-info",
- "sp-core-hashing",
+ "sp-crypto-hashing",
 ]
 
 [[package]]

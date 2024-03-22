@@ -40,7 +40,7 @@ regex = { workspace = true, features = ["unicode"] }
 hex = { workspace = true }
 cfg-if = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
-sp-core-hashing = { workspace = true }
+sp-crypto-hashing = { workspace = true }
 derive_more = { workspace = true }
 pbkdf2 = { workspace = true }
 sha2 = { workspace = true }
