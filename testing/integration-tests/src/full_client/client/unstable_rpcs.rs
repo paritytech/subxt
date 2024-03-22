@@ -14,7 +14,9 @@ use subxt::{
         FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
         StorageQueryType,
     },
+    config::Hasher,
     utils::{AccountId32, MultiAddress},
+    SubstrateConfig,
 };
 use subxt_signer::sr25519::dev;
 
@@ -330,6 +332,9 @@ async fn transaction_unstable_broadcast() {
         .unwrap()
         .into_encoded();
 
+    use subxt::config::Hasher;
+    let tx_hash = <SubstrateConfig as subxt::Config>::Hasher::hash(&tx_bytes);
+
     // Subscribe to finalized blocks.
     let mut finalized_sub = api.blocks().subscribe_finalized().await.unwrap();
     // Expect the tx to be encountered in a maximum number of blocks.
@@ -357,17 +362,18 @@ async fn transaction_unstable_broadcast() {
             .map(|res| res.unwrap())
             .collect::<Vec<_>>();
 
-        // All blocks must contain the timestamp, we expect the next extrinsics to be our own.
-        let Some(tx) = block_extrinsics.get(1) else {
+        let Some(ext) = block_extrinsics
+            .iter()
+            .find(|ext| <SubstrateConfig as subxt::Config>::Hasher::hash(ext.bytes()) == tx_hash)
+        else {
             continue;
         };
 
-        let ext = tx
+        let ext = ext
             .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
             .unwrap()
             .unwrap();
         assert_eq!(ext.value, 10_001);
-        assert!(tx.is_signed());
         return;
     }
 }
