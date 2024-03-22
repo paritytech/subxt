@@ -377,3 +377,44 @@ async fn transaction_unstable_broadcast() {
         return;
     }
 }
+
+#[tokio::test]
+async fn transaction_unstable_stop() {
+    let bob = dev::bob();
+    let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
+
+    let ctx = test_context().await;
+    let api = ctx.client();
+    let rpc = ctx.unstable_rpc_methods().await;
+
+    // Cannot stop an operation that was not started.
+    let _err = rpc
+        .transaction_unstable_stop("non-existent-operation-id")
+        .await
+        .unwrap_err();
+
+    // Submit a transaction and stop it.
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer_allow_death(bob_address.clone(), 10_001);
+    let tx_bytes = ctx
+        .client()
+        .tx()
+        .create_signed_offline(&tx, &dev::alice(), Default::default())
+        .unwrap()
+        .into_encoded();
+
+    // Submit the transaction.
+    let operation_id = rpc
+        .transaction_unstable_broadcast(&tx_bytes)
+        .await
+        .unwrap()
+        .expect("Server is not overloaded by 1 tx; qed");
+
+    let _ = rpc.transaction_unstable_stop(&operation_id).await.unwrap();
+    // Cannot stop it twice.
+    let _err = rpc
+        .transaction_unstable_stop(&operation_id)
+        .await
+        .unwrap_err();
+}
