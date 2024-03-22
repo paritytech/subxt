@@ -332,8 +332,7 @@ async fn transaction_unstable_broadcast() {
         .unwrap()
         .into_encoded();
 
-    use subxt::config::Hasher;
-    let tx_hash = <SubstrateConfig as subxt::Config>::Hasher::hash(&tx_bytes);
+    let tx_hash = <SubstrateConfig as subxt::Config>::Hasher::hash(&tx_bytes[2..]);
 
     // Subscribe to finalized blocks.
     let mut finalized_sub = api.blocks().subscribe_finalized().await.unwrap();
@@ -384,7 +383,6 @@ async fn transaction_unstable_stop() {
     let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
 
     let ctx = test_context().await;
-    let api = ctx.client();
     let rpc = ctx.unstable_rpc_methods().await;
 
     // Cannot stop an operation that was not started.
