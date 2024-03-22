@@ -290,7 +290,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     }
 
     /// Broadcast the transaction on the p2p network until the
-    ///[`Self::transaction_unstable_stop`] is called.
+    /// [`Self::transaction_unstable_stop`] is called.
     ///
     /// Returns an operation ID that can be used to stop the broadcasting process.
     /// Returns `None` if the server cannot handle the request at the moment.
