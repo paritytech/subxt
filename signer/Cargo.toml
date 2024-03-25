@@ -15,7 +15,7 @@ description = "Sign extrinsics to be submitted by Subxt"
 keywords = ["parity", "subxt", "extrinsic", "signer"]
 
 [features]
-default = ["sr25519", "ecdsa", "subxt", "std", "native"]
+default = ["sr25519", "ecdsa", "eth", "subxt", "std", "native"]
 std = ["regex/std", "sp-crypto-hashing/std", "pbkdf2/std", "sha2/std", "hmac/std", "bip39/std", "schnorrkel/std", "secp256k1/std", "sp-core/std"]
 
 # Pick the signer implementation(s) you need by enabling the
@@ -24,6 +24,7 @@ std = ["regex/std", "sp-crypto-hashing/std", "pbkdf2/std", "sha2/std", "hmac/std
 # https://github.com/rust-bitcoin/rust-bitcoin/issues/930#issuecomment-1215538699
 sr25519 = ["schnorrkel"]
 ecdsa = ["secp256k1"]
+eth = ["keccak-hash", "secp256k1"]
 
 # Make the keypair algorithms here compatible with Subxt's Signer trait,
 # so that they can be used to sign transactions for compatible chains.
@@ -50,7 +51,7 @@ bip39 = { workspace = true }
 schnorrkel = { workspace = true, optional = true }
 secp256k1 = { workspace = true, optional = true, features = ["alloc", "recovery"] }
 secrecy = { workspace = true }
-
+keccak-hash = { workspace = true, optional = true }
 
 # We only pull this in to enable the JS flag for schnorrkel to use.
 getrandom = { workspace = true, optional = true }
@@ -58,6 +59,7 @@ getrandom = { workspace = true, optional = true }
 [dev-dependencies]
 sp-core = { workspace = true }
 sp-keyring = { workspace = true }
+proptest = "1.4.0"
 
 [package.metadata.cargo-machete]
 ignored = ["getrandom"]

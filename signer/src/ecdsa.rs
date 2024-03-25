@@ -160,19 +160,20 @@ impl Keypair {
 
     /// Sign some message. These bytes can be used directly in a Substrate `MultiSignature::Ecdsa(..)`.
     pub fn sign(&self, message: &[u8]) -> Signature {
-        // From sp_core::ecdsa::sign:
         let message_hash = sp_crypto_hashing::blake2_256(message);
-        // From sp_core::ecdsa::sign_prehashed:
         let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
-        let recsig: RecoverableSignature =
-            Secp256k1::signing_only().sign_ecdsa_recoverable(&wrapped, &self.0.secret_key());
-        // From sp_core::ecdsa's `impl From<RecoverableSignature> for Signature`:
-        let (recid, sig): (_, [u8; 64]) = recsig.serialize_compact();
-        let mut signature_bytes: [u8; 65] = [0; 65];
-        signature_bytes[..64].copy_from_slice(&sig);
-        signature_bytes[64] = (recid.to_i32() & 0xFF) as u8;
-        Signature(signature_bytes)
+        Signature(sign(&self.0.secret_key(), &wrapped))
     }
+}
+
+pub(crate) fn sign(secret_key: &secp256k1::SecretKey, message: &Message) -> [u8; 65] {
+    let recsig: RecoverableSignature =
+        Secp256k1::signing_only().sign_ecdsa_recoverable(message, secret_key);
+    let (recid, sig): (_, [u8; 64]) = recsig.serialize_compact();
+    let mut signature_bytes: [u8; 65] = [0; 65];
+    signature_bytes[..64].copy_from_slice(&sig);
+    signature_bytes[64] = (recid.to_i32() & 0xFF) as u8;
+    signature_bytes
 }
 
 /// Verify that some signature for a message was created by the owner of the [`PublicKey`].
