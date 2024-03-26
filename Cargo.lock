@@ -4626,6 +4626,7 @@ dependencies = [
  "assert_matches",
  "async-trait",
  "bitvec",
+ "derive-where",
  "either",
  "frame-metadata 16.0.0",
  "futures",

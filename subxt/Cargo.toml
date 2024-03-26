@@ -68,6 +68,7 @@ unstable-light-client = ["subxt-lightclient"]
 [dependencies]
 async-trait = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
+derive-where = { workspace = true }
 scale-info = { workspace = true, features = ["default"] }
 scale-value = { workspace = true, features = ["default"] }
 scale-bits = { workspace = true, features = ["default"] }

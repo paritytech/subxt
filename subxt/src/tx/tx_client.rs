@@ -20,8 +20,7 @@ use derive_where::derive_where;
 use sp_crypto_hashing::blake2_256;
 
 /// A client for working with transactions.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct TxClient<T: Config, Client> {
     client: Client,
     _marker: PhantomDataSendSync<T>,
