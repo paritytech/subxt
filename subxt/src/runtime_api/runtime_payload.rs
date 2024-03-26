@@ -103,7 +103,7 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> RuntimeApiPayload
             .ok_or_else(|| MetadataError::RuntimeMethodNotFound((*self.method_name).to_owned()))?;
         let mut fields = api_method
             .inputs()
-            .map(|input| scale_encode::Field::named(input.ty, &input.name));
+            .map(|input| scale_encode::Field::named(&input.ty, &input.name));
 
         self.args_data
             .encode_as_fields_to(&mut fields, metadata.types(), out)?;

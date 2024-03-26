@@ -60,10 +60,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-// This fails until the fix in https://github.com/paritytech/subxt/pull/458 is introduced.
-// Here we create a key that looks a bit like a StorageNMap key, but should in fact be
-// treated as a StorageKey (ie we should hash both values together with one hasher, rather
-// than hash both values separately, or ignore the second value).
+
 #[cfg(fullclient)]
 #[subxt_test]
 async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> {
@@ -78,18 +75,21 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
         .session()
         .key_owner(KeyTypeId([1, 2, 3, 4]), [5u8, 6, 7, 8]);
     let actual_key_bytes = api.storage().address_bytes(&actual_key)?;
-
     // Let's manually hash to what we assume it should be and compare:
     let expected_key_bytes = {
         // Hash the prefix to the storage entry:
         let mut bytes = sp_core::twox_128("Session".as_bytes()).to_vec();
         bytes.extend(&sp_core::twox_128("KeyOwner".as_bytes())[..]);
-        // twox64_concat a *tuple* of the args expected:
-        let suffix = (KeyTypeId([1, 2, 3, 4]), vec![5u8, 6, 7, 8]).encode();
-        bytes.extend(sp_core::twox_64(&suffix));
-        bytes.extend(&suffix);
+        // Both keys, use twox64_concat hashers:
+        let key1 = KeyTypeId([1, 2, 3, 4]).encode();
+        let key2 = vec![5u8, 6, 7, 8].encode();
+        bytes.extend(sp_core::twox_64(&key1));
+        bytes.extend(&key1);
+        bytes.extend(sp_core::twox_64(&key2));
+        bytes.extend(&key2);
         bytes
     };
+    dbg!(&expected_key_bytes);
 
     assert_eq!(actual_key_bytes, expected_key_bytes);
     Ok(())
@@ -174,9 +174,9 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     let addr_bytes = api.storage().address_bytes(&addr)?;
     let mut results = api.storage().at_latest().await?.iter(addr).await?;
     let mut approvals = Vec::new();
-    while let Some(Ok((key, value))) = results.next().await {
-        assert!(key.starts_with(&addr_bytes));
-        approvals.push(value);
+    while let Some(Ok(kv)) = results.next().await {
+        assert!(kv.key_bytes.starts_with(&addr_bytes));
+        approvals.push(kv.value);
     }
     assert_eq!(approvals.len(), assets.len());
     let mut amounts = approvals.iter().map(|a| a.amount).collect::<Vec<_>>();
@@ -195,9 +195,10 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
         let mut results = api.storage().at_latest().await?.iter(addr).await?;
 
         let mut approvals = Vec::new();
-        while let Some(Ok((key, value))) = results.next().await {
-            assert!(key.starts_with(&addr_bytes));
-            approvals.push(value);
+        while let Some(Ok(kv)) = results.next().await {
+            assert!(kv.key_bytes.starts_with(&addr_bytes));
+            assert!(kv.keys.decoded().is_ok());
+            approvals.push(kv.value);
         }
         assert_eq!(approvals.len(), 1);
         assert_eq!(approvals[0].amount, amount);

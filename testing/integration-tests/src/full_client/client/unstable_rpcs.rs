@@ -14,7 +14,9 @@ use subxt::{
         FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
         StorageQueryType,
     },
-    utils::AccountId32,
+    config::Hasher,
+    utils::{AccountId32, MultiAddress},
+    SubstrateConfig,
 };
 
 #[cfg(lightclient)]
@@ -36,7 +38,7 @@ async fn chainhead_unstable_follow() {
     assert_eq!(
         event,
         FollowEvent::Initialized(Initialized {
-            finalized_block_hash,
+            finalized_block_hashes: vec![finalized_block_hash],
             finalized_block_runtime: None,
         })
     );
@@ -51,7 +53,7 @@ async fn chainhead_unstable_follow() {
     assert_matches!(
         event,
         FollowEvent::Initialized(init) => {
-            assert_eq!(init.finalized_block_hash, finalized_block_hash);
+            assert_eq!(init.finalized_block_hashes, vec![finalized_block_hash]);
             if let Some(RuntimeEvent::Valid(RuntimeVersionEvent { spec })) = init.finalized_block_runtime {
                 assert_eq!(spec.spec_version, runtime_version.spec_version);
                 assert_eq!(spec.transaction_version, runtime_version.transaction_version);
@@ -70,7 +72,7 @@ async fn chainhead_unstable_body() {
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -99,7 +101,7 @@ async fn chainhead_unstable_header() {
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -127,7 +129,7 @@ async fn chainhead_unstable_storage() {
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -172,7 +174,7 @@ async fn chainhead_unstable_call() {
     let mut blocks = rpc.chainhead_unstable_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -209,7 +211,7 @@ async fn chainhead_unstable_unpin() {
     let mut blocks = rpc.chainhead_unstable_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hash,
+        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -269,7 +271,7 @@ async fn transaction_unstable_submit_and_watch() {
     let tx_bytes = ctx
         .client()
         .tx()
-        .create_signed_with_nonce(&payload, &dev::alice(), 0, Default::default())
+        .create_signed_offline(&payload, &dev::alice(), Default::default())
         .unwrap()
         .into_encoded();
 
@@ -316,4 +318,109 @@ async fn next_operation_event<
     }
 
     panic!("Cannot find operation related event after {NUM_EVENTS} produced events");
+}
+
+#[tokio::test]
+async fn transaction_unstable_broadcast() {
+    let bob = dev::bob();
+    let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
+
+    let ctx = test_context().await;
+    let api = ctx.client();
+    let rpc = ctx.unstable_rpc_methods().await;
+
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer_allow_death(bob_address.clone(), 10_001);
+
+    let tx_bytes = ctx
+        .client()
+        .tx()
+        .create_signed_offline(&tx, &dev::alice(), Default::default())
+        .unwrap()
+        .into_encoded();
+
+    let tx_hash = <SubstrateConfig as subxt::Config>::Hasher::hash(&tx_bytes[2..]);
+
+    // Subscribe to finalized blocks.
+    let mut finalized_sub = api.blocks().subscribe_finalized().await.unwrap();
+    // Expect the tx to be encountered in a maximum number of blocks.
+    let mut num_blocks: usize = 10;
+
+    // Submit the transaction.
+    let _operation_id = rpc
+        .transaction_unstable_broadcast(&tx_bytes)
+        .await
+        .unwrap()
+        .expect("Server is not overloaded by 1 tx; qed");
+
+    while let Some(finalized) = finalized_sub.next().await {
+        let finalized = finalized.unwrap();
+
+        // Started with positive, should not overflow.
+        num_blocks = num_blocks.saturating_sub(1);
+        if num_blocks == 0 {
+            panic!("Did not find the tx in due time");
+        }
+
+        let extrinsics = finalized.extrinsics().await.unwrap();
+        let block_extrinsics = extrinsics
+            .iter()
+            .map(|res| res.unwrap())
+            .collect::<Vec<_>>();
+
+        let Some(ext) = block_extrinsics
+            .iter()
+            .find(|ext| <SubstrateConfig as subxt::Config>::Hasher::hash(ext.bytes()) == tx_hash)
+        else {
+            continue;
+        };
+
+        let ext = ext
+            .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
+            .unwrap()
+            .unwrap();
+        assert_eq!(ext.value, 10_001);
+        return;
+    }
+}
+
+#[tokio::test]
+async fn transaction_unstable_stop() {
+    let bob = dev::bob();
+    let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
+
+    let ctx = test_context().await;
+    let rpc = ctx.unstable_rpc_methods().await;
+
+    // Cannot stop an operation that was not started.
+    let _err = rpc
+        .transaction_unstable_stop("non-existent-operation-id")
+        .await
+        .unwrap_err();
+
+    // Submit a transaction and stop it.
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer_allow_death(bob_address.clone(), 10_001);
+    let tx_bytes = ctx
+        .client()
+        .tx()
+        .create_signed_offline(&tx, &dev::alice(), Default::default())
+        .unwrap()
+        .into_encoded();
+
+    // Submit the transaction.
+    let operation_id = rpc
+        .transaction_unstable_broadcast(&tx_bytes)
+        .await
+        .unwrap()
+        .expect("Server is not overloaded by 1 tx; qed");
+
+    let _ = rpc.transaction_unstable_stop(&operation_id).await.unwrap();
+    // Cannot stop it twice.
+    let _err = rpc
+        .transaction_unstable_stop(&operation_id)
+        .await
+        .unwrap_err();
 }

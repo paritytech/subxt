@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use alloc::string::String;
 use hmac::Hmac;
 use pbkdf2::pbkdf2;
 use sha2::Sha512;

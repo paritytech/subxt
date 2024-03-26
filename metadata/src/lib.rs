@@ -475,6 +475,35 @@ pub enum StorageHasher {
     Identity,
 }
 
+impl StorageHasher {
+    /// The hash produced by a [`StorageHasher`] can have these two components, in order:
+    ///
+    /// 1. A fixed size hash. (not present for [`StorageHasher::Identity`]).
+    /// 2. The SCALE encoded key that was used as an input to the hasher (only present for
+    /// [`StorageHasher::Twox64Concat`], [`StorageHasher::Blake2_128Concat`] or [`StorageHasher::Identity`]).
+    ///
+    /// This function returns the number of bytes used to represent the first of these.
+    pub fn len_excluding_key(&self) -> usize {
+        match self {
+            StorageHasher::Blake2_128Concat => 16,
+            StorageHasher::Twox64Concat => 8,
+            StorageHasher::Blake2_128 => 16,
+            StorageHasher::Blake2_256 => 32,
+            StorageHasher::Twox128 => 16,
+            StorageHasher::Twox256 => 32,
+            StorageHasher::Identity => 0,
+        }
+    }
+
+    /// Returns true if the key used to produce the hash is appended to the hash itself.
+    pub fn ends_with_key(&self) -> bool {
+        matches!(
+            self,
+            StorageHasher::Blake2_128Concat | StorageHasher::Twox64Concat | StorageHasher::Identity
+        )
+    }
+}
+
 /// Is the storage entry optional, or does it have a default value.
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum StorageEntryModifier {

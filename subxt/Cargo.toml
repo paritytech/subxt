@@ -25,20 +25,20 @@ default = ["jsonrpsee", "native"]
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
 native = [
-    "jsonrpsee?/async-client", 
-    "jsonrpsee?/client-ws-transport-native-tls", 
-    "subxt-lightclient?/native", 
+    "jsonrpsee?/async-client",
+    "jsonrpsee?/client-ws-transport-native-tls",
+    "subxt-lightclient?/native",
     "tokio-util"
 ]
 
 # Enable this for web/wasm builds.
 # Exactly 1 of "web" and "native" is expected.
 web = [
-    "jsonrpsee?/async-wasm-client", 
-    "jsonrpsee?/client-web-transport", 
-    "getrandom/js", 
-    "subxt-lightclient?/web", 
-    "subxt-macro/web", 
+    "jsonrpsee?/async-wasm-client",
+    "jsonrpsee?/client-web-transport",
+    "getrandom/js",
+    "subxt-lightclient?/web",
+    "subxt-macro/web",
     "instant/wasm-bindgen"
 ]
 
@@ -46,7 +46,9 @@ web = [
 unstable-reconnecting-rpc-client = ["dep:reconnecting-jsonrpsee-ws-client"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
-jsonrpsee = ["dep:jsonrpsee"]
+jsonrpsee = [
+    "dep:jsonrpsee",
+]
 
 # Enable this to pull in extra Substrate dependencies which make it possible to
 # use the `sp_core::crypto::Pair` Signer implementation, as well as adding some
@@ -61,20 +63,20 @@ unstable-metadata = []
 
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
-unstable-light-client = ["subxt-lightclient", "tokio-stream"]
+unstable-light-client = ["subxt-lightclient"]
 
 [dependencies]
 async-trait = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
-scale-info = { workspace = true }
-scale-value = { workspace = true }
-scale-bits = { workspace = true }
-scale-decode = { workspace = true }
-scale-encode = { workspace = true }
+scale-info = { workspace = true, features = ["default"] }
+scale-value = { workspace = true, features = ["default"] }
+scale-bits = { workspace = true, features = ["default"] }
+scale-decode = { workspace = true, features = ["default"] }
+scale-encode = { workspace = true, features = ["default"] }
 futures = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true, features = ["raw_value"] }
+serde_json = { workspace = true, features = ["default", "raw_value"] }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
@@ -84,8 +86,8 @@ instant = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }
-primitive-types = { workspace = true }
-sp-core-hashing = { workspace = true }
+primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"] }
+sp-crypto-hashing = { workspace = true }
 
 # For ss58 encoding AccountId32 to serialize them properly:
 base58 = { workspace = true }
@@ -100,11 +102,8 @@ sp-runtime = { workspace = true, optional = true }
 
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
-subxt-metadata = { workspace = true }
+subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
-
-# Light client support:
-tokio-stream = { workspace = true, optional = true }
 
 # Reconnecting jsonrpc ws client
 reconnecting-jsonrpsee-ws-client = { version = "0.3", optional = true }
@@ -136,13 +135,13 @@ wasm-bindgen-futures = { workspace = true }
 tracing-subscriber = { workspace = true }
 
 [[example]]
-name = "light_client_tx_basic"
-path = "examples/light_client_tx_basic.rs"
+name = "light_client_basic"
+path = "examples/light_client_basic.rs"
 required-features = ["unstable-light-client", "jsonrpsee"]
 
 [[example]]
-name = "light_client_parachains"
-path = "examples/light_client_parachains.rs"
+name = "light_client_local_node"
+path = "examples/light_client_local_node.rs"
 required-features = ["unstable-light-client", "jsonrpsee", "native"]
 
 [[example]]

@@ -137,11 +137,10 @@
 //!     Value::from_bytes("Hello there")
 //! ]);
 //!
-//! // Construct the tx but don't sign it. You need to provide the nonce
-//! // here, or can use `create_partial_signed` to fetch the correct nonce.
-//! let partial_tx = client.tx().create_partial_signed_with_nonce(
+//! // Construct the tx but don't sign it. The account nonce here defaults to 0.
+//! // You can use `create_partial_signed` to fetch the correct nonce.
+//! let partial_tx = client.tx().create_partial_signed_offline(
 //!     &payload,
-//!     0u64,
 //!     Default::default()
 //! )?;
 //!

@@ -61,6 +61,11 @@ pub mod utils;
 #[macro_use]
 mod macros;
 
+// Expose light client bits
+cfg_unstable_light_client! {
+    pub use subxt_lightclient as lightclient;
+}
+
 // Expose a few of the most common types at root,
 // but leave most types behind their respective modules.
 pub use crate::{

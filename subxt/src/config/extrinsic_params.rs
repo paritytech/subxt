@@ -10,6 +10,8 @@
 use crate::{client::OfflineClientT, Config};
 use core::fmt::Debug;
 
+use super::refine_params::RefineParams;
+
 /// An error that can be emitted when trying to construct an instance of [`ExtrinsicParams`],
 /// encode data from the instance, or match on signed extensions.
 #[derive(thiserror::Error, Debug)]
@@ -53,13 +55,12 @@ pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + 'static {
     /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to
     /// help construct your [`ExtrinsicParams`] object.
-    type OtherParams;
+    type Params: RefineParams<T>;
 
     /// Construct a new instance of our [`ExtrinsicParams`].
     fn new<Client: OfflineClientT<T>>(
-        nonce: u64,
         client: Client,
-        other_params: Self::OtherParams,
+        params: Self::Params,
     ) -> Result<Self, ExtrinsicParamsError>;
 }
 

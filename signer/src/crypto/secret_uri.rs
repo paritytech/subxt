@@ -3,6 +3,8 @@
 // see LICENSE for license details.
 
 use super::DeriveJunction;
+use alloc::vec::Vec;
+use derive_more::Display;
 use regex::Regex;
 use secrecy::SecretString;
 
@@ -88,7 +90,7 @@ pub struct SecretUri {
     pub junctions: Vec<DeriveJunction>,
 }
 
-impl std::str::FromStr for SecretUri {
+impl core::str::FromStr for SecretUri {
     type Err = SecretUriError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -115,14 +117,17 @@ impl std::str::FromStr for SecretUri {
 }
 
 /// This is returned if `FromStr` cannot parse a string into a `SecretUri`.
-#[derive(Debug, Copy, Clone, PartialEq, thiserror::Error)]
+#[derive(Debug, Copy, Clone, PartialEq, Display)]
 pub enum SecretUriError {
     /// Parsing the secret URI from a string failed; wrong format.
-    #[error("Invalid secret phrase format")]
+    #[display(fmt = "Invalid secret phrase format")]
     InvalidFormat,
 }
 
-once_static! {
+#[cfg(feature = "std")]
+impl std::error::Error for SecretUriError {}
+
+once_static_cloned! {
     /// Interpret a phrase like:
     ///
     /// ```text

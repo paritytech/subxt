@@ -245,27 +245,27 @@ where
                 // Skip over the address, signature and extra fields.
                 scale_decode::visitor::decode_with_visitor(
                     cursor,
-                    ids.address,
+                    &ids.address,
                     metadata.types(),
-                    scale_decode::visitor::IgnoreVisitor,
+                    scale_decode::visitor::IgnoreVisitor::new(),
                 )
                 .map_err(scale_decode::Error::from)?;
                 let address_end_idx = bytes.len() - cursor.len();
 
                 scale_decode::visitor::decode_with_visitor(
                     cursor,
-                    ids.signature,
+                    &ids.signature,
                     metadata.types(),
-                    scale_decode::visitor::IgnoreVisitor,
+                    scale_decode::visitor::IgnoreVisitor::new(),
                 )
                 .map_err(scale_decode::Error::from)?;
                 let signature_end_idx = bytes.len() - cursor.len();
 
                 scale_decode::visitor::decode_with_visitor(
                     cursor,
-                    ids.extra,
+                    &ids.extra,
                     metadata.types(),
-                    scale_decode::visitor::IgnoreVisitor,
+                    scale_decode::visitor::IgnoreVisitor::new(),
                 )
                 .map_err(scale_decode::Error::from)?;
                 let extra_end_idx = bytes.len() - cursor.len();
@@ -420,9 +420,7 @@ where
 
     /// Decode and provide the extrinsic fields back in the form of a [`scale_value::Composite`]
     /// type which represents the named or unnamed fields that were present in the extrinsic.
-    pub fn field_values(
-        &self,
-    ) -> Result<scale_value::Composite<scale_value::scale::TypeId>, Error> {
+    pub fn field_values(&self) -> Result<scale_value::Composite<u32>, Error> {
         let bytes = &mut self.field_bytes();
         let extrinsic_metadata = self.extrinsic_metadata()?;
 
@@ -430,12 +428,9 @@ where
             .variant
             .fields
             .iter()
-            .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
-        let decoded = <scale_value::Composite<scale_value::scale::TypeId>>::decode_as_fields(
-            bytes,
-            &mut fields,
-            self.metadata.types(),
-        )?;
+            .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
+        let decoded =
+            scale_value::scale::decode_as_fields(bytes, &mut fields, self.metadata.types())?;
 
         Ok(decoded)
     }
@@ -451,7 +446,7 @@ where
                 .variant
                 .fields
                 .iter()
-                .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
+                .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
             let decoded =
                 E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())?;
             Ok(Some(decoded))
@@ -466,7 +461,7 @@ where
     pub fn as_root_extrinsic<E: DecodeAsType>(&self) -> Result<E, Error> {
         let decoded = E::decode_as_type(
             &mut &self.call_bytes()[..],
-            self.metadata.outer_enums().call_enum_ty(),
+            &self.metadata.outer_enums().call_enum_ty(),
             self.metadata.types(),
         )?;
 
@@ -651,9 +646,9 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
             let cursor = &mut &bytes[byte_start_idx..];
             if let Err(err) = scale_decode::visitor::decode_with_visitor(
                 cursor,
-                ty_id,
+                &ty_id,
                 metadata.types(),
-                scale_decode::visitor::IgnoreVisitor,
+                scale_decode::visitor::IgnoreVisitor::new(),
             )
             .map_err(|e| Error::Decode(e.into()))
             {
@@ -748,7 +743,12 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
 
     /// Signed Extension as a [`scale_value::Value`]
     pub fn value(&self) -> Result<DecodedValue, Error> {
-        self.as_type()
+        let value = scale_value::scale::decode_as_type(
+            &mut &self.bytes[..],
+            &self.ty_id,
+            self.metadata.types(),
+        )?;
+        Ok(value)
     }
 
     /// Decodes the bytes of this Signed Extension into its associated `Decoded` type.
@@ -762,7 +762,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     }
 
     fn as_type<E: DecodeAsType>(&self) -> Result<E, Error> {
-        let value = E::decode_as_type(&mut &self.bytes[..], self.ty_id, self.metadata.types())?;
+        let value = E::decode_as_type(&mut &self.bytes[..], &self.ty_id, self.metadata.types())?;
         Ok(value)
     }
 }

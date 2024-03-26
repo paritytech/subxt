@@ -9,10 +9,10 @@ edition = "2021"
 futures = "0.3.28"
 subxt = { path = "../../subxt", default-features = false, features = ["jsonrpsee", "web"], target_arch = "wasm32" }
 yew = { version = "0.20.0", features = ["csr"] }
-web-sys = "0.3.63"
+web-sys = "0.3.69"
 hex = "0.4.3"
 yew-router = "0.17.0"
-js-sys = "0.3.63"
+js-sys = "0.3.69"
 wasm-bindgen = "0.2.86"
 wasm-bindgen-futures = "0.4.36"
 anyhow = "1.0.71"
