@@ -80,7 +80,6 @@ serde_json = { workspace = true, features = ["default", "raw_value"] }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
-derive_more = { workspace = true }
 either = { workspace = true }
 instant = { workspace = true }
 
