@@ -71,7 +71,7 @@ codec = { package = "parity-scale-codec", version = "3.6.9", default-features = 
 color-eyre = "0.6.3"
 console_error_panic_hook = "0.1.7"
 darling = "0.20.8"
-derivative = "2.2.0"
+derive-where = "1.2.7"
 derive_more = "0.99.17"
 either = { version = "1.10.0", default-features = false }
 frame-metadata = { version = "16.0.0", default-features = false }

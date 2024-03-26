@@ -4,7 +4,7 @@
 
 use super::PhantomDataSendSync;
 use codec::{Compact, Decode, DecodeAll, Encode};
-use derivative::Derivative;
+use derive_where::derive_where;
 use scale_decode::{ext::scale_type_resolver::visitor, IntoVisitor, TypeResolver, Visitor};
 use scale_encode::EncodeAsType;
 
@@ -21,15 +21,8 @@ use alloc::vec::Vec;
 // - However, the TypeInfo describes the type as a composite with first a compact encoded length and next the type itself.
 //  [`Encode`] and [`Decode`] impls will "just work" to take this into a `Vec<u8>`, but we need a custom [`EncodeAsType`]
 //  and [`Visitor`] implementation to encode and decode based on TypeInfo.
-#[derive(Derivative, Encode, Decode)]
-#[derivative(
-    Debug(bound = ""),
-    Clone(bound = ""),
-    PartialEq(bound = ""),
-    Eq(bound = ""),
-    Default(bound = ""),
-    Hash(bound = "")
-)]
+#[derive(Encode, Decode)]
+#[derive_where(Debug, Clone, PartialEq, Eq, Default, Hash)]
 pub struct WrapperKeepOpaque<T> {
     data: Vec<u8>,
     _phantom: PhantomDataSendSync<T>,

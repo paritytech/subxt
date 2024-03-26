@@ -13,7 +13,7 @@ use crate::{
     Config,
 };
 use codec::Decode;
-use derivative::Derivative;
+use derive_where::derive_where;
 use futures::StreamExt;
 
 use std::{future::Future, marker::PhantomData};
@@ -24,8 +24,7 @@ use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageEntryType};
 pub use crate::backend::StreamOfResults;
 
 /// Query the runtime storage.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct Storage<T: Config, Client> {
     client: Client,
     block_ref: BlockRef<T::Hash>,

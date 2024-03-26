@@ -4,12 +4,11 @@
 
 use crate::backend::{Backend, BackendExt, BlockRef};
 use crate::{client::OnlineClientT, error::Error, events::Events, Config};
-use derivative::Derivative;
+use derive_where::derive_where;
 use std::future::Future;
 
 /// A client for working with events.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct EventsClient<T, Client> {
     client: Client,
     _marker: std::marker::PhantomData<T>,

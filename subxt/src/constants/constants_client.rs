@@ -4,11 +4,10 @@
 
 use super::ConstantAddress;
 use crate::{client::OfflineClientT, error::Error, Config};
-use derivative::Derivative;
+use derive_where::derive_where;
 
 /// A client for accessing constants.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct ConstantsClient<T, Client> {
     client: Client,
     _marker: std::marker::PhantomData<T>,

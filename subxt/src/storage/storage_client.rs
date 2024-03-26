@@ -12,12 +12,11 @@ use crate::{
     error::Error,
     Config,
 };
-use derivative::Derivative;
+use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
 
 /// Query the runtime storage.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct StorageClient<T, Client> {
     client: Client,
     _marker: PhantomData<T>,

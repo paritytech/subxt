@@ -13,7 +13,7 @@ use crate::{
     events::EventsClient,
     Config,
 };
-use derivative::Derivative;
+use derive_where::derive_where;
 use futures::{Stream, StreamExt};
 use subxt_core::utils::strip_compact_prefix;
 
@@ -167,8 +167,7 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
 }
 
 /// Possible transaction statuses returned from our [`TxProgress::next()`] call.
-#[derive(Derivative)]
-#[derivative(Debug(bound = "C: std::fmt::Debug"))]
+#[derive_where(Debug; C)]
 pub enum TxStatus<T: Config, C> {
     /// Transaction is part of the future queue.
     Validated,
@@ -221,8 +220,7 @@ impl<T: Config, C> TxStatus<T, C> {
 }
 
 /// This struct represents a transaction that has made it into a block.
-#[derive(Derivative)]
-#[derivative(Debug(bound = "C: std::fmt::Debug"))]
+#[derive_where(Debug; C)]
 pub struct TxInBlock<T: Config, C> {
     block_ref: BlockRef<T::Hash>,
     ext_hash: T::Hash,

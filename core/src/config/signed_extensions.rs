@@ -20,7 +20,7 @@ use alloc::boxed::Box;
 use alloc::vec::Vec;
 use codec::{Compact, Encode};
 use core::fmt::Debug;
-use derivative::Derivative;
+use derive_where::derive_where;
 use hashbrown::HashMap;
 use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
@@ -238,8 +238,8 @@ impl<T: Config> SignedExtension<T> for CheckMortality<T> {
 }
 
 /// The [`ChargeAssetTxPayment`] signed extension.
-#[derive(Derivative, DecodeAsType)]
-#[derivative(Clone(bound = "T::AssetId: Clone"), Debug(bound = "T::AssetId: Debug"))]
+#[derive(DecodeAsType)]
+#[derive_where(Clone, Debug; T::AssetId)]
 #[decode_as_type(trait_bounds = "T::AssetId: DecodeAsType")]
 pub struct ChargeAssetTxPayment<T: Config> {
     tip: Compact<u128>,

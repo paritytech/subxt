@@ -1271,6 +1271,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive-where"
+version = "1.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "62d671cc41a825ebabc75757b62d3d168c577f9149b2d49ece1dad1f72119d25"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.53",
+]
+
+[[package]]
 name = "derive_more"
 version = "0.99.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2816,7 +2827,7 @@ checksum = "4e69bf016dc406eff7d53a7d3f7cf1c2e72c82b9088aac1118591e36dd2cd3e9"
 dependencies = [
  "bitcoin_hashes 0.13.0",
  "rand",
- "rand_core 0.5.1",
+ "rand_core 0.6.4",
  "serde",
  "unicode-normalization",
 ]
@@ -3637,9 +3648,9 @@ dependencies = [
 
 [[package]]
 name = "scale-info"
-version = "2.11.0"
+version = "2.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ef2175c2907e7c8bc0a9c3f86aeb5ec1f3b275300ad58a44d0c3ae379a5e52e"
+checksum = "788745a868b0e751750388f4e6546eb921ef714a4317fa6954f7cde114eb2eb7"
 dependencies = [
  "bitvec",
  "cfg-if",
@@ -3651,9 +3662,9 @@ dependencies = [
 
 [[package]]
 name = "scale-info-derive"
-version = "2.10.0"
+version = "2.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "abf2c68b89cafb3b8d918dd07b42be0da66ff202cf1155c5739a4e0c1ea0dc19"
+checksum = "7dc2f4e8bc344b9fc3d5f74f72c2e55bfc38d28dc2ebc69c194a3df424e4d9ac"
 dependencies = [
  "proc-macro-crate 1.3.1",
  "proc-macro2",
@@ -3673,7 +3684,9 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen"
-version = "0.4.0"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cacbfa9b14d85b4fdf2724d9ecaf7cd57913924db4b4c5d58a1cdf0c02125c15"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3685,7 +3698,9 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen-description"
-version = "0.4.0"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dfc2e4eb92544f7ea0a8dd522b9fbf08f2c011de73832330bcc7ce127c5ab273"
 dependencies = [
  "anyhow",
  "peekmore",
@@ -4611,7 +4626,7 @@ dependencies = [
  "assert_matches",
  "async-trait",
  "bitvec",
- "derivative",
+ "derive_more",
  "either",
  "frame-metadata 16.0.0",
  "futures",
@@ -4703,7 +4718,7 @@ dependencies = [
  "base58",
  "bitvec",
  "blake2",
- "derivative",
+ "derive-where",
  "derive_more",
  "frame-metadata 16.0.0",
  "hashbrown 0.14.3",

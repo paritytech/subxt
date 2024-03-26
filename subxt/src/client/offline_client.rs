@@ -8,7 +8,7 @@ use crate::{
     runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient, Config, Metadata,
 };
 
-use derivative::Derivative;
+use derive_where::derive_where;
 use std::sync::Arc;
 use subxt_core::client::{ClientState, RuntimeVersion};
 
@@ -64,8 +64,7 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
 
 /// A client that is capable of performing offline-only operations.
 /// Can be constructed as long as you can populate the required fields.
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""), Clone(bound = ""))]
+#[derive_where(Debug, Clone)]
 pub struct OfflineClient<T: Config> {
     inner: Arc<ClientState<T>>,
 }

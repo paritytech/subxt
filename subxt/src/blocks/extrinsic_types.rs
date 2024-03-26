@@ -19,7 +19,7 @@ use crate::config::SignedExtension;
 use crate::dynamic::Value;
 use crate::utils::strip_compact_prefix;
 use codec::Decode;
-use derivative::Derivative;
+use derive_where::derive_where;
 use scale_decode::DecodeAsType;
 
 use std::sync::Arc;
@@ -507,8 +507,7 @@ impl ExtrinsicPartTypeIds {
 }
 
 /// The events associated with a given extrinsic.
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
+#[derive_where(Debug)]
 pub struct ExtrinsicEvents<T: Config> {
     // The hash of the extrinsic (handy to expose here because
     // this type is returned from TxProgress things in the most

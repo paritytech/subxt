@@ -8,7 +8,7 @@ use crate::{
     metadata::{DecodeWithMetadata, Metadata},
     utils::Yes,
 };
-use derivative::Derivative;
+use derive_where::derive_where;
 
 use alloc::borrow::{Cow, ToOwned};
 use alloc::string::String;
@@ -53,15 +53,7 @@ pub trait StorageAddress {
 
 /// A concrete storage address. This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
-#[derive(Derivative)]
-#[derivative(
-    Clone(bound = "Keys: Clone"),
-    Debug(bound = "Keys: core::fmt::Debug"),
-    Eq(bound = "Keys: core::cmp::Eq"),
-    Ord(bound = "Keys: core::cmp::Ord"),
-    PartialEq(bound = "Keys: core::cmp::PartialEq"),
-    PartialOrd(bound = "Keys: core::cmp::PartialOrd")
-)]
+#[derive_where(Clone, Debug, Eq, Ord, PartialEq, PartialOrd; Keys)]
 pub struct Address<Keys: StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
     entry_name: Cow<'static, str>,

@@ -1,7 +1,7 @@
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use codec::{Compact, Decode, Encode};
-use derivative::Derivative;
+use derive_where::derive_where;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_metadata::PalletMetadata;
 
@@ -27,8 +27,7 @@ pub trait StaticEvent: DecodeAsFields {
 
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""))]
+#[derive_where(Clone)]
 pub struct Events<T: Config> {
     metadata: Metadata,
     // Note; raw event bytes are prefixed with a Compact<u32> containing

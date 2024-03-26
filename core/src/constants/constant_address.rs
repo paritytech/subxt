@@ -6,7 +6,7 @@ use crate::dynamic::DecodedValueThunk;
 use crate::metadata::DecodeWithMetadata;
 use alloc::borrow::Cow;
 use alloc::string::String;
-use derivative::Derivative;
+use derive_where::derive_where;
 
 /// This represents a constant address. Anything implementing this trait
 /// can be used to fetch constants.
@@ -29,15 +29,7 @@ pub trait ConstantAddress {
 }
 
 /// This represents the address of a constant.
-#[derive(Derivative)]
-#[derivative(
-    Clone(bound = ""),
-    Debug(bound = ""),
-    PartialOrd(bound = ""),
-    Ord(bound = ""),
-    PartialEq(bound = ""),
-    Eq(bound = "")
-)]
+#[derive_where(Clone, Debug, PartialOrd, Ord, PartialEq, Eq)]
 pub struct Address<ReturnTy> {
     pallet_name: Cow<'static, str>,
     constant_name: Cow<'static, str>,

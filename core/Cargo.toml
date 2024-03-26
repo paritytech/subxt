@@ -44,7 +44,7 @@ scale-decode = { workspace = true, default-features = false, features = ["derive
 scale-encode = { workspace = true, default-features = false, features = ["derive", "primitive-types", "bits"] }
 frame-metadata = { workspace = true, default-features = false }
 subxt-metadata = { workspace = true, default-features = false }
-derivative = { workspace = true, features = ["use_core"] }
+derive-where = { workspace = true }
 derive_more = { workspace = true }
 hex = { workspace = true, default-features = false, features = ["alloc"] }
 serde = { workspace = true, default-features = false, features = ["derive"] }

@@ -15,7 +15,7 @@ use crate::{
     tx::TxClient,
     Config, Metadata,
 };
-use derivative::Derivative;
+use derive_where::derive_where;
 use futures::future;
 use std::sync::{Arc, RwLock};
 use subxt_core::client::{ClientState, RuntimeVersion};
@@ -29,15 +29,13 @@ pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
 
 /// A client that can be used to perform API calls (that is, either those
 /// requiring an [`OfflineClientT`] or those requiring an [`OnlineClientT`]).
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""))]
+#[derive_where(Clone)]
 pub struct OnlineClient<T: Config> {
     inner: Arc<RwLock<Inner<T>>>,
     backend: Arc<dyn Backend<T>>,
 }
 
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
+#[derive_where(Debug)]
 struct Inner<T: Config> {
     genesis_hash: T::Hash,
     runtime_version: RuntimeVersion,

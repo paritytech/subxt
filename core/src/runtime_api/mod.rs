@@ -7,7 +7,7 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::marker::PhantomData;
-use derivative::Derivative;
+use derive_where::derive_where;
 use scale_encode::EncodeAsFields;
 use scale_value::Composite;
 
@@ -71,15 +71,7 @@ pub trait RuntimeApiPayload {
 ///
 /// This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
-#[derive(Derivative)]
-#[derivative(
-    Clone(bound = "ArgsData: Clone"),
-    Debug(bound = "ArgsData: core::fmt::Debug"),
-    Eq(bound = "ArgsData: core::cmp::Eq"),
-    Ord(bound = "ArgsData: core::cmp::Ord"),
-    PartialEq(bound = "ArgsData: core::cmp::PartialEq"),
-    PartialOrd(bound = "ArgsData: core::cmp::PartialOrd")
-)]
+#[derive_where(Clone, Debug, Eq, Ord, PartialEq, PartialOrd; ArgsData)]
 pub struct Payload<ArgsData, ReturnTy> {
     trait_name: Cow<'static, str>,
     method_name: Cow<'static, str>,

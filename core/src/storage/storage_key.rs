@@ -7,12 +7,9 @@ use scale_encode::EncodeAsType;
 use scale_info::{PortableRegistry, TypeDef};
 use scale_value::Value;
 use subxt_metadata::{StorageEntryType, StorageHasher};
-
 use alloc::vec;
 use alloc::vec::Vec;
-
-use derivative::Derivative;
-
+use derive_where::derive_where;
 use super::utils::hash_bytes;
 
 /// A collection of storage hashers paired with the type ids of the types they should hash.
@@ -165,14 +162,7 @@ impl StorageKey for () {
 
 /// A storage key for static encoded values.
 /// The original value is only present at construction, but can be decoded from the contained bytes.
-#[derive(Derivative)]
-#[derivative(
-    Clone(bound = ""),
-    Debug(bound = ""),
-    PartialOrd(bound = ""),
-    PartialEq(bound = ""),
-    Eq(bound = "")
-)]
+#[derive_where(Clone, Debug, PartialOrd, PartialEq, Eq)]
 pub struct StaticStorageKey<K: ?Sized> {
     bytes: Static<Encoded>,
     _marker: core::marker::PhantomData<K>,

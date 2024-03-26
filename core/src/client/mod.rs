@@ -1,13 +1,11 @@
-use derivative::Derivative;
-
 use crate::{config::Config, metadata::Metadata};
+use derive_where::derive_where;
 
 /// Each client should be able to provide access to the following fields
 /// - runtime version
 /// - genesis hash
 /// - metadata
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""), Clone(bound = ""))]
+#[derive_where(Clone, Debug)]
 pub struct ClientState<C: Config> {
     genesis_hash: C::Hash,
     runtime_version: RuntimeVersion,

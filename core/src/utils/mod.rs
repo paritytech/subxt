@@ -18,7 +18,7 @@ use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
 use codec::{Compact, Decode, Encode};
-use derivative::Derivative;
+use derive_where::derive_where;
 
 pub use account_id::AccountId32;
 pub use era::Era;
@@ -54,15 +54,8 @@ pub fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::Error> 
 /// A version of [`core::marker::PhantomData`] that is also Send and Sync (which is fine
 /// because regardless of the generic param, it is always possible to Send + Sync this
 /// 0 size type).
-#[derive(Derivative, Encode, Decode, scale_info::TypeInfo)]
-#[derivative(
-    Clone(bound = ""),
-    PartialEq(bound = ""),
-    Debug(bound = ""),
-    Eq(bound = ""),
-    Default(bound = ""),
-    Hash(bound = "")
-)]
+#[derive(Encode, Decode, scale_info::TypeInfo)]
+#[derive_where(Clone, PartialEq, Debug, Eq, Default, Hash)]
 #[scale_info(skip_type_params(T))]
 #[doc(hidden)]
 pub struct PhantomDataSendSync<T>(core::marker::PhantomData<T>);

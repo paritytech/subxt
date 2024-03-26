@@ -1,6 +1,6 @@
 use crate::client::OfflineClientT;
 use crate::{Config, Error};
-use derivative::Derivative;
+use derive_where::derive_where;
 
 use subxt_core::custom_values::{
     get_custom_value, get_custom_value_bytes, validate_custom_value, CustomValueAddress,
@@ -8,8 +8,7 @@ use subxt_core::custom_values::{
 use subxt_core::utils::Yes;
 
 /// A client for accessing custom values stored in the metadata.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct CustomValuesClient<T, Client> {
     client: Client,
     _marker: std::marker::PhantomData<T>,

@@ -1,4 +1,4 @@
-use derivative::Derivative;
+use derive_where::derive_where;
 
 use crate::dynamic::DecodedValueThunk;
 use crate::metadata::DecodeWithMetadata;
@@ -34,15 +34,7 @@ impl CustomValueAddress for str {
 }
 
 /// A static address to a custom value.
-#[derive(Derivative)]
-#[derivative(
-    Clone(bound = ""),
-    Debug(bound = ""),
-    PartialOrd(bound = ""),
-    Ord(bound = ""),
-    PartialEq(bound = ""),
-    Eq(bound = "")
-)]
+#[derive_where(Clone, Debug, PartialOrd, Ord, PartialEq, Eq)]
 pub struct StaticAddress<ReturnTy, IsDecodable> {
     name: &'static str,
     hash: Option<[u8; 32]>,
