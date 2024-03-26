@@ -19,9 +19,6 @@ use subxt::{
     SubstrateConfig,
 };
 
-#[cfg(lightclient)]
-use subxt::client::OfflineClientT;
-
 use subxt_signer::sr25519::dev;
 
 #[subxt_test]

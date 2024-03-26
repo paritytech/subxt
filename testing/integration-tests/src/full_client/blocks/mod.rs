@@ -6,9 +6,6 @@ use crate::{subxt_test, test_context};
 use codec::{Compact, Encode};
 use futures::StreamExt;
 
-#[cfg(lightclient)]
-use subxt::client::OnlineClientT;
-
 #[cfg(fullclient)]
 use crate::utils::node_runtime;
 #[cfg(fullclient)]

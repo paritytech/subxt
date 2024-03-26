@@ -11,9 +11,6 @@ use codec::{Decode, Encode};
 #[cfg(fullclient)]
 use futures::StreamExt;
 
-#[cfg(lightclient)]
-use subxt::client::OnlineClientT;
-
 use subxt::{
     backend::BackendExt,
     error::{DispatchError, Error},
