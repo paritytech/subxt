@@ -109,6 +109,7 @@ which = "5.0.0"
 scale-typegen-description = "0.2.0"
 scale-typegen = "0.2.0"
 strip-ansi-escapes = "0.2.0"
+proptest = "1.4.0"
 
 # Light client support:
 smoldot = { version = "0.16.0", default-features = false }

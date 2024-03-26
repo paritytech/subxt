@@ -39,7 +39,7 @@ impl AsRef<[u8]> for PublicKey {
 }
 
 /// An ecdsa keypair implementation.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Keypair(pub secp256k1::Keypair);
 
 impl Keypair {
