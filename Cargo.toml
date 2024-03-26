@@ -94,6 +94,8 @@ scale-value = { version = "0.14.1", default-features = false }
 scale-bits = { version = "0.5.0", default-features = false }
 scale-decode = { version = "0.11.1", default-features = false }
 scale-encode = { version = "0.6.0", default-features = false }
+scale-typegen = "0.4.2"
+scale-typegen-description = "0.4.2"
 serde = { version = "1.0.197", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.114", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
@@ -107,8 +109,6 @@ url = "2.5.0"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "5.0.0"
-scale-typegen-description = "0.4.1"
-scale-typegen = "0.4.1"
 strip-ansi-escapes = "0.2.0"
 
 # Light client support:
