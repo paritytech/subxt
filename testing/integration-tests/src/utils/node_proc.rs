@@ -254,9 +254,5 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineCli
         .map_err(|e| format!("Light client: cannot add relay chain: {e}"))?;
 
     // Instantiate subxt client from this.
-    let api = OnlineClient::from_rpc_client(rpc)
-        .await
-        .map_err(|e| format!("Failed to build OnlineClient from light client RPC: {e}"))?;
-
-    Ok(api)
+    build_unstable_client(rpc)
 }
