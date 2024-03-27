@@ -5,9 +5,7 @@
 use super::{OfflineClient, OfflineClientT};
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    backend::{
-        legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, RuntimeVersion, StreamOfResults,
-    },
+    backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, StreamOfResults},
     blocks::{BlockRef, BlocksClient},
     constants::ConstantsClient,
     error::Error,
@@ -17,9 +15,10 @@ use crate::{
     tx::TxClient,
     Config, Metadata,
 };
-use derivative::Derivative;
+use derive_where::derive_where;
 use futures::future;
 use std::sync::{Arc, RwLock};
+use subxt_core::client::{ClientState, RuntimeVersion};
 
 /// A trait representing a client that can perform
 /// online actions.
@@ -30,15 +29,13 @@ pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
 
 /// A client that can be used to perform API calls (that is, either those
 /// requiring an [`OfflineClientT`] or those requiring an [`OnlineClientT`]).
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""))]
+#[derive_where(Clone)]
 pub struct OnlineClient<T: Config> {
     inner: Arc<RwLock<Inner<T>>>,
     backend: Arc<dyn Backend<T>>,
 }
 
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
+#[derive_where(Debug)]
 struct Inner<T: Config> {
     genesis_hash: T::Hash,
     runtime_version: RuntimeVersion,
@@ -231,7 +228,7 @@ impl<T: Config> OnlineClient<T> {
     ///     let mut update_stream = updater.runtime_updates().await.unwrap();
     ///
     ///     while let Some(Ok(update)) = update_stream.next().await {
-    ///         let version = update.runtime_version().spec_version;
+    ///         let version = update.runtime_version().spec_version();
     ///
     ///         match updater.apply_update(update) {
     ///             Ok(()) => {
@@ -286,7 +283,17 @@ impl<T: Config> OnlineClient<T> {
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
         let inner = self.inner.read().expect("shouldn't be poisoned");
-        inner.runtime_version.clone()
+        inner.runtime_version
+    }
+
+    /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
+    pub fn client_state(&self) -> ClientState<T> {
+        let inner = self.inner.read().expect("shouldn't be poisoned");
+        ClientState::new(
+            inner.genesis_hash,
+            inner.runtime_version,
+            inner.metadata.clone(),
+        )
     }
 
     /// Change the [`RuntimeVersion`] used in this client.
@@ -310,7 +317,7 @@ impl<T: Config> OnlineClient<T> {
         let inner = self.inner.read().expect("shouldn't be poisoned");
         OfflineClient::new(
             inner.genesis_hash,
-            inner.runtime_version.clone(),
+            inner.runtime_version,
             inner.metadata.clone(),
         )
     }
@@ -363,6 +370,10 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     }
     fn runtime_version(&self) -> RuntimeVersion {
         self.runtime_version()
+    }
+
+    fn client_state(&self) -> ClientState<T> {
+        self.client_state()
     }
 }
 
@@ -525,7 +536,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
 
         let scale_val = match chunk.to_value() {
             Ok(v) => v,
-            Err(e) => return Some(Err(e)),
+            Err(e) => return Some(Err(e.into())),
         };
 
         let Some(Ok(spec_version)) = scale_val
@@ -540,7 +551,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
 
         // We are waiting for the chain to have the same spec version
         // as sent out via the runtime subscription.
-        if spec_version == runtime_version.spec_version {
+        if spec_version == runtime_version.spec_version() {
             break block_ref;
         }
     };

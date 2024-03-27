@@ -4,8 +4,7 @@
 
 //! Types associated with accessing constants.
 
-mod constant_address;
 mod constants_client;
 
-pub use constant_address::{dynamic, Address, ConstantAddress, DynamicAddress};
 pub use constants_client::ConstantsClient;
+pub use subxt_core::constants::{dynamic, Address, ConstantAddress, DynamicAddress};

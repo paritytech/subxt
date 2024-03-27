@@ -16,12 +16,11 @@ use crate::{
     utils::{Encoded, PhantomDataSendSync},
 };
 use codec::{Compact, Decode, Encode};
-use derivative::Derivative;
+use derive_where::derive_where;
 use sp_crypto_hashing::blake2_256;
 
 /// A client for working with transactions.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct TxClient<T: Config, Client> {
     client: Client,
     _marker: PhantomDataSendSync<T>,
@@ -126,7 +125,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 
         // 3. Construct our custom additional/extra params.
         let additional_and_extra_params =
-            <T::ExtrinsicParams as ExtrinsicParams<T>>::new(self.client.clone(), params)?;
+            <T::ExtrinsicParams as ExtrinsicParams<T>>::new(&self.client.client_state(), params)?;
 
         // Return these details, ready to construct a signed extrinsic from.
         Ok(PartialExtrinsic {

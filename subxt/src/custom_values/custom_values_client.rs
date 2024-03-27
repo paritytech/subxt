@@ -1,13 +1,14 @@
 use crate::client::OfflineClientT;
-use crate::custom_values::custom_value_address::{CustomValueAddress, Yes};
-use crate::error::MetadataError;
-use crate::metadata::DecodeWithMetadata;
 use crate::{Config, Error};
-use derivative::Derivative;
+use derive_where::derive_where;
+
+use subxt_core::custom_values::{
+    get_custom_value, get_custom_value_bytes, validate_custom_value, CustomValueAddress,
+};
+use subxt_core::utils::Yes;
 
 /// A client for accessing custom values stored in the metadata.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct CustomValuesClient<T, Client> {
     client: Client,
     _marker: std::marker::PhantomData<T>,
@@ -30,22 +31,7 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         &self,
         address: &Address,
     ) -> Result<Address::Target, Error> {
-        // 1. Validate custom value shape if hash given:
-        self.validate(address)?;
-
-        // 2. Attempt to decode custom value:
-        let metadata = self.client.metadata();
-        let custom = metadata.custom();
-        let custom_value = custom
-            .get(address.name())
-            .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().to_string()))?;
-
-        let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
-            &mut custom_value.bytes(),
-            custom_value.type_id(),
-            &metadata,
-        )?;
-        Ok(value)
+        get_custom_value(&self.client.metadata(), address).map_err(Into::into)
     }
 
     /// Access the bytes of a custom value by the address it is registered under.
@@ -53,17 +39,7 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         &self,
         address: &Address,
     ) -> Result<Vec<u8>, Error> {
-        // 1. Validate custom value shape if hash given:
-        self.validate(address)?;
-
-        // 2. Return the underlying bytes:
-        let metadata = self.client.metadata();
-        let custom = metadata.custom();
-        let custom_value = custom
-            .get(address.name())
-            .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().to_string()))?;
-
-        Ok(custom_value.bytes().to_vec())
+        get_custom_value_bytes(&self.client.metadata(), address).map_err(Into::into)
     }
 
     /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
@@ -73,27 +49,12 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         &self,
         address: &Address,
     ) -> Result<(), Error> {
-        let metadata = self.client.metadata();
-        if let Some(actual_hash) = address.validation_hash() {
-            let custom = metadata.custom();
-            let custom_value = custom
-                .get(address.name())
-                .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().into()))?;
-            let expected_hash = custom_value.hash();
-            if actual_hash != expected_hash {
-                return Err(MetadataError::IncompatibleCodegen.into());
-            }
-        }
-        if metadata.custom().get(address.name()).is_none() {
-            return Err(MetadataError::IncompatibleCodegen.into());
-        }
-        Ok(())
+        validate_custom_value(&self.client.metadata(), address).map_err(Into::into)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::backend::RuntimeVersion;
     use crate::custom_values::CustomValuesClient;
     use crate::{Metadata, OfflineClient, SubstrateConfig};
     use codec::Encode;
@@ -101,6 +62,7 @@ mod tests {
     use scale_info::form::PortableForm;
     use scale_info::TypeInfo;
     use std::collections::BTreeMap;
+    use subxt_core::client::RuntimeVersion;
 
     #[derive(Debug, Clone, PartialEq, Eq, Encode, TypeInfo, DecodeAsType)]
     pub struct Person {
@@ -158,10 +120,7 @@ mod tests {
     fn test_decoding() {
         let client = OfflineClient::<SubstrateConfig>::new(
             Default::default(),
-            RuntimeVersion {
-                spec_version: 0,
-                transaction_version: 0,
-            },
+            RuntimeVersion::new(0, 0),
             mock_metadata(),
         );
         let custom_value_client = CustomValuesClient::new(client);

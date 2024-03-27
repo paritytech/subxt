@@ -16,31 +16,14 @@ use crate::config::signed_extensions::{
     ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
 };
 use crate::config::SignedExtension;
-use crate::dynamic::DecodedValue;
+use crate::dynamic::Value;
 use crate::utils::strip_compact_prefix;
 use codec::Decode;
-use derivative::Derivative;
-use scale_decode::{DecodeAsFields, DecodeAsType};
+use derive_where::derive_where;
+use scale_decode::DecodeAsType;
 
 use std::sync::Arc;
-
-/// Trait to uniquely identify the extrinsic's identity from the runtime metadata.
-///
-/// Generated API structures that represent an extrinsic implement this trait.
-///
-/// The trait is utilized to decode emitted extrinsics from a block, via obtaining the
-/// form of the `Extrinsic` from the metadata.
-pub trait StaticExtrinsic: DecodeAsFields {
-    /// Pallet name.
-    const PALLET: &'static str;
-    /// Call name.
-    const CALL: &'static str;
-
-    /// Returns true if the given pallet and call names match this extrinsic.
-    fn is_extrinsic(pallet: &str, call: &str) -> bool {
-        Self::PALLET == pallet && Self::CALL == call
-    }
-}
+pub use subxt_core::blocks::StaticExtrinsic;
 
 /// The body of a block.
 pub struct Extrinsics<T: Config, C> {
@@ -524,8 +507,7 @@ impl ExtrinsicPartTypeIds {
 }
 
 /// The events associated with a given extrinsic.
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
+#[derive_where(Debug)]
 pub struct ExtrinsicEvents<T: Config> {
     // The hash of the extrinsic (handy to expose here because
     // this type is returned from TxProgress things in the most
@@ -545,11 +527,6 @@ impl<T: Config> ExtrinsicEvents<T> {
             idx,
             events,
         }
-    }
-
-    /// Return the hash of the block that the extrinsic is in.
-    pub fn block_hash(&self) -> T::Hash {
-        self.events.block_hash()
     }
 
     /// The index of the extrinsic that these events are produced from.
@@ -572,11 +549,14 @@ impl<T: Config> ExtrinsicEvents<T> {
     /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
     pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails<T>, Error>> + '_ {
-        self.events.iter().filter(|ev| {
-            ev.as_ref()
-                .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))
-                .unwrap_or(true) // Keep any errors.
-        })
+        self.events
+            .iter()
+            .filter(|ev| {
+                ev.as_ref()
+                    .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))
+                    .unwrap_or(true) // Keep any errors.
+            })
+            .map(|e| e.map_err(Error::from))
     }
 
     /// Find all of the transaction events matching the event type provided as a generic parameter.
@@ -742,7 +722,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     }
 
     /// Signed Extension as a [`scale_value::Value`]
-    pub fn value(&self) -> Result<DecodedValue, Error> {
+    pub fn value(&self) -> Result<Value<u32>, Error> {
         let value = scale_value::scale::decode_as_type(
             &mut &self.bytes[..],
             &self.ty_id,
@@ -770,7 +750,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{backend::RuntimeVersion, OfflineClient, PolkadotConfig};
+    use crate::{OfflineClient, PolkadotConfig};
     use assert_matches::assert_matches;
     use codec::{Decode, Encode};
     use frame_metadata::v15::{CustomMetadata, OuterEnums};
@@ -781,6 +761,7 @@ mod tests {
     use primitive_types::H256;
     use scale_info::{meta_type, TypeInfo};
     use scale_value::Value;
+    use subxt_core::client::RuntimeVersion;
 
     // Extrinsic needs to contain at least the generic type parameter "Call"
     // for the metadata to be valid.
@@ -902,10 +883,7 @@ mod tests {
     /// Build an offline client to work with the test metadata.
     fn client(metadata: Metadata) -> OfflineClient<PolkadotConfig> {
         // Create the encoded extrinsic bytes.
-        let rt_version = RuntimeVersion {
-            spec_version: 1,
-            transaction_version: 4,
-        };
+        let rt_version = RuntimeVersion::new(1, 4);
         let block_hash = H256::random();
         OfflineClient::new(block_hash, rt_version, metadata)
     }

@@ -2,7 +2,7 @@
 use codec::Encode;
 use scale_encode::EncodeAsType;
 use scale_info::PortableRegistry;
-use subxt::client::OfflineClientT;
+use subxt::client::ClientState;
 use subxt::config::signed_extensions;
 use subxt::config::{
     Config, DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder,
@@ -60,10 +60,7 @@ impl<T: Config> signed_extensions::SignedExtension<T> for CustomSignedExtension 
 impl<T: Config> ExtrinsicParams<T> for CustomSignedExtension {
     type Params = ();
 
-    fn new<Client: OfflineClientT<T>>(
-        _client: Client,
-        _params: Self::Params,
-    ) -> Result<Self, ExtrinsicParamsError> {
+    fn new(_client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(CustomSignedExtension)
     }
 }
