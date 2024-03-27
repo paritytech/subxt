@@ -396,9 +396,6 @@ jobs:
           command: test
           args: --release --package integration-tests --features unstable-light-client-long-running
 
-      - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
-
   # wasm_tests:
   #   name: Test (WASM)
   #   runs-on: ubuntu-latest
