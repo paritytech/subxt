@@ -272,7 +272,7 @@ mod test {
         type AssetId = u32;
     }
 
-    type Signer = dyn subxt::tx::Signer<StubEthRuntimeConfig>;
+    type SubxtSigner = dyn subxt::tx::Signer<StubEthRuntimeConfig>;
 
     prop_compose! {
         fn keypair()(seed in any::<[u8; 32]>()) -> Keypair {
@@ -291,8 +291,8 @@ mod test {
         fn check_subxt_signer_implementation_matches(keypair in keypair(), msg in ".*") {
             let msg_as_bytes = msg.as_bytes();
 
-            assert_eq!(Signer::account_id(&keypair), keypair.account_id());
-            assert_eq!(Signer::sign(&keypair, msg_as_bytes), keypair.sign(msg_as_bytes));
+            assert_eq!(SubxtSigner::account_id(&keypair), keypair.account_id());
+            assert_eq!(SubxtSigner::sign(&keypair, msg_as_bytes), keypair.sign(msg_as_bytes));
         }
 
         #[test]
@@ -310,12 +310,12 @@ mod test {
 
         #[test]
         fn check_account_id_eq_address(keypair in keypair()) {
-            assert_eq!(Signer::account_id(&keypair), Signer::address(&keypair));
+            assert_eq!(SubxtSigner::account_id(&keypair), SubxtSigner::address(&keypair));
         }
 
         #[test]
         fn check_signing_and_verifying_matches(keypair in keypair(), msg in ".*") {
-            let sig = Signer::sign(&keypair, msg.as_bytes());
+            let sig = SubxtSigner::sign(&keypair, msg.as_bytes());
 
             assert!(verify(
                 &sig,
