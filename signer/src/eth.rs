@@ -6,7 +6,7 @@
 
 use derive_more::{Display, From};
 use keccak_hash::keccak;
-use secp256k1::{Message, Secp256k1};
+use secp256k1::Message;
 
 use crate::crypto::{DeriveJunction, SecretUri};
 use crate::ecdsa;
@@ -119,7 +119,10 @@ impl Keypair {
         let message_hash = keccak(signer_payload);
         let wrapped =
             Message::from_digest_slice(message_hash.as_bytes()).expect("Message is 32 bytes; qed");
-        Signature(crate::ecdsa::sign(&self.0 .0.secret_key(), &wrapped))
+        Signature(crate::ecdsa::internal::sign(
+            &self.0 .0.secret_key(),
+            &wrapped,
+        ))
     }
 }
 
@@ -155,18 +158,12 @@ impl AsRef<[u8]> for AccountId20 {
 /// let public_key = keypair.public_key();
 /// assert!(eth::verify(&signature, message, &public_key));
 /// ```
-pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pub_key: &ecdsa::PublicKey) -> bool {
-    let Ok(signature) = secp256k1::ecdsa::Signature::from_compact(&sig.0[..64]) else {
-        return false;
-    };
+pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &ecdsa::PublicKey) -> bool {
     let message_hash = keccak(message.as_ref());
     let wrapped =
         Message::from_digest_slice(message_hash.as_bytes()).expect("Message is 32 bytes; qed");
-    let pub_key = secp256k1::PublicKey::from_slice(&pub_key.0).expect("valid public key");
 
-    Secp256k1::verification_only()
-        .verify_ecdsa(&wrapped, &signature, &pub_key)
-        .is_ok()
+    ecdsa::internal::verify(&sig.0, &wrapped, pubkey)
 }
 
 /// An error handed back if creating the keypair fails.
@@ -257,6 +254,7 @@ mod subxt_compat {
 mod test {
     use super::*;
     use proptest::prelude::*;
+    use secp256k1::Secp256k1;
 
     enum StubEthRuntimeConfig {}
 
