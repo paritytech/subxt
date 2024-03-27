@@ -4,7 +4,6 @@
 
 //! An ethereum keypair implementation.
 
-use derive_more::{Display, From};
 use keccak_hash::keccak;
 use secp256k1::Message;
 
@@ -41,9 +40,7 @@ impl Keypair {
     /// keypair.sign(b"Hello world!");
     /// ```
     pub fn from_uri(uri: &SecretUri) -> Result<Self, Error> {
-        ecdsa::Keypair::from_uri(uri)
-            .map(Self)
-            .map_err(Error::Inner)
+        ecdsa::Keypair::from_uri(uri).map(Self)
     }
 
     /// Create a keypair from a BIP-39 mnemonic phrase and optional password.
@@ -60,9 +57,7 @@ impl Keypair {
     /// keypair.sign(b"Hello world!");
     /// ```
     pub fn from_phrase(mnemonic: &bip39::Mnemonic, password: Option<&str>) -> Result<Self, Error> {
-        ecdsa::Keypair::from_phrase(mnemonic, password)
-            .map(Self)
-            .map_err(Error::Inner)
+        ecdsa::Keypair::from_phrase(mnemonic, password).map(Self)
     }
 
     /// Turn a 32 byte seed into a keypair.
@@ -71,9 +66,7 @@ impl Keypair {
     ///
     /// This will only be secure if the seed is secure!
     pub fn from_seed(seed: Seed) -> Result<Self, Error> {
-        ecdsa::Keypair::from_seed(seed)
-            .map(Self)
-            .map_err(Error::Inner)
+        ecdsa::Keypair::from_seed(seed).map(Self)
     }
 
     /// Derive a child key from this one given a series of junctions.
@@ -97,7 +90,7 @@ impl Keypair {
         &self,
         junctions: Js,
     ) -> Result<Self, Error> {
-        self.0.derive(junctions).map(Self).map_err(Error::Inner)
+        self.0.derive(junctions).map(Self)
     }
 
     /// Obtain the [`ecdsa::PublicKey`] of this keypair.
@@ -167,22 +160,7 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &ecdsa::Publi
 }
 
 /// An error handed back if creating the keypair fails.
-#[derive(Debug, PartialEq, Display, From)]
-pub enum Error {
-    /// Invalid private key.
-    #[display(fmt = "Invalid private key")]
-    #[from(ignore)]
-    InvalidPrivateKey,
-    /// Invalid hex.
-    #[display(fmt = "Cannot parse hex string: {_0}")]
-    Hex(hex::FromHexError),
-    /// Inner,
-    #[display(fmt = "{_0}")]
-    Inner(ecdsa::Error),
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for Error {}
+pub type Error = ecdsa::Error;
 
 /// Dev accounts, helpful for testing but not to be used in production,
 /// since the secret keys are known.
