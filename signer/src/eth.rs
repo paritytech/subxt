@@ -262,9 +262,9 @@ mod test {
 
     impl subxt::Config for StubEthRuntimeConfig {
         type Hash = subxt::utils::H256;
-        type AccountId = super::AccountId20;
-        type Address = super::AccountId20;
-        type Signature = super::Signature;
+        type AccountId = AccountId20;
+        type Address = AccountId20;
+        type Signature = Signature;
         type Hasher = subxt::config::substrate::BlakeTwo256;
         type Header =
             subxt::config::substrate::SubstrateHeader<u32, subxt::config::substrate::BlakeTwo256>;
