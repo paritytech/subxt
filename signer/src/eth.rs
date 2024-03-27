@@ -5,9 +5,8 @@
 //! An ethereum keypair implementation.
 
 use derive_more::{Display, From};
-use hex::FromHex;
 use keccak_hash::keccak;
-use secp256k1::{Message, Secp256k1, SecretKey};
+use secp256k1::{Message, Secp256k1};
 
 use crate::crypto::{DeriveJunction, SecretUri};
 use crate::ecdsa;
@@ -28,14 +27,6 @@ impl From<ecdsa::Keypair> for Keypair {
 }
 
 impl Keypair {
-    /// Construct a keypair from a hex-encoded private key.
-    pub fn from_private_key_hex(hex: &str) -> Result<Self, Error> {
-        let seed = <[u8; 32]>::from_hex(hex).map_err(Error::Hex)?;
-        let secret = SecretKey::from_slice(&seed).map_err(|_| Error::InvalidPrivateKey)?;
-        let kp = secp256k1::Keypair::from_secret_key(&Secp256k1::signing_only(), &secret);
-        Ok(Self(ecdsa::Keypair(kp)))
-    }
-
     /// Create a keypair from a [`SecretUri`]. See the [`SecretUri`] docs for more.
     ///
     /// # Example
@@ -267,7 +258,6 @@ mod test {
     use super::*;
     use proptest::prelude::*;
 
-    use hex::ToHex;
     enum StubEthRuntimeConfig {}
 
     impl subxt::Config for StubEthRuntimeConfig {
@@ -286,7 +276,7 @@ mod test {
 
     prop_compose! {
         fn keypair()(seed in any::<[u8; 32]>()) -> Keypair {
-            let secret = SecretKey::from_slice(&seed).expect("valid secret key");
+            let secret = secp256k1::SecretKey::from_slice(&seed).expect("valid secret key");
             let inner = secp256k1::Keypair::from_secret_key(
                 &Secp256k1::new(),
                 &secret,
@@ -321,15 +311,6 @@ mod test {
         #[test]
         fn check_account_id_eq_address(keypair in keypair()) {
             assert_eq!(Signer::account_id(&keypair), Signer::address(&keypair));
-        }
-
-        #[test]
-        fn check_from_private_key_hex_matches(keypair in keypair()) {
-            let private_key = keypair.0.0.secret_key();
-            let private_key_hex = private_key.as_ref().encode_hex::<String>();
-
-            assert_eq!(keypair,
-                Keypair::from_private_key_hex(&private_key_hex).expect("valid private key"));
         }
 
         #[test]
