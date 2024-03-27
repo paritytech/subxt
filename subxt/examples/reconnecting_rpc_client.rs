@@ -6,17 +6,36 @@
 
 #![allow(missing_docs)]
 
+use std::future::Future;
 use std::sync::Arc;
 use std::time::Duration;
 
 use subxt::backend::rpc::reconnecting_rpc_client::{CallRetryPolicy, Client, RetryPolicy};
 use subxt::backend::rpc::RpcClient;
+use subxt::config::Header;
 use subxt::error::{Error, RpcError};
 use subxt::{OnlineClient, PolkadotConfig};
+use tokio_retry::strategy::{jitter, ExponentialBackoff};
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
+
+async fn retryable_rpc_call<T, A>(mut retry_future: A) -> Result<T, Error>
+where
+    A: tokio_retry::Action<Item = T, Error = Error>,
+{
+    let retry_strategy = ExponentialBackoff::from_millis(10)
+        .map(jitter) // add jitter to delays
+        .take(10); // limit to 10 retries
+
+    tokio_retry::RetryIf::spawn(
+        retry_strategy,
+        || retry_future.run(),
+        |err: &Error| err.is_disconnected_will_reconnect(),
+    )
+    .await
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -31,8 +50,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     .with_max_delay(Duration::from_secs(10))
                     .with_max_retries(usize::MAX),
             )
-            // Just an example how to override the default retry policy for individual RPC calls.
-            .retry_policy_for_method("foo", CallRetryPolicy::Retry)
             .build("ws://localhost:9944".to_string())
             .await?,
     );
@@ -40,15 +57,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api: OnlineClient<PolkadotConfig> =
         OnlineClient::from_rpc_client(RpcClient::new(rpc.clone())).await?;
 
-    // Subscribe to all finalized blocks:
-    let mut blocks_sub = api.blocks().subscribe_finalized().await?;
+    // Example how to retry a rpc call.
+    let mut blocks_sub =
+        retryable_rpc_call(|| api.backend().stream_finalized_block_headers()).await?;
 
     // For each block, print a bunch of information about it:
     while let Some(block) = blocks_sub.next().await {
-        let block = match block {
-            Ok(b) => b,
+        let header = match block {
+            Ok((header, _)) => header,
             Err(Error::Rpc(RpcError::DisconnectedWillReconnect(err))) => {
                 println!("{err}");
+                blocks_sub = blocks_sub.resubscribe().await?;
                 continue;
             }
             Err(e) => {
@@ -56,8 +75,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         };
 
-        let block_number = block.header().number;
-        let block_hash = block.hash();
+        let block_number = header.number;
+        let block_hash = header.hash();
 
         println!("Block #{block_number} ({block_hash})");
     }

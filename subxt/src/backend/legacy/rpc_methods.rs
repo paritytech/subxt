@@ -4,11 +4,15 @@
 
 //! An interface to call the raw legacy RPC methods.
 
+use std::pin::Pin;
+use std::task::Poll;
+
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::metadata::Metadata;
 use crate::{Config, Error};
 use codec::Decode;
 use derivative::Derivative;
+use futures::{Stream, StreamExt};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
@@ -229,8 +233,8 @@ impl<T: Config> LegacyRpcMethods<T> {
     }
 
     /// Subscribe to all new best block headers.
-    pub async fn chain_subscribe_new_heads(&self) -> Result<RpcSubscription<T::Header>, Error> {
-        let subscription = self
+    pub async fn chain_subscribe_new_heads(&self) -> Result<BlockSubscription<T>, Error> {
+        let stream = self
             .client
             .subscribe(
                 // Despite the name, this returns a stream of all new blocks
@@ -242,12 +246,16 @@ impl<T: Config> LegacyRpcMethods<T> {
             )
             .await?;
 
-        Ok(subscription)
+        Ok(BlockSubscription {
+            stream,
+            backend: self.clone(),
+            kind: BlockSubscriptionKind::New,
+        })
     }
 
     /// Subscribe to all new block headers.
-    pub async fn chain_subscribe_all_heads(&self) -> Result<RpcSubscription<T::Header>, Error> {
-        let subscription = self
+    pub async fn chain_subscribe_all_heads(&self) -> Result<BlockSubscription<T>, Error> {
+        let stream = self
             .client
             .subscribe(
                 // Despite the name, this returns a stream of all new blocks
@@ -259,7 +267,11 @@ impl<T: Config> LegacyRpcMethods<T> {
             )
             .await?;
 
-        Ok(subscription)
+        Ok(BlockSubscription {
+            stream,
+            backend: self.clone(),
+            kind: BlockSubscriptionKind::All,
+        })
     }
 
     /// Subscribe to finalized block headers.
@@ -268,10 +280,8 @@ impl<T: Config> LegacyRpcMethods<T> {
     /// sometimes multiple blocks are finalized at once, and in this case only the
     /// latest one is returned. the higher level APIs that use this "fill in" the
     /// gaps for us.
-    pub async fn chain_subscribe_finalized_heads(
-        &self,
-    ) -> Result<RpcSubscription<T::Header>, Error> {
-        let subscription = self
+    pub async fn chain_subscribe_finalized_heads(&self) -> Result<BlockSubscription<T>, Error> {
+        let stream = self
             .client
             .subscribe(
                 "chain_subscribeFinalizedHeads",
@@ -279,15 +289,20 @@ impl<T: Config> LegacyRpcMethods<T> {
                 "chain_unsubscribeFinalizedHeads",
             )
             .await?;
-        Ok(subscription)
+
+        Ok(BlockSubscription {
+            stream,
+            backend: self.clone(),
+            kind: BlockSubscriptionKind::Finalized,
+        })
     }
 
     /// Subscribe to runtime version updates that produce changes in the metadata.
     /// The first item emitted by the stream is the current runtime version.
     pub async fn state_subscribe_runtime_version(
         &self,
-    ) -> Result<RpcSubscription<RuntimeVersion>, Error> {
-        let subscription = self
+    ) -> Result<RuntimeVersionSubscription<T>, Error> {
+        let stream = self
             .client
             .subscribe(
                 "state_subscribeRuntimeVersion",
@@ -295,7 +310,11 @@ impl<T: Config> LegacyRpcMethods<T> {
                 "state_unsubscribeRuntimeVersion",
             )
             .await?;
-        Ok(subscription)
+
+        Ok(RuntimeVersionSubscription {
+            backend: self.clone(),
+            stream,
+        })
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
@@ -312,9 +331,9 @@ impl<T: Config> LegacyRpcMethods<T> {
     pub async fn author_submit_and_watch_extrinsic(
         &self,
         extrinsic: &[u8],
-    ) -> Result<RpcSubscription<TransactionStatus<T::Hash>>, Error> {
+    ) -> Result<SubmitAndWatchSubscription<T>, Error> {
         let params = rpc_params![to_hex(extrinsic)];
-        let subscription = self
+        let stream = self
             .client
             .subscribe(
                 "author_submitAndWatchExtrinsic",
@@ -322,7 +341,11 @@ impl<T: Config> LegacyRpcMethods<T> {
                 "author_unwatchExtrinsic",
             )
             .await?;
-        Ok(subscription)
+
+        Ok(SubmitAndWatchSubscription {
+            backend: self.clone(),
+            stream,
+        })
     }
 
     /// Insert a key into the keystore.
@@ -680,5 +703,116 @@ impl std::ops::Deref for Bytes {
 impl From<Vec<u8>> for Bytes {
     fn from(s: Vec<u8>) -> Self {
         Bytes(s)
+    }
+}
+
+enum BlockSubscriptionKind {
+    All,
+    New,
+    Finalized,
+}
+
+/// Block subscription.
+pub struct BlockSubscription<T: Config> {
+    backend: LegacyRpcMethods<T>,
+    kind: BlockSubscriptionKind,
+    stream: RpcSubscription<T::Header>,
+}
+
+impl<T: Send + Sync + Config> BlockSubscription<T> {
+    /// Returns the next item in the stream. This is just a wrapper around
+    /// [`StreamExt::next()`] so that you can avoid the extra import.
+    pub async fn next(&mut self) -> Option<Result<T::Header, Error>> {
+        StreamExt::next(self).await
+    }
+
+    /// Resubscribe to the subscription.
+    pub async fn resubscribe(self) -> Result<Self, Error> {
+        match self.kind {
+            BlockSubscriptionKind::All => self.backend.chain_subscribe_all_heads().await,
+            BlockSubscriptionKind::New => self.backend.chain_subscribe_new_heads().await,
+            BlockSubscriptionKind::Finalized => {
+                self.backend.chain_subscribe_finalized_heads().await
+            }
+        }
+    }
+}
+
+impl<T: Config> std::marker::Unpin for BlockSubscription<T> {}
+
+impl<T: Send + Sync + Config> Stream for BlockSubscription<T> {
+    type Item = Result<T::Header, Error>;
+
+    fn poll_next(
+        mut self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> Poll<Option<Self::Item>> {
+        self.stream.poll_next_unpin(cx)
+    }
+}
+
+/// Runtime version subscription.
+pub struct RuntimeVersionSubscription<T: Config> {
+    backend: LegacyRpcMethods<T>,
+    stream: RpcSubscription<RuntimeVersion>,
+}
+
+impl<T: Send + Sync + Config> RuntimeVersionSubscription<T> {
+    /// Returns the next item in the stream. This is just a wrapper around
+    /// [`StreamExt::next()`] so that you can avoid the extra import.
+    pub async fn next(&mut self) -> Option<Result<RuntimeVersion, Error>> {
+        StreamExt::next(self).await
+    }
+
+    /// Resubscribe to the subscription.
+    pub async fn resubscribe(self) -> Result<Self, Error> {
+        self.backend.state_subscribe_runtime_version().await
+    }
+}
+
+impl<T: Config> std::marker::Unpin for RuntimeVersionSubscription<T> {}
+
+impl<T: Send + Sync + Config> Stream for RuntimeVersionSubscription<T> {
+    type Item = Result<RuntimeVersion, Error>;
+
+    fn poll_next(
+        mut self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> Poll<Option<Self::Item>> {
+        self.stream.poll_next_unpin(cx)
+    }
+}
+
+/// submitAndWatch subscription.
+pub struct SubmitAndWatchSubscription<T: Config> {
+    backend: LegacyRpcMethods<T>,
+    stream: RpcSubscription<TransactionStatus<T::Hash>>,
+}
+
+impl<T: Send + Sync + Config> SubmitAndWatchSubscription<T> {
+    /// Returns the next item in the stream. This is just a wrapper around
+    /// [`StreamExt::next()`] so that you can avoid the extra import.
+    pub async fn next(&mut self) -> Option<Result<TransactionStatus<T::Hash>, Error>> {
+        StreamExt::next(self).await
+    }
+
+    /// Re-send the extrinsic and resubscribe.
+    pub async fn resubscribe(self, extrinsic: &[u8]) -> Result<Self, Error> {
+        self.backend
+            .author_submit_and_watch_extrinsic(extrinsic)
+            .await
+    }
+}
+
+impl<T: Config> std::marker::Unpin for SubmitAndWatchSubscription<T> {}
+
+impl<T: Send + Sync + Config> Stream for SubmitAndWatchSubscription<T> {
+    type Item = Result<TransactionStatus<T::Hash>, Error>;
+
+    fn poll_next(
+        mut self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> Poll<Option<Self::Item>> {
+        self.stream.poll_next_unpin(cx)
     }
 }

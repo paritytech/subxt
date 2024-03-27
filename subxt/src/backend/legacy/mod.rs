@@ -9,8 +9,8 @@ pub mod rpc_methods;
 
 use self::rpc_methods::TransactionStatus as RpcTransactionStatus;
 use crate::backend::{
-    rpc::RpcClient, Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
-    TransactionStatus,
+    rpc::RpcClient, Backend, BlockRef, RuntimeVersion, RuntimeVersionSubscription, StorageResponse,
+    StreamOf, StreamOfResults, TransactionStatus,
 };
 use crate::{config::Header, Config, Error};
 use async_trait::async_trait;
@@ -21,6 +21,8 @@ use std::task::{Context, Poll};
 
 // Expose the RPC methods.
 pub use rpc_methods::LegacyRpcMethods;
+
+use super::utils::{BlockSubscription, BlockSubscriptionKind, SubmitTransactionSubscription};
 
 /// Configure and build an [`LegacyBackend`].
 pub struct LegacyBackendBuilder<T> {
@@ -72,6 +74,13 @@ impl<T: Config> LegacyBackend<T> {
     /// Configure and construct an [`LegacyBackend`].
     pub fn builder() -> LegacyBackendBuilder<T> {
         LegacyBackendBuilder::new()
+    }
+
+    fn boxed_dyn_backend(&self) -> Box<dyn Backend<T>> {
+        Box::new(Self {
+            methods: self.methods.clone(),
+            storage_page_size: self.storage_page_size,
+        })
     }
 }
 
@@ -187,7 +196,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         })
     }
 
-    async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
+    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription<T>, Error> {
         let sub = self.methods.state_subscribe_runtime_version().await?;
         let sub = sub.map(|r| {
             r.map(|v| RuntimeVersion {
@@ -195,12 +204,14 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 transaction_version: v.transaction_version,
             })
         });
-        Ok(StreamOf(Box::pin(sub)))
+
+        Ok(RuntimeVersionSubscription {
+            stream: StreamOf::new(Box::pin(sub)),
+            backend: self.boxed_dyn_backend(),
+        })
     }
 
-    async fn stream_all_block_headers(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+    async fn stream_all_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
         let sub = self.methods.chain_subscribe_all_heads().await?;
         let sub = sub.map(|r| {
             r.map(|h| {
@@ -208,12 +219,15 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 (h, BlockRef::from_hash(hash))
             })
         });
-        Ok(StreamOf(Box::pin(sub)))
+
+        Ok(BlockSubscription {
+            stream: StreamOf::new(Box::pin(sub)),
+            kind: BlockSubscriptionKind::All,
+            backend: self.boxed_dyn_backend(),
+        })
     }
 
-    async fn stream_best_block_headers(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+    async fn stream_best_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
         let sub = self.methods.chain_subscribe_new_heads().await?;
         let sub = sub.map(|r| {
             r.map(|h| {
@@ -221,14 +235,16 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 (h, BlockRef::from_hash(hash))
             })
         });
-        Ok(StreamOf(Box::pin(sub)))
+
+        Ok(BlockSubscription {
+            stream: StreamOf::new(Box::pin(sub)),
+            kind: BlockSubscriptionKind::Best,
+            backend: self.boxed_dyn_backend(),
+        })
     }
 
-    async fn stream_finalized_block_headers(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let sub: super::rpc::RpcSubscription<<T as Config>::Header> =
-            self.methods.chain_subscribe_finalized_heads().await?;
+    async fn stream_finalized_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
+        let sub = self.methods.chain_subscribe_finalized_heads().await?;
 
         // Get the last finalized block immediately so that the stream will emit every finalized block after this.
         let last_finalized_block_ref = self.latest_finalized_block_ref().await?;
@@ -250,13 +266,18 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 (h, BlockRef::from_hash(hash))
             })
         });
-        Ok(StreamOf(Box::pin(sub)))
+
+        Ok(BlockSubscription {
+            stream: StreamOf::new(Box::pin(sub)),
+            kind: BlockSubscriptionKind::Finalized,
+            backend: self.boxed_dyn_backend(),
+        })
     }
 
     async fn submit_transaction(
         &self,
         extrinsic: &[u8],
-    ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
+    ) -> Result<SubmitTransactionSubscription<T>, Error> {
         let sub = self
             .methods
             .author_submit_and_watch_extrinsic(extrinsic)
@@ -309,7 +330,11 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
             future::ready(mapped)
         });
-        Ok(StreamOf(Box::pin(sub)))
+
+        Ok(SubmitTransactionSubscription {
+            stream: StreamOf::new(Box::pin(sub)),
+            backend: self.boxed_dyn_backend(),
+        })
     }
 
     async fn call(

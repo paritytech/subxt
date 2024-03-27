@@ -9,6 +9,7 @@
 pub mod legacy;
 pub mod rpc;
 pub mod unstable;
+pub mod utils;
 
 use crate::error::Error;
 use crate::metadata::Metadata;
@@ -18,6 +19,10 @@ use codec::{Decode, Encode};
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use std::sync::Arc;
+
+use utils::RuntimeVersionSubscription;
+
+use self::utils::{BlockSubscription, SubmitTransactionSubscription};
 
 /// Prevent the backend trait being implemented externally.
 #[doc(hidden)]
@@ -69,28 +74,22 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error>;
 
     /// A stream of all new runtime versions as they occur.
-    async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error>;
+    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription<T>, Error>;
 
     /// A stream of all new block headers as they arrive.
-    async fn stream_all_block_headers(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>;
+    async fn stream_all_block_headers(&self) -> Result<BlockSubscription<T>, Error>;
 
     /// A stream of best block headers.
-    async fn stream_best_block_headers(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>;
+    async fn stream_best_block_headers(&self) -> Result<BlockSubscription<T>, Error>;
 
     /// A stream of finalized block headers.
-    async fn stream_finalized_block_headers(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>;
+    async fn stream_finalized_block_headers(&self) -> Result<BlockSubscription<T>, Error>;
 
     /// Submit a transaction. This will return a stream of events about it.
     async fn submit_transaction(
         &self,
         bytes: &[u8],
-    ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error>;
+    ) -> Result<SubmitTransactionSubscription<T>, Error>;
 
     /// Make a call to some runtime API.
     async fn call(

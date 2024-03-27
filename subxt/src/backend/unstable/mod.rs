@@ -22,8 +22,8 @@ use self::rpc_methods::{
     FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
 };
 use crate::backend::{
-    rpc::RpcClient, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf,
-    StreamOfResults, TransactionStatus,
+    rpc::RpcClient, Backend, BlockRef, BlockRefT, RuntimeVersion, RuntimeVersionSubscription,
+    StorageResponse, StreamOf, StreamOfResults, TransactionStatus,
 };
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
@@ -38,6 +38,8 @@ use storage_items::StorageItems;
 
 // Expose the RPC methods.
 pub use rpc_methods::UnstableRpcMethods;
+
+use super::utils::{BlockSubscription, BlockSubscriptionKind, SubmitTransactionSubscription};
 
 /// Configure and build an [`UnstableBackend`].
 pub struct UnstableBackendBuilder<T> {
@@ -133,6 +135,13 @@ impl<T: Config> UnstableBackend<T> {
     /// Configure and construct an [`UnstableBackend`] and the associated [`UnstableBackendDriver`].
     pub fn builder() -> UnstableBackendBuilder<T> {
         UnstableBackendBuilder::new()
+    }
+
+    fn boxed_dyn_backend(&self) -> Box<dyn Backend<T>> {
+        Box::new(UnstableBackend {
+            methods: self.methods.clone(),
+            follow_handle: self.follow_handle.clone(),
+        })
     }
 
     /// Stream block headers based on the provided filter fn
@@ -347,7 +356,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         }
     }
 
-    async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
+    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription<T>, Error> {
         // Keep track of runtime details announced in new blocks, and then when blocks
         // are finalized, find the latest of these that has runtime details, and clear the rest.
         let mut runtimes = HashMap::new();
@@ -423,48 +432,71 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 })))
             });
 
-        Ok(StreamOf(Box::pin(runtime_stream)))
+        let backend = UnstableBackend {
+            methods: self.methods.clone(),
+            follow_handle: self.follow_handle.clone(),
+        };
+
+        Ok(RuntimeVersionSubscription {
+            backend: Box::new(backend),
+            stream: StreamOf::new(Box::pin(runtime_stream)),
+        })
     }
 
-    async fn stream_all_block_headers(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        self.stream_headers(|ev| match ev {
-            FollowEvent::Initialized(init) => init.finalized_block_hashes,
-            FollowEvent::NewBlock(ev) => {
-                vec![ev.block_hash]
-            }
-            _ => vec![],
+    async fn stream_all_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
+        let stream = self
+            .stream_headers(|ev| match ev {
+                FollowEvent::Initialized(init) => init.finalized_block_hashes,
+                FollowEvent::NewBlock(ev) => {
+                    vec![ev.block_hash]
+                }
+                _ => vec![],
+            })
+            .await?;
+
+        Ok(BlockSubscription {
+            stream,
+            kind: BlockSubscriptionKind::All,
+            backend: self.boxed_dyn_backend(),
         })
-        .await
     }
 
-    async fn stream_best_block_headers(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        self.stream_headers(|ev| match ev {
-            FollowEvent::Initialized(init) => init.finalized_block_hashes,
-            FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
-            _ => vec![],
+    async fn stream_best_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
+        let stream = self
+            .stream_headers(|ev| match ev {
+                FollowEvent::Initialized(init) => init.finalized_block_hashes,
+                FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
+                _ => vec![],
+            })
+            .await?;
+
+        Ok(BlockSubscription {
+            stream,
+            kind: BlockSubscriptionKind::Best,
+            backend: self.boxed_dyn_backend(),
         })
-        .await
     }
 
-    async fn stream_finalized_block_headers(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        self.stream_headers(|ev| match ev {
-            FollowEvent::Initialized(init) => init.finalized_block_hashes,
-            FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
-            _ => vec![],
+    async fn stream_finalized_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
+        let stream = self
+            .stream_headers(|ev| match ev {
+                FollowEvent::Initialized(init) => init.finalized_block_hashes,
+                FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
+                _ => vec![],
+            })
+            .await?;
+
+        Ok(BlockSubscription {
+            stream,
+            kind: BlockSubscriptionKind::Finalized,
+            backend: self.boxed_dyn_backend(),
         })
-        .await
     }
 
     async fn submit_transaction(
         &self,
         extrinsic: &[u8],
-    ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
+    ) -> Result<SubmitTransactionSubscription<T>, Error> {
         // We care about new and finalized block hashes.
         enum SeenBlockMarker {
             New,
@@ -629,7 +661,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             }
         });
 
-        Ok(StreamOf(Box::pin(tx_stream)))
+        Ok(SubmitTransactionSubscription {
+            stream: StreamOf(Box::pin(tx_stream)),
+            backend: self.boxed_dyn_backend(),
+        })
     }
 
     async fn call(

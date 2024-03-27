@@ -426,9 +426,9 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     /// Instead that's up to the user of this API to decide when to update and
     /// to perform the actual updating.
     pub async fn runtime_updates(&self) -> Result<RuntimeUpdaterStream<T>, Error> {
-        let stream = self.0.backend().stream_runtime_version().await?;
+        let sub = self.0.backend().stream_runtime_version().await?;
         Ok(RuntimeUpdaterStream {
-            stream,
+            stream: sub.stream,
             client: self.0.clone(),
         })
     }

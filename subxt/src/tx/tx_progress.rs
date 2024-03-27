@@ -6,9 +6,10 @@
 
 use std::task::Poll;
 
+use crate::backend::utils::SubmitTransactionSubscription;
 use crate::utils::strip_compact_prefix;
 use crate::{
-    backend::{BlockRef, StreamOfResults, TransactionStatus as BackendTxStatus},
+    backend::{BlockRef, TransactionStatus as BackendTxStatus},
     client::OnlineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
@@ -19,7 +20,7 @@ use futures::{Stream, StreamExt};
 
 /// This struct represents a subscription to the progress of some transaction.
 pub struct TxProgress<T: Config, C> {
-    sub: Option<StreamOfResults<BackendTxStatus<T::Hash>>>,
+    sub: Option<SubmitTransactionSubscription<T>>,
     ext_hash: T::Hash,
     client: C,
 }
@@ -41,11 +42,7 @@ impl<T: Config, C> Unpin for TxProgress<T, C> {}
 
 impl<T: Config, C> TxProgress<T, C> {
     /// Instantiate a new [`TxProgress`] from a custom subscription.
-    pub fn new(
-        sub: StreamOfResults<BackendTxStatus<T::Hash>>,
-        client: C,
-        ext_hash: T::Hash,
-    ) -> Self {
+    pub fn new(sub: SubmitTransactionSubscription<T>, client: C, ext_hash: T::Hash) -> Self {
         Self {
             sub: Some(sub),
             client,
@@ -402,16 +399,18 @@ mod test {
     }
 
     fn mock_tx_progress(statuses: Vec<MockSubstrateTxStatus>) -> MockTxProgress {
-        let sub = create_substrate_tx_status_subscription(statuses);
-        TxProgress::new(sub, MockClient, Default::default())
+        todo!();
+        //let sub = create_substrate_tx_status_subscription(statuses);
+        //TxProgress::new(sub, MockClient, Default::default())
     }
 
     fn create_substrate_tx_status_subscription(
         elements: Vec<MockSubstrateTxStatus>,
     ) -> StreamOfResults<MockSubstrateTxStatus> {
-        let results = elements.into_iter().map(Ok);
+        todo!();
+        /*let results = elements.into_iter().map(Ok);
         let stream = Box::pin(futures::stream::iter(results));
         let sub: StreamOfResults<MockSubstrateTxStatus> = StreamOfResults::new(stream);
-        sub
+        sub*/
     }
 }
