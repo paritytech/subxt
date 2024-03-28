@@ -146,8 +146,13 @@ path = "examples/light_client_local_node.rs"
 required-features = ["unstable-light-client", "jsonrpsee", "native"]
 
 [[example]]
-name = "reconnecting_rpc_client"
-path = "examples/reconnecting_rpc_client.rs"
+name = "legacy_reconnecting_rpc_client"
+path = "examples/legacy_reconnecting_rpc_client.rs"
+required-features = ["unstable-reconnecting-rpc-client"]
+
+[[example]]
+name = "unstable_reconnecting_rpc_client"
+path = "examples/unstable_reconnecting_rpc_client.rs"
 required-features = ["unstable-reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]
