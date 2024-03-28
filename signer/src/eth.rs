@@ -28,7 +28,8 @@ impl From<ecdsa::Keypair> for Keypair {
 }
 
 impl Keypair {
-    /// Create a keypair from a BIP-39 mnemonic phrase, optional password, and derivation index.
+    /// Create a keypair from a BIP-39 mnemonic phrase, optional password, account index, and
+    /// derivation type.
     ///
     /// # Example
     ///
@@ -37,7 +38,7 @@ impl Keypair {
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
     /// let mnemonic = Mnemonic::parse(phrase).unwrap();
-    /// let keypair = Keypair::from_phrase(&mnemonic, None, 0).unwrap();
+    /// let keypair = Keypair::from_phrase(&mnemonic, None, 0, Default::default()).unwrap();
     ///
     /// keypair.sign(b"Hello world!");
     /// ```
@@ -45,10 +46,15 @@ impl Keypair {
         mnemonic: &bip39::Mnemonic,
         password: Option<&str>,
         index: u32,
+        derivation: Derivation,
     ) -> Result<Self, Error> {
-        let derivation_path: bip32::DerivationPath = format!("m/44'/60'/0'/0/{}", index)
-            .parse()
-            .map_err(Error::InvalidDerivationIndex)?;
+        let derivation_path = match derivation {
+            Derivation::Hard => format!("m/44'/60'/{}'/0/0", index),
+            Derivation::Soft => format!("m/44'/60'/0'/0/{}", index),
+        }
+        .parse()
+        .map_err(Error::InvalidDerivationIndex)?;
+
         let private = bip32::XPrv::derive_from_path(
             mnemonic.to_seed(password.unwrap_or("")),
             &derivation_path,
@@ -89,6 +95,18 @@ impl Keypair {
         let wrapped =
             Message::from_digest_slice(message_hash.as_bytes()).expect("Message is 32 bytes; qed");
         Signature(ecdsa::internal::sign(&self.0 .0.secret_key(), &wrapped))
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Derivation {
+    Hard,
+    Soft,
+}
+
+impl Default for Derivation {
+    fn default() -> Self {
+        Self::Soft
     }
 }
 
@@ -156,37 +174,38 @@ pub mod dev {
     once_static_cloned! {
         pub fn alith() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 0).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 0, Derivation::Soft).unwrap()
         }
         pub fn baltathar() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 1).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 1, Derivation::Soft).unwrap()
         }
         pub fn charleth() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 2).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 2, Derivation::Soft).unwrap()
         }
         pub fn dorothy() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 3).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 3, Derivation::Soft).unwrap()
         }
         pub fn ethan() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 4).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 4, Derivation::Soft).unwrap()
         }
         pub fn faith() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 5).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 5, Derivation::Soft).unwrap()
         }
     }
 }
 
 #[cfg(feature = "subxt")]
 mod subxt_compat {
-    use super::*;
-
     use subxt_core::config::Config;
     use subxt_core::tx::Signer as SignerT;
+
+    use super::*;
+
     impl<T: Config> SignerT<T> for Keypair
     where
         T::AccountId: From<AccountId20>,
@@ -209,12 +228,9 @@ mod subxt_compat {
 
 #[cfg(test)]
 mod test {
-    use core::str::FromStr;
-
     use proptest::prelude::*;
     use secp256k1::Secp256k1;
 
-    use crate::DEV_PHRASE;
     use subxt_core::{config::*, tx::Signer as SignerT, utils::H256};
 
     use super::*;
@@ -234,6 +250,10 @@ mod test {
 
     type SubxtSigner = dyn SignerT<StubEthRuntimeConfig>;
 
+    fn derivation_strategy() -> impl Strategy<Value = Derivation> {
+        prop_oneof![Just(Derivation::Hard), Just(Derivation::Soft),]
+    }
+
     prop_compose! {
         fn keypair()(seed in any::<[u8; 32]>()) -> Keypair {
             let secret = secp256k1::SecretKey::from_slice(&seed).expect("valid secret key");
@@ -247,6 +267,44 @@ mod test {
     }
 
     proptest! {
+        #[test]
+        fn check_from_phrase(
+            entropy in any::<[u8; 32]>(),
+            password in any::<Option<String>>(),
+            index in 1..(i32::MAX as u32),
+            derivation in derivation_strategy()
+        ) {
+            let mnemonic = bip39::Mnemonic::from_entropy(&entropy).expect("valid mnemonic");
+            let derivation_path = match derivation {
+                Derivation::Hard => format!("m/44'/60'/{}'/0/0", index),
+                Derivation::Soft => format!("m/44'/60'/0'/0/{}", index),
+            }.parse().expect("valid derivation path");
+            let private = bip32::XPrv::derive_from_path(
+                mnemonic.to_seed(password.clone().unwrap_or("".to_string())),
+                &derivation_path,
+            ).expect("valid private");
+
+            assert_eq!(
+                Keypair::from_phrase(&mnemonic, password.as_deref(), index, derivation).expect("valid keypair"),
+                Keypair(ecdsa::Keypair::from_seed(private.to_bytes()).expect("valid ecdsa keypair"))
+            );
+        }
+
+       #[test]
+        fn check_from_phrase_bad_index(
+            entropy in any::<[u8; 32]>(),
+            password in any::<Option<String>>(),
+            index in (i32::MAX as u32)..=u32::MAX,
+            derivation in derivation_strategy()
+        ) {
+            let mnemonic = bip39::Mnemonic::from_entropy(&entropy).expect("valid mnemonic");
+
+            assert_eq!(
+                Keypair::from_phrase(&mnemonic, password.as_deref(), index, derivation).expect_err("bad index"),
+                Error::InvalidDerivationIndex(bip32::Error::ChildNumber)
+            );
+        }
+
         #[test]
         fn check_subxt_signer_implementation_matches(keypair in keypair(), msg in ".*") {
             let msg_as_bytes = msg.as_bytes();
@@ -311,5 +369,47 @@ mod test {
             dev::faith().account_id().to_string(),
             eth_checksum::checksum("0xC0F0f4ab324C46e55D02D0033343B4Be8A55532d")
         );
+    }
+
+    /// Test the same accounts from moonbeam so we know for sure that this implementation is working
+    /// https://github.com/moonbeam-foundation/moonbeam/blob/e70ee0d427dfee8987d5a5671a66416ee6ec38aa/primitives/account/src/lib.rs#L217
+    #[cfg(test)]
+    mod moonbeam_sanity_tests {
+        use hex_literal::hex;
+
+        use super::*;
+
+        const KEY_1: [u8; 32] =
+            hex!("502f97299c472b88754accd412b7c9a6062ef3186fba0c0388365e1edec24875");
+        const KEY_2: [u8; 32] =
+            hex!("0f02ba4d7f83e59eaa32eae9c3c4d99b68ce76decade21cdab7ecce8f4aef81a");
+        const KEY_3: [u8; 32] =
+            hex!("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
+        #[test]
+        fn test_account_derivation_1() {
+            let kp = Keypair::from_seed(KEY_1).expect("valid keypair");
+            assert_eq!(
+                kp.account_id().to_string(),
+                eth_checksum::checksum("0x976f8456e4e2034179b284a23c0e0c8f6d3da50c")
+            );
+        }
+
+        #[test]
+        fn test_account_derivation_2() {
+            let kp = Keypair::from_seed(KEY_2).expect("valid keypair");
+            assert_eq!(
+                kp.account_id().to_string(),
+                eth_checksum::checksum("0x420e9f260b40af7e49440cead3069f8e82a5230f")
+            );
+        }
+
+        #[test]
+        fn test_account_derivation_3() {
+            let kp = Keypair::from_seed(KEY_3).expect("valid keypair");
+            assert_eq!(
+                kp.account_id().to_string(),
+                eth_checksum::checksum("0x9cce34F7aB185c7ABA1b7C8140d620B4BDA941d6")
+            );
+        }
     }
 }

@@ -60,6 +60,7 @@ getrandom = { workspace = true, optional = true }
 [dev-dependencies]
 sp-keyring = { workspace = true }
 proptest = { workspace = true }
+hex-literal = { workspace = true }
 sp-core = { workspace = true }
 
 [package.metadata.cargo-machete]
