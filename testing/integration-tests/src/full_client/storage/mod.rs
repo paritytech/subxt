@@ -60,7 +60,6 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-
 #[cfg(fullclient)]
 #[subxt_test]
 async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> {
