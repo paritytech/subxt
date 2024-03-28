@@ -114,7 +114,7 @@ impl AsRef<[u8]> for AccountId20 {
 
 impl Display for AccountId20 {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}", eth_checksum::checksum(&hex::encode(&self)))
+        write!(f, "{}", eth_checksum::checksum(&hex::encode(self)))
     }
 }
 
