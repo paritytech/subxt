@@ -4668,7 +4668,6 @@ dependencies = [
  "tracing",
  "tracing-subscriber 0.3.18",
  "url",
- "wasm-bindgen-futures",
 ]
 
 [[package]]
