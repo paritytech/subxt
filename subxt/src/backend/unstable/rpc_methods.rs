@@ -997,4 +997,30 @@ mod test {
         let _ = serde_json::from_value::<Foo32>(from_err)
             .expect_err("can't deser invalid num into u32");
     }
+
+    #[test]
+    fn chain_head_initialized() {
+        // Latest format version.
+        let event = serde_json::json!({
+            "finalizedBlockHashes": ["0x1", "0x2"],
+        });
+        let decoded: Initialized<String> = serde_json::from_value(event).unwrap();
+        assert_eq!(
+            decoded.finalized_block_hashes,
+            vec!["0x1".to_string(), "0x2".to_string()]
+        );
+
+        // Old format.
+        let event = serde_json::json!({
+            "finalizedBlockHash": "0x1",
+        });
+        let decoded: Initialized<String> = serde_json::from_value(event).unwrap();
+        assert_eq!(decoded.finalized_block_hashes, vec!["0x1".to_string()]);
+
+        // Wrong format.
+        let event = serde_json::json!({
+            "finalizedBlockHash": ["0x1"],
+        });
+        let _ = serde_json::from_value::<Initialized<String>>(event).unwrap_err();
+    }
 }
