@@ -11,7 +11,7 @@ use crate::{
         },
         staking,
     },
-    test_context,
+    submit_tx_wait_for_finalized_success, subxt_test, test_context,
 };
 use assert_matches::assert_matches;
 use subxt::error::{DispatchError, Error};
@@ -34,7 +34,7 @@ fn default_validator_prefs() -> ValidatorPrefs {
     }
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn validate_with_stash_account() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -45,16 +45,17 @@ async fn validate_with_stash_account() {
         .staking()
         .validate(default_validator_prefs());
 
-    api.tx()
-        .sign_and_submit_then_watch_default(&tx, &alice_stash)
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice_stash, Default::default())
         .await
-        .unwrap()
-        .wait_for_finalized_success()
+        .unwrap();
+    submit_tx_wait_for_finalized_success(&signed_extrinsic)
         .await
         .expect("should be successful");
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn validate_not_possible_for_controller_account() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -65,12 +66,12 @@ async fn validate_not_possible_for_controller_account() -> Result<(), Error> {
         .staking()
         .validate(default_validator_prefs());
 
-    let announce_validator = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
-        .await?
-        .wait_for_finalized_success()
-        .await;
+        .create_signed(&tx, &alice, Default::default())
+        .await?;
+    let announce_validator = submit_tx_wait_for_finalized_success(&signed_extrinsic).await;
+
     assert_matches!(announce_validator, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();
         assert_eq!(details.pallet.name(), "Staking");
@@ -79,7 +80,7 @@ async fn validate_not_possible_for_controller_account() -> Result<(), Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn nominate_with_stash_account() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -91,16 +92,17 @@ async fn nominate_with_stash_account() {
         .staking()
         .nominate(vec![bob.public_key().to_address()]);
 
-    api.tx()
-        .sign_and_submit_then_watch_default(&tx, &alice_stash)
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice_stash, Default::default())
         .await
-        .unwrap()
-        .wait_for_finalized_success()
+        .unwrap();
+    submit_tx_wait_for_finalized_success(&signed_extrinsic)
         .await
         .expect("should be successful");
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn nominate_not_possible_for_controller_account() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -112,13 +114,12 @@ async fn nominate_not_possible_for_controller_account() -> Result<(), Error> {
         .staking()
         .nominate(vec![bob.public_key().to_address()]);
 
-    let nomination = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
+        .create_signed(&tx, &alice, Default::default())
         .await
-        .unwrap()
-        .wait_for_finalized_success()
-        .await;
+        .unwrap();
+    let nomination = submit_tx_wait_for_finalized_success(&signed_extrinsic).await;
 
     assert_matches!(nomination, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();
@@ -128,7 +129,7 @@ async fn nominate_not_possible_for_controller_account() -> Result<(), Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn chill_works_for_stash_only() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -141,11 +142,12 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
     let nominate_tx = node_runtime::tx()
         .staking()
         .nominate(vec![bob_stash.public_key().to_address()]);
-    api.tx()
-        .sign_and_submit_then_watch_default(&nominate_tx, &alice_stash)
-        .await?
-        .wait_for_finalized_success()
+
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&nominate_tx, &alice_stash, Default::default())
         .await?;
+    submit_tx_wait_for_finalized_success(&signed_extrinsic).await?;
 
     let ledger_addr = node_runtime::storage()
         .staking()
@@ -161,12 +163,11 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
 
     let chill_tx = node_runtime::tx().staking().chill();
 
-    let chill = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&chill_tx, &alice)
-        .await?
-        .wait_for_finalized_success()
-        .await;
+        .create_signed(&chill_tx, &alice, Default::default())
+        .await?;
+    let chill = submit_tx_wait_for_finalized_success(&signed_extrinsic).await;
 
     assert_matches!(chill, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();
@@ -174,19 +175,20 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
         assert_eq!(&details.variant.name, "NotController");
     });
 
-    let is_chilled = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&chill_tx, &alice_stash)
-        .await?
-        .wait_for_finalized_success()
+        .create_signed(&chill_tx, &alice_stash, Default::default())
+        .await?;
+    let is_chilled = submit_tx_wait_for_finalized_success(&signed_extrinsic)
         .await?
         .has::<staking::events::Chilled>()?;
+
     assert!(is_chilled);
 
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn tx_bond() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -197,21 +199,19 @@ async fn tx_bond() -> Result<(), Error> {
         .staking()
         .bond(100_000_000_000_000, RewardDestination::Stash);
 
-    let bond = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&bond_tx, &alice)
-        .await?
-        .wait_for_finalized_success()
-        .await;
+        .create_signed(&bond_tx, &alice, Default::default())
+        .await?;
+    let bond = submit_tx_wait_for_finalized_success(&signed_extrinsic).await;
 
     assert!(bond.is_ok());
 
-    let bond_again = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&bond_tx, &alice)
-        .await?
-        .wait_for_finalized_success()
-        .await;
+        .create_signed(&bond_tx, &alice, Default::default())
+        .await?;
+    let bond_again = submit_tx_wait_for_finalized_success(&signed_extrinsic).await;
 
     assert_matches!(bond_again, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();
@@ -221,7 +221,7 @@ async fn tx_bond() -> Result<(), Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn storage_history_depth() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -231,7 +231,7 @@ async fn storage_history_depth() -> Result<(), Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn storage_current_era() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -246,7 +246,7 @@ async fn storage_current_era() -> Result<(), Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn storage_era_reward_points() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();

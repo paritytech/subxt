@@ -9,10 +9,11 @@ use crate::{
         runtime_types::{pallet_contracts::wasm::Determinism, sp_weights::weight_v2::Weight},
         system,
     },
-    test_context, TestContext,
+    submit_tx_wait_for_finalized_success, subxt_test, test_context, TestClient, TestConfig,
+    TestContext,
 };
 use subxt::ext::futures::StreamExt;
-use subxt::{tx::TxProgress, utils::MultiAddress, Config, Error, OnlineClient, SubstrateConfig};
+use subxt::{tx::TxProgress, utils::MultiAddress, Config, Error};
 use subxt_signer::sr25519::{self, dev};
 
 struct ContractsTestContext {
@@ -20,8 +21,8 @@ struct ContractsTestContext {
     signer: sr25519::Keypair,
 }
 
-type Hash = <SubstrateConfig as Config>::Hash;
-type AccountId = <SubstrateConfig as Config>::AccountId;
+type Hash = <TestConfig as Config>::Hash;
+type AccountId = <TestConfig as Config>::AccountId;
 
 /// A dummy contract which does nothing at all.
 const CONTRACT: &str = r#"
@@ -42,7 +43,7 @@ impl ContractsTestContext {
         Self { cxt, signer }
     }
 
-    fn client(&self) -> OnlineClient<SubstrateConfig> {
+    fn client(&self) -> TestClient {
         self.cxt.client()
     }
 
@@ -54,13 +55,12 @@ impl ContractsTestContext {
                 .contracts()
                 .upload_code(code, None, Determinism::Enforced);
 
-        let events = self
+        let signed_extrinsic = self
             .client()
             .tx()
-            .sign_and_submit_then_watch_default(&upload_tx, &self.signer)
-            .await?
-            .wait_for_finalized_success()
+            .create_signed(&upload_tx, &self.signer, Default::default())
             .await?;
+        let events = submit_tx_wait_for_finalized_success(&signed_extrinsic).await?;
 
         let code_stored = events
             .find_first::<events::CodeStored>()?
@@ -84,13 +84,12 @@ impl ContractsTestContext {
             vec![], // salt
         );
 
-        let events = self
+        let signed_extrinsic = self
             .client()
             .tx()
-            .sign_and_submit_then_watch_default(&instantiate_tx, &self.signer)
-            .await?
-            .wait_for_finalized_success()
+            .create_signed(&instantiate_tx, &self.signer, Default::default())
             .await?;
+        let events = submit_tx_wait_for_finalized_success(&signed_extrinsic).await?;
 
         let code_stored = events
             .find_first::<events::CodeStored>()?
@@ -126,13 +125,12 @@ impl ContractsTestContext {
             salt,
         );
 
-        let result = self
+        let signed_extrinsic = self
             .client()
             .tx()
-            .sign_and_submit_then_watch_default(&instantiate_tx, &self.signer)
-            .await?
-            .wait_for_finalized_success()
+            .create_signed(&instantiate_tx, &self.signer, Default::default())
             .await?;
+        let result = submit_tx_wait_for_finalized_success(&signed_extrinsic).await?;
 
         tracing::info!("Instantiate result: {:?}", result);
         let instantiated = result
@@ -146,7 +144,7 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<TxProgress<SubstrateConfig, OnlineClient<SubstrateConfig>>, Error> {
+    ) -> Result<TxProgress<TestConfig, TestClient>, Error> {
         tracing::info!("call: {:?}", contract);
         let call_tx = node_runtime::tx().contracts().call(
             MultiAddress::Id(contract),
@@ -170,7 +168,7 @@ impl ContractsTestContext {
     }
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn tx_instantiate_with_code() {
     let ctx = ContractsTestContext::init().await;
     let result = ctx.instantiate_with_code().await;
@@ -181,7 +179,7 @@ async fn tx_instantiate_with_code() {
     );
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn tx_instantiate() {
     let ctx = ContractsTestContext::init().await;
     let code_hash = ctx.upload_code().await.unwrap();
@@ -194,7 +192,7 @@ async fn tx_instantiate() {
     );
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn tx_call() {
     let cxt = ContractsTestContext::init().await;
     let (_, contract) = cxt.instantiate_with_code().await.unwrap();

@@ -3,11 +3,14 @@
 // see LICENSE for license details.
 
 use crate::{
-    test_context,
+    submit_tx_wait_for_finalized_success, subxt_test, test_context,
     utils::{node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};
+
+#[cfg(fullclient)]
 use futures::StreamExt;
+
 use subxt::{
     backend::BackendExt,
     error::{DispatchError, Error},
@@ -15,10 +18,13 @@ use subxt::{
 };
 use subxt_signer::sr25519::dev;
 
+#[cfg(fullclient)]
 mod legacy_rpcs;
+
 mod unstable_rpcs;
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn storage_fetch_raw_keys() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -39,7 +45,8 @@ async fn storage_fetch_raw_keys() {
     assert_eq!(len, 13)
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn storage_iter() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -63,7 +70,8 @@ async fn storage_iter() {
     assert_eq!(len, 13);
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn storage_child_values_same_across_backends() {
     let ctx = test_context().await;
 
@@ -103,7 +111,7 @@ async fn storage_child_values_same_across_backends() {
     }
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn transaction_validation() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -128,16 +136,12 @@ async fn transaction_validation() {
         .await
         .expect("validation failed");
 
-    signed_extrinsic
-        .submit_and_watch()
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
+    submit_tx_wait_for_finalized_success(&signed_extrinsic)
         .await
         .unwrap();
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn validation_fails() {
     use std::str::FromStr;
     use subxt_signer::{sr25519::Keypair, SecretUri};
@@ -171,7 +175,7 @@ async fn validation_fails() {
     );
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn external_signing() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -195,19 +199,16 @@ async fn external_signing() {
         .sign_with_address_and_signature(&alice.public_key().into(), &signature.into());
 
     // And now submit it.
-    extrinsic
-        .submit_and_watch()
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
+    submit_tx_wait_for_finalized_success(&extrinsic)
         .await
         .unwrap();
 }
 
+#[cfg(fullclient)]
 // TODO: Investigate and fix this test failure when using the UnstableBackend.
 // (https://github.com/paritytech/subxt/issues/1308)
 #[cfg(not(feature = "unstable-backend-client"))]
-#[tokio::test]
+#[subxt_test]
 async fn submit_large_extrinsic() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -234,7 +235,7 @@ async fn submit_large_extrinsic() {
         .unwrap();
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn decode_a_module_error() {
     use node_runtime::runtime_types::pallet_assets::pallet as assets;
 
@@ -248,12 +249,13 @@ async fn decode_a_module_error() {
     // "unknown" module error from the assets pallet.
     let freeze_unknown_asset = node_runtime::tx().assets().freeze(1, alice_addr);
 
-    let err = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&freeze_unknown_asset, &alice)
+        .create_signed(&freeze_unknown_asset, &alice, Default::default())
         .await
-        .unwrap()
-        .wait_for_finalized_success()
+        .unwrap();
+
+    let err = submit_tx_wait_for_finalized_success(&signed_extrinsic)
         .await
         .expect_err("an 'unknown asset' error");
 
@@ -271,7 +273,7 @@ async fn decode_a_module_error() {
     );
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -299,7 +301,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
     assert_eq!(actual_tx_bytes, expected_tx_bytes);
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn extrinsic_hash_is_same_as_returned() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -351,7 +353,7 @@ pub struct InclusionFee {
     pub adjusted_weight_fee: u128,
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn partial_fee_estimate_correct() {
     let ctx = test_context().await;
     let api = ctx.client();

@@ -2,17 +2,27 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{test_context, utils::node_runtime};
+use crate::{subxt_test, test_context};
 use codec::{Compact, Encode};
 use futures::StreamExt;
+
+#[cfg(fullclient)]
+use crate::utils::node_runtime;
+#[cfg(fullclient)]
 use subxt::config::signed_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce};
+#[cfg(fullclient)]
 use subxt::config::DefaultExtrinsicParamsBuilder;
+#[cfg(fullclient)]
 use subxt::config::SubstrateConfig;
+#[cfg(fullclient)]
 use subxt::utils::Era;
-use subxt_metadata::Metadata;
+#[cfg(fullclient)]
 use subxt_signer::sr25519::dev;
 
-#[tokio::test]
+use subxt_metadata::Metadata;
+
+#[cfg(fullclient)]
+#[subxt_test]
 async fn block_subscriptions_are_consistent_with_eachother() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -76,7 +86,7 @@ async fn block_subscriptions_are_consistent_with_eachother() -> Result<(), subxt
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -93,7 +103,7 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
     use subxt::backend::legacy;
 
@@ -138,7 +148,7 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
 }
 
 // Check that we can subscribe to non-finalized blocks.
-#[tokio::test]
+#[subxt_test]
 async fn runtime_api_call() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -163,7 +173,8 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn fetch_block_and_decode_extrinsic_details() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -232,7 +243,8 @@ async fn fetch_block_and_decode_extrinsic_details() {
     assert!(tx.is_signed());
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn decode_signed_extensions_from_blocks() {
     let ctx = test_context().await;
     let api = ctx.client();

@@ -2,11 +2,14 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, test_context, utils::wait_for_blocks};
+use crate::{node_runtime, subxt_test, test_context, utils::wait_for_blocks};
+
+#[cfg(fullclient)]
 use subxt::utils::AccountId32;
+#[cfg(fullclient)]
 use subxt_signer::sr25519::dev;
 
-#[tokio::test]
+#[subxt_test]
 async fn storage_plain_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -27,7 +30,8 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn storage_map_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -56,7 +60,8 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> {
     use codec::Encode;
     use node_runtime::runtime_types::sp_core::crypto::KeyTypeId;
@@ -89,7 +94,8 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
     Ok(())
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -125,7 +131,8 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -199,7 +206,7 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn storage_runtime_wasm_code() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -208,7 +215,7 @@ async fn storage_runtime_wasm_code() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn storage_pallet_storage_version() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
