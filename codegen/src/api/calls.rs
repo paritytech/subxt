@@ -92,8 +92,8 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> #crate_path::tx::Payload<types::#struct_name> {
-                    #crate_path::tx::Payload::new_static(
+                ) -> #crate_path::tx::payload::Payload<types::#struct_name> {
+                    #crate_path::tx::payload::Payload::new_static(
                         #pallet_name,
                         #call_name,
                         types::#struct_name { #( #call_args, )* },

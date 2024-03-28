@@ -67,6 +67,7 @@ sp-runtime = { workspace = true, optional = true }
 tracing = { workspace = true, default-features = false }
 
 [dev-dependencies]
+assert_matches = { workspace = true }
 bitvec = { workspace = true }
 codec = { workspace = true, features = ["derive", "bit-vec"] }
 sp-core = { workspace = true }

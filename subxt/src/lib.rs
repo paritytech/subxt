@@ -71,7 +71,7 @@ pub mod config {
 
 /// Types representing the metadata obtained from a node.
 pub mod metadata {
-    pub use subxt_core::metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata, MetadataExt};
+    pub use subxt_core::metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata};
     // Expose metadata types under a sub module in case somebody needs to reference them:
     pub use subxt_metadata as types;
 }

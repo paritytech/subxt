@@ -1,19 +1,15 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Types associated with accessing custom types
+//! Types associated with accessing custom types.
 
 mod custom_value_address;
 
 use crate::utils::Yes;
 pub use custom_value_address::{CustomValueAddress, StaticAddress};
 
-use crate::{
-    error::MetadataError,
-    metadata::{DecodeWithMetadata, MetadataExt},
-    Error, Metadata,
-};
+use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
 use alloc::vec::Vec;
 
 /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
@@ -135,7 +131,7 @@ mod tests {
         };
 
         let metadata: subxt_metadata::Metadata = frame_metadata.try_into().unwrap();
-        Metadata::new(metadata)
+        Metadata::from(metadata)
     }
 
     #[test]
