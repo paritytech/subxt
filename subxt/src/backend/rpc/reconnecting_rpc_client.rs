@@ -2,14 +2,14 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-pub use reconnecting_jsonrpsee_ws_client::{CallRetryPolicy, RetryPolicy};
-
 use super::{RawRpcFuture, RawRpcSubscription, RpcClientT};
 use crate::error::RpcError;
 use futures::{FutureExt, StreamExt, TryStreamExt};
-use reconnecting_jsonrpsee_ws_client::{Client as InnerClient, SubscriptionId};
+use reconnecting_jsonrpsee_ws_client::{CallRetryPolicy, Client as InnerClient, SubscriptionId};
 use serde_json::value::RawValue;
 use std::time::Duration;
+
+pub use reconnecting_jsonrpsee_ws_client::RetryPolicy;
 
 /// Reconnecting rpc client builder.
 pub struct Builder {

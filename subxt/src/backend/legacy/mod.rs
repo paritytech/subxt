@@ -76,7 +76,8 @@ impl<T: Config> LegacyBackend<T> {
         LegacyBackendBuilder::new()
     }
 
-    fn boxed_dyn_backend(&self) -> Box<dyn Backend<T>> {
+    /// ...
+    pub fn boxed_dyn_backend(&self) -> Box<dyn Backend<T>> {
         Box::new(Self {
             methods: self.methods.clone(),
             storage_page_size: self.storage_page_size,

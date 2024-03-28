@@ -6,36 +6,20 @@
 
 #![allow(missing_docs)]
 
-use std::future::Future;
 use std::sync::Arc;
 use std::time::Duration;
 
-use subxt::backend::rpc::reconnecting_rpc_client::{CallRetryPolicy, Client, RetryPolicy};
+use subxt::backend::legacy::LegacyBackend;
+use subxt::backend::retry::RetryBackend;
+use subxt::backend::rpc::reconnecting_rpc_client::{Client, RetryPolicy};
 use subxt::backend::rpc::RpcClient;
 use subxt::config::Header;
 use subxt::error::{Error, RpcError};
 use subxt::{OnlineClient, PolkadotConfig};
-use tokio_retry::strategy::{jitter, ExponentialBackoff};
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
-
-async fn retryable_rpc_call<T, A>(mut retry_future: A) -> Result<T, Error>
-where
-    A: tokio_retry::Action<Item = T, Error = Error>,
-{
-    let retry_strategy = ExponentialBackoff::from_millis(10)
-        .map(jitter) // add jitter to delays
-        .take(10); // limit to 10 retries
-
-    tokio_retry::RetryIf::spawn(
-        retry_strategy,
-        || retry_future.run(),
-        |err: &Error| err.is_disconnected_will_reconnect(),
-    )
-    .await
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -54,12 +38,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await?,
     );
 
-    let api: OnlineClient<PolkadotConfig> =
-        OnlineClient::from_rpc_client(RpcClient::new(rpc.clone())).await?;
+    let backend: LegacyBackend<PolkadotConfig> =
+        LegacyBackend::builder().build(RpcClient::new(rpc.clone()));
 
-    // Example how to retry a rpc call.
-    let mut blocks_sub =
-        retryable_rpc_call(|| api.backend().stream_finalized_block_headers()).await?;
+    let retry_backend = RetryBackend::from(backend.boxed_dyn_backend());
+
+    let api: OnlineClient<PolkadotConfig> =
+        OnlineClient::from_backend(Arc::new(retry_backend)).await?;
+
+    // The retry-able rpc backend will re-run this until it's succesful.
+    // It's also possible to run custom retry_logic withot the retry-backend
+    //
+    // Then you can use `subxt::backend::utils::retry` or `subxt::backend::utils::retry_with_strategy`
+    // to retry rpc calls or write your own retry logic.
+    let mut blocks_sub = api.backend().stream_finalized_block_headers().await?;
 
     // For each block, print a bunch of information about it:
     while let Some(block) = blocks_sub.next().await {

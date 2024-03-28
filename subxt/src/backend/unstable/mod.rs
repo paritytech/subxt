@@ -137,7 +137,8 @@ impl<T: Config> UnstableBackend<T> {
         UnstableBackendBuilder::new()
     }
 
-    fn boxed_dyn_backend(&self) -> Box<dyn Backend<T>> {
+    /// todo..
+    pub fn boxed_dyn_backend(&self) -> Box<dyn Backend<T>> {
         Box::new(UnstableBackend {
             methods: self.methods.clone(),
             follow_handle: self.follow_handle.clone(),

@@ -28,7 +28,8 @@ native = [
     "jsonrpsee?/async-client",
     "jsonrpsee?/client-ws-transport-native-tls",
     "subxt-lightclient?/native",
-    "tokio-util"
+    "tokio-util",
+    "tokio-retry"
 ]
 
 # Enable this for web/wasm builds.
@@ -43,7 +44,7 @@ web = [
 ]
 
 # Enable this to use the reconnecting rpc client
-unstable-reconnecting-rpc-client = ["dep:reconnecting-jsonrpsee-ws-client", "dep:tokio-retry"]
+unstable-reconnecting-rpc-client = ["dep:reconnecting-jsonrpsee-ws-client"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = [
