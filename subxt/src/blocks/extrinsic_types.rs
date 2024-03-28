@@ -12,17 +12,11 @@ use crate::{
 
 use derive_where::derive_where;
 use scale_decode::DecodeAsType;
-use subxt_core::blocks::{
-    Extrinsics as CoreExtrinsics,
-    ExtrinsicDetails as CoreExtrinsicDetails,
-};
+use subxt_core::blocks::{ExtrinsicDetails as CoreExtrinsicDetails, Extrinsics as CoreExtrinsics};
 
 // Re-export anything that's directly returned/used in the APIs below.
 pub use subxt_core::blocks::{
-    StaticExtrinsic,
-    ExtrinsicSignedExtensions,
-    ExtrinsicSignedExtension,
-    ExtrinsicMetadataDetails,
+    ExtrinsicMetadataDetails, ExtrinsicSignedExtension, ExtrinsicSignedExtensions, StaticExtrinsic,
 };
 
 /// The body of a block.
@@ -80,7 +74,12 @@ where
 
         self.inner.iter().map(move |res| {
             let inner = res?;
-            Ok(ExtrinsicDetails::new(inner, client.clone(), block_hash, cached_events.clone()))
+            Ok(ExtrinsicDetails::new(
+                inner,
+                client.clone(),
+                block_hash,
+                cached_events.clone(),
+            ))
         })
     }
 
@@ -99,10 +98,13 @@ where
                         ext.details,
                         self.client.clone(),
                         self.hash,
-                        self.cached_events.clone()
+                        self.cached_events.clone(),
                     );
 
-                    Ok(FoundExtrinsic { details, value: ext.value })
+                    Ok(FoundExtrinsic {
+                        details,
+                        value: ext.value,
+                    })
                 }
             }
         })
@@ -159,7 +161,7 @@ where
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::is_signed()`].
     pub fn is_signed(&self) -> bool {
-       self.inner.is_signed()
+        self.inner.is_signed()
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::index()`].

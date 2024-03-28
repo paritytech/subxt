@@ -29,7 +29,7 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
         ClientState {
             genesis_hash: self.genesis_hash(),
             runtime_version: self.runtime_version(),
-            metadata: self.metadata()
+            metadata: self.metadata(),
         }
     }
 

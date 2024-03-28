@@ -18,7 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 2. A runtime version (system_version constant on a Substrate node has these):
     let runtime_version = subxt::client::RuntimeVersion {
         spec_version: 9370,
-        transaction_version: 20
+        transaction_version: 20,
     };
 
     // 3. Metadata (I'll load it from the downloaded metadata, but you can use

@@ -10,11 +10,7 @@ pub use constant_address::{dynamic, Address, ConstantAddress, DynamicAddress};
 
 use alloc::borrow::ToOwned;
 
-use crate::{
-    error::MetadataError,
-    metadata::DecodeWithMetadata,
-    Error, Metadata,
-};
+use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
 /// that the shape of the constant value is the same as the shape expected by the static address.

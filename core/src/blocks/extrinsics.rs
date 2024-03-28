@@ -2,19 +2,19 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::blocks::extrinsic_signed_extensions::ExtrinsicSignedExtensions;
+use crate::utils::strip_compact_prefix;
 use crate::{
     config::Config,
     error::{BlockError, Error, MetadataError},
     Metadata,
 };
-use subxt_metadata::PalletMetadata;
-use crate::utils::strip_compact_prefix;
-use crate::blocks::extrinsic_signed_extensions::ExtrinsicSignedExtensions;
 use codec::Decode;
 use scale_decode::DecodeAsType;
+use subxt_metadata::PalletMetadata;
 
-use std::sync::Arc;
 pub use crate::blocks::StaticExtrinsic;
+use std::sync::Arc;
 
 /// The body of a block.
 pub struct Extrinsics<T: Config> {
@@ -28,10 +28,7 @@ impl<T: Config> Extrinsics<T> {
     /// Instantiate a new [`Extrinsics`] object, given a vector containing
     /// each extrinsic hash (in the form of bytes) and some metadata that
     /// we'll use to decode them.
-    pub fn new(
-        extrinsics: Vec<Vec<u8>>,
-        metadata: Metadata,
-    ) -> Result<Self, BlockError> {
+    pub fn new(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, BlockError> {
         let ids = ExtrinsicPartTypeIds::new(&metadata)?;
 
         Ok(Self {
@@ -610,8 +607,7 @@ mod tests {
         let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
         // Decode with empty bytes.
-        let result =
-            ExtrinsicDetails::<SubstrateConfig>::decode_from(0, &[], metadata, ids);
+        let result = ExtrinsicDetails::<SubstrateConfig>::decode_from(0, &[], metadata, ids);
         assert_matches!(result.err(), Some(crate::Error::Codec(_)));
     }
 
@@ -621,12 +617,8 @@ mod tests {
         let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
         // Decode with invalid version.
-        let result = ExtrinsicDetails::<SubstrateConfig>::decode_from(
-            0,
-            &vec![3u8].encode(),
-            metadata,
-            ids,
-        );
+        let result =
+            ExtrinsicDetails::<SubstrateConfig>::decode_from(0, &vec![3u8].encode(), metadata, ids);
 
         assert_matches!(
             result.err(),

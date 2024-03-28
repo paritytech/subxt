@@ -61,7 +61,9 @@ impl Metadata {
 
 impl From<subxt_metadata::Metadata> for Metadata {
     fn from(md: subxt_metadata::Metadata) -> Self {
-        Metadata { inner: Arc::new(md) }
+        Metadata {
+            inner: Arc::new(md),
+        }
     }
 }
 

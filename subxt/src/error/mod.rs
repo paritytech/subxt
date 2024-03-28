@@ -6,10 +6,7 @@
 
 mod dispatch_error;
 
-use subxt_core::error::{
-    Error as CoreError,
-    BlockError as CoreBlockError
-};
+use subxt_core::error::{BlockError as CoreBlockError, Error as CoreError};
 
 crate::macros::cfg_unstable_light_client! {
     pub use subxt_lightclient::LightClientError;

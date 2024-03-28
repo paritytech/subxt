@@ -9,11 +9,7 @@ mod custom_value_address;
 use crate::utils::Yes;
 pub use custom_value_address::{CustomValueAddress, StaticAddress};
 
-use crate::{
-    error::MetadataError,
-    metadata::DecodeWithMetadata,
-    Error, Metadata,
-};
+use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
 use alloc::vec::Vec;
 
 /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`

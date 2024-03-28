@@ -62,7 +62,7 @@ impl<T: Config> ExtrinsicParams<T> for CustomExtrinsicParams<T> {
     // Gather together all of the params we will need to encode:
     fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(Self {
-            genesis_hash: client.genesis_hash(),
+            genesis_hash: client.genesis_hash,
             tip: params.tip,
             foo: params.foo,
         })

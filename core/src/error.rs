@@ -32,7 +32,7 @@ pub enum Error {
     ExtrinsicParams(ExtrinsicParamsError),
     /// Block body error.
     #[display(fmt = "Error working with block body: {_0}")]
-    Block(BlockError)
+    Block(BlockError),
 }
 
 #[cfg(feature = "std")]
@@ -48,7 +48,9 @@ impl From<scale_decode::visitor::DecodeError> for Error {
 #[derive(Clone, Debug, Display, Eq, PartialEq)]
 pub enum BlockError {
     /// Extrinsic type ID cannot be resolved with the provided metadata.
-    #[display(fmt = "Extrinsic type ID cannot be resolved with the provided metadata. Make sure this is a valid metadata")]
+    #[display(
+        fmt = "Extrinsic type ID cannot be resolved with the provided metadata. Make sure this is a valid metadata"
+    )]
     MissingType,
     /// Unsupported signature.
     #[display(fmt = "Unsupported extrinsic version, only version 4 is supported currently")]

@@ -4,21 +4,14 @@
 
 //! Functions and types for decoding and iterating over block bodies.
 
-mod extrinsics;
 mod extrinsic_signed_extensions;
+mod extrinsics;
 mod static_extrinsic;
 
 pub use static_extrinsic::StaticExtrinsic;
 
-pub use extrinsic_signed_extensions::{
-    ExtrinsicSignedExtensions,
-    ExtrinsicSignedExtension,
-};
+pub use extrinsic_signed_extensions::{ExtrinsicSignedExtension, ExtrinsicSignedExtensions};
 
 pub use extrinsics::{
-    Extrinsics,
-    ExtrinsicDetails,
-    SignedExtrinsicDetails,
-    FoundExtrinsic,
-    ExtrinsicMetadataDetails,
+    ExtrinsicDetails, ExtrinsicMetadataDetails, Extrinsics, FoundExtrinsic, SignedExtrinsicDetails,
 };

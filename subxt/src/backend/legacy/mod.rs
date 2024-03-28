@@ -189,8 +189,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
     async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
         let sub = self.methods.state_subscribe_runtime_version().await?;
-        let sub =
-            sub.map(|r| r.map(|v| RuntimeVersion { spec_version: v.spec_version, transaction_version: v.transaction_version }));
+        let sub = sub.map(|r| {
+            r.map(|v| RuntimeVersion {
+                spec_version: v.spec_version,
+                transaction_version: v.transaction_version,
+            })
+        });
         Ok(StreamOf(Box::pin(sub)))
     }
 

@@ -2,16 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{
-    config::Config,
-    error::Error,
-    Metadata,
-};
 use crate::config::signed_extensions::{
     ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
 };
 use crate::config::SignedExtension;
 use crate::dynamic::Value;
+use crate::{config::Config, error::Error, Metadata};
 use scale_decode::DecodeAsType;
 
 /// The signed extensions of an extrinsic.
@@ -24,7 +20,11 @@ pub struct ExtrinsicSignedExtensions<'a, T: Config> {
 
 impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     pub(crate) fn new(bytes: &'a [u8], metadata: &'a Metadata) -> Self {
-        Self { bytes, metadata, _marker: core::marker::PhantomData }
+        Self {
+            bytes,
+            metadata,
+            _marker: core::marker::PhantomData,
+        }
     }
 
     /// Returns an iterator over each of the signed extension details of the extrinsic.

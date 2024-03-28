@@ -109,9 +109,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
     type Params = ();
 
     fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckTxVersion(
-            client.runtime_version.transaction_version,
-        ))
+        Ok(CheckTxVersion(client.runtime_version.transaction_version))
     }
 }
 
