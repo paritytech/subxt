@@ -393,7 +393,7 @@ where
         let sub = self
             .client
             .backend()
-            .submit_transaction(&self.encoded())
+            .submit_transaction(self.encoded())
             .await?;
 
         Ok(TxProgress::new(sub, self.client.clone(), ext_hash))
@@ -409,7 +409,7 @@ where
         let mut sub = self
             .client
             .backend()
-            .submit_transaction(&self.encoded())
+            .submit_transaction(self.encoded())
             .await?;
 
         // If we get a bad status or error back straight away then error, else return the hash.
