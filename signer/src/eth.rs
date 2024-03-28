@@ -185,7 +185,9 @@ pub mod dev {
 mod subxt_compat {
     use super::*;
 
-    impl<T: subxt::Config> subxt::tx::Signer<T> for Keypair
+    use subxt_core::config::Config;
+    use subxt_core::tx::Signer as SignerT;
+    impl<T: Config> SignerT<T> for Keypair
     where
         T::AccountId: From<AccountId20>,
         T::Address: From<AccountId20>,
@@ -213,24 +215,24 @@ mod test {
     use secp256k1::Secp256k1;
 
     use crate::DEV_PHRASE;
+    use subxt_core::{config::*, tx::Signer as SignerT, utils::H256};
 
     use super::*;
 
     enum StubEthRuntimeConfig {}
 
-    impl subxt::Config for StubEthRuntimeConfig {
-        type Hash = subxt::utils::H256;
+    impl Config for StubEthRuntimeConfig {
+        type Hash = H256;
         type AccountId = AccountId20;
         type Address = AccountId20;
         type Signature = Signature;
-        type Hasher = subxt::config::substrate::BlakeTwo256;
-        type Header =
-            subxt::config::substrate::SubstrateHeader<u32, subxt::config::substrate::BlakeTwo256>;
-        type ExtrinsicParams = subxt::config::SubstrateExtrinsicParams<Self>;
+        type Hasher = substrate::BlakeTwo256;
+        type Header = substrate::SubstrateHeader<u32, substrate::BlakeTwo256>;
+        type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
         type AssetId = u32;
     }
 
-    type SubxtSigner = dyn subxt::tx::Signer<StubEthRuntimeConfig>;
+    type SubxtSigner = dyn SignerT<StubEthRuntimeConfig>;
 
     prop_compose! {
         fn keypair()(seed in any::<[u8; 32]>()) -> Keypair {

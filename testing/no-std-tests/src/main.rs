@@ -57,4 +57,14 @@ fn compile_test() {
     // let _signature = keypair.sign(message);
     // let _public_key = keypair.public_key();
     //
+
+    // Subxt Core compiles:
+    let _era = subxt_core::utils::Era::Immortal;
+    
 }
+
+#[subxt_macro::subxt(
+    runtime_metadata_path = "../../artifacts/polkadot_metadata_full.scale",
+    crate="::subxt_core"
+)]
+pub mod polkadot{}

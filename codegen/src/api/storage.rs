@@ -13,6 +13,8 @@ use subxt_metadata::{
 
 use super::CodegenError;
 
+use scale_typegen::typegen::ir::ToTokensWithSettings;
+
 /// Generate functions which create storage addresses from the provided pallet's metadata.
 /// These addresses can be used to access and iterate over storage values.
 ///
@@ -20,7 +22,7 @@ use super::CodegenError;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the storage items are generated.
-/// - `crate_path` - The crate path under which subxt is located, e.g. `::subxt` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
 pub fn generate_storage(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -69,7 +71,8 @@ fn generate_storage_entry_fns(
     let storage_entry_ty = storage_entry.entry_type().value_ty();
     let storage_entry_value_ty = type_gen
         .resolve_type_path(storage_entry_ty)
-        .expect("storage type is in metadata; qed");
+        .expect("storage type is in metadata; qed")
+        .to_token_stream(type_gen.settings());
 
     let alias_name = format_ident!("{}", storage_entry.name().to_upper_camel_case());
     let alias_module_name = format_ident!("{snake_case_name}");
@@ -89,7 +92,7 @@ fn generate_storage_entry_fns(
             .expect("type is in metadata; qed");
 
         let alias_name = format_ident!("Param{}", idx);
-        let alias_type = primitive_type_alias(&ty_path);
+        let alias_type = primitive_type_alias(&ty_path, type_gen.settings());
 
         let alias_type_def = quote!( pub type #alias_name = #alias_type; );
         let alias_type_path = quote!( types::#alias_module_name::#alias_name );
@@ -169,7 +172,7 @@ fn generate_storage_entry_fns(
         .unwrap_or_default();
 
     let is_defaultable_type = match storage_entry.modifier() {
-        StorageEntryModifier::Default => quote!(#crate_path::storage::address::Yes),
+        StorageEntryModifier::Default => quote!(#crate_path::utils::Yes),
         StorageEntryModifier::Optional => quote!(()),
     };
 
@@ -191,10 +194,10 @@ fn generate_storage_entry_fns(
             (fn_name, false, true)
         };
         let is_fetchable_type = is_fetchable
-            .then_some(quote!(#crate_path::storage::address::Yes))
+            .then_some(quote!(#crate_path::utils::Yes))
             .unwrap_or(quote!(()));
         let is_iterable_type = is_iterable
-            .then_some(quote!(#crate_path::storage::address::Yes))
+            .then_some(quote!(#crate_path::utils::Yes))
             .unwrap_or(quote!(()));
 
         let (keys, keys_type) = match keys_slice.len() {
@@ -247,7 +250,7 @@ fn generate_storage_entry_fns(
                  arg_name,
                  alias_type_path,
                  ..
-             }| quote!( #arg_name: impl ::std::borrow::Borrow<#alias_type_path> ),
+             }| quote!( #arg_name: impl ::core::borrow::Borrow<#alias_type_path> ),
         );
 
         quote!(
@@ -297,16 +300,20 @@ fn generate_storage_entry_fns(
     ))
 }
 
-fn primitive_type_alias(type_path: &TypePath) -> TokenStream {
+fn primitive_type_alias(
+    type_path: &TypePath,
+    settings: &scale_typegen::TypeGeneratorSettings,
+) -> TokenStream {
     // Vec<T> is cast to [T]
     if let Some(ty) = type_path.vec_type_param() {
+        let ty = ty.to_token_stream(settings);
         return quote!([#ty]);
     }
     // String is cast to str
     if type_path.is_string() {
         return quote!(::core::primitive::str);
     }
-    quote!(#type_path)
+    type_path.to_token_stream(settings)
 }
 
 #[cfg(test)]
@@ -424,7 +431,7 @@ mod tests {
             let expected_storage_constructor = quote!(
                 fn #name_ident(
                     &self,
-                    _0: impl ::std::borrow::Borrow<types::#name_ident::Param0>,
+                    _0: impl ::core::borrow::Borrow<types::#name_ident::Param0>,
                 )
             );
             dbg!(&generated_str);

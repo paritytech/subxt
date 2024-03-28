@@ -361,7 +361,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         for finalized_block in ev.finalized_block_hashes {
                             runtimes.remove(&finalized_block.hash());
                         }
-
                         ev.finalized_block_runtime
                     }
                     FollowEvent::NewBlock(ev) => {
@@ -417,10 +416,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     RuntimeEvent::Valid(ev) => ev,
                 };
 
-                std::future::ready(Some(Ok(RuntimeVersion {
-                    spec_version: runtime_details.spec.spec_version,
-                    transaction_version: runtime_details.spec.transaction_version,
-                })))
+                let runtime_version = RuntimeVersion::new(runtime_details.spec.spec_version, runtime_details.spec.transaction_version);
+                std::future::ready(Some(Ok(runtime_version)))
             });
 
         Ok(StreamOf(Box::pin(runtime_stream)))

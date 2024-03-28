@@ -84,7 +84,7 @@ fn ui_tests() {
     }
 
     // Validation should succeed when metadata we codegen from is stripped and
-    // client metadata is full:
+    // client state is full:
     {
         let mut metadata = MetadataTestRunner::load_metadata();
         metadata.retain(

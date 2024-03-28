@@ -10,14 +10,13 @@ use crate::{
     Config,
 };
 use codec::Decode;
-use derivative::Derivative;
+use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
 
 use super::RuntimeApiPayload;
 
 /// Execute runtime API calls.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct RuntimeApi<T: Config, Client> {
     client: Client,
     block_ref: BlockRef<T::Hash>,

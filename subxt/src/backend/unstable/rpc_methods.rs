@@ -9,7 +9,7 @@
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::config::BlockHash;
 use crate::{Config, Error};
-use derivative::Derivative;
+use derive_where::derive_where;
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
@@ -18,8 +18,7 @@ use std::task::Poll;
 /// An interface to call the unstable RPC methods. This interface is instantiated with
 /// some `T: Config` trait which determines some of the types that the RPC methods will
 /// take or hand back.
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""), Debug(bound = ""))]
+#[derive_where(Clone, Debug)]
 pub struct UnstableRpcMethods<T> {
     client: RpcClient,
     _marker: std::marker::PhantomData<T>,
@@ -287,6 +286,28 @@ impl<T: Config> UnstableRpcMethods<T> {
             .await?;
 
         Ok(TransactionSubscription { sub, done: false })
+    }
+
+    /// Broadcast the transaction on the p2p network until the
+    /// [`Self::transaction_unstable_stop`] is called.
+    ///
+    /// Returns an operation ID that can be used to stop the broadcasting process.
+    /// Returns `None` if the server cannot handle the request at the moment.
+    pub async fn transaction_unstable_broadcast(&self, tx: &[u8]) -> Result<Option<String>, Error> {
+        self.client
+            .request("transaction_unstable_broadcast", rpc_params![to_hex(tx)])
+            .await
+    }
+
+    /// Stop the broadcasting process of the transaction.
+    ///
+    /// The operation ID is obtained from the [`Self::transaction_unstable_broadcast`] method.
+    ///
+    /// Returns an error if the operation ID does not correspond to any active transaction for this connection.
+    pub async fn transaction_unstable_stop(&self, operation_id: &str) -> Result<(), Error> {
+        self.client
+            .request("transaction_unstable_stop", rpc_params![operation_id])
+            .await
     }
 }
 

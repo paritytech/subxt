@@ -2,12 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use super::CodegenError;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
+use scale_typegen::typegen::ir::ToTokensWithSettings;
 use scale_typegen::TypeGenerator;
 use subxt_metadata::PalletMetadata;
-
-use super::CodegenError;
 
 /// Generate events from the provided pallet metadata.
 ///
@@ -37,7 +37,7 @@ use super::CodegenError;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the events are generated.
-/// - `crate_path` - The crate path under which subxt is located, e.g. `::subxt` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
 pub fn generate_events(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -56,7 +56,9 @@ pub fn generate_events(
         let event_struct_name = &var.composite.name;
         let event_name = var.variant_name;
         let alias_mod = var.type_alias_mod;
-        let struct_def = type_gen.upcast_composite(&var.composite);
+        let struct_def = type_gen
+            .upcast_composite(&var.composite)
+            .to_token_stream(type_gen.settings());
         quote! {
             #struct_def
             #alias_mod
@@ -68,7 +70,9 @@ pub fn generate_events(
         }
     });
 
-    let event_type = type_gen.resolve_type_path(event_ty)?;
+    let event_type = type_gen
+        .resolve_type_path(event_ty)?
+        .to_token_stream(type_gen.settings());
     let event_ty = type_gen.resolve_type(event_ty)?;
     let docs = &event_ty.docs;
     let docs = type_gen
