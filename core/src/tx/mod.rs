@@ -7,25 +7,22 @@
 pub mod payload;
 pub mod signer;
 
-use crate::metadata::Metadata;
-use crate::error::{ Error, MetadataError };
 use crate::client::ClientState;
-use crate::config::{Config, Hasher, ExtrinsicParams, ExtrinsicParamsEncoder};
+use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher};
+use crate::error::{Error, MetadataError};
+use crate::metadata::Metadata;
 use crate::utils::Encoded;
-use std::borrow::Cow;
-use codec::{Encode, Compact};
+use codec::{Compact, Encode};
 use payload::TxPayload;
 use signer::Signer as SignerT;
 use sp_crypto_hashing::blake2_256;
+use std::borrow::Cow;
 
 /// Run the validation logic against some extrinsic you'd like to submit. Returns `Ok(())`
 /// if the call is valid (or if it's not possible to check since the call has no validation hash).
 /// Return an error if the call was not valid or something went wrong trying to validate it (ie
 /// the pallet or call in question do not exist at all).
-pub fn validate<Call: TxPayload>(
-    metadata: &Metadata,
-    call: &Call
-) -> Result<(), Error> {
+pub fn validate<Call: TxPayload>(metadata: &Metadata, call: &Call) -> Result<(), Error> {
     if let Some(details) = call.validation_details() {
         let expected_hash = metadata
             .pallet_by_name_err(details.pallet_name)?
@@ -49,7 +46,7 @@ pub fn call_data<Call: TxPayload>(metadata: &Metadata, call: &Call) -> Result<Ve
 /// Creates an unsigned extrinsic without submitting it.
 pub fn create_unsigned<T: Config, Call: TxPayload>(
     metadata: &Metadata,
-    call: &Call
+    call: &Call,
 ) -> Result<Transaction<T>, Error> {
     // 1. Validate this call against the current node metadata if the call comes
     // with a hash allowing us to do so.
@@ -142,7 +139,7 @@ pub struct PartialTransaction<T: Config> {
     additional_and_extra_params: T::ExtrinsicParams,
 }
 
-impl <T: Config> PartialTransaction<T> {
+impl<T: Config> PartialTransaction<T> {
     // Obtain bytes representing the signer payload and run call some function
     // with them. This can avoid an allocation in some cases when compared to
     // [`PartialExtrinsic::signer_payload()`].
@@ -232,7 +229,7 @@ pub struct Transaction<T> {
     marker: std::marker::PhantomData<T>,
 }
 
-impl <T: Config> Transaction<T> {
+impl<T: Config> Transaction<T> {
     /// Create a [`Transaction`] from some already-signed and prepared
     /// extrinsic bytes,
     ///

@@ -5,10 +5,7 @@
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
-    config::{
-        Config, ExtrinsicParams, Header, RefineParams,
-        RefineParamsData,
-    },
+    config::{Config, ExtrinsicParams, Header, RefineParams, RefineParamsData},
     error::{BlockError, Error},
     tx::{Signer as SignerT, TxPayload, TxProgress},
     utils::PhantomDataSendSync,
@@ -59,7 +56,10 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         Call: TxPayload,
     {
         subxt_core::tx::create_unsigned(&self.client.metadata(), call)
-            .map(|tx| SubmittableExtrinsic { client: self.client.clone(), inner: tx })
+            .map(|tx| SubmittableExtrinsic {
+                client: self.client.clone(),
+                inner: tx,
+            })
             .map_err(Into::into)
     }
 
@@ -75,9 +75,17 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: TxPayload,
     {
-        subxt_core::tx::create_partial_signed(&self.client.metadata(), &self.client.client_state(), call, params)
-            .map(|tx| PartialExtrinsic { client: self.client.clone(), inner: tx })
-            .map_err(Into::into)
+        subxt_core::tx::create_partial_signed(
+            &self.client.metadata(),
+            &self.client.client_state(),
+            call,
+            params,
+        )
+        .map(|tx| PartialExtrinsic {
+            client: self.client.clone(),
+            inner: tx,
+        })
+        .map_err(Into::into)
     }
 
     /// Creates a signed extrinsic without submitting it.
@@ -94,9 +102,18 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         Call: TxPayload,
         Signer: SignerT<T>,
     {
-        subxt_core::tx::create_signed(&self.client.metadata(), &self.client.client_state(), call, signer, params)
-            .map(|tx| SubmittableExtrinsic { client: self.client.clone(), inner: tx })
-            .map_err(Into::into)
+        subxt_core::tx::create_signed(
+            &self.client.metadata(),
+            &self.client.client_state(),
+            call,
+            signer,
+            params,
+        )
+        .map(|tx| SubmittableExtrinsic {
+            client: self.client.clone(),
+            inner: tx,
+        })
+        .map_err(Into::into)
     }
 }
 
@@ -310,7 +327,9 @@ where
     ) -> SubmittableExtrinsic<T, C> {
         SubmittableExtrinsic {
             client: self.client.clone(),
-            inner: self.inner.sign_with_address_and_signature(address, signature),
+            inner: self
+                .inner
+                .sign_with_address_and_signature(address, signature),
         }
     }
 }
