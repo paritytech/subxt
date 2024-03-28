@@ -39,7 +39,7 @@ pub fn validate<Call: TxPayload>(metadata: &Metadata, call: &Call) -> Result<(),
 /// Return the SCALE encoded bytes representing the call data of the transaction.
 pub fn call_data<Call: TxPayload>(metadata: &Metadata, call: &Call) -> Result<Vec<u8>, Error> {
     let mut bytes = Vec::new();
-    call.encode_call_data_to(&metadata, &mut bytes)?;
+    call.encode_call_data_to(metadata, &mut bytes)?;
     Ok(bytes)
 }
 
@@ -58,7 +58,7 @@ pub fn create_unsigned<T: Config, Call: TxPayload>(
         // transaction protocol version (4) (is not signed, so no 1 bit at the front).
         4u8.encode_to(&mut encoded_inner);
         // encode call data after this byte.
-        call.encode_call_data_to(&metadata, &mut encoded_inner)?;
+        call.encode_call_data_to(metadata, &mut encoded_inner)?;
         // now, prefix byte length:
         let len = Compact(
             u32::try_from(encoded_inner.len()).expect("extrinsic size expected to be <4GB"),
