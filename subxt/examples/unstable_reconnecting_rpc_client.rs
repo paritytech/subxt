@@ -86,6 +86,8 @@ async fn drive_rpc_backend(mut driver: UnstableBackendDriver<PolkadotConfig>) {
         if let Err(e) = val {
             if e.is_disconnected_will_reconnect() {
                 eprintln!("Unstable backend was disconnecting; reconnecting");
+                // TODO need re-subscribe to chainHead_follow here for this to work
+                // not possible right now.
                 continue;
             } else {
                 eprintln!("Error driving unstable backend: {e}; terminating client");
