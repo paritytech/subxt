@@ -132,7 +132,7 @@ impl AsRef<[u8]> for AccountId20 {
 
 impl Display for AccountId20 {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}", eth_checksum::checksum(&hex::encode(self)))
+        write!(f, "{}", ethaddr::Address::from_slice(&self.0))
     }
 }
 
@@ -348,27 +348,27 @@ mod test {
     fn check_dev_accounts_match() {
         assert_eq!(
             dev::alith().account_id().to_string(),
-            eth_checksum::checksum("0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")
+            "0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac"
         );
         assert_eq!(
             dev::baltathar().account_id().to_string(),
-            eth_checksum::checksum("0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")
+            "0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0"
         );
         assert_eq!(
             dev::charleth().account_id().to_string(),
-            eth_checksum::checksum("0x798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc")
+            "0x798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc"
         );
         assert_eq!(
             dev::dorothy().account_id().to_string(),
-            eth_checksum::checksum("0x773539d4Ac0e786233D90A233654ccEE26a613D9")
+            "0x773539d4Ac0e786233D90A233654ccEE26a613D9"
         );
         assert_eq!(
             dev::ethan().account_id().to_string(),
-            eth_checksum::checksum("0xFf64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB")
+            "0xFf64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB"
         );
         assert_eq!(
             dev::faith().account_id().to_string(),
-            eth_checksum::checksum("0xC0F0f4ab324C46e55D02D0033343B4Be8A55532d")
+            "0xC0F0f4ab324C46e55D02D0033343B4Be8A55532d"
         );
     }
 
@@ -391,7 +391,7 @@ mod test {
             let kp = Keypair::from_seed(KEY_1).expect("valid keypair");
             assert_eq!(
                 kp.account_id().to_string(),
-                eth_checksum::checksum("0x976f8456e4e2034179b284a23c0e0c8f6d3da50c")
+                "0x976f8456E4e2034179B284A23C0e0c8f6d3da50c"
             );
         }
 
@@ -400,7 +400,7 @@ mod test {
             let kp = Keypair::from_seed(KEY_2).expect("valid keypair");
             assert_eq!(
                 kp.account_id().to_string(),
-                eth_checksum::checksum("0x420e9f260b40af7e49440cead3069f8e82a5230f")
+                "0x420e9F260B40aF7E49440ceAd3069f8e82A5230f"
             );
         }
 
@@ -409,7 +409,7 @@ mod test {
             let kp = Keypair::from_seed(KEY_3).expect("valid keypair");
             assert_eq!(
                 kp.account_id().to_string(),
-                eth_checksum::checksum("0x9cce34F7aB185c7ABA1b7C8140d620B4BDA941d6")
+                "0x9cce34F7aB185c7ABA1b7C8140d620B4BDA941d6"
             );
         }
     }
