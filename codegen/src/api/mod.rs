@@ -13,6 +13,7 @@ mod runtime_apis;
 mod storage;
 
 use scale_typegen::typegen::ir::type_ir::{CompositeFieldIR, CompositeIR, CompositeIRKind};
+use scale_typegen::typegen::ir::ToTokensWithSettings;
 use scale_typegen::typegen::type_params::TypeParameters;
 use scale_typegen::typegen::type_path::TypePath;
 use scale_typegen::TypeGenerator;
@@ -44,7 +45,7 @@ impl RuntimeGenerator {
     ///
     /// Supported versions: v14 and v15.
     pub fn new(mut metadata: Metadata) -> Self {
-        metadata.ensure_unique_type_paths();
+        scale_typegen::utils::ensure_unique_type_paths(metadata.types_mut());
         RuntimeGenerator { metadata }
     }
 
@@ -72,7 +73,9 @@ impl RuntimeGenerator {
             subxt_type_gen_settings(derives, type_substitutes, &crate_path, should_gen_docs);
 
         let type_gen = TypeGenerator::new(self.metadata.types(), &settings);
-        let types_mod = type_gen.generate_types_mod()?;
+        let types_mod = type_gen
+            .generate_types_mod()?
+            .to_token_stream(type_gen.settings());
         let mod_ident = &item_mod_ir.ident;
         let rust_items = item_mod_ir.rust_items();
 
@@ -121,7 +124,9 @@ impl RuntimeGenerator {
             subxt_type_gen_settings(derives, type_substitutes, &crate_path, should_gen_docs);
 
         let type_gen = TypeGenerator::new(self.metadata.types(), &settings);
-        let types_mod = type_gen.generate_types_mod()?;
+        let types_mod = type_gen
+            .generate_types_mod()?
+            .to_token_stream(type_gen.settings());
         let types_mod_ident = type_gen.types_mod_ident();
         let pallets_with_mod_names = self
             .metadata
@@ -214,9 +219,15 @@ impl RuntimeGenerator {
         // Fetch the paths of the outer enums.
         // Substrate exposes those under `kitchensink_runtime`, while Polkadot under `polkadot_runtime`.
 
-        let call_path = type_gen.resolve_type_path(self.metadata.outer_enums().call_enum_ty())?;
-        let event_path = type_gen.resolve_type_path(self.metadata.outer_enums().event_enum_ty())?;
-        let error_path = type_gen.resolve_type_path(self.metadata.outer_enums().error_enum_ty())?;
+        let call_path = type_gen
+            .resolve_type_path(self.metadata.outer_enums().call_enum_ty())?
+            .to_token_stream(type_gen.settings());
+        let event_path = type_gen
+            .resolve_type_path(self.metadata.outer_enums().event_enum_ty())?
+            .to_token_stream(type_gen.settings());
+        let error_path = type_gen
+            .resolve_type_path(self.metadata.outer_enums().error_enum_ty())?
+            .to_token_stream(type_gen.settings());
 
         let custom_values = generate_custom_values(&self.metadata, &type_gen, &crate_path);
 
@@ -399,7 +410,7 @@ pub fn generate_type_alias_mod(
         .expect("composite name in snake_case should be a valid identifier");
 
     let mut modify_field_to_be_type_alias = |field: &mut CompositeFieldIR, alias_name: Ident| {
-        let type_path = &field.type_path;
+        let type_path = field.type_path.to_token_stream(type_gen.settings());
         aliases.push(quote!(pub type #alias_name = #type_path;));
 
         let type_alias_path: syn::Path = parse_quote!(#alias_mod_name::#alias_name);

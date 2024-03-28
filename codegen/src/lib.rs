@@ -25,6 +25,7 @@ use getrandom as _;
 
 use api::RuntimeGenerator;
 use proc_macro2::TokenStream as TokenStream2;
+use scale_typegen::typegen::settings::AllocCratePath;
 use scale_typegen::{
     typegen::settings::substitutes::absolute_path, DerivesRegistry, TypeGeneratorSettings,
     TypeSubstitutes, TypegenError,
@@ -77,7 +78,7 @@ pub struct CodegenBuilder {
 impl Default for CodegenBuilder {
     fn default() -> Self {
         CodegenBuilder {
-            crate_path: syn::parse_quote!(::subxt),
+            crate_path: syn::parse_quote!(::subxt::ext::subxt_core),
             use_default_derives: true,
             use_default_substitutions: true,
             generate_docs: true,
@@ -222,12 +223,12 @@ impl CodegenBuilder {
         self.item_mod = item_mod;
     }
 
-    /// Set the path to the `subxt` crate. By default, we expect it to be at `::subxt`.
+    /// Set the path to the `subxt` crate. By default, we expect it to be at `::subxt::ext::subxt_core`.
     pub fn set_subxt_crate_path(&mut self, crate_path: syn::Path) {
         self.crate_path = crate_path;
     }
 
-    /// Generate an interface, assuming that the default path to the `subxt` crate is `::subxt`.
+    /// Generate an interface, assuming that the default path to the `subxt` crate is `::subxt::ext::subxt_core`.
     /// If the `subxt` crate is not available as a top level dependency, use `generate` and provide
     /// a valid path to the `subxt¦ crate.
     pub fn generate(self, metadata: Metadata) -> Result<TokenStream2, CodegenError> {
@@ -295,7 +296,7 @@ impl CodegenBuilder {
 /// The default [`scale_typegen::TypeGeneratorSettings`], subxt is using for generating code.
 /// Useful for emulating subxt's code generation settings from e.g. subxt-explorer.
 pub fn default_subxt_type_gen_settings() -> TypeGeneratorSettings {
-    let crate_path: syn::Path = parse_quote!(::subxt);
+    let crate_path: syn::Path = parse_quote!(::subxt::ext::subxt_core);
     let derives = default_derives(&crate_path);
     let substitutes = default_substitutes(&crate_path);
     subxt_type_gen_settings(derives, substitutes, &crate_path, true)
@@ -316,6 +317,7 @@ fn subxt_type_gen_settings(
         compact_as_type_path: Some(parse_quote!(#crate_path::ext::codec::CompactAs)),
         compact_type_path: Some(parse_quote!(#crate_path::ext::codec::Compact)),
         insert_codec_attributes: true,
+        alloc_crate_path: AllocCratePath::Custom(parse_quote!(#crate_path::alloc)),
     }
 }
 
@@ -387,7 +389,10 @@ fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
             parse_quote!(BTreeMap),
             parse_quote!(#crate_path::utils::KeyedVec),
         ),
-        (parse_quote!(BTreeSet), parse_quote!(::std::vec::Vec)),
+        (
+            parse_quote!(BTreeSet),
+            parse_quote!(#crate_path::alloc::vec::Vec),
+        ),
         // The `UncheckedExtrinsic(pub Vec<u8>)` is part of the runtime API calls.
         // The inner bytes represent the encoded extrinsic, however when deriving the
         // `EncodeAsType` the bytes would be re-encoded. This leads to the bytes

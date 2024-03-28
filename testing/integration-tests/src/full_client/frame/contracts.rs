@@ -101,7 +101,6 @@ impl ContractsTestContext {
             .find_first::<system::events::ExtrinsicSuccess>()?
             .ok_or_else(|| Error::Other("Failed to find a ExtrinsicSuccess event".into()))?;
 
-        tracing::info!("  Block hash: {:?}", events.block_hash());
         tracing::info!("  Code hash: {:?}", code_stored.code_hash);
         tracing::info!("  Contract address: {:?}", instantiated.contract);
         Ok((code_stored.code_hash, instantiated.contract))

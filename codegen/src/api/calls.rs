@@ -6,6 +6,7 @@ use super::CodegenError;
 use heck::{ToSnakeCase as _, ToUpperCamelCase as _};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
+use scale_typegen::typegen::ir::ToTokensWithSettings;
 use scale_typegen::{typegen::ir::type_ir::CompositeIRKind, TypeGenerator};
 use subxt_metadata::PalletMetadata;
 
@@ -16,7 +17,7 @@ use subxt_metadata::PalletMetadata;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the calls are generated.
-/// - `crate_path` - The crate path under which subxt is located, e.g. `::subxt` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
 pub fn generate_calls(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -41,9 +42,9 @@ pub fn generate_calls(
                     .iter()
                     .map(|(name, field)| {
                         // Note: fn_arg_type this is relative the type path of the type alias when prefixed with `types::`, e.g. `set_max_code_size::New`
-                        let fn_arg_type = &field.type_path;
+                        let fn_arg_type = field.type_path.to_token_stream(type_gen.settings());
                         let call_arg = if field.is_boxed {
-                            quote! { #name: ::std::boxed::Box::new(#name) }
+                            quote! { #name: #crate_path::alloc::boxed::Box::new(#name) }
                         } else {
                             quote! { #name }
                         };
@@ -71,7 +72,9 @@ pub fn generate_calls(
             let docs = &var.composite.docs;
 
             // this converts the composite into a full struct type. No Type Parameters needed here.
-            let struct_def = type_gen.upcast_composite(&var.composite);
+            let struct_def = type_gen
+                .upcast_composite(&var.composite)
+                .to_token_stream(type_gen.settings());
             let alias_mod = var.type_alias_mod;
             // The call structure's documentation was stripped above.
             let call_struct = quote! {
@@ -105,7 +108,9 @@ pub fn generate_calls(
         .into_iter()
         .unzip();
 
-    let call_type = type_gen.resolve_type_path(call_ty)?;
+    let call_type = type_gen
+        .resolve_type_path(call_ty)?
+        .to_token_stream(type_gen.settings());
     let call_ty = type_gen.resolve_type(call_ty)?;
     let docs = type_gen.docs_from_scale_info(&call_ty.docs);
 

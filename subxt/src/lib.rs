@@ -45,17 +45,43 @@ pub use getrandom as _;
 pub mod backend;
 pub mod blocks;
 pub mod client;
-pub mod config;
 pub mod constants;
 pub mod custom_values;
-pub mod dynamic;
 pub mod error;
 pub mod events;
-pub mod metadata;
 pub mod runtime_api;
 pub mod storage;
 pub mod tx;
 pub mod utils;
+
+/// This module provides a [`Config`] type, which is used to define various
+/// types that are important in order to speak to a particular chain.
+/// [`SubstrateConfig`] provides a default set of these types suitable for the
+/// default Substrate node implementation, and [`PolkadotConfig`] for a
+/// Polkadot node.
+pub mod config {
+    pub use subxt_core::config::{
+        polkadot, signed_extensions, substrate, BlockHash, Config, DefaultExtrinsicParams,
+        DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header,
+        PolkadotConfig, PolkadotExtrinsicParams, RefineParams, RefineParamsData, SignedExtension,
+        SubstrateConfig, SubstrateExtrinsicParams,
+    };
+    pub use subxt_core::error::ExtrinsicParamsError;
+}
+
+/// Types representing the metadata obtained from a node.
+pub mod metadata {
+    pub use subxt_core::metadata::{DecodeWithMetadata, EncodeWithMetadata, Metadata, MetadataExt};
+    // Expose metadata types under a sub module in case somebody needs to reference them:
+    pub use subxt_metadata as types;
+}
+
+/// Submit dynamic transactions.
+pub mod dynamic {
+    pub use subxt_core::dynamic::{
+        constant, runtime_api_call, storage, tx, At, DecodedValue, DecodedValueThunk, Value,
+    };
+}
 
 // Internal helper macros
 #[macro_use]
@@ -84,10 +110,10 @@ pub mod ext {
     pub use scale_decode;
     pub use scale_encode;
     pub use scale_value;
+    pub use subxt_core;
 
     cfg_substrate_compat! {
-        pub use sp_runtime;
-        pub use sp_core;
+        pub use subxt_core::ext::{sp_runtime, sp_core};
     }
 }
 
@@ -127,15 +153,15 @@ pub mod ext {
 ///
 /// ## `crate = "..."`
 ///
-/// Use this attribute to specify a custom path to the `subxt` crate:
+/// Use this attribute to specify a custom path to the `subxt_core` crate:
 ///
 /// ```rust
-/// # pub extern crate subxt;
-/// # pub mod path { pub mod to { pub use subxt; } }
+/// # pub extern crate subxt_core;
+/// # pub mod path { pub mod to { pub use subxt_core; } }
 /// # fn main() {}
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
-///     crate = "crate::path::to::subxt"
+///     crate = "crate::path::to::subxt_core"
 /// )]
 /// mod polkadot {}
 /// ```

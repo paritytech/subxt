@@ -9,7 +9,7 @@
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
 use crate::config::BlockHash;
 use crate::{Config, Error};
-use derivative::Derivative;
+use derive_where::derive_where;
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::{HashMap, VecDeque};
@@ -18,8 +18,7 @@ use std::task::Poll;
 /// An interface to call the unstable RPC methods. This interface is instantiated with
 /// some `T: Config` trait which determines some of the types that the RPC methods will
 /// take or hand back.
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""), Debug(bound = ""))]
+#[derive_where(Clone, Debug)]
 pub struct UnstableRpcMethods<T> {
     client: RpcClient,
     _marker: std::marker::PhantomData<T>,

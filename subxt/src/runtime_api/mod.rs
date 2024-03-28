@@ -5,9 +5,8 @@
 //! Types associated with executing runtime API calls.
 
 mod runtime_client;
-mod runtime_payload;
 mod runtime_types;
 
 pub use runtime_client::RuntimeApiClient;
-pub use runtime_payload::{dynamic, DynamicRuntimeApiPayload, Payload, RuntimeApiPayload};
 pub use runtime_types::RuntimeApi;
+pub use subxt_core::runtime_api::{dynamic, DynamicRuntimeApiPayload, Payload, RuntimeApiPayload};

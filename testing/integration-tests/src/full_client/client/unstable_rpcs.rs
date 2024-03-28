@@ -52,8 +52,8 @@ async fn chainhead_unstable_follow() {
         FollowEvent::Initialized(init) => {
             assert_eq!(init.finalized_block_hashes, vec![finalized_block_hash]);
             if let Some(RuntimeEvent::Valid(RuntimeVersionEvent { spec })) = init.finalized_block_runtime {
-                assert_eq!(spec.spec_version, runtime_version.spec_version);
-                assert_eq!(spec.transaction_version, runtime_version.transaction_version);
+                assert_eq!(spec.spec_version, runtime_version.spec_version());
+                assert_eq!(spec.transaction_version, runtime_version.transaction_version());
             } else {
                 panic!("runtime details not provided with init event, got {:?}", init.finalized_block_runtime);
             }

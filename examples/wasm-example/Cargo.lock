@@ -2502,8 +2502,6 @@ name = "subxt"
 version = "0.35.0"
 dependencies = [
  "async-trait",
- "base58",
- "blake2",
  "derivative",
  "either",
  "frame-metadata 16.0.0",
@@ -2549,6 +2547,32 @@ dependencies = [
  "syn 2.0.48",
  "thiserror",
  "tokio",
+]
+
+[[package]]
+name = "subxt-core"
+version = "0.34.0"
+dependencies = [
+ "base58",
+ "blake2",
+ "derivative",
+ "derive_more",
+ "frame-metadata 16.0.0",
+ "hashbrown 0.14.3",
+ "hex",
+ "impl-serde",
+ "parity-scale-codec",
+ "primitive-types",
+ "scale-bits",
+ "scale-decode",
+ "scale-encode",
+ "scale-info",
+ "scale-value",
+ "serde",
+ "serde_json",
+ "sp-core-hashing",
+ "subxt-metadata",
+ "tracing",
 ]
 
 [[package]]

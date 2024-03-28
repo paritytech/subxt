@@ -10,7 +10,7 @@ use crate::{
     error::{BlockError, Error},
     utils::PhantomDataSendSync,
 };
-use derivative::Derivative;
+use derive_where::derive_where;
 use futures::StreamExt;
 use std::future::Future;
 
@@ -18,8 +18,7 @@ type BlockStream<T> = StreamOfResults<T>;
 type BlockStreamRes<T> = Result<BlockStream<T>, Error>;
 
 /// A client for working with blocks.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct BlocksClient<T, Client> {
     client: Client,
     _marker: PhantomDataSendSync<T>,

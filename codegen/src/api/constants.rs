@@ -5,6 +5,7 @@
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
+use scale_typegen::typegen::ir::ToTokensWithSettings;
 use scale_typegen::TypeGenerator;
 use subxt_metadata::PalletMetadata;
 
@@ -31,7 +32,7 @@ use super::CodegenError;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the constants are generated.
-/// - `crate_path` - The crate path under which subxt is located, e.g. `::subxt` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
 pub fn generate_constants(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -55,7 +56,9 @@ pub fn generate_constants(
                 ));
             };
 
-            let return_ty = type_gen.resolve_type_path(constant.ty())?;
+            let return_ty = type_gen
+                .resolve_type_path(constant.ty())?
+                .to_token_stream(type_gen.settings());
             let docs = constant.docs();
             let docs = type_gen
                 .settings()
