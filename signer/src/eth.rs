@@ -59,7 +59,7 @@ impl Keypair {
             mnemonic.to_seed(password.unwrap_or("")),
             &derivation_path,
         )
-        .unwrap();
+        .expect("valid private key");
 
         Keypair::from_seed(private.to_bytes())
     }
@@ -315,6 +315,7 @@ mod test {
 
         #[test]
         fn check_account_id(keypair in keypair()) {
+            // https://github.com/ethereumbook/ethereumbook/blob/develop/04keys-addresses.asciidoc#ethereum-addresses
             let account_id = {
                 let uncompressed = keypair.0.0.public_key().serialize_uncompressed();
                 let hash = keccak(&uncompressed[1..]).0;

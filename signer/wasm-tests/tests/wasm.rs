@@ -45,7 +45,7 @@ async fn wasm_ecdsa_signing_works() {
 
 #[wasm_bindgen_test]
 async fn wasm_eth_signing_works() {
-    let alice = eth::dev::alice();
+    let alice = eth::dev::alith();
 
     // There's some non-determinism in the signing, so this ensures that
     // the rand stuff is configured properly to run ok in wasm.
