@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -41,6 +41,7 @@ pub trait TxPayload {
     }
 }
 
+/// Details required to validate the shape of a transaction payload against some metadata.
 pub struct ValidationDetails<'a> {
     /// The pallet name.
     pub pallet_name: &'a str,

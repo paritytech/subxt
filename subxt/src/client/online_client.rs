@@ -286,16 +286,6 @@ impl<T: Config> OnlineClient<T> {
         inner.runtime_version
     }
 
-    /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
-    pub fn client_state(&self) -> ClientState<T> {
-        let inner = self.inner.read().expect("shouldn't be poisoned");
-        ClientState::new(
-            inner.genesis_hash,
-            inner.runtime_version,
-            inner.metadata.clone(),
-        )
-    }
-
     /// Change the [`RuntimeVersion`] used in this client.
     ///
     /// # Warning
@@ -371,9 +361,14 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     fn runtime_version(&self) -> RuntimeVersion {
         self.runtime_version()
     }
-
+    // This is provided by default, but we can optimise here and only lock once:
     fn client_state(&self) -> ClientState<T> {
-        self.client_state()
+        let inner = self.inner.read().expect("shouldn't be poisoned");
+        ClientState {
+            genesis_hash: inner.genesis_hash,
+            runtime_version: inner.runtime_version,
+            metadata: inner.metadata.clone(),
+        }
     }
 }
 
@@ -551,7 +546,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
 
         // We are waiting for the chain to have the same spec version
         // as sent out via the runtime subscription.
-        if spec_version == runtime_version.spec_version() {
+        if spec_version == runtime_version.spec_version {
             break block_ref;
         }
     };

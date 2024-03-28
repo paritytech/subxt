@@ -6,6 +6,8 @@
 //!
 //! `#[no_std]` compatible core crate for subxt.
 
+#![deny(missing_docs)]
+
 #![cfg_attr(not(feature = "std"), no_std)]
 pub extern crate alloc;
 
@@ -30,6 +32,7 @@ pub use metadata::Metadata;
 #[macro_use]
 mod macros;
 
+/// Key external crates.
 pub mod ext {
     pub use codec;
     pub use scale_decode;

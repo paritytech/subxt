@@ -4,7 +4,7 @@
 
 use crate::{
     backend::BlockRef,
-    blocks::{extrinsic_types::ExtrinsicPartTypeIds, Extrinsics},
+    blocks::Extrinsics,
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Header},
     error::{BlockError, DecodeError, Error},
@@ -79,7 +79,6 @@ where
 
     /// Fetch and return the extrinsics in the block body.
     pub async fn extrinsics(&self) -> Result<Extrinsics<T, C>, Error> {
-        let ids = ExtrinsicPartTypeIds::new(&self.client.metadata())?;
         let block_hash = self.header.hash();
         let Some(extrinsics) = self.client.backend().block_body(block_hash).await? else {
             return Err(BlockError::not_found(block_hash).into());
@@ -89,9 +88,8 @@ where
             self.client.clone(),
             extrinsics,
             self.cached_events.clone(),
-            ids,
             block_hash,
-        ))
+        )?)
     }
 
     /// Work with storage.

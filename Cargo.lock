@@ -4715,6 +4715,7 @@ dependencies = [
 name = "subxt-core"
 version = "0.35.0"
 dependencies = [
+ "assert_matches",
  "base58",
  "bitvec",
  "blake2",

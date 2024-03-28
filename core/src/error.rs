@@ -1,15 +1,24 @@
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
+
+//! The errors that can be emitted in this crate.
+
 use alloc::boxed::Box;
 use alloc::string::String;
 use derive_more::{Display, From};
 use subxt_metadata::StorageHasher;
 
+/// The error emitted when something goes wrong.
 #[derive(Debug, Display, From)]
 pub enum Error {
     /// Codec error.
     #[display(fmt = "Scale codec error: {_0}")]
     Codec(codec::Error),
+    /// Metadata error.
     #[display(fmt = "Metadata Error: {_0}")]
     Metadata(MetadataError),
+    /// Storage address error.
     #[display(fmt = "Storage Error: {_0}")]
     StorageAddress(StorageAddressError),
     /// Error decoding to a [`crate::dynamic::Value`].
@@ -21,7 +30,13 @@ pub enum Error {
     /// Error constructing the appropriate extrinsic params.
     #[display(fmt = "Extrinsic params error: {_0}")]
     ExtrinsicParams(ExtrinsicParamsError),
+    /// Block body error.
+    #[display(fmt = "Error working with block body: {_0}")]
+    Block(BlockError)
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
 
 impl From<scale_decode::visitor::DecodeError> for Error {
     fn from(value: scale_decode::visitor::DecodeError) -> Self {
@@ -29,8 +44,23 @@ impl From<scale_decode::visitor::DecodeError> for Error {
     }
 }
 
+/// Block error
+#[derive(Clone, Debug, Display, Eq, PartialEq)]
+pub enum BlockError {
+    /// Extrinsic type ID cannot be resolved with the provided metadata.
+    #[display(fmt = "Extrinsic type ID cannot be resolved with the provided metadata. Make sure this is a valid metadata")]
+    MissingType,
+    /// Unsupported signature.
+    #[display(fmt = "Unsupported extrinsic version, only version 4 is supported currently")]
+    /// The extrinsic has an unsupported version.
+    UnsupportedVersion(u8),
+    /// Decoding error.
+    #[display(fmt = "Cannot decode extrinsic: {_0}")]
+    DecodingError(codec::Error),
+}
+
 #[cfg(feature = "std")]
-impl std::error::Error for Error {}
+impl std::error::Error for BlockError {}
 
 /// Something went wrong trying to access details in the metadata.
 #[derive(Clone, Debug, PartialEq, Display)]

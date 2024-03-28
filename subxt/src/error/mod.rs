@@ -6,6 +6,11 @@
 
 mod dispatch_error;
 
+use subxt_core::error::{
+    Error as CoreError,
+    BlockError as CoreBlockError
+};
+
 crate::macros::cfg_unstable_light_client! {
     pub use subxt_lightclient::LightClientError;
 }
@@ -80,15 +85,16 @@ pub enum Error {
     Other(String),
 }
 
-impl From<subxt_core::Error> for Error {
-    fn from(value: subxt_core::Error) -> Self {
+impl From<CoreError> for Error {
+    fn from(value: CoreError) -> Self {
         match value {
-            subxt_core::Error::Codec(e) => Error::Codec(e),
-            subxt_core::Error::Metadata(e) => Error::Metadata(e),
-            subxt_core::Error::StorageAddress(e) => Error::StorageAddress(e),
-            subxt_core::Error::Decode(e) => Error::Decode(e),
-            subxt_core::Error::Encode(e) => Error::Encode(e),
-            subxt_core::Error::ExtrinsicParams(e) => Error::ExtrinsicParams(e),
+            CoreError::Codec(e) => Error::Codec(e),
+            CoreError::Metadata(e) => Error::Metadata(e),
+            CoreError::StorageAddress(e) => Error::StorageAddress(e),
+            CoreError::Decode(e) => Error::Decode(e),
+            CoreError::Encode(e) => Error::Encode(e),
+            CoreError::ExtrinsicParams(e) => Error::ExtrinsicParams(e),
+            CoreError::Block(e) => Error::Block(e.into()),
         }
     }
 }
@@ -173,6 +179,16 @@ pub enum BlockError {
     /// Decoding error.
     #[error("Cannot decode extrinsic: {0}")]
     DecodingError(codec::Error),
+}
+
+impl From<CoreBlockError> for BlockError {
+    fn from(value: CoreBlockError) -> Self {
+        match value {
+            CoreBlockError::MissingType => BlockError::MissingType,
+            CoreBlockError::UnsupportedVersion(n) => BlockError::UnsupportedVersion(n),
+            CoreBlockError::DecodingError(e) => BlockError::DecodingError(e),
+        }
+    }
 }
 
 impl BlockError {

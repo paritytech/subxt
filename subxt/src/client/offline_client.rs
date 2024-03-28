@@ -17,13 +17,20 @@ use subxt_core::client::{ClientState, RuntimeVersion};
 pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Return the provided [`Metadata`].
     fn metadata(&self) -> Metadata;
+
     /// Return the provided genesis hash.
     fn genesis_hash(&self) -> T::Hash;
+
     /// Return the provided [`RuntimeVersion`].
     fn runtime_version(&self) -> RuntimeVersion;
+
     /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
     fn client_state(&self) -> ClientState<T> {
-        ClientState::new(self.genesis_hash(), self.runtime_version(), self.metadata())
+        ClientState {
+            genesis_hash: self.genesis_hash(),
+            runtime_version: self.runtime_version(),
+            metadata: self.metadata()
+        }
     }
 
     /// Work with transactions.
@@ -77,37 +84,30 @@ impl<T: Config> OfflineClient<T> {
         runtime_version: RuntimeVersion,
         metadata: impl Into<Metadata>,
     ) -> OfflineClient<T> {
+        let metadata = metadata.into();
+
         OfflineClient {
-            inner: Arc::new(ClientState::new(
+            inner: Arc::new(ClientState {
                 genesis_hash,
                 runtime_version,
-                metadata.into(),
-            )),
+                metadata,
+            }),
         }
     }
 
     /// Return the genesis hash.
     pub fn genesis_hash(&self) -> T::Hash {
-        self.inner.genesis_hash()
+        self.inner.genesis_hash
     }
 
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
-        self.inner.runtime_version()
+        self.inner.runtime_version
     }
 
     /// Return the [`Metadata`] used in this client.
     pub fn metadata(&self) -> Metadata {
-        self.inner.metadata()
-    }
-
-    /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
-    pub fn client_state(&self) -> ClientState<T> {
-        ClientState::new(
-            self.inner.genesis_hash(),
-            self.inner.runtime_version(),
-            self.inner.metadata(),
-        )
+        self.inner.metadata.clone()
     }
 
     // Just a copy of the most important trait methods so that people
@@ -148,9 +148,6 @@ impl<T: Config> OfflineClientT<T> for OfflineClient<T> {
     }
     fn metadata(&self) -> Metadata {
         self.metadata()
-    }
-    fn client_state(&self) -> ClientState<T> {
-        self.client_state()
     }
 }
 

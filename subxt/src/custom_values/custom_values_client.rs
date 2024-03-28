@@ -113,14 +113,14 @@ mod tests {
         };
 
         let metadata: subxt_metadata::Metadata = frame_metadata.try_into().unwrap();
-        Metadata::new(metadata)
+        Metadata::from(metadata)
     }
 
     #[test]
     fn test_decoding() {
         let client = OfflineClient::<SubstrateConfig>::new(
             Default::default(),
-            RuntimeVersion::new(0, 0),
+            RuntimeVersion { spec_version: 0, transaction_version: 0 },
             mock_metadata(),
         );
         let custom_value_client = CustomValuesClient::new(client);

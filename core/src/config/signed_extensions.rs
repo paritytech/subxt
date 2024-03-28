@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -47,7 +47,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
     type Params = ();
 
     fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckSpecVersion(client.runtime_version().spec_version()))
+        Ok(CheckSpecVersion(client.runtime_version.spec_version))
     }
 }
 
@@ -110,7 +110,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
 
     fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckTxVersion(
-            client.runtime_version().transaction_version(),
+            client.runtime_version.transaction_version,
         ))
     }
 }
@@ -135,7 +135,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
     type Params = ();
 
     fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckGenesis(client.genesis_hash()))
+        Ok(CheckGenesis(client.genesis_hash))
     }
 }
 
@@ -209,12 +209,12 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
         let check_mortality = if let Some(params) = params.0 {
             CheckMortality {
                 era: params.era,
-                checkpoint: params.checkpoint.unwrap_or(client.genesis_hash()),
+                checkpoint: params.checkpoint.unwrap_or(client.genesis_hash),
             }
         } else {
             CheckMortality {
                 era: Era::Immortal,
-                checkpoint: client.genesis_hash(),
+                checkpoint: client.genesis_hash,
             }
         };
         Ok(check_mortality)
@@ -402,7 +402,7 @@ macro_rules! impl_tuples {
                 client: &ClientState<T>,
                 params: Self::Params,
             ) -> Result<Self, ExtrinsicParamsError> {
-                let metadata = client.metadata();
+                let metadata = &client.metadata;
                 let types = metadata.types();
 
                 // For each signed extension in the tuple, find the matching index in the metadata, if

@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -7,7 +7,7 @@
 //! the trait itself.
 
 use crate::error::MetadataError;
-use crate::metadata::{DecodeWithMetadata, MetadataExt};
+use crate::metadata::DecodeWithMetadata;
 use alloc::vec::Vec;
 use subxt_metadata::PalletMetadata;
 use subxt_metadata::{StorageEntryMetadata, StorageHasher};
@@ -68,7 +68,7 @@ pub fn hash_bytes(input: &[u8], hasher: StorageHasher, bytes: &mut Vec<u8>) {
 pub fn lookup_entry_details<'a>(
     pallet_name: &str,
     entry_name: &str,
-    metadata: &'a subxt_metadata::Metadata,
+    metadata: &'a Metadata,
 ) -> Result<(PalletMetadata<'a>, &'a StorageEntryMetadata), Error> {
     let pallet_metadata = metadata.pallet_by_name_err(pallet_name)?;
     let storage_metadata = pallet_metadata

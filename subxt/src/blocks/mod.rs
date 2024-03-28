@@ -15,7 +15,7 @@ pub use block_types::Block;
 pub use blocks_client::BlocksClient;
 pub use extrinsic_types::{
     ExtrinsicDetails, ExtrinsicEvents, ExtrinsicSignedExtension, ExtrinsicSignedExtensions,
-    Extrinsics, StaticExtrinsic,
+    Extrinsics, StaticExtrinsic, FoundExtrinsic
 };
 
 // We get account nonce info in tx_client, too, so re-use the logic:

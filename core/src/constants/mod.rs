@@ -1,8 +1,8 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Types associated with accessing constants.
+//! Functions and types associated with accessing constants.
 
 mod constant_address;
 
@@ -12,16 +12,17 @@ use alloc::borrow::ToOwned;
 
 use crate::{
     error::MetadataError,
-    metadata::{DecodeWithMetadata, MetadataExt},
+    metadata::DecodeWithMetadata,
     Error, Metadata,
 };
 
-/// Run validation logic against some constant address you'd like to access. Returns `Ok(())`
-/// if the address is valid (or if it's not possible to check since the address has no validation hash).
-/// Return an error if the address was not valid or something went wrong trying to validate it (ie
-/// the pallet or constant in question do not exist at all).
+/// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
+/// that the shape of the constant value is the same as the shape expected by the static address.
+///
+/// When the provided `address` is dynamic (and thus does not come with any expectation of the
+/// shape of the constant value), this just returns `Ok(())`
 pub fn validate_constant<Address: ConstantAddress>(
-    metadata: &subxt_metadata::Metadata,
+    metadata: &Metadata,
     address: &Address,
 ) -> Result<(), Error> {
     if let Some(actual_hash) = address.validation_hash() {
@@ -38,6 +39,8 @@ pub fn validate_constant<Address: ConstantAddress>(
     Ok(())
 }
 
+/// Fetch a constant out of the metadata given a constant address. If the `address` has been
+/// statically generated, this will validate that the constant shape is as expected, too.
 pub fn get_constant<Address: ConstantAddress>(
     metadata: &Metadata,
     address: &Address,
