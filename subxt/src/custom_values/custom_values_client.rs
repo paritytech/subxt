@@ -2,9 +2,7 @@ use crate::client::OfflineClientT;
 use crate::{Config, Error};
 use derive_where::derive_where;
 
-use subxt_core::custom_values::{
-    get_custom_value, get_custom_value_bytes, validate_custom_value, CustomValueAddress,
-};
+use subxt_core::custom_values::CustomValueAddress;
 use subxt_core::utils::Yes;
 
 /// A client for accessing custom values stored in the metadata.
@@ -31,7 +29,7 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         &self,
         address: &Address,
     ) -> Result<Address::Target, Error> {
-        get_custom_value(&self.client.metadata(), address).map_err(Into::into)
+        subxt_core::custom_values::get_custom_value(&self.client.metadata(), address).map_err(Into::into)
     }
 
     /// Access the bytes of a custom value by the address it is registered under.
@@ -39,7 +37,7 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         &self,
         address: &Address,
     ) -> Result<Vec<u8>, Error> {
-        get_custom_value_bytes(&self.client.metadata(), address).map_err(Into::into)
+        subxt_core::custom_values::get_custom_value_bytes(&self.client.metadata(), address).map_err(Into::into)
     }
 
     /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
@@ -49,7 +47,7 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
         &self,
         address: &Address,
     ) -> Result<(), Error> {
-        validate_custom_value(&self.client.metadata(), address).map_err(Into::into)
+        subxt_core::custom_values::validate_custom_value(&self.client.metadata(), address).map_err(Into::into)
     }
 }
 

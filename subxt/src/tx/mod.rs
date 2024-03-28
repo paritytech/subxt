@@ -14,21 +14,16 @@ use crate::macros::cfg_substrate_compat;
 mod tx_client;
 mod tx_progress;
 
-pub use subxt_core::tx as tx_payload;
-pub use subxt_core::tx::signer;
-
 // The PairSigner impl currently relies on Substrate bits and pieces, so make it an optional
 // feature if we want to avoid needing sp_core and sp_runtime.
 cfg_substrate_compat! {
-    pub use signer::PairSigner;
+    pub use subxt_core::tx::signer::PairSigner;
 }
 
-pub use self::{
-    signer::Signer,
-    tx_client::{
-        PartialExtrinsic, SubmittableExtrinsic, TransactionInvalid, TransactionUnknown, TxClient,
-        ValidationResult,
-    },
-    tx_payload::{dynamic, DynamicPayload, Payload, TxPayload},
-    tx_progress::{TxInBlock, TxProgress, TxStatus},
+pub use tx_client::{
+    PartialExtrinsic, SubmittableExtrinsic, TransactionInvalid, TransactionUnknown, TxClient,
+    ValidationResult,
 };
+pub use tx_progress::{TxInBlock, TxProgress, TxStatus};
+pub use subxt_core::tx::signer::{self, Signer};
+pub use subxt_core::tx::payload::{dynamic, DynamicPayload, Payload, TxPayload};

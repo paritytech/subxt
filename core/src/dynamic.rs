@@ -17,7 +17,7 @@ pub use scale_value::{At, Value};
 pub type DecodedValue = scale_value::Value<u32>;
 
 // Submit dynamic transactions.
-pub use crate::tx::dynamic as tx;
+pub use crate::tx::payload::dynamic as tx;
 
 // Lookup constants dynamically.
 pub use crate::constants::dynamic as constant;

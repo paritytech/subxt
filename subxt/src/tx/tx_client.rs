@@ -2,22 +2,19 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use std::borrow::Cow;
-
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
     config::{
-        Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header, RefineParams,
+        Config, ExtrinsicParams, Header, RefineParams,
         RefineParamsData,
     },
-    error::{BlockError, Error, MetadataError},
+    error::{BlockError, Error},
     tx::{Signer as SignerT, TxPayload, TxProgress},
-    utils::{Encoded, PhantomDataSendSync},
+    utils::PhantomDataSendSync,
 };
 use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
-use sp_crypto_hashing::blake2_256;
 
 /// A client for working with transactions.
 #[derive_where(Clone; Client)]
@@ -45,19 +42,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: TxPayload,
     {
-        if let Some(details) = call.validation_details() {
-            let expected_hash = self
-                .client
-                .metadata()
-                .pallet_by_name_err(details.pallet_name)?
-                .call_hash(details.call_name)
-                .ok_or_else(|| MetadataError::CallNameNotFound(details.call_name.to_owned()))?;
-
-            if details.hash != expected_hash {
-                return Err(MetadataError::IncompatibleCodegen.into());
-            }
-        }
-        Ok(())
+        subxt_core::tx::validate(&self.client.metadata(), call).map_err(Into::into)
     }
 
     /// Return the SCALE encoded bytes representing the call data of the transaction.
@@ -65,10 +50,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: TxPayload,
     {
-        let metadata = self.client.metadata();
-        let mut bytes = Vec::new();
-        call.encode_call_data_to(&metadata, &mut bytes)?;
-        Ok(bytes)
+        subxt_core::tx::call_data(&self.client.metadata(), call).map_err(Into::into)
     }
 
     /// Creates an unsigned extrinsic without submitting it.
@@ -76,32 +58,9 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: TxPayload,
     {
-        // 1. Validate this call against the current node metadata if the call comes
-        // with a hash allowing us to do so.
-        self.validate(call)?;
-
-        // 2. Encode extrinsic
-        let extrinsic = {
-            let mut encoded_inner = Vec::new();
-            // transaction protocol version (4) (is not signed, so no 1 bit at the front).
-            4u8.encode_to(&mut encoded_inner);
-            // encode call data after this byte.
-            call.encode_call_data_to(&self.client.metadata(), &mut encoded_inner)?;
-            // now, prefix byte length:
-            let len = Compact(
-                u32::try_from(encoded_inner.len()).expect("extrinsic size expected to be <4GB"),
-            );
-            let mut encoded = Vec::new();
-            len.encode_to(&mut encoded);
-            encoded.extend(encoded_inner);
-            encoded
-        };
-
-        // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
-        Ok(SubmittableExtrinsic::from_bytes(
-            self.client.clone(),
-            extrinsic,
-        ))
+        subxt_core::tx::create_unsigned(&self.client.metadata(), call)
+            .map(|tx| SubmittableExtrinsic { client: self.client.clone(), inner: tx })
+            .map_err(Into::into)
     }
 
     /// Create a partial extrinsic.
@@ -116,23 +75,9 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: TxPayload,
     {
-        // 1. Validate this call against the current node metadata if the call comes
-        // with a hash allowing us to do so.
-        self.validate(call)?;
-
-        // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
-        let call_data = self.call_data(call)?;
-
-        // 3. Construct our custom additional/extra params.
-        let additional_and_extra_params =
-            <T::ExtrinsicParams as ExtrinsicParams<T>>::new(&self.client.client_state(), params)?;
-
-        // Return these details, ready to construct a signed extrinsic from.
-        Ok(PartialExtrinsic {
-            client: self.client.clone(),
-            call_data,
-            additional_and_extra_params,
-        })
+        subxt_core::tx::create_partial_signed(&self.client.metadata(), &self.client.client_state(), call, params)
+            .map(|tx| PartialExtrinsic { client: self.client.clone(), inner: tx })
+            .map_err(Into::into)
     }
 
     /// Creates a signed extrinsic without submitting it.
@@ -149,16 +94,9 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         Call: TxPayload,
         Signer: SignerT<T>,
     {
-        // 1. Validate this call against the current node metadata if the call comes
-        // with a hash allowing us to do so.
-        self.validate(call)?;
-
-        // 2. Gather the "additional" and "extra" params along with the encoded call data,
-        //    ready to be signed.
-        let partial_signed = self.create_partial_signed_offline(call, params)?;
-
-        // 3. Sign and construct an extrinsic from these details.
-        Ok(partial_signed.sign(signer))
+        subxt_core::tx::create_signed(&self.client.metadata(), &self.client.client_state(), call, signer, params)
+            .map(|tx| SubmittableExtrinsic { client: self.client.clone(), inner: tx })
+            .map_err(Into::into)
     }
 }
 
@@ -328,8 +266,7 @@ where
 /// This payload contains the information needed to produce an extrinsic.
 pub struct PartialExtrinsic<T: Config, C> {
     client: C,
-    call_data: Vec<u8>,
-    additional_and_extra_params: T::ExtrinsicParams,
+    inner: subxt_core::tx::PartialTransaction<T>,
 }
 
 impl<T, C> PartialExtrinsic<T, C>
@@ -337,34 +274,16 @@ where
     T: Config,
     C: OfflineClientT<T>,
 {
-    // Obtain bytes representing the signer payload and run call some function
-    // with them. This can avoid an allocation in some cases when compared to
-    // [`PartialExtrinsic::signer_payload()`].
-    fn with_signer_payload<F, R>(&self, f: F) -> R
-    where
-        F: for<'a> FnOnce(Cow<'a, [u8]>) -> R,
-    {
-        let mut bytes = self.call_data.clone();
-        self.additional_and_extra_params.encode_extra_to(&mut bytes);
-        self.additional_and_extra_params
-            .encode_additional_to(&mut bytes);
-        if bytes.len() > 256 {
-            f(Cow::Borrowed(blake2_256(&bytes).as_ref()))
-        } else {
-            f(Cow::Owned(bytes))
-        }
-    }
-
     /// Return the signer payload for this extrinsic. These are the bytes that must
     /// be signed in order to produce a valid signature for the extrinsic.
     pub fn signer_payload(&self) -> Vec<u8> {
-        self.with_signer_payload(|bytes| bytes.to_vec())
+        self.inner.signer_payload()
     }
 
     /// Return the bytes representing the call data for this partially constructed
     /// extrinsic.
     pub fn call_data(&self) -> &[u8] {
-        &self.call_data
+        self.inner.call_data()
     }
 
     /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
@@ -374,10 +293,10 @@ where
     where
         Signer: SignerT<T>,
     {
-        // Given our signer, we can sign the payload representing this extrinsic.
-        let signature = self.with_signer_payload(|bytes| signer.sign(&bytes));
-        // Now, use the signature and "from" address to build the extrinsic.
-        self.sign_with_address_and_signature(&signer.address(), &signature)
+        SubmittableExtrinsic {
+            client: self.client.clone(),
+            inner: self.inner.sign(signer),
+        }
     }
 
     /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
@@ -389,40 +308,17 @@ where
         address: &T::Address,
         signature: &T::Signature,
     ) -> SubmittableExtrinsic<T, C> {
-        // Encode the extrinsic (into the format expected by protocol version 4)
-        let extrinsic = {
-            let mut encoded_inner = Vec::new();
-            // "is signed" + transaction protocol version (4)
-            (0b10000000 + 4u8).encode_to(&mut encoded_inner);
-            // from address for signature
-            address.encode_to(&mut encoded_inner);
-            // the signature
-            signature.encode_to(&mut encoded_inner);
-            // attach custom extra params
-            self.additional_and_extra_params
-                .encode_extra_to(&mut encoded_inner);
-            // and now, call data (remembering that it's been encoded already and just needs appending)
-            encoded_inner.extend(&self.call_data);
-            // now, prefix byte length:
-            let len = Compact(
-                u32::try_from(encoded_inner.len()).expect("extrinsic size expected to be <4GB"),
-            );
-            let mut encoded = Vec::new();
-            len.encode_to(&mut encoded);
-            encoded.extend(encoded_inner);
-            encoded
-        };
-
-        // Return an extrinsic ready to be submitted.
-        SubmittableExtrinsic::from_bytes(self.client.clone(), extrinsic)
+        SubmittableExtrinsic {
+            client: self.client.clone(),
+            inner: self.inner.sign_with_address_and_signature(address, signature),
+        }
     }
 }
 
 /// This represents an extrinsic that has been signed and is ready to submit.
 pub struct SubmittableExtrinsic<T, C> {
     client: C,
-    encoded: Encoded,
-    marker: std::marker::PhantomData<T>,
+    inner: subxt_core::tx::Transaction<T>,
 }
 
 impl<T, C> SubmittableExtrinsic<T, C>
@@ -440,25 +336,24 @@ where
     pub fn from_bytes(client: C, tx_bytes: Vec<u8>) -> Self {
         Self {
             client,
-            encoded: Encoded(tx_bytes),
-            marker: std::marker::PhantomData,
+            inner: subxt_core::tx::Transaction::from_bytes(tx_bytes),
         }
     }
 
     /// Calculate and return the hash of the extrinsic, based on the configured hasher.
     pub fn hash(&self) -> T::Hash {
-        T::Hasher::hash_of(&self.encoded)
+        self.inner.hash()
     }
 
     /// Returns the SCALE encoded extrinsic bytes.
     pub fn encoded(&self) -> &[u8] {
-        &self.encoded.0
+        self.inner.encoded()
     }
 
     /// Consumes [`SubmittableExtrinsic`] and returns the SCALE encoded
     /// extrinsic bytes.
     pub fn into_encoded(self) -> Vec<u8> {
-        self.encoded.0
+        self.inner.into_encoded()
     }
 }
 
@@ -479,7 +374,7 @@ where
         let sub = self
             .client
             .backend()
-            .submit_transaction(&self.encoded.0)
+            .submit_transaction(&self.encoded())
             .await?;
 
         Ok(TxProgress::new(sub, self.client.clone(), ext_hash))
@@ -495,7 +390,7 @@ where
         let mut sub = self
             .client
             .backend()
-            .submit_transaction(&self.encoded.0)
+            .submit_transaction(&self.encoded())
             .await?;
 
         // If we get a bad status or error back straight away then error, else return the hash.
@@ -543,7 +438,7 @@ where
         let block_hash = at.into().hash();
 
         // Approach taken from https://github.com/paritytech/json-rpc-interface-spec/issues/55.
-        let mut params = Vec::with_capacity(8 + self.encoded.0.len() + 8);
+        let mut params = Vec::with_capacity(8 + self.encoded().len() + 8);
         2u8.encode_to(&mut params);
         params.extend(self.encoded().iter());
         block_hash.encode_to(&mut params);
