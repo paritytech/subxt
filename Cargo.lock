@@ -4790,7 +4790,6 @@ dependencies = [
 name = "subxt-test-proc-macro"
 version = "0.35.0"
 dependencies = [
- "proc-macro2",
  "quote",
  "syn 2.0.53",
 ]
