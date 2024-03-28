@@ -4,10 +4,12 @@
 
 //! An ethereum keypair implementation.
 
+use core::fmt::{Display, Formatter};
+
+use derive_more::{Display, From};
 use keccak_hash::keccak;
 use secp256k1::Message;
 
-use crate::crypto::{DeriveJunction, SecretUri};
 use crate::ecdsa;
 
 const SEED_LENGTH: usize = 32;
@@ -26,24 +28,7 @@ impl From<ecdsa::Keypair> for Keypair {
 }
 
 impl Keypair {
-    /// Create a keypair from a [`SecretUri`]. See the [`SecretUri`] docs for more.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use subxt_signer::{ SecretUri, eth::Keypair };
-    /// use std::str::FromStr;
-    ///
-    /// let uri = SecretUri::from_str("//Alice").unwrap();
-    /// let keypair = Keypair::from_uri(&uri).unwrap();
-    ///
-    /// keypair.sign(b"Hello world!");
-    /// ```
-    pub fn from_uri(uri: &SecretUri) -> Result<Self, Error> {
-        ecdsa::Keypair::from_uri(uri).map(Self)
-    }
-
-    /// Create a keypair from a BIP-39 mnemonic phrase and optional password.
+    /// Create a keypair from a BIP-39 mnemonic phrase, optional password, and derivation index.
     ///
     /// # Example
     ///
@@ -52,12 +37,25 @@ impl Keypair {
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
     /// let mnemonic = Mnemonic::parse(phrase).unwrap();
-    /// let keypair = Keypair::from_phrase(&mnemonic, None).unwrap();
+    /// let keypair = Keypair::from_phrase(&mnemonic, None, 0).unwrap();
     ///
     /// keypair.sign(b"Hello world!");
     /// ```
-    pub fn from_phrase(mnemonic: &bip39::Mnemonic, password: Option<&str>) -> Result<Self, Error> {
-        ecdsa::Keypair::from_phrase(mnemonic, password).map(Self)
+    pub fn from_phrase(
+        mnemonic: &bip39::Mnemonic,
+        password: Option<&str>,
+        index: u32,
+    ) -> Result<Self, Error> {
+        let derivation_path: bip32::DerivationPath = format!("m/44'/60'/0'/0/{}", index)
+            .parse()
+            .map_err(Error::InvalidDerivationIndex)?;
+        let private = bip32::XPrv::derive_from_path(
+            mnemonic.to_seed(password.unwrap_or("")),
+            &derivation_path,
+        )
+        .unwrap();
+
+        Keypair::from_seed(private.to_bytes())
     }
 
     /// Turn a 32 byte seed into a keypair.
@@ -66,31 +64,9 @@ impl Keypair {
     ///
     /// This will only be secure if the seed is secure!
     pub fn from_seed(seed: Seed) -> Result<Self, Error> {
-        ecdsa::Keypair::from_seed(seed).map(Self)
-    }
-
-    /// Derive a child key from this one given a series of junctions.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use subxt_signer::{ bip39::Mnemonic, eth::Keypair, DeriveJunction };
-    ///
-    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
-    /// let mnemonic = Mnemonic::parse(phrase).unwrap();
-    /// let keypair = Keypair::from_phrase(&mnemonic, None).unwrap();
-    ///
-    /// // Equivalent to the URI path '//Alice//stash':
-    /// let new_keypair = keypair.derive([
-    ///     DeriveJunction::hard("Alice"),
-    ///     DeriveJunction::hard("stash")
-    /// ]);
-    /// ```
-    pub fn derive<Js: IntoIterator<Item = DeriveJunction>>(
-        &self,
-        junctions: Js,
-    ) -> Result<Self, Error> {
-        self.0.derive(junctions).map(Self)
+        ecdsa::Keypair::from_seed(seed)
+            .map(Self)
+            .map_err(|_| Error::InvalidSeed)
     }
 
     /// Obtain the [`ecdsa::PublicKey`] of this keypair.
@@ -112,10 +88,7 @@ impl Keypair {
         let message_hash = keccak(signer_payload);
         let wrapped =
             Message::from_digest_slice(message_hash.as_bytes()).expect("Message is 32 bytes; qed");
-        Signature(crate::ecdsa::internal::sign(
-            &self.0 .0.secret_key(),
-            &wrapped,
-        ))
+        Signature(ecdsa::internal::sign(&self.0 .0.secret_key(), &wrapped))
     }
 }
 
@@ -139,18 +112,12 @@ impl AsRef<[u8]> for AccountId20 {
     }
 }
 
-/// Verify that some signature for a message was created by the owner of the [`ecdsa::PublicKey`].
-///
-/// ```rust
-/// use subxt_signer::eth;
-///
-/// let keypair = eth::dev::alice();
-/// let message = b"Hello!";
-///
-/// let signature = keypair.sign(message);
-/// let public_key = keypair.public_key();
-/// assert!(eth::verify(&signature, message, &public_key));
-/// ```
+impl Display for AccountId20 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", eth_checksum::checksum(&hex::encode(&self)))
+    }
+}
+
 pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &ecdsa::PublicKey) -> bool {
     let message_hash = keccak(message.as_ref());
     let wrapped =
@@ -159,47 +126,57 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &ecdsa::Publi
     ecdsa::internal::verify(&sig.0, &wrapped, pubkey)
 }
 
-/// An error handed back if creating the keypair fails.
-pub type Error = ecdsa::Error;
+/// An error handed back if creating a keypair fails.
+#[derive(Debug, PartialEq, Display, From)]
+pub enum Error {
+    /// Invalid seed.
+    #[display(fmt = "Invalid seed (was it the wrong length?)")]
+    #[from(ignore)]
+    InvalidSeed,
+    /// Invalid derivation index.
+    #[display(fmt = "Invalid derivation index: {_0}")]
+    InvalidDerivationIndex(bip32::Error),
+    /// Invalid phrase.
+    #[display(fmt = "Cannot parse phrase: {_0}")]
+    InvalidPhrase(bip39::Error),
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
 
 /// Dev accounts, helpful for testing but not to be used in production,
 /// since the secret keys are known.
 pub mod dev {
-    use super::*;
     use core::str::FromStr;
 
+    use crate::DEV_PHRASE;
+
+    use super::*;
+
     once_static_cloned! {
-        /// Equivalent to `{DEV_PHRASE}//Alice`.
-        pub fn alice() -> Keypair {
-            Keypair::from_uri(&SecretUri::from_str("//Alice").unwrap()).unwrap()
+        pub fn alith() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 0).unwrap()
         }
-        /// Equivalent to `{DEV_PHRASE}//Bob`.
-        pub fn bob() -> Keypair {
-            Keypair::from_uri(&SecretUri::from_str("//Bob").unwrap()).unwrap()
+        pub fn baltathar() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 1).unwrap()
         }
-        /// Equivalent to `{DEV_PHRASE}//Charlie`.
-        pub fn charlie() -> Keypair {
-            Keypair::from_uri(&SecretUri::from_str("//Charlie").unwrap()).unwrap()
+        pub fn charleth() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 2).unwrap()
         }
-        /// Equivalent to `{DEV_PHRASE}//Dave`.
-        pub fn dave() -> Keypair {
-            Keypair::from_uri(&SecretUri::from_str("//Dave").unwrap()).unwrap()
+        pub fn dorothy() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 3).unwrap()
         }
-        /// Equivalent to `{DEV_PHRASE}//Eve`.
-        pub fn eve() -> Keypair {
-            Keypair::from_uri(&SecretUri::from_str("//Eve").unwrap()).unwrap()
+        pub fn ethan() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 4).unwrap()
         }
-        /// Equivalent to `{DEV_PHRASE}//Ferdie`.
-        pub fn ferdie() -> Keypair {
-            Keypair::from_uri(&SecretUri::from_str("//Ferdie").unwrap()).unwrap()
-        }
-        /// Equivalent to `{DEV_PHRASE}//One`.
-        pub fn one() -> Keypair {
-            Keypair::from_uri(&SecretUri::from_str("//One").unwrap()).unwrap()
-        }
-        /// Equivalent to `{DEV_PHRASE}//Two`.
-        pub fn two() -> Keypair {
-            Keypair::from_uri(&SecretUri::from_str("//Two").unwrap()).unwrap()
+        pub fn faith() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 5).unwrap()
         }
     }
 }
@@ -230,9 +207,14 @@ mod subxt_compat {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use core::str::FromStr;
+
     use proptest::prelude::*;
     use secp256k1::Secp256k1;
+
+    use crate::DEV_PHRASE;
+
+    use super::*;
 
     enum StubEthRuntimeConfig {}
 
@@ -299,5 +281,33 @@ mod test {
                 &keypair.public_key())
             );
         }
+    }
+
+    #[test]
+    fn check_dev_accounts_match() {
+        assert_eq!(
+            dev::alith().account_id().to_string(),
+            eth_checksum::checksum("0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")
+        );
+        assert_eq!(
+            dev::baltathar().account_id().to_string(),
+            eth_checksum::checksum("0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0")
+        );
+        assert_eq!(
+            dev::charleth().account_id().to_string(),
+            eth_checksum::checksum("0x798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc")
+        );
+        assert_eq!(
+            dev::dorothy().account_id().to_string(),
+            eth_checksum::checksum("0x773539d4Ac0e786233D90A233654ccEE26a613D9")
+        );
+        assert_eq!(
+            dev::ethan().account_id().to_string(),
+            eth_checksum::checksum("0xFf64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB")
+        );
+        assert_eq!(
+            dev::faith().account_id().to_string(),
+            eth_checksum::checksum("0xC0F0f4ab324C46e55D02D0033343B4Be8A55532d")
+        );
     }
 }
