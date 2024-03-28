@@ -39,7 +39,7 @@ impl AsRef<[u8]> for PublicKey {
 }
 
 /// An ecdsa keypair implementation.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Keypair(pub secp256k1::Keypair);
 
 impl Keypair {
@@ -160,18 +160,9 @@ impl Keypair {
 
     /// Sign some message. These bytes can be used directly in a Substrate `MultiSignature::Ecdsa(..)`.
     pub fn sign(&self, message: &[u8]) -> Signature {
-        // From sp_core::ecdsa::sign:
         let message_hash = sp_crypto_hashing::blake2_256(message);
-        // From sp_core::ecdsa::sign_prehashed:
         let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
-        let recsig: RecoverableSignature =
-            Secp256k1::signing_only().sign_ecdsa_recoverable(&wrapped, &self.0.secret_key());
-        // From sp_core::ecdsa's `impl From<RecoverableSignature> for Signature`:
-        let (recid, sig): (_, [u8; 64]) = recsig.serialize_compact();
-        let mut signature_bytes: [u8; 65] = [0; 65];
-        signature_bytes[..64].copy_from_slice(&sig);
-        signature_bytes[64] = (recid.to_i32() & 0xFF) as u8;
-        Signature(signature_bytes)
+        Signature(internal::sign(&self.0.secret_key(), &wrapped))
     }
 }
 
@@ -188,18 +179,37 @@ impl Keypair {
 /// assert!(ecdsa::verify(&signature, message, &public_key));
 /// ```
 pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -> bool {
-    let Ok(signature) = secp256k1::ecdsa::Signature::from_compact(&sig.0[..64]) else {
-        return false;
-    };
-    let Ok(public) = secp256k1::PublicKey::from_slice(&pubkey.0) else {
-        return false;
-    };
     let message_hash = sp_crypto_hashing::blake2_256(message.as_ref());
     let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
 
-    Secp256k1::verification_only()
-        .verify_ecdsa(&wrapped, &signature, &public)
-        .is_ok()
+    internal::verify(&sig.0, &wrapped, pubkey)
+}
+
+pub(crate) mod internal {
+    use super::*;
+
+    pub fn sign(secret_key: &secp256k1::SecretKey, message: &Message) -> [u8; 65] {
+        let recsig: RecoverableSignature =
+            Secp256k1::signing_only().sign_ecdsa_recoverable(message, secret_key);
+        let (recid, sig): (_, [u8; 64]) = recsig.serialize_compact();
+        let mut signature_bytes: [u8; 65] = [0; 65];
+        signature_bytes[..64].copy_from_slice(&sig);
+        signature_bytes[64] = (recid.to_i32() & 0xFF) as u8;
+        signature_bytes
+    }
+
+    pub fn verify(sig: &[u8; 65], message: &Message, pubkey: &PublicKey) -> bool {
+        let Ok(signature) = secp256k1::ecdsa::Signature::from_compact(&sig[..64]) else {
+            return false;
+        };
+        let Ok(public) = secp256k1::PublicKey::from_slice(&pubkey.0) else {
+            return false;
+        };
+
+        Secp256k1::verification_only()
+            .verify_ecdsa(message, &signature, &public)
+            .is_ok()
+    }
 }
 
 /// An error handed back if creating a keypair fails.
