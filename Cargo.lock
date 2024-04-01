@@ -1530,12 +1530,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ethaddr"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ecbcc1770d1b2e3fb83915c80c47a10efbe1964544a40e0211fe40274f8363c8"
-
-[[package]]
 name = "event-listener"
 version = "2.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4913,7 +4907,6 @@ dependencies = [
  "bip39",
  "cfg-if",
  "derive_more",
- "ethaddr",
  "getrandom",
  "hex",
  "hex-literal",

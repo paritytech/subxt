@@ -124,6 +124,29 @@ impl AsRef<[u8; 65]> for Signature {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, codec::Encode)]
 pub struct AccountId20(pub [u8; 20]);
 
+impl AccountId20 {
+    fn checksum(&self) -> String {
+        let hex_address = hex::encode(self.0);
+        let hash = keccak(hex_address.as_bytes());
+
+        let mut checksum_address = String::with_capacity(42);
+        checksum_address.push_str("0x");
+
+        for (i, ch) in hex_address.chars().enumerate() {
+            // Get the corresponding nibble from the hash
+            let nibble = hash[i / 2] >> (if i % 2 == 0 { 4 } else { 0 }) & 0xf;
+
+            if nibble >= 8 {
+                checksum_address.push(ch.to_ascii_uppercase());
+            } else {
+                checksum_address.push(ch);
+            }
+        }
+
+        checksum_address
+    }
+}
+
 impl AsRef<[u8]> for AccountId20 {
     fn as_ref(&self) -> &[u8] {
         &self.0
@@ -132,7 +155,7 @@ impl AsRef<[u8]> for AccountId20 {
 
 impl Display for AccountId20 {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}", ethaddr::Address::from_slice(&self.0))
+        write!(f, "{}", self.checksum())
     }
 }
 
@@ -386,6 +409,7 @@ mod test {
             hex!("0f02ba4d7f83e59eaa32eae9c3c4d99b68ce76decade21cdab7ecce8f4aef81a");
         const KEY_3: [u8; 32] =
             hex!("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
+
         #[test]
         fn test_account_derivation_1() {
             let kp = Keypair::from_seed(KEY_1).expect("valid keypair");
