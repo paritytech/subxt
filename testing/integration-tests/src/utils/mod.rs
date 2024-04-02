@@ -12,7 +12,7 @@ pub use node_proc::TestNodeProcess;
 pub use tx_retries::*;
 pub use wait_for_blocks::*;
 
-pub use subxt_test_proc_macro::subxt_test;
+pub use subxt_test_macro::subxt_test;
 
 /// The test timeout is set to 1 second.
 /// However, the test is sleeping for 5 seconds.

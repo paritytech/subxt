@@ -1,5 +1,5 @@
 [package]
-name = "subxt-test-proc-macro"
+name = "subxt-test-macro"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true

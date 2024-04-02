@@ -2290,7 +2290,7 @@ dependencies = [
  "subxt-codegen",
  "subxt-metadata",
  "subxt-signer",
- "subxt-test-proc-macro",
+ "subxt-test-macro",
  "syn 2.0.53",
  "test-runtime",
  "tokio",
@@ -4827,7 +4827,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "subxt-test-proc-macro"
+name = "subxt-test-macro"
 version = "0.35.0"
 dependencies = [
  "quote",
