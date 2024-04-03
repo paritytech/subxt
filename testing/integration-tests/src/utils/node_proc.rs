@@ -228,10 +228,10 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineCli
         .await
         .map_err(|err| format!("Failed to connect to node rpc at {ws_url}: {err}"))?;
 
-    // Wait for at least 3 blocks before starting the light client.
+    // Wait for at least a few blocks before starting the light client.
     // Otherwise, the lightclient might error with
     // `"Error when retrieving the call proof: No node available for call proof query"`.
-    super::wait_for_number_of_blocks(&client, 4).await;
+    super::wait_for_number_of_blocks(&client, 5).await;
 
     // Now, configure a light client; fetch the chain spec and modify the bootnodes.
     let bootnode = format!(
