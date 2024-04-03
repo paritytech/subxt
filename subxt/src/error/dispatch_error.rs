@@ -7,8 +7,9 @@
 
 use crate::metadata::{DecodeWithMetadata, Metadata};
 use core::fmt::Debug;
-use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType};
-use std::borrow::Cow;
+use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, TypeResolver};
+
+use std::{borrow::Cow, marker::PhantomData};
 
 use super::{Error, MetadataError};
 
@@ -59,6 +60,9 @@ pub enum DispatchError {
         "Some resource (e.g. a preimage) is unavailable right now. This might fix itself later."
     )]
     Unavailable,
+    /// Root origin is not allowed.
+    #[error("Root origin is not allowed.")]
+    RootNotAllowed,
 }
 
 /// An error relating to tokens when dispatching a transaction.
@@ -92,6 +96,9 @@ pub enum TokenError {
     /// Withdrawal would cause unwanted loss of account.
     #[error("Withdrawal would cause unwanted loss of account.")]
     NotExpendable,
+    /// Account cannot receive the assets.
+    #[error("Account cannot receive the assets.")]
+    Blocked,
 }
 
 /// An error relating to arithmetic when dispatching a transaction.
@@ -203,7 +210,7 @@ impl ModuleError {
     pub fn as_root_error<E: DecodeAsType>(&self) -> Result<E, Error> {
         let decoded = E::decode_as_type(
             &mut &self.bytes[..],
-            self.metadata.outer_enums().error_enum_ty(),
+            &self.metadata.outer_enums().error_enum_ty(),
             self.metadata.types(),
         )?;
 
@@ -249,30 +256,34 @@ impl DispatchError {
             Exhausted,
             Corruption,
             Unavailable,
+            RootNotAllowed,
         }
 
         // ModuleError is a bit special; we want to support being decoded from either
         // a legacy format of 2 bytes, or a newer format of 5 bytes. So, just grab the bytes
         // out when decoding to manually work with them.
         struct DecodedModuleErrorBytes(Vec<u8>);
-        struct DecodedModuleErrorBytesVisitor;
-        impl scale_decode::Visitor for DecodedModuleErrorBytesVisitor {
+        struct DecodedModuleErrorBytesVisitor<R: TypeResolver>(PhantomData<R>);
+        impl<R: TypeResolver> scale_decode::Visitor for DecodedModuleErrorBytesVisitor<R> {
             type Error = scale_decode::Error;
             type Value<'scale, 'info> = DecodedModuleErrorBytes;
+            type TypeResolver = R;
+
             fn unchecked_decode_as_type<'scale, 'info>(
                 self,
                 input: &mut &'scale [u8],
-                _type_id: scale_decode::visitor::TypeId,
-                _types: &'info scale_info::PortableRegistry,
+                _type_id: &R::TypeId,
+                _types: &'info R,
             ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'info>, Self::Error>>
             {
                 DecodeAsTypeResult::Decoded(Ok(DecodedModuleErrorBytes(input.to_vec())))
             }
         }
+
         impl scale_decode::IntoVisitor for DecodedModuleErrorBytes {
-            type Visitor = DecodedModuleErrorBytesVisitor;
-            fn into_visitor() -> Self::Visitor {
-                DecodedModuleErrorBytesVisitor
+            type AnyVisitor<R: TypeResolver> = DecodedModuleErrorBytesVisitor<R>;
+            fn into_visitor<R: TypeResolver>() -> DecodedModuleErrorBytesVisitor<R> {
+                DecodedModuleErrorBytesVisitor(PhantomData)
             }
         }
 
@@ -298,6 +309,7 @@ impl DispatchError {
             DecodedDispatchError::Exhausted => DispatchError::Exhausted,
             DecodedDispatchError::Corruption => DispatchError::Corruption,
             DecodedDispatchError::Unavailable => DispatchError::Unavailable,
+            DecodedDispatchError::RootNotAllowed => DispatchError::RootNotAllowed,
             // But we apply custom logic to transform the module error into the outward facing version:
             DecodedDispatchError::Module(module_bytes) => {
                 let module_bytes = module_bytes.0;

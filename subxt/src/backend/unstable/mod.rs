@@ -75,9 +75,12 @@ impl<T: Config> UnstableBackendBuilder<T> {
     /// Given an [`RpcClient`] to use to make requests, this returns a tuple of an [`UnstableBackend`],
     /// which implements the [`Backend`] trait, and an [`UnstableBackendDriver`] which must be polled in
     /// order for the backend to make progress.
-    pub fn build(self, client: RpcClient) -> (UnstableBackend<T>, UnstableBackendDriver<T>) {
+    pub fn build(
+        self,
+        client: impl Into<RpcClient>,
+    ) -> (UnstableBackend<T>, UnstableBackendDriver<T>) {
         // Construct the underlying follow_stream layers:
-        let rpc_methods = UnstableRpcMethods::new(client);
+        let rpc_methods = UnstableRpcMethods::new(client.into());
         let follow_stream =
             follow_stream::FollowStream::<T::Hash>::from_methods(rpc_methods.clone());
         let follow_stream_unpin = follow_stream_unpin::FollowStreamUnpin::<T::Hash>::from_methods(
@@ -321,7 +324,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             .events()
             .filter_map(|ev| {
                 let out = match ev {
-                    FollowEvent::Initialized(init) => Some(init.finalized_block_hash.into()),
+                    FollowEvent::Initialized(init) => {
+                        init.finalized_block_hashes.last().map(|b| b.clone().into())
+                    }
                     _ => None,
                 };
                 std::future::ready(out)
@@ -353,7 +358,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             .filter_map(move |ev| {
                 let output = match ev {
                     FollowEvent::Initialized(ev) => {
-                        runtimes.remove(&ev.finalized_block_hash.hash());
+                        for finalized_block in ev.finalized_block_hashes {
+                            runtimes.remove(&finalized_block.hash());
+                        }
                         ev.finalized_block_runtime
                     }
                     FollowEvent::NewBlock(ev) => {
@@ -409,10 +416,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     RuntimeEvent::Valid(ev) => ev,
                 };
 
-                std::future::ready(Some(Ok(RuntimeVersion {
-                    spec_version: runtime_details.spec.spec_version,
-                    transaction_version: runtime_details.spec.transaction_version,
-                })))
+                let runtime_version = RuntimeVersion::new(runtime_details.spec.spec_version, runtime_details.spec.transaction_version);
+                std::future::ready(Some(Ok(runtime_version)))
             });
 
         Ok(StreamOf(Box::pin(runtime_stream)))
@@ -422,9 +427,11 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         self.stream_headers(|ev| match ev {
-            FollowEvent::Initialized(ev) => Some(ev.finalized_block_hash),
-            FollowEvent::NewBlock(ev) => Some(ev.block_hash),
-            _ => None,
+            FollowEvent::Initialized(init) => init.finalized_block_hashes,
+            FollowEvent::NewBlock(ev) => {
+                vec![ev.block_hash]
+            }
+            _ => vec![],
         })
         .await
     }
@@ -433,9 +440,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         self.stream_headers(|ev| match ev {
-            FollowEvent::Initialized(ev) => Some(ev.finalized_block_hash),
-            FollowEvent::BestBlockChanged(ev) => Some(ev.best_block_hash),
-            _ => None,
+            FollowEvent::Initialized(init) => init.finalized_block_hashes,
+            FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
+            _ => vec![],
         })
         .await
     }
@@ -444,9 +451,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         self.stream_headers(|ev| match ev {
-            FollowEvent::Initialized(ev) => {
-                vec![ev.finalized_block_hash]
-            }
+            FollowEvent::Initialized(init) => init.finalized_block_hashes,
             FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
             _ => vec![],
         })
@@ -610,7 +615,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         TransactionStatus::Dropped { message: error }
                     }
                     rpc_methods::TransactionStatus::Error { error } => {
-                        TransactionStatus::Dropped { message: error }
+                        TransactionStatus::Error { message: error }
                     }
                     rpc_methods::TransactionStatus::Invalid { error } => {
                         TransactionStatus::Invalid { message: error }

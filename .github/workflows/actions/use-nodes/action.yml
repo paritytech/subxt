@@ -1,0 +1,40 @@
+name: Use substrate and polkadot binaries
+description: Downloads and configures the substrate and polkadot binaries built with `build-nodes`
+runs:
+  using: composite
+  steps:
+    - name: Download substrate-node binary
+      id: download-substrate-binary
+      uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+      with:
+        workflow: build-nodes.yml
+        name: nightly-substrate-binary
+
+    - name: Download polkadot binary
+      id: download-polkadot-binary
+      uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
+      with:
+        workflow: build-nodes.yml
+        name: nightly-polkadot-binary
+
+    - name: decompress polkadot binary
+      shell: bash
+      run: |
+        tar -xzvf ./polkadot.tar.gz
+        cp ./target/release/polkadot ./polkadot
+
+    - name: Prepare binaries
+      shell: bash
+      run: |
+        chmod u+x ./substrate-node
+        chmod u+x ./polkadot
+        chmod u+x ./polkadot-execute-worker
+        chmod u+x ./polkadot-prepare-worker
+        ./substrate-node --version
+        ./polkadot --version
+        mkdir -p ~/.local/bin
+        mv ./substrate-node ~/.local/bin
+        mv ./polkadot ~/.local/bin
+        mv ./polkadot-execute-worker ~/.local/bin
+        mv ./polkadot-prepare-worker ~/.local/bin
+        rm ./polkadot.tar.gz

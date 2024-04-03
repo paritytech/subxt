@@ -8,10 +8,12 @@ use quote::{format_ident, quote};
 use scale_info::TypeDef;
 use scale_typegen::{typegen::type_path::TypePath, TypeGenerator};
 use subxt_metadata::{
-    PalletMetadata, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
+    PalletMetadata, StorageEntryMetadata, StorageEntryModifier, StorageEntryType, StorageHasher,
 };
 
 use super::CodegenError;
+
+use scale_typegen::typegen::ir::ToTokensWithSettings;
 
 /// Generate functions which create storage addresses from the provided pallet's metadata.
 /// These addresses can be used to access and iterate over storage values.
@@ -20,7 +22,7 @@ use super::CodegenError;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the storage items are generated.
-/// - `crate_path` - The crate path under which subxt is located, e.g. `::subxt` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
 pub fn generate_storage(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -69,49 +71,90 @@ fn generate_storage_entry_fns(
     let storage_entry_ty = storage_entry.entry_type().value_ty();
     let storage_entry_value_ty = type_gen
         .resolve_type_path(storage_entry_ty)
-        .expect("storage type is in metadata; qed");
+        .expect("storage type is in metadata; qed")
+        .to_token_stream(type_gen.settings());
 
     let alias_name = format_ident!("{}", storage_entry.name().to_upper_camel_case());
     let alias_module_name = format_ident!("{snake_case_name}");
     let alias_storage_path = quote!( types::#alias_module_name::#alias_name );
 
-    let storage_entry_map = |idx, id| {
-        let ident: Ident = format_ident!("_{}", idx);
+    struct MapEntryKey {
+        arg_name: Ident,
+        alias_type_def: TokenStream,
+        alias_type_path: TokenStream,
+        hasher: StorageHasher,
+    }
+
+    let map_entry_key = |idx, id, hasher| -> MapEntryKey {
+        let arg_name: Ident = format_ident!("_{}", idx);
         let ty_path = type_gen
             .resolve_type_path(id)
             .expect("type is in metadata; qed");
 
         let alias_name = format_ident!("Param{}", idx);
-        let alias_type = primitive_type_alias(&ty_path);
+        let alias_type = primitive_type_alias(&ty_path, type_gen.settings());
 
-        let alias_type = quote!( pub type #alias_name = #alias_type; );
-        let path_to_alias = quote!( types::#alias_module_name::#alias_name );
+        let alias_type_def = quote!( pub type #alias_name = #alias_type; );
+        let alias_type_path = quote!( types::#alias_module_name::#alias_name );
 
-        (ident, alias_type, path_to_alias)
+        MapEntryKey {
+            arg_name,
+            alias_type_def,
+            alias_type_path,
+            hasher,
+        }
     };
 
-    let keys: Vec<(Ident, TokenStream, TokenStream)> = match storage_entry.entry_type() {
+    let keys: Vec<MapEntryKey> = match storage_entry.entry_type() {
         StorageEntryType::Plain(_) => vec![],
-        StorageEntryType::Map { key_ty, .. } => {
+        StorageEntryType::Map {
+            key_ty, hashers, ..
+        } => {
             match &type_gen
                 .resolve_type(*key_ty)
                 .expect("key type should be present")
                 .type_def
             {
                 // An N-map; return each of the keys separately.
-                TypeDef::Tuple(tuple) => tuple
-                    .fields
-                    .iter()
-                    .enumerate()
-                    .map(|(idx, f)| storage_entry_map(idx, f.id))
-                    .collect::<Vec<_>>(),
+                TypeDef::Tuple(tuple) => {
+                    let key_count = tuple.fields.len();
+                    let hasher_count = hashers.len();
+                    if hasher_count != 1 && hasher_count != key_count {
+                        return Err(CodegenError::InvalidStorageHasherCount {
+                            storage_entry_name: storage_entry.name().to_owned(),
+                            key_count,
+                            hasher_count,
+                        });
+                    }
+
+                    let mut map_entry_keys: Vec<MapEntryKey> = vec![];
+                    for (idx, field) in tuple.fields.iter().enumerate() {
+                        // Note: these are in bounds because of the checks above, qed;
+                        let hasher = if idx >= hasher_count {
+                            hashers[0]
+                        } else {
+                            hashers[idx]
+                        };
+                        map_entry_keys.push(map_entry_key(idx, field.id, hasher));
+                    }
+                    map_entry_keys
+                }
                 // A map with a single key; return the single key.
                 _ => {
-                    vec![storage_entry_map(0, *key_ty)]
+                    let Some(hasher) = hashers.first() else {
+                        return Err(CodegenError::InvalidStorageHasherCount {
+                            storage_entry_name: storage_entry.name().to_owned(),
+                            key_count: 1,
+                            hasher_count: 0,
+                        });
+                    };
+
+                    vec![map_entry_key(0, *key_ty, *hasher)]
                 }
             }
         }
     };
+
     let pallet_name = pallet.name();
     let storage_name = storage_entry.name();
     let Some(storage_hash) = pallet.storage_hash(storage_name) else {
@@ -129,10 +172,14 @@ fn generate_storage_entry_fns(
         .unwrap_or_default();
 
     let is_defaultable_type = match storage_entry.modifier() {
-        StorageEntryModifier::Default => quote!(#crate_path::storage::address::Yes),
+        StorageEntryModifier::Default => quote!(#crate_path::utils::Yes),
         StorageEntryModifier::Optional => quote!(()),
     };
 
+    // Note: putting `#crate_path::storage::address::StaticStorageKey` into this variable is necessary
+    // to get the line width below a certain limit. If not done, rustfmt will refuse to format the following big expression.
+    // for more information see [this post](https://users.rust-lang.org/t/rustfmt-silently-fails-to-work/75485/4).
+    let static_storage_key: TokenStream = quote!(#crate_path::storage::address::StaticStorageKey);
     let all_fns = (0..=keys.len()).map(|n_keys| {
         let keys_slice = &keys[..n_keys];
         let (fn_name, is_fetchable, is_iterable) = if n_keys == keys.len() {
@@ -146,12 +193,65 @@ fn generate_storage_entry_fns(
             };
             (fn_name, false, true)
         };
-        let is_fetchable_type = is_fetchable.then_some(quote!(#crate_path::storage::address::Yes)).unwrap_or(quote!(()));
-        let is_iterable_type = is_iterable.then_some(quote!(#crate_path::storage::address::Yes)).unwrap_or(quote!(()));
-        let key_impls = keys_slice.iter().map(|(field_name, _, _)| quote!( #crate_path::storage::address::make_static_storage_map_key(#field_name.borrow()) ));
-        let key_args = keys_slice.iter().map(|(field_name, _, path_to_alias )| {
-            quote!( #field_name: impl ::std::borrow::Borrow<#path_to_alias> )
-        });
+        let is_fetchable_type = is_fetchable
+            .then_some(quote!(#crate_path::utils::Yes))
+            .unwrap_or(quote!(()));
+        let is_iterable_type = is_iterable
+            .then_some(quote!(#crate_path::utils::Yes))
+            .unwrap_or(quote!(()));
+
+        let (keys, keys_type) = match keys_slice.len() {
+            0 => (quote!(()), quote!(())),
+            1 => {
+                let key = &keys_slice[0];
+                if key.hasher.ends_with_key() {
+                    let arg = &key.arg_name;
+                    let keys = quote!(#static_storage_key::new(#arg.borrow()));
+                    let path = &key.alias_type_path;
+                    let path = quote!(#static_storage_key<#path>);
+                    (keys, path)
+                } else {
+                    (quote!(()), quote!(()))
+                }
+            }
+            _ => {
+                let keys_iter = keys_slice.iter().map(
+                    |MapEntryKey {
+                         arg_name, hasher, ..
+                     }| {
+                        if hasher.ends_with_key() {
+                            quote!( #static_storage_key::new(#arg_name.borrow()) )
+                        } else {
+                            quote!(())
+                        }
+                    },
+                );
+                let keys = quote!( (#(#keys_iter,)*) );
+                let paths_iter = keys_slice.iter().map(
+                    |MapEntryKey {
+                         alias_type_path,
+                         hasher,
+                         ..
+                     }| {
+                        if hasher.ends_with_key() {
+                            quote!( #static_storage_key<#alias_type_path> )
+                        } else {
+                            quote!(())
+                        }
+                    },
+                );
+                let paths = quote!( (#(#paths_iter,)*) );
+                (keys, paths)
+            }
+        };
+
+        let key_args = keys_slice.iter().map(
+            |MapEntryKey {
+                 arg_name,
+                 alias_type_path,
+                 ..
+             }| quote!( #arg_name: impl ::core::borrow::Borrow<#alias_type_path> ),
+        );
 
         quote!(
             #docs
@@ -159,7 +259,7 @@ fn generate_storage_entry_fns(
                 &self,
                 #(#key_args,)*
             ) -> #crate_path::storage::address::Address::<
-                #crate_path::storage::address::StaticStorageMapKey,
+                #keys_type,
                 #alias_storage_path,
                 #is_fetchable_type,
                 #is_defaultable_type,
@@ -168,14 +268,16 @@ fn generate_storage_entry_fns(
                 #crate_path::storage::address::Address::new_static(
                     #pallet_name,
                     #storage_name,
-                    vec![#(#key_impls,)*],
+                    #keys,
                     [#(#storage_hash,)*]
                 )
             }
         )
     });
 
-    let alias_types = keys.iter().map(|(_, alias_type, _)| alias_type);
+    let alias_types = keys
+        .iter()
+        .map(|MapEntryKey { alias_type_def, .. }| alias_type_def);
 
     let types_mod_ident = type_gen.types_mod_ident();
     // Generate type alias for the return type only, since
@@ -198,16 +300,20 @@ fn generate_storage_entry_fns(
     ))
 }
 
-fn primitive_type_alias(type_path: &TypePath) -> TokenStream {
+fn primitive_type_alias(
+    type_path: &TypePath,
+    settings: &scale_typegen::TypeGeneratorSettings,
+) -> TokenStream {
     // Vec<T> is cast to [T]
     if let Some(ty) = type_path.vec_type_param() {
+        let ty = ty.to_token_stream(settings);
         return quote!([#ty]);
     }
     // String is cast to str
     if type_path.is_string() {
         return quote!(::core::primitive::str);
     }
-    quote!(#type_path)
+    type_path.to_token_stream(settings)
 }
 
 #[cfg(test)]
@@ -231,7 +337,7 @@ mod tests {
                 name,
                 modifier: v15::StorageEntryModifier::Optional,
                 ty: v15::StorageEntryType::Map {
-                    hashers: vec![],
+                    hashers: vec![v15::StorageHasher::Blake2_128Concat],
                     key,
                     value: meta_type::<bool>(),
                 },
@@ -325,7 +431,7 @@ mod tests {
             let expected_storage_constructor = quote!(
                 fn #name_ident(
                     &self,
-                    _0: impl ::std::borrow::Borrow<types::#name_ident::Param0>,
+                    _0: impl ::core::borrow::Borrow<types::#name_ident::Param0>,
                 )
             );
             dbg!(&generated_str);

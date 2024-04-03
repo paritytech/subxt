@@ -2,11 +2,15 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use std::collections::HashMap;
-
 use super::TryFromError;
 use crate::Metadata;
+use alloc::borrow::ToOwned;
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::fmt::Write;
 use frame_metadata::{v14, v15};
+use hashbrown::HashMap;
 use scale_info::TypeDef;
 
 impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
@@ -31,27 +35,27 @@ fn v15_to_v14(mut metadata: v15::RuntimeMetadataV15) -> v14::RuntimeMetadataV14 
     let extrinsic_type = scale_info::Type {
         path: scale_info::Path {
             segments: vec![
-                "primitives".to_string(),
-                "runtime".to_string(),
-                "generic".to_string(),
-                "UncheckedExtrinsic".to_string(),
+                "primitives".to_owned(),
+                "runtime".to_owned(),
+                "generic".to_owned(),
+                "UncheckedExtrinsic".to_owned(),
             ],
         },
         type_params: vec![
             scale_info::TypeParameter::<scale_info::form::PortableForm> {
-                name: "Address".to_string(),
+                name: "Address".to_owned(),
                 ty: Some(metadata.extrinsic.address_ty),
             },
             scale_info::TypeParameter::<scale_info::form::PortableForm> {
-                name: "Call".to_string(),
+                name: "Call".to_owned(),
                 ty: Some(metadata.extrinsic.call_ty),
             },
             scale_info::TypeParameter::<scale_info::form::PortableForm> {
-                name: "Signature".to_string(),
+                name: "Signature".to_owned(),
                 ty: Some(metadata.extrinsic.signature_ty),
             },
             scale_info::TypeParameter::<scale_info::form::PortableForm> {
-                name: "Extra".to_string(),
+                name: "Extra".to_owned(),
                 ty: Some(metadata.extrinsic.extra_ty),
             },
         ],
@@ -312,9 +316,7 @@ fn generate_outer_enums(
 ) -> Result<v15::OuterEnums<scale_info::form::PortableForm>, TryFromError> {
     let find_type = |name: &str| {
         metadata.types.types.iter().find_map(|ty| {
-            let Some(ident) = ty.ty.path.ident() else {
-                return None;
-            };
+            let ident = ty.ty.path.ident()?;
 
             if ident != name {
                 return None;
@@ -342,7 +344,7 @@ fn generate_outer_enums(
         let Some(last) = call_path.last_mut() else {
             return Err(TryFromError::InvalidTypePath("RuntimeCall".into()));
         };
-        *last = "RuntimeError".to_string();
+        *last = "RuntimeError".to_owned();
         generate_outer_error_enum_type(metadata, call_path)
     };
 
@@ -364,11 +366,12 @@ fn generate_outer_error_enum_type(
         .pallets
         .iter()
         .filter_map(|pallet| {
-            let Some(error) = &pallet.error else {
-                return None;
-            };
+            let error = pallet.error.as_ref()?;
 
-            let path = format!("{}Error", pallet.name);
+            // Note:  using the `alloc::format!` macro like in `let path = format!("{}Error", pallet.name);`
+            // leads to linker errors about extern function `_Unwind_Resume` not being defined.
+            let mut path = String::new();
+            write!(path, "{}Error", pallet.name).expect("Cannot panic, qed;");
             let ty = error.ty.id.into();
 
             Some(scale_info::Variant {

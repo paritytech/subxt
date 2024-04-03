@@ -2,7 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use std::collections::HashMap;
+use alloc::vec::Vec;
+use core::mem;
+use hashbrown::HashMap;
 
 /// A minimal ordered map to let one search for
 /// things by key or get the values in insert order.
@@ -23,7 +25,7 @@ impl<K, V> Default for OrderedMap<K, V> {
 
 impl<K, V> OrderedMap<K, V>
 where
-    K: PartialEq + Eq + std::hash::Hash,
+    K: PartialEq + Eq + core::hash::Hash,
 {
     /// Create a new, empty [`OrderedMap`].
     pub fn new() -> Self {
@@ -47,8 +49,8 @@ where
     where
         F: FnMut(&V) -> bool,
     {
-        let values = std::mem::take(&mut self.values);
-        let map = std::mem::take(&mut self.map);
+        let values = mem::take(&mut self.values);
+        let map = mem::take(&mut self.map);
 
         // Filter the values, storing a map from old to new positions:
         let mut new_values = Vec::new();
@@ -78,8 +80,8 @@ where
     /// Get an item by its key.
     pub fn get_by_key<Q>(&self, key: &Q) -> Option<&V>
     where
-        K: std::borrow::Borrow<Q>,
-        Q: std::hash::Hash + Eq + ?Sized,
+        K: alloc::borrow::Borrow<Q>,
+        Q: core::hash::Hash + Eq + ?Sized,
     {
         self.map.get(key).and_then(|&v| self.values.get(v))
     }
@@ -107,7 +109,7 @@ where
 
 impl<K, V> FromIterator<(K, V)> for OrderedMap<K, V>
 where
-    K: PartialEq + Eq + std::hash::Hash,
+    K: PartialEq + Eq + core::hash::Hash,
 {
     fn from_iter<T: IntoIterator<Item = (K, V)>>(iter: T) -> Self {
         let mut map = OrderedMap::new();

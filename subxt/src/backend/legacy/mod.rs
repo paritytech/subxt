@@ -22,18 +22,56 @@ use std::task::{Context, Poll};
 // Expose the RPC methods.
 pub use rpc_methods::LegacyRpcMethods;
 
+/// Configure and build an [`LegacyBackend`].
+pub struct LegacyBackendBuilder<T> {
+    storage_page_size: u32,
+    _marker: std::marker::PhantomData<T>,
+}
+
+impl<T: Config> Default for LegacyBackendBuilder<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<T: Config> LegacyBackendBuilder<T> {
+    /// Create a new [`LegacyBackendBuilder`].
+    pub fn new() -> Self {
+        Self {
+            storage_page_size: 64,
+            _marker: std::marker::PhantomData,
+        }
+    }
+
+    /// Iterating over storage entries using the [`LegacyBackend`] requires
+    /// fetching entries in batches. This configures the number of entries that
+    /// we'll try to obtain in each batch (default: 64).
+    pub fn storage_page_size(mut self, storage_page_size: u32) -> Self {
+        self.storage_page_size = storage_page_size;
+        self
+    }
+
+    /// Given an [`RpcClient`] to use to make requests, this returns a [`LegacyBackend`],
+    /// which implements the [`Backend`] trait.
+    pub fn build(self, client: impl Into<RpcClient>) -> LegacyBackend<T> {
+        LegacyBackend {
+            storage_page_size: self.storage_page_size,
+            methods: LegacyRpcMethods::new(client.into()),
+        }
+    }
+}
+
 /// The legacy backend.
 #[derive(Debug, Clone)]
 pub struct LegacyBackend<T> {
+    storage_page_size: u32,
     methods: LegacyRpcMethods<T>,
 }
 
 impl<T: Config> LegacyBackend<T> {
-    /// Instantiate a new backend which uses the legacy API methods.
-    pub fn new(client: RpcClient) -> Self {
-        Self {
-            methods: LegacyRpcMethods::new(client),
-        }
+    /// Configure and construct an [`LegacyBackend`].
+    pub fn builder() -> LegacyBackendBuilder<T> {
+        LegacyBackendBuilder::new()
     }
 }
 
@@ -74,6 +112,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         let keys = StorageFetchDescendantKeysStream {
             at,
             key,
+            storage_page_size: self.storage_page_size,
             methods: self.methods.clone(),
             done: Default::default(),
             keys_fut: Default::default(),
@@ -104,6 +143,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         let keys_stream = StorageFetchDescendantKeysStream {
             at,
             key,
+            storage_page_size: self.storage_page_size,
             methods: self.methods.clone(),
             done: Default::default(),
             keys_fut: Default::default(),
@@ -141,20 +181,16 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
         let details = self.methods.state_get_runtime_version(None).await?;
-        Ok(RuntimeVersion {
-            spec_version: details.spec_version,
-            transaction_version: details.transaction_version,
-        })
+        Ok(RuntimeVersion::new(
+            details.spec_version,
+            details.transaction_version,
+        ))
     }
 
     async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
         let sub = self.methods.state_subscribe_runtime_version().await?;
-        let sub = sub.map(|r| {
-            r.map(|v| RuntimeVersion {
-                spec_version: v.spec_version,
-                transaction_version: v.transaction_version,
-            })
-        });
+        let sub =
+            sub.map(|r| r.map(|v| RuntimeVersion::new(v.spec_version, v.transaction_version)));
         Ok(StreamOf(Box::pin(sub)))
     }
 
@@ -332,9 +368,6 @@ where
     })
 }
 
-/// How many keys/values to fetch at once.
-const STORAGE_PAGE_SIZE: u32 = 32;
-
 /// This provides a stream of values given some prefix `key`. It
 /// internally manages pagination and such.
 #[allow(clippy::type_complexity)]
@@ -342,6 +375,8 @@ pub struct StorageFetchDescendantKeysStream<T: Config> {
     methods: LegacyRpcMethods<T>,
     key: Vec<u8>,
     at: T::Hash,
+    // How many entries to ask for each time.
+    storage_page_size: u32,
     // What key do we start paginating from? None = from the beginning.
     pagination_start_key: Option<Vec<u8>>,
     // Keys, future and cached:
@@ -392,12 +427,13 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
             let methods = this.methods.clone();
             let key = this.key.clone();
             let at = this.at;
+            let storage_page_size = this.storage_page_size;
             let pagination_start_key = this.pagination_start_key.take();
             let keys_fut = async move {
                 methods
                     .state_get_keys_paged(
                         &key,
-                        STORAGE_PAGE_SIZE,
+                        storage_page_size,
                         pagination_start_key.as_deref(),
                         Some(at),
                     )

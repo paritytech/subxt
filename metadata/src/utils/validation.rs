@@ -8,9 +8,10 @@ use crate::{
     CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, PalletMetadata,
     RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType,
 };
+use alloc::vec::Vec;
+use hashbrown::HashMap;
 use outer_enum_hashes::OuterEnumHashes;
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefVariant, Variant};
-use std::collections::HashMap;
 
 pub mod outer_enum_hashes;
 
@@ -34,7 +35,7 @@ enum TypeBeingHashed {
 
 /// Hashing function utilized internally.
 fn hash(data: &[u8]) -> Hash {
-    sp_core_hashing::twox_256(data)
+    sp_crypto_hashing::twox_256(data)
 }
 
 /// XOR two hashes together. Only use this when you don't care about the order

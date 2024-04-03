@@ -8,8 +8,9 @@ use crate::{
     ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
     StorageEntryType,
 };
+use alloc::collections::BTreeMap;
+use hashbrown::HashSet;
 use scale_info::TypeDef;
-use std::collections::{BTreeMap, HashSet};
 
 /// Collect all type IDs needed to represent the provided pallet.
 fn collect_pallet_types(pallet: &PalletMetadataInner, type_ids: &mut HashSet<u32>) {

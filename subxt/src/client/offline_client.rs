@@ -4,13 +4,13 @@
 
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    backend::RuntimeVersion, blocks::BlocksClient, constants::ConstantsClient,
-    events::EventsClient, runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient,
-    Config, Metadata,
+    blocks::BlocksClient, constants::ConstantsClient, events::EventsClient,
+    runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient, Config, Metadata,
 };
-use derivative::Derivative;
 
+use derive_where::derive_where;
 use std::sync::Arc;
+use subxt_core::client::{ClientState, RuntimeVersion};
 
 /// A trait representing a client that can perform
 /// offline-only actions.
@@ -21,6 +21,10 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     fn genesis_hash(&self) -> T::Hash;
     /// Return the provided [`RuntimeVersion`].
     fn runtime_version(&self) -> RuntimeVersion;
+    /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
+    fn client_state(&self) -> ClientState<T> {
+        ClientState::new(self.genesis_hash(), self.runtime_version(), self.metadata())
+    }
 
     /// Work with transactions.
     fn tx(&self) -> TxClient<T, Self> {
@@ -60,18 +64,9 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
 
 /// A client that is capable of performing offline-only operations.
 /// Can be constructed as long as you can populate the required fields.
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""), Clone(bound = ""))]
+#[derive_where(Debug, Clone)]
 pub struct OfflineClient<T: Config> {
-    inner: Arc<Inner<T>>,
-}
-
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""), Clone(bound = ""))]
-struct Inner<T: Config> {
-    genesis_hash: T::Hash,
-    runtime_version: RuntimeVersion,
-    metadata: Metadata,
+    inner: Arc<ClientState<T>>,
 }
 
 impl<T: Config> OfflineClient<T> {
@@ -83,27 +78,36 @@ impl<T: Config> OfflineClient<T> {
         metadata: impl Into<Metadata>,
     ) -> OfflineClient<T> {
         OfflineClient {
-            inner: Arc::new(Inner {
+            inner: Arc::new(ClientState::new(
                 genesis_hash,
                 runtime_version,
-                metadata: metadata.into(),
-            }),
+                metadata.into(),
+            )),
         }
     }
 
     /// Return the genesis hash.
     pub fn genesis_hash(&self) -> T::Hash {
-        self.inner.genesis_hash
+        self.inner.genesis_hash()
     }
 
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
-        self.inner.runtime_version.clone()
+        self.inner.runtime_version()
     }
 
     /// Return the [`Metadata`] used in this client.
     pub fn metadata(&self) -> Metadata {
-        self.inner.metadata.clone()
+        self.inner.metadata()
+    }
+
+    /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
+    pub fn client_state(&self) -> ClientState<T> {
+        ClientState::new(
+            self.inner.genesis_hash(),
+            self.inner.runtime_version(),
+            self.inner.metadata(),
+        )
     }
 
     // Just a copy of the most important trait methods so that people
@@ -144,6 +148,9 @@ impl<T: Config> OfflineClientT<T> for OfflineClient<T> {
     }
     fn metadata(&self) -> Metadata {
         self.metadata()
+    }
+    fn client_state(&self) -> ClientState<T> {
+        self.client_state()
     }
 }
 

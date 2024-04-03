@@ -4,12 +4,11 @@
 
 use crate::backend::{Backend, BackendExt, BlockRef};
 use crate::{client::OnlineClientT, error::Error, events::Events, Config};
-use derivative::Derivative;
+use derive_where::derive_where;
 use std::future::Future;
 
 /// A client for working with events.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct EventsClient<T, Client> {
     client: Client,
     _marker: std::marker::PhantomData<T>,
@@ -65,19 +64,15 @@ where
             };
 
             let event_bytes = get_event_bytes(client.backend(), block_ref.hash()).await?;
-            Ok(Events::new(
-                client.metadata(),
-                block_ref.hash(),
-                event_bytes,
-            ))
+            Ok(Events::decode_from(client.metadata(), event_bytes))
         }
     }
 }
 
 // The storage key needed to access events.
 fn system_events_key() -> [u8; 32] {
-    let a = sp_core_hashing::twox_128(b"System");
-    let b = sp_core_hashing::twox_128(b"Events");
+    let a = sp_crypto_hashing::twox_128(b"System");
+    let b = sp_crypto_hashing::twox_128(b"Events");
     let mut res = [0; 32];
     res[0..16].clone_from_slice(&a);
     res[16..32].clone_from_slice(&b);

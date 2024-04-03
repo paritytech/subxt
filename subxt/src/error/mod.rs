@@ -6,10 +6,8 @@
 
 mod dispatch_error;
 
-use core::fmt::Debug;
-
 crate::macros::cfg_unstable_light_client! {
-    pub use crate::client::LightClientError;
+    pub use subxt_lightclient::LightClientError;
 }
 
 // Re-export dispatch error types:
@@ -18,10 +16,10 @@ pub use dispatch_error::{
 };
 
 // Re-expose the errors we use from other crates here:
-pub use crate::config::ExtrinsicParamsError;
 pub use crate::metadata::Metadata;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
+pub use subxt_core::error::{ExtrinsicParamsError, MetadataError, StorageAddressError};
 pub use subxt_metadata::TryFromError as MetadataTryFromError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
@@ -82,6 +80,19 @@ pub enum Error {
     Other(String),
 }
 
+impl From<subxt_core::Error> for Error {
+    fn from(value: subxt_core::Error) -> Self {
+        match value {
+            subxt_core::Error::Codec(e) => Error::Codec(e),
+            subxt_core::Error::Metadata(e) => Error::Metadata(e),
+            subxt_core::Error::StorageAddress(e) => Error::StorageAddress(e),
+            subxt_core::Error::Decode(e) => Error::Decode(e),
+            subxt_core::Error::Encode(e) => Error::Encode(e),
+            subxt_core::Error::ExtrinsicParams(e) => Error::ExtrinsicParams(e),
+        }
+    }
+}
+
 impl<'a> From<&'a str> for Error {
     fn from(error: &'a str) -> Self {
         Error::Other(error.into())
@@ -97,6 +108,19 @@ impl From<String> for Error {
 impl From<std::convert::Infallible> for Error {
     fn from(value: std::convert::Infallible) -> Self {
         match value {}
+    }
+}
+
+impl From<scale_decode::visitor::DecodeError> for Error {
+    fn from(value: scale_decode::visitor::DecodeError) -> Self {
+        Error::Decode(value.into())
+    }
+}
+
+impl Error {
+    /// Checks whether the error was caused by a RPC re-connection.
+    pub fn is_disconnected_will_reconnect(&self) -> bool {
+        matches!(self, Error::Rpc(RpcError::DisconnectedWillReconnect(_)))
     }
 }
 
@@ -120,6 +144,9 @@ pub enum RpcError {
     /// The requested URL is insecure.
     #[error("RPC error: insecure URL: {0}")]
     InsecureUrl(String),
+    /// The connection was lost and automatically reconnected.
+    #[error("RPC error: the connection was lost `{0}`; reconnect automatically initiated")]
+    DisconnectedWillReconnect(String),
 }
 
 impl RpcError {
@@ -173,80 +200,4 @@ pub enum TransactionError {
     /// The transaction was dropped.
     #[error("The transaction was dropped: {0}")]
     Dropped(String),
-}
-
-/// Something went wrong trying to encode a storage address.
-#[derive(Clone, Debug, thiserror::Error)]
-#[non_exhaustive]
-pub enum StorageAddressError {
-    /// Storage map type must be a composite type.
-    #[error("Storage map type must be a composite type")]
-    MapTypeMustBeTuple,
-    /// Storage lookup does not have the expected number of keys.
-    #[error("Storage lookup requires {expected} keys but got {actual} keys")]
-    WrongNumberOfKeys {
-        /// The actual number of keys needed, based on the metadata.
-        actual: usize,
-        /// The number of keys provided in the storage address.
-        expected: usize,
-    },
-    /// This storage entry in the metadata does not have the correct number of hashers to fields.
-    #[error("Storage entry in metadata does not have the correct number of hashers to fields")]
-    WrongNumberOfHashers {
-        /// The number of hashers in the metadata for this storage entry.
-        hashers: usize,
-        /// The number of fields in the metadata for this storage entry.
-        fields: usize,
-    },
-}
-
-/// Something went wrong trying to access details in the metadata.
-#[derive(Clone, Debug, PartialEq, thiserror::Error)]
-#[non_exhaustive]
-pub enum MetadataError {
-    /// The DispatchError type isn't available in the metadata
-    #[error("The DispatchError type isn't available")]
-    DispatchErrorNotFound,
-    /// Type not found in metadata.
-    #[error("Type with ID {0} not found")]
-    TypeNotFound(u32),
-    /// Pallet not found (index).
-    #[error("Pallet with index {0} not found")]
-    PalletIndexNotFound(u8),
-    /// Pallet not found (name).
-    #[error("Pallet with name {0} not found")]
-    PalletNameNotFound(String),
-    /// Variant not found.
-    #[error("Variant with index {0} not found")]
-    VariantIndexNotFound(u8),
-    /// Constant not found.
-    #[error("Constant with name {0} not found")]
-    ConstantNameNotFound(String),
-    /// Call not found.
-    #[error("Call with name {0} not found")]
-    CallNameNotFound(String),
-    /// Runtime trait not found.
-    #[error("Runtime trait with name {0} not found")]
-    RuntimeTraitNotFound(String),
-    /// Runtime method not found.
-    #[error("Runtime method with name {0} not found")]
-    RuntimeMethodNotFound(String),
-    /// Call type not found in metadata.
-    #[error("Call type not found in pallet with index {0}")]
-    CallTypeNotFoundInPallet(u8),
-    /// Event type not found in metadata.
-    #[error("Event type not found in pallet with index {0}")]
-    EventTypeNotFoundInPallet(u8),
-    /// Storage details not found in metadata.
-    #[error("Storage details not found in pallet with name {0}")]
-    StorageNotFoundInPallet(String),
-    /// Storage entry not found.
-    #[error("Storage entry {0} not found")]
-    StorageEntryNotFound(String),
-    /// The generated interface used is not compatible with the node.
-    #[error("The generated code is not compatible with the node")]
-    IncompatibleCodegen,
-    /// Custom value not found.
-    #[error("Custom value with name {0} not found")]
-    CustomValueNameNotFound(String),
 }

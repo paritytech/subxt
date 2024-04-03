@@ -6,8 +6,10 @@
 use codec::Encode;
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
+use core::str::FromStr;
+use derive_more::{Display, From};
 use hex::FromHex;
-use secp256k1::{ecdsa::RecoverableSignature, Message, SecretKey, SECP256K1};
+use secp256k1::{ecdsa::RecoverableSignature, Message, Secp256k1, SecretKey};
 use secrecy::ExposeSecret;
 
 const SEED_LENGTH: usize = 32;
@@ -68,7 +70,7 @@ impl Keypair {
             let seed = Seed::from_hex(hex_str)?;
             Self::from_seed(seed)?
         } else {
-            let phrase = bip39::Mnemonic::parse(phrase.expose_secret().as_str())?;
+            let phrase = bip39::Mnemonic::from_str(phrase.expose_secret().as_str())?;
             let pass_str = password.as_ref().map(|p| p.expose_secret().as_str());
             Self::from_phrase(&phrase, pass_str)?
         };
@@ -91,8 +93,9 @@ impl Keypair {
     /// keypair.sign(b"Hello world!");
     /// ```
     pub fn from_phrase(mnemonic: &bip39::Mnemonic, password: Option<&str>) -> Result<Self, Error> {
-        let big_seed = seed_from_entropy(&mnemonic.to_entropy(), password.unwrap_or(""))
-            .ok_or(Error::InvalidSeed)?;
+        let (arr, len) = mnemonic.to_entropy_array();
+        let big_seed =
+            seed_from_entropy(&arr[0..len], password.unwrap_or("")).ok_or(Error::InvalidSeed)?;
 
         let seed: Seed = big_seed[..SEED_LENGTH]
             .try_into()
@@ -109,7 +112,8 @@ impl Keypair {
     pub fn from_seed(seed: Seed) -> Result<Self, Error> {
         let secret = SecretKey::from_slice(&seed).map_err(|_| Error::InvalidSeed)?;
         Ok(Self(secp256k1::Keypair::from_secret_key(
-            SECP256K1, &secret,
+            &Secp256k1::signing_only(),
+            &secret,
         )))
     }
 
@@ -140,7 +144,7 @@ impl Keypair {
                 DeriveJunction::Soft(_) => return Err(Error::SoftJunction),
                 DeriveJunction::Hard(junction_bytes) => {
                     acc = ("Secp256k1HDKD", acc, junction_bytes)
-                        .using_encoded(sp_core_hashing::blake2_256)
+                        .using_encoded(sp_crypto_hashing::blake2_256)
                 }
             }
         }
@@ -157,13 +161,13 @@ impl Keypair {
     /// Sign some message. These bytes can be used directly in a Substrate `MultiSignature::Ecdsa(..)`.
     pub fn sign(&self, message: &[u8]) -> Signature {
         // From sp_core::ecdsa::sign:
-        let message_hash = sp_core_hashing::blake2_256(message);
+        let message_hash = sp_crypto_hashing::blake2_256(message);
         // From sp_core::ecdsa::sign_prehashed:
         let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
         let recsig: RecoverableSignature =
-            SECP256K1.sign_ecdsa_recoverable(&wrapped, &self.0.secret_key());
+            Secp256k1::signing_only().sign_ecdsa_recoverable(&wrapped, &self.0.secret_key());
         // From sp_core::ecdsa's `impl From<RecoverableSignature> for Signature`:
-        let (recid, sig) = recsig.serialize_compact();
+        let (recid, sig): (_, [u8; 64]) = recsig.serialize_compact();
         let mut signature_bytes: [u8; 65] = [0; 65];
         signature_bytes[..64].copy_from_slice(&sig);
         signature_bytes[64] = (recid.to_i32() & 0xFF) as u8;
@@ -190,33 +194,41 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
     let Ok(public) = secp256k1::PublicKey::from_slice(&pubkey.0) else {
         return false;
     };
-    let message_hash = sp_core_hashing::blake2_256(message.as_ref());
+    let message_hash = sp_crypto_hashing::blake2_256(message.as_ref());
     let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
-    signature.verify(&wrapped, &public).is_ok()
+
+    Secp256k1::verification_only()
+        .verify_ecdsa(&wrapped, &signature, &public)
+        .is_ok()
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug, PartialEq, thiserror::Error)]
+#[derive(Debug, PartialEq, Display, From)]
 pub enum Error {
     /// Invalid seed.
-    #[error("Invalid seed (was it the wrong length?)")]
+    #[display(fmt = "Invalid seed (was it the wrong length?)")]
+    #[from(ignore)]
     InvalidSeed,
     /// Invalid seed.
-    #[error("Invalid seed for ECDSA, contained soft junction")]
+    #[display(fmt = "Invalid seed for ECDSA, contained soft junction")]
+    #[from(ignore)]
     SoftJunction,
     /// Invalid phrase.
-    #[error("Cannot parse phrase: {0}")]
-    Phrase(#[from] bip39::Error),
+    #[display(fmt = "Cannot parse phrase: {_0}")]
+    Phrase(bip39::Error),
     /// Invalid hex.
-    #[error("Cannot parse hex string: {0}")]
-    Hex(#[from] hex::FromHexError),
+    #[display(fmt = "Cannot parse hex string: {_0}")]
+    Hex(hex::FromHexError),
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
 
 /// Dev accounts, helpful for testing but not to be used in production,
 /// since the secret keys are known.
 pub mod dev {
     use super::*;
-    use std::str::FromStr;
+    use core::str::FromStr;
 
     once_static_cloned! {
         /// Equivalent to `{DEV_PHRASE}//Alice`.
@@ -260,9 +272,9 @@ pub mod dev {
 mod subxt_compat {
     use super::*;
 
-    use subxt::config::Config;
-    use subxt::tx::Signer as SignerT;
-    use subxt::utils::{AccountId32, MultiAddress, MultiSignature};
+    use subxt_core::config::Config;
+    use subxt_core::tx::Signer as SignerT;
+    use subxt_core::utils::{AccountId32, MultiAddress, MultiSignature};
 
     impl From<Signature> for MultiSignature {
         fn from(value: Signature) -> Self {
@@ -287,7 +299,7 @@ mod subxt_compat {
         /// We often want this type, and using this method avoids any
         /// ambiguous type resolution issues.
         pub fn to_account_id(self) -> AccountId32 {
-            AccountId32(sp_core_hashing::blake2_256(&self.0))
+            AccountId32(sp_crypto_hashing::blake2_256(&self.0))
         }
         /// A shortcut to obtain a [`MultiAddress`] from a [`PublicKey`].
         /// We often want this type, and using this method avoids any

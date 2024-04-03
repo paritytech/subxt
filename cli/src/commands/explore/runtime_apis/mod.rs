@@ -19,7 +19,7 @@ use subxt_metadata::RuntimeApiMetadata;
 
 /// Runs for a specified runtime API trait.
 /// Cases to consider:
-/// ```norun
+/// ```txt
 /// method is:
 ///   None => Show pallet docs + available methods
 ///   Some (invalid) => Show Error + available methods
@@ -161,9 +161,8 @@ pub async fn run<'a>(
             {value_str}
             "}?;
             // encode, then decode. This ensures that the scale value is of the correct shape for the param:
-            let bytes = value.encode_as_type(ty.ty, metadata.types())?;
-            let value = Value::decode_as_type(&mut &bytes[..], ty.ty, metadata.types())?
-                .map_context(|_| ());
+            let bytes = value.encode_as_type(&ty.ty, metadata.types())?;
+            let value = Value::decode_as_type(&mut &bytes[..], &ty.ty, metadata.types())?;
             Ok(value)
         })
         .collect::<color_eyre::Result<Vec<Value>>>()?;

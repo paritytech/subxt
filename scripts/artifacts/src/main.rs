@@ -10,7 +10,7 @@ use substrate_runner::SubstrateNode;
 /// Run with `cargo run --bin artifacts` from the root of the repository.
 fn main() {
     let mut node_builder = SubstrateNode::builder();
-    node_builder.binary_paths(["substrate-node", "substrate"]);
+    node_builder.polkadot();
 
     // Spawn the node and retrieve a ws URL to it:
     let proc = node_builder
@@ -37,13 +37,13 @@ fn main() {
 
     // Generate a metadata file that only contains a few pallets that we need for our examples.
     run_cmd(
-        r#"cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets "Balances,Staking,System,Multisig,Timestamp,ParaInherent""#,
+        "cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets Balances,Staking,System,Multisig,Timestamp,ParaInherent",
         Some("artifacts/polkadot_metadata_small.scale"),
     );
 
     // Generate a metadata file that contains no pallets
     run_cmd(
-        r#"cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets """#,
+        "cargo run --bin subxt metadata --file artifacts/polkadot_metadata_full.scale --pallets \"\"",
         Some("artifacts/polkadot_metadata_tiny.scale"),
     );
 

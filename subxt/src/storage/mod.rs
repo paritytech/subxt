@@ -4,25 +4,23 @@
 
 //! Types associated with accessing and working with storage items.
 
-mod storage_address;
 mod storage_client;
 mod storage_type;
 
-pub mod utils;
-
 pub use storage_client::StorageClient;
 
-pub use storage_type::Storage;
+pub use storage_type::{Storage, StorageKeyValuePair};
 
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.
 pub mod address {
-    pub use super::storage_address::{
-        dynamic, make_static_storage_map_key, Address, DynamicAddress, StaticStorageMapKey,
-        StorageAddress, Yes,
+    pub use subxt_core::storage::address::{
+        dynamic, Address, DynamicAddress, StaticStorageKey, StorageAddress, StorageKey,
     };
 }
 
+pub use subxt_core::storage::StorageKey;
+
 // For consistency with other modules, also expose
 // the basic address stuff at the root of the module.
-pub use storage_address::{dynamic, Address, DynamicAddress, StorageAddress};
+pub use address::{dynamic, Address, DynamicAddress, StorageAddress};

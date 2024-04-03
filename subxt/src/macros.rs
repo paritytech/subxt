@@ -52,7 +52,21 @@ macro_rules! cfg_jsonrpsee_web {
 	}
 }
 
-pub(crate) use {cfg_feature, cfg_jsonrpsee, cfg_substrate_compat, cfg_unstable_light_client};
+#[allow(unused)]
+macro_rules! cfg_reconnecting_rpc_client {
+	($($item:item)*) => {
+		$(
+			#[cfg(feature = "unstable-reconnecting-rpc-client")]
+			#[cfg_attr(docsrs, doc(cfg(feature = "unstable-reconnecting-rpc-client")))]
+			$item
+		)*
+	}
+}
+
+pub(crate) use {
+    cfg_feature, cfg_jsonrpsee, cfg_reconnecting_rpc_client, cfg_substrate_compat,
+    cfg_unstable_light_client,
+};
 
 // Only used by light-client.
 #[allow(unused)]

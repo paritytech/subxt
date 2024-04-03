@@ -15,6 +15,7 @@ description = "Command line utilities for working with subxt codegen"
 [[bin]]
 name = "subxt"
 path = "src/main.rs"
+doc = false
 
 [lints]
 workspace = true

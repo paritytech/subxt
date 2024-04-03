@@ -49,7 +49,7 @@
 //! // A static query capable of iterating over accounts:
 //! let storage_query = polkadot::storage().system().account_iter();
 //! // A dynamic query to do the same:
-//! let storage_query = subxt::dynamic::storage("System", "Account", Vec::<u8>::new());
+//! let storage_query = subxt::dynamic::storage("System", "Account", ());
 //! ```
 //!
 //! Some storage entries are maps with multiple keys. As an example, we might end up with

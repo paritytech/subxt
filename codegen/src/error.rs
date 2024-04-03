@@ -39,15 +39,21 @@ pub enum CodegenError {
     #[error("Call variant for type {0} must have all named fields. Make sure you are providing a valid substrate-based metadata")]
     InvalidCallVariant(u32),
     /// Type should be an variant/enum.
-    #[error(
-        "{0} type should be an variant/enum type. Make sure you are providing a valid substrate-based metadata"
-    )]
+    #[error("{0} type should be an variant/enum type. Make sure you are providing a valid substrate-based metadata")]
     InvalidType(String),
     /// Extrinsic call type could not be found.
-    #[error(
-        "Extrinsic call type could not be found. Make sure you are providing a valid substrate-based metadata"
-    )]
+    #[error("Extrinsic call type could not be found. Make sure you are providing a valid substrate-based metadata")]
     MissingCallType,
+    /// There are too many or too few hashers.
+    #[error("Could not generate functions for storage entry {storage_entry_name}. There are {key_count} keys, but only {hasher_count} hashers. The number of hashers must equal the number of keys or be exactly 1.")]
+    InvalidStorageHasherCount {
+        /// The name of the storage entry
+        storage_entry_name: String,
+        /// Number of keys
+        key_count: usize,
+        /// Number of hashers
+        hasher_count: usize,
+    },
     /// Cannot generate types.
     #[error("Type Generation failed: {0}")]
     TypeGeneration(#[from] TypegenError),

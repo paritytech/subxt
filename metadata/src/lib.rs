@@ -14,14 +14,19 @@
 //! 2. Obtaining [`frame_metadata::RuntimeMetadataPrefixed`], and then
 //!    using `.try_into()` to convert it into [`Metadata`].
 
+#![cfg_attr(not(feature = "std"), no_std)]
 #![deny(missing_docs)]
+
+extern crate alloc;
 
 mod from_into;
 mod utils;
 
+use alloc::string::String;
+use alloc::sync::Arc;
+use alloc::vec::Vec;
+use hashbrown::HashMap;
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
-use std::collections::HashMap;
-use std::sync::Arc;
 use utils::variant_index::VariantIndex;
 use utils::{ordered_map::OrderedMap, validation::outer_enum_hashes::OuterEnumHashes};
 
@@ -165,45 +170,6 @@ impl Metadata {
             id,
             &OuterEnumHashes::empty(),
         ))
-    }
-
-    /// Ensure that every unique type we'll be generating or referring to also has a
-    /// unique path, so that types with matching paths don't end up overwriting each other
-    /// in the codegen. We ignore any types with generics; Subxt actually endeavours to
-    /// de-duplicate those into single types with a generic.
-    pub fn ensure_unique_type_paths(&mut self) {
-        let mut visited_path_counts = HashMap::<Vec<String>, usize>::new();
-        for ty in self.types.types.iter_mut() {
-            // Ignore types without a path (ie prelude types).
-            if ty.ty.path.namespace().is_empty() {
-                continue;
-            }
-
-            let has_valid_type_params = ty.ty.type_params.iter().any(|tp| tp.ty.is_some());
-
-            // Ignore types which have generic params that the type generation will use.
-            // Ordinarily we'd expect that any two types with identical paths must be parameterized
-            // in order to share the path. However scale-info doesn't understand all forms of generics
-            // properly I think (eg generics that have associated types that can differ), and so in
-            // those cases we need to fix the paths for Subxt to generate correct code.
-            if has_valid_type_params {
-                continue;
-            }
-
-            // Count how many times we've seen the same path already.
-            let visited_count = visited_path_counts
-                .entry(ty.ty.path.segments.clone())
-                .or_default();
-            *visited_count += 1;
-
-            // alter the type so that if it's been seen more than once, we append a number to
-            // its name to ensure that every unique type has a unique path, too.
-            if *visited_count > 1 {
-                if let Some(name) = ty.ty.path.segments.last_mut() {
-                    *name = format!("{name}{visited_count}");
-                }
-            }
-        }
     }
 }
 
@@ -468,6 +434,35 @@ pub enum StorageHasher {
     Twox64Concat,
     /// Identity hashing (no hashing).
     Identity,
+}
+
+impl StorageHasher {
+    /// The hash produced by a [`StorageHasher`] can have these two components, in order:
+    ///
+    /// 1. A fixed size hash. (not present for [`StorageHasher::Identity`]).
+    /// 2. The SCALE encoded key that was used as an input to the hasher (only present for
+    /// [`StorageHasher::Twox64Concat`], [`StorageHasher::Blake2_128Concat`] or [`StorageHasher::Identity`]).
+    ///
+    /// This function returns the number of bytes used to represent the first of these.
+    pub fn len_excluding_key(&self) -> usize {
+        match self {
+            StorageHasher::Blake2_128Concat => 16,
+            StorageHasher::Twox64Concat => 8,
+            StorageHasher::Blake2_128 => 16,
+            StorageHasher::Blake2_256 => 32,
+            StorageHasher::Twox128 => 16,
+            StorageHasher::Twox256 => 32,
+            StorageHasher::Identity => 0,
+        }
+    }
+
+    /// Returns true if the key used to produce the hash is appended to the hash itself.
+    pub fn ends_with_key(&self) -> bool {
+        matches!(
+            self,
+            StorageHasher::Blake2_128Concat | StorageHasher::Twox64Concat | StorageHasher::Identity
+        )
+    }
 }
 
 /// Is the storage entry optional, or does it have a default value.

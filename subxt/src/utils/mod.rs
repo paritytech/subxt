@@ -4,50 +4,19 @@
 
 //! Miscellaneous utility helpers.
 
-mod account_id;
-pub mod bits;
-mod era;
-mod multi_address;
-mod multi_signature;
-mod static_type;
-mod unchecked_extrinsic;
-mod wrapper_opaque;
-
-use crate::error::RpcError;
-use crate::Error;
-use codec::{Compact, Decode, Encode};
-use derivative::Derivative;
+use crate::macros::cfg_jsonrpsee;
+use crate::{error::RpcError, Error};
 use url::Url;
 
-pub use account_id::AccountId32;
-pub use era::Era;
-pub use multi_address::MultiAddress;
-pub use multi_signature::MultiSignature;
-pub use static_type::Static;
-pub use unchecked_extrinsic::UncheckedExtrinsic;
-pub use wrapper_opaque::WrapperKeepOpaque;
+pub use subxt_core::utils::{
+    bits, strip_compact_prefix, to_hex, AccountId32, Encoded, Era, KeyedVec, MultiAddress,
+    MultiSignature, PhantomDataSendSync, Static, UncheckedExtrinsic, WrapperKeepOpaque, Yes, H160,
+    H256, H512,
+};
 
-// Used in codegen
-#[doc(hidden)]
-pub use primitive_types::{H160, H256, H512};
-
-/// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
-/// the transaction payload
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Encoded(pub Vec<u8>);
-
-impl codec::Encode for Encoded {
-    fn encode(&self) -> Vec<u8> {
-        self.0.to_owned()
-    }
-}
-
-/// Decodes a compact encoded value from the beginning of the provided bytes,
-/// returning the value and any remaining bytes.
-pub(crate) fn strip_compact_prefix(bytes: &[u8]) -> Result<(u64, &[u8]), codec::Error> {
-    let cursor = &mut &*bytes;
-    let val = <Compact<u64>>::decode(cursor)?;
-    Ok((val.0, *cursor))
+cfg_jsonrpsee! {
+    mod fetch_chain_spec;
+    pub use fetch_chain_spec::{fetch_chainspec_from_rpc_node, FetchChainspecError};
 }
 
 /// A URL is considered secure if it uses a secure scheme ("https" or "wss") or is referring to localhost.
@@ -74,33 +43,3 @@ pub fn validate_url_is_secure(url: &str) -> Result<(), Error> {
         Ok(())
     }
 }
-
-/// A version of [`std::marker::PhantomData`] that is also Send and Sync (which is fine
-/// because regardless of the generic param, it is always possible to Send + Sync this
-/// 0 size type).
-#[derive(Derivative, Encode, Decode, scale_info::TypeInfo)]
-#[derivative(
-    Clone(bound = ""),
-    PartialEq(bound = ""),
-    Debug(bound = ""),
-    Eq(bound = ""),
-    Default(bound = ""),
-    Hash(bound = "")
-)]
-#[scale_info(skip_type_params(T))]
-#[doc(hidden)]
-pub struct PhantomDataSendSync<T>(core::marker::PhantomData<T>);
-
-impl<T> PhantomDataSendSync<T> {
-    pub(crate) fn new() -> Self {
-        Self(core::marker::PhantomData)
-    }
-}
-
-unsafe impl<T> Send for PhantomDataSendSync<T> {}
-unsafe impl<T> Sync for PhantomDataSendSync<T> {}
-
-/// This represents a key-value collection and is SCALE compatible
-/// with collections like BTreeMap. This has the same type params
-/// as `BTreeMap` which allows us to easily swap the two during codegen.
-pub type KeyedVec<K, V> = Vec<(K, V)>;
