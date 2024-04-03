@@ -8,7 +8,7 @@ use crate::{
         runtime_types::{self, sp_weights::weight_v2::Weight},
         sudo,
     },
-    submit_tx_wait_for_finalized_success, subxt_test, test_context,
+    subxt_test, test_context,
 };
 use subxt_signer::sr25519::dev;
 
@@ -34,7 +34,10 @@ async fn test_sudo() -> Result<(), subxt::Error> {
         .create_signed(&tx, &alice, Default::default())
         .await?;
 
-    let found_event = submit_tx_wait_for_finalized_success(&signed_extrinsic)
+    let found_event = signed_extrinsic
+        .submit_and_watch()
+        .await?
+        .wait_for_finalized_success()
         .await?
         .has::<sudo::events::Sudid>()?;
 
@@ -67,7 +70,10 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
         .create_signed(&tx, &alice, Default::default())
         .await?;
 
-    let found_event = submit_tx_wait_for_finalized_success(&signed_extrinsic)
+    let found_event = signed_extrinsic
+        .submit_and_watch()
+        .await?
+        .wait_for_finalized_success()
         .await?
         .has::<sudo::events::Sudid>()?;
 

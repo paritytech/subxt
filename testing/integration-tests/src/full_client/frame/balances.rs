@@ -4,7 +4,7 @@
 
 use crate::{
     node_runtime::{self, balances, runtime_types, system},
-    submit_tx_wait_for_finalized_success, subxt_test, test_context,
+    subxt_test, test_context,
 };
 use codec::Decode;
 use subxt::{
@@ -49,7 +49,13 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
         .tx()
         .create_signed(&tx, &alice, Default::default())
         .await?;
-    let events = submit_tx_wait_for_finalized_success(&signed_extrinsic).await?;
+
+    let events = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await?;
 
     let event = events
         .find_first::<balances::events::Transfer>()
@@ -238,7 +244,12 @@ async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
             .create_signed(&tx, &alice, Default::default())
             .await?;
 
-        submit_tx_wait_for_finalized_success(&signed_extrinsic).await?;
+        signed_extrinsic
+            .submit_and_watch()
+            .await
+            .unwrap()
+            .wait_for_finalized_success()
+            .await?;
     }
 
     let bob_post = api
@@ -285,7 +296,12 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
         .tx()
         .create_signed(&tx, &bob_signer, Default::default())
         .await?;
-    submit_tx_wait_for_finalized_success(&signed_extrinsic)
+
+    signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
         .await?
         .find_first::<system::events::ExtrinsicSuccess>()?
         .expect("No ExtrinsicSuccess Event found");
@@ -332,7 +348,11 @@ async fn transfer_error() {
         .create_signed(&to_bob_tx, &alice, Default::default())
         .await
         .unwrap();
-    submit_tx_wait_for_finalized_success(&signed_extrinsic)
+    signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
         .await
         .unwrap();
 
@@ -344,7 +364,12 @@ async fn transfer_error() {
         .await
         .unwrap();
 
-    let res = submit_tx_wait_for_finalized_success(&signed_extrinsic).await;
+    let res = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await;
 
     assert!(
         matches!(
@@ -374,7 +399,11 @@ async fn transfer_implicit_subscription() {
         .await
         .unwrap();
 
-    let event = submit_tx_wait_for_finalized_success(&signed_extrinsic)
+    let event = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
         .await
         .unwrap()
         .find_first::<balances::events::Transfer>()

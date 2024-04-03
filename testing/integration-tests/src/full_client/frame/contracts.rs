@@ -9,8 +9,7 @@ use crate::{
         runtime_types::{pallet_contracts::wasm::Determinism, sp_weights::weight_v2::Weight},
         system,
     },
-    submit_tx_wait_for_finalized_success, subxt_test, test_context, TestClient, TestConfig,
-    TestContext,
+    subxt_test, test_context, TestClient, TestConfig, TestContext,
 };
 use subxt::ext::futures::StreamExt;
 use subxt::{tx::TxProgress, utils::MultiAddress, Config, Error};
@@ -60,7 +59,13 @@ impl ContractsTestContext {
             .tx()
             .create_signed(&upload_tx, &self.signer, Default::default())
             .await?;
-        let events = submit_tx_wait_for_finalized_success(&signed_extrinsic).await?;
+
+        let events = signed_extrinsic
+            .submit_and_watch()
+            .await
+            .unwrap()
+            .wait_for_finalized_success()
+            .await?;
 
         let code_stored = events
             .find_first::<events::CodeStored>()?
@@ -89,7 +94,13 @@ impl ContractsTestContext {
             .tx()
             .create_signed(&instantiate_tx, &self.signer, Default::default())
             .await?;
-        let events = submit_tx_wait_for_finalized_success(&signed_extrinsic).await?;
+
+        let events = signed_extrinsic
+            .submit_and_watch()
+            .await
+            .unwrap()
+            .wait_for_finalized_success()
+            .await?;
 
         let code_stored = events
             .find_first::<events::CodeStored>()?
@@ -130,7 +141,12 @@ impl ContractsTestContext {
             .tx()
             .create_signed(&instantiate_tx, &self.signer, Default::default())
             .await?;
-        let result = submit_tx_wait_for_finalized_success(&signed_extrinsic).await?;
+        let result = signed_extrinsic
+            .submit_and_watch()
+            .await
+            .unwrap()
+            .wait_for_finalized_success()
+            .await?;
 
         tracing::info!("Instantiate result: {:?}", result);
         let instantiated = result

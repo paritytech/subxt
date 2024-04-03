@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    submit_tx_wait_for_finalized_success, subxt_test, test_context,
+    subxt_test, test_context,
     utils::{node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};
@@ -136,7 +136,11 @@ async fn transaction_validation() {
         .await
         .expect("validation failed");
 
-    submit_tx_wait_for_finalized_success(&signed_extrinsic)
+    signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
         .await
         .unwrap();
 }
@@ -199,7 +203,11 @@ async fn external_signing() {
         .sign_with_address_and_signature(&alice.public_key().into(), &signature.into());
 
     // And now submit it.
-    submit_tx_wait_for_finalized_success(&extrinsic)
+    extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
         .await
         .unwrap();
 }
@@ -255,7 +263,11 @@ async fn decode_a_module_error() {
         .await
         .unwrap();
 
-    let err = submit_tx_wait_for_finalized_success(&signed_extrinsic)
+    let err = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
         .await
         .expect_err("an 'unknown asset' error");
 

@@ -11,7 +11,7 @@ use crate::{
         },
         staking,
     },
-    submit_tx_wait_for_finalized_success, subxt_test, test_context,
+    subxt_test, test_context,
 };
 use assert_matches::assert_matches;
 use subxt::error::{DispatchError, Error};
@@ -50,7 +50,12 @@ async fn validate_with_stash_account() {
         .create_signed(&tx, &alice_stash, Default::default())
         .await
         .unwrap();
-    submit_tx_wait_for_finalized_success(&signed_extrinsic)
+
+    signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
         .await
         .expect("should be successful");
 }
@@ -70,7 +75,13 @@ async fn validate_not_possible_for_controller_account() -> Result<(), Error> {
         .tx()
         .create_signed(&tx, &alice, Default::default())
         .await?;
-    let announce_validator = submit_tx_wait_for_finalized_success(&signed_extrinsic).await;
+
+    let announce_validator = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await;
 
     assert_matches!(announce_validator, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();
@@ -97,7 +108,12 @@ async fn nominate_with_stash_account() {
         .create_signed(&tx, &alice_stash, Default::default())
         .await
         .unwrap();
-    submit_tx_wait_for_finalized_success(&signed_extrinsic)
+
+    signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
         .await
         .expect("should be successful");
 }
@@ -119,7 +135,12 @@ async fn nominate_not_possible_for_controller_account() -> Result<(), Error> {
         .create_signed(&tx, &alice, Default::default())
         .await
         .unwrap();
-    let nomination = submit_tx_wait_for_finalized_success(&signed_extrinsic).await;
+    let nomination = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await;
 
     assert_matches!(nomination, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();
@@ -147,7 +168,12 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
         .tx()
         .create_signed(&nominate_tx, &alice_stash, Default::default())
         .await?;
-    submit_tx_wait_for_finalized_success(&signed_extrinsic).await?;
+    signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await?;
 
     let ledger_addr = node_runtime::storage()
         .staking()
@@ -167,7 +193,13 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
         .tx()
         .create_signed(&chill_tx, &alice, Default::default())
         .await?;
-    let chill = submit_tx_wait_for_finalized_success(&signed_extrinsic).await;
+
+    let chill = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await;
 
     assert_matches!(chill, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();
@@ -179,7 +211,10 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
         .tx()
         .create_signed(&chill_tx, &alice_stash, Default::default())
         .await?;
-    let is_chilled = submit_tx_wait_for_finalized_success(&signed_extrinsic)
+    let is_chilled = signed_extrinsic
+        .submit_and_watch()
+        .await?
+        .wait_for_finalized_success()
         .await?
         .has::<staking::events::Chilled>()?;
 
@@ -203,15 +238,23 @@ async fn tx_bond() -> Result<(), Error> {
         .tx()
         .create_signed(&bond_tx, &alice, Default::default())
         .await?;
-    let bond = submit_tx_wait_for_finalized_success(&signed_extrinsic).await;
-
+    let bond = signed_extrinsic
+        .submit_and_watch()
+        .await?
+        .wait_for_finalized_success()
+        .await;
     assert!(bond.is_ok());
 
     let signed_extrinsic = api
         .tx()
         .create_signed(&bond_tx, &alice, Default::default())
         .await?;
-    let bond_again = submit_tx_wait_for_finalized_success(&signed_extrinsic).await;
+
+    let bond_again = signed_extrinsic
+        .submit_and_watch()
+        .await?
+        .wait_for_finalized_success()
+        .await;
 
     assert_matches!(bond_again, Err(Error::Runtime(DispatchError::Module(err))) => {
         let details = err.details().unwrap();

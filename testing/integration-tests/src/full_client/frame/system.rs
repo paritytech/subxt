@@ -4,7 +4,7 @@
 
 use crate::{
     node_runtime::{self, system},
-    submit_tx_wait_for_finalized_success, subxt_test, test_context,
+    subxt_test, test_context,
 };
 use assert_matches::assert_matches;
 use subxt_signer::sr25519::dev;
@@ -47,7 +47,10 @@ async fn tx_remark_with_event() -> Result<(), subxt::Error> {
         .create_signed(&tx, &alice, Default::default())
         .await?;
 
-    let found_event = submit_tx_wait_for_finalized_success(&signed_extrinsic)
+    let found_event = signed_extrinsic
+        .submit_and_watch()
+        .await?
+        .wait_for_finalized_success()
         .await?
         .has::<system::events::Remarked>()?;
 

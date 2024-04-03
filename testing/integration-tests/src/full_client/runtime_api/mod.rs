@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, submit_tx_wait_for_finalized_success, subxt_test, test_context};
+use crate::{node_runtime, subxt_test, test_context};
 use codec::Encode;
 use subxt::utils::AccountId32;
 use subxt_signer::sr25519::dev;
@@ -33,7 +33,12 @@ async fn account_nonce() -> Result<(), subxt::Error> {
         .tx()
         .create_signed(&remark_tx, &alice, Default::default())
         .await?;
-    submit_tx_wait_for_finalized_success(&signed_extrinsic).await?;
+
+    signed_extrinsic
+        .submit_and_watch()
+        .await?
+        .wait_for_finalized_success()
+        .await?;
 
     let runtime_api_call = node_runtime::apis()
         .account_nonce_api()
