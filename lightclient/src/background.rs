@@ -108,7 +108,7 @@ impl BackgroundTaskHandle {
 /// coming to/from Smoldot.
 #[allow(clippy::type_complexity)]
 pub struct BackgroundTask<TPlatform: PlatformRef, TChain> {
-    channels: BackgroundTaskChannels,
+    channels: BackgroundTaskChannels<TPlatform>,
     data: BackgroundTaskData<TPlatform, TChain>,
 }
 
@@ -117,7 +117,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     pub(crate) fn new(
         client: SharedClient<TPlatform, TChain>,
         chain_id: smoldot_light::ChainId,
-        from_back: smoldot_light::JsonRpcResponses,
+        from_back: smoldot_light::JsonRpcResponses<TPlatform>,
     ) -> (BackgroundTask<TPlatform, TChain>, BackgroundTaskHandle) {
         let (tx, rx) = mpsc::unbounded_channel();
 
@@ -191,11 +191,11 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     }
 }
 
-struct BackgroundTaskChannels {
+struct BackgroundTaskChannels<TPlatform: PlatformRef> {
     /// Messages sent into this background task from the front end.
     from_front: UnboundedReceiverStream<Message>,
     /// Messages sent into the background task from Smoldot.
-    from_back: smoldot_light::JsonRpcResponses,
+    from_back: smoldot_light::JsonRpcResponses<TPlatform>,
 }
 
 struct BackgroundTaskData<TPlatform: PlatformRef, TChain> {
