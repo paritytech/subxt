@@ -242,6 +242,12 @@ struct ActiveSubscription {
     unsubscribe_method: String,
 }
 
+fn trim_response(response: &str) -> &str {
+    const MAX_RESPONSE_SIZE: usize = 256;
+    let len = std::cmp::min(response.len(), MAX_RESPONSE_SIZE);
+    &response[..len]
+}
+
 impl<TPlatform: PlatformRef, TChain> BackgroundTaskData<TPlatform, TChain> {
     /// Fetch and increment the request ID.
     fn next_id(&mut self) -> usize {
@@ -359,7 +365,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTaskData<TPlatform, TChain> {
     /// Parse the response received from the light client and sent it to the appropriate user.
     fn handle_rpc_response(&mut self, response: String) {
         let chain_id = self.chain_id;
-        tracing::trace!(target: LOG_TARGET, "Received from smoldot response='{response}' chain={chain_id:?}");
+        tracing::trace!(target: LOG_TARGET, "Received from smoldot response='{}' chain={chain_id:?}", trim_response(&response));
 
         match RpcResponse::from_str(&response) {
             Ok(RpcResponse::Method { id, result }) => {
