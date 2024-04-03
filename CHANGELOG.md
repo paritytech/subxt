@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.35.1] - 2024-04-03
+
+This is a small patch release that adds support for `BinaryHeap` in the codegen/subxt-cli
+which wasn't supported by `scale-typegen`. This was discovered because the most recent metadata in polkadot
+are now utilizing `BinaryHeap`.
+
 ## [0.35.0] - 2024-03-21
 
 This release contains several fixes, adds `no_std` support to a couple of crates (`subxt-signer` and `subxt-metadata`) and introduces a few quality of life improvements, which I'll quickly cover:
