@@ -38,7 +38,7 @@ where
         cached_events: CachedEvents<T>,
         hash: T::Hash,
     ) -> Result<Self, BlockError> {
-        let inner = CoreExtrinsics::new(extrinsics, client.metadata())?;
+        let inner = CoreExtrinsics::decode_from(extrinsics, client.metadata())?;
         Ok(Self {
             inner,
             client,

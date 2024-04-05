@@ -2,13 +2,28 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! # Subxt-core
+//! # subxt-core
 //!
-//! `#[no_std]` compatible core crate for subxt.
+//! A `#[no_std]` compatible subset of the functionality provided in the `subxt` crate. Mostly,
+//! this contains the logic for encoding and decoding things, but nothing related to networking.
+//!
+//! Here's an overview of the main things exposed here:
+//!
+//! - [`blocks`]: decode and explore block bodies.
+//! - [`constants`]: access and validate the constants in some metadata.
+//! - [`custom_values`]: access and validate the custom values in some metadata.
+//! - [`metadata`]: decode bytes into the metadata used throughout this library.
+//! - [`storage`]: construct storage request payloads.
+//! - [`tx`]: construct and sign transactions (extrinsics).
+//! - [`runtime_api`]: construct runtime API request payloads.
+//!
 
 #![deny(missing_docs)]
 #![cfg_attr(not(feature = "std"), no_std)]
 pub extern crate alloc;
+
+#[macro_use]
+mod macros;
 
 pub mod blocks;
 pub mod client;
@@ -28,14 +43,12 @@ pub use config::Config;
 pub use error::Error;
 pub use metadata::Metadata;
 
-#[macro_use]
-mod macros;
-
-/// Key external crates.
+/// Re-exports of some of the key external crates.
 pub mod ext {
     pub use codec;
     pub use scale_decode;
     pub use scale_encode;
+    pub use scale_value;
 
     cfg_substrate_compat! {
         pub use sp_runtime;

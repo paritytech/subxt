@@ -64,7 +64,7 @@ where
             };
 
             let event_bytes = get_event_bytes(client.backend(), block_ref.hash()).await?;
-            Ok(Events::decode_from(client.metadata(), event_bytes))
+            Ok(Events::decode_from(event_bytes, client.metadata()))
         }
     }
 }

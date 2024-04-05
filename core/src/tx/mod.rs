@@ -170,7 +170,7 @@ impl<T: Config> PartialTransaction<T> {
         &self.call_data
     }
 
-    /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
+    /// Convert this [`PartialTransaction`] into a [`Transaction`], ready to submit.
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
     pub fn sign<Signer>(&self, signer: &Signer) -> Transaction<T>
@@ -183,10 +183,10 @@ impl<T: Config> PartialTransaction<T> {
         self.sign_with_address_and_signature(&signer.address(), &signature)
     }
 
-    /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
+    /// Convert this [`PartialTransaction`] into a [`Transaction`], ready to submit.
     /// An address, and something representing a signature that can be SCALE encoded, are both
     /// needed in order to construct it. If you have a `Signer` to hand, you can use
-    /// [`PartialExtrinsic::sign()`] instead.
+    /// [`PartialTransaction::sign()`] instead.
     pub fn sign_with_address_and_signature(
         &self,
         address: &T::Address,
@@ -232,10 +232,6 @@ pub struct Transaction<T> {
 impl<T: Config> Transaction<T> {
     /// Create a [`Transaction`] from some already-signed and prepared
     /// extrinsic bytes,
-    ///
-    /// Prefer to use [`TxClient`] to create and sign extrinsics. This is simply
-    /// exposed in case you want to skip this process and submit something you've
-    /// already created.
     pub fn from_bytes(tx_bytes: Vec<u8>) -> Self {
         Self {
             encoded: Encoded(tx_bytes),
@@ -253,7 +249,7 @@ impl<T: Config> Transaction<T> {
         &self.encoded.0
     }
 
-    /// Consumes [`SubmittableExtrinsic`] and returns the SCALE encoded
+    /// Consumes this [`Transaction`] and returns the SCALE encoded
     /// extrinsic bytes.
     pub fn into_encoded(self) -> Vec<u8> {
         self.encoded.0

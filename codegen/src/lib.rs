@@ -224,7 +224,16 @@ impl CodegenBuilder {
     }
 
     /// Set the path to the `subxt` crate. By default, we expect it to be at `::subxt::ext::subxt_core`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the path provided is not an absolute path.
     pub fn set_subxt_crate_path(&mut self, crate_path: syn::Path) {
+        if absolute_path(crate_path.clone()).is_err() {
+            // Throw an error here, because otherwise we end up with a harder to comprehend error when
+            // substitute types don't begin with an absolute path.
+            panic!("The provided crate path must be an absolute path, ie prefixed with '::' or 'crate'");
+        }
         self.crate_path = crate_path;
     }
 

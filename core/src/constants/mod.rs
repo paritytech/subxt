@@ -2,7 +2,40 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Functions and types associated with accessing constants.
+//! Access constants from metadata.
+//!
+//! # Examples
+//!
+//! ```rust
+//! extern crate alloc;
+//!
+//! use subxt_macro::subxt;
+//! use subxt_core::constants;
+//! use subxt_core::metadata::Metadata;
+//!
+//! // If we generate types without `subxt`, we need to point to `::subxt_core`:
+//! #[subxt(
+//!     crate = "::subxt_core",
+//!     runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale",
+//! )]
+//! pub mod polkadot {}
+//!
+//! // Some metadata we'd like to access constants in:
+//! let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
+//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//!
+//! // We can use a static address to obtain some constant:
+//! let address = polkadot::constants().balances().existential_deposit();
+//!
+//! // This validates that the address given is in line with the metadata
+//! // we're trying to access the constant in:
+//! constants::validate(&metadata, &address).expect("is valid");
+//!
+//! // This acquires the constant (and internally also validates it):
+//! let ed = constants::get(&metadata, &address).expect("can decode constant");
+//!
+//! assert_eq!(ed, 33_333_333);
+//! ```
 
 mod constant_address;
 
@@ -17,7 +50,7 @@ use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata}
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate_constant<Address: ConstantAddress>(
+pub fn validate<Address: ConstantAddress>(
     metadata: &Metadata,
     address: &Address,
 ) -> Result<(), Error> {
@@ -37,12 +70,12 @@ pub fn validate_constant<Address: ConstantAddress>(
 
 /// Fetch a constant out of the metadata given a constant address. If the `address` has been
 /// statically generated, this will validate that the constant shape is as expected, too.
-pub fn get_constant<Address: ConstantAddress>(
+pub fn get<Address: ConstantAddress>(
     metadata: &Metadata,
     address: &Address,
 ) -> Result<Address::Target, Error> {
     // 1. Validate constant shape if hash given:
-    validate_constant(metadata, address)?;
+    validate(metadata, address)?;
 
     // 2. Attempt to decode the constant into the type given:
     let constant = metadata

@@ -28,7 +28,7 @@ impl<T: Config> Extrinsics<T> {
     /// Instantiate a new [`Extrinsics`] object, given a vector containing
     /// each extrinsic hash (in the form of bytes) and some metadata that
     /// we'll use to decode them.
-    pub fn new(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, BlockError> {
+    pub fn decode_from(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, BlockError> {
         let ids = ExtrinsicPartTypeIds::new(&metadata)?;
 
         Ok(Self {

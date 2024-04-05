@@ -13,6 +13,13 @@ use subxt_metadata::PalletMetadata;
 
 use crate::{error::MetadataError, Config, Error, Metadata};
 
+/// Create a new [`Events`] instance from the given bytes.
+///
+/// This is a shortcut for [`Events::decode_from`].
+pub fn decode_from<T: Config>(event_bytes: Vec<u8>, metadata: Metadata) -> Events<T> {
+    Events::decode_from(event_bytes, metadata)
+}
+
 /// Trait to uniquely identify the events's identity from the runtime metadata.
 ///
 /// Generated API structures that represent an event implement this trait.
@@ -58,7 +65,7 @@ impl<T: Config> core::fmt::Debug for Events<T> {
 
 impl<T: Config> Events<T> {
     /// Create a new [`Events`] instance from the given bytes.
-    pub fn decode_from(metadata: Metadata, event_bytes: Vec<u8>) -> Self {
+    pub fn decode_from(event_bytes: Vec<u8>, metadata: Metadata) -> Self {
         // event_bytes is a SCALE encoded vector of events. So, pluck the
         // compact encoded length from the front, leaving the remaining bytes
         // for our iterating to decode.
@@ -532,7 +539,7 @@ pub(crate) mod test_utils {
         // Prepend compact encoded length to event bytes:
         let mut all_event_bytes = Compact(num_events).encode();
         all_event_bytes.extend(event_bytes);
-        Events::decode_from(metadata, all_event_bytes)
+        Events::decode_from(all_event_bytes, metadata)
     }
 }
 
