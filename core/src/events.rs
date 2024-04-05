@@ -2,7 +2,41 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Types and functions for decoding and iterating over events.
+//! Decode and work with events.
+//!
+//! # Example
+//!
+//! ```rust
+//! use subxt_macro::subxt;
+//! use subxt_core::config::PolkadotConfig;
+//! use subxt_core::events;
+//! use subxt_core::metadata;
+//!
+//! // If we generate types without `subxt`, we need to point to `::subxt_core`:
+//! #[subxt(
+//!     crate = "::subxt_core",
+//!     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
+//! )]
+//! pub mod polkadot {}
+//!
+//! // Some metadata we'll use to work with storage entries:
+//! let metadata_bytes = include_bytes!("../../artifacts/polkadot_metadata_full.scale");
+//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//!
+//! // Some bytes representing events (located in System.Events storage):
+//! let event_bytes = hex::decode("1c00000000000000a2e9b53d5517020000000100000000000310c96d901d0102000000020000000408d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27dbeea5a030000000000000000000000000000020000000402d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48102700000000000000000000000000000000020000000407be5ddb1579b72e84524fc29e78609e3caf42e85aa118ebfe0b0ad404b5bdd25fbeea5a030000000000000000000000000000020000002100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27dbeea5a03000000000000000000000000000000000000000000000000000000000000020000000000426df03e00000000").unwrap();
+//!
+//! // We can decode these bytes like so:
+//! let evs = events::decode_from::<PolkadotConfig>(event_bytes, metadata);
+//!
+//! // And then do things like iterate over them and inspect details:
+//! for ev in evs.iter() {
+//!     let ev = ev.unwrap();
+//!     println!("Index: {}", ev.index());
+//!     println!("Name: {}.{}", ev.pallet_name(), ev.variant_name());
+//!     println!("Fields: {:?}", ev.field_values().unwrap());
+//! }
+//! ```
 
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -96,6 +130,11 @@ impl<T: Config> Events<T> {
     // Note: mainly here to satisfy clippy.
     pub fn is_empty(&self) -> bool {
         self.num_events == 0
+    }
+
+    /// Return the bytes representing all of the events.
+    pub fn bytes(&self) -> &[u8] {
+        &self.event_bytes
     }
 
     /// Iterate over all of the events, using metadata to dynamically
