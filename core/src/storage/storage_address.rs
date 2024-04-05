@@ -120,7 +120,7 @@ where
 
     /// Return bytes representing the root of this storage entry (a hash of the pallet and entry name).
     pub fn to_root_bytes(&self) -> Vec<u8> {
-        super::utils::storage_address_root_bytes(self)
+        super::get_address_root_bytes(self)
     }
 }
 

@@ -76,7 +76,6 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         Call: TxPayload,
     {
         subxt_core::tx::create_partial_signed(
-            &self.client.metadata(),
             &self.client.client_state(),
             call,
             params,
@@ -103,7 +102,6 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         Signer: SignerT<T>,
     {
         subxt_core::tx::create_signed(
-            &self.client.metadata(),
             &self.client.client_state(),
             call,
             signer,

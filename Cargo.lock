@@ -4736,6 +4736,7 @@ dependencies = [
  "sp-runtime",
  "subxt-macro",
  "subxt-metadata",
+ "subxt-signer",
  "tracing",
 ]
 

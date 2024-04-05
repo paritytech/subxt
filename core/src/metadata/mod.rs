@@ -2,16 +2,16 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! This provides a [`Metadata`] type, which can be decoded from the bytes handed
-//! back from a node when asking for metadata, and is required to help drive many of the
-//! functions in this crate.
+//! A [`Metadata`] type, which is used through this crate.
+//!
+//! This can be decoded from the bytes handed back from a node when asking for metadata.
 //!
 //! # Examples
 //!
 //! ```rust
 //! use subxt_core::metadata;
 //!
-//! // We need to fetch the bytes from somewhere, and then can decode them:
+//! // We need to fetch the bytes from somewhere, and then we can decode them:
 //! let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
 //! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
 //! ```

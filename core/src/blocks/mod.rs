@@ -15,7 +15,7 @@
 //!
 //! use subxt_macro::subxt;
 //! use subxt_core::blocks;
-//! use subxt_core::metadata::Metadata;
+//! use subxt_core::metadata;
 //! use subxt_core::config::PolkadotConfig;
 //! use alloc::vec;
 //!

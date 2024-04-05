@@ -71,6 +71,7 @@ assert_matches = { workspace = true }
 bitvec = { workspace = true }
 codec = { workspace = true, features = ["derive", "bit-vec"] }
 subxt-macro = { workspace = true }
+subxt-signer = { workspace = true, features = ["sr25519", "subxt"] }
 sp-core = { workspace = true }
 sp-keyring = { workspace = true }
 sp-runtime = { workspace = true }

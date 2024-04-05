@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::{
-    storage_type::{validate_storage_address, Storage},
+    storage_type::Storage,
     StorageAddress,
 };
 use crate::{
@@ -42,15 +42,13 @@ where
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie
     /// the pallet or storage entry in question do not exist at all).
     pub fn validate<Address: StorageAddress>(&self, address: &Address) -> Result<(), Error> {
-        let metadata = self.client.metadata();
-        let pallet_metadata = metadata.pallet_by_name_err(address.pallet_name())?;
-        validate_storage_address(address, pallet_metadata)
+        subxt_core::storage::validate(&self.client.metadata(), address).map_err(Into::into)
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
     /// to retrieve the entries at the root of the associated address.
     pub fn address_root_bytes<Address: StorageAddress>(&self, address: &Address) -> Vec<u8> {
-        subxt_core::storage::utils::storage_address_root_bytes(address)
+        subxt_core::storage::get_address_root_bytes(address)
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
@@ -62,7 +60,7 @@ where
         &self,
         address: &Address,
     ) -> Result<Vec<u8>, Error> {
-        subxt_core::storage::utils::storage_address_bytes(address, &self.client.metadata())
+        subxt_core::storage::get_address_bytes(&self.client.metadata(), address)
             .map_err(Into::into)
     }
 }

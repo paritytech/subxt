@@ -2,12 +2,61 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Types and functions responsible for encoding and signing transactions.
+//! Construct and sign transactions.
+//!
+//! # Example
+//!
+//! ```rust
+//! use subxt_signer::sr25519::dev;
+//! use subxt_macro::subxt;
+//! use subxt_core::config::PolkadotConfig;
+//! use subxt_core::config::DefaultExtrinsicParamsBuilder as Params;
+//! use subxt_core::tx;
+//! use subxt_core::utils::H256;
+//! use subxt_core::metadata;
+//!
+//! // If we generate types without `subxt`, we need to point to `::subxt_core`:
+//! #[subxt(
+//!     crate = "::subxt_core",
+//!     runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale",
+//! )]
+//! pub mod polkadot {}
+//!
+//! // Gather some other information about the chain that we'll need to construct valid extrinsics:
+//! let state = tx::ClientState::<PolkadotConfig> {
+//!     metadata: {
+//!         let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
+//!         metadata::decode_from(&metadata_bytes[..]).unwrap()
+//!     },
+//!     genesis_hash: {
+//!         let h = "91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3";
+//!         let bytes = hex::decode(h).unwrap();
+//!         H256::from_slice(&bytes)
+//!     },
+//!     runtime_version: tx::RuntimeVersion {
+//!         spec_version: 9370,
+//!         transaction_version: 20,
+//!     }
+//! };
+//!
+//! // Now we can build a balance transfer extrinsic.
+//! let dest = dev::bob().public_key().into();
+//! let call = polkadot::tx().balances().transfer_allow_death(dest, 10_000);
+//! let params = Params::new().tip(1_000).nonce(0).build();
+//!
+//! // We can validate that this lines up with the given metadata:
+//! tx::validate(&state.metadata, &call).unwrap();
+//!
+//! // We can build a signed transaction:
+//! let signed_call = tx::create_signed(&state, &call, &dev::alice(), params).unwrap();
+//!
+//! // And log it:
+//! println!("Tx: 0x{}", hex::encode(signed_call.encoded()));
+//! ```
 
 pub mod payload;
 pub mod signer;
 
-use crate::client::ClientState;
 use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher};
 use crate::error::{Error, MetadataError};
 use crate::metadata::Metadata;
@@ -17,6 +66,9 @@ use payload::TxPayload;
 use signer::Signer as SignerT;
 use sp_crypto_hashing::blake2_256;
 use std::borrow::Cow;
+
+// Expose these here since we expect them in some calls below.
+pub use crate::client::{ ClientState, RuntimeVersion };
 
 /// Run the validation logic against some extrinsic you'd like to submit. Returns `Ok(())`
 /// if the call is valid (or if it's not possible to check since the call has no validation hash).
@@ -78,17 +130,16 @@ pub fn create_unsigned<T: Config, Call: TxPayload>(
 /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
 /// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
 pub fn create_partial_signed<T: Config, Call: TxPayload>(
-    metadata: &Metadata,
     client_state: &ClientState<T>,
     call: &Call,
     params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
 ) -> Result<PartialTransaction<T>, Error> {
     // 1. Validate this call against the current node metadata if the call comes
     // with a hash allowing us to do so.
-    validate(metadata, call)?;
+    validate(&client_state.metadata, call)?;
 
     // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
-    let call_data = call_data(metadata, call)?;
+    let call_data = call_data(&client_state.metadata, call)?;
 
     // 3. Construct our custom additional/extra params.
     let additional_and_extra_params =
@@ -106,7 +157,6 @@ pub fn create_partial_signed<T: Config, Call: TxPayload>(
 /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
 /// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
 pub fn create_signed<T, Call, Signer>(
-    metadata: &Metadata,
     client_state: &ClientState<T>,
     call: &Call,
     signer: &Signer,
@@ -119,11 +169,11 @@ where
 {
     // 1. Validate this call against the current node metadata if the call comes
     // with a hash allowing us to do so.
-    validate(metadata, call)?;
+    validate(&client_state.metadata, call)?;
 
     // 2. Gather the "additional" and "extra" params along with the encoded call data,
     //    ready to be signed.
-    let partial_signed = create_partial_signed(metadata, client_state, call, params)?;
+    let partial_signed = create_partial_signed(client_state, call, params)?;
 
     // 3. Sign and construct an extrinsic from these details.
     Ok(partial_signed.sign(signer))

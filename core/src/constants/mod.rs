@@ -4,14 +4,15 @@
 
 //! Access constants from metadata.
 //!
-//! # Examples
+//! Use [`get`] to retrieve a constant from some metadata, or [`validate`] to check that a static
+//! constant address lines up with the value seen in the metadata.
+//!
+//! # Example
 //!
 //! ```rust
-//! extern crate alloc;
-//!
 //! use subxt_macro::subxt;
 //! use subxt_core::constants;
-//! use subxt_core::metadata::Metadata;
+//! use subxt_core::metadata;
 //!
 //! // If we generate types without `subxt`, we need to point to `::subxt_core`:
 //! #[subxt(

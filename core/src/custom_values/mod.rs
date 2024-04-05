@@ -4,11 +4,12 @@
 
 //! Access custom values from metadata.
 //!
-//! # Examples
+//! Use [`get`] to retrieve a custom value from some metadata, or [`validate`] to check that a
+//! static custom value address lines up with the value seen in the metadata.
+//!
+//! # Example
 //!
 //! ```rust
-//! extern crate alloc;
-//!
 //! use subxt_macro::subxt;
 //! use subxt_core::custom_values;
 //! use subxt_core::metadata;
@@ -24,7 +25,7 @@
 //! let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
 //! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
 //!
-//! // At the moment,we don't expect to see any custom values in the metadata
+//! // At the moment, we don't expect to see any custom values in the metadata
 //! // for Polkadot, so this will return an error:
 //! let err = custom_values::get(&metadata, "Foo");
 //! ```
