@@ -15,7 +15,7 @@ use syn::{
 const SUBXT_TEST_TIMEOUT: &str = "SUBXT_TEST_TIMEOUT";
 
 /// Default timeout for the test.
-const DEFAULT_TIMEOUT: u64 = 60 * 6;
+const DEFAULT_TIMEOUT_SECS: u64 = 60 * 6;
 
 #[proc_macro_attribute]
 pub fn subxt_test(attr: TokenStream, item: TokenStream) -> TokenStream {
@@ -30,8 +30,8 @@ pub fn subxt_test(attr: TokenStream, item: TokenStream) -> TokenStream {
     // - A default of 6 minutes.
     let timeout_duration = subxt_attr.timeout.unwrap_or_else(|| {
         std::env::var(SUBXT_TEST_TIMEOUT)
-            .map(|str| str.parse().unwrap_or(DEFAULT_TIMEOUT))
-            .unwrap_or(DEFAULT_TIMEOUT)
+            .map(|str| str.parse().unwrap_or(DEFAULT_TIMEOUT_SECS))
+            .unwrap_or(DEFAULT_TIMEOUT_SECS)
     });
 
     let func: syn::ItemFn = match syn::parse(item) {
