@@ -4,12 +4,12 @@
 
 use crate::{
     node_runtime::{self, system},
-    test_context,
+    subxt_test, test_context,
 };
 use assert_matches::assert_matches;
 use subxt_signer::sr25519::dev;
 
-#[tokio::test]
+#[subxt_test]
 async fn storage_account() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -31,7 +31,7 @@ async fn storage_account() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn tx_remark_with_event() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -42,9 +42,13 @@ async fn tx_remark_with_event() -> Result<(), subxt::Error> {
         .system()
         .remark_with_event(b"remarkable".to_vec());
 
-    let found_event = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
+        .create_signed(&tx, &alice, Default::default())
+        .await?;
+
+    let found_event = signed_extrinsic
+        .submit_and_watch()
         .await?
         .wait_for_finalized_success()
         .await?
