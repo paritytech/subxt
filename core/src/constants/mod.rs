@@ -38,10 +38,9 @@
 //! assert_eq!(ed, 33_333_333);
 //! ```
 
-mod constant_address;
+pub mod address;
 
-pub use constant_address::{dynamic, Address, ConstantAddress, DynamicAddress};
-
+use address::AddressT;
 use alloc::borrow::ToOwned;
 
 use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
@@ -51,7 +50,7 @@ use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata}
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Address: ConstantAddress>(
+pub fn validate<Address: AddressT>(
     metadata: &Metadata,
     address: &Address,
 ) -> Result<(), Error> {
@@ -71,7 +70,7 @@ pub fn validate<Address: ConstantAddress>(
 
 /// Fetch a constant out of the metadata given a constant address. If the `address` has been
 /// statically generated, this will validate that the constant shape is as expected, too.
-pub fn get<Address: ConstantAddress>(
+pub fn get<Address: AddressT>(
     metadata: &Metadata,
     address: &Address,
 ) -> Result<Address::Target, Error> {

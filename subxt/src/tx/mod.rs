@@ -20,7 +20,7 @@ cfg_substrate_compat! {
     pub use subxt_core::tx::signer::PairSigner;
 }
 
-pub use subxt_core::tx::payload::{dynamic, DynamicPayload, Payload, TxPayload};
+pub use subxt_core::tx::payload::{dynamic, DynamicPayload, Payload, PayloadT};
 pub use subxt_core::tx::signer::{self, Signer};
 pub use tx_client::{
     PartialExtrinsic, SubmittableExtrinsic, TransactionInvalid, TransactionUnknown, TxClient,

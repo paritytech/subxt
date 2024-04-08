@@ -30,18 +30,17 @@
 //! let err = custom_values::get(&metadata, "Foo");
 //! ```
 
-mod custom_value_address;
+pub mod address;
 
 use crate::utils::Yes;
-pub use custom_value_address::{CustomValueAddress, StaticAddress};
-
+use address::AddressT;
 use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
 use alloc::vec::Vec;
 
 /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
 /// if the address is valid (or if it's not possible to check since the address has no validation hash).
 /// Returns an error if the address was not valid (wrong name, type or raw bytes)
-pub fn validate<Address: CustomValueAddress + ?Sized>(
+pub fn validate<Address: AddressT + ?Sized>(
     metadata: &Metadata,
     address: &Address,
 ) -> Result<(), Error> {
@@ -63,7 +62,7 @@ pub fn validate<Address: CustomValueAddress + ?Sized>(
 
 /// Access a custom value by the address it is registered under. This can be just a [str] to get back a dynamic value,
 /// or a static address from the generated static interface to get a value of a static type returned.
-pub fn get<Address: CustomValueAddress<IsDecodable = Yes> + ?Sized>(
+pub fn get<Address: AddressT<IsDecodable = Yes> + ?Sized>(
     metadata: &Metadata,
     address: &Address,
 ) -> Result<Address::Target, Error> {
@@ -81,7 +80,7 @@ pub fn get<Address: CustomValueAddress<IsDecodable = Yes> + ?Sized>(
 }
 
 /// Access the bytes of a custom value by the address it is registered under.
-pub fn get_bytes<Address: CustomValueAddress + ?Sized>(
+pub fn get_bytes<Address: AddressT + ?Sized>(
     metadata: &Metadata,
     address: &Address,
 ) -> Result<Vec<u8>, Error> {

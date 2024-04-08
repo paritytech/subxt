@@ -62,7 +62,7 @@ use crate::error::{Error, MetadataError};
 use crate::metadata::Metadata;
 use crate::utils::Encoded;
 use codec::{Compact, Encode};
-use payload::TxPayload;
+use payload::PayloadT;
 use signer::Signer as SignerT;
 use sp_crypto_hashing::blake2_256;
 use std::borrow::Cow;
@@ -74,7 +74,7 @@ pub use crate::client::{ ClientState, RuntimeVersion };
 /// if the call is valid (or if it's not possible to check since the call has no validation hash).
 /// Return an error if the call was not valid or something went wrong trying to validate it (ie
 /// the pallet or call in question do not exist at all).
-pub fn validate<Call: TxPayload>(metadata: &Metadata, call: &Call) -> Result<(), Error> {
+pub fn validate<Call: PayloadT>(metadata: &Metadata, call: &Call) -> Result<(), Error> {
     if let Some(details) = call.validation_details() {
         let expected_hash = metadata
             .pallet_by_name_err(details.pallet_name)?
@@ -89,14 +89,14 @@ pub fn validate<Call: TxPayload>(metadata: &Metadata, call: &Call) -> Result<(),
 }
 
 /// Return the SCALE encoded bytes representing the call data of the transaction.
-pub fn call_data<Call: TxPayload>(metadata: &Metadata, call: &Call) -> Result<Vec<u8>, Error> {
+pub fn call_data<Call: PayloadT>(metadata: &Metadata, call: &Call) -> Result<Vec<u8>, Error> {
     let mut bytes = Vec::new();
     call.encode_call_data_to(metadata, &mut bytes)?;
     Ok(bytes)
 }
 
 /// Creates an unsigned extrinsic without submitting it.
-pub fn create_unsigned<T: Config, Call: TxPayload>(
+pub fn create_unsigned<T: Config, Call: PayloadT>(
     metadata: &Metadata,
     call: &Call,
 ) -> Result<Transaction<T>, Error> {
@@ -129,7 +129,7 @@ pub fn create_unsigned<T: Config, Call: TxPayload>(
 ///
 /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
 /// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
-pub fn create_partial_signed<T: Config, Call: TxPayload>(
+pub fn create_partial_signed<T: Config, Call: PayloadT>(
     client_state: &ClientState<T>,
     call: &Call,
     params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
@@ -164,7 +164,7 @@ pub fn create_signed<T, Call, Signer>(
 ) -> Result<Transaction<T>, Error>
 where
     T: Config,
-    Call: TxPayload,
+    Call: PayloadT,
     Signer: SignerT<T>,
 {
     // 1. Validate this call against the current node metadata if the call comes

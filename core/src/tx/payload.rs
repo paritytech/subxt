@@ -18,12 +18,12 @@ use scale_value::{Composite, Value, ValueDef, Variant};
 
 /// This represents a transaction payload that can be submitted
 /// to a node.
-pub trait TxPayload {
+pub trait PayloadT {
     /// Encode call data to the provided output.
     fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error>;
 
     /// Encode call data and return the output. This is a convenience
-    /// wrapper around [`TxPayload::encode_call_data_to`].
+    /// wrapper around [`PayloadT::encode_call_data_to`].
     fn encode_call_data(&self, metadata: &Metadata) -> Result<Vec<u8>, Error> {
         let mut v = Vec::new();
         self.encode_call_data_to(metadata, &mut v)?;
@@ -134,7 +134,7 @@ impl Payload<Composite<()>> {
     }
 }
 
-impl<CallData: EncodeAsFields> TxPayload for Payload<CallData> {
+impl<CallData: EncodeAsFields> PayloadT for Payload<CallData> {
     fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error> {
         let pallet = metadata.pallet_by_name_err(&self.pallet_name)?;
         let call = pallet

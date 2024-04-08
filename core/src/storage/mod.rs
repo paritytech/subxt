@@ -41,35 +41,24 @@
 //! println!("Alice's account info: {value:?}");
 //! ```
 
-mod storage_address;
 mod storage_key;
 mod utils;
+
+pub mod address;
+
+use address::AddressT;
+use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
 
 // This isn't a part of the public API, but expose here because it's useful in Subxt.
 #[doc(hidden)]
 pub use utils::lookup_storage_entry_details;
-
-use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
-
-/// Types representing an address which describes where a storage
-/// entry lives and how to properly decode it.
-pub mod address {
-    pub use super::storage_address::{dynamic, Address, DynamicAddress, StorageAddress};
-    pub use super::storage_key::{StaticStorageKey, StorageHashers, StorageKey};
-}
-
-pub use storage_key::StorageKey;
-
-// For consistency with other modules, also expose
-// the basic address stuff at the root of the module.
-pub use storage_address::{dynamic, Address, DynamicAddress, StorageAddress};
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
 /// that the shape of the storage value is the same as the shape expected by the static address.
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Address: StorageAddress>(
+pub fn validate<Address: AddressT>(
     metadata: &Metadata,
     address: &Address,
 ) -> Result<(), Error> {
@@ -93,7 +82,7 @@ pub fn validate<Address: StorageAddress>(
 
 /// Given a storage address and some metadata, this encodes the address into bytes which can be
 /// handed to a node to retrieve the corresponding value.
-pub fn get_address_bytes<Address: StorageAddress>(
+pub fn get_address_bytes<Address: AddressT>(
     metadata: &Metadata,
     address: &Address,
 ) -> Result<Vec<u8>, Error> {
@@ -106,7 +95,7 @@ pub fn get_address_bytes<Address: StorageAddress>(
 /// Given a storage address and some metadata, this encodes the root of the address (ie the pallet
 /// and storage entry part) into bytes. If the entry being addressed is inside a map, this returns
 /// the bytes needed to iterate over all of the entries within it.
-pub fn get_address_root_bytes<Address: StorageAddress>(address: &Address) -> Vec<u8> {
+pub fn get_address_root_bytes<Address: AddressT>(address: &Address) -> Vec<u8> {
     let mut bytes = Vec::new();
     utils::write_storage_address_root_bytes(address, &mut bytes);
     bytes
@@ -115,7 +104,7 @@ pub fn get_address_root_bytes<Address: StorageAddress>(address: &Address) -> Vec
 /// Given some storage value that we've retrieved from a node, the address used to retrieve it, and
 /// metadata from the node, this function attempts to decode the bytes into the target value specified
 /// by the address.
-pub fn decode_value<Address: StorageAddress>(
+pub fn decode_value<Address: AddressT>(
     metadata: &Metadata,
     address: &Address,
     bytes: &mut &[u8],
@@ -134,7 +123,7 @@ pub fn decode_value<Address: StorageAddress>(
 }
 
 /// Return the default value at a given storage address if one is available, or an error otherwise.
-pub fn default_value<Address: StorageAddress>(
+pub fn default_value<Address: AddressT>(
     metadata: &Metadata,
     address: &Address,
 ) -> Result<Address::Target, Error> {

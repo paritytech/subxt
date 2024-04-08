@@ -2,7 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Types and functions for constructing runtime API requests.
+//! This module contains the trait and types used to represent
+//! runtime API calls that can be made.
 
 use alloc::borrow::Cow;
 use alloc::borrow::ToOwned;
@@ -39,7 +40,7 @@ use crate::metadata::{DecodeWithMetadata, Metadata};
 /// - encoded arguments
 ///
 /// Each argument of the runtime function must be scale-encoded.
-pub trait RuntimeApiPayload {
+pub trait PayloadT {
     /// The return type of the function call.
     // Note: `DecodeWithMetadata` is needed to decode the function call result
     // with the `subxt::Metadata.
@@ -55,7 +56,7 @@ pub trait RuntimeApiPayload {
     fn encode_args_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error>;
 
     /// Encode arguments data and return the output. This is a convenience
-    /// wrapper around [`RuntimeApiPayload::encode_args_to`].
+    /// wrapper around [`PayloadT::encode_args_to`].
     fn encode_args(&self, metadata: &Metadata) -> Result<Vec<u8>, Error> {
         let mut v = Vec::new();
         self.encode_args_to(metadata, &mut v)?;
@@ -82,7 +83,7 @@ pub struct Payload<ArgsData, ReturnTy> {
     _marker: PhantomData<ReturnTy>,
 }
 
-impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> RuntimeApiPayload
+impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> PayloadT
     for Payload<ArgsData, ReturnTy>
 {
     type ReturnType = ReturnTy;
@@ -115,7 +116,7 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> RuntimeApiPayload
 }
 
 /// A dynamic runtime API payload.
-pub type DynamicRuntimeApiPayload = Payload<Composite<()>, DecodedValueThunk>;
+pub type DynamicPayload = Payload<Composite<()>, DecodedValueThunk>;
 
 impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
     /// Create a new [`Payload`].
@@ -177,11 +178,11 @@ impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
     }
 }
 
-/// Create a new [`DynamicRuntimeApiPayload`].
+/// Create a new [`DynamicPayload`].
 pub fn dynamic(
     trait_name: impl Into<String>,
     method_name: impl Into<String>,
     args_data: impl Into<Composite<()>>,
-) -> DynamicRuntimeApiPayload {
+) -> DynamicPayload {
     Payload::new(trait_name, method_name, args_data.into())
 }

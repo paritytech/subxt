@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! Construct addresses to access constants with.
+
 use crate::dynamic::DecodedValueThunk;
 use crate::metadata::DecodeWithMetadata;
 use alloc::borrow::Cow;
@@ -10,7 +12,7 @@ use derive_where::derive_where;
 
 /// This represents a constant address. Anything implementing this trait
 /// can be used to fetch constants.
-pub trait ConstantAddress {
+pub trait AddressT {
     /// The target type of the value that lives at this address.
     type Target: DecodeWithMetadata;
 
@@ -78,7 +80,7 @@ impl<ReturnTy> Address<ReturnTy> {
     }
 }
 
-impl<ReturnTy: DecodeWithMetadata> ConstantAddress for Address<ReturnTy> {
+impl<ReturnTy: DecodeWithMetadata> AddressT for Address<ReturnTy> {
     type Target = ReturnTy;
 
     fn pallet_name(&self) -> &str {

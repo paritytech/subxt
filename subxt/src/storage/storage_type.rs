@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use subxt_core::storage::address::{StorageAddress, StorageHashers, StorageKey};
+use subxt_core::storage::address::{AddressT, StorageHashers, StorageKey};
 use subxt_core::utils::Yes;
 use crate::{
     backend::{BackendExt, BlockRef},
@@ -115,7 +115,7 @@ where
         address: &'address Address,
     ) -> impl Future<Output = Result<Option<Address::Target>, Error>> + 'address
     where
-        Address: StorageAddress<IsFetchable = Yes> + 'address,
+        Address: AddressT<IsFetchable = Yes> + 'address,
     {
         let client = self.clone();
         async move {
@@ -146,7 +146,7 @@ where
         address: &'address Address,
     ) -> impl Future<Output = Result<Address::Target, Error>> + 'address
     where
-        Address: StorageAddress<IsFetchable = Yes, IsDefaultable = Yes> + 'address,
+        Address: AddressT<IsFetchable = Yes, IsDefaultable = Yes> + 'address,
     {
         let client = self.clone();
         async move {
@@ -197,7 +197,7 @@ where
         address: Address,
     ) -> impl Future<Output = Result<StreamOfResults<StorageKeyValuePair<Address>>, Error>> + 'static
     where
-        Address: StorageAddress<IsIterable = Yes> + 'static,
+        Address: AddressT<IsIterable = Yes> + 'static,
         Address::Keys: 'static + Sized,
     {
         let client = self.client.clone();
@@ -313,7 +313,7 @@ fn strip_storage_addess_root_bytes(address_bytes: &mut &[u8]) -> Result<(), Stor
 /// A pair of keys and values together with all the bytes that make up the storage address.
 /// `keys` is `None` if non-concat hashers are used. In this case the keys could not be extracted back from the key_bytes.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
-pub struct StorageKeyValuePair<T: StorageAddress> {
+pub struct StorageKeyValuePair<T: AddressT> {
     /// The bytes that make up the address of the storage entry.
     pub key_bytes: Vec<u8>,
     /// The keys that can be used to construct the address of this storage entry.

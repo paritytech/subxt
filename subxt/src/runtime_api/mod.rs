@@ -9,4 +9,4 @@ mod runtime_types;
 
 pub use runtime_client::RuntimeApiClient;
 pub use runtime_types::RuntimeApi;
-pub use subxt_core::runtime_api::{dynamic, DynamicRuntimeApiPayload, Payload, RuntimeApiPayload};
+pub use subxt_core::runtime_api::payload::{dynamic, DynamicPayload, Payload, PayloadT};

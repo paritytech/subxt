@@ -2,17 +2,19 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use derive_where::derive_where;
+//! Construct addresses to access custom values with.
 
+use derive_where::derive_where;
 use crate::dynamic::DecodedValueThunk;
 use crate::metadata::DecodeWithMetadata;
-use crate::utils::Yes;
+
+/// Use this with [`ConstantvalueAddress::IsDecodable`].
+pub use crate::utils::Yes;
 
 /// This represents the address of a custom value in in the metadata.
-/// Anything, that implements the [CustomValueAddress] trait can be used, to fetch
-/// custom values from the metadata.
-/// The trait is implemented by [str] for dynamic loopup and [StaticAddress] for static queries.
-pub trait CustomValueAddress {
+/// Anything that implements it can be used to fetch custom values from the metadata.
+/// The trait is implemented by [`str`] for dynamic lookup and [`StaticAddress`] for static queries.
+pub trait AddressT {
     /// The type of the custom value.
     type Target: DecodeWithMetadata;
     /// Should be set to `Yes` for Dynamic values and static values that have a valid type.
@@ -28,7 +30,7 @@ pub trait CustomValueAddress {
     }
 }
 
-impl CustomValueAddress for str {
+impl AddressT for str {
     type Target = DecodedValueThunk;
     type IsDecodable = Yes;
 
@@ -66,7 +68,7 @@ impl<ReturnTy, IsDecodable> StaticAddress<ReturnTy, IsDecodable> {
     }
 }
 
-impl<R: DecodeWithMetadata, Y> CustomValueAddress for StaticAddress<R, Y> {
+impl<R: DecodeWithMetadata, Y> AddressT for StaticAddress<R, Y> {
     type Target = R;
     type IsDecodable = Y;
 

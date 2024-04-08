@@ -5,15 +5,13 @@
 use crate::{
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
-    error::{Error, MetadataError},
-    metadata::DecodeWithMetadata,
+    error::Error,
     Config,
 };
 use codec::Decode;
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
-
-use super::RuntimeApiPayload;
+use super::PayloadT;
 
 /// Execute runtime API calls.
 #[derive_where(Clone; Client)]
@@ -39,6 +37,14 @@ where
     T: Config,
     Client: OnlineClientT<T>,
 {
+    /// Run the validation logic against some runtime API payload you'd like to use. Returns `Ok(())`
+    /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
+    /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
+    /// the runtime API in question do not exist at all)
+    pub fn validate<Call: PayloadT>(&self, payload: &Call) -> Result<(), Error> {
+        subxt_core::runtime_api::validate(&self.client.metadata(), payload).map_err(Into::into)
+    }
+
     /// Execute a raw runtime API call.
     pub fn call_raw<'a, Res: Decode>(
         &self,
@@ -59,7 +65,7 @@ where
     }
 
     /// Execute a runtime API call.
-    pub fn call<Call: RuntimeApiPayload>(
+    pub fn call<Call: PayloadT>(
         &self,
         payload: Call,
     ) -> impl Future<Output = Result<Call::ReturnType, Error>> {
@@ -70,39 +76,21 @@ where
         async move {
             let metadata = client.metadata();
 
-            let api_trait = metadata.runtime_api_trait_by_name_err(payload.trait_name())?;
-            let api_method = api_trait
-                .method_by_name(payload.method_name())
-                .ok_or_else(|| {
-                    MetadataError::RuntimeMethodNotFound(payload.method_name().to_owned())
-                })?;
-
             // Validate the runtime API payload hash against the compile hash from codegen.
-            if let Some(static_hash) = payload.validation_hash() {
-                let Some(runtime_hash) = api_trait.method_hash(payload.method_name()) else {
-                    return Err(MetadataError::IncompatibleCodegen.into());
-                };
-                if static_hash != runtime_hash {
-                    return Err(MetadataError::IncompatibleCodegen.into());
-                }
-            }
+            subxt_core::runtime_api::validate(&metadata, &payload)?;
 
             // Encode the arguments of the runtime call.
-            // For static payloads (codegen) this is pass-through, bytes are not altered.
-            // For dynamic payloads this relies on `scale_value::encode_as_fields_to`.
-            let params = payload.encode_args(&metadata)?;
-            let call_name = format!("{}_{}", payload.trait_name(), payload.method_name());
+            let call_name = subxt_core::runtime_api::call_name(&payload);
+            let call_args = subxt_core::runtime_api::call_args(&metadata, &payload)?;
 
+            // Make the call.
             let bytes = client
                 .backend()
-                .call(&call_name, Some(params.as_slice()), block_hash)
+                .call(&call_name, Some(call_args.as_slice()), block_hash)
                 .await?;
 
-            let value = <Call::ReturnType as DecodeWithMetadata>::decode_with_metadata(
-                &mut &bytes[..],
-                api_method.output_ty(),
-                &metadata,
-            )?;
+            // Decode the response.
+            let value = subxt_core::runtime_api::decode_value(&metadata, &payload, &mut &*bytes)?;
             Ok(value)
         }
     }

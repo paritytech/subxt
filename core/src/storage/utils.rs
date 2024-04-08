@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! these utility methods complement the [`StorageAddress`] trait, but
+//! these utility methods complement the [`AddressT`] trait, but
 //! aren't things that should ever be overridden, and so don't exist on
 //! the trait itself.
 
@@ -10,12 +10,11 @@ use alloc::vec::Vec;
 use subxt_metadata::{StorageHasher, PalletMetadata, StorageEntryMetadata};
 use crate::error::{Error, MetadataError};
 use crate::metadata::Metadata;
+use super::address::AddressT;
 
-use super::StorageAddress;
-
-/// Return the root of a given [`StorageAddress`]: hash the pallet name and entry name
+/// Return the root of a given [`AddressT`]: hash the pallet name and entry name
 /// and append those bytes to the output.
-pub fn write_storage_address_root_bytes<Address: StorageAddress>(
+pub fn write_storage_address_root_bytes<Address: AddressT>(
     addr: &Address,
     out: &mut Vec<u8>,
 ) {

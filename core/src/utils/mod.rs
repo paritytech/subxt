@@ -71,7 +71,7 @@ unsafe impl<T> Sync for PhantomDataSendSync<T> {}
 /// as `BTreeMap` which allows us to easily swap the two during codegen.
 pub type KeyedVec<K, V> = Vec<(K, V)>;
 
-/// A unit marker struct signalling that some property is true
+/// A unit marker struct.
 pub struct Yes;
 
 /// A quick helper to encode some bytes to hex.
