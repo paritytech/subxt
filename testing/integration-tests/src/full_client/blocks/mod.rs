@@ -8,14 +8,16 @@ use futures::StreamExt;
 
 #[cfg(fullclient)]
 use crate::utils::node_runtime;
+
 #[cfg(fullclient)]
-use subxt::config::signed_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce};
-#[cfg(fullclient)]
-use subxt::config::DefaultExtrinsicParamsBuilder;
-#[cfg(fullclient)]
-use subxt::config::SubstrateConfig;
-#[cfg(fullclient)]
-use subxt::utils::Era;
+use subxt::{
+    config::{
+        signed_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce},
+        DefaultExtrinsicParamsBuilder, SubstrateConfig,
+    },
+    utils::Era,
+};
+
 #[cfg(fullclient)]
 use subxt_signer::sr25519::dev;
 
