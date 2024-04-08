@@ -4,7 +4,7 @@ use crate::dynamic::DecodedValueThunk;
 use crate::metadata::DecodeWithMetadata;
 use crate::utils::Yes;
 
-/// This represents the address of a custom value in in the metadata.
+/// This represents the address of a custom value in the metadata.
 /// Anything, that implements the [CustomValueAddress] trait can be used, to fetch
 /// custom values from the metadata.
 /// The trait is implemented by [str] for dynamic loopup and [StaticAddress] for static queries.
