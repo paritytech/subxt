@@ -14,7 +14,10 @@ pub mod utils;
 #[cfg_attr(test, allow(unused_imports))]
 use utils::*;
 
-#[cfg(all(test, not(feature = "unstable-light-client")))]
+#[cfg(any(
+    all(test, not(feature = "unstable-light-client")),
+    all(test, feature = "unstable-light-client-long-running")
+))]
 mod full_client;
 
 #[cfg(all(test, feature = "unstable-light-client"))]
