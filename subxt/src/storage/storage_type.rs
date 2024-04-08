@@ -314,10 +314,10 @@ where
     }
 }
 
-/// Strips the first 16 bytes (8 for the pallet hash, 8 for the entry hash) off some storage address bytes.
+/// Strips the first 32 bytes (16 for the pallet hash, 16 for the entry hash) off some storage address bytes.
 fn strip_storage_addess_root_bytes(address_bytes: &mut &[u8]) -> Result<(), StorageAddressError> {
-    if address_bytes.len() >= 16 {
-        *address_bytes = &address_bytes[16..];
+    if address_bytes.len() >= 32 {
+        *address_bytes = &address_bytes[32..];
         Ok(())
     } else {
         Err(StorageAddressError::UnexpectedAddressBytes)
