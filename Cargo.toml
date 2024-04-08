@@ -33,7 +33,7 @@ resolver = "2"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 version = "0.35.0"
-rust-version = "1.74.0"
+rust-version = "1.77.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt"
@@ -112,8 +112,12 @@ which = "5.0.0"
 strip-ansi-escapes = "0.2.0"
 
 # Light client support:
-smoldot = { version = "0.17.0", default-features = false }
-smoldot-light = { version = "0.15.0", default-features = false }
+smoldot = { path = "/home/lexnv/workspace/smoldot/lib", default-features = false }
+#smoldot = { version = "0.17.0", default-features = false }
+
+#smoldot-light = { version = "0.15.0", default-features = false }
+smoldot-light = { path = "/home/lexnv/workspace/smoldot/light-base", default-features = false }
+
 tokio-stream = "0.1.14"
 futures-util = "0.3.30"
 rand = "0.8.5"
