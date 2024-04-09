@@ -21,7 +21,7 @@ cfg_jsonrpsee! {
 
 /// A URL is considered secure if it uses a secure scheme ("https" or "wss") or is referring to localhost.
 ///
-/// Returns an error if the the string could not be parsed into a URL.
+/// Returns an error if the string could not be parsed into a URL.
 pub fn url_is_secure(url: &str) -> Result<bool, Error> {
     let url = Url::parse(url).map_err(|e| Error::Rpc(RpcError::ClientError(Box::new(e))))?;
 
