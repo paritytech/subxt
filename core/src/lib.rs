@@ -4,18 +4,19 @@
 
 //! # subxt-core
 //!
-//! A `#[no_std]` compatible subset of the functionality provided in the `subxt` crate. Mostly,
-//! this contains the logic for encoding and decoding things, but nothing related to networking.
+//! A `#[no_std]` compatible subset of the functionality provided in the `subxt` crate. This
+//! contains the core logic for encoding and decoding things, but nothing related to networking.
 //!
 //! Here's an overview of the main things exposed here:
 //!
 //! - [`blocks`]: decode and explore block bodies.
-//! - [`constants`]: access and validate the constants in some metadata.
-//! - [`custom_values`]: access and validate the custom values in some metadata.
+//! - [`constants`]: access and validate the constant addresses in some metadata.
+//! - [`custom_values`]: access and validate the custom value addresses in some metadata.
 //! - [`metadata`]: decode bytes into the metadata used throughout this library.
-//! - [`storage`]: construct storage request payloads.
+//! - [`storage`]: construct storage request payloads and decode the results you'd get back.
 //! - [`tx`]: construct and sign transactions (extrinsics).
-//! - [`runtime_api`]: construct runtime API request payloads.
+//! - [`runtime_api`]: construct runtime API request payloads and decode the results you'd get back.
+//! - [`events`]: decode and explore events.
 //!
 
 #![deny(missing_docs)]
