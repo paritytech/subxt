@@ -8,7 +8,7 @@ use crate::dynamic::DecodedValueThunk;
 use crate::metadata::DecodeWithMetadata;
 use derive_where::derive_where;
 
-/// Use this with [`ConstantvalueAddress::IsDecodable`].
+/// Use this with [`AddressT::IsDecodable`].
 pub use crate::utils::Yes;
 
 /// This represents the address of a custom value in in the metadata.
