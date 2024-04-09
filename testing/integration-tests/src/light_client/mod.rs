@@ -27,7 +27,7 @@
 //! For more context see: https://github.com/tokio-rs/tokio/issues/2374.
 //!
 
-use crate::{test_context, utils::node_runtime};
+use crate::{subxt_test, test_context, utils::node_runtime};
 use codec::Compact;
 use subxt::{client::OnlineClient, config::SubstrateConfig};
 use subxt_metadata::Metadata;
