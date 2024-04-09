@@ -61,11 +61,11 @@ use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher};
 use crate::error::{Error, MetadataError};
 use crate::metadata::Metadata;
 use crate::utils::Encoded;
+use alloc::borrow::Cow;
 use codec::{Compact, Encode};
 use payload::PayloadT;
 use signer::Signer as SignerT;
 use sp_crypto_hashing::blake2_256;
-use std::borrow::Cow;
 
 // Expose these here since we expect them in some calls below.
 pub use crate::client::{ClientState, RuntimeVersion};
@@ -276,7 +276,7 @@ impl<T: Config> PartialTransaction<T> {
 /// get the bytes for it, or [`Transaction::hash()`] to get the hash.
 pub struct Transaction<T> {
     encoded: Encoded,
-    marker: std::marker::PhantomData<T>,
+    marker: core::marker::PhantomData<T>,
 }
 
 impl<T: Config> Transaction<T> {
@@ -285,7 +285,7 @@ impl<T: Config> Transaction<T> {
     pub fn from_bytes(tx_bytes: Vec<u8>) -> Self {
         Self {
             encoded: Encoded(tx_bytes),
-            marker: std::marker::PhantomData,
+            marker: core::marker::PhantomData,
         }
     }
 

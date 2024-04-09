@@ -10,11 +10,11 @@ use crate::{
     Metadata,
 };
 use codec::Decode;
+use core::sync::Arc;
 use scale_decode::DecodeAsType;
 use subxt_metadata::PalletMetadata;
 
 pub use crate::blocks::StaticExtrinsic;
-use std::sync::Arc;
 
 /// The body of a block.
 pub struct Extrinsics<T: Config> {
@@ -62,7 +62,7 @@ impl<T: Config> Extrinsics<T> {
         let ids = self.ids;
         let mut index = 0;
 
-        std::iter::from_fn(move || {
+        core::iter::from_fn(move || {
             if index == num_extrinsics {
                 None
             } else {
@@ -137,7 +137,7 @@ pub struct ExtrinsicDetails<T: Config> {
     variant_index: u8,
     /// Subxt metadata to fetch the extrinsic metadata.
     metadata: Metadata,
-    _marker: std::marker::PhantomData<T>,
+    _marker: core::marker::PhantomData<T>,
 }
 
 /// Details only available in signed extrinsics.
@@ -243,7 +243,7 @@ where
             pallet_index,
             variant_index,
             metadata,
-            _marker: std::marker::PhantomData,
+            _marker: core::marker::PhantomData,
         })
     }
 

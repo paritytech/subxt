@@ -15,7 +15,7 @@ use scale_decode::DecodeAsType;
 pub struct ExtrinsicSignedExtensions<'a, T: Config> {
     bytes: &'a [u8],
     metadata: &'a Metadata,
-    _marker: std::marker::PhantomData<T>,
+    _marker: core::marker::PhantomData<T>,
 }
 
 impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
@@ -37,7 +37,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
         let mut byte_start_idx = 0;
         let metadata = &self.metadata;
 
-        std::iter::from_fn(move || {
+        core::iter::from_fn(move || {
             if index == num_signed_extensions {
                 return None;
             }
@@ -65,7 +65,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
                 ty_id,
                 identifier: extension.identifier(),
                 metadata,
-                _marker: std::marker::PhantomData,
+                _marker: core::marker::PhantomData,
             }))
         })
     }
@@ -123,7 +123,7 @@ pub struct ExtrinsicSignedExtension<'a, T: Config> {
     ty_id: u32,
     identifier: &'a str,
     metadata: &'a Metadata,
-    _marker: std::marker::PhantomData<T>,
+    _marker: core::marker::PhantomData<T>,
 }
 
 impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
