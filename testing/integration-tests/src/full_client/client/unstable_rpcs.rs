@@ -69,7 +69,7 @@ async fn chainhead_unstable_body() {
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
+        FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -98,7 +98,7 @@ async fn chainhead_unstable_header() {
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
+        FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -126,7 +126,7 @@ async fn chainhead_unstable_storage() {
     let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
+        FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -171,7 +171,7 @@ async fn chainhead_unstable_call() {
     let mut blocks = rpc.chainhead_unstable_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
+        FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -208,7 +208,7 @@ async fn chainhead_unstable_unpin() {
     let mut blocks = rpc.chainhead_unstable_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
+        FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -414,7 +414,7 @@ async fn transaction_unstable_stop() {
         .unwrap()
         .expect("Server is not overloaded by 1 tx; qed");
 
-    let _ = rpc.transaction_unstable_stop(&operation_id).await.unwrap();
+    rpc.transaction_unstable_stop(&operation_id).await.unwrap();
     // Cannot stop it twice.
     let _err = rpc
         .transaction_unstable_stop(&operation_id)

@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .fetch_raw(subxt_core::storage::get_address_bytes(&storage_query, &api.metadata()).unwrap())
         .await?;
 
-    let v = hex::encode(&result.unwrap());
+    let v = hex::encode(result.unwrap());
     println!("Alice: {v}");
     Ok(())
 }

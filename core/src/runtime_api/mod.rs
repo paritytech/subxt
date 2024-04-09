@@ -77,7 +77,7 @@ pub fn call_args<Payload: PayloadT>(
     payload: &Payload,
     metadata: &Metadata,
 ) -> Result<Vec<u8>, Error> {
-    payload.encode_args(&metadata)
+    payload.encode_args(metadata)
 }
 
 /// Decode the value bytes at the location given by the provided runtime API payload.
@@ -94,7 +94,7 @@ pub fn decode_value<Payload: PayloadT>(
     let val = <Payload::ReturnType as DecodeWithMetadata>::decode_with_metadata(
         &mut &bytes[..],
         api_method.output_ty(),
-        &metadata,
+        metadata,
     )?;
 
     Ok(val)
