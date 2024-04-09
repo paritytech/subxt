@@ -113,10 +113,8 @@ which = "5.0.0"
 strip-ansi-escapes = "0.2.0"
 
 # Light client support:
-smoldot = { path = "/home/lexnv/workspace/smoldot/lib", default-features = false }
-#smoldot = { version = "0.17.0", default-features = false }
-#smoldot-light = { version = "0.15.0", default-features = false }
-smoldot-light = { path = "/home/lexnv/workspace/smoldot/light-base", default-features = false }
+smoldot = { version = "0.17.0", default-features = false }
+smoldot-light = { version = "0.15.0", default-features = false }
 
 tokio-stream = "0.1.15"
 

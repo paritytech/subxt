@@ -548,12 +548,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
 
 [[package]]
-name = "base64"
-version = "0.22.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9475866fec1451be56a3c2400fd081ff546538961565ccb5b7142cbd22bc7a51"
-
-[[package]]
 name = "base64ct"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2376,7 +2370,7 @@ dependencies = [
  "pin-project",
  "rustls-native-certs 0.7.0",
  "rustls-pki-types",
- "soketto 0.7.1",
+ "soketto",
  "thiserror",
  "tokio",
  "tokio-rustls 0.25.0",
@@ -3586,12 +3580,13 @@ checksum = "7ffc183a10b4478d04cbbbfc96d0873219d962dd5accaff2ffbd4ceb7df837f4"
 
 [[package]]
 name = "ruzstd"
-version = "0.6.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5174a470eeb535a721ae9fdd6e291c2411a906b96592182d05217591d5c5cf7b"
+checksum = "58c4eb8a81997cf040a091d1f7e1938aeab6749d3a0dfa73af43cdc32393483d"
 dependencies = [
  "byteorder",
  "derive_more",
+ "twox-hash",
 ]
 
 [[package]]
@@ -3976,17 +3971,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sha1"
-version = "0.10.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3bf829a2d51ab4a5ddf1352d8470c140cadc8301b2ae1789db023f01cedd6ba"
-dependencies = [
- "cfg-if",
- "cpufeatures",
- "digest 0.10.7",
-]
-
-[[package]]
 name = "sha2"
 version = "0.9.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4095,11 +4079,13 @@ dependencies = [
 [[package]]
 name = "smoldot"
 version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "65332bfea88002d2b47f33e5f3ccd22a1c94967f8ada0c912be56865a02e5e57"
 dependencies = [
  "arrayvec 0.7.4",
  "async-lock 3.3.0",
  "atomic-take",
- "base64 0.22.0",
+ "base64 0.21.7",
  "bip39",
  "blake2-rfc",
  "bs58",
@@ -4108,7 +4094,7 @@ dependencies = [
  "derive_more",
  "ed25519-zebra 4.0.3",
  "either",
- "event-listener 5.0.0",
+ "event-listener 4.0.3",
  "fnv",
  "futures-lite",
  "futures-util",
@@ -4138,7 +4124,7 @@ dependencies = [
  "siphasher",
  "slab",
  "smallvec",
- "soketto 0.8.0",
+ "soketto",
  "twox-hash",
  "wasmi",
  "x25519-dalek",
@@ -4148,15 +4134,16 @@ dependencies = [
 [[package]]
 name = "smoldot-light"
 version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "416a29c366a0e6d41bf81dc6c1e4851c60834eabea7e65d056c6becfdfd89977"
 dependencies = [
  "async-channel",
  "async-lock 3.3.0",
- "base64 0.22.0",
+ "base64 0.21.7",
  "blake2-rfc",
- "bs58",
  "derive_more",
  "either",
- "event-listener 5.0.0",
+ "event-listener 4.0.3",
  "fnv",
  "futures-channel",
  "futures-lite",
@@ -4203,21 +4190,6 @@ dependencies = [
  "log",
  "rand",
  "sha-1",
-]
-
-[[package]]
-name = "soketto"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37468c595637c10857701c990f93a40ce0e357cedb0953d1c26c8d8027f9bb53"
-dependencies = [
- "base64 0.22.0",
- "bytes",
- "futures",
- "httparse",
- "log",
- "rand",
- "sha1",
 ]
 
 [[package]]
