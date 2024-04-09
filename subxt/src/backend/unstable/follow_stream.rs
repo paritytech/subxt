@@ -132,6 +132,8 @@ impl<Hash> Stream for FollowStream<Hash> {
         let this = self.get_mut();
 
         loop {
+            tracing::trace!("stream: {:?}", this.stream);
+
             match &mut this.stream {
                 InnerStreamState::New => {
                     let fut = (this.stream_getter)();
@@ -148,6 +150,12 @@ impl<Hash> Stream for FollowStream<Hash> {
                             continue;
                         }
                         Poll::Ready(Err(e)) => {
+                            // Re-start if a reconnecting backend was enabled.
+                            if e.is_disconnected_will_reconnect() {
+                                this.stream = InnerStreamState::New;
+                                continue;
+                            }
+
                             // Finish forever if there's an error, passing it on.
                             this.stream = InnerStreamState::Finished;
                             return Poll::Ready(Some(Err(e)));
@@ -182,6 +190,12 @@ impl<Hash> Stream for FollowStream<Hash> {
                             return Poll::Ready(Some(Ok(FollowStreamMsg::Event(ev))));
                         }
                         Poll::Ready(Some(Err(e))) => {
+                            // Re-start if a reconnecting backend was enabled.
+                            if e.is_disconnected_will_reconnect() {
+                                this.stream = InnerStreamState::New;
+                                continue;
+                            }
+
                             // Finish forever if there's an error, passing it on.
                             this.stream = InnerStreamState::Finished;
                             return Poll::Ready(Some(Err(e)));

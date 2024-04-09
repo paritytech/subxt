@@ -61,7 +61,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let header = match block {
             Ok((header, _)) => header,
             Err(Error::Rpc(RpcError::DisconnectedWillReconnect(err))) => {
-                println!("{err}");
+                println!("sub_error: {err}");
                 blocks_sub = blocks_sub.resubscribe().await?;
                 continue;
             }
@@ -84,14 +84,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn drive_rpc_backend(mut driver: UnstableBackendDriver<PolkadotConfig>) {
     while let Some(val) = driver.next().await {
         if let Err(e) = val {
-            if e.is_disconnected_will_reconnect() {
-                eprintln!("Unstable backend was disconnecting; reconnecting");
-                // TODO need re-subscribe to chainHead_follow here for this to work
-                // not possible right now.
-                continue;
-            } else {
-                eprintln!("Error driving unstable backend: {e}; terminating client");
-            }
+            eprintln!("Error driving unstable backend: {e}; terminating client");
         }
     }
 }
