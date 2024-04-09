@@ -2,12 +2,44 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Types and functions for constructing runtime API requests.
-
-// TODO: Like with storage entries:
-// - put payload stuff in separate module and re-export here.
-// - expose functions for encoding the request and decoding the response.
-// - add example of this at the top.
+//! Encode runtime API payloads, decode the associated values returned from them, and validate
+//! static runtime API payloads.
+//!
+//! # Example
+//!
+//! ```rust
+//! use subxt_macro::subxt;
+//! use subxt_core::runtime_api;
+//! use subxt_core::metadata;
+//!
+//! // If we generate types without `subxt`, we need to point to `::subxt_core`:
+//! #[subxt(
+//!     crate = "::subxt_core",
+//!     runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale",
+//! )]
+//! pub mod polkadot {}
+//!
+//! // Some metadata we'll use to work with storage entries:
+//! let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
+//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//!
+//! // Build a storage query to access account information.
+//! let payload = polkadot::apis().metadata().metadata_versions();
+//!
+//! // We can validate that the payload is compatible with the given metadata.
+//! runtime_api::validate(&metadata, &payload).unwrap();
+//!
+//! // Encode the payload name and arguments to hand to a node:
+//! let _call_name = runtime_api::call_name(&payload);
+//! let _call_args = runtime_api::call_args(&metadata, &payload).unwrap();
+//!
+//! // If we were to obtain a value back from the node, we could
+//! // then decode it using the same payload and metadata like so:
+//! let value_bytes = hex::decode("080e0000000f000000").unwrap();
+//! let value = runtime_api::decode_value(&metadata, &payload, &mut &*value_bytes).unwrap();
+//!
+//! println!("Available metadata versions: {value:?}");
+//! ```
 
 pub mod payload;
 
