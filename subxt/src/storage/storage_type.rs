@@ -255,7 +255,7 @@ where
 
                     let key_bytes = kv.key;
                     let cursor = &mut &key_bytes[..];
-                    strip_storage_addess_root_bytes(cursor)?;
+                    strip_storage_address_root_bytes(cursor)?;
 
                     let keys = <Address::Keys as StorageKey>::decode_storage_key(
                         cursor,
@@ -314,10 +314,10 @@ where
     }
 }
 
-/// Strips the first 16 bytes (8 for the pallet hash, 8 for the entry hash) off some storage address bytes.
-fn strip_storage_addess_root_bytes(address_bytes: &mut &[u8]) -> Result<(), StorageAddressError> {
-    if address_bytes.len() >= 16 {
-        *address_bytes = &address_bytes[16..];
+/// Strips the first 32 bytes (16 for the pallet hash, 16 for the entry hash) off some storage address bytes.
+fn strip_storage_address_root_bytes(address_bytes: &mut &[u8]) -> Result<(), StorageAddressError> {
+    if address_bytes.len() >= 32 {
+        *address_bytes = &address_bytes[32..];
         Ok(())
     } else {
         Err(StorageAddressError::UnexpectedAddressBytes)
