@@ -4,12 +4,15 @@
 
 use super::wasm_socket::WasmSocket;
 
-use core::time::Duration;
+use core::{
+    fmt::{self, Write as _},
+    time::Duration,
+};
 use futures::prelude::*;
 use smoldot::libp2p::with_buffers;
 use smoldot_light::platform::{
-    Address, ConnectionType, IpAddr, MultiStreamAddress, MultiStreamWebRtcConnection, PlatformRef,
-    SubstreamDirection,
+    Address, ConnectionType, IpAddr, LogLevel, MultiStreamAddress, MultiStreamWebRtcConnection,
+    PlatformRef, SubstreamDirection,
 };
 
 use std::{io, net::SocketAddr, pin::Pin};
@@ -186,5 +189,34 @@ impl PlatformRef for SubxtPlatform {
             let duration = when.saturating_duration_since(now);
             super::wasm_helpers::sleep(duration).await;
         }))
+    }
+
+    fn log<'a>(
+        &self,
+        log_level: LogLevel,
+        log_target: &'a str,
+        message: &'a str,
+        key_values: impl Iterator<Item = (&'a str, &'a dyn fmt::Display)>,
+    ) {
+        let mut message_build = String::with_capacity(128);
+        message_build.push_str(message);
+        let mut first = true;
+        for (key, value) in key_values {
+            if first {
+                let _ = write!(message_build, "; ");
+                first = false;
+            } else {
+                let _ = write!(message_build, ", ");
+            }
+            let _ = write!(message_build, "{}={}", key, value);
+        }
+
+        match log_level {
+            LogLevel::Error => tracing::error!("target={} {}", log_target, message_build),
+            LogLevel::Warn => tracing::warn!("target={} {}", log_target, message_build),
+            LogLevel::Info => tracing::info!("target={} {}", log_target, message_build),
+            LogLevel::Debug => tracing::debug!("target={} {}", log_target, message_build),
+            LogLevel::Trace => tracing::trace!("target={} {}", log_target, message_build),
+        };
     }
 }
