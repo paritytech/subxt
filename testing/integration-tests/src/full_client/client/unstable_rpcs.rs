@@ -5,7 +5,7 @@
 //! Just sanity checking some of the new RPC methods to try and
 //! catch differences as the implementations evolve.
 
-use crate::{test_context, utils::node_runtime};
+use crate::{subxt_test, test_context, utils::node_runtime};
 use assert_matches::assert_matches;
 use codec::Encode;
 use futures::Stream;
@@ -18,9 +18,10 @@ use subxt::{
     utils::{AccountId32, MultiAddress},
     SubstrateConfig,
 };
+
 use subxt_signer::sr25519::dev;
 
-#[tokio::test]
+#[subxt_test]
 async fn chainhead_unstable_follow() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
@@ -60,7 +61,7 @@ async fn chainhead_unstable_follow() {
     );
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn chainhead_unstable_body() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
@@ -88,7 +89,7 @@ async fn chainhead_unstable_body() {
     );
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn chainhead_unstable_header() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
@@ -116,7 +117,7 @@ async fn chainhead_unstable_header() {
     assert_eq!(new_header, old_header);
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn chainhead_unstable_storage() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -162,7 +163,7 @@ async fn chainhead_unstable_storage() {
     assert_matches!(event, FollowEvent::OperationStorageDone(res) if res.operation_id == operation_id);
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn chainhead_unstable_call() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
@@ -199,7 +200,7 @@ async fn chainhead_unstable_call() {
     );
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn chainhead_unstable_unpin() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
@@ -217,7 +218,8 @@ async fn chainhead_unstable_unpin() {
     assert!(rpc.chainhead_unstable_unpin(sub_id, hash).await.is_err());
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn chainspec_v1_genesishash() {
     let ctx = test_context().await;
     let old_rpc = ctx.legacy_rpc_methods().await;
@@ -229,7 +231,8 @@ async fn chainspec_v1_genesishash() {
     assert_eq!(a, b);
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn chainspec_v1_chainname() {
     let ctx = test_context().await;
     let old_rpc = ctx.legacy_rpc_methods().await;
@@ -241,7 +244,8 @@ async fn chainspec_v1_chainname() {
     assert_eq!(a, b);
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn chainspec_v1_properties() {
     let ctx = test_context().await;
     let old_rpc = ctx.legacy_rpc_methods().await;
@@ -253,7 +257,8 @@ async fn chainspec_v1_properties() {
     assert_eq!(a, b);
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn transaction_unstable_submit_and_watch() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
