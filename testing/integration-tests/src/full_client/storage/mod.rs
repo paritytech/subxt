@@ -237,7 +237,7 @@ async fn storage_pallet_storage_version() -> Result<(), subxt::Error> {
 }
 
 #[subxt_test]
-async fn storage_decode_keys() -> Result<(), subxt::Error> {
+async fn storage_iter_decode_keys() -> Result<(), subxt::Error> {
     use futures::StreamExt;
 
     let ctx = test_context().await;
