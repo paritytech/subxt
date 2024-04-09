@@ -9,6 +9,7 @@
 use super::address::AddressT;
 use crate::error::{Error, MetadataError};
 use crate::metadata::Metadata;
+use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
 use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageHasher};
 

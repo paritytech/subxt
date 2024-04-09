@@ -48,6 +48,7 @@ pub mod address;
 
 use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
 use address::AddressT;
+use alloc::vec::Vec;
 
 // This isn't a part of the public API, but expose here because it's useful in Subxt.
 #[doc(hidden)]

@@ -73,6 +73,7 @@ mod static_extrinsic;
 use crate::config::Config;
 use crate::error::BlockError;
 use crate::Metadata;
+use alloc::vec::Vec;
 
 pub use extrinsic_signed_extensions::{ExtrinsicSignedExtension, ExtrinsicSignedExtensions};
 pub use extrinsics::{

@@ -10,6 +10,7 @@ use crate::{
     Metadata,
 };
 use alloc::sync::Arc;
+use alloc::vec::Vec;
 use codec::Decode;
 use scale_decode::DecodeAsType;
 use subxt_metadata::PalletMetadata;
