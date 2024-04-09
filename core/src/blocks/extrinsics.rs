@@ -9,8 +9,8 @@ use crate::{
     error::{BlockError, Error, MetadataError},
     Metadata,
 };
+use alloc::sync::Arc;
 use codec::Decode;
-use core::sync::Arc;
 use scale_decode::DecodeAsType;
 use subxt_metadata::PalletMetadata;
 
