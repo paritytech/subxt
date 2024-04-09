@@ -164,6 +164,3 @@ opt-level = 2
 opt-level = 2
 [profile.test.package.smoldot]
 opt-level = 2
-
-[patch.crates-io]
-scale-info = { path = "../scale-info" }
