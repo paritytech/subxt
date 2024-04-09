@@ -229,7 +229,7 @@ async fn storage_pallet_storage_version() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[subxt_test]
+#[tokio::test]
 async fn storage_iter_decode_keys() -> Result<(), subxt::Error> {
     use futures::StreamExt;
 
