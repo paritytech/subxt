@@ -22,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .storage()
         .at_latest()
         .await?
-        .fetch_raw(subxt_core::storage::get_address_bytes(&api.metadata(), &storage_query).unwrap())
+        .fetch_raw(subxt_core::storage::get_address_bytes(&storage_query, &api.metadata()).unwrap())
         .await?;
 
     let v = hex::encode(&result.unwrap());

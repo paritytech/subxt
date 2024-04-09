@@ -42,7 +42,7 @@ where
     /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
     /// the runtime API in question do not exist at all)
     pub fn validate<Call: PayloadT>(&self, payload: &Call) -> Result<(), Error> {
-        subxt_core::runtime_api::validate(&self.client.metadata(), payload).map_err(Into::into)
+        subxt_core::runtime_api::validate(payload, &self.client.metadata()).map_err(Into::into)
     }
 
     /// Execute a raw runtime API call.
@@ -77,11 +77,11 @@ where
             let metadata = client.metadata();
 
             // Validate the runtime API payload hash against the compile hash from codegen.
-            subxt_core::runtime_api::validate(&metadata, &payload)?;
+            subxt_core::runtime_api::validate(&payload, &metadata)?;
 
             // Encode the arguments of the runtime call.
             let call_name = subxt_core::runtime_api::call_name(&payload);
-            let call_args = subxt_core::runtime_api::call_args(&metadata, &payload)?;
+            let call_args = subxt_core::runtime_api::call_args(&payload, &metadata)?;
 
             // Make the call.
             let bytes = client
@@ -90,7 +90,7 @@ where
                 .await?;
 
             // Decode the response.
-            let value = subxt_core::runtime_api::decode_value(&metadata, &payload, &mut &*bytes)?;
+            let value = subxt_core::runtime_api::decode_value(&mut &*bytes, &payload, &metadata)?;
             Ok(value)
         }
     }

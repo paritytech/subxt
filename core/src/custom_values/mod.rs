@@ -27,7 +27,7 @@
 //!
 //! // At the moment, we don't expect to see any custom values in the metadata
 //! // for Polkadot, so this will return an error:
-//! let err = custom_values::get(&metadata, "Foo");
+//! let err = custom_values::get("Foo", &metadata);
 //! ```
 
 pub mod address;
@@ -41,8 +41,8 @@ use alloc::vec::Vec;
 /// if the address is valid (or if it's not possible to check since the address has no validation hash).
 /// Returns an error if the address was not valid (wrong name, type or raw bytes)
 pub fn validate<Address: AddressT + ?Sized>(
-    metadata: &Metadata,
     address: &Address,
+    metadata: &Metadata,
 ) -> Result<(), Error> {
     if let Some(actual_hash) = address.validation_hash() {
         let custom = metadata.custom();
@@ -63,11 +63,11 @@ pub fn validate<Address: AddressT + ?Sized>(
 /// Access a custom value by the address it is registered under. This can be just a [str] to get back a dynamic value,
 /// or a static address from the generated static interface to get a value of a static type returned.
 pub fn get<Address: AddressT<IsDecodable = Yes> + ?Sized>(
-    metadata: &Metadata,
     address: &Address,
+    metadata: &Metadata,
 ) -> Result<Address::Target, Error> {
     // 1. Validate custom value shape if hash given:
-    validate(metadata, address)?;
+    validate(address, metadata)?;
 
     // 2. Attempt to decode custom value:
     let custom_value = metadata.custom_value_by_name_err(address.name())?;
@@ -81,11 +81,11 @@ pub fn get<Address: AddressT<IsDecodable = Yes> + ?Sized>(
 
 /// Access the bytes of a custom value by the address it is registered under.
 pub fn get_bytes<Address: AddressT + ?Sized>(
-    metadata: &Metadata,
     address: &Address,
+    metadata: &Metadata,
 ) -> Result<Vec<u8>, Error> {
     // 1. Validate custom value shape if hash given:
-    validate(metadata, address)?;
+    validate(address, metadata)?;
 
     // 2. Return the underlying bytes:
     let custom_value = metadata.custom_value_by_name_err(address.name())?;
@@ -164,8 +164,8 @@ mod tests {
     fn test_decoding() {
         let metadata = mock_metadata();
 
-        assert!(custom_values::get(&metadata, "Invalid Address").is_err());
-        let person_decoded_value_thunk = custom_values::get(&metadata, "Mr. Robot").unwrap();
+        assert!(custom_values::get("Invalid Address", &metadata).is_err());
+        let person_decoded_value_thunk = custom_values::get("Mr. Robot", &metadata).unwrap();
         let person: Person = person_decoded_value_thunk.as_type().unwrap();
         assert_eq!(
             person,

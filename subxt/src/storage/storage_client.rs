@@ -40,7 +40,7 @@ where
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie
     /// the pallet or storage entry in question do not exist at all).
     pub fn validate<Address: AddressT>(&self, address: &Address) -> Result<(), Error> {
-        subxt_core::storage::validate(&self.client.metadata(), address).map_err(Into::into)
+        subxt_core::storage::validate(address, &self.client.metadata()).map_err(Into::into)
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
@@ -55,7 +55,7 @@ where
     /// node you're communicating with, or if the metadata is missing some type information (which should not
     /// happen).
     pub fn address_bytes<Address: AddressT>(&self, address: &Address) -> Result<Vec<u8>, Error> {
-        subxt_core::storage::get_address_bytes(&self.client.metadata(), address).map_err(Into::into)
+        subxt_core::storage::get_address_bytes(address, &self.client.metadata()).map_err(Into::into)
     }
 }
 

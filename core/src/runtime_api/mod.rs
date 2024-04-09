@@ -27,16 +27,16 @@
 //! let payload = polkadot::apis().metadata().metadata_versions();
 //!
 //! // We can validate that the payload is compatible with the given metadata.
-//! runtime_api::validate(&metadata, &payload).unwrap();
+//! runtime_api::validate(&payload, &metadata).unwrap();
 //!
 //! // Encode the payload name and arguments to hand to a node:
 //! let _call_name = runtime_api::call_name(&payload);
-//! let _call_args = runtime_api::call_args(&metadata, &payload).unwrap();
+//! let _call_args = runtime_api::call_args(&payload, &metadata).unwrap();
 //!
 //! // If we were to obtain a value back from the node, we could
 //! // then decode it using the same payload and metadata like so:
 //! let value_bytes = hex::decode("080e0000000f000000").unwrap();
-//! let value = runtime_api::decode_value(&metadata, &payload, &mut &*value_bytes).unwrap();
+//! let value = runtime_api::decode_value(&mut &*value_bytes, &payload, &metadata).unwrap();
 //!
 //! println!("Available metadata versions: {value:?}");
 //! ```
@@ -51,7 +51,7 @@ use payload::PayloadT;
 /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
 /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
 /// the runtime API in question do not exist at all)
-pub fn validate<Payload: PayloadT>(metadata: &Metadata, payload: &Payload) -> Result<(), Error> {
+pub fn validate<Payload: PayloadT>(payload: &Payload, metadata: &Metadata) -> Result<(), Error> {
     let Some(static_hash) = payload.validation_hash() else {
         return Ok(());
     };
@@ -74,17 +74,17 @@ pub fn call_name<Payload: PayloadT>(payload: &Payload) -> String {
 
 /// Return the encoded call args given a runtime API payload.
 pub fn call_args<Payload: PayloadT>(
-    metadata: &Metadata,
     payload: &Payload,
+    metadata: &Metadata,
 ) -> Result<Vec<u8>, Error> {
     payload.encode_args(&metadata)
 }
 
 /// Decode the value bytes at the location given by the provided runtime API payload.
 pub fn decode_value<Payload: PayloadT>(
-    metadata: &Metadata,
-    payload: &Payload,
     bytes: &mut &[u8],
+    payload: &Payload,
+    metadata: &Metadata,
 ) -> Result<Payload::ReturnType, Error> {
     let api_method = metadata
         .runtime_api_trait_by_name_err(payload.trait_name())?

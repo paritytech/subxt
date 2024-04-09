@@ -45,10 +45,10 @@
 //! let params = Params::new().tip(1_000).nonce(0).build();
 //!
 //! // We can validate that this lines up with the given metadata:
-//! tx::validate(&state.metadata, &call).unwrap();
+//! tx::validate(&call, &state.metadata).unwrap();
 //!
 //! // We can build a signed transaction:
-//! let signed_call = tx::create_signed(&state, &call, &dev::alice(), params).unwrap();
+//! let signed_call = tx::create_signed(&call, &state, &dev::alice(), params).unwrap();
 //!
 //! // And log it:
 //! println!("Tx: 0x{}", hex::encode(signed_call.encoded()));
@@ -74,7 +74,7 @@ pub use crate::client::{ClientState, RuntimeVersion};
 /// if the call is valid (or if it's not possible to check since the call has no validation hash).
 /// Return an error if the call was not valid or something went wrong trying to validate it (ie
 /// the pallet or call in question do not exist at all).
-pub fn validate<Call: PayloadT>(metadata: &Metadata, call: &Call) -> Result<(), Error> {
+pub fn validate<Call: PayloadT>(call: &Call, metadata: &Metadata) -> Result<(), Error> {
     if let Some(details) = call.validation_details() {
         let expected_hash = metadata
             .pallet_by_name_err(details.pallet_name)?
@@ -89,7 +89,7 @@ pub fn validate<Call: PayloadT>(metadata: &Metadata, call: &Call) -> Result<(), 
 }
 
 /// Return the SCALE encoded bytes representing the call data of the transaction.
-pub fn call_data<Call: PayloadT>(metadata: &Metadata, call: &Call) -> Result<Vec<u8>, Error> {
+pub fn call_data<Call: PayloadT>(call: &Call, metadata: &Metadata) -> Result<Vec<u8>, Error> {
     let mut bytes = Vec::new();
     call.encode_call_data_to(metadata, &mut bytes)?;
     Ok(bytes)
@@ -97,12 +97,12 @@ pub fn call_data<Call: PayloadT>(metadata: &Metadata, call: &Call) -> Result<Vec
 
 /// Creates an unsigned extrinsic without submitting it.
 pub fn create_unsigned<T: Config, Call: PayloadT>(
-    metadata: &Metadata,
     call: &Call,
+    metadata: &Metadata,
 ) -> Result<Transaction<T>, Error> {
     // 1. Validate this call against the current node metadata if the call comes
     // with a hash allowing us to do so.
-    validate(metadata, call)?;
+    validate(call, metadata)?;
 
     // 2. Encode extrinsic
     let extrinsic = {
@@ -130,16 +130,16 @@ pub fn create_unsigned<T: Config, Call: PayloadT>(
 /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
 /// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
 pub fn create_partial_signed<T: Config, Call: PayloadT>(
-    client_state: &ClientState<T>,
     call: &Call,
+    client_state: &ClientState<T>,
     params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
 ) -> Result<PartialTransaction<T>, Error> {
     // 1. Validate this call against the current node metadata if the call comes
     // with a hash allowing us to do so.
-    validate(&client_state.metadata, call)?;
+    validate(call, &client_state.metadata)?;
 
     // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
-    let call_data = call_data(&client_state.metadata, call)?;
+    let call_data = call_data(call, &client_state.metadata)?;
 
     // 3. Construct our custom additional/extra params.
     let additional_and_extra_params =
@@ -157,8 +157,8 @@ pub fn create_partial_signed<T: Config, Call: PayloadT>(
 /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
 /// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
 pub fn create_signed<T, Call, Signer>(
-    client_state: &ClientState<T>,
     call: &Call,
+    client_state: &ClientState<T>,
     signer: &Signer,
     params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
 ) -> Result<Transaction<T>, Error>
@@ -169,11 +169,11 @@ where
 {
     // 1. Validate this call against the current node metadata if the call comes
     // with a hash allowing us to do so.
-    validate(&client_state.metadata, call)?;
+    validate(call, &client_state.metadata)?;
 
     // 2. Gather the "additional" and "extra" params along with the encoded call data,
     //    ready to be signed.
-    let partial_signed = create_partial_signed(client_state, call, params)?;
+    let partial_signed = create_partial_signed(call, client_state, params)?;
 
     // 3. Sign and construct an extrinsic from these details.
     Ok(partial_signed.sign(signer))

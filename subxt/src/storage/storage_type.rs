@@ -125,12 +125,12 @@ where
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            subxt_core::storage::validate(&metadata, address)?;
+            subxt_core::storage::validate(address, &metadata)?;
 
             // Look up the return type ID to enable DecodeWithMetadata:
-            let lookup_bytes = subxt_core::storage::get_address_bytes(&metadata, address)?;
+            let lookup_bytes = subxt_core::storage::get_address_bytes(address, &metadata)?;
             if let Some(data) = client.fetch_raw(lookup_bytes).await? {
-                let val = subxt_core::storage::decode_value(&metadata, address, &mut &*data)?;
+                let val = subxt_core::storage::decode_value(&mut &*data, address, &metadata)?;
                 Ok(Some(val))
             } else {
                 Ok(None)
@@ -153,7 +153,7 @@ where
                 Ok(data)
             } else {
                 let metadata = client.client.metadata();
-                let val = subxt_core::storage::default_value(&metadata, address)?;
+                let val = subxt_core::storage::default_value(address, &metadata)?;
                 Ok(val)
             }
         }
@@ -212,7 +212,7 @@ where
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            subxt_core::storage::validate(&metadata, &address)?;
+            subxt_core::storage::validate(&address, &metadata)?;
 
             // Look up the return type for flexible decoding. Do this once here to avoid
             // potentially doing it every iteration if we used `decode_storage_with_metadata`
@@ -223,7 +223,7 @@ where
             let hashers = StorageHashers::new(entry, metadata.types())?;
 
             // The address bytes of this entry:
-            let address_bytes = subxt_core::storage::get_address_bytes(&metadata, &address)?;
+            let address_bytes = subxt_core::storage::get_address_bytes(&address, &metadata)?;
             let s = client
                 .backend()
                 .storage_fetch_descendant_values(address_bytes, block_ref.hash())

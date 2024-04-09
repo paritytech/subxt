@@ -39,7 +39,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: PayloadT,
     {
-        subxt_core::tx::validate(&self.client.metadata(), call).map_err(Into::into)
+        subxt_core::tx::validate(call, &self.client.metadata()).map_err(Into::into)
     }
 
     /// Return the SCALE encoded bytes representing the call data of the transaction.
@@ -47,7 +47,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: PayloadT,
     {
-        subxt_core::tx::call_data(&self.client.metadata(), call).map_err(Into::into)
+        subxt_core::tx::call_data(call, &self.client.metadata()).map_err(Into::into)
     }
 
     /// Creates an unsigned extrinsic without submitting it.
@@ -55,7 +55,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: PayloadT,
     {
-        subxt_core::tx::create_unsigned(&self.client.metadata(), call)
+        subxt_core::tx::create_unsigned(call, &self.client.metadata())
             .map(|tx| SubmittableExtrinsic {
                 client: self.client.clone(),
                 inner: tx,
@@ -75,7 +75,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: PayloadT,
     {
-        subxt_core::tx::create_partial_signed(&self.client.client_state(), call, params)
+        subxt_core::tx::create_partial_signed(call, &self.client.client_state(), params)
             .map(|tx| PartialExtrinsic {
                 client: self.client.clone(),
                 inner: tx,
@@ -97,7 +97,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         Call: PayloadT,
         Signer: SignerT<T>,
     {
-        subxt_core::tx::create_signed(&self.client.client_state(), call, signer, params)
+        subxt_core::tx::create_signed(call, &self.client.client_state(), signer, params)
             .map(|tx| SubmittableExtrinsic {
                 client: self.client.clone(),
                 inner: tx,

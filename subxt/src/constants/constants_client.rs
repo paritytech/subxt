@@ -30,7 +30,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     /// the pallet or constant in question do not exist at all).
     pub fn validate<Address: AddressT>(&self, address: &Address) -> Result<(), Error> {
         let metadata = self.client.metadata();
-        subxt_core::constants::validate(&metadata, address).map_err(Error::from)
+        subxt_core::constants::validate(address, &metadata).map_err(Error::from)
     }
 
     /// Access the constant at the address given, returning the type defined by this address.
@@ -38,6 +38,6 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     /// construct your own, too.
     pub fn at<Address: AddressT>(&self, address: &Address) -> Result<Address::Target, Error> {
         let metadata = self.client.metadata();
-        subxt_core::constants::get(&metadata, address).map_err(Error::from)
+        subxt_core::constants::get(address, &metadata).map_err(Error::from)
     }
 }

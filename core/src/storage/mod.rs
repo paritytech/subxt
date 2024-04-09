@@ -28,15 +28,15 @@
 //! let address = polkadot::storage().system().account(&account);
 //!
 //! // We can validate that the address is compatible with the given metadata.
-//! storage::validate(&metadata, &address).unwrap();
+//! storage::validate(&address, &metadata).unwrap();
 //!
 //! // Encode the address to bytes. These can be sent to a node to query the value.
-//! storage::get_address_bytes(&metadata, &address).unwrap();
+//! storage::get_address_bytes(&address, &metadata).unwrap();
 //!
 //! // If we were to obtain a value back from the node at that address, we could
 //! // then decode it using the same address and metadata like so:
 //! let value_bytes = hex::decode("00000000000000000100000000000000000064a7b3b6e00d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080").unwrap();
-//! let value = storage::decode_value(&metadata, &address, &mut &*value_bytes).unwrap();
+//! let value = storage::decode_value(&mut &*value_bytes, &address, &metadata).unwrap();
 //!
 //! println!("Alice's account info: {value:?}");
 //! ```
@@ -58,7 +58,7 @@ pub use utils::lookup_storage_entry_details;
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Address: AddressT>(metadata: &Metadata, address: &Address) -> Result<(), Error> {
+pub fn validate<Address: AddressT>(address: &Address, metadata: &Metadata) -> Result<(), Error> {
     let Some(hash) = address.validation_hash() else {
         return Ok(());
     };
@@ -80,8 +80,8 @@ pub fn validate<Address: AddressT>(metadata: &Metadata, address: &Address) -> Re
 /// Given a storage address and some metadata, this encodes the address into bytes which can be
 /// handed to a node to retrieve the corresponding value.
 pub fn get_address_bytes<Address: AddressT>(
-    metadata: &Metadata,
     address: &Address,
+    metadata: &Metadata,
 ) -> Result<Vec<u8>, Error> {
     let mut bytes = Vec::new();
     utils::write_storage_address_root_bytes(address, &mut bytes);
@@ -102,9 +102,9 @@ pub fn get_address_root_bytes<Address: AddressT>(address: &Address) -> Vec<u8> {
 /// metadata from the node, this function attempts to decode the bytes into the target value specified
 /// by the address.
 pub fn decode_value<Address: AddressT>(
-    metadata: &Metadata,
-    address: &Address,
     bytes: &mut &[u8],
+    address: &Address,
+    metadata: &Metadata,
 ) -> Result<Address::Target, Error> {
     let pallet_name = address.pallet_name();
     let entry_name = address.entry_name();
@@ -122,8 +122,8 @@ pub fn decode_value<Address: AddressT>(
 
 /// Return the default value at a given storage address if one is available, or an error otherwise.
 pub fn default_value<Address: AddressT>(
-    metadata: &Metadata,
     address: &Address,
+    metadata: &Metadata,
 ) -> Result<Address::Target, Error> {
     let pallet_name = address.pallet_name();
     let entry_name = address.entry_name();

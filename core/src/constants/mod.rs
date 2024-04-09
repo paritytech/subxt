@@ -30,10 +30,10 @@
 //!
 //! // This validates that the address given is in line with the metadata
 //! // we're trying to access the constant in:
-//! constants::validate(&metadata, &address).expect("is valid");
+//! constants::validate(&address, &metadata).expect("is valid");
 //!
 //! // This acquires the constant (and internally also validates it):
-//! let ed = constants::get(&metadata, &address).expect("can decode constant");
+//! let ed = constants::get(&address, &metadata).expect("can decode constant");
 //!
 //! assert_eq!(ed, 33_333_333);
 //! ```
@@ -50,7 +50,7 @@ use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata}
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Address: AddressT>(metadata: &Metadata, address: &Address) -> Result<(), Error> {
+pub fn validate<Address: AddressT>(address: &Address, metadata: &Metadata) -> Result<(), Error> {
     if let Some(actual_hash) = address.validation_hash() {
         let expected_hash = metadata
             .pallet_by_name_err(address.pallet_name())?
@@ -68,11 +68,11 @@ pub fn validate<Address: AddressT>(metadata: &Metadata, address: &Address) -> Re
 /// Fetch a constant out of the metadata given a constant address. If the `address` has been
 /// statically generated, this will validate that the constant shape is as expected, too.
 pub fn get<Address: AddressT>(
-    metadata: &Metadata,
     address: &Address,
+    metadata: &Metadata,
 ) -> Result<Address::Target, Error> {
     // 1. Validate constant shape if hash given:
-    validate(metadata, address)?;
+    validate(address, metadata)?;
 
     // 2. Attempt to decode the constant into the type given:
     let constant = metadata
