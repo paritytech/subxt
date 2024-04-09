@@ -50,10 +50,7 @@ use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata}
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Address: AddressT>(
-    metadata: &Metadata,
-    address: &Address,
-) -> Result<(), Error> {
+pub fn validate<Address: AddressT>(metadata: &Metadata, address: &Address) -> Result<(), Error> {
     if let Some(actual_hash) = address.validation_hash() {
         let expected_hash = metadata
             .pallet_by_name_err(address.pallet_name())?

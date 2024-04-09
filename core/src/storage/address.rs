@@ -17,12 +17,7 @@ use alloc::string::String;
 use alloc::vec::Vec;
 
 // Re-export types used here:
-pub use super::storage_key::{
-    StaticStorageKey,
-    StorageHashers,
-    StorageHashersIter,
-    StorageKey,
-};
+pub use super::storage_key::{StaticStorageKey, StorageHashers, StorageHashersIter, StorageKey};
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.

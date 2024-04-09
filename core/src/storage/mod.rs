@@ -46,8 +46,8 @@ mod utils;
 
 pub mod address;
 
-use address::AddressT;
 use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
+use address::AddressT;
 
 // This isn't a part of the public API, but expose here because it's useful in Subxt.
 #[doc(hidden)]
@@ -58,12 +58,9 @@ pub use utils::lookup_storage_entry_details;
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Address: AddressT>(
-    metadata: &Metadata,
-    address: &Address,
-) -> Result<(), Error> {
+pub fn validate<Address: AddressT>(metadata: &Metadata, address: &Address) -> Result<(), Error> {
     let Some(hash) = address.validation_hash() else {
-        return Ok(())
+        return Ok(());
     };
 
     let pallet_name = address.pallet_name();
@@ -112,7 +109,8 @@ pub fn decode_value<Address: AddressT>(
     let pallet_name = address.pallet_name();
     let entry_name = address.entry_name();
 
-    let (_, entry_metadata) = utils::lookup_storage_entry_details(pallet_name, entry_name, metadata)?;
+    let (_, entry_metadata) =
+        utils::lookup_storage_entry_details(pallet_name, entry_name, metadata)?;
     let value_ty_id = match entry_metadata.entry_type() {
         subxt_metadata::StorageEntryType::Plain(ty) => *ty,
         subxt_metadata::StorageEntryType::Map { value_ty, .. } => *value_ty,
@@ -130,7 +128,8 @@ pub fn default_value<Address: AddressT>(
     let pallet_name = address.pallet_name();
     let entry_name = address.entry_name();
 
-    let (_, entry_metadata) = utils::lookup_storage_entry_details(pallet_name, entry_name, metadata)?;
+    let (_, entry_metadata) =
+        utils::lookup_storage_entry_details(pallet_name, entry_name, metadata)?;
     let value_ty_id = match entry_metadata.entry_type() {
         subxt_metadata::StorageEntryType::Plain(ty) => *ty,
         subxt_metadata::StorageEntryType::Map { value_ty, .. } => *value_ty,

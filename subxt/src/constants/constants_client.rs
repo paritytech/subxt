@@ -2,9 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use subxt_core::constants::address::AddressT;
 use crate::{client::OfflineClientT, error::Error, Config};
 use derive_where::derive_where;
+use subxt_core::constants::address::AddressT;
 
 /// A client for accessing constants.
 #[derive_where(Clone; Client)]
@@ -36,10 +36,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     /// Access the constant at the address given, returning the type defined by this address.
     /// This is probably used with addresses given from static codegen, although you can manually
     /// construct your own, too.
-    pub fn at<Address: AddressT>(
-        &self,
-        address: &Address,
-    ) -> Result<Address::Target, Error> {
+    pub fn at<Address: AddressT>(&self, address: &Address) -> Result<Address::Target, Error> {
         let metadata = self.client.metadata();
         subxt_core::constants::get(&metadata, address).map_err(Error::from)
     }

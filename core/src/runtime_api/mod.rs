@@ -43,9 +43,9 @@
 
 pub mod payload;
 
+use crate::error::{Error, MetadataError};
+use crate::metadata::{DecodeWithMetadata, Metadata};
 use payload::PayloadT;
-use crate::error::{Error,MetadataError};
-use crate::metadata::{Metadata,DecodeWithMetadata};
 
 /// Run the validation logic against some runtime API payload you'd like to use. Returns `Ok(())`
 /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
@@ -53,7 +53,7 @@ use crate::metadata::{Metadata,DecodeWithMetadata};
 /// the runtime API in question do not exist at all)
 pub fn validate<Payload: PayloadT>(metadata: &Metadata, payload: &Payload) -> Result<(), Error> {
     let Some(static_hash) = payload.validation_hash() else {
-        return Ok(())
+        return Ok(());
     };
 
     let api_trait = metadata.runtime_api_trait_by_name_err(payload.trait_name())?;
@@ -73,7 +73,10 @@ pub fn call_name<Payload: PayloadT>(payload: &Payload) -> String {
 }
 
 /// Return the encoded call args given a runtime API payload.
-pub fn call_args<Payload: PayloadT>(metadata: &Metadata, payload: &Payload) -> Result<Vec<u8>, Error> {
+pub fn call_args<Payload: PayloadT>(
+    metadata: &Metadata,
+    payload: &Payload,
+) -> Result<Vec<u8>, Error> {
     payload.encode_args(&metadata)
 }
 
@@ -86,9 +89,7 @@ pub fn decode_value<Payload: PayloadT>(
     let api_method = metadata
         .runtime_api_trait_by_name_err(payload.trait_name())?
         .method_by_name(payload.method_name())
-        .ok_or_else(|| {
-            MetadataError::RuntimeMethodNotFound(payload.method_name().to_owned())
-        })?;
+        .ok_or_else(|| MetadataError::RuntimeMethodNotFound(payload.method_name().to_owned()))?;
 
     let val = <Payload::ReturnType as DecodeWithMetadata>::decode_with_metadata(
         &mut &bytes[..],

@@ -3,7 +3,6 @@
 // see LICENSE for license details.
 
 use super::storage_type::Storage;
-use subxt_core::storage::address::AddressT;
 use crate::{
     backend::BlockRef,
     client::{OfflineClientT, OnlineClientT},
@@ -12,6 +11,7 @@ use crate::{
 };
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
+use subxt_core::storage::address::AddressT;
 
 /// Query the runtime storage.
 #[derive_where(Clone; Client)]
@@ -54,12 +54,8 @@ where
     /// implementation this would be if the pallet and storage entry being asked for is not available on the
     /// node you're communicating with, or if the metadata is missing some type information (which should not
     /// happen).
-    pub fn address_bytes<Address: AddressT>(
-        &self,
-        address: &Address,
-    ) -> Result<Vec<u8>, Error> {
-        subxt_core::storage::get_address_bytes(&self.client.metadata(), address)
-            .map_err(Into::into)
+    pub fn address_bytes<Address: AddressT>(&self, address: &Address) -> Result<Vec<u8>, Error> {
+        subxt_core::storage::get_address_bytes(&self.client.metadata(), address).map_err(Into::into)
     }
 }
 

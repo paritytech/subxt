@@ -33,8 +33,8 @@
 pub mod address;
 
 use crate::utils::Yes;
-use address::AddressT;
 use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
+use address::AddressT;
 use alloc::vec::Vec;
 
 /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`

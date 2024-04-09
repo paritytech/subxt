@@ -68,7 +68,7 @@ use sp_crypto_hashing::blake2_256;
 use std::borrow::Cow;
 
 // Expose these here since we expect them in some calls below.
-pub use crate::client::{ ClientState, RuntimeVersion };
+pub use crate::client::{ClientState, RuntimeVersion};
 
 /// Run the validation logic against some extrinsic you'd like to submit. Returns `Ok(())`
 /// if the call is valid (or if it's not possible to check since the call has no validation hash).

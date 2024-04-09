@@ -2,8 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use subxt_core::storage::address::{AddressT, StorageHashers, StorageKey};
-use subxt_core::utils::Yes;
 use crate::{
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
@@ -15,6 +13,8 @@ use codec::Decode;
 use derive_where::derive_where;
 use futures::StreamExt;
 use std::{future::Future, marker::PhantomData};
+use subxt_core::storage::address::{AddressT, StorageHashers, StorageKey};
+use subxt_core::utils::Yes;
 
 /// This is returned from a couple of storage functions.
 pub use crate::backend::StreamOfResults;
@@ -128,11 +128,9 @@ where
             subxt_core::storage::validate(&metadata, address)?;
 
             // Look up the return type ID to enable DecodeWithMetadata:
-            let lookup_bytes =
-                subxt_core::storage::get_address_bytes(&metadata, address)?;
+            let lookup_bytes = subxt_core::storage::get_address_bytes(&metadata, address)?;
             if let Some(data) = client.fetch_raw(lookup_bytes).await? {
-                let val =
-                    subxt_core::storage::decode_value(&metadata, address, &mut &*data)?;
+                let val = subxt_core::storage::decode_value(&metadata, address, &mut &*data)?;
                 Ok(Some(val))
             } else {
                 Ok(None)
@@ -204,8 +202,11 @@ where
         let block_ref = self.block_ref.clone();
         async move {
             let metadata = client.metadata();
-            let (_pallet, entry) =
-                subxt_core::storage::lookup_storage_entry_details(address.pallet_name(), address.entry_name(), &metadata)?;
+            let (_pallet, entry) = subxt_core::storage::lookup_storage_entry_details(
+                address.pallet_name(),
+                address.entry_name(),
+                &metadata,
+            )?;
 
             // Metadata validation checks whether the static address given
             // is likely to actually correspond to a real storage entry or not.
@@ -222,8 +223,7 @@ where
             let hashers = StorageHashers::new(entry, metadata.types())?;
 
             // The address bytes of this entry:
-            let address_bytes =
-                subxt_core::storage::get_address_bytes(&metadata, &address)?;
+            let address_bytes = subxt_core::storage::get_address_bytes(&metadata, &address)?;
             let s = client
                 .backend()
                 .storage_fetch_descendant_values(address_bytes, block_ref.hash())

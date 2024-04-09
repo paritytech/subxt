@@ -7,7 +7,7 @@ use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, Header, RefineParams, RefineParamsData},
     error::{BlockError, Error},
-    tx::{Signer as SignerT, PayloadT, TxProgress},
+    tx::{PayloadT, Signer as SignerT, TxProgress},
     utils::PhantomDataSendSync,
 };
 use codec::{Compact, Decode, Encode};
@@ -75,16 +75,12 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: PayloadT,
     {
-        subxt_core::tx::create_partial_signed(
-            &self.client.client_state(),
-            call,
-            params,
-        )
-        .map(|tx| PartialExtrinsic {
-            client: self.client.clone(),
-            inner: tx,
-        })
-        .map_err(Into::into)
+        subxt_core::tx::create_partial_signed(&self.client.client_state(), call, params)
+            .map(|tx| PartialExtrinsic {
+                client: self.client.clone(),
+                inner: tx,
+            })
+            .map_err(Into::into)
     }
 
     /// Creates a signed extrinsic without submitting it.
@@ -101,17 +97,12 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         Call: PayloadT,
         Signer: SignerT<T>,
     {
-        subxt_core::tx::create_signed(
-            &self.client.client_state(),
-            call,
-            signer,
-            params,
-        )
-        .map(|tx| SubmittableExtrinsic {
-            client: self.client.clone(),
-            inner: tx,
-        })
-        .map_err(Into::into)
+        subxt_core::tx::create_signed(&self.client.client_state(), call, signer, params)
+            .map(|tx| SubmittableExtrinsic {
+                client: self.client.clone(),
+                inner: tx,
+            })
+            .map_err(Into::into)
     }
 }
 

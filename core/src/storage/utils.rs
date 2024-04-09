@@ -6,18 +6,15 @@
 //! aren't things that should ever be overridden, and so don't exist on
 //! the trait itself.
 
-use alloc::vec::Vec;
-use subxt_metadata::{StorageHasher, PalletMetadata, StorageEntryMetadata};
+use super::address::AddressT;
 use crate::error::{Error, MetadataError};
 use crate::metadata::Metadata;
-use super::address::AddressT;
+use alloc::vec::Vec;
+use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageHasher};
 
 /// Return the root of a given [`AddressT`]: hash the pallet name and entry name
 /// and append those bytes to the output.
-pub fn write_storage_address_root_bytes<Address: AddressT>(
-    addr: &Address,
-    out: &mut Vec<u8>,
-) {
+pub fn write_storage_address_root_bytes<Address: AddressT>(addr: &Address, out: &mut Vec<u8>) {
     out.extend(sp_crypto_hashing::twox_128(addr.pallet_name().as_bytes()));
     out.extend(sp_crypto_hashing::twox_128(addr.entry_name().as_bytes()));
 }

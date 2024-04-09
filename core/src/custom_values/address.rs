@@ -4,9 +4,9 @@
 
 //! Construct addresses to access custom values with.
 
-use derive_where::derive_where;
 use crate::dynamic::DecodedValueThunk;
 use crate::metadata::DecodeWithMetadata;
+use derive_where::derive_where;
 
 /// Use this with [`ConstantvalueAddress::IsDecodable`].
 pub use crate::utils::Yes;
