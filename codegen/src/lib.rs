@@ -391,7 +391,7 @@ fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
         ),
         (
             parse_quote!(BinaryHeap),
-            parse_quote!(#crate_path::utils::KeyedVec),
+            parse_quote!(#crate_path::alloc::vec::Vec),
         ),
         (
             parse_quote!(BTreeSet),
