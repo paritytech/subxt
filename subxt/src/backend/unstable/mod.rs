@@ -155,20 +155,26 @@ impl<T: Config> UnstableBackend<T> {
         I: IntoIterator<Item = follow_stream_unpin::BlockRef<T::Hash>> + Send + 'static,
         <I as IntoIterator>::IntoIter: Send,
     {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
-        let sub_id = Arc::new(sub_id);
+
         let methods = self.methods.clone();
+        let follow_handle = self.follow_handle.clone();
+
         let headers = self.follow_handle.subscribe().events().flat_map(move |ev| {
-            let sub_id = sub_id.clone();
             let methods = methods.clone();
+            let follow_handle = follow_handle.clone();
 
             let block_refs = f(ev).into_iter();
 
             futures::stream::iter(block_refs).filter_map(move |block_ref| {
-                let sub_id = sub_id.clone();
                 let methods = methods.clone();
+                let follow_handle = follow_handle.clone();
 
                 async move {
+                    let sub_id = match get_subscription_id(&follow_handle).await {
+                        Ok(sub_id) => sub_id,
+                        Err(e) => return Some(Err(e)),
+                    };
+
                     let res = methods
                         .chainhead_unstable_header(&sub_id, block_ref.hash())
                         .await
