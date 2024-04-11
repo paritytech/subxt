@@ -155,7 +155,6 @@ impl<T: Config> UnstableBackend<T> {
         I: IntoIterator<Item = follow_stream_unpin::BlockRef<T::Hash>> + Send + 'static,
         <I as IntoIterator>::IntoIter: Send,
     {
-
         let methods = self.methods.clone();
         let follow_handle = self.follow_handle.clone();
 
@@ -170,6 +169,12 @@ impl<T: Config> UnstableBackend<T> {
                 let follow_handle = follow_handle.clone();
 
                 async move {
+                    // TODO(niklasad1): naive impl which will fetch the subscription ID for every block
+                    //
+                    // Can we expose Shared::as_subscription_id() -> Option<String> or something?
+                    //
+                    // In most scenarios the subscription is already initialized and it seems
+                    // quite unefficient to subscribe to it again and again.
                     let sub_id = match get_subscription_id(&follow_handle).await {
                         Ok(sub_id) => sub_id,
                         Err(e) => return Some(Err(e)),
