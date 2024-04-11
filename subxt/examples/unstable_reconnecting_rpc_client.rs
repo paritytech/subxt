@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The unstable backend needs driving:
     tokio::spawn(drive_rpc_backend(driver));
 
-    let retry_backend = RetryBackend::from(backend.boxed_dyn_backend());
+    let retry_backend = RetryBackend::from(backend.as_dyn_backend());
 
     let api: OnlineClient<PolkadotConfig> =
         OnlineClient::from_backend(Arc::new(retry_backend)).await?;

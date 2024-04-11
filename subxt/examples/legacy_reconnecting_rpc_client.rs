@@ -41,7 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend: LegacyBackend<PolkadotConfig> =
         LegacyBackend::builder().build(RpcClient::new(rpc.clone()));
 
-    let retry_backend = RetryBackend::from(backend.boxed_dyn_backend());
+    let retry_backend = RetryBackend::from(backend.as_dyn_backend());
 
     let api: OnlineClient<PolkadotConfig> =
         OnlineClient::from_backend(Arc::new(retry_backend)).await?;
@@ -57,11 +57,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(block) = blocks_sub.next().await {
         let header = match block {
             Ok((header, _)) => header,
-            Err(Error::Rpc(RpcError::DisconnectedWillReconnect(err))) => {
-                println!("{err}");
-                blocks_sub = blocks_sub.resubscribe().await?;
-                continue;
-            }
             Err(e) => {
                 return Err(e.into());
             }

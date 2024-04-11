@@ -342,10 +342,7 @@ impl<T: Config> LegacyRpcMethods<T> {
             )
             .await?;
 
-        Ok(SubmitAndWatchSubscription {
-            backend: self.clone(),
-            stream,
-        })
+        Ok(SubmitAndWatchSubscription { stream })
     }
 
     /// Insert a key into the keystore.
@@ -725,17 +722,6 @@ impl<T: Send + Sync + Config> BlockSubscription<T> {
     pub async fn next(&mut self) -> Option<Result<T::Header, Error>> {
         StreamExt::next(self).await
     }
-
-    /// Resubscribe to the subscription.
-    pub async fn resubscribe(self) -> Result<Self, Error> {
-        match self.kind {
-            BlockSubscriptionKind::All => self.backend.chain_subscribe_all_heads().await,
-            BlockSubscriptionKind::New => self.backend.chain_subscribe_new_heads().await,
-            BlockSubscriptionKind::Finalized => {
-                self.backend.chain_subscribe_finalized_heads().await
-            }
-        }
-    }
 }
 
 impl<T: Config> std::marker::Unpin for BlockSubscription<T> {}
@@ -763,11 +749,6 @@ impl<T: Send + Sync + Config> RuntimeVersionSubscription<T> {
     pub async fn next(&mut self) -> Option<Result<RuntimeVersion, Error>> {
         StreamExt::next(self).await
     }
-
-    /// Resubscribe to the subscription.
-    pub async fn resubscribe(self) -> Result<Self, Error> {
-        self.backend.state_subscribe_runtime_version().await
-    }
 }
 
 impl<T: Config> std::marker::Unpin for RuntimeVersionSubscription<T> {}
@@ -785,7 +766,6 @@ impl<T: Send + Sync + Config> Stream for RuntimeVersionSubscription<T> {
 
 /// submitAndWatch subscription.
 pub struct SubmitAndWatchSubscription<T: Config> {
-    backend: LegacyRpcMethods<T>,
     stream: RpcSubscription<TransactionStatus<T::Hash>>,
 }
 
@@ -794,13 +774,6 @@ impl<T: Send + Sync + Config> SubmitAndWatchSubscription<T> {
     /// [`StreamExt::next()`] so that you can avoid the extra import.
     pub async fn next(&mut self) -> Option<Result<TransactionStatus<T::Hash>, Error>> {
         StreamExt::next(self).await
-    }
-
-    /// Re-send the extrinsic and resubscribe.
-    pub async fn resubscribe(self, extrinsic: &[u8]) -> Result<Self, Error> {
-        self.backend
-            .author_submit_and_watch_extrinsic(extrinsic)
-            .await
     }
 }
 

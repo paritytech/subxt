@@ -39,7 +39,7 @@ use storage_items::StorageItems;
 // Expose the RPC methods.
 pub use rpc_methods::UnstableRpcMethods;
 
-use super::utils::{BlockSubscription, BlockSubscriptionKind, SubmitTransactionSubscription};
+use super::utils::{BlockSubscription, SubmitTransactionSubscription};
 
 /// Configure and build an [`UnstableBackend`].
 pub struct UnstableBackendBuilder<T> {
@@ -138,8 +138,8 @@ impl<T: Config> UnstableBackend<T> {
     }
 
     /// todo..
-    pub fn boxed_dyn_backend(&self) -> Box<dyn Backend<T>> {
-        Box::new(UnstableBackend {
+    pub fn as_dyn_backend(&self) -> Arc<dyn Backend<T>> {
+        Arc::new(UnstableBackend {
             methods: self.methods.clone(),
             follow_handle: self.follow_handle.clone(),
         })
@@ -368,7 +368,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         }
     }
 
-    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription<T>, Error> {
+    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription, Error> {
         // Keep track of runtime details announced in new blocks, and then when blocks
         // are finalized, find the latest of these that has runtime details, and clear the rest.
         let mut runtimes = HashMap::new();
@@ -444,13 +444,20 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 })))
             });
 
-        let backend = UnstableBackend {
+        let backend = Arc::new(UnstableBackend {
             methods: self.methods.clone(),
             follow_handle: self.follow_handle.clone(),
-        };
+        });
 
         Ok(RuntimeVersionSubscription {
-            backend: Box::new(backend),
+            resubscribe: Box::new(move || {
+                let backend = backend.clone();
+                Box::pin(async move {
+                    // Make the RPC call:
+                    let sub = backend.stream_runtime_version().await?;
+                    Ok(sub.stream)
+                })
+            }),
             stream: StreamOf::new(Box::pin(runtime_stream)),
         })
     }
@@ -466,10 +473,17 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             })
             .await?;
 
+        let backend = self.as_dyn_backend();
+
         Ok(BlockSubscription {
-            stream,
-            kind: BlockSubscriptionKind::All,
-            backend: self.boxed_dyn_backend(),
+            stream: StreamOf::new(Box::pin(stream)),
+            resubscribe: Box::new(move || {
+                let backend = backend.clone();
+                Box::pin(async move {
+                    let sub = backend.stream_all_block_headers().await?;
+                    Ok(sub.stream)
+                })
+            }),
         })
     }
 
@@ -482,10 +496,17 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             })
             .await?;
 
+        let backend = self.as_dyn_backend();
+
         Ok(BlockSubscription {
-            stream,
-            kind: BlockSubscriptionKind::Best,
-            backend: self.boxed_dyn_backend(),
+            stream: StreamOf::new(Box::pin(stream)),
+            resubscribe: Box::new(move || {
+                let backend = backend.clone();
+                Box::pin(async move {
+                    let sub = backend.stream_best_block_headers().await?;
+                    Ok(sub.stream)
+                })
+            }),
         })
     }
 
@@ -498,10 +519,17 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             })
             .await?;
 
+        let backend = self.as_dyn_backend();
+
         Ok(BlockSubscription {
-            stream,
-            kind: BlockSubscriptionKind::Finalized,
-            backend: self.boxed_dyn_backend(),
+            stream: StreamOf::new(Box::pin(stream)),
+            resubscribe: Box::new(move || {
+                let backend = backend.clone();
+                Box::pin(async move {
+                    let sub = backend.stream_finalized_block_headers().await?;
+                    Ok(sub.stream)
+                })
+            }),
         })
     }
 
@@ -675,7 +703,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
 
         Ok(SubmitTransactionSubscription {
             stream: StreamOf(Box::pin(tx_stream)),
-            backend: self.boxed_dyn_backend(),
         })
     }
 

@@ -12,7 +12,6 @@ pub mod rpc;
 pub mod unstable;
 pub mod utils;
 
-
 use crate::error::Error;
 use crate::metadata::Metadata;
 use crate::Config;
@@ -76,7 +75,7 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error>;
 
     /// A stream of all new runtime versions as they occur.
-    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription<T>, Error>;
+    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription, Error>;
 
     /// A stream of all new block headers as they arrive.
     async fn stream_all_block_headers(&self) -> Result<BlockSubscription<T>, Error>;

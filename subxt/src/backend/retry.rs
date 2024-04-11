@@ -1,5 +1,7 @@
 //! Retry-able backend.
 
+use std::sync::Arc;
+
 use super::{
     utils::{retry, BlockSubscription, RuntimeVersionSubscription, SubmitTransactionSubscription},
     Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOfResults,
@@ -8,10 +10,10 @@ use crate::{Config, Error};
 use async_trait::async_trait;
 
 /// Retry-able rpc backend.
-pub struct RetryBackend<T>(Box<dyn Backend<T>>);
+pub struct RetryBackend<T>(Arc<dyn Backend<T>>);
 
-impl<T> From<Box<dyn Backend<T>>> for RetryBackend<T> {
-    fn from(backend: Box<dyn Backend<T>>) -> Self {
+impl<T> From<Arc<dyn Backend<T>>> for RetryBackend<T> {
+    fn from(backend: Arc<dyn Backend<T>>) -> Self {
         Self(backend)
     }
 }
@@ -64,7 +66,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for RetryBackend<T> {
         retry(|| self.0.current_runtime_version()).await
     }
 
-    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription<T>, Error> {
+    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription, Error> {
         retry(|| self.0.stream_runtime_version()).await
     }
 

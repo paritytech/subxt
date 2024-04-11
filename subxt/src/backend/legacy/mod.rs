@@ -17,12 +17,13 @@ use async_trait::async_trait;
 use futures::{future, future::Either, stream, Future, FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;
 use std::pin::Pin;
+use std::sync::Arc;
 use std::task::{Context, Poll};
 
 // Expose the RPC methods.
 pub use rpc_methods::LegacyRpcMethods;
 
-use super::utils::{BlockSubscription, BlockSubscriptionKind, SubmitTransactionSubscription};
+use super::utils::{BlockSubscription, SubmitTransactionSubscription};
 
 /// Configure and build an [`LegacyBackend`].
 pub struct LegacyBackendBuilder<T> {
@@ -77,8 +78,8 @@ impl<T: Config> LegacyBackend<T> {
     }
 
     /// ...
-    pub fn boxed_dyn_backend(&self) -> Box<dyn Backend<T>> {
-        Box::new(Self {
+    pub fn as_dyn_backend(&self) -> Arc<dyn Backend<T>> {
+        Arc::new(Self {
             methods: self.methods.clone(),
             storage_page_size: self.storage_page_size,
         })
@@ -197,7 +198,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         })
     }
 
-    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription<T>, Error> {
+    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription, Error> {
         let sub = self.methods.state_subscribe_runtime_version().await?;
         let sub = sub.map(|r| {
             r.map(|v| RuntimeVersion {
@@ -206,9 +207,21 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             })
         });
 
+        let backend = Arc::new(Self {
+            methods: self.methods.clone(),
+            storage_page_size: self.storage_page_size,
+        });
+
         Ok(RuntimeVersionSubscription {
             stream: StreamOf::new(Box::pin(sub)),
-            backend: self.boxed_dyn_backend(),
+            resubscribe: Box::new(move || {
+                let backend = backend.clone();
+                Box::pin(async move {
+                    // Make the RPC call:
+                    let sub = backend.stream_runtime_version().await?;
+                    Ok(sub.stream)
+                })
+            }),
         })
     }
 
@@ -221,10 +234,18 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             })
         });
 
+        let backend = self.as_dyn_backend();
+
         Ok(BlockSubscription {
             stream: StreamOf::new(Box::pin(sub)),
-            kind: BlockSubscriptionKind::All,
-            backend: self.boxed_dyn_backend(),
+            resubscribe: Box::new(move || {
+                let backend = backend.clone();
+                Box::pin(async move {
+                    // Make the RPC call:
+                    let sub = backend.stream_all_block_headers().await?;
+                    Ok(sub.stream)
+                })
+            }),
         })
     }
 
@@ -237,10 +258,18 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             })
         });
 
+        let backend = self.as_dyn_backend();
+
         Ok(BlockSubscription {
             stream: StreamOf::new(Box::pin(sub)),
-            kind: BlockSubscriptionKind::Best,
-            backend: self.boxed_dyn_backend(),
+            resubscribe: Box::new(move || {
+                let backend = backend.clone();
+                Box::pin(async move {
+                    // Make the RPC call:
+                    let sub = backend.stream_best_block_headers().await?;
+                    Ok(sub.stream)
+                })
+            }),
         })
     }
 
@@ -268,10 +297,18 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             })
         });
 
+        let backend = self.as_dyn_backend();
+
         Ok(BlockSubscription {
             stream: StreamOf::new(Box::pin(sub)),
-            kind: BlockSubscriptionKind::Finalized,
-            backend: self.boxed_dyn_backend(),
+            resubscribe: Box::new(move || {
+                let backend = backend.clone();
+                Box::pin(async move {
+                    // Make the RPC call:
+                    let sub = backend.stream_finalized_block_headers().await?;
+                    Ok(sub.stream)
+                })
+            }),
         })
     }
 
@@ -334,7 +371,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
         Ok(SubmitTransactionSubscription {
             stream: StreamOf::new(Box::pin(sub)),
-            backend: self.boxed_dyn_backend(),
         })
     }
 
