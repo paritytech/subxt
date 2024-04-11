@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.35.1] - 2024-04-09
+## [0.35.3] - 2024-04-11
+
+Another bug-fix release that substitutes `BinaryHeap` for `Vec` in the same way that we do for BTreeMap/Set to avoid issues with the Ord constraint on the generic type (because this may be a generated type, and we don't automatically apply Ord to generated types).
+
+## [0.35.2] - 2024-04-09
 
 This is a small patch release that fixes the storage key decoding. Previously, we assumed the length of the hash of the storage prefix or entry name was 8 bytes, however it is 16.
 
