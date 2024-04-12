@@ -3,9 +3,10 @@
 use std::sync::Arc;
 
 use super::{
-    utils::{retry, BlockSubscription, RuntimeVersionSubscription, SubmitTransactionSubscription},
+    utils::{retry, RetrySubscription},
     Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOfResults,
 };
+use crate::backend::TransactionStatus;
 use crate::{Config, Error};
 use async_trait::async_trait;
 
@@ -66,26 +67,32 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for RetryBackend<T> {
         retry(|| self.0.current_runtime_version()).await
     }
 
-    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription, Error> {
+    async fn stream_runtime_version(&self) -> Result<RetrySubscription<RuntimeVersion>, Error> {
         retry(|| self.0.stream_runtime_version()).await
     }
 
-    async fn stream_all_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
+    async fn stream_all_block_headers(
+        &self,
+    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
         retry(|| self.0.stream_all_block_headers()).await
     }
 
-    async fn stream_best_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
+    async fn stream_best_block_headers(
+        &self,
+    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
         retry(|| self.0.stream_best_block_headers()).await
     }
 
-    async fn stream_finalized_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
+    async fn stream_finalized_block_headers(
+        &self,
+    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
         retry(|| self.0.stream_finalized_block_headers()).await
     }
 
     async fn submit_transaction(
         &self,
         extrinsic: &[u8],
-    ) -> Result<SubmitTransactionSubscription<T>, Error> {
+    ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
         retry(|| self.0.submit_transaction(extrinsic)).await
     }
 

@@ -3,132 +3,94 @@
 use futures::future::BoxFuture;
 pub use tokio_retry::strategy::*;
 
-use super::{Backend, BlockRef, RuntimeVersion, StreamOfResults};
+use super::{RuntimeVersion, StreamOfResults};
 use crate::error::Error;
-use crate::Config;
-use crate::{backend::TransactionStatus, error::RpcError};
-use futures::{FutureExt, Stream, StreamExt};
+use futures::{ready, FutureExt, Stream, StreamExt};
 use std::{future::Future, pin::Pin, task::Poll, time::Duration};
 use tokio_retry::{Action, RetryIf};
 
-/// ..
+/// Resubscribe callback.
 pub type ResubscribeGetter<T> = Box<dyn FnMut() -> ResubscribeFuture<T> + Send>;
 
-/// ...
+/// Future that resolves to a subscription stream.
 pub type ResubscribeFuture<T> =
     Pin<Box<dyn Future<Output = Result<StreamOfResults<T>, Error>> + Send>>;
 
-enum WaitingOrStream {
+pub(crate) enum WaitingOrStream {
     Waiting(BoxFuture<'static, StreamOfResults<RuntimeVersion>>),
     Stream(StreamOfResults<RuntimeVersion>),
 }
 
-/// Runtime version subscription.
-pub struct RuntimeVersionSubscription {
-    pub(crate) resubscribe: ResubscribeGetter<RuntimeVersion>,
-    pub(crate) stream: StreamOfResults<RuntimeVersion>,
+/// Retry subscription.
+pub struct RetrySubscription<T> {
+    pub(crate) resubscribe: ResubscribeGetter<T>,
+    pub(crate) stream: Option<StreamOfResults<T>>,
+    pub(crate) pending: Option<BoxFuture<'static, Result<StreamOfResults<T>, Error>>>,
 }
 
-/// Block subscription.
-pub struct BlockSubscription<T: Config> {
-    pub(crate) resubscribe: ResubscribeGetter<(T::Header, BlockRef<T::Hash>)>,
-    pub(crate) stream: StreamOfResults<(T::Header, BlockRef<T::Hash>)>,
-}
+impl<T> RetrySubscription<T> {
+    /// Create a new retry-able subscription.
+    pub fn new(stream: StreamOfResults<T>, resubscribe: ResubscribeGetter<T>) -> Self {
+        Self {
+            stream: Some(stream),
+            resubscribe,
+            pending: None,
+        }
+    }
 
-/// Submit transaction subscription.
-pub struct SubmitTransactionSubscription<T: Config> {
-    pub(crate) stream: StreamOfResults<TransactionStatus<T::Hash>>,
-}
-
-impl<T: Send + Sync + Config> SubmitTransactionSubscription<T> {
     /// Returns the next item in the stream. This is just a wrapper around
     /// [`StreamExt::next()`] so that you can avoid the extra import.
-    pub async fn next(&mut self) -> Option<Result<TransactionStatus<T::Hash>, Error>> {
+    pub async fn next(&mut self) -> Option<Result<T, Error>> {
         StreamExt::next(self).await
     }
 }
 
-impl<T: Config> std::marker::Unpin for SubmitTransactionSubscription<T> {}
+impl<T> std::marker::Unpin for RetrySubscription<T> {}
 
-impl<T: Send + Sync + Config> Stream for SubmitTransactionSubscription<T> {
-    type Item = Result<TransactionStatus<T::Hash>, Error>;
+impl<T> Stream for RetrySubscription<T> {
+    type Item = Result<T, Error>;
 
     fn poll_next(
         mut self: Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> Poll<Option<Self::Item>> {
-        self.stream.poll_next_unpin(cx)
-    }
-}
-
-impl<T: Send + Sync + Config> BlockSubscription<T> {
-    /// Returns the next item in the stream. This is just a wrapper around
-    /// [`StreamExt::next()`] so that you can avoid the extra import.
-    pub async fn next(&mut self) -> Option<Result<(T::Header, BlockRef<T::Hash>), Error>> {
         loop {
-            match self.stream.next().await {
-                Some(Err(e)) => {
-                    if e.is_disconnected_will_reconnect() {
-                        self.stream = match (self.resubscribe)().await {
-                            Ok(s) => s,
-                            Err(e) => break Some(Err(e)),
-                        };
-                    } else {
-                        break Some(Err(e));
+            // Poll the stream.
+            let need_resubscribe = match self.stream.as_mut() {
+                Some(s) => match s.poll_next_unpin(cx) {
+                    Poll::Ready(Some(Err(e))) => {
+                        if e.is_disconnected_will_reconnect() {
+                            true
+                        } else {
+                            return Poll::Ready(Some(Err(e)));
+                        }
                     }
+                    other => return other,
+                },
+                None => false,
+            };
+
+            if need_resubscribe {
+                self.stream = None;
+                self.pending = Some((self.resubscribe)());
+            }
+
+            // Poll the resubscription.
+            let not_pending = if let Some(p) = self.pending.as_mut() {
+                if let Ok(stream) = ready!(p.poll_unpin(cx)) {
+                    self.stream = Some(stream);
+                    true
+                } else {
+                    false
                 }
-                other => break other,
+            } else {
+                false
+            };
+
+            if not_pending {
+                self.pending = None;
             }
         }
-    }
-}
-
-impl<T: Config> std::marker::Unpin for BlockSubscription<T> {}
-
-impl<T: Send + Sync + Config> Stream for BlockSubscription<T> {
-    type Item = Result<(T::Header, BlockRef<T::Hash>), Error>;
-
-    fn poll_next(
-        mut self: Pin<&mut Self>,
-        cx: &mut std::task::Context<'_>,
-    ) -> Poll<Option<Self::Item>> {
-        todo!("write a proper poll impl");
-        //self.stream.poll_next_unpin(cx)
-    }
-}
-
-impl RuntimeVersionSubscription {
-    /// Returns the next item in the stream. This is just a wrapper around
-    /// [`StreamExt::next()`] so that you can avoid the extra import.
-    pub async fn next(&mut self) -> Option<Result<RuntimeVersion, Error>> {
-        loop {
-            match self.stream.next().await {
-                Some(Err(e)) => {
-                    if e.is_disconnected_will_reconnect() {
-                        self.stream = match (self.resubscribe)().await {
-                            Ok(s) => s,
-                            Err(e) => break Some(Err(e)),
-                        };
-                    } else {
-                        break Some(Err(e));
-                    }
-                }
-                other => break other,
-            }
-        }
-    }
-}
-
-impl std::marker::Unpin for RuntimeVersionSubscription {}
-
-impl Stream for RuntimeVersionSubscription {
-    type Item = Result<RuntimeVersion, Error>;
-
-    fn poll_next(
-        mut self: Pin<&mut Self>,
-        cx: &mut std::task::Context<'_>,
-    ) -> Poll<Option<Self::Item>> {
-        todo!("write a proper poll impl");
     }
 }
 

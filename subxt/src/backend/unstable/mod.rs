@@ -22,8 +22,8 @@ use self::rpc_methods::{
     FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
 };
 use crate::backend::{
-    rpc::RpcClient, Backend, BlockRef, BlockRefT, RuntimeVersion, RuntimeVersionSubscription,
-    StorageResponse, StreamOf, StreamOfResults, TransactionStatus,
+    rpc::RpcClient, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf,
+    StreamOfResults, TransactionStatus,
 };
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
@@ -39,7 +39,7 @@ use storage_items::StorageItems;
 // Expose the RPC methods.
 pub use rpc_methods::UnstableRpcMethods;
 
-use super::utils::{BlockSubscription, SubmitTransactionSubscription};
+use super::utils::RetrySubscription;
 
 /// Configure and build an [`UnstableBackend`].
 pub struct UnstableBackendBuilder<T> {
@@ -143,6 +143,126 @@ impl<T: Config> UnstableBackend<T> {
             methods: self.methods.clone(),
             follow_handle: self.follow_handle.clone(),
         })
+    }
+
+    fn inner_subscribe_runtime_stream(&self) -> StreamOfResults<RuntimeVersion> {
+        // Keep track of runtime details announced in new blocks, and then when blocks
+        // are finalized, find the latest of these that has runtime details, and clear the rest.
+        let mut runtimes = HashMap::new();
+        let runtime_stream = self
+            .follow_handle
+            .subscribe()
+            .events()
+            .filter_map(move |ev| {
+                let output = match ev {
+                    FollowEvent::Initialized(ev) => {
+                        for finalized_block in ev.finalized_block_hashes {
+                            runtimes.remove(&finalized_block.hash());
+                        }
+                        ev.finalized_block_runtime
+                    }
+                    FollowEvent::NewBlock(ev) => {
+                        if let Some(runtime) = ev.new_runtime {
+                            runtimes.insert(ev.block_hash.hash(), runtime);
+                        }
+                        None
+                    }
+                    FollowEvent::Finalized(ev) => {
+                        let next_runtime = {
+                            let mut it = ev
+                                .finalized_block_hashes
+                                .iter()
+                                .rev()
+                                .filter_map(|h| runtimes.get(&h.hash()).cloned())
+                                .peekable();
+
+                            let next = it.next();
+
+                            if it.peek().is_some() {
+                                tracing::warn!(
+                                    target: "subxt",
+                                    "Several runtime upgrades in the finalized blocks but only the latest runtime upgrade is returned"
+                                );
+                            }
+
+                            next
+                        };
+
+                        // Remove finalized and pruned blocks as valid runtime upgrades.
+                        for block in ev
+                            .finalized_block_hashes
+                            .iter()
+                            .chain(ev.pruned_block_hashes.iter())
+                        {
+                            runtimes.remove(&block.hash());
+                        }
+
+                        next_runtime
+                    }
+                    _ => None,
+                };
+
+                let runtime_event = match output {
+                    None => return std::future::ready(None),
+                    Some(ev) => ev,
+                };
+
+                let runtime_details = match runtime_event {
+                    RuntimeEvent::Invalid(err) => {
+                        return std::future::ready(Some(Err(Error::Other(err.error))))
+                    }
+                    RuntimeEvent::Valid(ev) => ev,
+                };
+
+                let runtime_version = RuntimeVersion {
+                    spec_version: runtime_details.spec.spec_version,
+                    transaction_version: runtime_details.spec.transaction_version
+                };
+                std::future::ready(Some(Ok(runtime_version)))
+            });
+
+        StreamOf(Box::pin(runtime_stream))
+    }
+
+    async fn inner_subscribe_finalized_blocks(
+        &self,
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+        let stream = self
+            .stream_headers(|ev| match ev {
+                FollowEvent::Initialized(init) => init.finalized_block_hashes,
+                FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
+                _ => vec![],
+            })
+            .await?;
+        Ok(stream)
+    }
+
+    async fn inner_subscribe_best_blocks(
+        &self,
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+        let stream = self
+            .stream_headers(|ev| match ev {
+                FollowEvent::Initialized(init) => init.finalized_block_hashes,
+                FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
+                _ => vec![],
+            })
+            .await?;
+        Ok(stream)
+    }
+
+    async fn inner_subscribe_all_blocks(
+        &self,
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+        let stream = self
+            .stream_headers(|ev| match ev {
+                FollowEvent::Initialized(init) => init.finalized_block_hashes,
+                FollowEvent::NewBlock(ev) => {
+                    vec![ev.block_hash]
+                }
+                _ => vec![],
+            })
+            .await?;
+        Ok(stream)
     }
 
     /// Stream block headers based on the provided filter fn
@@ -368,175 +488,99 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         }
     }
 
-    async fn stream_runtime_version(&self) -> Result<RuntimeVersionSubscription, Error> {
-        // Keep track of runtime details announced in new blocks, and then when blocks
-        // are finalized, find the latest of these that has runtime details, and clear the rest.
-        let mut runtimes = HashMap::new();
-        let runtime_stream = self
-            .follow_handle
-            .subscribe()
-            .events()
-            .filter_map(move |ev| {
-                let output = match ev {
-                    FollowEvent::Initialized(ev) => {
-                        for finalized_block in ev.finalized_block_hashes {
-                            runtimes.remove(&finalized_block.hash());
-                        }
+    async fn stream_runtime_version(&self) -> Result<RetrySubscription<RuntimeVersion>, Error> {
+        let stream = self.inner_subscribe_runtime_stream();
 
-                        ev.finalized_block_runtime
-                    }
-                    FollowEvent::NewBlock(ev) => {
-                        if let Some(runtime) = ev.new_runtime {
-                            runtimes.insert(ev.block_hash.hash(), runtime);
-                        }
-                        None
-                    }
-                    FollowEvent::Finalized(ev) => {
-                        let next_runtime = {
-                            let mut it = ev
-                                .finalized_block_hashes
-                                .iter()
-                                .rev()
-                                .filter_map(|h| runtimes.get(&h.hash()).cloned())
-                                .peekable();
-
-                            let next = it.next();
-
-                            if it.peek().is_some() {
-                                tracing::warn!(
-                                    target: "subxt",
-                                    "Several runtime upgrades in the finalized blocks but only the latest runtime upgrade is returned"
-                                );
-                            }
-
-                            next
-                        };
-
-                        // Remove finalized and pruned blocks as valid runtime upgrades.
-                        for block in ev
-                            .finalized_block_hashes
-                            .iter()
-                            .chain(ev.pruned_block_hashes.iter())
-                        {
-                            runtimes.remove(&block.hash());
-                        }
-
-                        next_runtime
-                    }
-                    _ => None,
-                };
-
-                let runtime_event = match output {
-                    None => return std::future::ready(None),
-                    Some(ev) => ev,
-                };
-
-                let runtime_details = match runtime_event {
-                    RuntimeEvent::Invalid(err) => {
-                        return std::future::ready(Some(Err(Error::Other(err.error))))
-                    }
-                    RuntimeEvent::Valid(ev) => ev,
-                };
-
-                std::future::ready(Some(Ok(RuntimeVersion {
-                    spec_version: runtime_details.spec.spec_version,
-                    transaction_version: runtime_details.spec.transaction_version,
-                })))
-            });
-
-        let backend = Arc::new(UnstableBackend {
+        let this = UnstableBackend {
             methods: self.methods.clone(),
             follow_handle: self.follow_handle.clone(),
-        });
+        };
 
-        Ok(RuntimeVersionSubscription {
-            resubscribe: Box::new(move || {
-                let backend = backend.clone();
+        Ok(RetrySubscription::new(
+            StreamOf::new(Box::pin(stream)),
+            Box::new(move || {
+                let this = UnstableBackend {
+                    methods: this.methods.clone(),
+                    follow_handle: this.follow_handle.clone(),
+                };
                 Box::pin(async move {
-                    // Make the RPC call:
-                    let sub = backend.stream_runtime_version().await?;
-                    Ok(sub.stream)
+                    let sub = this.inner_subscribe_runtime_stream();
+                    Ok(sub)
                 })
             }),
-            stream: StreamOf::new(Box::pin(runtime_stream)),
-        })
+        ))
     }
 
-    async fn stream_all_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
-        let stream = self
-            .stream_headers(|ev| match ev {
-                FollowEvent::Initialized(init) => init.finalized_block_hashes,
-                FollowEvent::NewBlock(ev) => {
-                    vec![ev.block_hash]
-                }
-                _ => vec![],
-            })
-            .await?;
+    async fn stream_all_block_headers(
+        &self,
+    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
+        let stream = self.inner_subscribe_all_blocks().await?;
 
-        let backend = self.as_dyn_backend();
+        let this = UnstableBackend {
+            methods: self.methods.clone(),
+            follow_handle: self.follow_handle.clone(),
+        };
 
-        Ok(BlockSubscription {
-            stream: StreamOf::new(Box::pin(stream)),
-            resubscribe: Box::new(move || {
-                let backend = backend.clone();
-                Box::pin(async move {
-                    let sub = backend.stream_all_block_headers().await?;
-                    Ok(sub.stream)
-                })
+        Ok(RetrySubscription::new(
+            StreamOf::new(Box::pin(stream)),
+            Box::new(move || {
+                let this = UnstableBackend {
+                    methods: this.methods.clone(),
+                    follow_handle: this.follow_handle.clone(),
+                };
+                Box::pin(async move { this.inner_subscribe_all_blocks().await })
             }),
-        })
+        ))
     }
 
-    async fn stream_best_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
-        let stream = self
-            .stream_headers(|ev| match ev {
-                FollowEvent::Initialized(init) => init.finalized_block_hashes,
-                FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
-                _ => vec![],
-            })
-            .await?;
+    async fn stream_best_block_headers(
+        &self,
+    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
+        let stream = self.inner_subscribe_best_blocks().await?;
 
-        let backend = self.as_dyn_backend();
+        let this = UnstableBackend {
+            methods: self.methods.clone(),
+            follow_handle: self.follow_handle.clone(),
+        };
 
-        Ok(BlockSubscription {
-            stream: StreamOf::new(Box::pin(stream)),
-            resubscribe: Box::new(move || {
-                let backend = backend.clone();
-                Box::pin(async move {
-                    let sub = backend.stream_best_block_headers().await?;
-                    Ok(sub.stream)
-                })
+        Ok(RetrySubscription::new(
+            StreamOf::new(Box::pin(stream)),
+            Box::new(move || {
+                let this = UnstableBackend {
+                    methods: this.methods.clone(),
+                    follow_handle: this.follow_handle.clone(),
+                };
+                Box::pin(async move { this.inner_subscribe_best_blocks().await })
             }),
-        })
+        ))
     }
 
-    async fn stream_finalized_block_headers(&self) -> Result<BlockSubscription<T>, Error> {
-        let stream = self
-            .stream_headers(|ev| match ev {
-                FollowEvent::Initialized(init) => init.finalized_block_hashes,
-                FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
-                _ => vec![],
-            })
-            .await?;
+    async fn stream_finalized_block_headers(
+        &self,
+    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
+        let stream = self.inner_subscribe_finalized_blocks().await?;
 
-        let backend = self.as_dyn_backend();
+        let this = UnstableBackend {
+            methods: self.methods.clone(),
+            follow_handle: self.follow_handle.clone(),
+        };
 
-        Ok(BlockSubscription {
-            stream: StreamOf::new(Box::pin(stream)),
-            resubscribe: Box::new(move || {
-                let backend = backend.clone();
-                Box::pin(async move {
-                    let sub = backend.stream_finalized_block_headers().await?;
-                    Ok(sub.stream)
-                })
+        Ok(RetrySubscription::new(
+            stream,
+            Box::new(move || {
+                let this = UnstableBackend {
+                    methods: this.methods.clone(),
+                    follow_handle: this.follow_handle.clone(),
+                };
+                Box::pin(async move { this.inner_subscribe_finalized_blocks().await })
             }),
-        })
+        ))
     }
 
     async fn submit_transaction(
         &self,
         extrinsic: &[u8],
-    ) -> Result<SubmitTransactionSubscription<T>, Error> {
+    ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
         // We care about new and finalized block hashes.
         enum SeenBlockMarker {
             New,
@@ -701,9 +745,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             }
         });
 
-        Ok(SubmitTransactionSubscription {
-            stream: StreamOf(Box::pin(tx_stream)),
-        })
+        Ok(StreamOf(Box::pin(tx_stream)))
     }
 
     async fn call(

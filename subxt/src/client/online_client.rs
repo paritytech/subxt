@@ -3,11 +3,10 @@
 // see LICENSE for license details.
 
 use super::{OfflineClient, OfflineClientT};
+use crate::backend::utils::RetrySubscription;
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    backend::{
-        legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, RuntimeVersion, StreamOfResults,
-    },
+    backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, RuntimeVersion},
     blocks::{BlockRef, BlocksClient},
     constants::ConstantsClient,
     error::Error,
@@ -426,9 +425,8 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     /// Instead that's up to the user of this API to decide when to update and
     /// to perform the actual updating.
     pub async fn runtime_updates(&self) -> Result<RuntimeUpdaterStream<T>, Error> {
-        let sub = self.0.backend().stream_runtime_version().await?;
         Ok(RuntimeUpdaterStream {
-            stream: sub.stream,
+            stream: self.0.backend().stream_runtime_version().await?,
             client: self.0.clone(),
         })
     }
@@ -436,7 +434,7 @@ impl<T: Config> ClientRuntimeUpdater<T> {
 
 /// Stream to perform runtime upgrades.
 pub struct RuntimeUpdaterStream<T: Config> {
-    stream: StreamOfResults<RuntimeVersion>,
+    stream: RetrySubscription<RuntimeVersion>,
     client: OnlineClient<T>,
 }
 

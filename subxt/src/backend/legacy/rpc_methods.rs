@@ -4,15 +4,13 @@
 
 //! An interface to call the raw legacy RPC methods.
 
-use std::pin::Pin;
-use std::task::Poll;
-
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
+use crate::backend::utils::RetrySubscription;
+use crate::backend::StreamOf;
 use crate::metadata::Metadata;
 use crate::{Config, Error};
 use codec::Decode;
 use derivative::Derivative;
-use futures::{Stream, StreamExt};
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
@@ -233,45 +231,64 @@ impl<T: Config> LegacyRpcMethods<T> {
     }
 
     /// Subscribe to all new best block headers.
-    pub async fn chain_subscribe_new_heads(&self) -> Result<BlockSubscription<T>, Error> {
-        let stream = self
-            .client
-            .subscribe(
-                // Despite the name, this returns a stream of all new blocks
-                // imported by the node that happen to be added to the current best chain
-                // (ie all best blocks).
-                "chain_subscribeNewHeads",
-                rpc_params![],
-                "chain_unsubscribeNewHeads",
-            )
-            .await?;
+    pub async fn chain_subscribe_new_heads(&self) -> Result<RetrySubscription<T::Header>, Error> {
+        async fn subscribe_new_heads<T: Config>(
+            client: &RpcClient,
+        ) -> Result<RpcSubscription<T::Header>, Error> {
+            client
+                .subscribe(
+                    "chain_subscribeNewHeads",
+                    rpc_params![],
+                    "chain_unsubscribeNewHeads",
+                )
+                .await
+        }
 
-        Ok(BlockSubscription {
-            stream,
-            backend: self.clone(),
-            kind: BlockSubscriptionKind::New,
-        })
+        let stream = subscribe_new_heads::<T>(&self.client).await?;
+        let client = self.client.clone();
+
+        Ok(RetrySubscription::new(
+            StreamOf::new(Box::pin(stream)),
+            Box::new(move || {
+                let client = client.clone();
+                Box::pin(async move {
+                    let stream = subscribe_new_heads::<T>(&client).await?;
+                    Ok(StreamOf::new(Box::pin(stream)))
+                })
+            }),
+        ))
     }
 
     /// Subscribe to all new block headers.
-    pub async fn chain_subscribe_all_heads(&self) -> Result<BlockSubscription<T>, Error> {
-        let stream = self
-            .client
-            .subscribe(
-                // Despite the name, this returns a stream of all new blocks
-                // imported by the node that happen to be added to the current best chain
-                // (ie all best blocks).
-                "chain_subscribeAllHeads",
-                rpc_params![],
-                "chain_unsubscribeAllHeads",
-            )
-            .await?;
+    pub async fn chain_subscribe_all_heads(&self) -> Result<RetrySubscription<T::Header>, Error> {
+        async fn subscribe_all_heads<T: Config>(
+            client: &RpcClient,
+        ) -> Result<RpcSubscription<T::Header>, Error> {
+            client
+                .subscribe(
+                    // Despite the name, this returns a stream of all new blocks
+                    // imported by the node that happen to be added to the current best chain
+                    // (ie all best blocks).
+                    "chain_subscribeAllHeads",
+                    rpc_params![],
+                    "chain_unsubscribeAllHeads",
+                )
+                .await
+        }
 
-        Ok(BlockSubscription {
-            stream,
-            backend: self.clone(),
-            kind: BlockSubscriptionKind::All,
-        })
+        let stream = subscribe_all_heads::<T>(&self.client).await?;
+        let client = self.client.clone();
+
+        Ok(RetrySubscription::new(
+            StreamOf::new(Box::pin(stream)),
+            Box::new(move || {
+                let client = client.clone();
+                Box::pin(async move {
+                    let stream = subscribe_all_heads::<T>(&client).await?;
+                    Ok(StreamOf::new(Box::pin(stream)))
+                })
+            }),
+        ))
     }
 
     /// Subscribe to finalized block headers.
@@ -280,41 +297,66 @@ impl<T: Config> LegacyRpcMethods<T> {
     /// sometimes multiple blocks are finalized at once, and in this case only the
     /// latest one is returned. the higher level APIs that use this "fill in" the
     /// gaps for us.
-    pub async fn chain_subscribe_finalized_heads(&self) -> Result<BlockSubscription<T>, Error> {
-        let stream = self
-            .client
-            .subscribe(
-                "chain_subscribeFinalizedHeads",
-                rpc_params![],
-                "chain_unsubscribeFinalizedHeads",
-            )
-            .await?;
+    pub async fn chain_subscribe_finalized_heads(
+        &self,
+    ) -> Result<RetrySubscription<T::Header>, Error> {
+        async fn subscribe_finalized_heads<T: Config>(
+            client: &RpcClient,
+        ) -> Result<RpcSubscription<T::Header>, Error> {
+            client
+                .subscribe(
+                    "chain_subscribeFinalizedHeads",
+                    rpc_params![],
+                    "chain_unsubscribeFinalizedHeads",
+                )
+                .await
+        }
 
-        Ok(BlockSubscription {
-            stream,
-            backend: self.clone(),
-            kind: BlockSubscriptionKind::Finalized,
-        })
+        let stream = subscribe_finalized_heads::<T>(&self.client).await?;
+        let client = self.client.clone();
+
+        Ok(RetrySubscription::new(
+            StreamOf::new(Box::pin(stream)),
+            Box::new(move || {
+                let client = client.clone();
+                Box::pin(async move {
+                    let stream = subscribe_finalized_heads::<T>(&client).await?;
+                    Ok(StreamOf::new(Box::pin(stream)))
+                })
+            }),
+        ))
     }
 
     /// Subscribe to runtime version updates that produce changes in the metadata.
     /// The first item emitted by the stream is the current runtime version.
     pub async fn state_subscribe_runtime_version(
         &self,
-    ) -> Result<RuntimeVersionSubscription<T>, Error> {
-        let stream = self
-            .client
-            .subscribe(
-                "state_subscribeRuntimeVersion",
-                rpc_params![],
-                "state_unsubscribeRuntimeVersion",
-            )
-            .await?;
+    ) -> Result<RetrySubscription<RuntimeVersion>, Error> {
+        async fn subscribe_runtime_version(
+            client: &RpcClient,
+        ) -> Result<RpcSubscription<RuntimeVersion>, Error> {
+            client
+                .subscribe(
+                    "state_subscribeRuntimeVersion",
+                    rpc_params![],
+                    "state_unsubscribeRuntimeVersion",
+                )
+                .await
+        }
 
-        Ok(RuntimeVersionSubscription {
-            backend: self.clone(),
-            stream,
-        })
+        let stream = subscribe_runtime_version(&self.client).await?;
+        let client = self.client.clone();
+
+        Ok(RetrySubscription::new(
+            StreamOf::new(Box::pin(stream)),
+            Box::new(move || {
+                let client = client.clone();
+                Box::pin(async move {
+                    let stream = subscribe_runtime_version(&client).await?;
+                    Ok(StreamOf::new(Box::pin(stream)))
+                })
+            }),
+        ))
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
@@ -331,9 +373,9 @@ impl<T: Config> LegacyRpcMethods<T> {
     pub async fn author_submit_and_watch_extrinsic(
         &self,
         extrinsic: &[u8],
-    ) -> Result<SubmitAndWatchSubscription<T>, Error> {
+    ) -> Result<RpcSubscription<TransactionStatus<T::Hash>>, Error> {
         let params = rpc_params![to_hex(extrinsic)];
-        let stream = self
+        let subscription = self
             .client
             .subscribe(
                 "author_submitAndWatchExtrinsic",
@@ -342,7 +384,7 @@ impl<T: Config> LegacyRpcMethods<T> {
             )
             .await?;
 
-        Ok(SubmitAndWatchSubscription { stream })
+        Ok(subscription)
     }
 
     /// Insert a key into the keystore.
@@ -700,92 +742,5 @@ impl std::ops::Deref for Bytes {
 impl From<Vec<u8>> for Bytes {
     fn from(s: Vec<u8>) -> Self {
         Bytes(s)
-    }
-}
-
-enum BlockSubscriptionKind {
-    All,
-    New,
-    Finalized,
-}
-
-/// Block subscription.
-pub struct BlockSubscription<T: Config> {
-    backend: LegacyRpcMethods<T>,
-    kind: BlockSubscriptionKind,
-    stream: RpcSubscription<T::Header>,
-}
-
-impl<T: Send + Sync + Config> BlockSubscription<T> {
-    /// Returns the next item in the stream. This is just a wrapper around
-    /// [`StreamExt::next()`] so that you can avoid the extra import.
-    pub async fn next(&mut self) -> Option<Result<T::Header, Error>> {
-        StreamExt::next(self).await
-    }
-}
-
-impl<T: Config> std::marker::Unpin for BlockSubscription<T> {}
-
-impl<T: Send + Sync + Config> Stream for BlockSubscription<T> {
-    type Item = Result<T::Header, Error>;
-
-    fn poll_next(
-        mut self: Pin<&mut Self>,
-        cx: &mut std::task::Context<'_>,
-    ) -> Poll<Option<Self::Item>> {
-        self.stream.poll_next_unpin(cx)
-    }
-}
-
-/// Runtime version subscription.
-pub struct RuntimeVersionSubscription<T: Config> {
-    backend: LegacyRpcMethods<T>,
-    stream: RpcSubscription<RuntimeVersion>,
-}
-
-impl<T: Send + Sync + Config> RuntimeVersionSubscription<T> {
-    /// Returns the next item in the stream. This is just a wrapper around
-    /// [`StreamExt::next()`] so that you can avoid the extra import.
-    pub async fn next(&mut self) -> Option<Result<RuntimeVersion, Error>> {
-        StreamExt::next(self).await
-    }
-}
-
-impl<T: Config> std::marker::Unpin for RuntimeVersionSubscription<T> {}
-
-impl<T: Send + Sync + Config> Stream for RuntimeVersionSubscription<T> {
-    type Item = Result<RuntimeVersion, Error>;
-
-    fn poll_next(
-        mut self: Pin<&mut Self>,
-        cx: &mut std::task::Context<'_>,
-    ) -> Poll<Option<Self::Item>> {
-        self.stream.poll_next_unpin(cx)
-    }
-}
-
-/// submitAndWatch subscription.
-pub struct SubmitAndWatchSubscription<T: Config> {
-    stream: RpcSubscription<TransactionStatus<T::Hash>>,
-}
-
-impl<T: Send + Sync + Config> SubmitAndWatchSubscription<T> {
-    /// Returns the next item in the stream. This is just a wrapper around
-    /// [`StreamExt::next()`] so that you can avoid the extra import.
-    pub async fn next(&mut self) -> Option<Result<TransactionStatus<T::Hash>, Error>> {
-        StreamExt::next(self).await
-    }
-}
-
-impl<T: Config> std::marker::Unpin for SubmitAndWatchSubscription<T> {}
-
-impl<T: Send + Sync + Config> Stream for SubmitAndWatchSubscription<T> {
-    type Item = Result<TransactionStatus<T::Hash>, Error>;
-
-    fn poll_next(
-        mut self: Pin<&mut Self>,
-        cx: &mut std::task::Context<'_>,
-    ) -> Poll<Option<Self::Item>> {
-        self.stream.poll_next_unpin(cx)
     }
 }
