@@ -15,8 +15,18 @@ description = "Sign extrinsics to be submitted by Subxt"
 keywords = ["parity", "subxt", "extrinsic", "signer"]
 
 [features]
-default = ["sr25519", "ecdsa", "eth", "subxt", "std"]
-std = ["regex/std", "sp-crypto-hashing/std", "pbkdf2/std", "sha2/std", "hmac/std", "bip39/std", "schnorrkel/std", "secp256k1/std", "sp-core/std"]
+default = ["sr25519", "ecdsa", "subxt", "std"]
+std = [
+    "regex/std",
+    "sp-crypto-hashing/std",
+    "pbkdf2/std",
+    "sha2/std",
+    "hmac/std",
+    "bip39/std",
+    "schnorrkel/std",
+    "secp256k1/std",
+    "sp-core/std"
+]
 
 # Pick the signer implementation(s) you need by enabling the
 # corresponding features. Note: I had more difficulties getting
@@ -24,7 +34,7 @@ std = ["regex/std", "sp-crypto-hashing/std", "pbkdf2/std", "sha2/std", "hmac/std
 # https://github.com/rust-bitcoin/rust-bitcoin/issues/930#issuecomment-1215538699
 sr25519 = ["schnorrkel"]
 ecdsa = ["secp256k1"]
-eth = ["keccak-hash", "secp256k1", "bip32"]
+unstable-eth = ["keccak-hash", "ecdsa", "secp256k1", "bip32"]
 
 # Make the keypair algorithms here compatible with Subxt's Signer trait,
 # so that they can be used to sign transactions for compatible chains.

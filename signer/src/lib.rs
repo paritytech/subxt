@@ -33,8 +33,8 @@ pub mod sr25519;
 pub mod ecdsa;
 
 // An ethereum signer implementation.
-#[cfg(feature = "eth")]
-#[cfg_attr(docsrs, doc(cfg(feature = "eth")))]
+#[cfg(feature = "unstable-eth")]
+#[cfg_attr(docsrs, doc(cfg(feature = "unstable-eth")))]
 pub mod eth;
 
 // Re-export useful bits and pieces for generating a Pair from a phrase,
