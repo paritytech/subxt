@@ -9,7 +9,7 @@ use alloc::format;
 use alloc::string::String;
 use core::fmt::{Display, Formatter};
 use core::str::FromStr;
-use derive_more::{Display, From};
+use derive_more::Display;
 use keccak_hash::keccak;
 use secp256k1::Message;
 
@@ -58,7 +58,13 @@ impl Keypair {
         #[cfg(not(feature = "std"))]
         let seed = mnemonic.to_seed_normalized(password.unwrap_or(""));
 
-        let private = bip32::XPrv::derive_from_path(seed, &derivation_path.inner)?;
+        // TODO: Currently, we use bip32 to derive private keys which under the hood uses
+        // the Rust k256 crate. We _also_ use the secp256k1 crate (which is very similar).
+        // It'd be great if we could 100% use just one of the two crypto libs. bip32 has
+        // a feature flag to use secp256k1, but it's unfortunately a different version (older)
+        // than ours.
+        let private = bip32::XPrv::derive_from_path(seed, &derivation_path.inner)
+            .map_err(|_| Error::DeriveFromPath)?;
 
         Keypair::from_seed(private.to_bytes())
     }
@@ -97,7 +103,9 @@ impl Keypair {
     }
 }
 
-/// A derivation path.
+/// A derivation path. This can be parsed from a valid derivation path string like
+/// `"m/44'/60'/0'/0/0"`, or we can construct one using the helpers [`DerivationPath::empty()`]
+/// and [`DerivationPath::eth()`].
 #[derive(Clone, Debug)]
 pub struct DerivationPath {
     inner: bip32::DerivationPath,
@@ -134,7 +142,7 @@ impl DerivationPath {
 impl FromStr for DerivationPath {
     type Err = Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let inner = bip32::DerivationPath::from_str(s)?;
+        let inner = bip32::DerivationPath::from_str(s).map_err(|_| Error::DeriveFromPath)?;
         Ok(DerivationPath { inner })
     }
 }
@@ -197,15 +205,14 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &ecdsa::Publi
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug, PartialEq, Display, From)]
+#[derive(Debug, PartialEq, Display)]
 pub enum Error {
     /// Invalid seed.
     #[display(fmt = "Invalid seed (was it the wrong length?)")]
-    #[from(ignore)]
     InvalidSeed,
-    /// Invalid derivation index.
-    #[display(fmt = "Could not derive from path: {_0}")]
-    DeriveFromPath(bip32::Error),
+    /// Invalid derivation path.
+    #[display(fmt = "Could not derive from path; some valeus in the path may have been >= 2^31?")]
+    DeriveFromPath,
 }
 
 #[cfg(feature = "std")]
@@ -343,7 +350,7 @@ mod test {
             // Creating invalid derivation paths (ie values too large) will result in an error.
             assert_eq!(
                 derivation_path_err,
-                Error::DeriveFromPath(bip32::Error::ChildNumber)
+                Error::DeriveFromPath
             );
         }
 
