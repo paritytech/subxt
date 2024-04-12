@@ -235,3 +235,54 @@ async fn storage_pallet_storage_version() -> Result<(), subxt::Error> {
         .await?;
     Ok(())
 }
+
+#[subxt_test]
+async fn storage_iter_decode_keys() -> Result<(), subxt::Error> {
+    use futures::StreamExt;
+
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let storage_static = node_runtime::storage().system().account_iter();
+    let results_static = api
+        .storage()
+        .at_latest()
+        .await?
+        .iter(storage_static)
+        .await?;
+
+    let storage_dynamic = subxt::dynamic::storage("System", "Account", vec![]);
+    let results_dynamic = api
+        .storage()
+        .at_latest()
+        .await?
+        .iter(storage_dynamic)
+        .await?;
+
+    // Even the testing node should have more than 3 accounts registered.
+    let results_static = results_static.take(3).collect::<Vec<_>>().await;
+    let results_dynamic = results_dynamic.take(3).collect::<Vec<_>>().await;
+
+    assert_eq!(results_static.len(), 3);
+    assert_eq!(results_dynamic.len(), 3);
+
+    let twox_system = sp_core::twox_128("System".as_bytes());
+    let twox_account = sp_core::twox_128("Account".as_bytes());
+
+    for (static_kv, dynamic_kv) in results_static.into_iter().zip(results_dynamic.into_iter()) {
+        let static_kv = static_kv?;
+        let dynamic_kv = dynamic_kv?;
+
+        // We only care about the underlying key bytes.
+        assert_eq!(static_kv.key_bytes, dynamic_kv.key_bytes);
+
+        let bytes = static_kv.key_bytes;
+        assert!(bytes.len() > 32);
+
+        // The first 16 bytes should be the twox hash of "System" and the next 16 bytes should be the twox hash of "Account".
+        assert_eq!(&bytes[..16], &twox_system[..]);
+        assert_eq!(&bytes[16..32], &twox_account[..]);
+    }
+
+    Ok(())
+}
