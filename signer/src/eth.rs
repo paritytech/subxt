@@ -4,14 +4,14 @@
 
 //! An ethereum keypair implementation.
 
-use core::fmt::{Display, Formatter};
-use derive_more::{Display, From};
-use keccak_hash::keccak;
-use secp256k1::Message;
-use core::str::FromStr;
 use crate::ecdsa;
 use alloc::format;
 use alloc::string::String;
+use core::fmt::{Display, Formatter};
+use core::str::FromStr;
+use derive_more::{Display, From};
+use keccak_hash::keccak;
+use secp256k1::Message;
 
 const SEED_LENGTH: usize = 32;
 
@@ -58,10 +58,7 @@ impl Keypair {
         #[cfg(not(feature = "std"))]
         let seed = mnemonic.to_seed_normalized(password.unwrap_or(""));
 
-        let private = bip32::XPrv::derive_from_path(
-            seed,
-            &derivation_path.inner,
-        )?;
+        let private = bip32::XPrv::derive_from_path(seed, &derivation_path.inner)?;
 
         Keypair::from_seed(private.to_bytes())
     }
@@ -101,9 +98,9 @@ impl Keypair {
 }
 
 /// A derivation path.
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct DerivationPath {
-    inner: bip32::DerivationPath
+    inner: bip32::DerivationPath,
 }
 
 impl DerivationPath {
@@ -119,8 +116,14 @@ impl DerivationPath {
     ///
     /// Panics if the `account` or `address_index` provided are >= 2^31.
     pub fn eth(account: u32, address_index: u32) -> Self {
-        assert!(account < bip32::ChildNumber::HARDENED_FLAG, "account must be less than 2^31");
-        assert!(address_index < bip32::ChildNumber::HARDENED_FLAG, "address_index must be less than 2^31");
+        assert!(
+            account < bip32::ChildNumber::HARDENED_FLAG,
+            "account must be less than 2^31"
+        );
+        assert!(
+            address_index < bip32::ChildNumber::HARDENED_FLAG,
+            "address_index must be less than 2^31"
+        );
 
         let derivation_string = format!("m/44'/60'/{account}'/0/{address_index}");
         let inner = bip32::DerivationPath::from_str(&derivation_string).unwrap();
@@ -391,7 +394,7 @@ mod test {
             (
                 dev::alith(),
                 "0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac",
-                "0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133"
+                "0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133",
             ),
             (
                 dev::baltathar(),
@@ -422,10 +425,16 @@ mod test {
 
         for (case_idx, (keypair, exp_account_id, exp_priv_key)) in cases.into_iter().enumerate() {
             let act_account_id = keypair.account_id().to_string();
-            let act_priv_key = format!("0x{}", &keypair.0.0.display_secret());
+            let act_priv_key = format!("0x{}", &keypair.0 .0.display_secret());
 
-            assert_eq!(exp_account_id, act_account_id, "account ID mismatch in {case_idx}");
-            assert_eq!(exp_priv_key, act_priv_key, "private key mismatch in {case_idx}");
+            assert_eq!(
+                exp_account_id, act_account_id,
+                "account ID mismatch in {case_idx}"
+            );
+            assert_eq!(
+                exp_priv_key, act_priv_key,
+                "private key mismatch in {case_idx}"
+            );
         }
     }
 
