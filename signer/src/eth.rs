@@ -5,12 +5,13 @@
 //! An ethereum keypair implementation.
 
 use core::fmt::{Display, Formatter};
-
 use derive_more::{Display, From};
 use keccak_hash::keccak;
 use secp256k1::Message;
-
+use core::str::FromStr;
 use crate::ecdsa;
+use alloc::format;
+use alloc::string::String;
 
 const SEED_LENGTH: usize = 32;
 
@@ -31,6 +32,10 @@ impl Keypair {
     /// Create a keypair from a BIP-39 mnemonic phrase, optional password, account index, and
     /// derivation type.
     ///
+    /// **Note:** if the `std` feature is not enabled, we won't attempt to normalize the provided password
+    /// to NFKD first, and so this is your responsibility. This is not a concern if only ASCII
+    /// characters are used in the password.
+    ///
     /// # Example
     ///
     /// ```rust
@@ -38,28 +43,25 @@ impl Keypair {
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
     /// let mnemonic = Mnemonic::parse(phrase).unwrap();
-    /// let keypair = Keypair::from_phrase(&mnemonic, None, 0, Default::default()).unwrap();
+    /// let keypair = Keypair::from_phrase(&mnemonic, None, DerivationPath::eth(0,0)).unwrap();
     ///
     /// keypair.sign(b"Hello world!");
     /// ```
     pub fn from_phrase(
         mnemonic: &bip39::Mnemonic,
         password: Option<&str>,
-        index: u32,
-        derivation: Derivation,
+        derivation_path: DerivationPath,
     ) -> Result<Self, Error> {
-        let derivation_path = match derivation {
-            Derivation::Hard => format!("m/44'/60'/{}'/0/0", index),
-            Derivation::Soft => format!("m/44'/60'/0'/0/{}", index),
-        }
-        .parse()
-        .map_err(Error::InvalidDerivationIndex)?;
+        // `to_seed` isn't available unless std is enabled in bip39.
+        #[cfg(feature = "std")]
+        let seed = mnemonic.to_seed(password.unwrap_or(""));
+        #[cfg(not(feature = "std"))]
+        let seed = mnemonic.to_seed_normalized(password.unwrap_or(""));
 
         let private = bip32::XPrv::derive_from_path(
-            mnemonic.to_seed(password.unwrap_or("")),
-            &derivation_path,
-        )
-        .expect("valid private key");
+            seed,
+            &derivation_path.inner,
+        )?;
 
         Keypair::from_seed(private.to_bytes())
     }
@@ -98,15 +100,39 @@ impl Keypair {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Derivation {
-    Hard,
-    Soft,
+/// A derivation path.
+#[derive(Clone,Debug)]
+pub struct DerivationPath {
+    inner: bip32::DerivationPath
 }
 
-impl Default for Derivation {
-    fn default() -> Self {
-        Self::Soft
+impl DerivationPath {
+    /// An empty derivation path (in other words, just use the master-key as is).
+    pub fn empty() -> Self {
+        let inner = bip32::DerivationPath::from_str("m").unwrap();
+        DerivationPath { inner }
+    }
+
+    /// A BIP44 Ethereum compatible derivation using the path "m/44'/60'/account'/0/address_index".
+    ///
+    /// # Panics
+    ///
+    /// Panics if the `account` or `address_index` provided are >= 2^31.
+    pub fn eth(account: u32, address_index: u32) -> Self {
+        assert!(account < bip32::ChildNumber::HARDENED_FLAG, "account must be less than 2^31");
+        assert!(address_index < bip32::ChildNumber::HARDENED_FLAG, "address_index must be less than 2^31");
+
+        let derivation_string = format!("m/44'/60'/{account}'/0/{address_index}");
+        let inner = bip32::DerivationPath::from_str(&derivation_string).unwrap();
+        DerivationPath { inner }
+    }
+}
+
+impl FromStr for DerivationPath {
+    type Err = Error;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let inner = bip32::DerivationPath::from_str(s)?;
+        Ok(DerivationPath { inner })
     }
 }
 
@@ -175,11 +201,8 @@ pub enum Error {
     #[from(ignore)]
     InvalidSeed,
     /// Invalid derivation index.
-    #[display(fmt = "Invalid derivation index: {_0}")]
-    InvalidDerivationIndex(bip32::Error),
-    /// Invalid phrase.
-    #[display(fmt = "Cannot parse phrase: {_0}")]
-    InvalidPhrase(bip39::Error),
+    #[display(fmt = "Could not derive from path: {_0}")]
+    DeriveFromPath(bip32::Error),
 }
 
 #[cfg(feature = "std")]
@@ -197,27 +220,27 @@ pub mod dev {
     once_static_cloned! {
         pub fn alith() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 0, Derivation::Soft).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 0)).unwrap()
         }
         pub fn baltathar() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 1, Derivation::Soft).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 1)).unwrap()
         }
         pub fn charleth() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 2, Derivation::Soft).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 2)).unwrap()
         }
         pub fn dorothy() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 3, Derivation::Soft).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 3)).unwrap()
         }
         pub fn ethan() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 4, Derivation::Soft).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 4)).unwrap()
         }
         pub fn faith() -> Keypair {
             Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, 5, Derivation::Soft).unwrap()
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 5)).unwrap()
         }
     }
 }
@@ -273,10 +296,6 @@ mod test {
 
     type SubxtSigner = dyn SignerT<StubEthRuntimeConfig>;
 
-    fn derivation_strategy() -> impl Strategy<Value = Derivation> {
-        prop_oneof![Just(Derivation::Hard), Just(Derivation::Soft),]
-    }
-
     prop_compose! {
         fn keypair()(seed in any::<[u8; 32]>()) -> Keypair {
             let secret = secp256k1::SecretKey::from_slice(&seed).expect("valid secret key");
@@ -294,37 +313,34 @@ mod test {
         fn check_from_phrase(
             entropy in any::<[u8; 32]>(),
             password in any::<Option<String>>(),
-            index in 1..(i32::MAX as u32),
-            derivation in derivation_strategy()
+            address in 1..(i32::MAX as u32),
+            account_idx in 1..(i32::MAX as u32),
         ) {
             let mnemonic = bip39::Mnemonic::from_entropy(&entropy).expect("valid mnemonic");
-            let derivation_path = match derivation {
-                Derivation::Hard => format!("m/44'/60'/{}'/0/0", index),
-                Derivation::Soft => format!("m/44'/60'/0'/0/{}", index),
-            }.parse().expect("valid derivation path");
+            let derivation_path = format!("m/44'/60'/{address}'/0/{account_idx}").parse().expect("valid derivation path");
             let private = bip32::XPrv::derive_from_path(
                 mnemonic.to_seed(password.clone().unwrap_or("".to_string())),
                 &derivation_path,
             ).expect("valid private");
 
+            // Creating our own keypairs should be equivalent to using bip32 crate to do it:
             assert_eq!(
-                Keypair::from_phrase(&mnemonic, password.as_deref(), index, derivation).expect("valid keypair"),
+                Keypair::from_phrase(&mnemonic, password.as_deref(), DerivationPath::eth(address, account_idx)).expect("valid keypair"),
                 Keypair(ecdsa::Keypair::from_seed(private.to_bytes()).expect("valid ecdsa keypair"))
             );
         }
 
        #[test]
         fn check_from_phrase_bad_index(
-            entropy in any::<[u8; 32]>(),
-            password in any::<Option<String>>(),
-            index in (i32::MAX as u32)..=u32::MAX,
-            derivation in derivation_strategy()
+            address in (i32::MAX as u32)..=u32::MAX,
+            account_idx in (i32::MAX as u32)..=u32::MAX,
         ) {
-            let mnemonic = bip39::Mnemonic::from_entropy(&entropy).expect("valid mnemonic");
+            let derivation_path_err = format!("m/44'/60'/{address}'/0/{account_idx}").parse::<DerivationPath>().expect_err("bad path expected");
 
+            // Creating invalid derivation paths (ie values too large) will result in an error.
             assert_eq!(
-                Keypair::from_phrase(&mnemonic, password.as_deref(), index, derivation).expect_err("bad index"),
-                Error::InvalidDerivationIndex(bip32::Error::ChildNumber)
+                derivation_path_err,
+                Error::DeriveFromPath(bip32::Error::ChildNumber)
             );
         }
 
@@ -367,32 +383,50 @@ mod test {
         }
     }
 
+    /// Test that the dev accounts match those listed in the moonbeam README.
+    /// https://github.com/moonbeam-foundation/moonbeam/blob/96cf8898874509d529b03c4da0e07b2787bacb18/README.md
     #[test]
     fn check_dev_accounts_match() {
-        assert_eq!(
-            dev::alith().account_id().to_string(),
-            "0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac"
-        );
-        assert_eq!(
-            dev::baltathar().account_id().to_string(),
-            "0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0"
-        );
-        assert_eq!(
-            dev::charleth().account_id().to_string(),
-            "0x798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc"
-        );
-        assert_eq!(
-            dev::dorothy().account_id().to_string(),
-            "0x773539d4Ac0e786233D90A233654ccEE26a613D9"
-        );
-        assert_eq!(
-            dev::ethan().account_id().to_string(),
-            "0xFf64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB"
-        );
-        assert_eq!(
-            dev::faith().account_id().to_string(),
-            "0xC0F0f4ab324C46e55D02D0033343B4Be8A55532d"
-        );
+        let cases = [
+            (
+                dev::alith(),
+                "0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac",
+                "0x5fb92d6e98884f76de468fa3f6278f8807c48bebc13595d45af5bdc4da702133"
+            ),
+            (
+                dev::baltathar(),
+                "0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0",
+                "0x8075991ce870b93a8870eca0c0f91913d12f47948ca0fd25b49c6fa7cdbeee8b",
+            ),
+            (
+                dev::charleth(),
+                "0x798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc",
+                "0x0b6e18cafb6ed99687ec547bd28139cafdd2bffe70e6b688025de6b445aa5c5b",
+            ),
+            (
+                dev::dorothy(),
+                "0x773539d4Ac0e786233D90A233654ccEE26a613D9",
+                "0x39539ab1876910bbf3a223d84a29e28f1cb4e2e456503e7e91ed39b2e7223d68",
+            ),
+            (
+                dev::ethan(),
+                "0xFf64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB",
+                "0x7dce9bc8babb68fec1409be38c8e1a52650206a7ed90ff956ae8a6d15eeaaef4",
+            ),
+            (
+                dev::faith(),
+                "0xC0F0f4ab324C46e55D02D0033343B4Be8A55532d",
+                "0xb9d2ea9a615f3165812e8d44de0d24da9bbd164b65c4f0573e1ce2c8dbd9c8df",
+            ),
+        ];
+
+        for (case_idx, (keypair, exp_account_id, exp_priv_key)) in cases.into_iter().enumerate() {
+            let act_account_id = keypair.account_id().to_string();
+            let act_priv_key = format!("0x{}", &keypair.0.0.display_secret());
+
+            assert_eq!(exp_account_id, act_account_id, "account ID mismatch in {case_idx}");
+            assert_eq!(exp_priv_key, act_priv_key, "private key mismatch in {case_idx}");
+        }
     }
 
     /// Test the same accounts from moonbeam so we know for sure that this implementation is working

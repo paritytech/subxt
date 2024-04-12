@@ -17,7 +17,7 @@ subxt-signer = { path = "..", default-features = false, features = [
     "web",
     "sr25519",
     "ecdsa",
-    "eth",
+    "unstable-eth",
     "std",
 ] }
 
