@@ -469,6 +469,7 @@ mod tests {
         RuntimeMetadataPrefixed,
     };
     use scale_info::{meta_type, TypeInfo};
+    use scale_value::Value;
 
     // Extrinsic needs to contain at least the generic type parameter "Call"
     // for the metadata to be valid.
@@ -629,18 +630,12 @@ mod tests {
         );
     }
 
-    // TODO add this back when we have tx encode logic in core.
-    /*
-    use primitive_types::H256;
-    use scale_value::Value;
-
     #[test]
     fn statically_decode_extrinsic() {
         let metadata = metadata();
-        let client = client(metadata.clone());
         let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
-        let tx = crate::tx::dynamic(
+        let tx = crate::dynamic::tx(
             "Test",
             "TestCall",
             vec![
@@ -649,9 +644,7 @@ mod tests {
                 Value::string("SomeValue"),
             ],
         );
-        let tx_encoded = client
-            .tx()
-            .create_unsigned(&tx)
+        let tx_encoded = crate::tx::create_unsigned::<SubstrateConfig, _>(&tx, &metadata)
             .expect("Valid dynamic parameters are provided");
 
         // Note: `create_unsigned` produces the extrinsic bytes by prefixing the extrinsic length.
@@ -713,5 +706,4 @@ mod tests {
             }
         );
     }
-    */
 }
