@@ -7,7 +7,6 @@
 //! implementation).
 
 pub mod legacy;
-pub mod retry;
 pub mod rpc;
 pub mod unstable;
 pub mod utils;
