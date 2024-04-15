@@ -111,6 +111,8 @@ wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "5.0.0"
 strip-ansi-escapes = "0.2.0"
+proptest = "1.4.0"
+hex-literal = "0.4.1"
 
 # Light client support:
 smoldot = { version = "0.16.0", default-features = false }
@@ -149,10 +151,12 @@ substrate-runner = { path = "testing/substrate-runner" }
 
 # subxt-signer deps that I expect aren't useful anywhere else:
 bip39 = { version = "2.0.0", default-features = false }
+bip32 = { version = "0.5.1", default-features = false }
 hmac = { version = "0.12.1", default-features = false }
 pbkdf2 = { version = "0.12.2", default-features = false }
 schnorrkel = { version = "0.11.4", default-features = false }
 secp256k1 = { version = "0.28.2", default-features = false }
+keccak-hash = { version = "0.10.0", default-features = false }
 secrecy = "0.8.0"
 sha2 = { version = "0.10.8", default-features = false }
 zeroize = { version = "1", default-features = false }
