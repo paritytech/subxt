@@ -40,7 +40,7 @@
 //! );
 //! ```
 //!
-//! All valid runtime calls implement [`crate::runtime_api::RuntimeApiPayload`], a trait which
+//! All valid runtime calls implement [`crate::runtime_api::PayloadT`], a trait which
 //! describes how to encode the runtime call arguments and what return type to decode from the
 //! response.
 //!

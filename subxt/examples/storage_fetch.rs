@@ -22,9 +22,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .storage()
         .at_latest()
         .await?
-        .fetch(&storage_query)
+        .fetch_raw(subxt_core::storage::get_address_bytes(&storage_query, &api.metadata()).unwrap())
         .await?;
 
-    println!("Alice has free balance: {}", result.unwrap().data.free);
+    let v = hex::encode(result.unwrap());
+    println!("Alice: {v}");
     Ok(())
 }

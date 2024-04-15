@@ -259,7 +259,7 @@ mod subxt_compat {
     use super::*;
 
     use subxt_core::{
-        tx::Signer as SignerT,
+        tx::signer::Signer as SignerT,
         utils::{AccountId32, MultiAddress, MultiSignature},
         Config,
     };

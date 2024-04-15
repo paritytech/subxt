@@ -2,9 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::ConstantAddress;
 use crate::{client::OfflineClientT, error::Error, Config};
 use derive_where::derive_where;
+use subxt_core::constants::address::AddressT;
 
 /// A client for accessing constants.
 #[derive_where(Clone; Client)]
@@ -28,19 +28,16 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie
     /// the pallet or constant in question do not exist at all).
-    pub fn validate<Address: ConstantAddress>(&self, address: &Address) -> Result<(), Error> {
+    pub fn validate<Address: AddressT>(&self, address: &Address) -> Result<(), Error> {
         let metadata = self.client.metadata();
-        subxt_core::constants::validate_constant(&metadata, address).map_err(Error::from)
+        subxt_core::constants::validate(address, &metadata).map_err(Error::from)
     }
 
     /// Access the constant at the address given, returning the type defined by this address.
     /// This is probably used with addresses given from static codegen, although you can manually
     /// construct your own, too.
-    pub fn at<Address: ConstantAddress>(
-        &self,
-        address: &Address,
-    ) -> Result<Address::Target, Error> {
+    pub fn at<Address: AddressT>(&self, address: &Address) -> Result<Address::Target, Error> {
         let metadata = self.client.metadata();
-        subxt_core::constants::get_constant(&metadata, address).map_err(Error::from)
+        subxt_core::constants::get(address, &metadata).map_err(Error::from)
     }
 }

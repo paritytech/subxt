@@ -416,7 +416,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     RuntimeEvent::Valid(ev) => ev,
                 };
 
-                let runtime_version = RuntimeVersion::new(runtime_details.spec.spec_version, runtime_details.spec.transaction_version);
+                let runtime_version = RuntimeVersion {
+                    spec_version: runtime_details.spec.spec_version,
+                    transaction_version: runtime_details.spec.transaction_version
+                };
                 std::future::ready(Some(Ok(runtime_version)))
             });
 

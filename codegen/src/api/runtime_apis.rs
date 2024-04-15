@@ -135,8 +135,8 @@ fn generate_runtime_api(
 
             let method = quote!(
                 #docs
-                pub fn #method_name(&self, #( #fn_params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, types::#method_name::output::Output> {
-                    #crate_path::runtime_api::Payload::new_static(
+                pub fn #method_name(&self, #( #fn_params, )* ) -> #crate_path::runtime_api::payload::Payload<types::#struct_name, types::#method_name::output::Output> {
+                    #crate_path::runtime_api::payload::Payload::new_static(
                         #trait_name_str,
                         #method_name_str,
                         types::#struct_name { #( #param_names, )* },

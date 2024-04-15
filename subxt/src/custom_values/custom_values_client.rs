@@ -2,10 +2,7 @@ use crate::client::OfflineClientT;
 use crate::{Config, Error};
 use derive_where::derive_where;
 
-use subxt_core::custom_values::{
-    get_custom_value, get_custom_value_bytes, validate_custom_value, CustomValueAddress,
-};
-use subxt_core::utils::Yes;
+use subxt_core::custom_values::address::{AddressT, Yes};
 
 /// A client for accessing custom values stored in the metadata.
 #[derive_where(Clone; Client)]
@@ -27,29 +24,26 @@ impl<T, Client> CustomValuesClient<T, Client> {
 impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
     /// Access a custom value by the address it is registered under. This can be just a [str] to get back a dynamic value,
     /// or a static address from the generated static interface to get a value of a static type returned.
-    pub fn at<Address: CustomValueAddress<IsDecodable = Yes> + ?Sized>(
+    pub fn at<Address: AddressT<IsDecodable = Yes> + ?Sized>(
         &self,
         address: &Address,
     ) -> Result<Address::Target, Error> {
-        get_custom_value(&self.client.metadata(), address).map_err(Into::into)
+        subxt_core::custom_values::get(address, &self.client.metadata()).map_err(Into::into)
     }
 
     /// Access the bytes of a custom value by the address it is registered under.
-    pub fn bytes_at<Address: CustomValueAddress + ?Sized>(
+    pub fn bytes_at<Address: AddressT + ?Sized>(
         &self,
         address: &Address,
     ) -> Result<Vec<u8>, Error> {
-        get_custom_value_bytes(&self.client.metadata(), address).map_err(Into::into)
+        subxt_core::custom_values::get_bytes(address, &self.client.metadata()).map_err(Into::into)
     }
 
     /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Returns an error if the address was not valid (wrong name, type or raw bytes)
-    pub fn validate<Address: CustomValueAddress + ?Sized>(
-        &self,
-        address: &Address,
-    ) -> Result<(), Error> {
-        validate_custom_value(&self.client.metadata(), address).map_err(Into::into)
+    pub fn validate<Address: AddressT + ?Sized>(&self, address: &Address) -> Result<(), Error> {
+        subxt_core::custom_values::validate(address, &self.client.metadata()).map_err(Into::into)
     }
 }
 
@@ -113,14 +107,17 @@ mod tests {
         };
 
         let metadata: subxt_metadata::Metadata = frame_metadata.try_into().unwrap();
-        Metadata::new(metadata)
+        Metadata::from(metadata)
     }
 
     #[test]
     fn test_decoding() {
         let client = OfflineClient::<SubstrateConfig>::new(
             Default::default(),
-            RuntimeVersion::new(0, 0),
+            RuntimeVersion {
+                spec_version: 0,
+                transaction_version: 0,
+            },
             mock_metadata(),
         );
         let custom_value_client = CustomValuesClient::new(client);

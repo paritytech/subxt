@@ -1,6 +1,8 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
+
+//! Construct addresses to access storage entries with.
 
 use crate::{
     dynamic::DecodedValueThunk,
@@ -14,11 +16,12 @@ use alloc::borrow::{Cow, ToOwned};
 use alloc::string::String;
 use alloc::vec::Vec;
 
-use super::{storage_key::StorageHashers, StorageKey};
+// Re-export types used here:
+pub use super::storage_key::{StaticStorageKey, StorageHashers, StorageHashersIter, StorageKey};
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
-pub trait StorageAddress {
+pub trait AddressT {
     /// The target type of the value that lives at this address.
     type Target: DecodeWithMetadata;
     /// The keys type used to construct this address.
@@ -120,11 +123,11 @@ where
 
     /// Return bytes representing the root of this storage entry (a hash of the pallet and entry name).
     pub fn to_root_bytes(&self) -> Vec<u8> {
-        super::utils::storage_address_root_bytes(self)
+        super::get_address_root_bytes(self)
     }
 }
 
-impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable> StorageAddress
+impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable> AddressT
     for Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
 where
     Keys: StorageKey,

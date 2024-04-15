@@ -2,10 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{
-    storage_type::{validate_storage_address, Storage},
-    StorageAddress,
-};
+use super::storage_type::Storage;
 use crate::{
     backend::BlockRef,
     client::{OfflineClientT, OnlineClientT},
@@ -14,6 +11,7 @@ use crate::{
 };
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
+use subxt_core::storage::address::AddressT;
 
 /// Query the runtime storage.
 #[derive_where(Clone; Client)]
@@ -41,29 +39,23 @@ where
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie
     /// the pallet or storage entry in question do not exist at all).
-    pub fn validate<Address: StorageAddress>(&self, address: &Address) -> Result<(), Error> {
-        let metadata = self.client.metadata();
-        let pallet_metadata = metadata.pallet_by_name_err(address.pallet_name())?;
-        validate_storage_address(address, pallet_metadata)
+    pub fn validate<Address: AddressT>(&self, address: &Address) -> Result<(), Error> {
+        subxt_core::storage::validate(address, &self.client.metadata()).map_err(Into::into)
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
     /// to retrieve the entries at the root of the associated address.
-    pub fn address_root_bytes<Address: StorageAddress>(&self, address: &Address) -> Vec<u8> {
-        subxt_core::storage::utils::storage_address_root_bytes(address)
+    pub fn address_root_bytes<Address: AddressT>(&self, address: &Address) -> Vec<u8> {
+        subxt_core::storage::get_address_root_bytes(address)
     }
 
     /// Convert some storage address into the raw bytes that would be submitted to the node in order
-    /// to retrieve an entry. This fails if [`StorageAddress::append_entry_bytes`] does; in the built-in
+    /// to retrieve an entry. This fails if [`AddressT::append_entry_bytes`] does; in the built-in
     /// implementation this would be if the pallet and storage entry being asked for is not available on the
     /// node you're communicating with, or if the metadata is missing some type information (which should not
     /// happen).
-    pub fn address_bytes<Address: StorageAddress>(
-        &self,
-        address: &Address,
-    ) -> Result<Vec<u8>, Error> {
-        subxt_core::storage::utils::storage_address_bytes(address, &self.client.metadata())
-            .map_err(Into::into)
+    pub fn address_bytes<Address: AddressT>(&self, address: &Address) -> Result<Vec<u8>, Error> {
+        subxt_core::storage::get_address_bytes(address, &self.client.metadata()).map_err(Into::into)
     }
 }
 

@@ -66,7 +66,7 @@
 //! - `runtime::storage().foo().bar_iter3(u8, bool, u16)`: iterate over all of the entries in the "bar" map under
 //!   a given `u8`, `bool` and `u16` value.
 //!
-//! All valid storage queries implement [`crate::storage::StorageAddress`]. As well as describing
+//! All valid storage queries implement [`crate::storage::AddressT`]. As well as describing
 //! how to build a valid storage query, this trait also has some associated types that determine the
 //! shape of the result you'll get back, and determine what you can do with it (ie, can you iterate
 //! over storage entries using it).
@@ -124,7 +124,7 @@
 //!
 //! For more advanced use cases, have a look at [`crate::storage::Storage::fetch_raw`] and
 //! [`crate::storage::Storage::fetch_raw_keys`]. Both of these take raw bytes as arguments, which can be
-//! obtained from a [`crate::storage::StorageAddress`] by using
+//! obtained from a [`crate::storage::AddressT`] by using
 //! [`crate::storage::StorageClient::address_bytes()`] or
 //! [`crate::storage::StorageClient::address_root_bytes()`].
 //!

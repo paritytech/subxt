@@ -68,8 +68,8 @@ pub fn generate_constants(
 
             Ok(quote! {
                 #docs
-                pub fn #fn_name(&self) -> #crate_path::constants::Address<#return_ty> {
-                    #crate_path::constants::Address::new_static(
+                pub fn #fn_name(&self) -> #crate_path::constants::address::Address<#return_ty> {
+                    #crate_path::constants::address::Address::new_static(
                         #pallet_name,
                         #constant_name,
                         [#(#constant_hash,)*]
