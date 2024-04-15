@@ -169,7 +169,7 @@ impl<CallData: EncodeAsFields> Payload for DefaultPayload<CallData> {
     }
 }
 
-/// Construct a transaction at runtime; essentially an alias to [`Payload::new()`]
+/// Construct a transaction at runtime; essentially an alias to [`DefaultPayload::new()`]
 /// which provides a [`Composite`] value for the call data.
 pub fn dynamic(
     pallet_name: impl Into<String>,
