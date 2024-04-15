@@ -10,7 +10,6 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use futures::StreamExt;
-use subxt::backend::retry::RetryBackend;
 use subxt::backend::rpc::reconnecting_rpc_client::{Client, RetryPolicy};
 use subxt::backend::rpc::RpcClient;
 use subxt::backend::unstable::{UnstableBackend, UnstableBackendDriver};
@@ -46,10 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The unstable backend needs driving:
     tokio::spawn(drive_rpc_backend(driver));
 
-    let retry_backend = RetryBackend::from(backend.as_dyn_backend());
-
-    let api: OnlineClient<PolkadotConfig> =
-        OnlineClient::from_backend(Arc::new(retry_backend)).await?;
+    let api: OnlineClient<PolkadotConfig> = OnlineClient::from_backend(Arc::new(backend)).await?;
 
     subscribe_to_a_few_blocks(&api).await?;
     submit_retry_transaction(&api).await?;

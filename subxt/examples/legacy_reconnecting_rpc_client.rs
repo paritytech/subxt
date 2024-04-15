@@ -10,7 +10,6 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use subxt::backend::legacy::LegacyBackend;
-use subxt::backend::retry::RetryBackend;
 use subxt::backend::rpc::reconnecting_rpc_client::{Client, RetryPolicy};
 use subxt::backend::rpc::RpcClient;
 use subxt::config::Header;
@@ -41,10 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let backend: LegacyBackend<PolkadotConfig> =
         LegacyBackend::builder().build(RpcClient::new(rpc.clone()));
 
-    let retry_backend = RetryBackend::from(backend.as_dyn_backend());
-
-    let api: OnlineClient<PolkadotConfig> =
-        OnlineClient::from_backend(Arc::new(retry_backend)).await?;
+    let api: OnlineClient<PolkadotConfig> = OnlineClient::from_backend(Arc::new(backend)).await?;
 
     // The retry-able rpc backend will re-run this until it's succesful.
     // It's also possible to run custom retry_logic withot the retry-backend

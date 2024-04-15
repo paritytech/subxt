@@ -32,7 +32,6 @@ use async_trait::async_trait;
 use follow_stream_driver::{FollowStreamDriver, FollowStreamDriverHandle};
 use futures::{Stream, StreamExt};
 use std::collections::HashMap;
-use std::sync::Arc;
 use std::task::Poll;
 use storage_items::StorageItems;
 
@@ -135,14 +134,6 @@ impl<T: Config> UnstableBackend<T> {
     /// Configure and construct an [`UnstableBackend`] and the associated [`UnstableBackendDriver`].
     pub fn builder() -> UnstableBackendBuilder<T> {
         UnstableBackendBuilder::new()
-    }
-
-    /// todo..
-    pub fn as_dyn_backend(&self) -> Arc<dyn Backend<T>> {
-        Arc::new(UnstableBackend {
-            methods: self.methods.clone(),
-            follow_handle: self.follow_handle.clone(),
-        })
     }
 
     fn inner_subscribe_runtime_stream(&self) -> StreamOfResults<RuntimeVersion> {

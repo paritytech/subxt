@@ -1,7 +1,7 @@
 //! RPC utils.
 
 use futures::future::BoxFuture;
-pub use tokio_retry::strategy::*;
+pub use tokio_retry::strategy::ExponentialBackoff;
 
 use super::{RuntimeVersion, StreamOfResults};
 use crate::error::Error;
@@ -95,11 +95,12 @@ impl<T> Stream for RetrySubscription<T> {
 }
 
 /// Retry a future with custom strategy.
-pub async fn retry_with_strategy<T, A, I, S>(strategy: S, mut retry_future: A) -> Result<T, Error>
+pub async fn retry_with_strategy<T, A>(
+    strategy: tokio_retry::strategy::ExponentialBackoff,
+    mut retry_future: A,
+) -> Result<T, Error>
 where
     A: Action<Item = T, Error = Error>,
-    I: Iterator<Item = Duration>,
-    S: IntoIterator<IntoIter = I, Item = Duration>,
 {
     RetryIf::spawn(
         strategy,
@@ -109,16 +110,29 @@ where
     .await
 }
 
-/// Retry a future with default strategy.
-pub async fn retry<T, A>(retry_future: A) -> Result<T, Error>
-where
-    A: Action<Item = T, Error = Error>,
-{
-    retry_with_strategy(
-        ExponentialBackoff::from_millis(10)
-            .max_delay(Duration::from_secs(60))
-            .map(jitter),
-        retry_future,
-    )
-    .await
+/// Retry policy
+///
+/// Does nothing if a non-reconnecting rpc client hasn't been enabled.
+#[derive(Debug, Clone)]
+pub struct RetryPolicy(tokio_retry::strategy::ExponentialBackoff);
+
+impl Default for RetryPolicy {
+    fn default() -> Self {
+        Self(ExponentialBackoff::from_millis(10).max_delay(Duration::from_secs(60)))
+    }
+}
+
+impl RetryPolicy {
+    /// Create new retry policy
+    pub fn new(policy: ExponentialBackoff) -> Self {
+        Self(policy)
+    }
+
+    /// Run a retry-able call.
+    pub async fn call<T, A>(&self, retry_future: A) -> Result<T, Error>
+    where
+        A: Action<Item = T, Error = Error>,
+    {
+        retry_with_strategy(self.0.clone(), retry_future).await
+    }
 }
