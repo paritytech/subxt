@@ -56,7 +56,7 @@ pub trait Payload {
     fn encode_args_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error>;
 
     /// Encode arguments data and return the output. This is a convenience
-    /// wrapper around [`PayloadT::encode_args_to`].
+    /// wrapper around [`Payload::encode_args_to`].
     fn encode_args(&self, metadata: &Metadata) -> Result<Vec<u8>, Error> {
         let mut v = Vec::new();
         self.encode_args_to(metadata, &mut v)?;

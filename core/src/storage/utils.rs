@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! these utility methods complement the [`AddressT`] trait, but
+//! these utility methods complement the [`Address`] trait, but
 //! aren't things that should ever be overridden, and so don't exist on
 //! the trait itself.
 
@@ -13,7 +13,7 @@ use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
 use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageHasher};
 
-/// Return the root of a given [`AddressT`]: hash the pallet name and entry name
+/// Return the root of a given [`Address`]: hash the pallet name and entry name
 /// and append those bytes to the output.
 pub fn write_storage_address_root_bytes<Addr: Address>(addr: &Addr, out: &mut Vec<u8>) {
     out.extend(sp_crypto_hashing::twox_128(addr.pallet_name().as_bytes()));

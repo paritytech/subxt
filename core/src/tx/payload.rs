@@ -23,7 +23,7 @@ pub trait Payload {
     fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error>;
 
     /// Encode call data and return the output. This is a convenience
-    /// wrapper around [`PayloadT::encode_call_data_to`].
+    /// wrapper around [`Payload::encode_call_data_to`].
     fn encode_call_data(&self, metadata: &Metadata) -> Result<Vec<u8>, Error> {
         let mut v = Vec::new();
         self.encode_call_data_to(metadata, &mut v)?;
