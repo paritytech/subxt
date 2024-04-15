@@ -180,11 +180,11 @@ pub mod api {
                 #[doc = " Returns the version of the runtime."]
                 pub fn version(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::Version,
                     types::version::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "Core",
                         "version",
                         types::Version {},
@@ -200,11 +200,11 @@ pub mod api {
                 pub fn execute_block(
                     &self,
                     block: types::execute_block::Block,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::ExecuteBlock,
                     types::execute_block::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "Core",
                         "execute_block",
                         types::ExecuteBlock { block },
@@ -219,11 +219,11 @@ pub mod api {
                 pub fn initialize_block(
                     &self,
                     header: types::initialize_block::Header,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::InitializeBlock,
                     types::initialize_block::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "Core",
                         "initialize_block",
                         types::InitializeBlock { header },
@@ -321,11 +321,11 @@ pub mod api {
                 #[doc = " Returns the metadata of a runtime."]
                 pub fn metadata(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::Metadata,
                     types::metadata::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "Metadata",
                         "metadata",
                         types::Metadata {},
@@ -343,11 +343,11 @@ pub mod api {
                 pub fn metadata_at_version(
                     &self,
                     version: types::metadata_at_version::Version,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::MetadataAtVersion,
                     types::metadata_at_version::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "Metadata",
                         "metadata_at_version",
                         types::MetadataAtVersion { version },
@@ -364,11 +364,11 @@ pub mod api {
                 #[doc = " This can be used to call `metadata_at_version`."]
                 pub fn metadata_versions(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::MetadataVersions,
                     types::metadata_versions::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "Metadata",
                         "metadata_versions",
                         types::MetadataVersions {},
@@ -469,11 +469,11 @@ pub mod api {
                 pub fn apply_extrinsic(
                     &self,
                     extrinsic: types::apply_extrinsic::Extrinsic,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::ApplyExtrinsic,
                     types::apply_extrinsic::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BlockBuilder",
                         "apply_extrinsic",
                         types::ApplyExtrinsic { extrinsic },
@@ -487,11 +487,11 @@ pub mod api {
                 #[doc = " Finish the current block."]
                 pub fn finalize_block(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::FinalizeBlock,
                     types::finalize_block::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BlockBuilder",
                         "finalize_block",
                         types::FinalizeBlock {},
@@ -506,11 +506,11 @@ pub mod api {
                 pub fn inherent_extrinsics(
                     &self,
                     inherent: types::inherent_extrinsics::Inherent,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::InherentExtrinsics,
                     types::inherent_extrinsics::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BlockBuilder",
                         "inherent_extrinsics",
                         types::InherentExtrinsics { inherent },
@@ -527,11 +527,11 @@ pub mod api {
                     &self,
                     block: types::check_inherents::Block,
                     data: types::check_inherents::Data,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::CheckInherents,
                     types::check_inherents::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BlockBuilder",
                         "check_inherents",
                         types::CheckInherents { block, data },
@@ -669,11 +669,11 @@ pub mod api {
                     source: types::validate_transaction::Source,
                     tx: types::validate_transaction::Tx,
                     block_hash: types::validate_transaction::BlockHash,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::ValidateTransaction,
                     types::validate_transaction::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "TaggedTransactionQueue",
                         "validate_transaction",
                         types::ValidateTransaction {
@@ -733,11 +733,11 @@ pub mod api {
                 pub fn offchain_worker(
                     &self,
                     header: types::offchain_worker::Header,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::OffchainWorker,
                     types::offchain_worker::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "OffchainWorkerApi",
                         "offchain_worker",
                         types::OffchainWorker { header },
@@ -788,11 +788,11 @@ pub mod api {
                 #[doc = " Get the current validators."]
                 pub fn validators(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::Validators,
                     types::validators::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "validators",
                         types::Validators {},
@@ -809,11 +809,11 @@ pub mod api {
                 #[doc = " should be the successor of the number of the block."]
                 pub fn validator_groups(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::ValidatorGroups,
                     types::validator_groups::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "validator_groups",
                         types::ValidatorGroups {},
@@ -829,11 +829,11 @@ pub mod api {
                 #[doc = " Cores are either free or occupied. Free cores can have paras assigned to them."]
                 pub fn availability_cores(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::AvailabilityCores,
                     types::availability_cores::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "availability_cores",
                         types::AvailabilityCores {},
@@ -853,11 +853,11 @@ pub mod api {
                     &self,
                     para_id: types::persisted_validation_data::ParaId,
                     assumption: types::persisted_validation_data::Assumption,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::PersistedValidationData,
                     types::persisted_validation_data::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "persisted_validation_data",
                         types::PersistedValidationData {
@@ -878,11 +878,11 @@ pub mod api {
                     &self,
                     para_id: types::assumed_validation_data::ParaId,
                     expected_persisted_validation_data_hash : types :: assumed_validation_data :: ExpectedPersistedValidationDataHash,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::AssumedValidationData,
                     types::assumed_validation_data::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "assumed_validation_data",
                         types::AssumedValidationData {
@@ -901,11 +901,11 @@ pub mod api {
                     &self,
                     para_id: types::check_validation_outputs::ParaId,
                     outputs: types::check_validation_outputs::Outputs,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::CheckValidationOutputs,
                     types::check_validation_outputs::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "check_validation_outputs",
                         types::CheckValidationOutputs { para_id, outputs },
@@ -922,11 +922,11 @@ pub mod api {
                 #[doc = " This can be used to instantiate a `SigningContext`."]
                 pub fn session_index_for_child(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::SessionIndexForChild,
                     types::session_index_for_child::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "session_index_for_child",
                         types::SessionIndexForChild {},
@@ -945,11 +945,11 @@ pub mod api {
                     &self,
                     para_id: types::validation_code::ParaId,
                     assumption: types::validation_code::Assumption,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::ValidationCode,
                     types::validation_code::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "validation_code",
                         types::ValidationCode {
@@ -969,11 +969,11 @@ pub mod api {
                 pub fn candidate_pending_availability(
                     &self,
                     para_id: types::candidate_pending_availability::ParaId,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::CandidatePendingAvailability,
                     types::candidate_pending_availability::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "candidate_pending_availability",
                         types::CandidatePendingAvailability { para_id },
@@ -988,11 +988,11 @@ pub mod api {
                 #[doc = " Get a vector of events concerning candidates that occurred within a block."]
                 pub fn candidate_events(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::CandidateEvents,
                     types::candidate_events::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "candidate_events",
                         types::CandidateEvents {},
@@ -1008,11 +1008,11 @@ pub mod api {
                 pub fn dmq_contents(
                     &self,
                     recipient: types::dmq_contents::Recipient,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::DmqContents,
                     types::dmq_contents::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "dmq_contents",
                         types::DmqContents { recipient },
@@ -1028,11 +1028,11 @@ pub mod api {
                 pub fn inbound_hrmp_channels_contents(
                     &self,
                     recipient: types::inbound_hrmp_channels_contents::Recipient,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::InboundHrmpChannelsContents,
                     types::inbound_hrmp_channels_contents::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "inbound_hrmp_channels_contents",
                         types::InboundHrmpChannelsContents { recipient },
@@ -1047,11 +1047,11 @@ pub mod api {
                 pub fn validation_code_by_hash(
                     &self,
                     hash: types::validation_code_by_hash::Hash,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::ValidationCodeByHash,
                     types::validation_code_by_hash::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "validation_code_by_hash",
                         types::ValidationCodeByHash { hash },
@@ -1066,11 +1066,11 @@ pub mod api {
                 #[doc = " Scrape dispute relevant from on-chain, backing votes and resolved disputes."]
                 pub fn on_chain_votes(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::OnChainVotes,
                     types::on_chain_votes::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "on_chain_votes",
                         types::OnChainVotes {},
@@ -1087,11 +1087,11 @@ pub mod api {
                 pub fn session_info(
                     &self,
                     index: types::session_info::Index,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::SessionInfo,
                     types::session_info::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "session_info",
                         types::SessionInfo { index },
@@ -1110,11 +1110,11 @@ pub mod api {
                     &self,
                     stmt: types::submit_pvf_check_statement::Stmt,
                     signature: types::submit_pvf_check_statement::Signature,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::SubmitPvfCheckStatement,
                     types::submit_pvf_check_statement::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "submit_pvf_check_statement",
                         types::SubmitPvfCheckStatement { stmt, signature },
@@ -1131,11 +1131,11 @@ pub mod api {
                 #[doc = " NOTE: This function is only available since parachain host version 2."]
                 pub fn pvfs_require_precheck(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::PvfsRequirePrecheck,
                     types::pvfs_require_precheck::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "pvfs_require_precheck",
                         types::PvfsRequirePrecheck {},
@@ -1153,11 +1153,11 @@ pub mod api {
                     &self,
                     para_id: types::validation_code_hash::ParaId,
                     assumption: types::validation_code_hash::Assumption,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::ValidationCodeHash,
                     types::validation_code_hash::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "validation_code_hash",
                         types::ValidationCodeHash {
@@ -1175,11 +1175,11 @@ pub mod api {
                 #[doc = " Returns all onchain disputes."]
                 pub fn disputes(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::Disputes,
                     types::disputes::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "disputes",
                         types::Disputes {},
@@ -1194,11 +1194,11 @@ pub mod api {
                 pub fn session_executor_params(
                     &self,
                     session_index: types::session_executor_params::SessionIndex,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::SessionExecutorParams,
                     types::session_executor_params::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "session_executor_params",
                         types::SessionExecutorParams { session_index },
@@ -1213,11 +1213,11 @@ pub mod api {
                 #[doc = " NOTE: This function is only available since parachain host version 5."]
                 pub fn unapplied_slashes(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::UnappliedSlashes,
                     types::unapplied_slashes::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "unapplied_slashes",
                         types::UnappliedSlashes {},
@@ -1233,11 +1233,11 @@ pub mod api {
                 pub fn key_ownership_proof(
                     &self,
                     validator_id: types::key_ownership_proof::ValidatorId,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::KeyOwnershipProof,
                     types::key_ownership_proof::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "key_ownership_proof",
                         types::KeyOwnershipProof { validator_id },
@@ -1255,11 +1255,11 @@ pub mod api {
                     &self,
                     dispute_proof: types::submit_report_dispute_lost::DisputeProof,
                     key_ownership_proof: types::submit_report_dispute_lost::KeyOwnershipProof,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::SubmitReportDisputeLost,
                     types::submit_report_dispute_lost::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "submit_report_dispute_lost",
                         types::SubmitReportDisputeLost {
@@ -1277,11 +1277,11 @@ pub mod api {
                 #[doc = " This is a staging method! Do not use on production runtimes!"]
                 pub fn minimum_backing_votes(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::MinimumBackingVotes,
                     types::minimum_backing_votes::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "minimum_backing_votes",
                         types::MinimumBackingVotes {},
@@ -1297,11 +1297,11 @@ pub mod api {
                 pub fn para_backing_state(
                     &self,
                     _0: types::para_backing_state::Param0,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::ParaBackingState,
                     types::para_backing_state::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "para_backing_state",
                         types::ParaBackingState { _0 },
@@ -1315,11 +1315,11 @@ pub mod api {
                 #[doc = " Returns candidate's acceptance limitations for asynchronous backing for a relay parent."]
                 pub fn async_backing_params(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::AsyncBackingParams,
                     types::async_backing_params::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "async_backing_params",
                         types::AsyncBackingParams {},
@@ -1334,11 +1334,11 @@ pub mod api {
                 #[doc = " Returns a list of all disabled validators at the given block."]
                 pub fn disabled_validators(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::DisabledValidators,
                     types::disabled_validators::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "disabled_validators",
                         types::DisabledValidators {},
@@ -2095,11 +2095,11 @@ pub mod api {
                 #[doc = " Return the block number where BEEFY consensus is enabled/started"]
                 pub fn beefy_genesis(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::BeefyGenesis,
                     types::beefy_genesis::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BeefyApi",
                         "beefy_genesis",
                         types::BeefyGenesis {},
@@ -2114,11 +2114,11 @@ pub mod api {
                 #[doc = " Return the current active BEEFY validator set"]
                 pub fn validator_set(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::ValidatorSet,
                     types::validator_set::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BeefyApi",
                         "validator_set",
                         types::ValidatorSet {},
@@ -2141,11 +2141,11 @@ pub mod api {
                     &self,
                     equivocation_proof : types :: submit_report_equivocation_unsigned_extrinsic :: EquivocationProof,
                     key_owner_proof : types :: submit_report_equivocation_unsigned_extrinsic :: KeyOwnerProof,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::SubmitReportEquivocationUnsignedExtrinsic,
                     types::submit_report_equivocation_unsigned_extrinsic::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BeefyApi",
                         "submit_report_equivocation_unsigned_extrinsic",
                         types::SubmitReportEquivocationUnsignedExtrinsic {
@@ -2175,11 +2175,11 @@ pub mod api {
                     &self,
                     set_id: types::generate_key_ownership_proof::SetId,
                     authority_id: types::generate_key_ownership_proof::AuthorityId,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::GenerateKeyOwnershipProof,
                     types::generate_key_ownership_proof::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BeefyApi",
                         "generate_key_ownership_proof",
                         types::GenerateKeyOwnershipProof {
@@ -2319,11 +2319,11 @@ pub mod api {
                 #[doc = " Return the on-chain MMR root hash."]
                 pub fn mmr_root(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::MmrRoot,
                     types::mmr_root::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "MmrApi",
                         "mmr_root",
                         types::MmrRoot {},
@@ -2337,11 +2337,11 @@ pub mod api {
                 #[doc = " Return the number of MMR blocks in the chain."]
                 pub fn mmr_leaf_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::MmrLeafCount,
                     types::mmr_leaf_count::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "MmrApi",
                         "mmr_leaf_count",
                         types::MmrLeafCount {},
@@ -2359,11 +2359,11 @@ pub mod api {
                     &self,
                     block_numbers: types::generate_proof::BlockNumbers,
                     best_known_block_number: types::generate_proof::BestKnownBlockNumber,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::GenerateProof,
                     types::generate_proof::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "MmrApi",
                         "generate_proof",
                         types::GenerateProof {
@@ -2387,11 +2387,11 @@ pub mod api {
                     &self,
                     leaves: types::verify_proof::Leaves,
                     proof: types::verify_proof::Proof,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::VerifyProof,
                     types::verify_proof::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "MmrApi",
                         "verify_proof",
                         types::VerifyProof { leaves, proof },
@@ -2415,11 +2415,11 @@ pub mod api {
                     root: types::verify_proof_stateless::Root,
                     leaves: types::verify_proof_stateless::Leaves,
                     proof: types::verify_proof_stateless::Proof,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::VerifyProofStateless,
                     types::verify_proof_stateless::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "MmrApi",
                         "verify_proof_stateless",
                         types::VerifyProofStateless {
@@ -2615,11 +2615,11 @@ pub mod api {
                 #[doc = " is finalized by the authorities from block B-1."]
                 pub fn grandpa_authorities(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::GrandpaAuthorities,
                     types::grandpa_authorities::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "GrandpaApi",
                         "grandpa_authorities",
                         types::GrandpaAuthorities {},
@@ -2643,11 +2643,11 @@ pub mod api {
                     &self,
                     equivocation_proof : types :: submit_report_equivocation_unsigned_extrinsic :: EquivocationProof,
                     key_owner_proof : types :: submit_report_equivocation_unsigned_extrinsic :: KeyOwnerProof,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::SubmitReportEquivocationUnsignedExtrinsic,
                     types::submit_report_equivocation_unsigned_extrinsic::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "GrandpaApi",
                         "submit_report_equivocation_unsigned_extrinsic",
                         types::SubmitReportEquivocationUnsignedExtrinsic {
@@ -2677,11 +2677,11 @@ pub mod api {
                     &self,
                     set_id: types::generate_key_ownership_proof::SetId,
                     authority_id: types::generate_key_ownership_proof::AuthorityId,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::GenerateKeyOwnershipProof,
                     types::generate_key_ownership_proof::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "GrandpaApi",
                         "generate_key_ownership_proof",
                         types::GenerateKeyOwnershipProof {
@@ -2699,11 +2699,11 @@ pub mod api {
                 #[doc = " Get current GRANDPA authority set id."]
                 pub fn current_set_id(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::CurrentSetId,
                     types::current_set_id::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "GrandpaApi",
                         "current_set_id",
                         types::CurrentSetId {},
@@ -2839,11 +2839,11 @@ pub mod api {
                 #[doc = " Return the configuration for BABE."]
                 pub fn configuration(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::Configuration,
                     types::configuration::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BabeApi",
                         "configuration",
                         types::Configuration {},
@@ -2857,11 +2857,11 @@ pub mod api {
                 #[doc = " Returns the slot that started the current epoch."]
                 pub fn current_epoch_start(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::CurrentEpochStart,
                     types::current_epoch_start::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BabeApi",
                         "current_epoch_start",
                         types::CurrentEpochStart {},
@@ -2876,11 +2876,11 @@ pub mod api {
                 #[doc = " Returns information regarding the current epoch."]
                 pub fn current_epoch(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::CurrentEpoch,
                     types::current_epoch::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BabeApi",
                         "current_epoch",
                         types::CurrentEpoch {},
@@ -2895,11 +2895,11 @@ pub mod api {
                 #[doc = " previously announced)."]
                 pub fn next_epoch(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::NextEpoch,
                     types::next_epoch::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BabeApi",
                         "next_epoch",
                         types::NextEpoch {},
@@ -2926,11 +2926,11 @@ pub mod api {
                     &self,
                     slot: types::generate_key_ownership_proof::Slot,
                     authority_id: types::generate_key_ownership_proof::AuthorityId,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::GenerateKeyOwnershipProof,
                     types::generate_key_ownership_proof::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BabeApi",
                         "generate_key_ownership_proof",
                         types::GenerateKeyOwnershipProof { slot, authority_id },
@@ -2954,11 +2954,11 @@ pub mod api {
                     &self,
                     equivocation_proof : types :: submit_report_equivocation_unsigned_extrinsic :: EquivocationProof,
                     key_owner_proof : types :: submit_report_equivocation_unsigned_extrinsic :: KeyOwnerProof,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::SubmitReportEquivocationUnsignedExtrinsic,
                     types::submit_report_equivocation_unsigned_extrinsic::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BabeApi",
                         "submit_report_equivocation_unsigned_extrinsic",
                         types::SubmitReportEquivocationUnsignedExtrinsic {
@@ -3142,11 +3142,11 @@ pub mod api {
                 #[doc = " Retrieve authority identifiers of the current and next authority set."]
                 pub fn authorities(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::Authorities,
                     types::authorities::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "AuthorityDiscoveryApi",
                         "authorities",
                         types::Authorities {},
@@ -3202,11 +3202,11 @@ pub mod api {
                 pub fn generate_session_keys(
                     &self,
                     seed: types::generate_session_keys::Seed,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::GenerateSessionKeys,
                     types::generate_session_keys::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "SessionKeys",
                         "generate_session_keys",
                         types::GenerateSessionKeys { seed },
@@ -3223,11 +3223,11 @@ pub mod api {
                 pub fn decode_session_keys(
                     &self,
                     encoded: types::decode_session_keys::Encoded,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::DecodeSessionKeys,
                     types::decode_session_keys::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "SessionKeys",
                         "decode_session_keys",
                         types::DecodeSessionKeys { encoded },
@@ -3313,11 +3313,11 @@ pub mod api {
                 pub fn account_nonce(
                     &self,
                     account: types::account_nonce::Account,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::AccountNonce,
                     types::account_nonce::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "AccountNonceApi",
                         "account_nonce",
                         types::AccountNonce { account },
@@ -3368,11 +3368,11 @@ pub mod api {
                     &self,
                     uxt: types::query_info::Uxt,
                     len: types::query_info::Len,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::QueryInfo,
                     types::query_info::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "TransactionPaymentApi",
                         "query_info",
                         types::QueryInfo { uxt, len },
@@ -3387,11 +3387,11 @@ pub mod api {
                     &self,
                     uxt: types::query_fee_details::Uxt,
                     len: types::query_fee_details::Len,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::QueryFeeDetails,
                     types::query_fee_details::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "TransactionPaymentApi",
                         "query_fee_details",
                         types::QueryFeeDetails { uxt, len },
@@ -3406,11 +3406,11 @@ pub mod api {
                 pub fn query_weight_to_fee(
                     &self,
                     weight: types::query_weight_to_fee::Weight,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::QueryWeightToFee,
                     types::query_weight_to_fee::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "TransactionPaymentApi",
                         "query_weight_to_fee",
                         types::QueryWeightToFee { weight },
@@ -3425,11 +3425,11 @@ pub mod api {
                 pub fn query_length_to_fee(
                     &self,
                     length: types::query_length_to_fee::Length,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::QueryLengthToFee,
                     types::query_length_to_fee::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "TransactionPaymentApi",
                         "query_length_to_fee",
                         types::QueryLengthToFee { length },
@@ -3565,11 +3565,11 @@ pub mod api {
                 #[doc = " Return the currently active BEEFY authority set proof."]
                 pub fn authority_set_proof(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::AuthoritySetProof,
                     types::authority_set_proof::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BeefyMmrApi",
                         "authority_set_proof",
                         types::AuthoritySetProof {},
@@ -3584,11 +3584,11 @@ pub mod api {
                 #[doc = " Return the next/queued BEEFY authority set proof."]
                 pub fn next_authority_set_proof(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::NextAuthoritySetProof,
                     types::next_authority_set_proof::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "BeefyMmrApi",
                         "next_authority_set_proof",
                         types::NextAuthoritySetProof {},
@@ -3664,11 +3664,11 @@ pub mod api {
                 #[doc = " blob. It returns a `Vec<u8>` containing the JSON representation of the default `GenesisConfig`."]
                 pub fn create_default_config(
                     &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::CreateDefaultConfig,
                     types::create_default_config::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "GenesisBuilder",
                         "create_default_config",
                         types::CreateDefaultConfig {},
@@ -3689,11 +3689,11 @@ pub mod api {
                 pub fn build_config(
                     &self,
                     json: types::build_config::Json,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::BuildConfig,
                     types::build_config::output::Output,
                 > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "GenesisBuilder",
                         "build_config",
                         types::BuildConfig { json },
@@ -4471,8 +4471,9 @@ pub mod api {
                 pub fn remark(
                     &self,
                     remark: types::remark::Remark,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Remark> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Remark>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "System",
                         "remark",
                         types::Remark { remark },
@@ -4488,9 +4489,9 @@ pub mod api {
                 pub fn set_heap_pages(
                     &self,
                     pages: types::set_heap_pages::Pages,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetHeapPages>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetHeapPages>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "System",
                         "set_heap_pages",
                         types::SetHeapPages { pages },
@@ -4506,9 +4507,9 @@ pub mod api {
                 pub fn set_code(
                     &self,
                     code: types::set_code::Code,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetCode>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetCode>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "System",
                         "set_code",
                         types::SetCode { code },
@@ -4523,9 +4524,9 @@ pub mod api {
                 pub fn set_code_without_checks(
                     &self,
                     code: types::set_code_without_checks::Code,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetCodeWithoutChecks>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetCodeWithoutChecks>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "System",
                         "set_code_without_checks",
                         types::SetCodeWithoutChecks { code },
@@ -4541,9 +4542,9 @@ pub mod api {
                 pub fn set_storage(
                     &self,
                     items: types::set_storage::Items,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetStorage>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetStorage>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "System",
                         "set_storage",
                         types::SetStorage { items },
@@ -4559,9 +4560,9 @@ pub mod api {
                 pub fn kill_storage(
                     &self,
                     keys: types::kill_storage::Keys,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::KillStorage>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::KillStorage>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "System",
                         "kill_storage",
                         types::KillStorage { keys },
@@ -4578,9 +4579,9 @@ pub mod api {
                     &self,
                     prefix: types::kill_prefix::Prefix,
                     subkeys: types::kill_prefix::Subkeys,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::KillPrefix>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::KillPrefix>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "System",
                         "kill_prefix",
                         types::KillPrefix { prefix, subkeys },
@@ -4596,9 +4597,9 @@ pub mod api {
                 pub fn remark_with_event(
                     &self,
                     remark: types::remark_with_event::Remark,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemarkWithEvent>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RemarkWithEvent>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "System",
                         "remark_with_event",
                         types::RemarkWithEvent { remark },
@@ -4839,14 +4840,14 @@ pub mod api {
                 #[doc = " The full account information for a particular account ID."]
                 pub fn account_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::account::Account,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "Account",
                         (),
@@ -4861,7 +4862,7 @@ pub mod api {
                 pub fn account(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::account::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::account::Param0,
                     >,
@@ -4870,7 +4871,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "Account",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -4886,14 +4887,14 @@ pub mod api {
                 #[doc = " Total extrinsics count for the current block."]
                 pub fn extrinsic_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::extrinsic_count::ExtrinsicCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "ExtrinsicCount",
                         (),
@@ -4908,14 +4909,14 @@ pub mod api {
                 #[doc = " The current weight for the block."]
                 pub fn block_weight(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::block_weight::BlockWeight,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "BlockWeight",
                         (),
@@ -4929,14 +4930,14 @@ pub mod api {
                 #[doc = " Total length (in bytes) for all extrinsics put together, for the current block."]
                 pub fn all_extrinsics_len(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::all_extrinsics_len::AllExtrinsicsLen,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "AllExtrinsicsLen",
                         (),
@@ -4951,14 +4952,14 @@ pub mod api {
                 #[doc = " Map of block numbers to block hashes."]
                 pub fn block_hash_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::block_hash::BlockHash,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "BlockHash",
                         (),
@@ -4974,7 +4975,7 @@ pub mod api {
                 pub fn block_hash(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::block_hash::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::block_hash::Param0,
                     >,
@@ -4983,7 +4984,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "BlockHash",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -5000,14 +5001,14 @@ pub mod api {
                 #[doc = " Extrinsics data for the current block (maps an extrinsic's index to its data)."]
                 pub fn extrinsic_data_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::extrinsic_data::ExtrinsicData,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "ExtrinsicData",
                         (),
@@ -5022,7 +5023,7 @@ pub mod api {
                 pub fn extrinsic_data(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::extrinsic_data::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::extrinsic_data::Param0,
                     >,
@@ -5031,7 +5032,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "ExtrinsicData",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -5047,14 +5048,14 @@ pub mod api {
                 #[doc = " The current block number being processed. Set by `execute_block`."]
                 pub fn number(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::number::Number,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "Number",
                         (),
@@ -5068,14 +5069,14 @@ pub mod api {
                 #[doc = " Hash of the previous block."]
                 pub fn parent_hash(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::parent_hash::ParentHash,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "ParentHash",
                         (),
@@ -5089,14 +5090,14 @@ pub mod api {
                 #[doc = " Digest of the current block, also part of the block header."]
                 pub fn digest(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::digest::Digest,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "Digest",
                         (),
@@ -5116,14 +5117,14 @@ pub mod api {
                 #[doc = " just in case someone still reads them from within the runtime."]
                 pub fn events(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::events::Events,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "Events",
                         (),
@@ -5138,14 +5139,14 @@ pub mod api {
                 #[doc = " The number of events in the `Events<T>` list."]
                 pub fn event_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::event_count::EventCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "EventCount",
                         (),
@@ -5169,14 +5170,14 @@ pub mod api {
                 #[doc = " no notification will be triggered thus the event might be lost."]
                 pub fn event_topics_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::event_topics::EventTopics,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "EventTopics",
                         (),
@@ -5200,7 +5201,7 @@ pub mod api {
                 pub fn event_topics(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::event_topics::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::event_topics::Param0,
                     >,
@@ -5209,7 +5210,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "EventTopics",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -5225,14 +5226,14 @@ pub mod api {
                 #[doc = " Stores the `spec_version` and `spec_name` of when the last runtime upgrade happened."]
                 pub fn last_runtime_upgrade(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::last_runtime_upgrade::LastRuntimeUpgrade,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "LastRuntimeUpgrade",
                         (),
@@ -5246,14 +5247,14 @@ pub mod api {
                 #[doc = " True if we have upgraded so that `type RefCount` is `u32`. False (default) if not."]
                 pub fn upgraded_to_u32_ref_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::upgraded_to_u32_ref_count::UpgradedToU32RefCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "UpgradedToU32RefCount",
                         (),
@@ -5268,14 +5269,14 @@ pub mod api {
                 #[doc = " (default) if not."]
                 pub fn upgraded_to_triple_ref_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::upgraded_to_triple_ref_count::UpgradedToTripleRefCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "UpgradedToTripleRefCount",
                         (),
@@ -5290,14 +5291,14 @@ pub mod api {
                 #[doc = " The execution phase of the block."]
                 pub fn execution_phase(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::execution_phase::ExecutionPhase,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "System",
                         "ExecutionPhase",
                         (),
@@ -5317,10 +5318,10 @@ pub mod api {
                 #[doc = " Block & extrinsics weights: base values and limits."]
                 pub fn block_weights(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::frame_system::limits::BlockWeights,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "System",
                         "BlockWeights",
                         [
@@ -5333,10 +5334,10 @@ pub mod api {
                 #[doc = " The maximum length of a block (in bytes)."]
                 pub fn block_length(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::frame_system::limits::BlockLength,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "System",
                         "BlockLength",
                         [
@@ -5349,9 +5350,10 @@ pub mod api {
                 #[doc = " Maximum number of block number to block hash mappings to keep (oldest pruned first)."]
                 pub fn block_hash_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "System",
                         "BlockHashCount",
                         [
@@ -5365,10 +5367,10 @@ pub mod api {
                 #[doc = " The weight of runtime database operations the runtime can invoke."]
                 pub fn db_weight(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::sp_weights::RuntimeDbWeight,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "System",
                         "DbWeight",
                         [
@@ -5382,10 +5384,10 @@ pub mod api {
                 #[doc = " Get the chain's current version."]
                 pub fn version(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::sp_version::RuntimeVersion,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "System",
                         "Version",
                         [
@@ -5403,9 +5405,10 @@ pub mod api {
                 #[doc = " an identifier of the chain."]
                 pub fn ss58_prefix(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u16>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u16,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "System",
                         "SS58Prefix",
                         [
@@ -5538,9 +5541,9 @@ pub mod api {
                     &self,
                     equivocation_proof: types::report_equivocation::EquivocationProof,
                     key_owner_proof: types::report_equivocation::KeyOwnerProof,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ReportEquivocation>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ReportEquivocation>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Babe",
                         "report_equivocation",
                         types::ReportEquivocation {
@@ -5562,9 +5565,10 @@ pub mod api {
                     &self,
                     equivocation_proof: types::report_equivocation_unsigned::EquivocationProof,
                     key_owner_proof: types::report_equivocation_unsigned::KeyOwnerProof,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ReportEquivocationUnsigned>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::ReportEquivocationUnsigned,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Babe",
                         "report_equivocation_unsigned",
                         types::ReportEquivocationUnsigned {
@@ -5584,9 +5588,9 @@ pub mod api {
                 pub fn plan_config_change(
                     &self,
                     config: types::plan_config_change::Config,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::PlanConfigChange>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PlanConfigChange>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Babe",
                         "plan_config_change",
                         types::PlanConfigChange { config },
@@ -5699,14 +5703,14 @@ pub mod api {
                 #[doc = " Current epoch index."]
                 pub fn epoch_index(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::epoch_index::EpochIndex,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "EpochIndex",
                         (),
@@ -5721,14 +5725,14 @@ pub mod api {
                 #[doc = " Current epoch authorities."]
                 pub fn authorities(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::authorities::Authorities,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "Authorities",
                         (),
@@ -5744,14 +5748,14 @@ pub mod api {
                 #[doc = " until the first block of the chain."]
                 pub fn genesis_slot(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::genesis_slot::GenesisSlot,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "GenesisSlot",
                         (),
@@ -5766,14 +5770,14 @@ pub mod api {
                 #[doc = " Current slot number."]
                 pub fn current_slot(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::current_slot::CurrentSlot,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "CurrentSlot",
                         (),
@@ -5797,14 +5801,14 @@ pub mod api {
                 #[doc = " adversary, for purposes such as public-coin zero-knowledge proofs."]
                 pub fn randomness(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::randomness::Randomness,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "Randomness",
                         (),
@@ -5819,14 +5823,14 @@ pub mod api {
                 #[doc = " Pending epoch configuration change that will be applied when the next epoch is enacted."]
                 pub fn pending_epoch_config_change(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::pending_epoch_config_change::PendingEpochConfigChange,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "PendingEpochConfigChange",
                         (),
@@ -5840,14 +5844,14 @@ pub mod api {
                 #[doc = " Next epoch randomness."]
                 pub fn next_randomness(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::next_randomness::NextRandomness,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "NextRandomness",
                         (),
@@ -5861,14 +5865,14 @@ pub mod api {
                 #[doc = " Next epoch authorities."]
                 pub fn next_authorities(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::next_authorities::NextAuthorities,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "NextAuthorities",
                         (),
@@ -5891,14 +5895,14 @@ pub mod api {
                 #[doc = " epoch."]
                 pub fn segment_index(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::segment_index::SegmentIndex,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "SegmentIndex",
                         (),
@@ -5913,14 +5917,14 @@ pub mod api {
                 #[doc = " TWOX-NOTE: `SegmentIndex` is an increasing integer, so this is okay."]
                 pub fn under_construction_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::under_construction::UnderConstruction,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "UnderConstruction",
                         (),
@@ -5935,7 +5939,7 @@ pub mod api {
                 pub fn under_construction(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::under_construction::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::under_construction::Param0,
                     >,
@@ -5944,7 +5948,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "UnderConstruction",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -5961,14 +5965,14 @@ pub mod api {
                 #[doc = " if per-block initialization has already been called for current block."]
                 pub fn initialized(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::initialized::Initialized,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "Initialized",
                         (),
@@ -5985,14 +5989,14 @@ pub mod api {
                 #[doc = " It is set in `on_finalize`, before it will contain the value from the last block."]
                 pub fn author_vrf_randomness(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::author_vrf_randomness::AuthorVrfRandomness,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "AuthorVrfRandomness",
                         (),
@@ -6011,14 +6015,14 @@ pub mod api {
                 #[doc = " slots, which may be skipped, the block numbers may not line up with the slot numbers."]
                 pub fn epoch_start(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::epoch_start::EpochStart,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "EpochStart",
                         (),
@@ -6037,14 +6041,14 @@ pub mod api {
                 #[doc = " execution context should always yield zero."]
                 pub fn lateness(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::lateness::Lateness,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "Lateness",
                         (),
@@ -6060,14 +6064,14 @@ pub mod api {
                 #[doc = " genesis."]
                 pub fn epoch_config(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::epoch_config::EpochConfig,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "EpochConfig",
                         (),
@@ -6083,14 +6087,14 @@ pub mod api {
                 #[doc = " (you can fallback to `EpochConfig` instead in that case)."]
                 pub fn next_epoch_config(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::next_epoch_config::NextEpochConfig,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "NextEpochConfig",
                         (),
@@ -6112,14 +6116,14 @@ pub mod api {
                 #[doc = " active epoch index was during that session."]
                 pub fn skipped_epochs(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::skipped_epochs::SkippedEpochs,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Babe",
                         "SkippedEpochs",
                         (),
@@ -6141,9 +6145,10 @@ pub mod api {
                 #[doc = " the chain has started. Attempting to do so will brick block production."]
                 pub fn epoch_duration(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u64>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u64,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Babe",
                         "EpochDuration",
                         [
@@ -6161,9 +6166,10 @@ pub mod api {
                 #[doc = " the probability of a slot being empty)."]
                 pub fn expected_block_time(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u64>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u64,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Babe",
                         "ExpectedBlockTime",
                         [
@@ -6177,9 +6183,10 @@ pub mod api {
                 #[doc = " Max number of authorities allowed"]
                 pub fn max_authorities(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Babe",
                         "MaxAuthorities",
                         [
@@ -6193,9 +6200,10 @@ pub mod api {
                 #[doc = " The maximum number of nominators for each validator."]
                 pub fn max_nominators(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Babe",
                         "MaxNominators",
                         [
@@ -6254,8 +6262,9 @@ pub mod api {
                 pub fn set(
                     &self,
                     now: types::set::Now,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Set> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Set>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Timestamp",
                         "set",
                         types::Set { now },
@@ -6286,14 +6295,14 @@ pub mod api {
                 #[doc = " The current time for the current block."]
                 pub fn now(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::now::Now,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Timestamp",
                         "Now",
                         (),
@@ -6310,14 +6319,14 @@ pub mod api {
                 #[doc = " It is then checked at the end of each block execution in the `on_finalize` hook."]
                 pub fn did_update(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::did_update::DidUpdate,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Timestamp",
                         "DidUpdate",
                         (),
@@ -6343,9 +6352,10 @@ pub mod api {
                 #[doc = " period on default settings."]
                 pub fn minimum_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u64>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u64,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Timestamp",
                         "MinimumPeriod",
                         [
@@ -6521,8 +6531,9 @@ pub mod api {
                 pub fn claim(
                     &self,
                     index: types::claim::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Claim> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Claim>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Indices",
                         "claim",
                         types::Claim { index },
@@ -6538,9 +6549,9 @@ pub mod api {
                     &self,
                     new: types::transfer::New,
                     index: types::transfer::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Transfer>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Transfer>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Indices",
                         "transfer",
                         types::Transfer { new, index },
@@ -6556,8 +6567,9 @@ pub mod api {
                 pub fn free(
                     &self,
                     index: types::free::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Free> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Free>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Indices",
                         "free",
                         types::Free { index },
@@ -6575,9 +6587,9 @@ pub mod api {
                     new: types::force_transfer::New,
                     index: types::force_transfer::Index,
                     freeze: types::force_transfer::Freeze,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceTransfer>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceTransfer>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Indices",
                         "force_transfer",
                         types::ForceTransfer { new, index, freeze },
@@ -6593,8 +6605,9 @@ pub mod api {
                 pub fn freeze(
                     &self,
                     index: types::freeze::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Freeze> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Freeze>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Indices",
                         "freeze",
                         types::Freeze { index },
@@ -6702,14 +6715,14 @@ pub mod api {
                 #[doc = " The lookup from index to account."]
                 pub fn accounts_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::accounts::Accounts,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Indices",
                         "Accounts",
                         (),
@@ -6725,7 +6738,7 @@ pub mod api {
                 pub fn accounts(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::accounts::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::accounts::Param0,
                     >,
@@ -6734,7 +6747,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Indices",
                         "Accounts",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -6757,9 +6770,10 @@ pub mod api {
                 #[doc = " The deposit needed for reserving an index."]
                 pub fn deposit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Indices",
                         "Deposit",
                         [
@@ -7016,9 +7030,9 @@ pub mod api {
                     &self,
                     dest: types::transfer_allow_death::Dest,
                     value: types::transfer_allow_death::Value,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::TransferAllowDeath>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::TransferAllowDeath>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Balances",
                         "transfer_allow_death",
                         types::TransferAllowDeath { dest, value },
@@ -7036,9 +7050,9 @@ pub mod api {
                     source: types::force_transfer::Source,
                     dest: types::force_transfer::Dest,
                     value: types::force_transfer::Value,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceTransfer>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceTransfer>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Balances",
                         "force_transfer",
                         types::ForceTransfer {
@@ -7058,9 +7072,9 @@ pub mod api {
                     &self,
                     dest: types::transfer_keep_alive::Dest,
                     value: types::transfer_keep_alive::Value,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::TransferKeepAlive>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::TransferKeepAlive>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Balances",
                         "transfer_keep_alive",
                         types::TransferKeepAlive { dest, value },
@@ -7076,9 +7090,9 @@ pub mod api {
                     &self,
                     dest: types::transfer_all::Dest,
                     keep_alive: types::transfer_all::KeepAlive,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::TransferAll>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::TransferAll>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Balances",
                         "transfer_all",
                         types::TransferAll { dest, keep_alive },
@@ -7094,9 +7108,9 @@ pub mod api {
                     &self,
                     who: types::force_unreserve::Who,
                     amount: types::force_unreserve::Amount,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceUnreserve>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceUnreserve>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Balances",
                         "force_unreserve",
                         types::ForceUnreserve { who, amount },
@@ -7112,9 +7126,9 @@ pub mod api {
                 pub fn upgrade_accounts(
                     &self,
                     who: types::upgrade_accounts::Who,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::UpgradeAccounts>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::UpgradeAccounts>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Balances",
                         "upgrade_accounts",
                         types::UpgradeAccounts { who },
@@ -7130,9 +7144,9 @@ pub mod api {
                     &self,
                     who: types::force_set_balance::Who,
                     new_free: types::force_set_balance::NewFree,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceSetBalance>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceSetBalance>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Balances",
                         "force_set_balance",
                         types::ForceSetBalance { who, new_free },
@@ -7723,14 +7737,14 @@ pub mod api {
                 #[doc = " The total units issued in the system."]
                 pub fn total_issuance(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::total_issuance::TotalIssuance,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "TotalIssuance",
                         (),
@@ -7745,14 +7759,14 @@ pub mod api {
                 #[doc = " The total units of outstanding deactivated balance in the system."]
                 pub fn inactive_issuance(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::inactive_issuance::InactiveIssuance,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "InactiveIssuance",
                         (),
@@ -7789,14 +7803,14 @@ pub mod api {
                 #[doc = " NOTE: This is only used in the case that this pallet is used to store balances."]
                 pub fn account_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::account::Account,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "Account",
                         (),
@@ -7834,7 +7848,7 @@ pub mod api {
                 pub fn account(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::account::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::account::Param0,
                     >,
@@ -7843,7 +7857,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "Account",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -7860,14 +7874,14 @@ pub mod api {
                 #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]
                 pub fn locks_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::locks::Locks,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "Locks",
                         (),
@@ -7883,7 +7897,7 @@ pub mod api {
                 pub fn locks(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::locks::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::locks::Param0,
                     >,
@@ -7892,7 +7906,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "Locks",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -7908,14 +7922,14 @@ pub mod api {
                 #[doc = " Named reserves on some account balances."]
                 pub fn reserves_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::reserves::Reserves,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "Reserves",
                         (),
@@ -7930,7 +7944,7 @@ pub mod api {
                 pub fn reserves(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::reserves::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::reserves::Param0,
                     >,
@@ -7939,7 +7953,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "Reserves",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -7955,14 +7969,14 @@ pub mod api {
                 #[doc = " Holds on account balances."]
                 pub fn holds_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::holds::Holds,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "Holds",
                         (),
@@ -7978,7 +7992,7 @@ pub mod api {
                 pub fn holds(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::holds::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::holds::Param0,
                     >,
@@ -7987,7 +8001,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "Holds",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -8004,14 +8018,14 @@ pub mod api {
                 #[doc = " Freeze locks on account balances."]
                 pub fn freezes_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::freezes::Freezes,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "Freezes",
                         (),
@@ -8026,7 +8040,7 @@ pub mod api {
                 pub fn freezes(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::freezes::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::freezes::Param0,
                     >,
@@ -8035,7 +8049,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Balances",
                         "Freezes",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -8064,9 +8078,10 @@ pub mod api {
                 #[doc = " Bottom line: Do yourself a favour and make it at least one!"]
                 pub fn existential_deposit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Balances",
                         "ExistentialDeposit",
                         [
@@ -8080,9 +8095,10 @@ pub mod api {
                 #[doc = " Not strictly enforced, but used for weight estimation."]
                 pub fn max_locks(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Balances",
                         "MaxLocks",
                         [
@@ -8096,9 +8112,10 @@ pub mod api {
                 #[doc = " The maximum number of named reserves that can exist on an account."]
                 pub fn max_reserves(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Balances",
                         "MaxReserves",
                         [
@@ -8112,9 +8129,10 @@ pub mod api {
                 #[doc = " The maximum number of holds that can exist on an account at any time."]
                 pub fn max_holds(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Balances",
                         "MaxHolds",
                         [
@@ -8128,9 +8146,10 @@ pub mod api {
                 #[doc = " The maximum number of individual freeze locks that can exist on an account at any time."]
                 pub fn max_freezes(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Balances",
                         "MaxFreezes",
                         [
@@ -8197,14 +8216,14 @@ pub mod api {
             impl StorageApi {
                 pub fn next_fee_multiplier(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::next_fee_multiplier::NextFeeMultiplier,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "TransactionPayment",
                         "NextFeeMultiplier",
                         (),
@@ -8218,14 +8237,14 @@ pub mod api {
                 }
                 pub fn storage_version(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::storage_version::StorageVersion,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "TransactionPayment",
                         "StorageVersion",
                         (),
@@ -8266,9 +8285,10 @@ pub mod api {
                 #[doc = " transactions."]
                 pub fn operational_fee_multiplier(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u8>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u8,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "TransactionPayment",
                         "OperationalFeeMultiplier",
                         [
@@ -8299,14 +8319,14 @@ pub mod api {
                 #[doc = " Author of current block."]
                 pub fn author(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::author::Author,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Authorship",
                         "Author",
                         (),
@@ -8382,14 +8402,14 @@ pub mod api {
                 #[doc = " The primary structure that holds all offence records keyed by report identifiers."]
                 pub fn reports_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::reports::Reports,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Offences",
                         "Reports",
                         (),
@@ -8405,7 +8425,7 @@ pub mod api {
                 pub fn reports(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::reports::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::reports::Param0,
                     >,
@@ -8414,7 +8434,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Offences",
                         "Reports",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -8431,14 +8451,14 @@ pub mod api {
                 #[doc = " A vector of reports of the same kind that happened at the same time slot."]
                 pub fn concurrent_reports_index_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::concurrent_reports_index::ConcurrentReportsIndex,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Offences",
                         "ConcurrentReportsIndex",
                         (),
@@ -8454,7 +8474,7 @@ pub mod api {
                 pub fn concurrent_reports_index_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::concurrent_reports_index::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::concurrent_reports_index::Param0,
                     >,
@@ -8463,7 +8483,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Offences",
                         "ConcurrentReportsIndex",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -8482,7 +8502,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::concurrent_reports_index::Param0>,
                     _1: impl ::core::borrow::Borrow<types::concurrent_reports_index::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::concurrent_reports_index::Param0,
@@ -8496,7 +8516,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Offences",
                         "ConcurrentReportsIndex",
                         (
@@ -8639,9 +8659,9 @@ pub mod api {
                     &self,
                     equivocation_proof: types::report_equivocation::EquivocationProof,
                     key_owner_proof: types::report_equivocation::KeyOwnerProof,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ReportEquivocation>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ReportEquivocation>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Beefy",
                         "report_equivocation",
                         types::ReportEquivocation {
@@ -8663,9 +8683,10 @@ pub mod api {
                     &self,
                     equivocation_proof: types::report_equivocation_unsigned::EquivocationProof,
                     key_owner_proof: types::report_equivocation_unsigned::KeyOwnerProof,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ReportEquivocationUnsigned>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::ReportEquivocationUnsigned,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Beefy",
                         "report_equivocation_unsigned",
                         types::ReportEquivocationUnsigned {
@@ -8686,9 +8707,9 @@ pub mod api {
                 pub fn set_new_genesis(
                     &self,
                     delay_in_blocks: types::set_new_genesis::DelayInBlocks,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetNewGenesis>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetNewGenesis>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Beefy",
                         "set_new_genesis",
                         types::SetNewGenesis { delay_in_blocks },
@@ -8738,14 +8759,14 @@ pub mod api {
                 #[doc = " The current authorities set"]
                 pub fn authorities(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::authorities::Authorities,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Beefy",
                         "Authorities",
                         (),
@@ -8759,14 +8780,14 @@ pub mod api {
                 #[doc = " The current validator set id"]
                 pub fn validator_set_id(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::validator_set_id::ValidatorSetId,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Beefy",
                         "ValidatorSetId",
                         (),
@@ -8781,14 +8802,14 @@ pub mod api {
                 #[doc = " Authorities set scheduled to be used with the next session"]
                 pub fn next_authorities(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::next_authorities::NextAuthorities,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Beefy",
                         "NextAuthorities",
                         (),
@@ -8811,14 +8832,14 @@ pub mod api {
                 #[doc = " TWOX-NOTE: `ValidatorSetId` is not under user control."]
                 pub fn set_id_session_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::set_id_session::SetIdSession,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Beefy",
                         "SetIdSession",
                         (),
@@ -8842,7 +8863,7 @@ pub mod api {
                 pub fn set_id_session(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::set_id_session::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::set_id_session::Param0,
                     >,
@@ -8851,7 +8872,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Beefy",
                         "SetIdSession",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -8869,14 +8890,14 @@ pub mod api {
                 #[doc = " restarted from the newly set block number."]
                 pub fn genesis_block(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::genesis_block::GenesisBlock,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Beefy",
                         "GenesisBlock",
                         (),
@@ -8896,9 +8917,10 @@ pub mod api {
                 #[doc = " The maximum number of authorities that can be added."]
                 pub fn max_authorities(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Beefy",
                         "MaxAuthorities",
                         [
@@ -8912,9 +8934,10 @@ pub mod api {
                 #[doc = " The maximum number of nominators for each validator."]
                 pub fn max_nominators(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Beefy",
                         "MaxNominators",
                         [
@@ -8933,9 +8956,10 @@ pub mod api {
                 #[doc = " can be zero."]
                 pub fn max_set_id_session_entries(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u64>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u64,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Beefy",
                         "MaxSetIdSessionEntries",
                         [
@@ -8975,14 +8999,14 @@ pub mod api {
                 #[doc = " Latest MMR Root hash."]
                 pub fn root_hash(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::root_hash::RootHash,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Mmr",
                         "RootHash",
                         (),
@@ -8996,14 +9020,14 @@ pub mod api {
                 #[doc = " Current size of the MMR (number of leaves)."]
                 pub fn number_of_leaves(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::number_of_leaves::NumberOfLeaves,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Mmr",
                         "NumberOfLeaves",
                         (),
@@ -9020,14 +9044,14 @@ pub mod api {
                 #[doc = " are pruned and only stored in the Offchain DB."]
                 pub fn nodes_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::nodes::Nodes,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Mmr",
                         "Nodes",
                         (),
@@ -9045,7 +9069,7 @@ pub mod api {
                 pub fn nodes(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::nodes::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::nodes::Param0,
                     >,
@@ -9054,7 +9078,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Mmr",
                         "Nodes",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -9097,14 +9121,14 @@ pub mod api {
                 #[doc = " Details of current BEEFY authority set."]
                 pub fn beefy_authorities(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::beefy_authorities::BeefyAuthorities,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "MmrLeaf",
                         "BeefyAuthorities",
                         (),
@@ -9121,14 +9145,14 @@ pub mod api {
                 #[doc = " This storage entry is used as cache for calls to `update_beefy_next_authority_set`."]
                 pub fn beefy_next_authorities(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::beefy_next_authorities::BeefyNextAuthorities,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "MmrLeaf",
                         "BeefyNextAuthorities",
                         (),
@@ -9212,9 +9236,9 @@ pub mod api {
                     &self,
                     keys: types::set_keys::Keys,
                     proof: types::set_keys::Proof,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetKeys>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetKeys>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Session",
                         "set_keys",
                         types::SetKeys { keys, proof },
@@ -9228,9 +9252,9 @@ pub mod api {
                 #[doc = "See [`Pallet::purge_keys`]."]
                 pub fn purge_keys(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::PurgeKeys>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PurgeKeys>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Session",
                         "purge_keys",
                         types::PurgeKeys {},
@@ -9319,14 +9343,14 @@ pub mod api {
                 #[doc = " The current set of validators."]
                 pub fn validators(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::validators::Validators,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Session",
                         "Validators",
                         (),
@@ -9341,14 +9365,14 @@ pub mod api {
                 #[doc = " Current index of the session."]
                 pub fn current_index(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::current_index::CurrentIndex,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Session",
                         "CurrentIndex",
                         (),
@@ -9364,14 +9388,14 @@ pub mod api {
                 #[doc = " has changed in the queued validator set."]
                 pub fn queued_changed(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::queued_changed::QueuedChanged,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Session",
                         "QueuedChanged",
                         (),
@@ -9387,14 +9411,14 @@ pub mod api {
                 #[doc = " will be used to determine the validator's session keys."]
                 pub fn queued_keys(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::queued_keys::QueuedKeys,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Session",
                         "QueuedKeys",
                         (),
@@ -9412,14 +9436,14 @@ pub mod api {
                 #[doc = " a new set of identities."]
                 pub fn disabled_validators(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::disabled_validators::DisabledValidators,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Session",
                         "DisabledValidators",
                         (),
@@ -9433,14 +9457,14 @@ pub mod api {
                 #[doc = " The next session keys for a validator."]
                 pub fn next_keys_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::next_keys::NextKeys,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Session",
                         "NextKeys",
                         (),
@@ -9455,7 +9479,7 @@ pub mod api {
                 pub fn next_keys(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::next_keys::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::next_keys::Param0,
                     >,
@@ -9464,7 +9488,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Session",
                         "NextKeys",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -9480,14 +9504,14 @@ pub mod api {
                 #[doc = " The owner of a key. The key is the `KeyTypeId` + the encoded key."]
                 pub fn key_owner_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::key_owner::KeyOwner,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Session",
                         "KeyOwner",
                         (),
@@ -9503,7 +9527,7 @@ pub mod api {
                 pub fn key_owner_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::key_owner::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::key_owner::Param0,
                     >,
@@ -9512,7 +9536,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Session",
                         "KeyOwner",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -9531,7 +9555,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::key_owner::Param0>,
                     _1: impl ::core::borrow::Borrow<types::key_owner::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::key_owner::Param0,
@@ -9545,7 +9569,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Session",
                         "KeyOwner",
                         (
@@ -9684,9 +9708,9 @@ pub mod api {
                     &self,
                     equivocation_proof: types::report_equivocation::EquivocationProof,
                     key_owner_proof: types::report_equivocation::KeyOwnerProof,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ReportEquivocation>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ReportEquivocation>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Grandpa",
                         "report_equivocation",
                         types::ReportEquivocation {
@@ -9707,9 +9731,10 @@ pub mod api {
                     &self,
                     equivocation_proof: types::report_equivocation_unsigned::EquivocationProof,
                     key_owner_proof: types::report_equivocation_unsigned::KeyOwnerProof,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ReportEquivocationUnsigned>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::ReportEquivocationUnsigned,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Grandpa",
                         "report_equivocation_unsigned",
                         types::ReportEquivocationUnsigned {
@@ -9730,9 +9755,9 @@ pub mod api {
                     &self,
                     delay: types::note_stalled::Delay,
                     best_finalized_block_number: types::note_stalled::BestFinalizedBlockNumber,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::NoteStalled>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::NoteStalled>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Grandpa",
                         "note_stalled",
                         types::NoteStalled {
@@ -9847,14 +9872,14 @@ pub mod api {
                 #[doc = " State of the current authority set."]
                 pub fn state(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::state::State,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Grandpa",
                         "State",
                         (),
@@ -9868,14 +9893,14 @@ pub mod api {
                 #[doc = " Pending change: (signaled at, scheduled change)."]
                 pub fn pending_change(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::pending_change::PendingChange,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Grandpa",
                         "PendingChange",
                         (),
@@ -9890,14 +9915,14 @@ pub mod api {
                 #[doc = " next block number where we can force a change."]
                 pub fn next_forced(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::next_forced::NextForced,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Grandpa",
                         "NextForced",
                         (),
@@ -9911,14 +9936,14 @@ pub mod api {
                 #[doc = " `true` if we are currently stalled."]
                 pub fn stalled(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::stalled::Stalled,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Grandpa",
                         "Stalled",
                         (),
@@ -9933,14 +9958,14 @@ pub mod api {
                 #[doc = " in the \"set\" of Grandpa validators from genesis."]
                 pub fn current_set_id(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::current_set_id::CurrentSetId,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Grandpa",
                         "CurrentSetId",
                         (),
@@ -9964,14 +9989,14 @@ pub mod api {
                 #[doc = " TWOX-NOTE: `SetId` is not under user control."]
                 pub fn set_id_session_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::set_id_session::SetIdSession,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Grandpa",
                         "SetIdSession",
                         (),
@@ -9995,7 +10020,7 @@ pub mod api {
                 pub fn set_id_session(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::set_id_session::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::set_id_session::Param0,
                     >,
@@ -10004,7 +10029,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Grandpa",
                         "SetIdSession",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -10026,9 +10051,10 @@ pub mod api {
                 #[doc = " Max Authorities in use"]
                 pub fn max_authorities(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Grandpa",
                         "MaxAuthorities",
                         [
@@ -10042,9 +10068,10 @@ pub mod api {
                 #[doc = " The maximum number of nominators for each validator."]
                 pub fn max_nominators(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Grandpa",
                         "MaxNominators",
                         [
@@ -10063,9 +10090,10 @@ pub mod api {
                 #[doc = " can be zero."]
                 pub fn max_set_id_session_entries(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u64>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u64,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Grandpa",
                         "MaxSetIdSessionEntries",
                         [
@@ -10130,9 +10158,9 @@ pub mod api {
                     &self,
                     heartbeat: types::heartbeat::Heartbeat,
                     signature: types::heartbeat::Signature,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Heartbeat>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Heartbeat>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ImOnline",
                         "heartbeat",
                         types::Heartbeat {
@@ -10260,14 +10288,14 @@ pub mod api {
                 #[doc = " more accurate then the value we calculate for `HeartbeatAfter`."]
                 pub fn heartbeat_after(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::heartbeat_after::HeartbeatAfter,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ImOnline",
                         "HeartbeatAfter",
                         (),
@@ -10281,14 +10309,14 @@ pub mod api {
                 #[doc = " The current set of keys that may issue a heartbeat."]
                 pub fn keys(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::keys::Keys,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ImOnline",
                         "Keys",
                         (),
@@ -10303,14 +10331,14 @@ pub mod api {
                 #[doc = " For each session index, we keep a mapping of `SessionIndex` and `AuthIndex`."]
                 pub fn received_heartbeats_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::received_heartbeats::ReceivedHeartbeats,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ImOnline",
                         "ReceivedHeartbeats",
                         (),
@@ -10325,7 +10353,7 @@ pub mod api {
                 pub fn received_heartbeats_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::received_heartbeats::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::received_heartbeats::Param0,
                     >,
@@ -10334,7 +10362,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ImOnline",
                         "ReceivedHeartbeats",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -10352,7 +10380,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::received_heartbeats::Param0>,
                     _1: impl ::core::borrow::Borrow<types::received_heartbeats::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::received_heartbeats::Param0,
@@ -10366,7 +10394,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ImOnline",
                         "ReceivedHeartbeats",
                         (
@@ -10388,14 +10416,14 @@ pub mod api {
                 #[doc = " number of blocks authored by the given authority."]
                 pub fn authored_blocks_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::authored_blocks::AuthoredBlocks,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ImOnline",
                         "AuthoredBlocks",
                         (),
@@ -10412,7 +10440,7 @@ pub mod api {
                 pub fn authored_blocks_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::authored_blocks::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::authored_blocks::Param0,
                     >,
@@ -10421,7 +10449,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ImOnline",
                         "AuthoredBlocks",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -10441,7 +10469,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::authored_blocks::Param0>,
                     _1: impl ::core::borrow::Borrow<types::authored_blocks::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::authored_blocks::Param0,
@@ -10455,7 +10483,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ImOnline",
                         "AuthoredBlocks",
                         (
@@ -10486,9 +10514,10 @@ pub mod api {
                 #[doc = " multiple pallets send unsigned transactions."]
                 pub fn unsigned_priority(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u64>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u64,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "ImOnline",
                         "UnsignedPriority",
                         [
@@ -10785,9 +10814,9 @@ pub mod api {
                     &self,
                     value: types::propose_spend::Value,
                     beneficiary: types::propose_spend::Beneficiary,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ProposeSpend>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ProposeSpend>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Treasury",
                         "propose_spend",
                         types::ProposeSpend { value, beneficiary },
@@ -10802,9 +10831,9 @@ pub mod api {
                 pub fn reject_proposal(
                     &self,
                     proposal_id: types::reject_proposal::ProposalId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RejectProposal>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RejectProposal>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Treasury",
                         "reject_proposal",
                         types::RejectProposal { proposal_id },
@@ -10819,9 +10848,9 @@ pub mod api {
                 pub fn approve_proposal(
                     &self,
                     proposal_id: types::approve_proposal::ProposalId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ApproveProposal>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ApproveProposal>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Treasury",
                         "approve_proposal",
                         types::ApproveProposal { proposal_id },
@@ -10837,9 +10866,9 @@ pub mod api {
                     &self,
                     amount: types::spend_local::Amount,
                     beneficiary: types::spend_local::Beneficiary,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SpendLocal>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SpendLocal>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Treasury",
                         "spend_local",
                         types::SpendLocal {
@@ -10857,9 +10886,9 @@ pub mod api {
                 pub fn remove_approval(
                     &self,
                     proposal_id: types::remove_approval::ProposalId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemoveApproval>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RemoveApproval>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Treasury",
                         "remove_approval",
                         types::RemoveApproval { proposal_id },
@@ -10878,8 +10907,9 @@ pub mod api {
                     amount: types::spend::Amount,
                     beneficiary: types::spend::Beneficiary,
                     valid_from: types::spend::ValidFrom,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Spend> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Spend>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Treasury",
                         "spend",
                         types::Spend {
@@ -10904,8 +10934,9 @@ pub mod api {
                 pub fn payout(
                     &self,
                     index: types::payout::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Payout> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Payout>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Treasury",
                         "payout",
                         types::Payout { index },
@@ -10920,9 +10951,9 @@ pub mod api {
                 pub fn check_status(
                     &self,
                     index: types::check_status::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CheckStatus>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CheckStatus>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Treasury",
                         "check_status",
                         types::CheckStatus { index },
@@ -10937,9 +10968,9 @@ pub mod api {
                 pub fn void_spend(
                     &self,
                     index: types::void_spend::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::VoidSpend>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::VoidSpend>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Treasury",
                         "void_spend",
                         types::VoidSpend { index },
@@ -11341,14 +11372,14 @@ pub mod api {
                 #[doc = " Number of proposals that have been made."]
                 pub fn proposal_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::proposal_count::ProposalCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Treasury",
                         "ProposalCount",
                         (),
@@ -11362,14 +11393,14 @@ pub mod api {
                 #[doc = " Proposals that have been made."]
                 pub fn proposals_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::proposals::Proposals,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Treasury",
                         "Proposals",
                         (),
@@ -11385,7 +11416,7 @@ pub mod api {
                 pub fn proposals(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::proposals::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::proposals::Param0,
                     >,
@@ -11394,7 +11425,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Treasury",
                         "Proposals",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -11411,14 +11442,14 @@ pub mod api {
                 #[doc = " The amount which has been reported as inactive to Currency."]
                 pub fn deactivated(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::deactivated::Deactivated,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Treasury",
                         "Deactivated",
                         (),
@@ -11433,14 +11464,14 @@ pub mod api {
                 #[doc = " Proposal indices that have been approved but not yet awarded."]
                 pub fn approvals(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::approvals::Approvals,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Treasury",
                         "Approvals",
                         (),
@@ -11454,14 +11485,14 @@ pub mod api {
                 #[doc = " The count of spends that have been made."]
                 pub fn spend_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::spend_count::SpendCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Treasury",
                         "SpendCount",
                         (),
@@ -11476,14 +11507,14 @@ pub mod api {
                 #[doc = " Spends that have been approved and being processed."]
                 pub fn spends_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::spends::Spends,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Treasury",
                         "Spends",
                         (),
@@ -11499,7 +11530,7 @@ pub mod api {
                 pub fn spends(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::spends::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::spends::Param0,
                     >,
@@ -11508,7 +11539,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Treasury",
                         "Spends",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -11532,10 +11563,10 @@ pub mod api {
                 #[doc = " An accepted proposal gets these back. A rejected proposal does not."]
                 pub fn proposal_bond(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::sp_arithmetic::per_things::Permill,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Treasury",
                         "ProposalBond",
                         [
@@ -11548,9 +11579,10 @@ pub mod api {
                 #[doc = " Minimum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn proposal_bond_minimum(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Treasury",
                         "ProposalBondMinimum",
                         [
@@ -11563,10 +11595,10 @@ pub mod api {
                 #[doc = " Maximum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn proposal_bond_maximum(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     ::core::option::Option<::core::primitive::u128>,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Treasury",
                         "ProposalBondMaximum",
                         [
@@ -11580,9 +11612,10 @@ pub mod api {
                 #[doc = " Period between successive spends."]
                 pub fn spend_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Treasury",
                         "SpendPeriod",
                         [
@@ -11596,10 +11629,10 @@ pub mod api {
                 #[doc = " Percentage of spare funds (if any) that are burnt per spend period."]
                 pub fn burn(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::sp_arithmetic::per_things::Permill,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Treasury",
                         "Burn",
                         [
@@ -11612,10 +11645,10 @@ pub mod api {
                 #[doc = " The treasury's pallet id, used for deriving its sovereign account ID."]
                 pub fn pallet_id(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::frame_support::PalletId,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Treasury",
                         "PalletId",
                         [
@@ -11630,9 +11663,10 @@ pub mod api {
                 #[doc = " NOTE: This parameter is also used within the Bounties Pallet extension if enabled."]
                 pub fn max_approvals(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Treasury",
                         "MaxApprovals",
                         [
@@ -11646,9 +11680,10 @@ pub mod api {
                 #[doc = " The period during which an approved treasury spend has to be claimed."]
                 pub fn payout_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Treasury",
                         "PayoutPeriod",
                         [
@@ -11868,8 +11903,9 @@ pub mod api {
                     &self,
                     poll_index: types::vote::PollIndex,
                     vote: types::vote::Vote,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Vote> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Vote>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ConvictionVoting",
                         "vote",
                         types::Vote { poll_index, vote },
@@ -11888,9 +11924,9 @@ pub mod api {
                     to: types::delegate::To,
                     conviction: types::delegate::Conviction,
                     balance: types::delegate::Balance,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Delegate>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Delegate>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ConvictionVoting",
                         "delegate",
                         types::Delegate {
@@ -11910,9 +11946,9 @@ pub mod api {
                 pub fn undelegate(
                     &self,
                     class: types::undelegate::Class,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Undelegate>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Undelegate>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ConvictionVoting",
                         "undelegate",
                         types::Undelegate { class },
@@ -11929,8 +11965,9 @@ pub mod api {
                     &self,
                     class: types::unlock::Class,
                     target: types::unlock::Target,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Unlock> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Unlock>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ConvictionVoting",
                         "unlock",
                         types::Unlock { class, target },
@@ -11947,9 +11984,9 @@ pub mod api {
                     &self,
                     class: types::remove_vote::Class,
                     index: types::remove_vote::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemoveVote>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RemoveVote>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ConvictionVoting",
                         "remove_vote",
                         types::RemoveVote { class, index },
@@ -11967,9 +12004,9 @@ pub mod api {
                     target: types::remove_other_vote::Target,
                     class: types::remove_other_vote::Class,
                     index: types::remove_other_vote::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemoveOtherVote>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RemoveOtherVote>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ConvictionVoting",
                         "remove_other_vote",
                         types::RemoveOtherVote {
@@ -12063,14 +12100,14 @@ pub mod api {
                 #[doc = " number of votes that we have recorded."]
                 pub fn voting_for_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::voting_for::VotingFor,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ConvictionVoting",
                         "VotingFor",
                         (),
@@ -12086,7 +12123,7 @@ pub mod api {
                 pub fn voting_for_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::voting_for::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::voting_for::Param0,
                     >,
@@ -12095,7 +12132,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ConvictionVoting",
                         "VotingFor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -12114,7 +12151,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::voting_for::Param0>,
                     _1: impl ::core::borrow::Borrow<types::voting_for::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::voting_for::Param0,
@@ -12128,7 +12165,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ConvictionVoting",
                         "VotingFor",
                         (
@@ -12151,14 +12188,14 @@ pub mod api {
                 #[doc = " this list."]
                 pub fn class_locks_for_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::class_locks_for::ClassLocksFor,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ConvictionVoting",
                         "ClassLocksFor",
                         (),
@@ -12175,7 +12212,7 @@ pub mod api {
                 pub fn class_locks_for(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::class_locks_for::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::class_locks_for::Param0,
                     >,
@@ -12184,7 +12221,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ConvictionVoting",
                         "ClassLocksFor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -12209,9 +12246,10 @@ pub mod api {
                 #[doc = " weight estimation: see `delegate` for instance."]
                 pub fn max_votes(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "ConvictionVoting",
                         "MaxVotes",
                         [
@@ -12228,9 +12266,10 @@ pub mod api {
                 #[doc = " those successful voters are locked into the consequences that their votes entail."]
                 pub fn vote_locking_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "ConvictionVoting",
                         "VoteLockingPeriod",
                         [
@@ -12514,8 +12553,9 @@ pub mod api {
                     proposal_origin: types::submit::ProposalOrigin,
                     proposal: types::submit::Proposal,
                     enactment_moment: types::submit::EnactmentMoment,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Submit> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Submit>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Referenda",
                         "submit",
                         types::Submit {
@@ -12537,9 +12577,9 @@ pub mod api {
                 pub fn place_decision_deposit(
                     &self,
                     index: types::place_decision_deposit::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::PlaceDecisionDeposit>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PlaceDecisionDeposit>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Referenda",
                         "place_decision_deposit",
                         types::PlaceDecisionDeposit { index },
@@ -12554,9 +12594,10 @@ pub mod api {
                 pub fn refund_decision_deposit(
                     &self,
                     index: types::refund_decision_deposit::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RefundDecisionDeposit>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::RefundDecisionDeposit,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Referenda",
                         "refund_decision_deposit",
                         types::RefundDecisionDeposit { index },
@@ -12571,8 +12612,9 @@ pub mod api {
                 pub fn cancel(
                     &self,
                     index: types::cancel::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Cancel> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Cancel>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Referenda",
                         "cancel",
                         types::Cancel { index },
@@ -12588,8 +12630,9 @@ pub mod api {
                 pub fn kill(
                     &self,
                     index: types::kill::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Kill> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Kill>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Referenda",
                         "kill",
                         types::Kill { index },
@@ -12605,9 +12648,9 @@ pub mod api {
                 pub fn nudge_referendum(
                     &self,
                     index: types::nudge_referendum::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::NudgeReferendum>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::NudgeReferendum>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Referenda",
                         "nudge_referendum",
                         types::NudgeReferendum { index },
@@ -12623,9 +12666,9 @@ pub mod api {
                 pub fn one_fewer_deciding(
                     &self,
                     track: types::one_fewer_deciding::Track,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::OneFewerDeciding>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::OneFewerDeciding>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Referenda",
                         "one_fewer_deciding",
                         types::OneFewerDeciding { track },
@@ -12641,9 +12684,10 @@ pub mod api {
                 pub fn refund_submission_deposit(
                     &self,
                     index: types::refund_submission_deposit::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RefundSubmissionDeposit>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::RefundSubmissionDeposit,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Referenda",
                         "refund_submission_deposit",
                         types::RefundSubmissionDeposit { index },
@@ -12659,9 +12703,9 @@ pub mod api {
                     &self,
                     index: types::set_metadata::Index,
                     maybe_hash: types::set_metadata::MaybeHash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMetadata>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetMetadata>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Referenda",
                         "set_metadata",
                         types::SetMetadata { index, maybe_hash },
@@ -13133,14 +13177,14 @@ pub mod api {
                 #[doc = " The next free referendum index, aka the number of referenda started so far."]
                 pub fn referendum_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::referendum_count::ReferendumCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Referenda",
                         "ReferendumCount",
                         (),
@@ -13155,14 +13199,14 @@ pub mod api {
                 #[doc = " Information concerning any given referendum."]
                 pub fn referendum_info_for_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::referendum_info_for::ReferendumInfoFor,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Referenda",
                         "ReferendumInfoFor",
                         (),
@@ -13177,7 +13221,7 @@ pub mod api {
                 pub fn referendum_info_for(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::referendum_info_for::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::referendum_info_for::Param0,
                     >,
@@ -13186,7 +13230,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Referenda",
                         "ReferendumInfoFor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -13205,14 +13249,14 @@ pub mod api {
                 #[doc = " This should be empty if `DecidingCount` is less than `TrackInfo::max_deciding`."]
                 pub fn track_queue_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::track_queue::TrackQueue,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Referenda",
                         "TrackQueue",
                         (),
@@ -13230,7 +13274,7 @@ pub mod api {
                 pub fn track_queue(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::track_queue::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::track_queue::Param0,
                     >,
@@ -13239,7 +13283,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Referenda",
                         "TrackQueue",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -13255,14 +13299,14 @@ pub mod api {
                 #[doc = " The number of referenda being decided currently."]
                 pub fn deciding_count_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::deciding_count::DecidingCount,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Referenda",
                         "DecidingCount",
                         (),
@@ -13278,7 +13322,7 @@ pub mod api {
                 pub fn deciding_count(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::deciding_count::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::deciding_count::Param0,
                     >,
@@ -13287,7 +13331,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Referenda",
                         "DecidingCount",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -13309,14 +13353,14 @@ pub mod api {
                 #[doc = " large preimages."]
                 pub fn metadata_of_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::metadata_of::MetadataOf,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Referenda",
                         "MetadataOf",
                         (),
@@ -13337,7 +13381,7 @@ pub mod api {
                 pub fn metadata_of(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::metadata_of::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::metadata_of::Param0,
                     >,
@@ -13346,7 +13390,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Referenda",
                         "MetadataOf",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -13369,9 +13413,10 @@ pub mod api {
                 #[doc = " The minimum amount to be used as a deposit for a public referendum proposal."]
                 pub fn submission_deposit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Referenda",
                         "SubmissionDeposit",
                         [
@@ -13384,9 +13429,10 @@ pub mod api {
                 #[doc = " Maximum size of the referendum queue for a single track."]
                 pub fn max_queued(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Referenda",
                         "MaxQueued",
                         [
@@ -13401,9 +13447,10 @@ pub mod api {
                 #[doc = " Once this passes, then anyone may cancel the referendum."]
                 pub fn undeciding_timeout(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Referenda",
                         "UndecidingTimeout",
                         [
@@ -13419,9 +13466,10 @@ pub mod api {
                 #[doc = " automatic referendum status changes. Explicit servicing instructions are unaffected."]
                 pub fn alarm_interval(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Referenda",
                         "AlarmInterval",
                         [
@@ -13435,7 +13483,7 @@ pub mod api {
                 #[doc = " Information concerning the different referendum tracks."]
                 pub fn tracks(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     ::subxt::ext::subxt_core::alloc::vec::Vec<(
                         ::core::primitive::u16,
                         runtime_types::pallet_referenda::types::TrackInfo<
@@ -13444,7 +13492,7 @@ pub mod api {
                         >,
                     )>,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Referenda",
                         "Tracks",
                         [
@@ -13652,9 +13700,9 @@ pub mod api {
                 pub fn add_member(
                     &self,
                     who: types::add_member::Who,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AddMember>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AddMember>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipCollective",
                         "add_member",
                         types::AddMember { who },
@@ -13669,9 +13717,9 @@ pub mod api {
                 pub fn promote_member(
                     &self,
                     who: types::promote_member::Who,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::PromoteMember>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PromoteMember>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipCollective",
                         "promote_member",
                         types::PromoteMember { who },
@@ -13687,9 +13735,9 @@ pub mod api {
                 pub fn demote_member(
                     &self,
                     who: types::demote_member::Who,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::DemoteMember>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::DemoteMember>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipCollective",
                         "demote_member",
                         types::DemoteMember { who },
@@ -13706,9 +13754,9 @@ pub mod api {
                     &self,
                     who: types::remove_member::Who,
                     min_rank: types::remove_member::MinRank,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemoveMember>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RemoveMember>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipCollective",
                         "remove_member",
                         types::RemoveMember { who, min_rank },
@@ -13725,8 +13773,9 @@ pub mod api {
                     &self,
                     poll: types::vote::Poll,
                     aye: types::vote::Aye,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Vote> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Vote>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipCollective",
                         "vote",
                         types::Vote { poll, aye },
@@ -13742,9 +13791,9 @@ pub mod api {
                     &self,
                     poll_index: types::cleanup_poll::PollIndex,
                     max: types::cleanup_poll::Max,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CleanupPoll>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CleanupPoll>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipCollective",
                         "cleanup_poll",
                         types::CleanupPoll { poll_index, max },
@@ -13909,14 +13958,14 @@ pub mod api {
                 #[doc = " of the vec."]
                 pub fn member_count_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::member_count::MemberCount,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "MemberCount",
                         (),
@@ -13932,7 +13981,7 @@ pub mod api {
                 pub fn member_count(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::member_count::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::member_count::Param0,
                     >,
@@ -13941,7 +13990,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "MemberCount",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -13957,14 +14006,14 @@ pub mod api {
                 #[doc = " The current members of the collective."]
                 pub fn members_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::members::Members,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "Members",
                         (),
@@ -13980,7 +14029,7 @@ pub mod api {
                 pub fn members(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::members::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::members::Param0,
                     >,
@@ -13989,7 +14038,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "Members",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -14006,14 +14055,14 @@ pub mod api {
                 #[doc = " The index of each ranks's member into the group of members who have at least that rank."]
                 pub fn id_to_index_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::id_to_index::IdToIndex,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "IdToIndex",
                         (),
@@ -14028,7 +14077,7 @@ pub mod api {
                 pub fn id_to_index_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::id_to_index::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::id_to_index::Param0,
                     >,
@@ -14037,7 +14086,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "IdToIndex",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -14055,7 +14104,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::id_to_index::Param0>,
                     _1: impl ::core::borrow::Borrow<types::id_to_index::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::id_to_index::Param0,
@@ -14069,7 +14118,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "IdToIndex",
                         (
@@ -14091,14 +14140,14 @@ pub mod api {
                 #[doc = " return `Some`, however a member's index is not guaranteed to remain unchanged over time."]
                 pub fn index_to_id_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::index_to_id::IndexToId,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "IndexToId",
                         (),
@@ -14115,7 +14164,7 @@ pub mod api {
                 pub fn index_to_id_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::index_to_id::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::index_to_id::Param0,
                     >,
@@ -14124,7 +14173,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "IndexToId",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -14144,7 +14193,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::index_to_id::Param0>,
                     _1: impl ::core::borrow::Borrow<types::index_to_id::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::index_to_id::Param0,
@@ -14158,7 +14207,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "IndexToId",
                         (
@@ -14180,14 +14229,14 @@ pub mod api {
                 #[doc = " Votes on a given proposal, if it is ongoing."]
                 pub fn voting_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::voting::Voting,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "Voting",
                         (),
@@ -14203,7 +14252,7 @@ pub mod api {
                 pub fn voting_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::voting::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::voting::Param0,
                     >,
@@ -14212,7 +14261,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "Voting",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -14231,7 +14280,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::voting::Param0>,
                     _1: impl ::core::borrow::Borrow<types::voting::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::voting::Param0,
@@ -14245,7 +14294,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "Voting",
                         (
@@ -14266,14 +14315,14 @@ pub mod api {
                 }
                 pub fn voting_cleanup_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::voting_cleanup::VotingCleanup,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "VotingCleanup",
                         (),
@@ -14287,7 +14336,7 @@ pub mod api {
                 pub fn voting_cleanup(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::voting_cleanup::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::voting_cleanup::Param0,
                     >,
@@ -14296,7 +14345,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipCollective",
                         "VotingCleanup",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -14582,8 +14631,9 @@ pub mod api {
                     proposal_origin: types::submit::ProposalOrigin,
                     proposal: types::submit::Proposal,
                     enactment_moment: types::submit::EnactmentMoment,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Submit> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Submit>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipReferenda",
                         "submit",
                         types::Submit {
@@ -14605,9 +14655,9 @@ pub mod api {
                 pub fn place_decision_deposit(
                     &self,
                     index: types::place_decision_deposit::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::PlaceDecisionDeposit>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PlaceDecisionDeposit>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipReferenda",
                         "place_decision_deposit",
                         types::PlaceDecisionDeposit { index },
@@ -14622,9 +14672,10 @@ pub mod api {
                 pub fn refund_decision_deposit(
                     &self,
                     index: types::refund_decision_deposit::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RefundDecisionDeposit>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::RefundDecisionDeposit,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipReferenda",
                         "refund_decision_deposit",
                         types::RefundDecisionDeposit { index },
@@ -14639,8 +14690,9 @@ pub mod api {
                 pub fn cancel(
                     &self,
                     index: types::cancel::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Cancel> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Cancel>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipReferenda",
                         "cancel",
                         types::Cancel { index },
@@ -14656,8 +14708,9 @@ pub mod api {
                 pub fn kill(
                     &self,
                     index: types::kill::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Kill> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Kill>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipReferenda",
                         "kill",
                         types::Kill { index },
@@ -14673,9 +14726,9 @@ pub mod api {
                 pub fn nudge_referendum(
                     &self,
                     index: types::nudge_referendum::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::NudgeReferendum>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::NudgeReferendum>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipReferenda",
                         "nudge_referendum",
                         types::NudgeReferendum { index },
@@ -14691,9 +14744,9 @@ pub mod api {
                 pub fn one_fewer_deciding(
                     &self,
                     track: types::one_fewer_deciding::Track,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::OneFewerDeciding>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::OneFewerDeciding>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipReferenda",
                         "one_fewer_deciding",
                         types::OneFewerDeciding { track },
@@ -14709,9 +14762,10 @@ pub mod api {
                 pub fn refund_submission_deposit(
                     &self,
                     index: types::refund_submission_deposit::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RefundSubmissionDeposit>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::RefundSubmissionDeposit,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipReferenda",
                         "refund_submission_deposit",
                         types::RefundSubmissionDeposit { index },
@@ -14727,9 +14781,9 @@ pub mod api {
                     &self,
                     index: types::set_metadata::Index,
                     maybe_hash: types::set_metadata::MaybeHash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMetadata>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetMetadata>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "FellowshipReferenda",
                         "set_metadata",
                         types::SetMetadata { index, maybe_hash },
@@ -15193,14 +15247,14 @@ pub mod api {
                 #[doc = " The next free referendum index, aka the number of referenda started so far."]
                 pub fn referendum_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::referendum_count::ReferendumCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "ReferendumCount",
                         (),
@@ -15215,14 +15269,14 @@ pub mod api {
                 #[doc = " Information concerning any given referendum."]
                 pub fn referendum_info_for_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::referendum_info_for::ReferendumInfoFor,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "ReferendumInfoFor",
                         (),
@@ -15237,7 +15291,7 @@ pub mod api {
                 pub fn referendum_info_for(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::referendum_info_for::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::referendum_info_for::Param0,
                     >,
@@ -15246,7 +15300,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "ReferendumInfoFor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -15265,14 +15319,14 @@ pub mod api {
                 #[doc = " This should be empty if `DecidingCount` is less than `TrackInfo::max_deciding`."]
                 pub fn track_queue_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::track_queue::TrackQueue,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "TrackQueue",
                         (),
@@ -15291,7 +15345,7 @@ pub mod api {
                 pub fn track_queue(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::track_queue::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::track_queue::Param0,
                     >,
@@ -15300,7 +15354,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "TrackQueue",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -15317,14 +15371,14 @@ pub mod api {
                 #[doc = " The number of referenda being decided currently."]
                 pub fn deciding_count_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::deciding_count::DecidingCount,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "DecidingCount",
                         (),
@@ -15340,7 +15394,7 @@ pub mod api {
                 pub fn deciding_count(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::deciding_count::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::deciding_count::Param0,
                     >,
@@ -15349,7 +15403,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "DecidingCount",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -15371,14 +15425,14 @@ pub mod api {
                 #[doc = " large preimages."]
                 pub fn metadata_of_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::metadata_of::MetadataOf,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "MetadataOf",
                         (),
@@ -15399,7 +15453,7 @@ pub mod api {
                 pub fn metadata_of(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::metadata_of::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::metadata_of::Param0,
                     >,
@@ -15408,7 +15462,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "MetadataOf",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -15431,9 +15485,10 @@ pub mod api {
                 #[doc = " The minimum amount to be used as a deposit for a public referendum proposal."]
                 pub fn submission_deposit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "SubmissionDeposit",
                         [
@@ -15446,9 +15501,10 @@ pub mod api {
                 #[doc = " Maximum size of the referendum queue for a single track."]
                 pub fn max_queued(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "MaxQueued",
                         [
@@ -15463,9 +15519,10 @@ pub mod api {
                 #[doc = " Once this passes, then anyone may cancel the referendum."]
                 pub fn undeciding_timeout(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "UndecidingTimeout",
                         [
@@ -15481,9 +15538,10 @@ pub mod api {
                 #[doc = " automatic referendum status changes. Explicit servicing instructions are unaffected."]
                 pub fn alarm_interval(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "AlarmInterval",
                         [
@@ -15497,7 +15555,7 @@ pub mod api {
                 #[doc = " Information concerning the different referendum tracks."]
                 pub fn tracks(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     ::subxt::ext::subxt_core::alloc::vec::Vec<(
                         ::core::primitive::u16,
                         runtime_types::pallet_referenda::types::TrackInfo<
@@ -15506,7 +15564,7 @@ pub mod api {
                         >,
                     )>,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "Tracks",
                         [
@@ -15650,9 +15708,9 @@ pub mod api {
                 pub fn whitelist_call(
                     &self,
                     call_hash: types::whitelist_call::CallHash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::WhitelistCall>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::WhitelistCall>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Whitelist",
                         "whitelist_call",
                         types::WhitelistCall { call_hash },
@@ -15668,9 +15726,10 @@ pub mod api {
                 pub fn remove_whitelisted_call(
                     &self,
                     call_hash: types::remove_whitelisted_call::CallHash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemoveWhitelistedCall>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::RemoveWhitelistedCall,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Whitelist",
                         "remove_whitelisted_call",
                         types::RemoveWhitelistedCall { call_hash },
@@ -15688,9 +15747,10 @@ pub mod api {
                     call_hash: types::dispatch_whitelisted_call::CallHash,
                     call_encoded_len: types::dispatch_whitelisted_call::CallEncodedLen,
                     call_weight_witness: types::dispatch_whitelisted_call::CallWeightWitness,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::DispatchWhitelistedCall>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::DispatchWhitelistedCall,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Whitelist",
                         "dispatch_whitelisted_call",
                         types::DispatchWhitelistedCall {
@@ -15710,10 +15770,10 @@ pub mod api {
                 pub fn dispatch_whitelisted_call_with_preimage(
                     &self,
                     call: types::dispatch_whitelisted_call_with_preimage::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::DispatchWhitelistedCallWithPreimage,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Whitelist",
                         "dispatch_whitelisted_call_with_preimage",
                         types::DispatchWhitelistedCallWithPreimage {
@@ -15818,14 +15878,14 @@ pub mod api {
             impl StorageApi {
                 pub fn whitelisted_call_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::whitelisted_call::WhitelistedCall,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Whitelist",
                         "WhitelistedCall",
                         (),
@@ -15839,7 +15899,7 @@ pub mod api {
                 pub fn whitelisted_call(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::whitelisted_call::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::whitelisted_call::Param0,
                     >,
@@ -15848,7 +15908,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Whitelist",
                         "WhitelistedCall",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -16042,8 +16102,9 @@ pub mod api {
                     &self,
                     dest: types::claim::Dest,
                     ethereum_signature: types::claim::EthereumSignature,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Claim> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Claim>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Claims",
                         "claim",
                         types::Claim {
@@ -16065,9 +16126,9 @@ pub mod api {
                     value: types::mint_claim::Value,
                     vesting_schedule: types::mint_claim::VestingSchedule,
                     statement: types::mint_claim::Statement,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::MintClaim>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::MintClaim>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Claims",
                         "mint_claim",
                         types::MintClaim {
@@ -16089,9 +16150,9 @@ pub mod api {
                     dest: types::claim_attest::Dest,
                     ethereum_signature: types::claim_attest::EthereumSignature,
                     statement: types::claim_attest::Statement,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ClaimAttest>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ClaimAttest>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Claims",
                         "claim_attest",
                         types::ClaimAttest {
@@ -16110,8 +16171,9 @@ pub mod api {
                 pub fn attest(
                     &self,
                     statement: types::attest::Statement,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Attest> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Attest>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Claims",
                         "attest",
                         types::Attest { statement },
@@ -16129,9 +16191,9 @@ pub mod api {
                     old: types::move_claim::Old,
                     new: types::move_claim::New,
                     maybe_preclaim: types::move_claim::MaybePreclaim,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::MoveClaim>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::MoveClaim>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Claims",
                         "move_claim",
                         types::MoveClaim {
@@ -16223,14 +16285,14 @@ pub mod api {
             impl StorageApi {
                 pub fn claims_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::claims::Claims,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Claims",
                         "Claims",
                         (),
@@ -16245,7 +16307,7 @@ pub mod api {
                 pub fn claims(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::claims::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::claims::Param0,
                     >,
@@ -16254,7 +16316,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Claims",
                         "Claims",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -16270,14 +16332,14 @@ pub mod api {
                 }
                 pub fn total(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::total::Total,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Claims",
                         "Total",
                         (),
@@ -16295,14 +16357,14 @@ pub mod api {
                 #[doc = " The block number is when the vesting should start."]
                 pub fn vesting_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::vesting::Vesting,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Claims",
                         "Vesting",
                         (),
@@ -16321,7 +16383,7 @@ pub mod api {
                 pub fn vesting(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::vesting::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::vesting::Param0,
                     >,
@@ -16330,7 +16392,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Claims",
                         "Vesting",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -16347,14 +16409,14 @@ pub mod api {
                 #[doc = " The statement kind that must be signed, if any."]
                 pub fn signing_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::signing::Signing,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Claims",
                         "Signing",
                         (),
@@ -16369,7 +16431,7 @@ pub mod api {
                 pub fn signing(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::signing::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::signing::Param0,
                     >,
@@ -16378,7 +16440,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Claims",
                         "Signing",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -16394,14 +16456,14 @@ pub mod api {
                 #[doc = " Pre-claimed Ethereum accounts, by the Account ID that they are claimed to."]
                 pub fn preclaims_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::preclaims::Preclaims,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Claims",
                         "Preclaims",
                         (),
@@ -16417,7 +16479,7 @@ pub mod api {
                 pub fn preclaims(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::preclaims::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::preclaims::Param0,
                     >,
@@ -16426,7 +16488,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Claims",
                         "Preclaims",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -16448,10 +16510,10 @@ pub mod api {
             impl ConstantsApi {
                 pub fn prefix(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Claims",
                         "Prefix",
                         [
@@ -16654,8 +16716,9 @@ pub mod api {
                 pub fn batch(
                     &self,
                     calls: types::batch::Calls,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Batch> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Batch>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Utility",
                         "batch",
                         types::Batch { calls },
@@ -16672,9 +16735,9 @@ pub mod api {
                     &self,
                     index: types::as_derivative::Index,
                     call: types::as_derivative::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AsDerivative>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AsDerivative>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Utility",
                         "as_derivative",
                         types::AsDerivative {
@@ -16693,9 +16756,9 @@ pub mod api {
                 pub fn batch_all(
                     &self,
                     calls: types::batch_all::Calls,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::BatchAll>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::BatchAll>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Utility",
                         "batch_all",
                         types::BatchAll { calls },
@@ -16711,9 +16774,9 @@ pub mod api {
                     &self,
                     as_origin: types::dispatch_as::AsOrigin,
                     call: types::dispatch_as::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::DispatchAs>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::DispatchAs>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Utility",
                         "dispatch_as",
                         types::DispatchAs {
@@ -16732,9 +16795,9 @@ pub mod api {
                 pub fn force_batch(
                     &self,
                     calls: types::force_batch::Calls,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceBatch>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceBatch>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Utility",
                         "force_batch",
                         types::ForceBatch { calls },
@@ -16751,9 +16814,9 @@ pub mod api {
                     &self,
                     call: types::with_weight::Call,
                     weight: types::with_weight::Weight,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::WithWeight>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::WithWeight>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Utility",
                         "with_weight",
                         types::WithWeight {
@@ -16900,9 +16963,10 @@ pub mod api {
                 #[doc = " The limit on the number of batched calls."]
                 pub fn batched_calls_limit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Utility",
                         "batched_calls_limit",
                         [
@@ -17366,9 +17430,9 @@ pub mod api {
                 pub fn add_registrar(
                     &self,
                     account: types::add_registrar::Account,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AddRegistrar>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AddRegistrar>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "add_registrar",
                         types::AddRegistrar { account },
@@ -17383,9 +17447,9 @@ pub mod api {
                 pub fn set_identity(
                     &self,
                     info: types::set_identity::Info,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetIdentity>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetIdentity>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "set_identity",
                         types::SetIdentity {
@@ -17403,9 +17467,9 @@ pub mod api {
                 pub fn set_subs(
                     &self,
                     subs: types::set_subs::Subs,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetSubs>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetSubs>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "set_subs",
                         types::SetSubs { subs },
@@ -17420,9 +17484,9 @@ pub mod api {
                 #[doc = "See [`Pallet::clear_identity`]."]
                 pub fn clear_identity(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ClearIdentity>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ClearIdentity>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "clear_identity",
                         types::ClearIdentity {},
@@ -17439,9 +17503,9 @@ pub mod api {
                     &self,
                     reg_index: types::request_judgement::RegIndex,
                     max_fee: types::request_judgement::MaxFee,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RequestJudgement>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RequestJudgement>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "request_judgement",
                         types::RequestJudgement { reg_index, max_fee },
@@ -17456,9 +17520,9 @@ pub mod api {
                 pub fn cancel_request(
                     &self,
                     reg_index: types::cancel_request::RegIndex,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CancelRequest>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CancelRequest>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "cancel_request",
                         types::CancelRequest { reg_index },
@@ -17475,8 +17539,9 @@ pub mod api {
                     &self,
                     index: types::set_fee::Index,
                     fee: types::set_fee::Fee,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetFee> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetFee>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "set_fee",
                         types::SetFee { index, fee },
@@ -17493,9 +17558,9 @@ pub mod api {
                     &self,
                     index: types::set_account_id::Index,
                     new: types::set_account_id::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetAccountId>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetAccountId>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "set_account_id",
                         types::SetAccountId { index, new },
@@ -17512,9 +17577,9 @@ pub mod api {
                     &self,
                     index: types::set_fields::Index,
                     fields: types::set_fields::Fields,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetFields>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetFields>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "set_fields",
                         types::SetFields { index, fields },
@@ -17532,9 +17597,9 @@ pub mod api {
                     target: types::provide_judgement::Target,
                     judgement: types::provide_judgement::Judgement,
                     identity: types::provide_judgement::Identity,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ProvideJudgement>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ProvideJudgement>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "provide_judgement",
                         types::ProvideJudgement {
@@ -17555,9 +17620,9 @@ pub mod api {
                 pub fn kill_identity(
                     &self,
                     target: types::kill_identity::Target,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::KillIdentity>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::KillIdentity>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "kill_identity",
                         types::KillIdentity { target },
@@ -17574,8 +17639,9 @@ pub mod api {
                     &self,
                     sub: types::add_sub::Sub,
                     data: types::add_sub::Data,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AddSub> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AddSub>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "add_sub",
                         types::AddSub { sub, data },
@@ -17591,9 +17657,9 @@ pub mod api {
                     &self,
                     sub: types::rename_sub::Sub,
                     data: types::rename_sub::Data,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RenameSub>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RenameSub>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "rename_sub",
                         types::RenameSub { sub, data },
@@ -17609,9 +17675,9 @@ pub mod api {
                 pub fn remove_sub(
                     &self,
                     sub: types::remove_sub::Sub,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemoveSub>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RemoveSub>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "remove_sub",
                         types::RemoveSub { sub },
@@ -17625,9 +17691,9 @@ pub mod api {
                 #[doc = "See [`Pallet::quit_sub`]."]
                 pub fn quit_sub(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::QuitSub>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::QuitSub>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Identity",
                         "quit_sub",
                         types::QuitSub {},
@@ -17938,14 +18004,14 @@ pub mod api {
                 #[doc = " TWOX-NOTE: OK ― `AccountId` is a secure hash."]
                 pub fn identity_of_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::identity_of::IdentityOf,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Identity",
                         "IdentityOf",
                         (),
@@ -17962,7 +18028,7 @@ pub mod api {
                 pub fn identity_of(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::identity_of::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::identity_of::Param0,
                     >,
@@ -17971,7 +18037,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Identity",
                         "IdentityOf",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -17988,14 +18054,14 @@ pub mod api {
                 #[doc = " context. If the account is not some other account's sub-identity, then just `None`."]
                 pub fn super_of_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::super_of::SuperOf,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Identity",
                         "SuperOf",
                         (),
@@ -18011,7 +18077,7 @@ pub mod api {
                 pub fn super_of(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::super_of::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::super_of::Param0,
                     >,
@@ -18020,7 +18086,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Identity",
                         "SuperOf",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -18040,14 +18106,14 @@ pub mod api {
                 #[doc = " TWOX-NOTE: OK ― `AccountId` is a secure hash."]
                 pub fn subs_of_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::subs_of::SubsOf,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Identity",
                         "SubsOf",
                         (),
@@ -18067,7 +18133,7 @@ pub mod api {
                 pub fn subs_of(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::subs_of::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::subs_of::Param0,
                     >,
@@ -18076,7 +18142,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Identity",
                         "SubsOf",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -18096,14 +18162,14 @@ pub mod api {
                 #[doc = " The index into this can be cast to `RegistrarIndex` to get a valid value."]
                 pub fn registrars(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::registrars::Registrars,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Identity",
                         "Registrars",
                         (),
@@ -18124,9 +18190,10 @@ pub mod api {
                 #[doc = " The amount held on deposit for a registered identity"]
                 pub fn basic_deposit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Identity",
                         "BasicDeposit",
                         [
@@ -18139,9 +18206,10 @@ pub mod api {
                 #[doc = " The amount held on deposit per additional field for a registered identity."]
                 pub fn field_deposit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Identity",
                         "FieldDeposit",
                         [
@@ -18156,9 +18224,10 @@ pub mod api {
                 #[doc = " be another trie item whose value is the size of an account ID plus 32 bytes."]
                 pub fn sub_account_deposit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Identity",
                         "SubAccountDeposit",
                         [
@@ -18171,9 +18240,10 @@ pub mod api {
                 #[doc = " The maximum number of sub-accounts allowed per identified account."]
                 pub fn max_sub_accounts(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Identity",
                         "MaxSubAccounts",
                         [
@@ -18188,9 +18258,10 @@ pub mod api {
                 #[doc = " required to access an identity, but can be pretty high."]
                 pub fn max_additional_fields(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Identity",
                         "MaxAdditionalFields",
                         [
@@ -18205,9 +18276,10 @@ pub mod api {
                 #[doc = " of, e.g., updating judgements."]
                 pub fn max_registrars(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Identity",
                         "MaxRegistrars",
                         [
@@ -18760,8 +18832,9 @@ pub mod api {
                 pub fn bid(
                     &self,
                     value: types::bid::Value,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Bid> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Bid>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "bid",
                         types::Bid { value },
@@ -18775,8 +18848,9 @@ pub mod api {
                 #[doc = "See [`Pallet::unbid`]."]
                 pub fn unbid(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Unbid> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Unbid>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "unbid",
                         types::Unbid {},
@@ -18794,8 +18868,9 @@ pub mod api {
                     who: types::vouch::Who,
                     value: types::vouch::Value,
                     tip: types::vouch::Tip,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Vouch> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Vouch>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "vouch",
                         types::Vouch { who, value, tip },
@@ -18809,9 +18884,9 @@ pub mod api {
                 #[doc = "See [`Pallet::unvouch`]."]
                 pub fn unvouch(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Unvouch>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Unvouch>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "unvouch",
                         types::Unvouch {},
@@ -18828,8 +18903,9 @@ pub mod api {
                     &self,
                     candidate: types::vote::Candidate,
                     approve: types::vote::Approve,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Vote> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Vote>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "vote",
                         types::Vote { candidate, approve },
@@ -18844,9 +18920,9 @@ pub mod api {
                 pub fn defender_vote(
                     &self,
                     approve: types::defender_vote::Approve,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::DefenderVote>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::DefenderVote>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "defender_vote",
                         types::DefenderVote { approve },
@@ -18861,8 +18937,9 @@ pub mod api {
                 #[doc = "See [`Pallet::payout`]."]
                 pub fn payout(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Payout> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Payout>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "payout",
                         types::Payout {},
@@ -18877,9 +18954,9 @@ pub mod api {
                 pub fn waive_repay(
                     &self,
                     amount: types::waive_repay::Amount,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::WaiveRepay>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::WaiveRepay>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "waive_repay",
                         types::WaiveRepay { amount },
@@ -18899,9 +18976,9 @@ pub mod api {
                     max_strikes: types::found_society::MaxStrikes,
                     candidate_deposit: types::found_society::CandidateDeposit,
                     rules: types::found_society::Rules,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::FoundSociety>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::FoundSociety>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "found_society",
                         types::FoundSociety {
@@ -18923,9 +19000,9 @@ pub mod api {
                 #[doc = "See [`Pallet::dissolve`]."]
                 pub fn dissolve(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Dissolve>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Dissolve>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "dissolve",
                         types::Dissolve {},
@@ -18942,9 +19019,9 @@ pub mod api {
                     &self,
                     who: types::judge_suspended_member::Who,
                     forgive: types::judge_suspended_member::Forgive,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::JudgeSuspendedMember>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::JudgeSuspendedMember>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "judge_suspended_member",
                         types::JudgeSuspendedMember { who, forgive },
@@ -18962,9 +19039,9 @@ pub mod api {
                     max_intake: types::set_parameters::MaxIntake,
                     max_strikes: types::set_parameters::MaxStrikes,
                     candidate_deposit: types::set_parameters::CandidateDeposit,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetParameters>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetParameters>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "set_parameters",
                         types::SetParameters {
@@ -18984,9 +19061,9 @@ pub mod api {
                 #[doc = "See [`Pallet::punish_skeptic`]."]
                 pub fn punish_skeptic(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::PunishSkeptic>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PunishSkeptic>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "punish_skeptic",
                         types::PunishSkeptic {},
@@ -19001,9 +19078,9 @@ pub mod api {
                 #[doc = "See [`Pallet::claim_membership`]."]
                 pub fn claim_membership(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ClaimMembership>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ClaimMembership>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "claim_membership",
                         types::ClaimMembership {},
@@ -19018,9 +19095,9 @@ pub mod api {
                 pub fn bestow_membership(
                     &self,
                     candidate: types::bestow_membership::Candidate,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::BestowMembership>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::BestowMembership>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "bestow_membership",
                         types::BestowMembership { candidate },
@@ -19035,9 +19112,9 @@ pub mod api {
                 pub fn kick_candidate(
                     &self,
                     candidate: types::kick_candidate::Candidate,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::KickCandidate>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::KickCandidate>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "kick_candidate",
                         types::KickCandidate { candidate },
@@ -19051,9 +19128,9 @@ pub mod api {
                 #[doc = "See [`Pallet::resign_candidacy`]."]
                 pub fn resign_candidacy(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ResignCandidacy>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ResignCandidacy>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "resign_candidacy",
                         types::ResignCandidacy {},
@@ -19069,9 +19146,9 @@ pub mod api {
                 pub fn drop_candidate(
                     &self,
                     candidate: types::drop_candidate::Candidate,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::DropCandidate>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::DropCandidate>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "drop_candidate",
                         types::DropCandidate { candidate },
@@ -19087,9 +19164,9 @@ pub mod api {
                     &self,
                     candidate: types::cleanup_candidacy::Candidate,
                     max: types::cleanup_candidacy::Max,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CleanupCandidacy>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CleanupCandidacy>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "cleanup_candidacy",
                         types::CleanupCandidacy { candidate, max },
@@ -19106,9 +19183,9 @@ pub mod api {
                     &self,
                     challenge_round: types::cleanup_challenge::ChallengeRound,
                     max: types::cleanup_challenge::Max,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CleanupChallenge>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CleanupChallenge>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Society",
                         "cleanup_challenge",
                         types::CleanupChallenge {
@@ -19653,14 +19730,14 @@ pub mod api {
                 #[doc = " The max number of members for the society at one time."]
                 pub fn parameters(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::parameters::Parameters,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Parameters",
                         (),
@@ -19675,14 +19752,14 @@ pub mod api {
                 #[doc = " Amount of our account balance that is specifically for the next round's bid(s)."]
                 pub fn pot(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::pot::Pot,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Pot",
                         (),
@@ -19696,14 +19773,14 @@ pub mod api {
                 #[doc = " The first member."]
                 pub fn founder(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::founder::Founder,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Founder",
                         (),
@@ -19717,14 +19794,14 @@ pub mod api {
                 #[doc = " The most primary from the most recently approved rank 0 members in the society."]
                 pub fn head(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::head::Head,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Head",
                         (),
@@ -19739,14 +19816,14 @@ pub mod api {
                 #[doc = " only by the founder."]
                 pub fn rules(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::rules::Rules,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Rules",
                         (),
@@ -19761,14 +19838,14 @@ pub mod api {
                 #[doc = " The current members and their rank. Doesn't include `SuspendedMembers`."]
                 pub fn members_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::members::Members,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Members",
                         (),
@@ -19783,7 +19860,7 @@ pub mod api {
                 pub fn members(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::members::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::members::Param0,
                     >,
@@ -19792,7 +19869,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Members",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -19808,14 +19885,14 @@ pub mod api {
                 #[doc = " Information regarding rank-0 payouts, past and future."]
                 pub fn payouts_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::payouts::Payouts,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Payouts",
                         (),
@@ -19830,7 +19907,7 @@ pub mod api {
                 pub fn payouts(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::payouts::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::payouts::Param0,
                     >,
@@ -19839,7 +19916,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Payouts",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -19855,14 +19932,14 @@ pub mod api {
                 #[doc = " The number of items in `Members` currently. (Doesn't include `SuspendedMembers`.)"]
                 pub fn member_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::member_count::MemberCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "MemberCount",
                         (),
@@ -19878,14 +19955,14 @@ pub mod api {
                 #[doc = " `0..MemberCount` (does not include `MemberCount`)."]
                 pub fn member_by_index_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::member_by_index::MemberByIndex,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "MemberByIndex",
                         (),
@@ -19902,7 +19979,7 @@ pub mod api {
                 pub fn member_by_index(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::member_by_index::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::member_by_index::Param0,
                     >,
@@ -19911,7 +19988,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "MemberByIndex",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -19928,14 +20005,14 @@ pub mod api {
                 #[doc = " The set of suspended members, with their old membership record."]
                 pub fn suspended_members_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::suspended_members::SuspendedMembers,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "SuspendedMembers",
                         (),
@@ -19951,7 +20028,7 @@ pub mod api {
                 pub fn suspended_members(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::suspended_members::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::suspended_members::Param0,
                     >,
@@ -19960,7 +20037,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "SuspendedMembers",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -19977,14 +20054,14 @@ pub mod api {
                 #[doc = " The number of rounds which have passed."]
                 pub fn round_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::round_count::RoundCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "RoundCount",
                         (),
@@ -19999,14 +20076,14 @@ pub mod api {
                 #[doc = " The current bids, stored ordered by the value of the bid."]
                 pub fn bids(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::bids::Bids,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Bids",
                         (),
@@ -20019,14 +20096,14 @@ pub mod api {
                 }
                 pub fn candidates_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::candidates::Candidates,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Candidates",
                         (),
@@ -20040,7 +20117,7 @@ pub mod api {
                 pub fn candidates(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::candidates::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::candidates::Param0,
                     >,
@@ -20049,7 +20126,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Candidates",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -20065,14 +20142,14 @@ pub mod api {
                 #[doc = " The current skeptic."]
                 pub fn skeptic(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::skeptic::Skeptic,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Skeptic",
                         (),
@@ -20087,14 +20164,14 @@ pub mod api {
                 #[doc = " Double map from Candidate -> Voter -> (Maybe) Vote."]
                 pub fn votes_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::votes::Votes,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Votes",
                         (),
@@ -20110,7 +20187,7 @@ pub mod api {
                 pub fn votes_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::votes::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::votes::Param0,
                     >,
@@ -20119,7 +20196,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Votes",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -20138,7 +20215,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::votes::Param0>,
                     _1: impl ::core::borrow::Borrow<types::votes::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::votes::Param0,
@@ -20152,7 +20229,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Votes",
                         (
@@ -20174,14 +20251,14 @@ pub mod api {
                 #[doc = " Clear-cursor for Vote, map from Candidate -> (Maybe) Cursor."]
                 pub fn vote_clear_cursor_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::vote_clear_cursor::VoteClearCursor,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "VoteClearCursor",
                         (),
@@ -20197,7 +20274,7 @@ pub mod api {
                 pub fn vote_clear_cursor(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::vote_clear_cursor::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::vote_clear_cursor::Param0,
                     >,
@@ -20206,7 +20283,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "VoteClearCursor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -20225,14 +20302,14 @@ pub mod api {
                 #[doc = " become the new `Head`."]
                 pub fn next_head(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::next_head::NextHead,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "NextHead",
                         (),
@@ -20246,14 +20323,14 @@ pub mod api {
                 #[doc = " The number of challenge rounds there have been. Used to identify stale DefenderVotes."]
                 pub fn challenge_round_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::challenge_round_count::ChallengeRoundCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "ChallengeRoundCount",
                         (),
@@ -20267,14 +20344,14 @@ pub mod api {
                 #[doc = " The defending member currently being challenged, along with a running tally of votes."]
                 pub fn defending(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::defending::Defending,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "Defending",
                         (),
@@ -20288,14 +20365,14 @@ pub mod api {
                 #[doc = " Votes for the defender, keyed by challenge round."]
                 pub fn defender_votes_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::defender_votes::DefenderVotes,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "DefenderVotes",
                         (),
@@ -20311,7 +20388,7 @@ pub mod api {
                 pub fn defender_votes_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::defender_votes::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::defender_votes::Param0,
                     >,
@@ -20320,7 +20397,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "DefenderVotes",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -20339,7 +20416,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::defender_votes::Param0>,
                     _1: impl ::core::borrow::Borrow<types::defender_votes::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::defender_votes::Param0,
@@ -20353,7 +20430,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Society",
                         "DefenderVotes",
                         (
@@ -20381,10 +20458,10 @@ pub mod api {
                 #[doc = " The societies's pallet id"]
                 pub fn pallet_id(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::frame_support::PalletId,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Society",
                         "PalletId",
                         [
@@ -20397,9 +20474,10 @@ pub mod api {
                 #[doc = " The maximum number of strikes before a member gets funds slashed."]
                 pub fn grace_strikes(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Society",
                         "GraceStrikes",
                         [
@@ -20413,9 +20491,10 @@ pub mod api {
                 #[doc = " The amount of incentive paid within each period. Doesn't include VoterTip."]
                 pub fn period_spend(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Society",
                         "PeriodSpend",
                         [
@@ -20429,9 +20508,10 @@ pub mod api {
                 #[doc = " `ClaimPeriod`, this sums to the number of blocks between candidate intake periods."]
                 pub fn voting_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Society",
                         "VotingPeriod",
                         [
@@ -20446,9 +20526,10 @@ pub mod api {
                 #[doc = " named head."]
                 pub fn claim_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Society",
                         "ClaimPeriod",
                         [
@@ -20462,9 +20543,10 @@ pub mod api {
                 #[doc = " The maximum duration of the payout lock."]
                 pub fn max_lock_duration(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Society",
                         "MaxLockDuration",
                         [
@@ -20478,9 +20560,10 @@ pub mod api {
                 #[doc = " The number of blocks between membership challenges."]
                 pub fn challenge_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Society",
                         "ChallengePeriod",
                         [
@@ -20494,9 +20577,10 @@ pub mod api {
                 #[doc = " The maximum number of payouts a member may have waiting unclaimed."]
                 pub fn max_payouts(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Society",
                         "MaxPayouts",
                         [
@@ -20510,9 +20594,10 @@ pub mod api {
                 #[doc = " The maximum number of bids at once."]
                 pub fn max_bids(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Society",
                         "MaxBids",
                         [
@@ -20814,9 +20899,9 @@ pub mod api {
                     &self,
                     account: types::as_recovered::Account,
                     call: types::as_recovered::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AsRecovered>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AsRecovered>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Recovery",
                         "as_recovered",
                         types::AsRecovered {
@@ -20836,9 +20921,9 @@ pub mod api {
                     &self,
                     lost: types::set_recovered::Lost,
                     rescuer: types::set_recovered::Rescuer,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetRecovered>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetRecovered>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Recovery",
                         "set_recovered",
                         types::SetRecovered { lost, rescuer },
@@ -20855,9 +20940,9 @@ pub mod api {
                     friends: types::create_recovery::Friends,
                     threshold: types::create_recovery::Threshold,
                     delay_period: types::create_recovery::DelayPeriod,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CreateRecovery>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CreateRecovery>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Recovery",
                         "create_recovery",
                         types::CreateRecovery {
@@ -20876,9 +20961,9 @@ pub mod api {
                 pub fn initiate_recovery(
                     &self,
                     account: types::initiate_recovery::Account,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::InitiateRecovery>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::InitiateRecovery>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Recovery",
                         "initiate_recovery",
                         types::InitiateRecovery { account },
@@ -20894,9 +20979,9 @@ pub mod api {
                     &self,
                     lost: types::vouch_recovery::Lost,
                     rescuer: types::vouch_recovery::Rescuer,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::VouchRecovery>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::VouchRecovery>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Recovery",
                         "vouch_recovery",
                         types::VouchRecovery { lost, rescuer },
@@ -20911,9 +20996,9 @@ pub mod api {
                 pub fn claim_recovery(
                     &self,
                     account: types::claim_recovery::Account,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ClaimRecovery>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ClaimRecovery>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Recovery",
                         "claim_recovery",
                         types::ClaimRecovery { account },
@@ -20929,9 +21014,9 @@ pub mod api {
                 pub fn close_recovery(
                     &self,
                     rescuer: types::close_recovery::Rescuer,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CloseRecovery>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CloseRecovery>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Recovery",
                         "close_recovery",
                         types::CloseRecovery { rescuer },
@@ -20946,9 +21031,9 @@ pub mod api {
                 #[doc = "See [`Pallet::remove_recovery`]."]
                 pub fn remove_recovery(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemoveRecovery>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RemoveRecovery>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Recovery",
                         "remove_recovery",
                         types::RemoveRecovery {},
@@ -20964,9 +21049,9 @@ pub mod api {
                 pub fn cancel_recovered(
                     &self,
                     account: types::cancel_recovered::Account,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CancelRecovered>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CancelRecovered>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Recovery",
                         "cancel_recovered",
                         types::CancelRecovered { account },
@@ -21165,14 +21250,14 @@ pub mod api {
                 #[doc = " The set of recoverable accounts and their recovery configuration."]
                 pub fn recoverable_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::recoverable::Recoverable,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Recovery",
                         "Recoverable",
                         (),
@@ -21187,7 +21272,7 @@ pub mod api {
                 pub fn recoverable(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::recoverable::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::recoverable::Param0,
                     >,
@@ -21196,7 +21281,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Recovery",
                         "Recoverable",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -21215,14 +21300,14 @@ pub mod api {
                 #[doc = " is the user trying to recover the account."]
                 pub fn active_recoveries_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::active_recoveries::ActiveRecoveries,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Recovery",
                         "ActiveRecoveries",
                         (),
@@ -21241,7 +21326,7 @@ pub mod api {
                 pub fn active_recoveries_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::active_recoveries::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::active_recoveries::Param0,
                     >,
@@ -21250,7 +21335,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Recovery",
                         "ActiveRecoveries",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -21272,7 +21357,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::active_recoveries::Param0>,
                     _1: impl ::core::borrow::Borrow<types::active_recoveries::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::active_recoveries::Param0,
@@ -21286,7 +21371,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Recovery",
                         "ActiveRecoveries",
                         (
@@ -21310,14 +21395,14 @@ pub mod api {
                 #[doc = " Map from the user who can access it to the recovered account."]
                 pub fn proxy_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::proxy::Proxy,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Recovery",
                         "Proxy",
                         (),
@@ -21334,7 +21419,7 @@ pub mod api {
                 pub fn proxy(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::proxy::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::proxy::Param0,
                     >,
@@ -21343,7 +21428,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Recovery",
                         "Proxy",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -21368,9 +21453,10 @@ pub mod api {
                 #[doc = " `2 + sizeof(BlockNumber, Balance)` bytes."]
                 pub fn config_deposit_base(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Recovery",
                         "ConfigDepositBase",
                         [
@@ -21387,9 +21473,10 @@ pub mod api {
                 #[doc = " value."]
                 pub fn friend_deposit_factor(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Recovery",
                         "FriendDepositFactor",
                         [
@@ -21407,9 +21494,10 @@ pub mod api {
                 #[doc = " to anyway..."]
                 pub fn max_friends(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Recovery",
                         "MaxFriends",
                         [
@@ -21429,9 +21517,10 @@ pub mod api {
                 #[doc = " threshold."]
                 pub fn recovery_deposit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Recovery",
                         "RecoveryDeposit",
                         [
@@ -21611,8 +21700,11 @@ pub mod api {
             pub struct TransactionApi;
             impl TransactionApi {
                 #[doc = "See [`Pallet::vest`]."]
-                pub fn vest(&self) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Vest> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                pub fn vest(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Vest>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Vesting",
                         "vest",
                         types::Vest {},
@@ -21628,9 +21720,9 @@ pub mod api {
                 pub fn vest_other(
                     &self,
                     target: types::vest_other::Target,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::VestOther>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::VestOther>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Vesting",
                         "vest_other",
                         types::VestOther { target },
@@ -21646,9 +21738,9 @@ pub mod api {
                     &self,
                     target: types::vested_transfer::Target,
                     schedule: types::vested_transfer::Schedule,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::VestedTransfer>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::VestedTransfer>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Vesting",
                         "vested_transfer",
                         types::VestedTransfer { target, schedule },
@@ -21665,9 +21757,9 @@ pub mod api {
                     source: types::force_vested_transfer::Source,
                     target: types::force_vested_transfer::Target,
                     schedule: types::force_vested_transfer::Schedule,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceVestedTransfer>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceVestedTransfer>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Vesting",
                         "force_vested_transfer",
                         types::ForceVestedTransfer {
@@ -21688,9 +21780,9 @@ pub mod api {
                     &self,
                     schedule1_index: types::merge_schedules::Schedule1Index,
                     schedule2_index: types::merge_schedules::Schedule2Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::MergeSchedules>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::MergeSchedules>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Vesting",
                         "merge_schedules",
                         types::MergeSchedules {
@@ -21783,14 +21875,14 @@ pub mod api {
                 #[doc = " Information regarding the vesting of a given account."]
                 pub fn vesting_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::vesting::Vesting,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Vesting",
                         "Vesting",
                         (),
@@ -21806,7 +21898,7 @@ pub mod api {
                 pub fn vesting(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::vesting::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::vesting::Param0,
                     >,
@@ -21815,7 +21907,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Vesting",
                         "Vesting",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -21834,14 +21926,14 @@ pub mod api {
                 #[doc = " New networks start with latest version, as determined by the genesis build."]
                 pub fn storage_version(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::storage_version::StorageVersion,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Vesting",
                         "StorageVersion",
                         (),
@@ -21861,9 +21953,10 @@ pub mod api {
                 #[doc = " The minimum amount transferred to call `vested_transfer`."]
                 pub fn min_vested_transfer(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Vesting",
                         "MinVestedTransfer",
                         [
@@ -21875,9 +21968,10 @@ pub mod api {
                 }
                 pub fn max_vesting_schedules(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Vesting",
                         "MaxVestingSchedules",
                         [
@@ -22105,9 +22199,9 @@ pub mod api {
                     maybe_periodic: types::schedule::MaybePeriodic,
                     priority: types::schedule::Priority,
                     call: types::schedule::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Schedule>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Schedule>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Scheduler",
                         "schedule",
                         types::Schedule {
@@ -22129,8 +22223,9 @@ pub mod api {
                     &self,
                     when: types::cancel::When,
                     index: types::cancel::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Cancel> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Cancel>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Scheduler",
                         "cancel",
                         types::Cancel { when, index },
@@ -22150,9 +22245,9 @@ pub mod api {
                     maybe_periodic: types::schedule_named::MaybePeriodic,
                     priority: types::schedule_named::Priority,
                     call: types::schedule_named::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ScheduleNamed>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ScheduleNamed>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Scheduler",
                         "schedule_named",
                         types::ScheduleNamed {
@@ -22174,9 +22269,9 @@ pub mod api {
                 pub fn cancel_named(
                     &self,
                     id: types::cancel_named::Id,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CancelNamed>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CancelNamed>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Scheduler",
                         "cancel_named",
                         types::CancelNamed { id },
@@ -22194,9 +22289,9 @@ pub mod api {
                     maybe_periodic: types::schedule_after::MaybePeriodic,
                     priority: types::schedule_after::Priority,
                     call: types::schedule_after::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ScheduleAfter>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ScheduleAfter>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Scheduler",
                         "schedule_after",
                         types::ScheduleAfter {
@@ -22220,9 +22315,9 @@ pub mod api {
                     maybe_periodic: types::schedule_named_after::MaybePeriodic,
                     priority: types::schedule_named_after::Priority,
                     call: types::schedule_named_after::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ScheduleNamedAfter>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ScheduleNamedAfter>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Scheduler",
                         "schedule_named_after",
                         types::ScheduleNamedAfter {
@@ -22429,14 +22524,14 @@ pub mod api {
             impl StorageApi {
                 pub fn incomplete_since(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::incomplete_since::IncompleteSince,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Scheduler",
                         "IncompleteSince",
                         (),
@@ -22450,14 +22545,14 @@ pub mod api {
                 #[doc = " Items to be executed, indexed by the block number that they should be executed on."]
                 pub fn agenda_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::agenda::Agenda,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Scheduler",
                         "Agenda",
                         (),
@@ -22472,7 +22567,7 @@ pub mod api {
                 pub fn agenda(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::agenda::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::agenda::Param0,
                     >,
@@ -22481,7 +22576,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Scheduler",
                         "Agenda",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -22500,14 +22595,14 @@ pub mod api {
                 #[doc = " identities."]
                 pub fn lookup_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::lookup::Lookup,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Scheduler",
                         "Lookup",
                         (),
@@ -22525,7 +22620,7 @@ pub mod api {
                 pub fn lookup(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::lookup::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::lookup::Param0,
                     >,
@@ -22534,7 +22629,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Scheduler",
                         "Lookup",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -22556,10 +22651,10 @@ pub mod api {
                 #[doc = " The maximum weight that may be scheduled per block for any dispatchables."]
                 pub fn maximum_weight(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::sp_weights::weight_v2::Weight,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Scheduler",
                         "MaximumWeight",
                         [
@@ -22577,9 +22672,10 @@ pub mod api {
                 #[doc = " higher limit under `runtime-benchmarks` feature."]
                 pub fn max_scheduled_per_block(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Scheduler",
                         "MaxScheduledPerBlock",
                         [
@@ -22936,8 +23032,9 @@ pub mod api {
                     real: types::proxy::Real,
                     force_proxy_type: types::proxy::ForceProxyType,
                     call: types::proxy::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Proxy> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Proxy>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Proxy",
                         "proxy",
                         types::Proxy {
@@ -22958,9 +23055,9 @@ pub mod api {
                     delegate: types::add_proxy::Delegate,
                     proxy_type: types::add_proxy::ProxyType,
                     delay: types::add_proxy::Delay,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AddProxy>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AddProxy>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Proxy",
                         "add_proxy",
                         types::AddProxy {
@@ -22982,9 +23079,9 @@ pub mod api {
                     delegate: types::remove_proxy::Delegate,
                     proxy_type: types::remove_proxy::ProxyType,
                     delay: types::remove_proxy::Delay,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemoveProxy>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RemoveProxy>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Proxy",
                         "remove_proxy",
                         types::RemoveProxy {
@@ -23002,9 +23099,9 @@ pub mod api {
                 #[doc = "See [`Pallet::remove_proxies`]."]
                 pub fn remove_proxies(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemoveProxies>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RemoveProxies>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Proxy",
                         "remove_proxies",
                         types::RemoveProxies {},
@@ -23022,9 +23119,9 @@ pub mod api {
                     proxy_type: types::create_pure::ProxyType,
                     delay: types::create_pure::Delay,
                     index: types::create_pure::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CreatePure>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CreatePure>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Proxy",
                         "create_pure",
                         types::CreatePure {
@@ -23047,9 +23144,9 @@ pub mod api {
                     index: types::kill_pure::Index,
                     height: types::kill_pure::Height,
                     ext_index: types::kill_pure::ExtIndex,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::KillPure>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::KillPure>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Proxy",
                         "kill_pure",
                         types::KillPure {
@@ -23071,9 +23168,9 @@ pub mod api {
                     &self,
                     real: types::announce::Real,
                     call_hash: types::announce::CallHash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Announce>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Announce>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Proxy",
                         "announce",
                         types::Announce { real, call_hash },
@@ -23090,9 +23187,9 @@ pub mod api {
                     &self,
                     real: types::remove_announcement::Real,
                     call_hash: types::remove_announcement::CallHash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemoveAnnouncement>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RemoveAnnouncement>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Proxy",
                         "remove_announcement",
                         types::RemoveAnnouncement { real, call_hash },
@@ -23108,9 +23205,9 @@ pub mod api {
                     &self,
                     delegate: types::reject_announcement::Delegate,
                     call_hash: types::reject_announcement::CallHash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RejectAnnouncement>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RejectAnnouncement>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Proxy",
                         "reject_announcement",
                         types::RejectAnnouncement {
@@ -23131,9 +23228,9 @@ pub mod api {
                     real: types::proxy_announced::Real,
                     force_proxy_type: types::proxy_announced::ForceProxyType,
                     call: types::proxy_announced::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ProxyAnnounced>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ProxyAnnounced>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Proxy",
                         "proxy_announced",
                         types::ProxyAnnounced {
@@ -23329,14 +23426,14 @@ pub mod api {
                 #[doc = " which are being delegated to, together with the amount held on deposit."]
                 pub fn proxies_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::proxies::Proxies,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Proxy",
                         "Proxies",
                         (),
@@ -23352,7 +23449,7 @@ pub mod api {
                 pub fn proxies(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::proxies::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::proxies::Param0,
                     >,
@@ -23361,7 +23458,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Proxy",
                         "Proxies",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -23377,14 +23474,14 @@ pub mod api {
                 #[doc = " The announcements made by the proxy (key)."]
                 pub fn announcements_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::announcements::Announcements,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Proxy",
                         "Announcements",
                         (),
@@ -23400,7 +23497,7 @@ pub mod api {
                 pub fn announcements(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::announcements::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::announcements::Param0,
                     >,
@@ -23409,7 +23506,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Proxy",
                         "Announcements",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -23435,9 +23532,10 @@ pub mod api {
                 #[doc = " `sizeof(Balance)` bytes and whose key size is `sizeof(AccountId)` bytes."]
                 pub fn proxy_deposit_base(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Proxy",
                         "ProxyDepositBase",
                         [
@@ -23454,9 +23552,10 @@ pub mod api {
                 #[doc = " into account `32 + proxy_type.encode().len()` bytes of data."]
                 pub fn proxy_deposit_factor(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Proxy",
                         "ProxyDepositFactor",
                         [
@@ -23469,9 +23568,10 @@ pub mod api {
                 #[doc = " The maximum amount of proxies allowed for a single account."]
                 pub fn max_proxies(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Proxy",
                         "MaxProxies",
                         [
@@ -23485,9 +23585,10 @@ pub mod api {
                 #[doc = " The maximum amount of time-delayed announcements that are allowed to be pending."]
                 pub fn max_pending(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Proxy",
                         "MaxPending",
                         [
@@ -23504,9 +23605,10 @@ pub mod api {
                 #[doc = " bytes)."]
                 pub fn announcement_deposit_base(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Proxy",
                         "AnnouncementDepositBase",
                         [
@@ -23522,9 +23624,10 @@ pub mod api {
                 #[doc = " into a pre-existing storage value."]
                 pub fn announcement_deposit_factor(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Proxy",
                         "AnnouncementDepositFactor",
                         [
@@ -23700,9 +23803,9 @@ pub mod api {
                     &self,
                     other_signatories: types::as_multi_threshold1::OtherSignatories,
                     call: types::as_multi_threshold1::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AsMultiThreshold1>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AsMultiThreshold1>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Multisig",
                         "as_multi_threshold_1",
                         types::AsMultiThreshold1 {
@@ -23725,9 +23828,9 @@ pub mod api {
                     maybe_timepoint: types::as_multi::MaybeTimepoint,
                     call: types::as_multi::Call,
                     max_weight: types::as_multi::MaxWeight,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AsMulti>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AsMulti>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Multisig",
                         "as_multi",
                         types::AsMulti {
@@ -23753,9 +23856,9 @@ pub mod api {
                     maybe_timepoint: types::approve_as_multi::MaybeTimepoint,
                     call_hash: types::approve_as_multi::CallHash,
                     max_weight: types::approve_as_multi::MaxWeight,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ApproveAsMulti>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ApproveAsMulti>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Multisig",
                         "approve_as_multi",
                         types::ApproveAsMulti {
@@ -23779,9 +23882,9 @@ pub mod api {
                     other_signatories: types::cancel_as_multi::OtherSignatories,
                     timepoint: types::cancel_as_multi::Timepoint,
                     call_hash: types::cancel_as_multi::CallHash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CancelAsMulti>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CancelAsMulti>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Multisig",
                         "cancel_as_multi",
                         types::CancelAsMulti {
@@ -23940,14 +24043,14 @@ pub mod api {
                 #[doc = " The set of open multisig operations."]
                 pub fn multisigs_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::multisigs::Multisigs,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Multisig",
                         "Multisigs",
                         (),
@@ -23962,7 +24065,7 @@ pub mod api {
                 pub fn multisigs_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::multisigs::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::multisigs::Param0,
                     >,
@@ -23971,7 +24074,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Multisig",
                         "Multisigs",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -23989,7 +24092,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::multisigs::Param0>,
                     _1: impl ::core::borrow::Borrow<types::multisigs::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::multisigs::Param0,
@@ -24003,7 +24106,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Multisig",
                         "Multisigs",
                         (
@@ -24035,9 +24138,10 @@ pub mod api {
                 #[doc = " `32 + sizeof(AccountId)` bytes."]
                 pub fn deposit_base(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Multisig",
                         "DepositBase",
                         [
@@ -24052,9 +24156,10 @@ pub mod api {
                 #[doc = " This is held for adding 32 bytes more into a pre-existing storage value."]
                 pub fn deposit_factor(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Multisig",
                         "DepositFactor",
                         [
@@ -24067,9 +24172,10 @@ pub mod api {
                 #[doc = " The maximum amount of signatories allowed in the multisig."]
                 pub fn max_signatories(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Multisig",
                         "MaxSignatories",
                         [
@@ -24236,9 +24342,9 @@ pub mod api {
                 pub fn note_preimage(
                     &self,
                     bytes: types::note_preimage::Bytes,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::NotePreimage>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::NotePreimage>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Preimage",
                         "note_preimage",
                         types::NotePreimage { bytes },
@@ -24253,9 +24359,9 @@ pub mod api {
                 pub fn unnote_preimage(
                     &self,
                     hash: types::unnote_preimage::Hash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::UnnotePreimage>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::UnnotePreimage>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Preimage",
                         "unnote_preimage",
                         types::UnnotePreimage { hash },
@@ -24271,9 +24377,9 @@ pub mod api {
                 pub fn request_preimage(
                     &self,
                     hash: types::request_preimage::Hash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RequestPreimage>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RequestPreimage>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Preimage",
                         "request_preimage",
                         types::RequestPreimage { hash },
@@ -24288,9 +24394,9 @@ pub mod api {
                 pub fn unrequest_preimage(
                     &self,
                     hash: types::unrequest_preimage::Hash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::UnrequestPreimage>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::UnrequestPreimage>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Preimage",
                         "unrequest_preimage",
                         types::UnrequestPreimage { hash },
@@ -24306,9 +24412,9 @@ pub mod api {
                 pub fn ensure_updated(
                     &self,
                     hashes: types::ensure_updated::Hashes,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::EnsureUpdated>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::EnsureUpdated>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Preimage",
                         "ensure_updated",
                         types::EnsureUpdated { hashes },
@@ -24428,14 +24534,14 @@ pub mod api {
                 #[doc = " The request status of a given hash."]
                 pub fn status_for_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::status_for::StatusFor,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Preimage",
                         "StatusFor",
                         (),
@@ -24451,7 +24557,7 @@ pub mod api {
                 pub fn status_for(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::status_for::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::status_for::Param0,
                     >,
@@ -24460,7 +24566,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Preimage",
                         "StatusFor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -24477,14 +24583,14 @@ pub mod api {
                 #[doc = " The request status of a given hash."]
                 pub fn request_status_for_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::request_status_for::RequestStatusFor,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Preimage",
                         "RequestStatusFor",
                         (),
@@ -24499,7 +24605,7 @@ pub mod api {
                 pub fn request_status_for(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::request_status_for::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::request_status_for::Param0,
                     >,
@@ -24508,7 +24614,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Preimage",
                         "RequestStatusFor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -24523,14 +24629,14 @@ pub mod api {
                 }
                 pub fn preimage_for_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::preimage_for::PreimageFor,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Preimage",
                         "PreimageFor",
                         (),
@@ -24545,7 +24651,7 @@ pub mod api {
                 pub fn preimage_for_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::preimage_for::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::preimage_for::Param0,
                     >,
@@ -24554,7 +24660,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Preimage",
                         "PreimageFor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -24572,7 +24678,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::preimage_for::Param0>,
                     _1: impl ::core::borrow::Borrow<types::preimage_for::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::preimage_for::Param0,
@@ -24586,7 +24692,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Preimage",
                         "PreimageFor",
                         (
@@ -24714,8 +24820,9 @@ pub mod api {
                     &self,
                     asset_kind: types::create::AssetKind,
                     rate: types::create::Rate,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Create> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Create>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "AssetRate",
                         "create",
                         types::Create {
@@ -24737,8 +24844,9 @@ pub mod api {
                     &self,
                     asset_kind: types::update::AssetKind,
                     rate: types::update::Rate,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Update> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Update>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "AssetRate",
                         "update",
                         types::Update {
@@ -24759,8 +24867,9 @@ pub mod api {
                 pub fn remove(
                     &self,
                     asset_kind: types::remove::AssetKind,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Remove> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Remove>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "AssetRate",
                         "remove",
                         types::Remove {
@@ -24874,14 +24983,14 @@ pub mod api {
                 #[doc = " E.g. `native_amount = asset_amount * ConversionRateToNative::<T>::get(asset_kind)`"]
                 pub fn conversion_rate_to_native_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::conversion_rate_to_native::ConversionRateToNative,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "AssetRate",
                         "ConversionRateToNative",
                         (),
@@ -24898,7 +25007,7 @@ pub mod api {
                 pub fn conversion_rate_to_native(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::conversion_rate_to_native::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::conversion_rate_to_native::Param0,
                     >,
@@ -24907,7 +25016,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "AssetRate",
                         "ConversionRateToNative",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -25206,9 +25315,9 @@ pub mod api {
                     &self,
                     value: types::propose_bounty::Value,
                     description: types::propose_bounty::Description,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ProposeBounty>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ProposeBounty>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Bounties",
                         "propose_bounty",
                         types::ProposeBounty { value, description },
@@ -25223,9 +25332,9 @@ pub mod api {
                 pub fn approve_bounty(
                     &self,
                     bounty_id: types::approve_bounty::BountyId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ApproveBounty>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ApproveBounty>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Bounties",
                         "approve_bounty",
                         types::ApproveBounty { bounty_id },
@@ -25243,9 +25352,9 @@ pub mod api {
                     bounty_id: types::propose_curator::BountyId,
                     curator: types::propose_curator::Curator,
                     fee: types::propose_curator::Fee,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ProposeCurator>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ProposeCurator>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Bounties",
                         "propose_curator",
                         types::ProposeCurator {
@@ -25264,9 +25373,9 @@ pub mod api {
                 pub fn unassign_curator(
                     &self,
                     bounty_id: types::unassign_curator::BountyId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::UnassignCurator>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::UnassignCurator>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Bounties",
                         "unassign_curator",
                         types::UnassignCurator { bounty_id },
@@ -25282,9 +25391,9 @@ pub mod api {
                 pub fn accept_curator(
                     &self,
                     bounty_id: types::accept_curator::BountyId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AcceptCurator>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AcceptCurator>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Bounties",
                         "accept_curator",
                         types::AcceptCurator { bounty_id },
@@ -25300,9 +25409,9 @@ pub mod api {
                     &self,
                     bounty_id: types::award_bounty::BountyId,
                     beneficiary: types::award_bounty::Beneficiary,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AwardBounty>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AwardBounty>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Bounties",
                         "award_bounty",
                         types::AwardBounty {
@@ -25320,9 +25429,9 @@ pub mod api {
                 pub fn claim_bounty(
                     &self,
                     bounty_id: types::claim_bounty::BountyId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ClaimBounty>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ClaimBounty>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Bounties",
                         "claim_bounty",
                         types::ClaimBounty { bounty_id },
@@ -25338,9 +25447,9 @@ pub mod api {
                 pub fn close_bounty(
                     &self,
                     bounty_id: types::close_bounty::BountyId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CloseBounty>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CloseBounty>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Bounties",
                         "close_bounty",
                         types::CloseBounty { bounty_id },
@@ -25357,9 +25466,9 @@ pub mod api {
                     &self,
                     bounty_id: types::extend_bounty_expiry::BountyId,
                     remark: types::extend_bounty_expiry::Remark,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ExtendBountyExpiry>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ExtendBountyExpiry>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Bounties",
                         "extend_bounty_expiry",
                         types::ExtendBountyExpiry { bounty_id, remark },
@@ -25670,14 +25779,14 @@ pub mod api {
                 #[doc = " Number of bounty proposals that have been made."]
                 pub fn bounty_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::bounty_count::BountyCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Bounties",
                         "BountyCount",
                         (),
@@ -25692,14 +25801,14 @@ pub mod api {
                 #[doc = " Bounties that have been made."]
                 pub fn bounties_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::bounties::Bounties,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Bounties",
                         "Bounties",
                         (),
@@ -25715,7 +25824,7 @@ pub mod api {
                 pub fn bounties(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::bounties::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::bounties::Param0,
                     >,
@@ -25724,7 +25833,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Bounties",
                         "Bounties",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -25741,14 +25850,14 @@ pub mod api {
                 #[doc = " The description of each bounty."]
                 pub fn bounty_descriptions_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::bounty_descriptions::BountyDescriptions,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Bounties",
                         "BountyDescriptions",
                         (),
@@ -25763,7 +25872,7 @@ pub mod api {
                 pub fn bounty_descriptions(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::bounty_descriptions::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::bounty_descriptions::Param0,
                     >,
@@ -25772,7 +25881,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Bounties",
                         "BountyDescriptions",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -25788,14 +25897,14 @@ pub mod api {
                 #[doc = " Bounty indices that have been approved but not yet funded."]
                 pub fn bounty_approvals(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::bounty_approvals::BountyApprovals,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Bounties",
                         "BountyApprovals",
                         (),
@@ -25815,9 +25924,10 @@ pub mod api {
                 #[doc = " The amount held on deposit for placing a bounty proposal."]
                 pub fn bounty_deposit_base(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Bounties",
                         "BountyDepositBase",
                         [
@@ -25830,9 +25940,10 @@ pub mod api {
                 #[doc = " The delay period for which a bounty beneficiary need to wait before claim the payout."]
                 pub fn bounty_deposit_payout_delay(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Bounties",
                         "BountyDepositPayoutDelay",
                         [
@@ -25846,9 +25957,10 @@ pub mod api {
                 #[doc = " Bounty duration in blocks."]
                 pub fn bounty_update_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Bounties",
                         "BountyUpdatePeriod",
                         [
@@ -25865,10 +25977,10 @@ pub mod api {
                 #[doc = " `CuratorDepositMin`."]
                 pub fn curator_deposit_multiplier(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::sp_arithmetic::per_things::Permill,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Bounties",
                         "CuratorDepositMultiplier",
                         [
@@ -25881,10 +25993,10 @@ pub mod api {
                 #[doc = " Maximum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn curator_deposit_max(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     ::core::option::Option<::core::primitive::u128>,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Bounties",
                         "CuratorDepositMax",
                         [
@@ -25898,10 +26010,10 @@ pub mod api {
                 #[doc = " Minimum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn curator_deposit_min(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     ::core::option::Option<::core::primitive::u128>,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Bounties",
                         "CuratorDepositMin",
                         [
@@ -25915,9 +26027,10 @@ pub mod api {
                 #[doc = " Minimum value for a bounty."]
                 pub fn bounty_value_minimum(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Bounties",
                         "BountyValueMinimum",
                         [
@@ -25930,9 +26043,10 @@ pub mod api {
                 #[doc = " The amount held on deposit per byte within the tip report reason or bounty description."]
                 pub fn data_deposit_per_byte(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Bounties",
                         "DataDepositPerByte",
                         [
@@ -25947,9 +26061,10 @@ pub mod api {
                 #[doc = " Benchmarks depend on this value, be sure to update weights file when changing this value"]
                 pub fn maximum_reason_length(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Bounties",
                         "MaximumReasonLength",
                         [
@@ -26211,9 +26326,9 @@ pub mod api {
                     parent_bounty_id: types::add_child_bounty::ParentBountyId,
                     value: types::add_child_bounty::Value,
                     description: types::add_child_bounty::Description,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AddChildBounty>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AddChildBounty>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ChildBounties",
                         "add_child_bounty",
                         types::AddChildBounty {
@@ -26236,9 +26351,9 @@ pub mod api {
                     child_bounty_id: types::propose_curator::ChildBountyId,
                     curator: types::propose_curator::Curator,
                     fee: types::propose_curator::Fee,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ProposeCurator>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ProposeCurator>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ChildBounties",
                         "propose_curator",
                         types::ProposeCurator {
@@ -26259,9 +26374,9 @@ pub mod api {
                     &self,
                     parent_bounty_id: types::accept_curator::ParentBountyId,
                     child_bounty_id: types::accept_curator::ChildBountyId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AcceptCurator>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AcceptCurator>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ChildBounties",
                         "accept_curator",
                         types::AcceptCurator {
@@ -26281,9 +26396,9 @@ pub mod api {
                     &self,
                     parent_bounty_id: types::unassign_curator::ParentBountyId,
                     child_bounty_id: types::unassign_curator::ChildBountyId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::UnassignCurator>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::UnassignCurator>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ChildBounties",
                         "unassign_curator",
                         types::UnassignCurator {
@@ -26304,9 +26419,9 @@ pub mod api {
                     parent_bounty_id: types::award_child_bounty::ParentBountyId,
                     child_bounty_id: types::award_child_bounty::ChildBountyId,
                     beneficiary: types::award_child_bounty::Beneficiary,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AwardChildBounty>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AwardChildBounty>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ChildBounties",
                         "award_child_bounty",
                         types::AwardChildBounty {
@@ -26326,9 +26441,9 @@ pub mod api {
                     &self,
                     parent_bounty_id: types::claim_child_bounty::ParentBountyId,
                     child_bounty_id: types::claim_child_bounty::ChildBountyId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ClaimChildBounty>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ClaimChildBounty>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ChildBounties",
                         "claim_child_bounty",
                         types::ClaimChildBounty {
@@ -26347,9 +26462,9 @@ pub mod api {
                     &self,
                     parent_bounty_id: types::close_child_bounty::ParentBountyId,
                     child_bounty_id: types::close_child_bounty::ChildBountyId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CloseChildBounty>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CloseChildBounty>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ChildBounties",
                         "close_child_bounty",
                         types::CloseChildBounty {
@@ -26514,14 +26629,14 @@ pub mod api {
                 #[doc = " Number of total child bounties."]
                 pub fn child_bounty_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::child_bounty_count::ChildBountyCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ChildBounties",
                         "ChildBountyCount",
                         (),
@@ -26536,14 +26651,14 @@ pub mod api {
                 #[doc = " Map of parent bounty index to number of child bounties."]
                 pub fn parent_child_bounties_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::parent_child_bounties::ParentChildBounties,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ChildBounties",
                         "ParentChildBounties",
                         (),
@@ -26559,7 +26674,7 @@ pub mod api {
                 pub fn parent_child_bounties(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::parent_child_bounties::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::parent_child_bounties::Param0,
                     >,
@@ -26568,7 +26683,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ChildBounties",
                         "ParentChildBounties",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -26584,14 +26699,14 @@ pub mod api {
                 #[doc = " Child bounties that have been added."]
                 pub fn child_bounties_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::child_bounties::ChildBounties,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ChildBounties",
                         "ChildBounties",
                         (),
@@ -26607,7 +26722,7 @@ pub mod api {
                 pub fn child_bounties_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::child_bounties::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::child_bounties::Param0,
                     >,
@@ -26616,7 +26731,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ChildBounties",
                         "ChildBounties",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -26635,7 +26750,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::child_bounties::Param0>,
                     _1: impl ::core::borrow::Borrow<types::child_bounties::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::child_bounties::Param0,
@@ -26649,7 +26764,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ChildBounties",
                         "ChildBounties",
                         (
@@ -26671,14 +26786,14 @@ pub mod api {
                 #[doc = " The description of each child-bounty."]
                 pub fn child_bounty_descriptions_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::child_bounty_descriptions::ChildBountyDescriptions,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ChildBounties",
                         "ChildBountyDescriptions",
                         (),
@@ -26693,7 +26808,7 @@ pub mod api {
                 pub fn child_bounty_descriptions(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::child_bounty_descriptions::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::child_bounty_descriptions::Param0,
                     >,
@@ -26702,7 +26817,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ChildBounties",
                         "ChildBountyDescriptions",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -26718,14 +26833,14 @@ pub mod api {
                 #[doc = " The cumulative child-bounty curator fee for each parent bounty."]
                 pub fn children_curator_fees_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::children_curator_fees::ChildrenCuratorFees,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ChildBounties",
                         "ChildrenCuratorFees",
                         (),
@@ -26740,7 +26855,7 @@ pub mod api {
                 pub fn children_curator_fees(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::children_curator_fees::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::children_curator_fees::Param0,
                     >,
@@ -26749,7 +26864,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ChildBounties",
                         "ChildrenCuratorFees",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -26771,9 +26886,10 @@ pub mod api {
                 #[doc = " Maximum number of child bounties that can be added to a parent bounty."]
                 pub fn max_active_child_bounty_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "ChildBounties",
                         "MaxActiveChildBountyCount",
                         [
@@ -26787,9 +26903,10 @@ pub mod api {
                 #[doc = " Minimum value for a child-bounty."]
                 pub fn child_bounty_value_minimum(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "ChildBounties",
                         "ChildBountyValueMinimum",
                         [
@@ -27013,9 +27130,9 @@ pub mod api {
                     &self,
                     amount: types::place_bid::Amount,
                     duration: types::place_bid::Duration,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::PlaceBid>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PlaceBid>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Nis",
                         "place_bid",
                         types::PlaceBid { amount, duration },
@@ -27032,9 +27149,9 @@ pub mod api {
                     &self,
                     amount: types::retract_bid::Amount,
                     duration: types::retract_bid::Duration,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RetractBid>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RetractBid>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Nis",
                         "retract_bid",
                         types::RetractBid { amount, duration },
@@ -27048,9 +27165,9 @@ pub mod api {
                 #[doc = "See [`Pallet::fund_deficit`]."]
                 pub fn fund_deficit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::FundDeficit>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::FundDeficit>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Nis",
                         "fund_deficit",
                         types::FundDeficit {},
@@ -27067,9 +27184,9 @@ pub mod api {
                     &self,
                     index: types::thaw_private::Index,
                     maybe_proportion: types::thaw_private::MaybeProportion,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ThawPrivate>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ThawPrivate>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Nis",
                         "thaw_private",
                         types::ThawPrivate {
@@ -27087,9 +27204,9 @@ pub mod api {
                 pub fn thaw_communal(
                     &self,
                     index: types::thaw_communal::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ThawCommunal>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ThawCommunal>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Nis",
                         "thaw_communal",
                         types::ThawCommunal { index },
@@ -27105,9 +27222,9 @@ pub mod api {
                 pub fn communify(
                     &self,
                     index: types::communify::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Communify>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Communify>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Nis",
                         "communify",
                         types::Communify { index },
@@ -27123,9 +27240,9 @@ pub mod api {
                 pub fn privatize(
                     &self,
                     index: types::privatize::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Privatize>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Privatize>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Nis",
                         "privatize",
                         types::Privatize { index },
@@ -27378,14 +27495,14 @@ pub mod api {
                 #[doc = " whose duration is one `Period` would be storage `0`."]
                 pub fn queue_totals(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::queue_totals::QueueTotals,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Nis",
                         "QueueTotals",
                         (),
@@ -27399,14 +27516,14 @@ pub mod api {
                 #[doc = " The queues of bids. Indexed by duration (in `Period`s)."]
                 pub fn queues_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::queues::Queues,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Nis",
                         "Queues",
                         (),
@@ -27422,7 +27539,7 @@ pub mod api {
                 pub fn queues(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::queues::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::queues::Param0,
                     >,
@@ -27431,7 +27548,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Nis",
                         "Queues",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -27448,14 +27565,14 @@ pub mod api {
                 #[doc = " Summary information over the general state."]
                 pub fn summary(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::summary::Summary,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Nis",
                         "Summary",
                         (),
@@ -27470,14 +27587,14 @@ pub mod api {
                 #[doc = " The currently outstanding receipts, indexed according to the order of creation."]
                 pub fn receipts_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::receipts::Receipts,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Nis",
                         "Receipts",
                         (),
@@ -27492,7 +27609,7 @@ pub mod api {
                 pub fn receipts(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::receipts::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::receipts::Param0,
                     >,
@@ -27501,7 +27618,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Nis",
                         "Receipts",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -27523,10 +27640,10 @@ pub mod api {
                 #[doc = " The treasury's pallet id, used for deriving its sovereign account ID."]
                 pub fn pallet_id(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::frame_support::PalletId,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Nis",
                         "PalletId",
                         [
@@ -27540,9 +27657,10 @@ pub mod api {
                 #[doc = " this value multiplied by `Period`."]
                 pub fn queue_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Nis",
                         "QueueCount",
                         [
@@ -27558,9 +27676,10 @@ pub mod api {
                 #[doc = " Must be larger than zero."]
                 pub fn max_queue_len(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Nis",
                         "MaxQueueLen",
                         [
@@ -27576,9 +27695,10 @@ pub mod api {
                 #[doc = " Must be no greater than `MaxQueueLen`."]
                 pub fn fifo_queue_len(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Nis",
                         "FifoQueueLen",
                         [
@@ -27593,9 +27713,10 @@ pub mod api {
                 #[doc = " supported freezing durations that can be bid upon."]
                 pub fn base_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Nis",
                         "BasePeriod",
                         [
@@ -27614,9 +27735,10 @@ pub mod api {
                 #[doc = " or queue-filling attack."]
                 pub fn min_bid(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Nis",
                         "MinBid",
                         [
@@ -27630,10 +27752,10 @@ pub mod api {
                 #[doc = " receipt."]
                 pub fn min_receipt(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::sp_arithmetic::per_things::Perquintill,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Nis",
                         "MinReceipt",
                         [
@@ -27650,9 +27772,10 @@ pub mod api {
                 #[doc = " the target."]
                 pub fn intake_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Nis",
                         "IntakePeriod",
                         [
@@ -27668,10 +27791,10 @@ pub mod api {
                 #[doc = " glut of bids."]
                 pub fn max_intake_weight(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::sp_weights::weight_v2::Weight,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Nis",
                         "MaxIntakeWeight",
                         [
@@ -27685,11 +27808,11 @@ pub mod api {
                 #[doc = " The maximum proportion which may be thawed and the period over which it is reset."]
                 pub fn thaw_throttle(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<(
                     runtime_types::sp_arithmetic::per_things::Perquintill,
                     ::core::primitive::u32,
                 )> {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Nis",
                         "ThawThrottle",
                         [
@@ -27947,9 +28070,9 @@ pub mod api {
                     &self,
                     dest: types::transfer_allow_death::Dest,
                     value: types::transfer_allow_death::Value,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::TransferAllowDeath>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::TransferAllowDeath>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "NisCounterpartBalances",
                         "transfer_allow_death",
                         types::TransferAllowDeath { dest, value },
@@ -27967,9 +28090,9 @@ pub mod api {
                     source: types::force_transfer::Source,
                     dest: types::force_transfer::Dest,
                     value: types::force_transfer::Value,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceTransfer>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceTransfer>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "NisCounterpartBalances",
                         "force_transfer",
                         types::ForceTransfer {
@@ -27989,9 +28112,9 @@ pub mod api {
                     &self,
                     dest: types::transfer_keep_alive::Dest,
                     value: types::transfer_keep_alive::Value,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::TransferKeepAlive>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::TransferKeepAlive>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "NisCounterpartBalances",
                         "transfer_keep_alive",
                         types::TransferKeepAlive { dest, value },
@@ -28007,9 +28130,9 @@ pub mod api {
                     &self,
                     dest: types::transfer_all::Dest,
                     keep_alive: types::transfer_all::KeepAlive,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::TransferAll>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::TransferAll>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "NisCounterpartBalances",
                         "transfer_all",
                         types::TransferAll { dest, keep_alive },
@@ -28025,9 +28148,9 @@ pub mod api {
                     &self,
                     who: types::force_unreserve::Who,
                     amount: types::force_unreserve::Amount,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceUnreserve>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceUnreserve>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "NisCounterpartBalances",
                         "force_unreserve",
                         types::ForceUnreserve { who, amount },
@@ -28043,9 +28166,9 @@ pub mod api {
                 pub fn upgrade_accounts(
                     &self,
                     who: types::upgrade_accounts::Who,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::UpgradeAccounts>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::UpgradeAccounts>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "NisCounterpartBalances",
                         "upgrade_accounts",
                         types::UpgradeAccounts { who },
@@ -28061,9 +28184,9 @@ pub mod api {
                     &self,
                     who: types::force_set_balance::Who,
                     new_free: types::force_set_balance::NewFree,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceSetBalance>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceSetBalance>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "NisCounterpartBalances",
                         "force_set_balance",
                         types::ForceSetBalance { who, new_free },
@@ -28654,14 +28777,14 @@ pub mod api {
                 #[doc = " The total units issued in the system."]
                 pub fn total_issuance(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::total_issuance::TotalIssuance,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "TotalIssuance",
                         (),
@@ -28676,14 +28799,14 @@ pub mod api {
                 #[doc = " The total units of outstanding deactivated balance in the system."]
                 pub fn inactive_issuance(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::inactive_issuance::InactiveIssuance,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "InactiveIssuance",
                         (),
@@ -28720,14 +28843,14 @@ pub mod api {
                 #[doc = " NOTE: This is only used in the case that this pallet is used to store balances."]
                 pub fn account_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::account::Account,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "Account",
                         (),
@@ -28765,7 +28888,7 @@ pub mod api {
                 pub fn account(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::account::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::account::Param0,
                     >,
@@ -28774,7 +28897,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "Account",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -28791,14 +28914,14 @@ pub mod api {
                 #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]
                 pub fn locks_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::locks::Locks,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "Locks",
                         (),
@@ -28814,7 +28937,7 @@ pub mod api {
                 pub fn locks(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::locks::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::locks::Param0,
                     >,
@@ -28823,7 +28946,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "Locks",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -28839,14 +28962,14 @@ pub mod api {
                 #[doc = " Named reserves on some account balances."]
                 pub fn reserves_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::reserves::Reserves,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "Reserves",
                         (),
@@ -28861,7 +28984,7 @@ pub mod api {
                 pub fn reserves(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::reserves::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::reserves::Param0,
                     >,
@@ -28870,7 +28993,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "Reserves",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -28886,14 +29009,14 @@ pub mod api {
                 #[doc = " Holds on account balances."]
                 pub fn holds_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::holds::Holds,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "Holds",
                         (),
@@ -28909,7 +29032,7 @@ pub mod api {
                 pub fn holds(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::holds::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::holds::Param0,
                     >,
@@ -28918,7 +29041,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "Holds",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -28935,14 +29058,14 @@ pub mod api {
                 #[doc = " Freeze locks on account balances."]
                 pub fn freezes_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::freezes::Freezes,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "Freezes",
                         (),
@@ -28957,7 +29080,7 @@ pub mod api {
                 pub fn freezes(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::freezes::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::freezes::Param0,
                     >,
@@ -28966,7 +29089,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "Freezes",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -28995,9 +29118,10 @@ pub mod api {
                 #[doc = " Bottom line: Do yourself a favour and make it at least one!"]
                 pub fn existential_deposit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "ExistentialDeposit",
                         [
@@ -29011,9 +29135,10 @@ pub mod api {
                 #[doc = " Not strictly enforced, but used for weight estimation."]
                 pub fn max_locks(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "MaxLocks",
                         [
@@ -29027,9 +29152,10 @@ pub mod api {
                 #[doc = " The maximum number of named reserves that can exist on an account."]
                 pub fn max_reserves(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "MaxReserves",
                         [
@@ -29043,9 +29169,10 @@ pub mod api {
                 #[doc = " The maximum number of holds that can exist on an account at any time."]
                 pub fn max_holds(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "MaxHolds",
                         [
@@ -29059,9 +29186,10 @@ pub mod api {
                 #[doc = " The maximum number of individual freeze locks that can exist on an account at any time."]
                 pub fn max_freezes(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "MaxFreezes",
                         [
@@ -30273,10 +30401,10 @@ pub mod api {
                 pub fn set_validation_upgrade_cooldown(
                     &self,
                     new: types::set_validation_upgrade_cooldown::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::SetValidationUpgradeCooldown,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_validation_upgrade_cooldown",
                         types::SetValidationUpgradeCooldown { new },
@@ -30292,9 +30420,10 @@ pub mod api {
                 pub fn set_validation_upgrade_delay(
                     &self,
                     new: types::set_validation_upgrade_delay::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetValidationUpgradeDelay>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetValidationUpgradeDelay,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_validation_upgrade_delay",
                         types::SetValidationUpgradeDelay { new },
@@ -30309,9 +30438,10 @@ pub mod api {
                 pub fn set_code_retention_period(
                     &self,
                     new: types::set_code_retention_period::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetCodeRetentionPeriod>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetCodeRetentionPeriod,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_code_retention_period",
                         types::SetCodeRetentionPeriod { new },
@@ -30327,9 +30457,9 @@ pub mod api {
                 pub fn set_max_code_size(
                     &self,
                     new: types::set_max_code_size::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMaxCodeSize>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetMaxCodeSize>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_max_code_size",
                         types::SetMaxCodeSize { new },
@@ -30345,9 +30475,9 @@ pub mod api {
                 pub fn set_max_pov_size(
                     &self,
                     new: types::set_max_pov_size::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMaxPovSize>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetMaxPovSize>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_max_pov_size",
                         types::SetMaxPovSize { new },
@@ -30362,9 +30492,9 @@ pub mod api {
                 pub fn set_max_head_data_size(
                     &self,
                     new: types::set_max_head_data_size::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMaxHeadDataSize>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetMaxHeadDataSize>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_max_head_data_size",
                         types::SetMaxHeadDataSize { new },
@@ -30380,9 +30510,9 @@ pub mod api {
                 pub fn set_on_demand_cores(
                     &self,
                     new: types::set_on_demand_cores::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetOnDemandCores>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetOnDemandCores>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_on_demand_cores",
                         types::SetOnDemandCores { new },
@@ -30398,9 +30528,9 @@ pub mod api {
                 pub fn set_on_demand_retries(
                     &self,
                     new: types::set_on_demand_retries::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetOnDemandRetries>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetOnDemandRetries>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_on_demand_retries",
                         types::SetOnDemandRetries { new },
@@ -30416,9 +30546,10 @@ pub mod api {
                 pub fn set_group_rotation_frequency(
                     &self,
                     new: types::set_group_rotation_frequency::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetGroupRotationFrequency>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetGroupRotationFrequency,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_group_rotation_frequency",
                         types::SetGroupRotationFrequency { new },
@@ -30433,9 +30564,10 @@ pub mod api {
                 pub fn set_paras_availability_period(
                     &self,
                     new: types::set_paras_availability_period::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetParasAvailabilityPeriod>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetParasAvailabilityPeriod,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_paras_availability_period",
                         types::SetParasAvailabilityPeriod { new },
@@ -30450,9 +30582,10 @@ pub mod api {
                 pub fn set_scheduling_lookahead(
                     &self,
                     new: types::set_scheduling_lookahead::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetSchedulingLookahead>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetSchedulingLookahead,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_scheduling_lookahead",
                         types::SetSchedulingLookahead { new },
@@ -30468,9 +30601,10 @@ pub mod api {
                 pub fn set_max_validators_per_core(
                     &self,
                     new: types::set_max_validators_per_core::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMaxValidatorsPerCore>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetMaxValidatorsPerCore,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_max_validators_per_core",
                         types::SetMaxValidatorsPerCore { new },
@@ -30486,9 +30620,9 @@ pub mod api {
                 pub fn set_max_validators(
                     &self,
                     new: types::set_max_validators::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMaxValidators>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetMaxValidators>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_max_validators",
                         types::SetMaxValidators { new },
@@ -30504,9 +30638,9 @@ pub mod api {
                 pub fn set_dispute_period(
                     &self,
                     new: types::set_dispute_period::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetDisputePeriod>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetDisputePeriod>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_dispute_period",
                         types::SetDisputePeriod { new },
@@ -30522,10 +30656,10 @@ pub mod api {
                 pub fn set_dispute_post_conclusion_acceptance_period(
                     &self,
                     new: types::set_dispute_post_conclusion_acceptance_period::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::SetDisputePostConclusionAcceptancePeriod,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_dispute_post_conclusion_acceptance_period",
                         types::SetDisputePostConclusionAcceptancePeriod { new },
@@ -30541,9 +30675,9 @@ pub mod api {
                 pub fn set_no_show_slots(
                     &self,
                     new: types::set_no_show_slots::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetNoShowSlots>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetNoShowSlots>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_no_show_slots",
                         types::SetNoShowSlots { new },
@@ -30558,9 +30692,9 @@ pub mod api {
                 pub fn set_n_delay_tranches(
                     &self,
                     new: types::set_n_delay_tranches::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetNDelayTranches>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetNDelayTranches>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_n_delay_tranches",
                         types::SetNDelayTranches { new },
@@ -30576,9 +30710,10 @@ pub mod api {
                 pub fn set_zeroth_delay_tranche_width(
                     &self,
                     new: types::set_zeroth_delay_tranche_width::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetZerothDelayTrancheWidth>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetZerothDelayTrancheWidth,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_zeroth_delay_tranche_width",
                         types::SetZerothDelayTrancheWidth { new },
@@ -30593,9 +30728,9 @@ pub mod api {
                 pub fn set_needed_approvals(
                     &self,
                     new: types::set_needed_approvals::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetNeededApprovals>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetNeededApprovals>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_needed_approvals",
                         types::SetNeededApprovals { new },
@@ -30610,9 +30745,10 @@ pub mod api {
                 pub fn set_relay_vrf_modulo_samples(
                     &self,
                     new: types::set_relay_vrf_modulo_samples::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetRelayVrfModuloSamples>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetRelayVrfModuloSamples,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_relay_vrf_modulo_samples",
                         types::SetRelayVrfModuloSamples { new },
@@ -30628,9 +30764,10 @@ pub mod api {
                 pub fn set_max_upward_queue_count(
                     &self,
                     new: types::set_max_upward_queue_count::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMaxUpwardQueueCount>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetMaxUpwardQueueCount,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_max_upward_queue_count",
                         types::SetMaxUpwardQueueCount { new },
@@ -30646,9 +30783,10 @@ pub mod api {
                 pub fn set_max_upward_queue_size(
                     &self,
                     new: types::set_max_upward_queue_size::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMaxUpwardQueueSize>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetMaxUpwardQueueSize,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_max_upward_queue_size",
                         types::SetMaxUpwardQueueSize { new },
@@ -30664,9 +30802,10 @@ pub mod api {
                 pub fn set_max_downward_message_size(
                     &self,
                     new: types::set_max_downward_message_size::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMaxDownwardMessageSize>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetMaxDownwardMessageSize,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_max_downward_message_size",
                         types::SetMaxDownwardMessageSize { new },
@@ -30681,9 +30820,10 @@ pub mod api {
                 pub fn set_max_upward_message_size(
                     &self,
                     new: types::set_max_upward_message_size::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMaxUpwardMessageSize>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetMaxUpwardMessageSize,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_max_upward_message_size",
                         types::SetMaxUpwardMessageSize { new },
@@ -30699,10 +30839,10 @@ pub mod api {
                 pub fn set_max_upward_message_num_per_candidate(
                     &self,
                     new: types::set_max_upward_message_num_per_candidate::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::SetMaxUpwardMessageNumPerCandidate,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_max_upward_message_num_per_candidate",
                         types::SetMaxUpwardMessageNumPerCandidate { new },
@@ -30717,9 +30857,10 @@ pub mod api {
                 pub fn set_hrmp_open_request_ttl(
                     &self,
                     new: types::set_hrmp_open_request_ttl::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetHrmpOpenRequestTtl>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetHrmpOpenRequestTtl,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_hrmp_open_request_ttl",
                         types::SetHrmpOpenRequestTtl { new },
@@ -30734,9 +30875,9 @@ pub mod api {
                 pub fn set_hrmp_sender_deposit(
                     &self,
                     new: types::set_hrmp_sender_deposit::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetHrmpSenderDeposit>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetHrmpSenderDeposit>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_hrmp_sender_deposit",
                         types::SetHrmpSenderDeposit { new },
@@ -30751,9 +30892,10 @@ pub mod api {
                 pub fn set_hrmp_recipient_deposit(
                     &self,
                     new: types::set_hrmp_recipient_deposit::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetHrmpRecipientDeposit>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetHrmpRecipientDeposit,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_hrmp_recipient_deposit",
                         types::SetHrmpRecipientDeposit { new },
@@ -30769,9 +30911,10 @@ pub mod api {
                 pub fn set_hrmp_channel_max_capacity(
                     &self,
                     new: types::set_hrmp_channel_max_capacity::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetHrmpChannelMaxCapacity>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetHrmpChannelMaxCapacity,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_hrmp_channel_max_capacity",
                         types::SetHrmpChannelMaxCapacity { new },
@@ -30787,9 +30930,10 @@ pub mod api {
                 pub fn set_hrmp_channel_max_total_size(
                     &self,
                     new: types::set_hrmp_channel_max_total_size::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetHrmpChannelMaxTotalSize>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetHrmpChannelMaxTotalSize,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_hrmp_channel_max_total_size",
                         types::SetHrmpChannelMaxTotalSize { new },
@@ -30804,10 +30948,10 @@ pub mod api {
                 pub fn set_hrmp_max_parachain_inbound_channels(
                     &self,
                     new: types::set_hrmp_max_parachain_inbound_channels::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::SetHrmpMaxParachainInboundChannels,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_hrmp_max_parachain_inbound_channels",
                         types::SetHrmpMaxParachainInboundChannels { new },
@@ -30822,10 +30966,10 @@ pub mod api {
                 pub fn set_hrmp_channel_max_message_size(
                     &self,
                     new: types::set_hrmp_channel_max_message_size::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::SetHrmpChannelMaxMessageSize,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_hrmp_channel_max_message_size",
                         types::SetHrmpChannelMaxMessageSize { new },
@@ -30841,10 +30985,10 @@ pub mod api {
                 pub fn set_hrmp_max_parachain_outbound_channels(
                     &self,
                     new: types::set_hrmp_max_parachain_outbound_channels::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::SetHrmpMaxParachainOutboundChannels,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_hrmp_max_parachain_outbound_channels",
                         types::SetHrmpMaxParachainOutboundChannels { new },
@@ -30859,10 +31003,10 @@ pub mod api {
                 pub fn set_hrmp_max_message_num_per_candidate(
                     &self,
                     new: types::set_hrmp_max_message_num_per_candidate::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::SetHrmpMaxMessageNumPerCandidate,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_hrmp_max_message_num_per_candidate",
                         types::SetHrmpMaxMessageNumPerCandidate { new },
@@ -30877,9 +31021,9 @@ pub mod api {
                 pub fn set_pvf_voting_ttl(
                     &self,
                     new: types::set_pvf_voting_ttl::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetPvfVotingTtl>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetPvfVotingTtl>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_pvf_voting_ttl",
                         types::SetPvfVotingTtl { new },
@@ -30895,10 +31039,10 @@ pub mod api {
                 pub fn set_minimum_validation_upgrade_delay(
                     &self,
                     new: types::set_minimum_validation_upgrade_delay::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::SetMinimumValidationUpgradeDelay,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_minimum_validation_upgrade_delay",
                         types::SetMinimumValidationUpgradeDelay { new },
@@ -30914,9 +31058,10 @@ pub mod api {
                 pub fn set_bypass_consistency_check(
                     &self,
                     new: types::set_bypass_consistency_check::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetBypassConsistencyCheck>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetBypassConsistencyCheck,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_bypass_consistency_check",
                         types::SetBypassConsistencyCheck { new },
@@ -30932,9 +31077,10 @@ pub mod api {
                 pub fn set_async_backing_params(
                     &self,
                     new: types::set_async_backing_params::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetAsyncBackingParams>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetAsyncBackingParams,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_async_backing_params",
                         types::SetAsyncBackingParams { new },
@@ -30950,9 +31096,9 @@ pub mod api {
                 pub fn set_executor_params(
                     &self,
                     new: types::set_executor_params::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetExecutorParams>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetExecutorParams>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_executor_params",
                         types::SetExecutorParams { new },
@@ -30967,9 +31113,9 @@ pub mod api {
                 pub fn set_on_demand_base_fee(
                     &self,
                     new: types::set_on_demand_base_fee::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetOnDemandBaseFee>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetOnDemandBaseFee>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_on_demand_base_fee",
                         types::SetOnDemandBaseFee { new },
@@ -30984,9 +31130,10 @@ pub mod api {
                 pub fn set_on_demand_fee_variability(
                     &self,
                     new: types::set_on_demand_fee_variability::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetOnDemandFeeVariability>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetOnDemandFeeVariability,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_on_demand_fee_variability",
                         types::SetOnDemandFeeVariability { new },
@@ -31002,9 +31149,10 @@ pub mod api {
                 pub fn set_on_demand_queue_max_size(
                     &self,
                     new: types::set_on_demand_queue_max_size::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetOnDemandQueueMaxSize>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetOnDemandQueueMaxSize,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_on_demand_queue_max_size",
                         types::SetOnDemandQueueMaxSize { new },
@@ -31019,10 +31167,10 @@ pub mod api {
                 pub fn set_on_demand_target_queue_utilization(
                     &self,
                     new: types::set_on_demand_target_queue_utilization::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::SetOnDemandTargetQueueUtilization,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_on_demand_target_queue_utilization",
                         types::SetOnDemandTargetQueueUtilization { new },
@@ -31038,9 +31186,9 @@ pub mod api {
                 pub fn set_on_demand_ttl(
                     &self,
                     new: types::set_on_demand_ttl::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetOnDemandTtl>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetOnDemandTtl>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_on_demand_ttl",
                         types::SetOnDemandTtl { new },
@@ -31056,9 +31204,10 @@ pub mod api {
                 pub fn set_minimum_backing_votes(
                     &self,
                     new: types::set_minimum_backing_votes::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMinimumBackingVotes>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SetMinimumBackingVotes,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Configuration",
                         "set_minimum_backing_votes",
                         types::SetMinimumBackingVotes { new },
@@ -31093,14 +31242,14 @@ pub mod api {
                 #[doc = " The active configuration for the current session."]
                 pub fn active_config(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::active_config::ActiveConfig,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Configuration",
                         "ActiveConfig",
                         (),
@@ -31121,14 +31270,14 @@ pub mod api {
                 #[doc = " 2 items: for the next session and for the `scheduled_session`."]
                 pub fn pending_configs(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::pending_configs::PendingConfigs,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Configuration",
                         "PendingConfigs",
                         (),
@@ -31144,14 +31293,14 @@ pub mod api {
                 #[doc = " is meant to be used only as the last resort."]
                 pub fn bypass_consistency_check(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::bypass_consistency_check::BypassConsistencyCheck,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Configuration",
                         "BypassConsistencyCheck",
                         (),
@@ -31211,14 +31360,14 @@ pub mod api {
                 #[doc = " The current session index."]
                 pub fn current_session_index(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::current_session_index::CurrentSessionIndex,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasShared",
                         "CurrentSessionIndex",
                         (),
@@ -31234,14 +31383,14 @@ pub mod api {
                 #[doc = " Indices are into the broader validator set."]
                 pub fn active_validator_indices(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::active_validator_indices::ActiveValidatorIndices,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasShared",
                         "ActiveValidatorIndices",
                         (),
@@ -31256,14 +31405,14 @@ pub mod api {
                 #[doc = " consensus. This should be the same length as `ActiveValidatorIndices`."]
                 pub fn active_validator_keys(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::active_validator_keys::ActiveValidatorKeys,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasShared",
                         "ActiveValidatorKeys",
                         (),
@@ -31278,14 +31427,14 @@ pub mod api {
                 #[doc = " All allowed relay-parents."]
                 pub fn allowed_relay_parents(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::allowed_relay_parents::AllowedRelayParents,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasShared",
                         "AllowedRelayParents",
                         (),
@@ -31465,14 +31614,14 @@ pub mod api {
                 #[doc = " The latest bitfield for each validator, referred to by their index in the validator set."]
                 pub fn availability_bitfields_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::availability_bitfields::AvailabilityBitfields,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaInclusion",
                         "AvailabilityBitfields",
                         (),
@@ -31487,7 +31636,7 @@ pub mod api {
                 pub fn availability_bitfields(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::availability_bitfields::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::availability_bitfields::Param0,
                     >,
@@ -31496,7 +31645,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaInclusion",
                         "AvailabilityBitfields",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -31512,14 +31661,14 @@ pub mod api {
                 #[doc = " Candidates pending availability by `ParaId`."]
                 pub fn pending_availability_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::pending_availability::PendingAvailability,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaInclusion",
                         "PendingAvailability",
                         (),
@@ -31534,7 +31683,7 @@ pub mod api {
                 pub fn pending_availability(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::pending_availability::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::pending_availability::Param0,
                     >,
@@ -31543,7 +31692,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaInclusion",
                         "PendingAvailability",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -31559,14 +31708,14 @@ pub mod api {
                 #[doc = " The commitments of candidates pending availability, by `ParaId`."]
                 pub fn pending_availability_commitments_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::pending_availability_commitments::PendingAvailabilityCommitments,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaInclusion",
                         "PendingAvailabilityCommitments",
                         (),
@@ -31581,7 +31730,7 @@ pub mod api {
                 pub fn pending_availability_commitments(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::pending_availability_commitments::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::pending_availability_commitments::Param0,
                     >,
@@ -31590,7 +31739,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaInclusion",
                         "PendingAvailabilityCommitments",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -31654,8 +31803,9 @@ pub mod api {
                 pub fn enter(
                     &self,
                     data: types::enter::Data,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Enter> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Enter>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ParaInherent",
                         "enter",
                         types::Enter { data },
@@ -31694,14 +31844,14 @@ pub mod api {
                 #[doc = " If this is `None` at the end of the block, we panic and render the block invalid."]
                 pub fn included(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::included::Included,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaInherent",
                         "Included",
                         (),
@@ -31715,14 +31865,14 @@ pub mod api {
                 #[doc = " Scraped on chain data for extracting resolved disputes as well as backing votes."]
                 pub fn on_chain_votes(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::on_chain_votes::OnChainVotes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaInherent",
                         "OnChainVotes",
                         (),
@@ -31780,14 +31930,14 @@ pub mod api {
                 #[doc = " upper bound at 10k."]
                 pub fn validator_groups(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::validator_groups::ValidatorGroups,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaScheduler",
                         "ValidatorGroups",
                         (),
@@ -31808,14 +31958,14 @@ pub mod api {
                 #[doc = "   * The number of validators divided by `configuration.max_validators_per_core`."]
                 pub fn availability_cores(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::availability_cores::AvailabilityCores,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaScheduler",
                         "AvailabilityCores",
                         (),
@@ -31835,14 +31985,14 @@ pub mod api {
                 #[doc = " block following the session change, block number of which we save in this storage value."]
                 pub fn session_start_block(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::session_start_block::SessionStartBlock,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaScheduler",
                         "SessionStartBlock",
                         (),
@@ -31860,14 +32010,14 @@ pub mod api {
                 #[doc = " a block. Runtime APIs should be used to determine scheduled cores/ for the upcoming block."]
                 pub fn claim_queue(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::claim_queue::ClaimQueue,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaScheduler",
                         "ClaimQueue",
                         (),
@@ -32156,9 +32306,9 @@ pub mod api {
                     &self,
                     para: types::force_set_current_code::Para,
                     new_code: types::force_set_current_code::NewCode,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceSetCurrentCode>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceSetCurrentCode>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Paras",
                         "force_set_current_code",
                         types::ForceSetCurrentCode { para, new_code },
@@ -32175,9 +32325,9 @@ pub mod api {
                     &self,
                     para: types::force_set_current_head::Para,
                     new_head: types::force_set_current_head::NewHead,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceSetCurrentHead>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceSetCurrentHead>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Paras",
                         "force_set_current_head",
                         types::ForceSetCurrentHead { para, new_head },
@@ -32195,9 +32345,10 @@ pub mod api {
                     para: types::force_schedule_code_upgrade::Para,
                     new_code: types::force_schedule_code_upgrade::NewCode,
                     relay_parent_number: types::force_schedule_code_upgrade::RelayParentNumber,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceScheduleCodeUpgrade>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::ForceScheduleCodeUpgrade,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Paras",
                         "force_schedule_code_upgrade",
                         types::ForceScheduleCodeUpgrade {
@@ -32218,9 +32369,9 @@ pub mod api {
                     &self,
                     para: types::force_note_new_head::Para,
                     new_head: types::force_note_new_head::NewHead,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceNoteNewHead>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceNoteNewHead>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Paras",
                         "force_note_new_head",
                         types::ForceNoteNewHead { para, new_head },
@@ -32235,9 +32386,9 @@ pub mod api {
                 pub fn force_queue_action(
                     &self,
                     para: types::force_queue_action::Para,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceQueueAction>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceQueueAction>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Paras",
                         "force_queue_action",
                         types::ForceQueueAction { para },
@@ -32253,9 +32404,10 @@ pub mod api {
                 pub fn add_trusted_validation_code(
                     &self,
                     validation_code: types::add_trusted_validation_code::ValidationCode,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AddTrustedValidationCode>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::AddTrustedValidationCode,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Paras",
                         "add_trusted_validation_code",
                         types::AddTrustedValidationCode { validation_code },
@@ -32271,9 +32423,10 @@ pub mod api {
                 pub fn poke_unused_validation_code(
                     &self,
                     validation_code_hash: types::poke_unused_validation_code::ValidationCodeHash,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::PokeUnusedValidationCode>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::PokeUnusedValidationCode,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Paras",
                         "poke_unused_validation_code",
                         types::PokeUnusedValidationCode {
@@ -32291,9 +32444,10 @@ pub mod api {
                     &self,
                     stmt: types::include_pvf_check_statement::Stmt,
                     signature: types::include_pvf_check_statement::Signature,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::IncludePvfCheckStatement>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::IncludePvfCheckStatement,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Paras",
                         "include_pvf_check_statement",
                         types::IncludePvfCheckStatement { stmt, signature },
@@ -32310,9 +32464,10 @@ pub mod api {
                     &self,
                     para: types::force_set_most_recent_context::Para,
                     context: types::force_set_most_recent_context::Context,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceSetMostRecentContext>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::ForceSetMostRecentContext,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Paras",
                         "force_set_most_recent_context",
                         types::ForceSetMostRecentContext { para, context },
@@ -32643,14 +32798,14 @@ pub mod api {
                 #[doc = " - There are no PVF pre-checking votes that exists in list but not in the set and vice versa."]
                 pub fn pvf_active_vote_map_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::pvf_active_vote_map::PvfActiveVoteMap,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "PvfActiveVoteMap",
                         (),
@@ -32668,7 +32823,7 @@ pub mod api {
                 pub fn pvf_active_vote_map(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::pvf_active_vote_map::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::pvf_active_vote_map::Param0,
                     >,
@@ -32677,7 +32832,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "PvfActiveVoteMap",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -32693,14 +32848,14 @@ pub mod api {
                 #[doc = " The list of all currently active PVF votes. Auxiliary to `PvfActiveVoteMap`."]
                 pub fn pvf_active_vote_list(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::pvf_active_vote_list::PvfActiveVoteList,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "PvfActiveVoteList",
                         (),
@@ -32717,14 +32872,14 @@ pub mod api {
                 #[doc = " Consider using the [`ParachainsCache`] type of modifying."]
                 pub fn parachains(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::parachains::Parachains,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "Parachains",
                         (),
@@ -32739,14 +32894,14 @@ pub mod api {
                 #[doc = " The current lifecycle of a all known Para IDs."]
                 pub fn para_lifecycles_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::para_lifecycles::ParaLifecycles,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "ParaLifecycles",
                         (),
@@ -32762,7 +32917,7 @@ pub mod api {
                 pub fn para_lifecycles(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::para_lifecycles::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::para_lifecycles::Param0,
                     >,
@@ -32771,7 +32926,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "ParaLifecycles",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -32788,14 +32943,14 @@ pub mod api {
                 #[doc = " The head-data of every registered para."]
                 pub fn heads_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::heads::Heads,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "Heads",
                         (),
@@ -32810,7 +32965,7 @@ pub mod api {
                 pub fn heads(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::heads::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::heads::Param0,
                     >,
@@ -32819,7 +32974,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "Heads",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -32835,14 +32990,14 @@ pub mod api {
                 #[doc = " The context (relay-chain block number) of the most recent parachain head."]
                 pub fn most_recent_context_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::most_recent_context::MostRecentContext,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "MostRecentContext",
                         (),
@@ -32857,7 +33012,7 @@ pub mod api {
                 pub fn most_recent_context(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::most_recent_context::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::most_recent_context::Param0,
                     >,
@@ -32866,7 +33021,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "MostRecentContext",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -32884,14 +33039,14 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn current_code_hash_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::current_code_hash::CurrentCodeHash,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "CurrentCodeHash",
                         (),
@@ -32909,7 +33064,7 @@ pub mod api {
                 pub fn current_code_hash(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::current_code_hash::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::current_code_hash::Param0,
                     >,
@@ -32918,7 +33073,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "CurrentCodeHash",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -32938,14 +33093,14 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn past_code_hash_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::past_code_hash::PastCodeHash,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "PastCodeHash",
                         (),
@@ -32963,7 +33118,7 @@ pub mod api {
                 pub fn past_code_hash_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::past_code_hash::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::past_code_hash::Param0,
                     >,
@@ -32972,7 +33127,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "PastCodeHash",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -32993,7 +33148,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::past_code_hash::Param0>,
                     _1: impl ::core::borrow::Borrow<types::past_code_hash::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::past_code_hash::Param0,
@@ -33007,7 +33162,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "PastCodeHash",
                         (
@@ -33030,14 +33185,14 @@ pub mod api {
                 #[doc = " to keep it available for approval checkers."]
                 pub fn past_code_meta_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::past_code_meta::PastCodeMeta,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "PastCodeMeta",
                         (),
@@ -33054,7 +33209,7 @@ pub mod api {
                 pub fn past_code_meta(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::past_code_meta::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::past_code_meta::Param0,
                     >,
@@ -33063,7 +33218,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "PastCodeMeta",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -33084,14 +33239,14 @@ pub mod api {
                 #[doc = " Multiple entries for a single para are permitted. Ordered ascending by block number."]
                 pub fn past_code_pruning(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::past_code_pruning::PastCodePruning,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "PastCodePruning",
                         (),
@@ -33107,14 +33262,14 @@ pub mod api {
                 #[doc = " in the context of a relay chain block with a number >= `expected_at`."]
                 pub fn future_code_upgrades_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::future_code_upgrades::FutureCodeUpgrades,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "FutureCodeUpgrades",
                         (),
@@ -33131,7 +33286,7 @@ pub mod api {
                 pub fn future_code_upgrades(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::future_code_upgrades::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::future_code_upgrades::Param0,
                     >,
@@ -33140,7 +33295,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "FutureCodeUpgrades",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -33158,14 +33313,14 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn future_code_hash_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::future_code_hash::FutureCodeHash,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "FutureCodeHash",
                         (),
@@ -33182,7 +33337,7 @@ pub mod api {
                 pub fn future_code_hash(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::future_code_hash::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::future_code_hash::Param0,
                     >,
@@ -33191,7 +33346,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "FutureCodeHash",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -33216,14 +33371,14 @@ pub mod api {
                 #[doc = " the format will require migration of parachains."]
                 pub fn upgrade_go_ahead_signal_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::upgrade_go_ahead_signal::UpgradeGoAheadSignal,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "UpgradeGoAheadSignal",
                         (),
@@ -33248,7 +33403,7 @@ pub mod api {
                 pub fn upgrade_go_ahead_signal(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::upgrade_go_ahead_signal::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::upgrade_go_ahead_signal::Param0,
                     >,
@@ -33257,7 +33412,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "UpgradeGoAheadSignal",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -33282,14 +33437,14 @@ pub mod api {
                 #[doc = " the format will require migration of parachains."]
                 pub fn upgrade_restriction_signal_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::upgrade_restriction_signal::UpgradeRestrictionSignal,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "UpgradeRestrictionSignal",
                         (),
@@ -33313,7 +33468,7 @@ pub mod api {
                 pub fn upgrade_restriction_signal(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::upgrade_restriction_signal::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::upgrade_restriction_signal::Param0,
                     >,
@@ -33322,7 +33477,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "UpgradeRestrictionSignal",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -33341,14 +33496,14 @@ pub mod api {
                 #[doc = " Ordered ascending by block number."]
                 pub fn upgrade_cooldowns(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::upgrade_cooldowns::UpgradeCooldowns,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "UpgradeCooldowns",
                         (),
@@ -33366,14 +33521,14 @@ pub mod api {
                 #[doc = " Ordered ascending by block number."]
                 pub fn upcoming_upgrades(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::upcoming_upgrades::UpcomingUpgrades,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "UpcomingUpgrades",
                         (),
@@ -33387,14 +33542,14 @@ pub mod api {
                 #[doc = " The actions to perform during the start of a specific session index."]
                 pub fn actions_queue_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::actions_queue::ActionsQueue,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "ActionsQueue",
                         (),
@@ -33409,7 +33564,7 @@ pub mod api {
                 pub fn actions_queue(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::actions_queue::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::actions_queue::Param0,
                     >,
@@ -33418,7 +33573,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "ActionsQueue",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -33437,14 +33592,14 @@ pub mod api {
                 #[doc = " to empty. Instead, the code will be saved into the storage right away via `CodeByHash`."]
                 pub fn upcoming_paras_genesis_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::upcoming_paras_genesis::UpcomingParasGenesis,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "UpcomingParasGenesis",
                         (),
@@ -33463,7 +33618,7 @@ pub mod api {
                 pub fn upcoming_paras_genesis(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::upcoming_paras_genesis::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::upcoming_paras_genesis::Param0,
                     >,
@@ -33472,7 +33627,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "UpcomingParasGenesis",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -33489,14 +33644,14 @@ pub mod api {
                 #[doc = " The number of reference on the validation code in [`CodeByHash`] storage."]
                 pub fn code_by_hash_refs_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::code_by_hash_refs::CodeByHashRefs,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "CodeByHashRefs",
                         (),
@@ -33512,7 +33667,7 @@ pub mod api {
                 pub fn code_by_hash_refs(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::code_by_hash_refs::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::code_by_hash_refs::Param0,
                     >,
@@ -33521,7 +33676,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "CodeByHashRefs",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -33541,14 +33696,14 @@ pub mod api {
                 #[doc = " [`PastCodeHash`]."]
                 pub fn code_by_hash_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::code_by_hash::CodeByHash,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "CodeByHash",
                         (),
@@ -33566,7 +33721,7 @@ pub mod api {
                 pub fn code_by_hash(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::code_by_hash::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::code_by_hash::Param0,
                     >,
@@ -33575,7 +33730,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "CodeByHash",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -33596,9 +33751,10 @@ pub mod api {
             impl ConstantsApi {
                 pub fn unsigned_priority(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u64>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u64,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Paras",
                         "UnsignedPriority",
                         [
@@ -33656,9 +33812,9 @@ pub mod api {
                 pub fn force_approve(
                     &self,
                     up_to: types::force_approve::UpTo,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceApprove>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceApprove>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Initializer",
                         "force_approve",
                         types::ForceApprove { up_to },
@@ -33697,14 +33853,14 @@ pub mod api {
                 #[doc = " for the semantics of this variable."]
                 pub fn has_initialized(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::has_initialized::HasInitialized,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Initializer",
                         "HasInitialized",
                         (),
@@ -33724,14 +33880,14 @@ pub mod api {
                 #[doc = " upgrade boundaries or if governance intervenes."]
                 pub fn buffered_session_changes(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::buffered_session_changes::BufferedSessionChanges,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Initializer",
                         "BufferedSessionChanges",
                         (),
@@ -33778,14 +33934,14 @@ pub mod api {
                 #[doc = " The downward messages addressed for a certain para."]
                 pub fn downward_message_queues_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::downward_message_queues::DownwardMessageQueues,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Dmp",
                         "DownwardMessageQueues",
                         (),
@@ -33801,7 +33957,7 @@ pub mod api {
                 pub fn downward_message_queues(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::downward_message_queues::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::downward_message_queues::Param0,
                     >,
@@ -33810,7 +33966,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Dmp",
                         "DownwardMessageQueues",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -33833,14 +33989,14 @@ pub mod api {
                 #[doc = " - `H(M)`: is the hash of the message being appended."]
                 pub fn downward_message_queue_heads_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::downward_message_queue_heads::DownwardMessageQueueHeads,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Dmp",
                         "DownwardMessageQueueHeads",
                         (),
@@ -33861,7 +34017,7 @@ pub mod api {
                 pub fn downward_message_queue_heads(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::downward_message_queue_heads::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::downward_message_queue_heads::Param0,
                     >,
@@ -33870,7 +34026,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Dmp",
                         "DownwardMessageQueueHeads",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -33886,14 +34042,14 @@ pub mod api {
                 #[doc = " The factor to multiply the base delivery fee by."]
                 pub fn delivery_fee_factor_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::delivery_fee_factor::DeliveryFeeFactor,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Dmp",
                         "DeliveryFeeFactor",
                         (),
@@ -33908,7 +34064,7 @@ pub mod api {
                 pub fn delivery_fee_factor(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::delivery_fee_factor::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::delivery_fee_factor::Param0,
                     >,
@@ -33917,7 +34073,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Dmp",
                         "DeliveryFeeFactor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -34241,9 +34397,9 @@ pub mod api {
                     recipient: types::hrmp_init_open_channel::Recipient,
                     proposed_max_capacity: types::hrmp_init_open_channel::ProposedMaxCapacity,
                     proposed_max_message_size : types :: hrmp_init_open_channel :: ProposedMaxMessageSize,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::HrmpInitOpenChannel>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::HrmpInitOpenChannel>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Hrmp",
                         "hrmp_init_open_channel",
                         types::HrmpInitOpenChannel {
@@ -34263,9 +34419,10 @@ pub mod api {
                 pub fn hrmp_accept_open_channel(
                     &self,
                     sender: types::hrmp_accept_open_channel::Sender,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::HrmpAcceptOpenChannel>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::HrmpAcceptOpenChannel,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Hrmp",
                         "hrmp_accept_open_channel",
                         types::HrmpAcceptOpenChannel { sender },
@@ -34280,9 +34437,9 @@ pub mod api {
                 pub fn hrmp_close_channel(
                     &self,
                     channel_id: types::hrmp_close_channel::ChannelId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::HrmpCloseChannel>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::HrmpCloseChannel>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Hrmp",
                         "hrmp_close_channel",
                         types::HrmpCloseChannel { channel_id },
@@ -34300,9 +34457,9 @@ pub mod api {
                     para: types::force_clean_hrmp::Para,
                     num_inbound: types::force_clean_hrmp::NumInbound,
                     num_outbound: types::force_clean_hrmp::NumOutbound,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceCleanHrmp>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceCleanHrmp>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Hrmp",
                         "force_clean_hrmp",
                         types::ForceCleanHrmp {
@@ -34321,9 +34478,9 @@ pub mod api {
                 pub fn force_process_hrmp_open(
                     &self,
                     channels: types::force_process_hrmp_open::Channels,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceProcessHrmpOpen>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceProcessHrmpOpen>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Hrmp",
                         "force_process_hrmp_open",
                         types::ForceProcessHrmpOpen { channels },
@@ -34339,9 +34496,10 @@ pub mod api {
                 pub fn force_process_hrmp_close(
                     &self,
                     channels: types::force_process_hrmp_close::Channels,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceProcessHrmpClose>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::ForceProcessHrmpClose,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Hrmp",
                         "force_process_hrmp_close",
                         types::ForceProcessHrmpClose { channels },
@@ -34358,9 +34516,10 @@ pub mod api {
                     &self,
                     channel_id: types::hrmp_cancel_open_request::ChannelId,
                     open_requests: types::hrmp_cancel_open_request::OpenRequests,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::HrmpCancelOpenRequest>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::HrmpCancelOpenRequest,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Hrmp",
                         "hrmp_cancel_open_request",
                         types::HrmpCancelOpenRequest {
@@ -34381,9 +34540,9 @@ pub mod api {
                     recipient: types::force_open_hrmp_channel::Recipient,
                     max_capacity: types::force_open_hrmp_channel::MaxCapacity,
                     max_message_size: types::force_open_hrmp_channel::MaxMessageSize,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceOpenHrmpChannel>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceOpenHrmpChannel>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Hrmp",
                         "force_open_hrmp_channel",
                         types::ForceOpenHrmpChannel {
@@ -34404,9 +34563,10 @@ pub mod api {
                     &self,
                     sender: types::establish_system_channel::Sender,
                     recipient: types::establish_system_channel::Recipient,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::EstablishSystemChannel>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::EstablishSystemChannel,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Hrmp",
                         "establish_system_channel",
                         types::EstablishSystemChannel { sender, recipient },
@@ -34422,9 +34582,9 @@ pub mod api {
                     &self,
                     sender: types::poke_channel_deposits::Sender,
                     recipient: types::poke_channel_deposits::Recipient,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::PokeChannelDeposits>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PokeChannelDeposits>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Hrmp",
                         "poke_channel_deposits",
                         types::PokeChannelDeposits { sender, recipient },
@@ -34722,14 +34882,14 @@ pub mod api {
                 #[doc = " - There are no channels that exists in list but not in the set and vice versa."]
                 pub fn hrmp_open_channel_requests_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_open_channel_requests::HrmpOpenChannelRequests,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpOpenChannelRequests",
                         (),
@@ -34750,7 +34910,7 @@ pub mod api {
                 pub fn hrmp_open_channel_requests(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::hrmp_open_channel_requests::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::hrmp_open_channel_requests::Param0,
                     >,
@@ -34759,7 +34919,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpOpenChannelRequests",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -34775,14 +34935,14 @@ pub mod api {
                 }
                 pub fn hrmp_open_channel_requests_list(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_open_channel_requests_list::HrmpOpenChannelRequestsList,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpOpenChannelRequestsList",
                         (),
@@ -34799,14 +34959,14 @@ pub mod api {
                 #[doc = " `(X, _)` as the number of `HrmpOpenChannelRequestCount` for `X`."]
                 pub fn hrmp_open_channel_request_count_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_open_channel_request_count::HrmpOpenChannelRequestCount,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpOpenChannelRequestCount",
                         (),
@@ -34824,7 +34984,7 @@ pub mod api {
                 pub fn hrmp_open_channel_request_count(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::hrmp_open_channel_request_count::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::hrmp_open_channel_request_count::Param0,
                     >,
@@ -34833,7 +34993,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpOpenChannelRequestCount",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -34852,14 +35012,14 @@ pub mod api {
                 #[doc = " `confirmed` set to true, as the number of `HrmpAcceptedChannelRequestCount` for `X`."]
                 pub fn hrmp_accepted_channel_request_count_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_accepted_channel_request_count::HrmpAcceptedChannelRequestCount,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpAcceptedChannelRequestCount",
                         (),
@@ -34877,7 +35037,7 @@ pub mod api {
                 pub fn hrmp_accepted_channel_request_count(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::hrmp_accepted_channel_request_count::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::hrmp_accepted_channel_request_count::Param0,
                     >,
@@ -34886,7 +35046,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpAcceptedChannelRequestCount",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -34909,14 +35069,14 @@ pub mod api {
                 #[doc = " - There are no channels that exists in list but not in the set and vice versa."]
                 pub fn hrmp_close_channel_requests_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_close_channel_requests::HrmpCloseChannelRequests,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpCloseChannelRequests",
                         (),
@@ -34938,7 +35098,7 @@ pub mod api {
                 pub fn hrmp_close_channel_requests(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::hrmp_close_channel_requests::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::hrmp_close_channel_requests::Param0,
                     >,
@@ -34947,7 +35107,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpCloseChannelRequests",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -34963,14 +35123,14 @@ pub mod api {
                 }
                 pub fn hrmp_close_channel_requests_list(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_close_channel_requests_list::HrmpCloseChannelRequestsList,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpCloseChannelRequestsList",
                         (),
@@ -34987,14 +35147,14 @@ pub mod api {
                 #[doc = "   session."]
                 pub fn hrmp_watermarks_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_watermarks::HrmpWatermarks,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpWatermarks",
                         (),
@@ -35012,7 +35172,7 @@ pub mod api {
                 pub fn hrmp_watermarks(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::hrmp_watermarks::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::hrmp_watermarks::Param0,
                     >,
@@ -35021,7 +35181,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpWatermarks",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35039,14 +35199,14 @@ pub mod api {
                 #[doc = " - each participant in the channel should satisfy `Paras::is_valid_para(P)` within a session."]
                 pub fn hrmp_channels_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_channels::HrmpChannels,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpChannels",
                         (),
@@ -35064,7 +35224,7 @@ pub mod api {
                 pub fn hrmp_channels(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::hrmp_channels::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::hrmp_channels::Param0,
                     >,
@@ -35073,7 +35233,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpChannels",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35102,14 +35262,14 @@ pub mod api {
                 #[doc = " - the vectors are sorted."]
                 pub fn hrmp_ingress_channels_index_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_ingress_channels_index::HrmpIngressChannelsIndex,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpIngressChannelsIndex",
                         (),
@@ -35137,7 +35297,7 @@ pub mod api {
                 pub fn hrmp_ingress_channels_index(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::hrmp_ingress_channels_index::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::hrmp_ingress_channels_index::Param0,
                     >,
@@ -35146,7 +35306,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpIngressChannelsIndex",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35162,14 +35322,14 @@ pub mod api {
                 }
                 pub fn hrmp_egress_channels_index_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_egress_channels_index::HrmpEgressChannelsIndex,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpEgressChannelsIndex",
                         (),
@@ -35183,7 +35343,7 @@ pub mod api {
                 pub fn hrmp_egress_channels_index(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::hrmp_egress_channels_index::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::hrmp_egress_channels_index::Param0,
                     >,
@@ -35192,7 +35352,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpEgressChannelsIndex",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35209,14 +35369,14 @@ pub mod api {
                 #[doc = " Invariant: cannot be non-empty if the corresponding channel in `HrmpChannels` is `None`."]
                 pub fn hrmp_channel_contents_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_channel_contents::HrmpChannelContents,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpChannelContents",
                         (),
@@ -35233,7 +35393,7 @@ pub mod api {
                 pub fn hrmp_channel_contents(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::hrmp_channel_contents::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::hrmp_channel_contents::Param0,
                     >,
@@ -35242,7 +35402,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpChannelContents",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35264,14 +35424,14 @@ pub mod api {
                 #[doc = "   same block number."]
                 pub fn hrmp_channel_digests_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::hrmp_channel_digests::HrmpChannelDigests,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpChannelDigests",
                         (),
@@ -35291,7 +35451,7 @@ pub mod api {
                 pub fn hrmp_channel_digests(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::hrmp_channel_digests::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::hrmp_channel_digests::Param0,
                     >,
@@ -35300,7 +35460,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Hrmp",
                         "HrmpChannelDigests",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35359,14 +35519,14 @@ pub mod api {
                 #[doc = " When in doubt, use `Sessions` API instead."]
                 pub fn assignment_keys_unsafe(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::assignment_keys_unsafe::AssignmentKeysUnsafe,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaSessionInfo",
                         "AssignmentKeysUnsafe",
                         (),
@@ -35380,14 +35540,14 @@ pub mod api {
                 #[doc = " The earliest session for which previous session info is stored."]
                 pub fn earliest_stored_session(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::earliest_stored_session::EarliestStoredSession,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaSessionInfo",
                         "EarliestStoredSession",
                         (),
@@ -35403,14 +35563,14 @@ pub mod api {
                 #[doc = " Does not have any entries before the session index in the first session change notification."]
                 pub fn sessions_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::sessions::Sessions,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaSessionInfo",
                         "Sessions",
                         (),
@@ -35428,7 +35588,7 @@ pub mod api {
                 pub fn sessions(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::sessions::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::sessions::Param0,
                     >,
@@ -35437,7 +35597,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaSessionInfo",
                         "Sessions",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35454,14 +35614,14 @@ pub mod api {
                 #[doc = " The validator account keys of the validators actively participating in parachain consensus."]
                 pub fn account_keys_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::account_keys::AccountKeys,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaSessionInfo",
                         "AccountKeys",
                         (),
@@ -35477,7 +35637,7 @@ pub mod api {
                 pub fn account_keys(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::account_keys::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::account_keys::Param0,
                     >,
@@ -35486,7 +35646,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaSessionInfo",
                         "AccountKeys",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35503,14 +35663,14 @@ pub mod api {
                 #[doc = " Executor parameter set for a given session index"]
                 pub fn session_executor_params_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::session_executor_params::SessionExecutorParams,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaSessionInfo",
                         "SessionExecutorParams",
                         (),
@@ -35526,7 +35686,7 @@ pub mod api {
                 pub fn session_executor_params(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::session_executor_params::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::session_executor_params::Param0,
                     >,
@@ -35535,7 +35695,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParaSessionInfo",
                         "SessionExecutorParams",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35591,9 +35751,9 @@ pub mod api {
                 #[doc = "See [`Pallet::force_unfreeze`]."]
                 pub fn force_unfreeze(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceUnfreeze>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceUnfreeze>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ParasDisputes",
                         "force_unfreeze",
                         types::ForceUnfreeze {},
@@ -35726,14 +35886,14 @@ pub mod api {
                 #[doc = " references sessions."]
                 pub fn last_pruned_session(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::last_pruned_session::LastPrunedSession,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasDisputes",
                         "LastPrunedSession",
                         (),
@@ -35748,14 +35908,14 @@ pub mod api {
                 #[doc = " All ongoing or concluded disputes for the last several sessions."]
                 pub fn disputes_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::disputes::Disputes,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasDisputes",
                         "Disputes",
                         (),
@@ -35771,7 +35931,7 @@ pub mod api {
                 pub fn disputes_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::disputes::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::disputes::Param0,
                     >,
@@ -35780,7 +35940,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasDisputes",
                         "Disputes",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35799,7 +35959,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::disputes::Param0>,
                     _1: impl ::core::borrow::Borrow<types::disputes::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::disputes::Param0,
@@ -35813,7 +35973,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasDisputes",
                         "Disputes",
                         (
@@ -35836,14 +35996,14 @@ pub mod api {
                 #[doc = " This storage is used for slashing."]
                 pub fn backers_on_disputes_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::backers_on_disputes::BackersOnDisputes,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasDisputes",
                         "BackersOnDisputes",
                         (),
@@ -35860,7 +36020,7 @@ pub mod api {
                 pub fn backers_on_disputes_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::backers_on_disputes::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::backers_on_disputes::Param0,
                     >,
@@ -35869,7 +36029,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasDisputes",
                         "BackersOnDisputes",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35889,7 +36049,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::backers_on_disputes::Param0>,
                     _1: impl ::core::borrow::Borrow<types::backers_on_disputes::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::backers_on_disputes::Param0,
@@ -35903,7 +36063,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasDisputes",
                         "BackersOnDisputes",
                         (
@@ -35926,14 +36086,14 @@ pub mod api {
                 #[doc = " should be reverted back to if the candidate is disputed and determined to be invalid."]
                 pub fn included_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::included::Included,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasDisputes",
                         "Included",
                         (),
@@ -35950,7 +36110,7 @@ pub mod api {
                 pub fn included_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::included::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::included::Param0,
                     >,
@@ -35959,7 +36119,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasDisputes",
                         "Included",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -35979,7 +36139,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::included::Param0>,
                     _1: impl ::core::borrow::Borrow<types::included::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::included::Param0,
@@ -35993,7 +36153,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasDisputes",
                         "Included",
                         (
@@ -36018,14 +36178,14 @@ pub mod api {
                 #[doc = " It can only be set back to `None` by governance intervention."]
                 pub fn frozen(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::frozen::Frozen,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasDisputes",
                         "Frozen",
                         (),
@@ -36093,9 +36253,10 @@ pub mod api {
                     &self,
                     dispute_proof: types::report_dispute_lost_unsigned::DisputeProof,
                     key_owner_proof: types::report_dispute_lost_unsigned::KeyOwnerProof,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ReportDisputeLostUnsigned>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::ReportDisputeLostUnsigned,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ParasSlashing",
                         "report_dispute_lost_unsigned",
                         types::ReportDisputeLostUnsigned {
@@ -36136,14 +36297,14 @@ pub mod api {
                 #[doc = " Validators pending dispute slashes."]
                 pub fn unapplied_slashes_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::unapplied_slashes::UnappliedSlashes,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasSlashing",
                         "UnappliedSlashes",
                         (),
@@ -36159,7 +36320,7 @@ pub mod api {
                 pub fn unapplied_slashes_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::unapplied_slashes::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::unapplied_slashes::Param0,
                     >,
@@ -36168,7 +36329,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasSlashing",
                         "UnappliedSlashes",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -36187,7 +36348,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::unapplied_slashes::Param0>,
                     _1: impl ::core::borrow::Borrow<types::unapplied_slashes::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::unapplied_slashes::Param0,
@@ -36201,7 +36362,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasSlashing",
                         "UnappliedSlashes",
                         (
@@ -36223,14 +36384,14 @@ pub mod api {
                 #[doc = " `ValidatorSetCount` per session."]
                 pub fn validator_set_counts_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::validator_set_counts::ValidatorSetCounts,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasSlashing",
                         "ValidatorSetCounts",
                         (),
@@ -36245,7 +36406,7 @@ pub mod api {
                 pub fn validator_set_counts(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::validator_set_counts::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::validator_set_counts::Param0,
                     >,
@@ -36254,7 +36415,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ParasSlashing",
                         "ValidatorSetCounts",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -36351,9 +36512,9 @@ pub mod api {
                     &self,
                     message_origin: types::reap_page::MessageOrigin,
                     page_index: types::reap_page::PageIndex,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ReapPage>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ReapPage>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "MessageQueue",
                         "reap_page",
                         types::ReapPage {
@@ -36374,9 +36535,9 @@ pub mod api {
                     page: types::execute_overweight::Page,
                     index: types::execute_overweight::Index,
                     weight_limit: types::execute_overweight::WeightLimit,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ExecuteOverweight>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ExecuteOverweight>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "MessageQueue",
                         "execute_overweight",
                         types::ExecuteOverweight {
@@ -36537,14 +36698,14 @@ pub mod api {
                 #[doc = " The index of the first and last (non-empty) pages."]
                 pub fn book_state_for_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::book_state_for::BookStateFor,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "MessageQueue",
                         "BookStateFor",
                         (),
@@ -36560,7 +36721,7 @@ pub mod api {
                 pub fn book_state_for(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::book_state_for::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::book_state_for::Param0,
                     >,
@@ -36569,7 +36730,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "MessageQueue",
                         "BookStateFor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -36586,14 +36747,14 @@ pub mod api {
                 #[doc = " The origin at which we should begin servicing."]
                 pub fn service_head(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::service_head::ServiceHead,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "MessageQueue",
                         "ServiceHead",
                         (),
@@ -36608,14 +36769,14 @@ pub mod api {
                 #[doc = " The map of page indices to pages."]
                 pub fn pages_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::pages::Pages,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "MessageQueue",
                         "Pages",
                         (),
@@ -36631,7 +36792,7 @@ pub mod api {
                 pub fn pages_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::pages::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::pages::Param0,
                     >,
@@ -36640,7 +36801,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "MessageQueue",
                         "Pages",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -36659,7 +36820,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::pages::Param0>,
                     _1: impl ::core::borrow::Borrow<types::pages::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::pages::Param0,
@@ -36673,7 +36834,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "MessageQueue",
                         "Pages",
                         (
@@ -36705,9 +36866,10 @@ pub mod api {
                 #[doc = " size is slightly lower than this as defined by [`MaxMessageLenOf`]."]
                 pub fn heap_size(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "MessageQueue",
                         "HeapSize",
                         [
@@ -36723,9 +36885,10 @@ pub mod api {
                 #[doc = " dropped, even if they contain unprocessed overweight messages."]
                 pub fn max_stale(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "MessageQueue",
                         "MaxStale",
                         [
@@ -36743,10 +36906,10 @@ pub mod api {
                 #[doc = " `ServiceQueues::service_queues` manually."]
                 pub fn service_weight(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     ::core::option::Option<runtime_types::sp_weights::weight_v2::Weight>,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "MessageQueue",
                         "ServiceWeight",
                         [
@@ -36850,9 +37013,9 @@ pub mod api {
                     &self,
                     max_amount: types::place_order_allow_death::MaxAmount,
                     para_id: types::place_order_allow_death::ParaId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::PlaceOrderAllowDeath>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PlaceOrderAllowDeath>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "OnDemandAssignmentProvider",
                         "place_order_allow_death",
                         types::PlaceOrderAllowDeath {
@@ -36872,9 +37035,9 @@ pub mod api {
                     &self,
                     max_amount: types::place_order_keep_alive::MaxAmount,
                     para_id: types::place_order_keep_alive::ParaId,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::PlaceOrderKeepAlive>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PlaceOrderKeepAlive>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "OnDemandAssignmentProvider",
                         "place_order_keep_alive",
                         types::PlaceOrderKeepAlive {
@@ -36968,14 +37131,14 @@ pub mod api {
                 #[doc = " assigner."]
                 pub fn spot_traffic(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::spot_traffic::SpotTraffic,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "OnDemandAssignmentProvider",
                         "SpotTraffic",
                         (),
@@ -36990,14 +37153,14 @@ pub mod api {
                 #[doc = " queue from the scheduler on session boundaries."]
                 pub fn on_demand_queue(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::on_demand_queue::OnDemandQueue,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "OnDemandAssignmentProvider",
                         "OnDemandQueue",
                         (),
@@ -37014,14 +37177,14 @@ pub mod api {
                 #[doc = " `ParaId` on two or more `CoreIndex`es."]
                 pub fn para_id_affinity_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::para_id_affinity::ParaIdAffinity,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "OnDemandAssignmentProvider",
                         "ParaIdAffinity",
                         (),
@@ -37038,14 +37201,14 @@ pub mod api {
                 pub fn para_id_affinity(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::para_id_affinity::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::para_id_affinity::ParaIdAffinity,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "OnDemandAssignmentProvider",
                         "ParaIdAffinity",
                         (),
@@ -37065,10 +37228,10 @@ pub mod api {
                 #[doc = " The default value for the spot traffic multiplier."]
                 pub fn traffic_default_value(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::sp_arithmetic::fixed_point::FixedU128,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "OnDemandAssignmentProvider",
                         "TrafficDefaultValue",
                         [
@@ -37360,9 +37523,9 @@ pub mod api {
                     id: types::register::Id,
                     genesis_head: types::register::GenesisHead,
                     validation_code: types::register::ValidationCode,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Register>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Register>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Registrar",
                         "register",
                         types::Register {
@@ -37385,9 +37548,9 @@ pub mod api {
                     id: types::force_register::Id,
                     genesis_head: types::force_register::GenesisHead,
                     validation_code: types::force_register::ValidationCode,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceRegister>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceRegister>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Registrar",
                         "force_register",
                         types::ForceRegister {
@@ -37409,9 +37572,9 @@ pub mod api {
                 pub fn deregister(
                     &self,
                     id: types::deregister::Id,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Deregister>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Deregister>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Registrar",
                         "deregister",
                         types::Deregister { id },
@@ -37427,8 +37590,9 @@ pub mod api {
                     &self,
                     id: types::swap::Id,
                     other: types::swap::Other,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Swap> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Swap>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Registrar",
                         "swap",
                         types::Swap { id, other },
@@ -37444,9 +37608,9 @@ pub mod api {
                 pub fn remove_lock(
                     &self,
                     para: types::remove_lock::Para,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RemoveLock>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RemoveLock>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Registrar",
                         "remove_lock",
                         types::RemoveLock { para },
@@ -37460,9 +37624,9 @@ pub mod api {
                 #[doc = "See [`Pallet::reserve`]."]
                 pub fn reserve(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Reserve>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Reserve>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Registrar",
                         "reserve",
                         types::Reserve {},
@@ -37477,9 +37641,9 @@ pub mod api {
                 pub fn add_lock(
                     &self,
                     para: types::add_lock::Para,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AddLock>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AddLock>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Registrar",
                         "add_lock",
                         types::AddLock { para },
@@ -37495,9 +37659,9 @@ pub mod api {
                     &self,
                     para: types::schedule_code_upgrade::Para,
                     new_code: types::schedule_code_upgrade::NewCode,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ScheduleCodeUpgrade>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ScheduleCodeUpgrade>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Registrar",
                         "schedule_code_upgrade",
                         types::ScheduleCodeUpgrade { para, new_code },
@@ -37514,9 +37678,9 @@ pub mod api {
                     &self,
                     para: types::set_current_head::Para,
                     new_head: types::set_current_head::NewHead,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetCurrentHead>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetCurrentHead>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Registrar",
                         "set_current_head",
                         types::SetCurrentHead { para, new_head },
@@ -37655,14 +37819,14 @@ pub mod api {
                 #[doc = " Pending swap operations."]
                 pub fn pending_swap_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::pending_swap::PendingSwap,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Registrar",
                         "PendingSwap",
                         (),
@@ -37678,7 +37842,7 @@ pub mod api {
                 pub fn pending_swap(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::pending_swap::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::pending_swap::Param0,
                     >,
@@ -37687,7 +37851,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Registrar",
                         "PendingSwap",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -37707,14 +37871,14 @@ pub mod api {
                 #[doc = " only do so if it isn't yet registered. (After that, it's up to governance to do so.)"]
                 pub fn paras_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::paras::Paras,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Registrar",
                         "Paras",
                         (),
@@ -37732,7 +37896,7 @@ pub mod api {
                 pub fn paras(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::paras::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::paras::Param0,
                     >,
@@ -37741,7 +37905,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Registrar",
                         "Paras",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -37757,14 +37921,14 @@ pub mod api {
                 #[doc = " The next free `ParaId`."]
                 pub fn next_free_para_id(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::next_free_para_id::NextFreeParaId,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Registrar",
                         "NextFreeParaId",
                         (),
@@ -37786,9 +37950,10 @@ pub mod api {
                 #[doc = " This should include the cost for storing the genesis head and validation code."]
                 pub fn para_deposit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Registrar",
                         "ParaDeposit",
                         [
@@ -37801,9 +37966,10 @@ pub mod api {
                 #[doc = " The deposit to be paid per byte stored on chain."]
                 pub fn data_deposit_per_byte(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Registrar",
                         "DataDepositPerByte",
                         [
@@ -37926,9 +38092,9 @@ pub mod api {
                     amount: types::force_lease::Amount,
                     period_begin: types::force_lease::PeriodBegin,
                     period_count: types::force_lease::PeriodCount,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceLease>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceLease>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Slots",
                         "force_lease",
                         types::ForceLease {
@@ -37950,9 +38116,9 @@ pub mod api {
                 pub fn clear_all_leases(
                     &self,
                     para: types::clear_all_leases::Para,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ClearAllLeases>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ClearAllLeases>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Slots",
                         "clear_all_leases",
                         types::ClearAllLeases { para },
@@ -37967,9 +38133,9 @@ pub mod api {
                 pub fn trigger_onboard(
                     &self,
                     para: types::trigger_onboard::Para,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::TriggerOnboard>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::TriggerOnboard>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Slots",
                         "trigger_onboard",
                         types::TriggerOnboard { para },
@@ -38078,14 +38244,14 @@ pub mod api {
                 #[doc = " It is illegal for a `None` value to trail in the list."]
                 pub fn leases_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::leases::Leases,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Slots",
                         "Leases",
                         (),
@@ -38116,7 +38282,7 @@ pub mod api {
                 pub fn leases(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::leases::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::leases::Param0,
                     >,
@@ -38125,7 +38291,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Slots",
                         "Leases",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -38148,9 +38314,10 @@ pub mod api {
                 #[doc = " The number of blocks over which a single period lasts."]
                 pub fn lease_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Slots",
                         "LeasePeriod",
                         [
@@ -38164,9 +38331,10 @@ pub mod api {
                 #[doc = " The number of blocks to offset each lease period by."]
                 pub fn lease_offset(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Slots",
                         "LeaseOffset",
                         [
@@ -38290,9 +38458,9 @@ pub mod api {
                     &self,
                     duration: types::new_auction::Duration,
                     lease_period_index: types::new_auction::LeasePeriodIndex,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::NewAuction>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::NewAuction>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Auctions",
                         "new_auction",
                         types::NewAuction {
@@ -38315,8 +38483,9 @@ pub mod api {
                     first_slot: types::bid::FirstSlot,
                     last_slot: types::bid::LastSlot,
                     amount: types::bid::Amount,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Bid> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Bid>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Auctions",
                         "bid",
                         types::Bid {
@@ -38336,9 +38505,9 @@ pub mod api {
                 #[doc = "See [`Pallet::cancel_auction`]."]
                 pub fn cancel_auction(
                     &self,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::CancelAuction>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::CancelAuction>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Auctions",
                         "cancel_auction",
                         types::CancelAuction {},
@@ -38571,14 +38740,14 @@ pub mod api {
                 #[doc = " Number of auctions started so far."]
                 pub fn auction_counter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::auction_counter::AuctionCounter,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Auctions",
                         "AuctionCounter",
                         (),
@@ -38596,14 +38765,14 @@ pub mod api {
                 #[doc = " auction will \"begin to end\", i.e. the first block of the Ending Period of the auction."]
                 pub fn auction_info(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::auction_info::AuctionInfo,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Auctions",
                         "AuctionInfo",
                         (),
@@ -38618,14 +38787,14 @@ pub mod api {
                 #[doc = " (sub-)ranges."]
                 pub fn reserved_amounts_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::reserved_amounts::ReservedAmounts,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Auctions",
                         "ReservedAmounts",
                         (),
@@ -38642,7 +38811,7 @@ pub mod api {
                 pub fn reserved_amounts_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::reserved_amounts::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::reserved_amounts::Param0,
                     >,
@@ -38651,7 +38820,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Auctions",
                         "ReservedAmounts",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -38671,7 +38840,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::reserved_amounts::Param0>,
                     _1: impl ::core::borrow::Borrow<types::reserved_amounts::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::reserved_amounts::Param0,
@@ -38685,7 +38854,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Auctions",
                         "ReservedAmounts",
                         (
@@ -38709,14 +38878,14 @@ pub mod api {
                 #[doc = " first sample of the ending period is 0; the last is `Sample Size - 1`."]
                 pub fn winning_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::winning::Winning,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Auctions",
                         "Winning",
                         (),
@@ -38733,7 +38902,7 @@ pub mod api {
                 pub fn winning(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::winning::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::winning::Param0,
                     >,
@@ -38742,7 +38911,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Auctions",
                         "Winning",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -38764,9 +38933,10 @@ pub mod api {
                 #[doc = " The number of blocks over which an auction may be retroactively ended."]
                 pub fn ending_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Auctions",
                         "EndingPeriod",
                         [
@@ -38782,9 +38952,10 @@ pub mod api {
                 #[doc = " `EndingPeriod` / `SampleLength` = Total # of Samples"]
                 pub fn sample_length(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Auctions",
                         "SampleLength",
                         [
@@ -38797,9 +38968,10 @@ pub mod api {
                 }
                 pub fn slot_range_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Auctions",
                         "SlotRangeCount",
                         [
@@ -38812,9 +38984,10 @@ pub mod api {
                 }
                 pub fn lease_periods_per_slot(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Auctions",
                         "LeasePeriodsPerSlot",
                         [
@@ -39138,8 +39311,9 @@ pub mod api {
                     last_period: types::create::LastPeriod,
                     end: types::create::End,
                     verifier: types::create::Verifier,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Create> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Create>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Crowdloan",
                         "create",
                         types::Create {
@@ -39163,9 +39337,9 @@ pub mod api {
                     index: types::contribute::Index,
                     value: types::contribute::Value,
                     signature: types::contribute::Signature,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Contribute>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Contribute>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Crowdloan",
                         "contribute",
                         types::Contribute {
@@ -39186,9 +39360,9 @@ pub mod api {
                     &self,
                     who: types::withdraw::Who,
                     index: types::withdraw::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Withdraw>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Withdraw>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Crowdloan",
                         "withdraw",
                         types::Withdraw { who, index },
@@ -39203,8 +39377,9 @@ pub mod api {
                 pub fn refund(
                     &self,
                     index: types::refund::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Refund> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Refund>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Crowdloan",
                         "refund",
                         types::Refund { index },
@@ -39220,9 +39395,9 @@ pub mod api {
                 pub fn dissolve(
                     &self,
                     index: types::dissolve::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Dissolve>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Dissolve>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Crowdloan",
                         "dissolve",
                         types::Dissolve { index },
@@ -39243,8 +39418,9 @@ pub mod api {
                     last_period: types::edit::LastPeriod,
                     end: types::edit::End,
                     verifier: types::edit::Verifier,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Edit> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Edit>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Crowdloan",
                         "edit",
                         types::Edit {
@@ -39268,9 +39444,9 @@ pub mod api {
                     &self,
                     index: types::add_memo::Index,
                     memo: types::add_memo::Memo,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AddMemo>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::AddMemo>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Crowdloan",
                         "add_memo",
                         types::AddMemo { index, memo },
@@ -39286,8 +39462,9 @@ pub mod api {
                 pub fn poke(
                     &self,
                     index: types::poke::Index,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Poke> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Poke>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Crowdloan",
                         "poke",
                         types::Poke { index },
@@ -39304,9 +39481,9 @@ pub mod api {
                     &self,
                     index: types::contribute_all::Index,
                     signature: types::contribute_all::Signature,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ContributeAll>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ContributeAll>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Crowdloan",
                         "contribute_all",
                         types::ContributeAll { index, signature },
@@ -39594,14 +39771,14 @@ pub mod api {
                 #[doc = " Info on all of the funds."]
                 pub fn funds_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::funds::Funds,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Crowdloan",
                         "Funds",
                         (),
@@ -39617,7 +39794,7 @@ pub mod api {
                 pub fn funds(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::funds::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::funds::Param0,
                     >,
@@ -39626,7 +39803,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Crowdloan",
                         "Funds",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -39644,14 +39821,14 @@ pub mod api {
                 #[doc = " in order to determine which funds should submit new or updated bids."]
                 pub fn new_raise(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::new_raise::NewRaise,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Crowdloan",
                         "NewRaise",
                         (),
@@ -39666,14 +39843,14 @@ pub mod api {
                 #[doc = " The number of auctions that have entered into their ending period so far."]
                 pub fn endings_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::endings_count::EndingsCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Crowdloan",
                         "EndingsCount",
                         (),
@@ -39687,14 +39864,14 @@ pub mod api {
                 #[doc = " Tracker for the next available fund index"]
                 pub fn next_fund_index(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::next_fund_index::NextFundIndex,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Crowdloan",
                         "NextFundIndex",
                         (),
@@ -39716,10 +39893,10 @@ pub mod api {
                 #[doc = " `PalletId(*b\"py/cfund\")`"]
                 pub fn pallet_id(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
                     runtime_types::frame_support::PalletId,
                 > {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Crowdloan",
                         "PalletId",
                         [
@@ -39733,9 +39910,10 @@ pub mod api {
                 #[doc = " at least `ExistentialDeposit`."]
                 pub fn min_contribution(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u128>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Crowdloan",
                         "MinContribution",
                         [
@@ -39748,9 +39926,10 @@ pub mod api {
                 #[doc = " Max number of storage keys to remove per extrinsic call."]
                 pub fn remove_keys_limit(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Crowdloan",
                         "RemoveKeysLimit",
                         [
@@ -40129,8 +40308,9 @@ pub mod api {
                     &self,
                     dest: types::send::Dest,
                     message: types::send::Message,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Send> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Send>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "XcmPallet",
                         "send",
                         types::Send {
@@ -40151,9 +40331,9 @@ pub mod api {
                     beneficiary: types::teleport_assets::Beneficiary,
                     assets: types::teleport_assets::Assets,
                     fee_asset_item: types::teleport_assets::FeeAssetItem,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::TeleportAssets>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::TeleportAssets>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "XcmPallet",
                         "teleport_assets",
                         types::TeleportAssets {
@@ -40178,9 +40358,10 @@ pub mod api {
                     beneficiary: types::reserve_transfer_assets::Beneficiary,
                     assets: types::reserve_transfer_assets::Assets,
                     fee_asset_item: types::reserve_transfer_assets::FeeAssetItem,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ReserveTransferAssets>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::ReserveTransferAssets,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "XcmPallet",
                         "reserve_transfer_assets",
                         types::ReserveTransferAssets {
@@ -40203,9 +40384,9 @@ pub mod api {
                     &self,
                     message: types::execute::Message,
                     max_weight: types::execute::MaxWeight,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Execute>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Execute>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "XcmPallet",
                         "execute",
                         types::Execute {
@@ -40224,9 +40405,9 @@ pub mod api {
                     &self,
                     location: types::force_xcm_version::Location,
                     version: types::force_xcm_version::Version,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceXcmVersion>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceXcmVersion>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "XcmPallet",
                         "force_xcm_version",
                         types::ForceXcmVersion {
@@ -40244,9 +40425,10 @@ pub mod api {
                 pub fn force_default_xcm_version(
                     &self,
                     maybe_xcm_version: types::force_default_xcm_version::MaybeXcmVersion,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceDefaultXcmVersion>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::ForceDefaultXcmVersion,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "XcmPallet",
                         "force_default_xcm_version",
                         types::ForceDefaultXcmVersion { maybe_xcm_version },
@@ -40262,10 +40444,10 @@ pub mod api {
                 pub fn force_subscribe_version_notify(
                     &self,
                     location: types::force_subscribe_version_notify::Location,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::ForceSubscribeVersionNotify,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "XcmPallet",
                         "force_subscribe_version_notify",
                         types::ForceSubscribeVersionNotify {
@@ -40282,10 +40464,10 @@ pub mod api {
                 pub fn force_unsubscribe_version_notify(
                     &self,
                     location: types::force_unsubscribe_version_notify::Location,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::ForceUnsubscribeVersionNotify,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "XcmPallet",
                         "force_unsubscribe_version_notify",
                         types::ForceUnsubscribeVersionNotify {
@@ -40307,10 +40489,10 @@ pub mod api {
                     assets: types::limited_reserve_transfer_assets::Assets,
                     fee_asset_item: types::limited_reserve_transfer_assets::FeeAssetItem,
                     weight_limit: types::limited_reserve_transfer_assets::WeightLimit,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::LimitedReserveTransferAssets,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "XcmPallet",
                         "limited_reserve_transfer_assets",
                         types::LimitedReserveTransferAssets {
@@ -40338,9 +40520,10 @@ pub mod api {
                     assets: types::limited_teleport_assets::Assets,
                     fee_asset_item: types::limited_teleport_assets::FeeAssetItem,
                     weight_limit: types::limited_teleport_assets::WeightLimit,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::LimitedTeleportAssets>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::LimitedTeleportAssets,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "XcmPallet",
                         "limited_teleport_assets",
                         types::LimitedTeleportAssets {
@@ -40364,9 +40547,9 @@ pub mod api {
                 pub fn force_suspension(
                     &self,
                     suspended: types::force_suspension::Suspended,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceSuspension>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceSuspension>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "XcmPallet",
                         "force_suspension",
                         types::ForceSuspension { suspended },
@@ -41092,14 +41275,14 @@ pub mod api {
                 #[doc = " The latest available query index."]
                 pub fn query_counter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::query_counter::QueryCounter,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "QueryCounter",
                         (),
@@ -41114,14 +41297,14 @@ pub mod api {
                 #[doc = " The ongoing queries."]
                 pub fn queries_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::queries::Queries,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "Queries",
                         (),
@@ -41136,7 +41319,7 @@ pub mod api {
                 pub fn queries(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::queries::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::queries::Param0,
                     >,
@@ -41145,7 +41328,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "Queries",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -41164,14 +41347,14 @@ pub mod api {
                 #[doc = " times this pair has been trapped (usually just 1 if it exists at all)."]
                 pub fn asset_traps_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::asset_traps::AssetTraps,
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "AssetTraps",
                         (),
@@ -41189,7 +41372,7 @@ pub mod api {
                 pub fn asset_traps(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::asset_traps::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::asset_traps::Param0,
                     >,
@@ -41198,7 +41381,7 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "AssetTraps",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -41215,14 +41398,14 @@ pub mod api {
                 #[doc = " then the destinations whose XCM version is unknown are considered unreachable."]
                 pub fn safe_xcm_version(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::safe_xcm_version::SafeXcmVersion,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "SafeXcmVersion",
                         (),
@@ -41237,14 +41420,14 @@ pub mod api {
                 #[doc = " The Latest versions that we know various locations support."]
                 pub fn supported_version_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::supported_version::SupportedVersion,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "SupportedVersion",
                         (),
@@ -41259,7 +41442,7 @@ pub mod api {
                 pub fn supported_version_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::supported_version::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::supported_version::Param0,
                     >,
@@ -41268,7 +41451,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "SupportedVersion",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -41286,7 +41469,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::supported_version::Param0>,
                     _1: impl ::core::borrow::Borrow<types::supported_version::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::supported_version::Param0,
@@ -41300,7 +41483,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "SupportedVersion",
                         (
@@ -41321,14 +41504,14 @@ pub mod api {
                 #[doc = " All locations that we have requested version notifications from."]
                 pub fn version_notifiers_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::version_notifiers::VersionNotifiers,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "VersionNotifiers",
                         (),
@@ -41343,7 +41526,7 @@ pub mod api {
                 pub fn version_notifiers_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::version_notifiers::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::version_notifiers::Param0,
                     >,
@@ -41352,7 +41535,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "VersionNotifiers",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -41370,7 +41553,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::version_notifiers::Param0>,
                     _1: impl ::core::borrow::Borrow<types::version_notifiers::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::version_notifiers::Param0,
@@ -41384,7 +41567,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "VersionNotifiers",
                         (
@@ -41406,14 +41589,14 @@ pub mod api {
                 #[doc = " of our versions we informed them of."]
                 pub fn version_notify_targets_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::version_notify_targets::VersionNotifyTargets,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "VersionNotifyTargets",
                         (),
@@ -41430,7 +41613,7 @@ pub mod api {
                 pub fn version_notify_targets_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::version_notify_targets::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::version_notify_targets::Param0,
                     >,
@@ -41439,7 +41622,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "VersionNotifyTargets",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -41459,7 +41642,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::version_notify_targets::Param0>,
                     _1: impl ::core::borrow::Borrow<types::version_notify_targets::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::version_notify_targets::Param0,
@@ -41473,7 +41656,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "VersionNotifyTargets",
                         (
@@ -41497,14 +41680,14 @@ pub mod api {
                 #[doc = " which is used as a prioritization."]
                 pub fn version_discovery_queue(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::version_discovery_queue::VersionDiscoveryQueue,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "VersionDiscoveryQueue",
                         (),
@@ -41518,14 +41701,14 @@ pub mod api {
                 #[doc = " The current migration's stage, if any."]
                 pub fn current_migration(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::current_migration::CurrentMigration,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "CurrentMigration",
                         (),
@@ -41539,14 +41722,14 @@ pub mod api {
                 #[doc = " Fungible assets which we know are locked on a remote chain."]
                 pub fn remote_locked_fungibles_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::remote_locked_fungibles::RemoteLockedFungibles,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "RemoteLockedFungibles",
                         (),
@@ -41561,7 +41744,7 @@ pub mod api {
                 pub fn remote_locked_fungibles_iter1(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::remote_locked_fungibles::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::remote_locked_fungibles::Param0,
                     >,
@@ -41570,7 +41753,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "RemoteLockedFungibles",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -41588,7 +41771,7 @@ pub mod api {
                     &self,
                     _0: impl ::core::borrow::Borrow<types::remote_locked_fungibles::Param0>,
                     _1: impl ::core::borrow::Borrow<types::remote_locked_fungibles::Param1>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::remote_locked_fungibles::Param0,
@@ -41602,7 +41785,7 @@ pub mod api {
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "RemoteLockedFungibles",
                         (
@@ -41626,7 +41809,7 @@ pub mod api {
                     _0: impl ::core::borrow::Borrow<types::remote_locked_fungibles::Param0>,
                     _1: impl ::core::borrow::Borrow<types::remote_locked_fungibles::Param1>,
                     _2: impl ::core::borrow::Borrow<types::remote_locked_fungibles::Param2>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                             types::remote_locked_fungibles::Param0,
@@ -41643,7 +41826,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "RemoteLockedFungibles",
                         (
@@ -41667,14 +41850,14 @@ pub mod api {
                 #[doc = " Fungible assets which we know are locked on this chain."]
                 pub fn locked_fungibles_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::locked_fungibles::LockedFungibles,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "LockedFungibles",
                         (),
@@ -41690,7 +41873,7 @@ pub mod api {
                 pub fn locked_fungibles(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::locked_fungibles::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::locked_fungibles::Param0,
                     >,
@@ -41699,7 +41882,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "LockedFungibles",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -41716,14 +41899,14 @@ pub mod api {
                 #[doc = " Global suspension state of the XCM executor."]
                 pub fn xcm_execution_suspended(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::xcm_execution_suspended::XcmExecutionSuspended,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "XcmPallet",
                         "XcmExecutionSuspended",
                         (),
@@ -41927,9 +42110,10 @@ pub mod api {
                     &self,
                     id: types::sudo_schedule_para_initialize::Id,
                     genesis: types::sudo_schedule_para_initialize::Genesis,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SudoScheduleParaInitialize>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SudoScheduleParaInitialize,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ParasSudoWrapper",
                         "sudo_schedule_para_initialize",
                         types::SudoScheduleParaInitialize { id, genesis },
@@ -41944,9 +42128,10 @@ pub mod api {
                 pub fn sudo_schedule_para_cleanup(
                     &self,
                     id: types::sudo_schedule_para_cleanup::Id,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SudoScheduleParaCleanup>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SudoScheduleParaCleanup,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ParasSudoWrapper",
                         "sudo_schedule_para_cleanup",
                         types::SudoScheduleParaCleanup { id },
@@ -41961,10 +42146,10 @@ pub mod api {
                 pub fn sudo_schedule_parathread_upgrade(
                     &self,
                     id: types::sudo_schedule_parathread_upgrade::Id,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::SudoScheduleParathreadUpgrade,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ParasSudoWrapper",
                         "sudo_schedule_parathread_upgrade",
                         types::SudoScheduleParathreadUpgrade { id },
@@ -41980,10 +42165,10 @@ pub mod api {
                 pub fn sudo_schedule_parachain_downgrade(
                     &self,
                     id: types::sudo_schedule_parachain_downgrade::Id,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
                     types::SudoScheduleParachainDowngrade,
                 > {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ParasSudoWrapper",
                         "sudo_schedule_parachain_downgrade",
                         types::SudoScheduleParachainDowngrade { id },
@@ -42000,9 +42185,9 @@ pub mod api {
                     &self,
                     id: types::sudo_queue_downward_xcm::Id,
                     xcm: types::sudo_queue_downward_xcm::Xcm,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SudoQueueDownwardXcm>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SudoQueueDownwardXcm>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ParasSudoWrapper",
                         "sudo_queue_downward_xcm",
                         types::SudoQueueDownwardXcm {
@@ -42024,9 +42209,10 @@ pub mod api {
                     recipient: types::sudo_establish_hrmp_channel::Recipient,
                     max_capacity: types::sudo_establish_hrmp_channel::MaxCapacity,
                     max_message_size: types::sudo_establish_hrmp_channel::MaxMessageSize,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SudoEstablishHrmpChannel>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::SudoEstablishHrmpChannel,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ParasSudoWrapper",
                         "sudo_establish_hrmp_channel",
                         types::SudoEstablishHrmpChannel {
@@ -42197,9 +42383,10 @@ pub mod api {
                 pub fn assign_perm_parachain_slot(
                     &self,
                     id: types::assign_perm_parachain_slot::Id,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AssignPermParachainSlot>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::AssignPermParachainSlot,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "AssignedSlots",
                         "assign_perm_parachain_slot",
                         types::AssignPermParachainSlot { id },
@@ -42215,9 +42402,10 @@ pub mod api {
                     &self,
                     id: types::assign_temp_parachain_slot::Id,
                     lease_period_start: types::assign_temp_parachain_slot::LeasePeriodStart,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::AssignTempParachainSlot>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::AssignTempParachainSlot,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "AssignedSlots",
                         "assign_temp_parachain_slot",
                         types::AssignTempParachainSlot {
@@ -42236,9 +42424,10 @@ pub mod api {
                 pub fn unassign_parachain_slot(
                     &self,
                     id: types::unassign_parachain_slot::Id,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::UnassignParachainSlot>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::UnassignParachainSlot,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "AssignedSlots",
                         "unassign_parachain_slot",
                         types::UnassignParachainSlot { id },
@@ -42254,9 +42443,9 @@ pub mod api {
                 pub fn set_max_permanent_slots(
                     &self,
                     slots: types::set_max_permanent_slots::Slots,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMaxPermanentSlots>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetMaxPermanentSlots>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "AssignedSlots",
                         "set_max_permanent_slots",
                         types::SetMaxPermanentSlots { slots },
@@ -42271,9 +42460,9 @@ pub mod api {
                 pub fn set_max_temporary_slots(
                     &self,
                     slots: types::set_max_temporary_slots::Slots,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetMaxTemporarySlots>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetMaxTemporarySlots>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "AssignedSlots",
                         "set_max_temporary_slots",
                         types::SetMaxTemporarySlots { slots },
@@ -42416,14 +42605,14 @@ pub mod api {
                 #[doc = " Assigned permanent slots, with their start lease period, and duration."]
                 pub fn permanent_slots_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::permanent_slots::PermanentSlots,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "PermanentSlots",
                         (),
@@ -42439,7 +42628,7 @@ pub mod api {
                 pub fn permanent_slots(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::permanent_slots::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::permanent_slots::Param0,
                     >,
@@ -42448,7 +42637,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "PermanentSlots",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -42465,14 +42654,14 @@ pub mod api {
                 #[doc = " Number of assigned (and active) permanent slots."]
                 pub fn permanent_slot_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::permanent_slot_count::PermanentSlotCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "PermanentSlotCount",
                         (),
@@ -42486,14 +42675,14 @@ pub mod api {
                 #[doc = " Assigned temporary slots."]
                 pub fn temporary_slots_iter(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::temporary_slots::TemporarySlots,
                     (),
                     (),
                     ::subxt::ext::subxt_core::utils::Yes,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "TemporarySlots",
                         (),
@@ -42509,7 +42698,7 @@ pub mod api {
                 pub fn temporary_slots(
                     &self,
                     _0: impl ::core::borrow::Borrow<types::temporary_slots::Param0>,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
                         types::temporary_slots::Param0,
                     >,
@@ -42518,7 +42707,7 @@ pub mod api {
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "TemporarySlots",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(
@@ -42535,14 +42724,14 @@ pub mod api {
                 #[doc = " Number of assigned temporary slots."]
                 pub fn temporary_slot_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::temporary_slot_count::TemporarySlotCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "TemporarySlotCount",
                         (),
@@ -42556,14 +42745,14 @@ pub mod api {
                 #[doc = " Number of active temporary slots in current slot lease period."]
                 pub fn active_temporary_slot_count(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::active_temporary_slot_count::ActiveTemporarySlotCount,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "ActiveTemporarySlotCount",
                         (),
@@ -42578,14 +42767,14 @@ pub mod api {
                 #[doc = "  The max number of temporary slots that can be assigned."]
                 pub fn max_temporary_slots(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::max_temporary_slots::MaxTemporarySlots,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "MaxTemporarySlots",
                         (),
@@ -42600,14 +42789,14 @@ pub mod api {
                 #[doc = " The max number of permanent slots that can be assigned."]
                 pub fn max_permanent_slots(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::max_permanent_slots::MaxPermanentSlots,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "MaxPermanentSlots",
                         (),
@@ -42628,9 +42817,10 @@ pub mod api {
                 #[doc = " The number of lease periods a permanent parachain slot lasts."]
                 pub fn permanent_slot_lease_period_length(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "PermanentSlotLeasePeriodLength",
                         [
@@ -42644,9 +42834,10 @@ pub mod api {
                 #[doc = " The number of lease periods a temporary parachain slot lasts."]
                 pub fn temporary_slot_lease_period_length(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "TemporarySlotLeasePeriodLength",
                         [
@@ -42660,9 +42851,10 @@ pub mod api {
                 #[doc = " The max number of temporary slots to be scheduled per lease periods."]
                 pub fn max_temporary_slot_per_lease_period(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "AssignedSlots",
                         "MaxTemporarySlotPerLeasePeriod",
                         [
@@ -42750,9 +42942,9 @@ pub mod api {
                 pub fn register_validators(
                     &self,
                     validators: types::register_validators::Validators,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::RegisterValidators>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::RegisterValidators>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ValidatorManager",
                         "register_validators",
                         types::RegisterValidators { validators },
@@ -42768,9 +42960,9 @@ pub mod api {
                 pub fn deregister_validators(
                     &self,
                     validators: types::deregister_validators::Validators,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::DeregisterValidators>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::DeregisterValidators>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "ValidatorManager",
                         "deregister_validators",
                         types::DeregisterValidators { validators },
@@ -42855,14 +43047,14 @@ pub mod api {
                 #[doc = " Validators that should be retired, because their Parachain was deregistered."]
                 pub fn validators_to_retire(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::validators_to_retire::ValidatorsToRetire,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ValidatorManager",
                         "ValidatorsToRetire",
                         (),
@@ -42876,14 +43068,14 @@ pub mod api {
                 #[doc = " Validators that should be added."]
                 pub fn validators_to_add(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::validators_to_add::ValidatorsToAdd,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "ValidatorManager",
                         "ValidatorsToAdd",
                         (),
@@ -43098,9 +43290,9 @@ pub mod api {
                 pub fn control_auto_migration(
                     &self,
                     maybe_config: types::control_auto_migration::MaybeConfig,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ControlAutoMigration>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ControlAutoMigration>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "StateTrieMigration",
                         "control_auto_migration",
                         types::ControlAutoMigration { maybe_config },
@@ -43117,9 +43309,9 @@ pub mod api {
                     limits: types::continue_migrate::Limits,
                     real_size_upper: types::continue_migrate::RealSizeUpper,
                     witness_task: types::continue_migrate::WitnessTask,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ContinueMigrate>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ContinueMigrate>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "StateTrieMigration",
                         "continue_migrate",
                         types::ContinueMigrate {
@@ -43140,9 +43332,9 @@ pub mod api {
                     &self,
                     keys: types::migrate_custom_top::Keys,
                     witness_size: types::migrate_custom_top::WitnessSize,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::MigrateCustomTop>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::MigrateCustomTop>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "StateTrieMigration",
                         "migrate_custom_top",
                         types::MigrateCustomTop { keys, witness_size },
@@ -43159,9 +43351,9 @@ pub mod api {
                     root: types::migrate_custom_child::Root,
                     child_keys: types::migrate_custom_child::ChildKeys,
                     total_size: types::migrate_custom_child::TotalSize,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::MigrateCustomChild>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::MigrateCustomChild>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "StateTrieMigration",
                         "migrate_custom_child",
                         types::MigrateCustomChild {
@@ -43180,9 +43372,9 @@ pub mod api {
                 pub fn set_signed_max_limits(
                     &self,
                     limits: types::set_signed_max_limits::Limits,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetSignedMaxLimits>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetSignedMaxLimits>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "StateTrieMigration",
                         "set_signed_max_limits",
                         types::SetSignedMaxLimits { limits },
@@ -43198,9 +43390,9 @@ pub mod api {
                     &self,
                     progress_top: types::force_set_progress::ProgressTop,
                     progress_child: types::force_set_progress::ProgressChild,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::ForceSetProgress>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::ForceSetProgress>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "StateTrieMigration",
                         "force_set_progress",
                         types::ForceSetProgress {
@@ -43341,14 +43533,14 @@ pub mod api {
                 #[doc = " forward by any of the means provided by this pallet."]
                 pub fn migration_process(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::migration_process::MigrationProcess,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "StateTrieMigration",
                         "MigrationProcess",
                         (),
@@ -43364,14 +43556,14 @@ pub mod api {
                 #[doc = " If set to None, then no automatic migration happens."]
                 pub fn auto_limits(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::auto_limits::AutoLimits,
                     ::subxt::ext::subxt_core::utils::Yes,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "StateTrieMigration",
                         "AutoLimits",
                         (),
@@ -43387,14 +43579,14 @@ pub mod api {
                 #[doc = " If not set, no signed submission is allowed."]
                 pub fn signed_migration_max_limits(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::signed_migration_max_limits::SignedMigrationMaxLimits,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "StateTrieMigration",
                         "SignedMigrationMaxLimits",
                         (),
@@ -43435,9 +43627,10 @@ pub mod api {
                 #[doc = " <https://www.shawntabrizi.com/substrate/querying-substrate-storage-via-rpc/>"]
                 pub fn max_key_len(
                     &self,
-                ) -> ::subxt::ext::subxt_core::constants::address::Address<::core::primitive::u32>
-                {
-                    ::subxt::ext::subxt_core::constants::address::Address::new_static(
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "StateTrieMigration",
                         "MaxKeyLen",
                         [
@@ -43586,8 +43779,9 @@ pub mod api {
                 pub fn sudo(
                     &self,
                     call: types::sudo::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::Sudo> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::Sudo>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Sudo",
                         "sudo",
                         types::Sudo {
@@ -43605,9 +43799,9 @@ pub mod api {
                     &self,
                     call: types::sudo_unchecked_weight::Call,
                     weight: types::sudo_unchecked_weight::Weight,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SudoUncheckedWeight>
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SudoUncheckedWeight>
                 {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Sudo",
                         "sudo_unchecked_weight",
                         types::SudoUncheckedWeight {
@@ -43626,8 +43820,9 @@ pub mod api {
                 pub fn set_key(
                     &self,
                     new: types::set_key::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SetKey> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetKey>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Sudo",
                         "set_key",
                         types::SetKey { new },
@@ -43643,8 +43838,9 @@ pub mod api {
                     &self,
                     who: types::sudo_as::Who,
                     call: types::sudo_as::Call,
-                ) -> ::subxt::ext::subxt_core::tx::payload::Payload<types::SudoAs> {
-                    ::subxt::ext::subxt_core::tx::payload::Payload::new_static(
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SudoAs>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
                         "Sudo",
                         "sudo_as",
                         types::SudoAs {
@@ -43749,14 +43945,14 @@ pub mod api {
                 #[doc = " The `AccountId` of the sudo key."]
                 pub fn key(
                     &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::Address<
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::key::Key,
                     ::subxt::ext::subxt_core::utils::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::ext::subxt_core::storage::address::Address::new_static(
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Sudo",
                         "Key",
                         (),

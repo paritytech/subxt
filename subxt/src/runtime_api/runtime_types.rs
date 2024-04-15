@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::PayloadT;
+use super::Payload;
 use crate::{
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
@@ -41,7 +41,7 @@ where
     /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
     /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
     /// the runtime API in question do not exist at all)
-    pub fn validate<Call: PayloadT>(&self, payload: &Call) -> Result<(), Error> {
+    pub fn validate<Call: Payload>(&self, payload: &Call) -> Result<(), Error> {
         subxt_core::runtime_api::validate(payload, &self.client.metadata()).map_err(Into::into)
     }
 
@@ -65,7 +65,7 @@ where
     }
 
     /// Execute a runtime API call.
-    pub fn call<Call: PayloadT>(
+    pub fn call<Call: Payload>(
         &self,
         payload: Call,
     ) -> impl Future<Output = Result<Call::ReturnType, Error>> {

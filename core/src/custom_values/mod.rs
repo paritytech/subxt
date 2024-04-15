@@ -34,16 +34,13 @@ pub mod address;
 
 use crate::utils::Yes;
 use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
-use address::AddressT;
+use address::Address;
 use alloc::vec::Vec;
 
 /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
 /// if the address is valid (or if it's not possible to check since the address has no validation hash).
 /// Returns an error if the address was not valid (wrong name, type or raw bytes)
-pub fn validate<Address: AddressT + ?Sized>(
-    address: &Address,
-    metadata: &Metadata,
-) -> Result<(), Error> {
+pub fn validate<Addr: Address + ?Sized>(address: &Addr, metadata: &Metadata) -> Result<(), Error> {
     if let Some(actual_hash) = address.validation_hash() {
         let custom = metadata.custom();
         let custom_value = custom
@@ -62,16 +59,16 @@ pub fn validate<Address: AddressT + ?Sized>(
 
 /// Access a custom value by the address it is registered under. This can be just a [str] to get back a dynamic value,
 /// or a static address from the generated static interface to get a value of a static type returned.
-pub fn get<Address: AddressT<IsDecodable = Yes> + ?Sized>(
-    address: &Address,
+pub fn get<Addr: Address<IsDecodable = Yes> + ?Sized>(
+    address: &Addr,
     metadata: &Metadata,
-) -> Result<Address::Target, Error> {
+) -> Result<Addr::Target, Error> {
     // 1. Validate custom value shape if hash given:
     validate(address, metadata)?;
 
     // 2. Attempt to decode custom value:
     let custom_value = metadata.custom_value_by_name_err(address.name())?;
-    let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
+    let value = <Addr::Target as DecodeWithMetadata>::decode_with_metadata(
         &mut custom_value.bytes(),
         custom_value.type_id(),
         metadata,
@@ -80,8 +77,8 @@ pub fn get<Address: AddressT<IsDecodable = Yes> + ?Sized>(
 }
 
 /// Access the bytes of a custom value by the address it is registered under.
-pub fn get_bytes<Address: AddressT + ?Sized>(
-    address: &Address,
+pub fn get_bytes<Addr: Address + ?Sized>(
+    address: &Addr,
     metadata: &Metadata,
 ) -> Result<Vec<u8>, Error> {
     // 1. Validate custom value shape if hash given:

@@ -21,7 +21,7 @@ pub use super::storage_key::{StaticStorageKey, StorageHashers, StorageHashersIte
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
-pub trait AddressT {
+pub trait Address {
     /// The target type of the value that lives at this address.
     type Target: DecodeWithMetadata;
     /// The keys type used to construct this address.
@@ -57,7 +57,7 @@ pub trait AddressT {
 /// A concrete storage address. This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
 #[derive_where(Clone, Debug, Eq, Ord, PartialEq, PartialOrd; Keys)]
-pub struct Address<Keys: StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
+pub struct DefaultAddress<Keys: StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
     entry_name: Cow<'static, str>,
     keys: Keys,
@@ -65,9 +65,12 @@ pub struct Address<Keys: StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
     _marker: core::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
 }
 
+/// A storage address constructed by the static codegen.
+pub type StaticAddress<Keys, ReturnTy, Fetchable, Defaultable, Iterable> =
+    DefaultAddress<Keys, ReturnTy, Fetchable, Defaultable, Iterable>;
 /// A typical storage address constructed at runtime rather than via the `subxt` macro; this
 /// has no restriction on what it can be used for (since we don't statically know).
-pub type DynamicAddress<Keys> = Address<Keys, DecodedValueThunk, Yes, Yes, Yes>;
+pub type DynamicAddress<Keys> = DefaultAddress<Keys, DecodedValueThunk, Yes, Yes, Yes>;
 
 impl<Keys: StorageKey> DynamicAddress<Keys> {
     /// Creates a new dynamic address. As `Keys` you can use a `Vec<scale_value::Value>`
@@ -83,7 +86,7 @@ impl<Keys: StorageKey> DynamicAddress<Keys> {
 }
 
 impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
-    Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+    DefaultAddress<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
 where
     Keys: StorageKey,
     ReturnTy: DecodeWithMetadata,
@@ -108,7 +111,7 @@ where
 }
 
 impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
-    Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+    DefaultAddress<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
 where
     Keys: StorageKey,
     ReturnTy: DecodeWithMetadata,
@@ -127,8 +130,8 @@ where
     }
 }
 
-impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable> AddressT
-    for Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable> Address
+    for DefaultAddress<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
 where
     Keys: StorageKey,
     ReturnTy: DecodeWithMetadata,

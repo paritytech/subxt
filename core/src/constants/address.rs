@@ -12,7 +12,7 @@ use derive_where::derive_where;
 
 /// This represents a constant address. Anything implementing this trait
 /// can be used to fetch constants.
-pub trait AddressT {
+pub trait Address {
     /// The target type of the value that lives at this address.
     type Target: DecodeWithMetadata;
 
@@ -32,18 +32,20 @@ pub trait AddressT {
 
 /// This represents the address of a constant.
 #[derive_where(Clone, Debug, PartialOrd, Ord, PartialEq, Eq)]
-pub struct Address<ReturnTy> {
+pub struct DefaultAddress<ReturnTy> {
     pallet_name: Cow<'static, str>,
     constant_name: Cow<'static, str>,
     constant_hash: Option<[u8; 32]>,
     _marker: core::marker::PhantomData<ReturnTy>,
 }
 
+/// The type of address used by our static codegen.
+pub type StaticAddress<ReturnTy> = DefaultAddress<ReturnTy>;
 /// The type of address typically used to return dynamic constant values.
-pub type DynamicAddress = Address<DecodedValueThunk>;
+pub type DynamicAddress = DefaultAddress<DecodedValueThunk>;
 
-impl<ReturnTy> Address<ReturnTy> {
-    /// Create a new [`Address`] to use to look up a constant.
+impl<ReturnTy> DefaultAddress<ReturnTy> {
+    /// Create a new [`DefaultAddress`] to use to look up a constant.
     pub fn new(pallet_name: impl Into<String>, constant_name: impl Into<String>) -> Self {
         Self {
             pallet_name: Cow::Owned(pallet_name.into()),
@@ -53,7 +55,7 @@ impl<ReturnTy> Address<ReturnTy> {
         }
     }
 
-    /// Create a new [`Address`] that will be validated
+    /// Create a new [`DefaultAddress`] that will be validated
     /// against node metadata using the hash given.
     #[doc(hidden)]
     pub fn new_static(
@@ -80,7 +82,7 @@ impl<ReturnTy> Address<ReturnTy> {
     }
 }
 
-impl<ReturnTy: DecodeWithMetadata> AddressT for Address<ReturnTy> {
+impl<ReturnTy: DecodeWithMetadata> Address for DefaultAddress<ReturnTy> {
     type Target = ReturnTy;
 
     fn pallet_name(&self) -> &str {

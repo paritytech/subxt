@@ -14,7 +14,7 @@ pub use crate::utils::Yes;
 /// This represents the address of a custom value in in the metadata.
 /// Anything that implements it can be used to fetch custom values from the metadata.
 /// The trait is implemented by [`str`] for dynamic lookup and [`StaticAddress`] for static queries.
-pub trait AddressT {
+pub trait Address {
     /// The type of the custom value.
     type Target: DecodeWithMetadata;
     /// Should be set to `Yes` for Dynamic values and static values that have a valid type.
@@ -30,7 +30,7 @@ pub trait AddressT {
     }
 }
 
-impl AddressT for str {
+impl Address for str {
     type Target = DecodedValueThunk;
     type IsDecodable = Yes;
 
@@ -68,7 +68,7 @@ impl<ReturnTy, IsDecodable> StaticAddress<ReturnTy, IsDecodable> {
     }
 }
 
-impl<R: DecodeWithMetadata, Y> AddressT for StaticAddress<R, Y> {
+impl<R: DecodeWithMetadata, Y> Address for StaticAddress<R, Y> {
     type Target = R;
     type IsDecodable = Y;
 

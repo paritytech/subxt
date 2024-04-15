@@ -7,7 +7,7 @@ use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, Header, RefineParams, RefineParamsData},
     error::{BlockError, Error},
-    tx::{PayloadT, Signer as SignerT, TxProgress},
+    tx::{Payload, Signer as SignerT, TxProgress},
     utils::PhantomDataSendSync,
 };
 use codec::{Compact, Decode, Encode};
@@ -37,7 +37,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     /// the pallet or call in question do not exist at all).
     pub fn validate<Call>(&self, call: &Call) -> Result<(), Error>
     where
-        Call: PayloadT,
+        Call: Payload,
     {
         subxt_core::tx::validate(call, &self.client.metadata()).map_err(Into::into)
     }
@@ -45,7 +45,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     /// Return the SCALE encoded bytes representing the call data of the transaction.
     pub fn call_data<Call>(&self, call: &Call) -> Result<Vec<u8>, Error>
     where
-        Call: PayloadT,
+        Call: Payload,
     {
         subxt_core::tx::call_data(call, &self.client.metadata()).map_err(Into::into)
     }
@@ -53,7 +53,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     /// Creates an unsigned extrinsic without submitting it.
     pub fn create_unsigned<Call>(&self, call: &Call) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
-        Call: PayloadT,
+        Call: Payload,
     {
         subxt_core::tx::create_unsigned(call, &self.client.metadata())
             .map(|tx| SubmittableExtrinsic {
@@ -73,7 +73,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<PartialExtrinsic<T, C>, Error>
     where
-        Call: PayloadT,
+        Call: Payload,
     {
         subxt_core::tx::create_partial_signed(call, &self.client.client_state(), params)
             .map(|tx| PartialExtrinsic {
@@ -94,7 +94,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
-        Call: PayloadT,
+        Call: Payload,
         Signer: SignerT<T>,
     {
         subxt_core::tx::create_signed(call, &self.client.client_state(), signer, params)
@@ -149,7 +149,7 @@ where
         mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<PartialExtrinsic<T, C>, Error>
     where
-        Call: PayloadT,
+        Call: Payload,
     {
         // Refine the params by adding account nonce and latest block information:
         self.refine_params(account_id, &mut params).await?;
@@ -165,7 +165,7 @@ where
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<SubmittableExtrinsic<T, C>, Error>
     where
-        Call: PayloadT,
+        Call: Payload,
         Signer: SignerT<T>,
     {
         // 1. Validate this call against the current node metadata if the call comes
@@ -193,7 +193,7 @@ where
         signer: &Signer,
     ) -> Result<TxProgress<T, C>, Error>
     where
-        Call: PayloadT,
+        Call: Payload,
         Signer: SignerT<T>,
         <T::ExtrinsicParams as ExtrinsicParams<T>>::Params: Default,
     {
@@ -212,7 +212,7 @@ where
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<TxProgress<T, C>, Error>
     where
-        Call: PayloadT,
+        Call: Payload,
         Signer: SignerT<T>,
     {
         self.create_signed(call, signer, params)
@@ -237,7 +237,7 @@ where
         signer: &Signer,
     ) -> Result<T::Hash, Error>
     where
-        Call: PayloadT,
+        Call: Payload,
         Signer: SignerT<T>,
         <T::ExtrinsicParams as ExtrinsicParams<T>>::Params: Default,
     {
@@ -259,7 +259,7 @@ where
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<T::Hash, Error>
     where
-        Call: PayloadT,
+        Call: Payload,
         Signer: SignerT<T>,
     {
         self.create_signed(call, signer, params)

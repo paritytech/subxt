@@ -40,7 +40,7 @@ use crate::metadata::{DecodeWithMetadata, Metadata};
 /// - encoded arguments
 ///
 /// Each argument of the runtime function must be scale-encoded.
-pub trait PayloadT {
+pub trait Payload {
     /// The return type of the function call.
     // Note: `DecodeWithMetadata` is needed to decode the function call result
     // with the `subxt::Metadata.
@@ -75,7 +75,7 @@ pub trait PayloadT {
 /// This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
 #[derive_where(Clone, Debug, Eq, Ord, PartialEq, PartialOrd; ArgsData)]
-pub struct Payload<ArgsData, ReturnTy> {
+pub struct DefaultPayload<ArgsData, ReturnTy> {
     trait_name: Cow<'static, str>,
     method_name: Cow<'static, str>,
     args_data: ArgsData,
@@ -83,8 +83,13 @@ pub struct Payload<ArgsData, ReturnTy> {
     _marker: PhantomData<ReturnTy>,
 }
 
-impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> PayloadT
-    for Payload<ArgsData, ReturnTy>
+/// A statically generated runtime API payload.
+pub type StaticPayload<ArgsData, ReturnTy> = DefaultPayload<ArgsData, ReturnTy>;
+/// A dynamic runtime API payload.
+pub type DynamicPayload = DefaultPayload<Composite<()>, DecodedValueThunk>;
+
+impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> Payload
+    for DefaultPayload<ArgsData, ReturnTy>
 {
     type ReturnType = ReturnTy;
 
@@ -115,17 +120,14 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> PayloadT
     }
 }
 
-/// A dynamic runtime API payload.
-pub type DynamicPayload = Payload<Composite<()>, DecodedValueThunk>;
-
-impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
-    /// Create a new [`Payload`].
+impl<ReturnTy, ArgsData> DefaultPayload<ArgsData, ReturnTy> {
+    /// Create a new [`DefaultPayload`].
     pub fn new(
         trait_name: impl Into<String>,
         method_name: impl Into<String>,
         args_data: ArgsData,
     ) -> Self {
-        Payload {
+        DefaultPayload {
             trait_name: Cow::Owned(trait_name.into()),
             method_name: Cow::Owned(method_name.into()),
             args_data,
@@ -134,7 +136,7 @@ impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
         }
     }
 
-    /// Create a new static [`Payload`] using static function name
+    /// Create a new static [`DefaultPayload`] using static function name
     /// and scale-encoded argument data.
     ///
     /// This is only expected to be used from codegen.
@@ -144,8 +146,8 @@ impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
         method_name: &'static str,
         args_data: ArgsData,
         hash: [u8; 32],
-    ) -> Payload<ArgsData, ReturnTy> {
-        Payload {
+    ) -> DefaultPayload<ArgsData, ReturnTy> {
+        DefaultPayload {
             trait_name: Cow::Borrowed(trait_name),
             method_name: Cow::Borrowed(method_name),
             args_data,
@@ -184,5 +186,5 @@ pub fn dynamic(
     method_name: impl Into<String>,
     args_data: impl Into<Composite<()>>,
 ) -> DynamicPayload {
-    Payload::new(trait_name, method_name, args_data.into())
+    DefaultPayload::new(trait_name, method_name, args_data.into())
 }

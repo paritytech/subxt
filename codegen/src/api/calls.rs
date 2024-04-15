@@ -10,7 +10,7 @@ use scale_typegen::typegen::ir::ToTokensWithSettings;
 use scale_typegen::{typegen::ir::type_ir::CompositeIRKind, TypeGenerator};
 use subxt_metadata::PalletMetadata;
 
-/// Generate calls from the provided pallet's metadata. Each call returns a `StaticTxPayload`
+/// Generate calls from the provided pallet's metadata. Each call returns a `StaticPayload`
 /// that can be passed to the subxt client to submit/sign/encode.
 ///
 /// # Arguments
@@ -92,8 +92,8 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> #crate_path::tx::payload::Payload<types::#struct_name> {
-                    #crate_path::tx::payload::Payload::new_static(
+                ) -> #crate_path::tx::payload::StaticPayload<types::#struct_name> {
+                    #crate_path::tx::payload::StaticPayload::new_static(
                         #pallet_name,
                         #call_name,
                         types::#struct_name { #( #call_args, )* },

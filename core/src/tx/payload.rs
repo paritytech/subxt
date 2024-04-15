@@ -18,7 +18,7 @@ use scale_value::{Composite, Value, ValueDef, Variant};
 
 /// This represents a transaction payload that can be submitted
 /// to a node.
-pub trait PayloadT {
+pub trait Payload {
     /// Encode call data to the provided output.
     fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error>;
 
@@ -51,24 +51,26 @@ pub struct ValidationDetails<'a> {
 
 /// A transaction payload containing some generic `CallData`.
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct Payload<CallData> {
+pub struct DefaultPayload<CallData> {
     pallet_name: Cow<'static, str>,
     call_name: Cow<'static, str>,
     call_data: CallData,
     validation_hash: Option<[u8; 32]>,
 }
 
+/// The payload type used by static codegen.
+pub type StaticPayload<Calldata> = DefaultPayload<Calldata>;
 /// The type of a payload typically used for dynamic transaction payloads.
-pub type DynamicPayload = Payload<Composite<()>>;
+pub type DynamicPayload = DefaultPayload<Composite<()>>;
 
-impl<CallData> Payload<CallData> {
-    /// Create a new [`Payload`].
+impl<CallData> DefaultPayload<CallData> {
+    /// Create a new [`DefaultPayload`].
     pub fn new(
         pallet_name: impl Into<String>,
         call_name: impl Into<String>,
         call_data: CallData,
     ) -> Self {
-        Payload {
+        DefaultPayload {
             pallet_name: Cow::Owned(pallet_name.into()),
             call_name: Cow::Owned(call_name.into()),
             call_data,
@@ -76,7 +78,7 @@ impl<CallData> Payload<CallData> {
         }
     }
 
-    /// Create a new [`Payload`] using static strings for the pallet and call name.
+    /// Create a new [`DefaultPayload`] using static strings for the pallet and call name.
     /// This is only expected to be used from codegen.
     #[doc(hidden)]
     pub fn new_static(
@@ -85,7 +87,7 @@ impl<CallData> Payload<CallData> {
         call_data: CallData,
         validation_hash: [u8; 32],
     ) -> Self {
-        Payload {
+        DefaultPayload {
             pallet_name: Cow::Borrowed(pallet_name),
             call_name: Cow::Borrowed(call_name),
             call_data,
@@ -117,7 +119,7 @@ impl<CallData> Payload<CallData> {
     }
 }
 
-impl Payload<Composite<()>> {
+impl DefaultPayload<Composite<()>> {
     /// Convert the dynamic `Composite` payload into a [`Value`].
     /// This is useful if you want to use this as an argument for a
     /// larger dynamic call that wants to use this as a nested call.
@@ -134,7 +136,7 @@ impl Payload<Composite<()>> {
     }
 }
 
-impl<CallData: EncodeAsFields> PayloadT for Payload<CallData> {
+impl<CallData: EncodeAsFields> Payload for DefaultPayload<CallData> {
     fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error> {
         let pallet = metadata.pallet_by_name_err(&self.pallet_name)?;
         let call = pallet
@@ -174,5 +176,5 @@ pub fn dynamic(
     call_name: impl Into<String>,
     call_data: impl Into<Composite<()>>,
 ) -> DynamicPayload {
-    Payload::new(pallet_name, call_name, call_data.into())
+    DefaultPayload::new(pallet_name, call_name, call_data.into())
 }

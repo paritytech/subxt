@@ -49,13 +49,13 @@ use alloc::borrow::ToOwned;
 use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
-use payload::PayloadT;
+use payload::Payload;
 
 /// Run the validation logic against some runtime API payload you'd like to use. Returns `Ok(())`
 /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
 /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
 /// the runtime API in question do not exist at all)
-pub fn validate<Payload: PayloadT>(payload: &Payload, metadata: &Metadata) -> Result<(), Error> {
+pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), Error> {
     let Some(static_hash) = payload.validation_hash() else {
         return Ok(());
     };
@@ -72,30 +72,27 @@ pub fn validate<Payload: PayloadT>(payload: &Payload, metadata: &Metadata) -> Re
 }
 
 /// Return the name of the runtime API call from the payload.
-pub fn call_name<Payload: PayloadT>(payload: &Payload) -> String {
+pub fn call_name<P: Payload>(payload: &P) -> String {
     format!("{}_{}", payload.trait_name(), payload.method_name())
 }
 
 /// Return the encoded call args given a runtime API payload.
-pub fn call_args<Payload: PayloadT>(
-    payload: &Payload,
-    metadata: &Metadata,
-) -> Result<Vec<u8>, Error> {
+pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>, Error> {
     payload.encode_args(metadata)
 }
 
 /// Decode the value bytes at the location given by the provided runtime API payload.
-pub fn decode_value<Payload: PayloadT>(
+pub fn decode_value<P: Payload>(
     bytes: &mut &[u8],
-    payload: &Payload,
+    payload: &P,
     metadata: &Metadata,
-) -> Result<Payload::ReturnType, Error> {
+) -> Result<P::ReturnType, Error> {
     let api_method = metadata
         .runtime_api_trait_by_name_err(payload.trait_name())?
         .method_by_name(payload.method_name())
         .ok_or_else(|| MetadataError::RuntimeMethodNotFound(payload.method_name().to_owned()))?;
 
-    let val = <Payload::ReturnType as DecodeWithMetadata>::decode_with_metadata(
+    let val = <P::ReturnType as DecodeWithMetadata>::decode_with_metadata(
         &mut &bytes[..],
         api_method.output_ty(),
         metadata,

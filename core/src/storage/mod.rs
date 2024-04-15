@@ -47,7 +47,7 @@ mod utils;
 pub mod address;
 
 use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
-use address::AddressT;
+use address::Address;
 use alloc::vec::Vec;
 
 // This isn't a part of the public API, but expose here because it's useful in Subxt.
@@ -59,7 +59,7 @@ pub use utils::lookup_storage_entry_details;
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Address: AddressT>(address: &Address, metadata: &Metadata) -> Result<(), Error> {
+pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<(), Error> {
     let Some(hash) = address.validation_hash() else {
         return Ok(());
     };
@@ -80,8 +80,8 @@ pub fn validate<Address: AddressT>(address: &Address, metadata: &Metadata) -> Re
 
 /// Given a storage address and some metadata, this encodes the address into bytes which can be
 /// handed to a node to retrieve the corresponding value.
-pub fn get_address_bytes<Address: AddressT>(
-    address: &Address,
+pub fn get_address_bytes<Addr: Address>(
+    address: &Addr,
     metadata: &Metadata,
 ) -> Result<Vec<u8>, Error> {
     let mut bytes = Vec::new();
@@ -93,7 +93,7 @@ pub fn get_address_bytes<Address: AddressT>(
 /// Given a storage address and some metadata, this encodes the root of the address (ie the pallet
 /// and storage entry part) into bytes. If the entry being addressed is inside a map, this returns
 /// the bytes needed to iterate over all of the entries within it.
-pub fn get_address_root_bytes<Address: AddressT>(address: &Address) -> Vec<u8> {
+pub fn get_address_root_bytes<Addr: Address>(address: &Addr) -> Vec<u8> {
     let mut bytes = Vec::new();
     utils::write_storage_address_root_bytes(address, &mut bytes);
     bytes
@@ -102,11 +102,11 @@ pub fn get_address_root_bytes<Address: AddressT>(address: &Address) -> Vec<u8> {
 /// Given some storage value that we've retrieved from a node, the address used to retrieve it, and
 /// metadata from the node, this function attempts to decode the bytes into the target value specified
 /// by the address.
-pub fn decode_value<Address: AddressT>(
+pub fn decode_value<Addr: Address>(
     bytes: &mut &[u8],
-    address: &Address,
+    address: &Addr,
     metadata: &Metadata,
-) -> Result<Address::Target, Error> {
+) -> Result<Addr::Target, Error> {
     let pallet_name = address.pallet_name();
     let entry_name = address.entry_name();
 
@@ -117,15 +117,15 @@ pub fn decode_value<Address: AddressT>(
         subxt_metadata::StorageEntryType::Map { value_ty, .. } => *value_ty,
     };
 
-    let val = Address::Target::decode_with_metadata(bytes, value_ty_id, metadata)?;
+    let val = Addr::Target::decode_with_metadata(bytes, value_ty_id, metadata)?;
     Ok(val)
 }
 
 /// Return the default value at a given storage address if one is available, or an error otherwise.
-pub fn default_value<Address: AddressT>(
-    address: &Address,
+pub fn default_value<Addr: Address>(
+    address: &Addr,
     metadata: &Metadata,
-) -> Result<Address::Target, Error> {
+) -> Result<Addr::Target, Error> {
     let pallet_name = address.pallet_name();
     let entry_name = address.entry_name();
 
@@ -137,6 +137,6 @@ pub fn default_value<Address: AddressT>(
     };
 
     let default_bytes = entry_metadata.default_bytes();
-    let val = Address::Target::decode_with_metadata(&mut &*default_bytes, value_ty_id, metadata)?;
+    let val = Addr::Target::decode_with_metadata(&mut &*default_bytes, value_ty_id, metadata)?;
     Ok(val)
 }
