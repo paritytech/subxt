@@ -220,7 +220,7 @@ fn try_find_substrate_port_from_output(
 
         // Parse the p2p port line (present in debug logs)
         let p2p_port_line = line
-            .rsplit_once("libp2p_tcp: New listen address: /ip4/127.0.0.1/tcp/")
+            .rsplit_once("New listen address: /ip4/127.0.0.1/tcp/")
             .map(|(_, address_str)| address_str);
 
         if let Some(line_port) = p2p_port_line {
