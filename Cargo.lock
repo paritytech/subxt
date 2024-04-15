@@ -4677,7 +4677,7 @@ dependencies = [
  "clap 4.5.3",
  "color-eyre",
  "frame-metadata 16.0.0",
- "heck 0.4.1",
+ "heck 0.5.0",
  "hex",
  "indoc",
  "jsonrpsee",
@@ -4705,7 +4705,7 @@ version = "0.35.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "getrandom",
- "heck 0.4.1",
+ "heck 0.5.0",
  "hex",
  "jsonrpsee",
  "parity-scale-codec",
