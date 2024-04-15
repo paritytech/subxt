@@ -379,11 +379,6 @@ pub struct StorageFetchDescendantKeysStream<T: Config> {
     storage_page_size: u32,
     // What key do we start paginating from? None = from the beginning.
     pagination_start_key: Option<Vec<u8>>,
-    // // What key did we see last? In Smoldot, the legacy storage API will hand
-    // // back the `start_key` (ie the key we saw last time) as the first key,
-    // // whereas in Substrate it will not. Here we'll want to skip over it to avoid
-    // // returning it twice.
-    // last_seen_key: Option<Vec<u8>>,
     // Keys, future and cached:
     keys_fut: Option<Pin<Box<dyn Future<Output = Result<Vec<Vec<u8>>, Error>> + Send + 'static>>>,
     // Set to true when we're done:
