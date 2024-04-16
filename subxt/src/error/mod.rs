@@ -6,6 +6,8 @@
 
 mod dispatch_error;
 
+use subxt_core::error::{BlockError as CoreBlockError, Error as CoreError};
+
 crate::macros::cfg_unstable_light_client! {
     pub use subxt_lightclient::LightClientError;
 }
@@ -14,13 +16,12 @@ crate::macros::cfg_unstable_light_client! {
 pub use dispatch_error::{
     ArithmeticError, DispatchError, ModuleError, TokenError, TransactionalError,
 };
-use subxt_metadata::StorageHasher;
 
 // Re-expose the errors we use from other crates here:
-pub use crate::config::ExtrinsicParamsError;
 pub use crate::metadata::Metadata;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
+pub use subxt_core::error::{ExtrinsicParamsError, MetadataError, StorageAddressError};
 pub use subxt_metadata::TryFromError as MetadataTryFromError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
@@ -79,6 +80,20 @@ pub enum Error {
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
+}
+
+impl From<CoreError> for Error {
+    fn from(value: CoreError) -> Self {
+        match value {
+            CoreError::Codec(e) => Error::Codec(e),
+            CoreError::Metadata(e) => Error::Metadata(e),
+            CoreError::StorageAddress(e) => Error::StorageAddress(e),
+            CoreError::Decode(e) => Error::Decode(e),
+            CoreError::Encode(e) => Error::Encode(e),
+            CoreError::ExtrinsicParams(e) => Error::ExtrinsicParams(e),
+            CoreError::Block(e) => Error::Block(e.into()),
+        }
+    }
 }
 
 impl<'a> From<&'a str> for Error {
@@ -163,6 +178,16 @@ pub enum BlockError {
     DecodingError(codec::Error),
 }
 
+impl From<CoreBlockError> for BlockError {
+    fn from(value: CoreBlockError) -> Self {
+        match value {
+            CoreBlockError::MissingType => BlockError::MissingType,
+            CoreBlockError::UnsupportedVersion(n) => BlockError::UnsupportedVersion(n),
+            CoreBlockError::DecodingError(e) => BlockError::DecodingError(e),
+        }
+    }
+}
+
 impl BlockError {
     /// Produce an error that a block with the given hash cannot be found.
     pub fn not_found(hash: impl AsRef<[u8]>) -> BlockError {
@@ -188,92 +213,4 @@ pub enum TransactionError {
     /// The transaction was dropped.
     #[error("The transaction was dropped: {0}")]
     Dropped(String),
-}
-
-/// Something went wrong trying to encode a storage address.
-#[derive(Clone, Debug, thiserror::Error)]
-#[non_exhaustive]
-pub enum StorageAddressError {
-    /// Storage lookup does not have the expected number of keys.
-    #[error("Storage lookup requires {expected} keys but more keys have been provided.")]
-    TooManyKeys {
-        /// The number of keys provided in the storage address.
-        expected: usize,
-    },
-    /// This storage entry in the metadata does not have the correct number of hashers to fields.
-    #[error("Storage entry in metadata does not have the correct number of hashers to fields")]
-    WrongNumberOfHashers {
-        /// The number of hashers in the metadata for this storage entry.
-        hashers: usize,
-        /// The number of fields in the metadata for this storage entry.
-        fields: usize,
-    },
-    /// We weren't given enough bytes to decode the storage address/key.
-    #[error("Not enough remaining bytes to decode the storage address/key")]
-    NotEnoughBytes,
-    /// We have leftover bytes after decoding the storage address.
-    #[error("We have leftover bytes after decoding the storage address")]
-    TooManyBytes,
-    /// The bytes of a storage address are not the expected address for decoding the storage keys of the address.
-    #[error("Storage address bytes are not the expected format. Addresses need to be at least 16 bytes (pallet ++ entry) and follow a structure given by the hashers defined in the metadata")]
-    UnexpectedAddressBytes,
-    /// An invalid hasher was used to reconstruct a value from a chunk of bytes that is part of a storage address. Hashers where the hash does not contain the original value are invalid for this purpose.
-    #[error("An invalid hasher was used to reconstruct a value with type ID {ty_id} from a hash formed by a {hasher:?} hasher. This is only possible for concat-style hashers or the identity hasher")]
-    HasherCannotReconstructKey {
-        /// Type id of the key's type.
-        ty_id: u32,
-        /// The invalid hasher that caused this error.
-        hasher: StorageHasher,
-    },
-}
-
-/// Something went wrong trying to access details in the metadata.
-#[derive(Clone, Debug, PartialEq, thiserror::Error)]
-#[non_exhaustive]
-pub enum MetadataError {
-    /// The DispatchError type isn't available in the metadata
-    #[error("The DispatchError type isn't available")]
-    DispatchErrorNotFound,
-    /// Type not found in metadata.
-    #[error("Type with ID {0} not found")]
-    TypeNotFound(u32),
-    /// Pallet not found (index).
-    #[error("Pallet with index {0} not found")]
-    PalletIndexNotFound(u8),
-    /// Pallet not found (name).
-    #[error("Pallet with name {0} not found")]
-    PalletNameNotFound(String),
-    /// Variant not found.
-    #[error("Variant with index {0} not found")]
-    VariantIndexNotFound(u8),
-    /// Constant not found.
-    #[error("Constant with name {0} not found")]
-    ConstantNameNotFound(String),
-    /// Call not found.
-    #[error("Call with name {0} not found")]
-    CallNameNotFound(String),
-    /// Runtime trait not found.
-    #[error("Runtime trait with name {0} not found")]
-    RuntimeTraitNotFound(String),
-    /// Runtime method not found.
-    #[error("Runtime method with name {0} not found")]
-    RuntimeMethodNotFound(String),
-    /// Call type not found in metadata.
-    #[error("Call type not found in pallet with index {0}")]
-    CallTypeNotFoundInPallet(u8),
-    /// Event type not found in metadata.
-    #[error("Event type not found in pallet with index {0}")]
-    EventTypeNotFoundInPallet(u8),
-    /// Storage details not found in metadata.
-    #[error("Storage details not found in pallet with name {0}")]
-    StorageNotFoundInPallet(String),
-    /// Storage entry not found.
-    #[error("Storage entry {0} not found")]
-    StorageEntryNotFound(String),
-    /// The generated interface used is not compatible with the node.
-    #[error("The generated code is not compatible with the node")]
-    IncompatibleCodegen,
-    /// Custom value not found.
-    #[error("Custom value with name {0} not found")]
-    CustomValueNameNotFound(String),
 }

@@ -5,12 +5,11 @@
 use super::runtime_types::RuntimeApi;
 
 use crate::{backend::BlockRef, client::OnlineClientT, error::Error, Config};
-use derivative::Derivative;
+use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
 
 /// Execute runtime API calls.
-#[derive(Derivative)]
-#[derivative(Clone(bound = "Client: Clone"))]
+#[derive_where(Clone; Client)]
 pub struct RuntimeApiClient<T, Client> {
     client: Client,
     _marker: PhantomData<T>,

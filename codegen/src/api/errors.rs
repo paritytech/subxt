@@ -8,6 +8,7 @@ use scale_typegen::TypeGenerator;
 use subxt_metadata::PalletMetadata;
 
 use super::CodegenError;
+use scale_typegen::typegen::ir::ToTokensWithSettings;
 
 /// Generate error type alias from the provided pallet metadata.
 pub fn generate_error_type_alias(
@@ -18,7 +19,9 @@ pub fn generate_error_type_alias(
         return Ok(quote!());
     };
 
-    let error_type = type_gen.resolve_type_path(error_ty)?;
+    let error_type = type_gen
+        .resolve_type_path(error_ty)?
+        .to_token_stream(type_gen.settings());
     let error_ty = type_gen.resolve_type(error_ty)?;
     let docs = &error_ty.docs;
     let docs = type_gen

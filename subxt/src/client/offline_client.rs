@@ -4,23 +4,34 @@
 
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    backend::RuntimeVersion, blocks::BlocksClient, constants::ConstantsClient,
-    events::EventsClient, runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient,
-    Config, Metadata,
+    blocks::BlocksClient, constants::ConstantsClient, events::EventsClient,
+    runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient, Config, Metadata,
 };
-use derivative::Derivative;
 
+use derive_where::derive_where;
 use std::sync::Arc;
+use subxt_core::client::{ClientState, RuntimeVersion};
 
 /// A trait representing a client that can perform
 /// offline-only actions.
 pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Return the provided [`Metadata`].
     fn metadata(&self) -> Metadata;
+
     /// Return the provided genesis hash.
     fn genesis_hash(&self) -> T::Hash;
+
     /// Return the provided [`RuntimeVersion`].
     fn runtime_version(&self) -> RuntimeVersion;
+
+    /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
+    fn client_state(&self) -> ClientState<T> {
+        ClientState {
+            genesis_hash: self.genesis_hash(),
+            runtime_version: self.runtime_version(),
+            metadata: self.metadata(),
+        }
+    }
 
     /// Work with transactions.
     fn tx(&self) -> TxClient<T, Self> {
@@ -60,18 +71,9 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
 
 /// A client that is capable of performing offline-only operations.
 /// Can be constructed as long as you can populate the required fields.
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""), Clone(bound = ""))]
+#[derive_where(Debug, Clone)]
 pub struct OfflineClient<T: Config> {
-    inner: Arc<Inner<T>>,
-}
-
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""), Clone(bound = ""))]
-struct Inner<T: Config> {
-    genesis_hash: T::Hash,
-    runtime_version: RuntimeVersion,
-    metadata: Metadata,
+    inner: Arc<ClientState<T>>,
 }
 
 impl<T: Config> OfflineClient<T> {
@@ -82,11 +84,13 @@ impl<T: Config> OfflineClient<T> {
         runtime_version: RuntimeVersion,
         metadata: impl Into<Metadata>,
     ) -> OfflineClient<T> {
+        let metadata = metadata.into();
+
         OfflineClient {
-            inner: Arc::new(Inner {
+            inner: Arc::new(ClientState {
                 genesis_hash,
                 runtime_version,
-                metadata: metadata.into(),
+                metadata,
             }),
         }
     }
@@ -98,7 +102,7 @@ impl<T: Config> OfflineClient<T> {
 
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
-        self.inner.runtime_version.clone()
+        self.inner.runtime_version
     }
 
     /// Return the [`Metadata`] used in this client.

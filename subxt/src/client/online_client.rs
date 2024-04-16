@@ -6,7 +6,7 @@ use super::{OfflineClient, OfflineClientT};
 use crate::backend::utils::RetrySubscription;
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, RuntimeVersion},
+    backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt},
     blocks::{BlockRef, BlocksClient},
     constants::ConstantsClient,
     error::Error,
@@ -16,9 +16,10 @@ use crate::{
     tx::TxClient,
     Config, Metadata,
 };
-use derivative::Derivative;
+use derive_where::derive_where;
 use futures::future;
 use std::sync::{Arc, RwLock};
+use subxt_core::client::{ClientState, RuntimeVersion};
 
 /// A trait representing a client that can perform
 /// online actions.
@@ -29,15 +30,13 @@ pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
 
 /// A client that can be used to perform API calls (that is, either those
 /// requiring an [`OfflineClientT`] or those requiring an [`OnlineClientT`]).
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""))]
+#[derive_where(Clone)]
 pub struct OnlineClient<T: Config> {
     inner: Arc<RwLock<Inner<T>>>,
     backend: Arc<dyn Backend<T>>,
 }
 
-#[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
+#[derive_where(Debug)]
 struct Inner<T: Config> {
     genesis_hash: T::Hash,
     runtime_version: RuntimeVersion,
@@ -285,7 +284,7 @@ impl<T: Config> OnlineClient<T> {
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
         let inner = self.inner.read().expect("shouldn't be poisoned");
-        inner.runtime_version.clone()
+        inner.runtime_version
     }
 
     /// Change the [`RuntimeVersion`] used in this client.
@@ -309,7 +308,7 @@ impl<T: Config> OnlineClient<T> {
         let inner = self.inner.read().expect("shouldn't be poisoned");
         OfflineClient::new(
             inner.genesis_hash,
-            inner.runtime_version.clone(),
+            inner.runtime_version,
             inner.metadata.clone(),
         )
     }
@@ -362,6 +361,15 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     }
     fn runtime_version(&self) -> RuntimeVersion {
         self.runtime_version()
+    }
+    // This is provided by default, but we can optimise here and only lock once:
+    fn client_state(&self) -> ClientState<T> {
+        let inner = self.inner.read().expect("shouldn't be poisoned");
+        ClientState {
+            genesis_hash: inner.genesis_hash,
+            runtime_version: inner.runtime_version,
+            metadata: inner.metadata.clone(),
+        }
     }
 }
 
@@ -523,7 +531,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
 
         let scale_val = match chunk.to_value() {
             Ok(v) => v,
-            Err(e) => return Some(Err(e)),
+            Err(e) => return Some(Err(e.into())),
         };
 
         let Some(Ok(spec_version)) = scale_val

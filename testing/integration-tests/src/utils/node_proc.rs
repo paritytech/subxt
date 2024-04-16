@@ -145,7 +145,7 @@ impl TestNodeProcessBuilder {
         #[allow(unused_assignments, unused_mut)]
         let mut legacy_client = None;
 
-        #[cfg(feature = "unstable-light-client")]
+        #[cfg(lightclient)]
         let client = build_light_client(&proc).await?;
 
         #[cfg(feature = "unstable-backend-client")]
@@ -155,10 +155,7 @@ impl TestNodeProcessBuilder {
             client
         };
 
-        #[cfg(all(
-            not(feature = "unstable-light-client"),
-            not(feature = "unstable-backend-client")
-        ))]
+        #[cfg(all(not(lightclient), not(feature = "unstable-backend-client")))]
         let client = {
             let client = build_legacy_client(rpc_client.clone()).await?;
             legacy_client = Some(client.clone());
@@ -219,7 +216,7 @@ async fn build_unstable_client<T: Config>(
     Ok(client)
 }
 
-#[cfg(feature = "unstable-light-client")]
+#[cfg(lightclient)]
 async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineClient<T>, String> {
     use subxt::lightclient::{ChainConfig, LightClient};
 
@@ -230,7 +227,11 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineCli
     let client = OnlineClient::<T>::from_url(ws_url.clone())
         .await
         .map_err(|err| format!("Failed to connect to node rpc at {ws_url}: {err}"))?;
-    super::wait_for_blocks(&client).await;
+
+    // Wait for at least a few blocks before starting the light client.
+    // Otherwise, the lightclient might error with
+    // `"Error when retrieving the call proof: No node available for call proof query"`.
+    super::wait_for_number_of_blocks(&client, 5).await;
 
     // Now, configure a light client; fetch the chain spec and modify the bootnodes.
     let bootnode = format!(
@@ -252,9 +253,5 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineCli
         .map_err(|e| format!("Light client: cannot add relay chain: {e}"))?;
 
     // Instantiate subxt client from this.
-    let api = OnlineClient::from_rpc_client(rpc)
-        .await
-        .map_err(|e| format!("Failed to build OnlineClient from light client RPC: {e}"))?;
-
-    Ok(api)
+    build_unstable_client(rpc.into()).await
 }

@@ -7,6 +7,7 @@ use std::collections::HashSet;
 use heck::ToSnakeCase as _;
 use heck::ToUpperCamelCase as _;
 
+use scale_typegen::typegen::ir::ToTokensWithSettings;
 use scale_typegen::TypeGenerator;
 use subxt_metadata::{Metadata, RuntimeApiMetadata};
 
@@ -77,7 +78,7 @@ fn generate_runtime_api(
                     // Generate alias for runtime type.
                     let ty = type_gen
                         .resolve_type_path(input.ty)
-                        .expect("runtime api input type is in metadata; qed");
+                        .expect("runtime api input type is in metadata; qed").to_token_stream(type_gen.settings());
                     let aliased_param = quote!( pub type #alias_name = #ty; );
 
                     // Structures are placed on the same level as the alias module.
@@ -96,7 +97,7 @@ fn generate_runtime_api(
             let type_aliases = inputs.iter().map(|(_, _, _, aliased_param)| aliased_param);
             let types_mod_ident = type_gen.types_mod_ident();
 
-            let output = type_gen.resolve_type_path(method.output_ty())?;
+            let output = type_gen.resolve_type_path(method.output_ty())?.to_token_stream(type_gen.settings());
             let aliased_module = quote!(
                 pub mod #method_name {
                     use super::#types_mod_ident;
@@ -134,8 +135,8 @@ fn generate_runtime_api(
 
             let method = quote!(
                 #docs
-                pub fn #method_name(&self, #( #fn_params, )* ) -> #crate_path::runtime_api::Payload<types::#struct_name, types::#method_name::output::Output> {
-                    #crate_path::runtime_api::Payload::new_static(
+                pub fn #method_name(&self, #( #fn_params, )* ) -> #crate_path::runtime_api::payload::StaticPayload<types::#struct_name, types::#method_name::output::Output> {
+                    #crate_path::runtime_api::payload::StaticPayload::new_static(
                         #trait_name_str,
                         #method_name_str,
                         types::#struct_name { #( #param_names, )* },

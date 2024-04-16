@@ -531,7 +531,17 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
                 };
 
                 match keys {
-                    Ok(keys) => {
+                    Ok(mut keys) => {
+                        if this.pagination_start_key.is_some()
+                            && keys.first() == this.pagination_start_key.as_ref()
+                        {
+                            // Currently, Smoldot returns the "start key" as the first key in the input
+                            // (see https://github.com/smol-dot/smoldot/issues/1692), whereas Substrate doesn't.
+                            // We don't expect the start key to be returned either (since it was the last key of prev
+                            // iteration), so remove it if we see it. This `remove()` method isn't very efficient but
+                            // this will be a non issue with the RPC V2 APIs or if Smoldot aligns with Substrate anyway.
+                            keys.remove(0);
+                        }
                         if keys.is_empty() {
                             // No keys left; we're done!
                             this.done = true;
@@ -554,7 +564,7 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
             let key = this.key.clone();
             let at = this.at;
             let storage_page_size = this.storage_page_size;
-            let pagination_start_key = this.pagination_start_key.take();
+            let pagination_start_key = this.pagination_start_key.clone();
             let keys_fut = async move {
                 methods
                     .state_get_keys_paged(

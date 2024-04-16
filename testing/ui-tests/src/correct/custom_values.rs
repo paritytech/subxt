@@ -35,10 +35,11 @@ fn construct_offline_client() -> OfflineClient<PolkadotConfig> {
         let bytes = hex::decode(h).unwrap();
         H256::from_slice(&bytes)
     };
-    let runtime_version = subxt::backend::RuntimeVersion {
+    let runtime_version = subxt::client::RuntimeVersion {
         spec_version: 9370,
         transaction_version: 20,
     };
+
     let metadata = {
         let bytes = std::fs::read("../../../../artifacts/metadata_with_custom_values.scale").unwrap();
         Metadata::decode(&mut &*bytes).unwrap()

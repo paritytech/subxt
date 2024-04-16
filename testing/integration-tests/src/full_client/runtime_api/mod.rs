@@ -2,12 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, test_context};
+use crate::{node_runtime, subxt_test, test_context};
 use codec::Encode;
 use subxt::utils::AccountId32;
 use subxt_signer::sr25519::dev;
 
-#[tokio::test]
+#[subxt_test]
 async fn account_nonce() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -29,8 +29,13 @@ async fn account_nonce() -> Result<(), subxt::Error> {
 
     // Do some transaction to bump the Alice nonce to 1:
     let remark_tx = node_runtime::tx().system().remark(vec![1, 2, 3, 4, 5]);
-    api.tx()
-        .sign_and_submit_then_watch_default(&remark_tx, &alice)
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&remark_tx, &alice, Default::default())
+        .await?;
+
+    signed_extrinsic
+        .submit_and_watch()
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -49,7 +54,7 @@ async fn account_nonce() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn unchecked_extrinsic_encoding() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();

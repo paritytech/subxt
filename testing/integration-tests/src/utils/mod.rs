@@ -8,4 +8,15 @@ mod wait_for_blocks;
 
 pub use context::*;
 pub use node_proc::TestNodeProcess;
-pub use wait_for_blocks::wait_for_blocks;
+pub use wait_for_blocks::*;
+
+pub use subxt_test_macro::subxt_test;
+
+/// The test timeout is set to 1 second.
+/// However, the test is sleeping for 5 seconds.
+/// This must cause the test to panic.
+#[subxt_test(timeout = 1)]
+#[should_panic]
+async fn test_subxt_macro() {
+    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+}

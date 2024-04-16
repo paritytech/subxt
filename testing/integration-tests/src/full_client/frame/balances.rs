@@ -4,7 +4,7 @@
 
 use crate::{
     node_runtime::{self, balances, runtime_types, system},
-    test_context,
+    subxt_test, test_context,
 };
 use codec::Decode;
 use subxt::{
@@ -13,7 +13,7 @@ use subxt::{
 };
 use subxt_signer::sr25519::dev;
 
-#[tokio::test]
+#[subxt_test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let alice = dev::alice();
     let bob = dev::bob();
@@ -45,12 +45,18 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
         .balances()
         .transfer_allow_death(bob_address, 10_000);
 
-    let events = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
-        .await?
+        .create_signed(&tx, &alice, Default::default())
+        .await?;
+
+    let events = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
         .wait_for_finalized_success()
         .await?;
+
     let event = events
         .find_first::<balances::events::Transfer>()
         .expect("Failed to decode balances::events::Transfer")
@@ -85,7 +91,8 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[cfg(fullclient)]
+#[subxt_test]
 async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     use subxt::ext::scale_value::{At, Composite, Value};
 
@@ -207,7 +214,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
     let alice = dev::alice();
     let bob = dev::bob();
@@ -232,9 +239,15 @@ async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
         .balances()
         .transfer_allow_death(bob_address.clone(), 10_000);
     for _ in 0..3 {
-        api.tx()
-            .sign_and_submit_then_watch_default(&tx, &alice)
-            .await?
+        let signed_extrinsic = api
+            .tx()
+            .create_signed(&tx, &alice, Default::default())
+            .await?;
+
+        signed_extrinsic
+            .submit_and_watch()
+            .await
+            .unwrap()
             .wait_for_finalized_success()
             .await?;
     }
@@ -250,7 +263,7 @@ async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn storage_total_issuance() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -267,7 +280,7 @@ async fn storage_total_issuance() {
     assert_ne!(total_issuance, 0);
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let bob_signer = dev::bob();
     let bob: AccountId32 = dev::bob().public_key().into();
@@ -279,9 +292,15 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
         runtime_types::pallet_staking::RewardDestination::Stash,
     );
 
-    api.tx()
-        .sign_and_submit_then_watch_default(&tx, &bob_signer)
-        .await?
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &bob_signer, Default::default())
+        .await?;
+
+    signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
         .wait_for_finalized_success()
         .await?
         .find_first::<system::events::ExtrinsicSuccess>()?
@@ -308,7 +327,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn transfer_error() {
     let alice = dev::alice();
     let alice_addr = alice.public_key().into();
@@ -324,8 +343,13 @@ async fn transfer_error() {
         .balances()
         .transfer_allow_death(alice_addr, 100_000_000_000_000_000);
 
-    api.tx()
-        .sign_and_submit_then_watch_default(&to_bob_tx, &alice)
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&to_bob_tx, &alice, Default::default())
+        .await
+        .unwrap();
+    signed_extrinsic
+        .submit_and_watch()
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -334,9 +358,14 @@ async fn transfer_error() {
 
     // When we try giving all of the funds back, Bob doesn't have
     // anything left to pay transfer fees, so we hit an error.
-    let res = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&to_alice_tx, &bob)
+        .create_signed(&to_alice_tx, &bob, Default::default())
+        .await
+        .unwrap();
+
+    let res = signed_extrinsic
+        .submit_and_watch()
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -353,7 +382,7 @@ async fn transfer_error() {
     );
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn transfer_implicit_subscription() {
     let alice = dev::alice();
     let bob: AccountId32 = dev::bob().public_key().into();
@@ -364,9 +393,14 @@ async fn transfer_implicit_subscription() {
         .balances()
         .transfer_allow_death(bob.clone().into(), 10_000);
 
-    let event = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&to_bob_tx, &alice)
+        .create_signed(&to_bob_tx, &alice, Default::default())
+        .await
+        .unwrap();
+
+    let event = signed_extrinsic
+        .submit_and_watch()
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -386,7 +420,7 @@ async fn transfer_implicit_subscription() {
     );
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn constant_existential_deposit() {
     let ctx = test_context().await;
     let api = ctx.client();

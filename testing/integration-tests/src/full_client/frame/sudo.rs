@@ -8,14 +8,14 @@ use crate::{
         runtime_types::{self, sp_weights::weight_v2::Weight},
         sudo,
     },
-    test_context,
+    subxt_test, test_context,
 };
 use subxt_signer::sr25519::dev;
 
 type Call = runtime_types::kitchensink_runtime::RuntimeCall;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
-#[tokio::test]
+#[subxt_test]
 async fn test_sudo() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -29,9 +29,13 @@ async fn test_sudo() -> Result<(), subxt::Error> {
     });
     let tx = node_runtime::tx().sudo().sudo(call);
 
-    let found_event = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
+        .create_signed(&tx, &alice, Default::default())
+        .await?;
+
+    let found_event = signed_extrinsic
+        .submit_and_watch()
         .await?
         .wait_for_finalized_success()
         .await?
@@ -41,7 +45,7 @@ async fn test_sudo() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -61,9 +65,13 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
         },
     );
 
-    let found_event = api
+    let signed_extrinsic = api
         .tx()
-        .sign_and_submit_then_watch_default(&tx, &alice)
+        .create_signed(&tx, &alice, Default::default())
+        .await?;
+
+    let found_event = signed_extrinsic
+        .submit_and_watch()
         .await?
         .wait_for_finalized_success()
         .await?

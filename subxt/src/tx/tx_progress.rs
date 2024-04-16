@@ -6,16 +6,15 @@
 
 use std::task::Poll;
 
-use crate::backend::StreamOfResults;
-use crate::utils::strip_compact_prefix;
 use crate::{
-    backend::{BlockRef, TransactionStatus as BackendTxStatus},
+    backend::{BlockRef, StreamOfResults, TransactionStatus as BackendTxStatus},
     client::OnlineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
+    utils::strip_compact_prefix,
     Config,
 };
-use derivative::Derivative;
+use derive_where::derive_where;
 use futures::{Stream, StreamExt};
 
 /// This struct represents a subscription to the progress of some transaction.
@@ -168,8 +167,7 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
 }
 
 /// Possible transaction statuses returned from our [`TxProgress::next()`] call.
-#[derive(Derivative)]
-#[derivative(Debug(bound = "C: std::fmt::Debug"))]
+#[derive_where(Debug; C)]
 pub enum TxStatus<T: Config, C> {
     /// Transaction is part of the future queue.
     Validated,
@@ -222,8 +220,7 @@ impl<T: Config, C> TxStatus<T, C> {
 }
 
 /// This struct represents a transaction that has made it into a block.
-#[derive(Derivative)]
-#[derivative(Debug(bound = "C: std::fmt::Debug"))]
+#[derive_where(Debug; C)]
 pub struct TxInBlock<T: Config, C> {
     block_ref: BlockRef<T::Hash>,
     ext_hash: T::Hash,
@@ -322,6 +319,8 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
 
 #[cfg(test)]
 mod test {
+    use subxt_core::client::RuntimeVersion;
+
     use crate::{
         backend::{StreamOfResults, TransactionStatus},
         client::{OfflineClientT, OnlineClientT},
@@ -346,7 +345,11 @@ mod test {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
 
-        fn runtime_version(&self) -> crate::backend::RuntimeVersion {
+        fn runtime_version(&self) -> RuntimeVersion {
+            unimplemented!("just a mock impl to satisfy trait bounds")
+        }
+
+        fn client_state(&self) -> subxt_core::client::ClientState<SubstrateConfig> {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
     }

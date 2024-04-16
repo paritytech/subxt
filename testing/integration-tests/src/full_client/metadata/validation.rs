@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, test_context, TestContext};
+use crate::{node_runtime, subxt_test, test_context, TestContext};
 use frame_metadata::v15::{
     CustomMetadata, ExtrinsicMetadata, OuterEnums, PalletCallMetadata, PalletMetadata,
     PalletStorageMetadata, RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier,
@@ -97,7 +97,7 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> Metadata {
     ))
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn full_metadata_check() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -114,7 +114,7 @@ async fn full_metadata_check() {
     assert!(!node_runtime::is_codegen_valid_for(&metadata));
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn constant_values_are_not_validated() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -146,7 +146,7 @@ async fn constant_values_are_not_validated() {
     assert!(api.constants().at(&deposit_addr).is_ok());
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn calls_check() {
     let ctx = test_context().await;
     let api = ctx.client();
@@ -232,7 +232,7 @@ async fn calls_check() {
     assert!(api.tx().validate(&withdraw_unbonded_addr).is_ok());
 }
 
-#[tokio::test]
+#[subxt_test]
 async fn storage_check() {
     let ctx = test_context().await;
     let api = ctx.client();

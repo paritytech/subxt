@@ -46,7 +46,7 @@ pub struct Opts {
     #[clap(long = "substitute-type", value_parser = substitute_type_parser)]
     substitute_types: Vec<(String, String)>,
     /// The `subxt` crate access path in the generated code.
-    /// Defaults to `::subxt`.
+    /// Defaults to `::subxt::ext::subxt_core`.
     #[clap(long = "crate")]
     crate_path: Option<String>,
     /// Do not generate documentation for the runtime API code.

@@ -2,10 +2,12 @@
 members = [
     "cli",
     "codegen",
+    "core",
     "lightclient",
     "testing/substrate-runner",
     "testing/test-runtime",
     "testing/integration-tests",
+    "testing/integration-tests/subxt-test-macro",
     "testing/ui-tests",
     "testing/generate-custom-metadata",
     "macro",
@@ -58,7 +60,7 @@ type_complexity = "allow"
 all = "deny"
 
 [workspace.dependencies]
-async-trait = "0.1.79"
+async-trait = "0.1.80"
 assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
@@ -70,7 +72,7 @@ codec = { package = "parity-scale-codec", version = "3.6.9", default-features = 
 color-eyre = "0.6.3"
 console_error_panic_hook = "0.1.7"
 darling = "0.20.8"
-derivative = "2.2.0"
+derive-where = "1.2.7"
 derive_more = "0.99.17"
 either = { version = "1.10.0", default-features = false }
 frame-metadata = { version = "16.0.0", default-features = false }
@@ -78,42 +80,44 @@ futures = { version = "0.3.30", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
 hashbrown = "0.14.3"
 hex = { version = "0.4.3", default-features = false }
-heck = "0.4.1"
+heck = "0.5.0"
 impl-serde = { version = "0.4.0", default-features = false }
 indoc = "2"
 jsonrpsee = { version = "0.22" }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.2", default-features = false }
 proc-macro-error = "1.0.4"
-proc-macro2 = "1.0.79"
+proc-macro2 = "1.0.80"
 quote = "1.0.35"
-regex = { version = "1.10.3", default-features = false }
+regex = { version = "1.10.4", default-features = false }
 scale-info = { version = "2.11.0", default-features = false }
 scale-value = { version = "0.14.1", default-features = false }
 scale-bits = { version = "0.5.0", default-features = false }
 scale-decode = { version = "0.11.1", default-features = false }
 scale-encode = { version = "0.6.0", default-features = false }
+scale-typegen = "0.4.2"
+scale-typegen-description = "0.4.3"
 serde = { version = "1.0.197", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.114", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.58"
-tokio = { version = "1.36", default-features = false }
+tokio = { version = "1.37", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
 tracing-subscriber = "0.3.18"
-trybuild = "1.0.90"
+trybuild = "1.0.91"
 url = "2.5.0"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "5.0.0"
-scale-typegen-description = "0.2.0"
-scale-typegen = "0.2.0"
 strip-ansi-escapes = "0.2.0"
+proptest = "1.4.0"
+hex-literal = "0.4.1"
 
 # Light client support:
 smoldot = { version = "0.16.0", default-features = false }
 smoldot-light = { version = "0.14.0", default-features = false }
-tokio-stream = "0.1.14"
+tokio-stream = "0.1.15"
 futures-util = "0.3.30"
 rand = "0.8.5"
 pin-project = "1.1.5"
@@ -136,6 +140,7 @@ sp-keyring = "34.0.0"
 
 # Subxt workspace crates:
 subxt = { version = "0.35.0", path = "subxt", default-features = false }
+subxt-core = { version = "0.35.0", path = "core", default-features = false }
 subxt-macro = { version = "0.35.0", path = "macro" }
 subxt-metadata = { version = "0.35.0", path = "metadata", default-features = false }
 subxt-codegen = { version = "0.35.0", path = "codegen" }
@@ -146,10 +151,12 @@ substrate-runner = { path = "testing/substrate-runner" }
 
 # subxt-signer deps that I expect aren't useful anywhere else:
 bip39 = { version = "2.0.0", default-features = false }
+bip32 = { version = "0.5.1", default-features = false }
 hmac = { version = "0.12.1", default-features = false }
 pbkdf2 = { version = "0.12.2", default-features = false }
 schnorrkel = { version = "0.11.4", default-features = false }
 secp256k1 = { version = "0.28.2", default-features = false }
+keccak-hash = { version = "0.10.0", default-features = false }
 secrecy = "0.8.0"
 sha2 = { version = "0.10.8", default-features = false }
 zeroize = { version = "1", default-features = false }
