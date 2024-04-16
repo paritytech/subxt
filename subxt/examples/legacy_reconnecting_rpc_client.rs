@@ -42,11 +42,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let api: OnlineClient<PolkadotConfig> = OnlineClient::from_backend(Arc::new(backend)).await?;
 
-    // The retry-able rpc backend will re-run this until it's succesful.
-    // It's also possible to run custom retry_logic withot the retry-backend
-    //
-    // Then you can use `subxt::backend::utils::retry` or `subxt::backend::utils::retry_with_strategy`
-    // to retry rpc calls or write your own retry logic.
+    // Print when the RPC client reconnects.
+    tokio::spawn(async move {
+        loop {
+            rpc.on_reconnect().await;
+            println!("RPC client reconnect initiated");
+        }
+    });
+
     let mut blocks_sub = api.backend().stream_finalized_block_headers().await?;
 
     // For each block, print a bunch of information about it:
@@ -63,8 +66,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         println!("Block #{block_number} ({block_hash})");
     }
-
-    println!("RPC client reconnected `{}` times", rpc.reconnect_count());
 
     Ok(())
 }

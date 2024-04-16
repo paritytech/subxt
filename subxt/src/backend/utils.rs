@@ -90,11 +90,12 @@ impl<T> Stream for RetrySubscription<T> {
             if need_resubscribe {
                 self.stream = None;
 
-                if self.resubscribe.is_none() {
+                let Some(f) = self.resubscribe.as_mut() else {
                     tracing::error!("No callback configured for RetrySubscription that emitted Error::DisconnectedWillReconnect; This a bug please file an issue");
-                }
+                    return Poll::Ready(None);
+                };
 
-                return Poll::Ready(None);
+                self.pending = Some(f());
             }
 
             // Poll the resubscription.
