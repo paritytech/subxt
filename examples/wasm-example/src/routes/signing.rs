@@ -5,7 +5,7 @@ use subxt::{OnlineClient, PolkadotConfig};
 
 use subxt::config::DefaultExtrinsicParamsBuilder;
 use subxt::ext::codec::{Decode, Encode};
-use subxt::tx::PayloadT as _;
+use subxt::tx::Payload as _;
 use subxt::tx::SubmittableExtrinsic;
 use subxt::utils::{AccountId32, MultiSignature};
 

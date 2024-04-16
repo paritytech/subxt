@@ -40,7 +40,7 @@
 
 pub mod address;
 
-use address::AddressT;
+use address::Address;
 use alloc::borrow::ToOwned;
 
 use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
@@ -50,7 +50,7 @@ use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata}
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Address: AddressT>(address: &Address, metadata: &Metadata) -> Result<(), Error> {
+pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<(), Error> {
     if let Some(actual_hash) = address.validation_hash() {
         let expected_hash = metadata
             .pallet_by_name_err(address.pallet_name())?
@@ -67,10 +67,7 @@ pub fn validate<Address: AddressT>(address: &Address, metadata: &Metadata) -> Re
 
 /// Fetch a constant out of the metadata given a constant address. If the `address` has been
 /// statically generated, this will validate that the constant shape is as expected, too.
-pub fn get<Address: AddressT>(
-    address: &Address,
-    metadata: &Metadata,
-) -> Result<Address::Target, Error> {
+pub fn get<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<Addr::Target, Error> {
     // 1. Validate constant shape if hash given:
     validate(address, metadata)?;
 
@@ -79,7 +76,7 @@ pub fn get<Address: AddressT>(
         .pallet_by_name_err(address.pallet_name())?
         .constant_by_name(address.constant_name())
         .ok_or_else(|| MetadataError::ConstantNameNotFound(address.constant_name().to_owned()))?;
-    let value = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
+    let value = <Addr::Target as DecodeWithMetadata>::decode_with_metadata(
         &mut constant.value(),
         constant.ty(),
         metadata,

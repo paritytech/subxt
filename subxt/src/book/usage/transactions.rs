@@ -53,7 +53,7 @@
 //! represents any type of data that can be SCALE encoded or decoded. It can be serialized,
 //! deserialized and parsed from/to strings.
 //!
-//! A valid transaction payload is just something that implements the [`crate::tx::PayloadT`] trait;
+//! A valid transaction payload is just something that implements the [`crate::tx::Payload`] trait;
 //! you can implement this trait on your own custom types if the built-in ones are not suitable for
 //! your needs.
 //!

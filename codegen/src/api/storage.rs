@@ -258,14 +258,14 @@ fn generate_storage_entry_fns(
             pub fn #fn_name(
                 &self,
                 #(#key_args,)*
-            ) -> #crate_path::storage::address::Address::<
+            ) -> #crate_path::storage::address::StaticAddress::<
                 #keys_type,
                 #alias_storage_path,
                 #is_fetchable_type,
                 #is_defaultable_type,
                 #is_iterable_type
             > {
-                #crate_path::storage::address::Address::new_static(
+                #crate_path::storage::address::StaticAddress::new_static(
                     #pallet_name,
                     #storage_name,
                     #keys,

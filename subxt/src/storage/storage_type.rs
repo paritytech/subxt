@@ -13,7 +13,7 @@ use codec::Decode;
 use derive_where::derive_where;
 use futures::StreamExt;
 use std::{future::Future, marker::PhantomData};
-use subxt_core::storage::address::{AddressT, StorageHashers, StorageKey};
+use subxt_core::storage::address::{Address, StorageHashers, StorageKey};
 use subxt_core::utils::Yes;
 
 /// This is returned from a couple of storage functions.
@@ -110,12 +110,12 @@ where
     /// println!("Value: {:?}", value);
     /// # }
     /// ```
-    pub fn fetch<'address, Address>(
+    pub fn fetch<'address, Addr>(
         &self,
-        address: &'address Address,
-    ) -> impl Future<Output = Result<Option<Address::Target>, Error>> + 'address
+        address: &'address Addr,
+    ) -> impl Future<Output = Result<Option<Addr::Target>, Error>> + 'address
     where
-        Address: AddressT<IsFetchable = Yes> + 'address,
+        Addr: Address<IsFetchable = Yes> + 'address,
     {
         let client = self.clone();
         async move {
@@ -139,12 +139,12 @@ where
     }
 
     /// Fetch a StorageKey that has a default value with an optional block hash.
-    pub fn fetch_or_default<'address, Address>(
+    pub fn fetch_or_default<'address, Addr>(
         &self,
-        address: &'address Address,
-    ) -> impl Future<Output = Result<Address::Target, Error>> + 'address
+        address: &'address Addr,
+    ) -> impl Future<Output = Result<Addr::Target, Error>> + 'address
     where
-        Address: AddressT<IsFetchable = Yes, IsDefaultable = Yes> + 'address,
+        Addr: Address<IsFetchable = Yes, IsDefaultable = Yes> + 'address,
     {
         let client = self.clone();
         async move {
@@ -190,13 +190,13 @@ where
     /// }
     /// # }
     /// ```
-    pub fn iter<Address>(
+    pub fn iter<Addr>(
         &self,
-        address: Address,
-    ) -> impl Future<Output = Result<StreamOfResults<StorageKeyValuePair<Address>>, Error>> + 'static
+        address: Addr,
+    ) -> impl Future<Output = Result<StreamOfResults<StorageKeyValuePair<Addr>>, Error>> + 'static
     where
-        Address: AddressT<IsIterable = Yes> + 'static,
-        Address::Keys: 'static + Sized,
+        Addr: Address<IsIterable = Yes> + 'static,
+        Addr::Keys: 'static + Sized,
     {
         let client = self.client.clone();
         let block_ref = self.block_ref.clone();
@@ -233,7 +233,7 @@ where
                         Ok(kv) => kv,
                         Err(e) => return Err(e),
                     };
-                    let value = Address::Target::decode_with_metadata(
+                    let value = Addr::Target::decode_with_metadata(
                         &mut &*kv.value,
                         return_type_id,
                         &metadata,
@@ -243,13 +243,13 @@ where
                     let cursor = &mut &key_bytes[..];
                     strip_storage_address_root_bytes(cursor)?;
 
-                    let keys = <Address::Keys as StorageKey>::decode_storage_key(
+                    let keys = <Addr::Keys as StorageKey>::decode_storage_key(
                         cursor,
                         &mut hashers.iter(),
                         metadata.types(),
                     )?;
 
-                    Ok(StorageKeyValuePair::<Address> {
+                    Ok(StorageKeyValuePair::<Addr> {
                         keys,
                         key_bytes,
                         value,
@@ -313,7 +313,7 @@ fn strip_storage_address_root_bytes(address_bytes: &mut &[u8]) -> Result<(), Sto
 /// A pair of keys and values together with all the bytes that make up the storage address.
 /// `keys` is `None` if non-concat hashers are used. In this case the keys could not be extracted back from the key_bytes.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
-pub struct StorageKeyValuePair<T: AddressT> {
+pub struct StorageKeyValuePair<T: Address> {
     /// The bytes that make up the address of the storage entry.
     pub key_bytes: Vec<u8>,
     /// The keys that can be used to construct the address of this storage entry.
