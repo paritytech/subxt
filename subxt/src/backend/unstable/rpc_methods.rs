@@ -7,6 +7,7 @@
 //! methods exposed here.
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
+use crate::backend::utils::RetryPolicy;
 use crate::config::BlockHash;
 use crate::{Config, Error};
 use derivative::Derivative;
@@ -23,6 +24,7 @@ use std::task::Poll;
 pub struct UnstableRpcMethods<T> {
     client: RpcClient,
     _marker: std::marker::PhantomData<T>,
+    retry: RetryPolicy,
 }
 
 impl<T: Config> UnstableRpcMethods<T> {
@@ -31,7 +33,12 @@ impl<T: Config> UnstableRpcMethods<T> {
         UnstableRpcMethods {
             client,
             _marker: std::marker::PhantomData,
+            retry: RetryPolicy::default(),
         }
+    }
+
+    pub(crate) fn retry(&self) -> RetryPolicy {
+        self.retry.clone()
     }
 
     /// Subscribe to `chainHead_unstable_follow` to obtain all reported blocks by the chain.
@@ -51,16 +58,20 @@ impl<T: Config> UnstableRpcMethods<T> {
         &self,
         with_runtime: bool,
     ) -> Result<FollowSubscription<T::Hash>, Error> {
-        let sub = self
-            .client
-            .subscribe(
-                "chainHead_unstable_follow",
-                rpc_params![with_runtime],
-                "chainHead_unstable_unfollow",
-            )
-            .await?;
+        self.retry
+            .call(|| async {
+                let sub = self
+                    .client
+                    .subscribe(
+                        "chainHead_unstable_follow",
+                        rpc_params![with_runtime],
+                        "chainHead_unstable_unfollow",
+                    )
+                    .await?;
 
-        Ok(FollowSubscription { sub, done: false })
+                Ok(FollowSubscription { sub, done: false })
+            })
+            .await
     }
 
     /// Resumes a storage fetch started with chainHead_unstable_storage after it has generated an
@@ -73,14 +84,14 @@ impl<T: Config> UnstableRpcMethods<T> {
         follow_subscription: &str,
         operation_id: &str,
     ) -> Result<(), Error> {
-        self.client
-            .request(
-                "chainHead_unstable_continue",
-                rpc_params![follow_subscription, operation_id],
-            )
-            .await?;
-
-        Ok(())
+        self.retry
+            .call(|| {
+                self.client.request(
+                    "chainHead_unstable_continue",
+                    rpc_params![follow_subscription, operation_id],
+                )
+            })
+            .await
     }
 
     /// Stops an operation started with `chainHead_unstable_body`, `chainHead_unstable_call`, or
@@ -93,14 +104,14 @@ impl<T: Config> UnstableRpcMethods<T> {
         follow_subscription: &str,
         operation_id: &str,
     ) -> Result<(), Error> {
-        self.client
-            .request(
-                "chainHead_unstable_stopOperation",
-                rpc_params![follow_subscription, operation_id],
-            )
-            .await?;
-
-        Ok(())
+        self.retry
+            .call(|| {
+                self.client.request(
+                    "chainHead_unstable_stopOperation",
+                    rpc_params![follow_subscription, operation_id],
+                )
+            })
+            .await
     }
 
     /// Call the `chainHead_unstable_body` method and return an operation ID to obtain the block's body.
@@ -117,15 +128,14 @@ impl<T: Config> UnstableRpcMethods<T> {
         subscription_id: &str,
         hash: T::Hash,
     ) -> Result<MethodResponse, Error> {
-        let response = self
-            .client
-            .request(
-                "chainHead_unstable_body",
-                rpc_params![subscription_id, hash],
-            )
-            .await?;
-
-        Ok(response)
+        self.retry
+            .call(|| {
+                self.client.request(
+                    "chainHead_unstable_body",
+                    rpc_params![subscription_id, hash],
+                )
+            })
+            .await
     }
 
     /// Get the block's header using the `chainHead_unstable_header` method.
@@ -139,19 +149,23 @@ impl<T: Config> UnstableRpcMethods<T> {
         subscription_id: &str,
         hash: T::Hash,
     ) -> Result<Option<T::Header>, Error> {
-        // header returned as hex encoded SCALE encoded bytes.
-        let header: Option<Bytes> = self
-            .client
-            .request(
-                "chainHead_unstable_header",
-                rpc_params![subscription_id, hash],
-            )
-            .await?;
+        self.retry
+            .call(|| async {
+                // header returned as hex encoded SCALE encoded bytes.
+                let header: Option<Bytes> = self
+                    .client
+                    .request(
+                        "chainHead_unstable_header",
+                        rpc_params![subscription_id, hash],
+                    )
+                    .await?;
 
-        let header = header
-            .map(|h| codec::Decode::decode(&mut &*h.0))
-            .transpose()?;
-        Ok(header)
+                let header = header
+                    .map(|h| codec::Decode::decode(&mut &*h.0))
+                    .transpose()?;
+                Ok(header)
+            })
+            .await
     }
 
     /// Call the `chainhead_unstable_storage` method and return an operation ID to obtain the block's storage.
@@ -178,15 +192,16 @@ impl<T: Config> UnstableRpcMethods<T> {
             })
             .collect();
 
-        let response = self
-            .client
-            .request(
-                "chainHead_unstable_storage",
-                rpc_params![subscription_id, hash, items, child_key.map(to_hex)],
-            )
-            .await?;
+        let child_key = child_key.map(to_hex);
 
-        Ok(response)
+        self.retry
+            .call(|| {
+                self.client.request(
+                    "chainHead_unstable_storage",
+                    rpc_params![&subscription_id, &hash, &items, &child_key],
+                )
+            })
+            .await
     }
 
     /// Call the `chainhead_unstable_storage` method and return an operation ID to obtain the runtime API result.
@@ -205,15 +220,16 @@ impl<T: Config> UnstableRpcMethods<T> {
         function: &str,
         call_parameters: &[u8],
     ) -> Result<MethodResponse, Error> {
-        let response = self
-            .client
-            .request(
-                "chainHead_unstable_call",
-                rpc_params![subscription_id, hash, function, to_hex(call_parameters)],
-            )
-            .await?;
+        let call_params = to_hex(call_parameters);
 
-        Ok(response)
+        self.retry
+            .call(|| {
+                self.client.request(
+                    "chainHead_unstable_call",
+                    rpc_params![&subscription_id, &hash, &function, &call_params],
+                )
+            })
+            .await
     }
 
     /// Unpin a block reported by the `chainHead_follow` subscription.
@@ -227,32 +243,31 @@ impl<T: Config> UnstableRpcMethods<T> {
         subscription_id: &str,
         hash: T::Hash,
     ) -> Result<(), Error> {
-        self.client
-            .request(
-                "chainHead_unstable_unpin",
-                rpc_params![subscription_id, hash],
-            )
-            .await?;
-
-        Ok(())
+        self.retry
+            .call(|| {
+                self.client.request(
+                    "chainHead_unstable_unpin",
+                    rpc_params![subscription_id, hash],
+                )
+            })
+            .await
     }
 
     /// Return the genesis hash.
     pub async fn chainspec_v1_genesis_hash(&self) -> Result<T::Hash, Error> {
-        let hash = self
-            .client
-            .request("chainSpec_v1_genesisHash", rpc_params![])
-            .await?;
-        Ok(hash)
+        self.retry
+            .call(|| {
+                self.client
+                    .request("chainSpec_v1_genesisHash", rpc_params![])
+            })
+            .await
     }
 
     /// Return a string containing the human-readable name of the chain.
     pub async fn chainspec_v1_chain_name(&self) -> Result<String, Error> {
-        let hash = self
-            .client
-            .request("chainSpec_v1_chainName", rpc_params![])
-            .await?;
-        Ok(hash)
+        self.retry
+            .call(|| self.client.request("chainSpec_v1_chainName", rpc_params![]))
+            .await
     }
 
     /// Returns the JSON payload found in the chain specification under the key properties.
@@ -261,15 +276,20 @@ impl<T: Config> UnstableRpcMethods<T> {
     pub async fn chainspec_v1_properties<Props: serde::de::DeserializeOwned>(
         &self,
     ) -> Result<Props, Error> {
-        self.client
-            .request("chainSpec_v1_properties", rpc_params![])
+        self.retry
+            .call(|| {
+                self.client
+                    .request("chainSpec_v1_properties", rpc_params![])
+            })
             .await
     }
 
     /// Returns an array of strings indicating the names of all the JSON-RPC functions supported by
     /// the JSON-RPC server.
     pub async fn rpc_methods(&self) -> Result<Vec<String>, Error> {
-        self.client.request("rpc_methods", rpc_params![]).await
+        self.retry
+            .call(|| self.client.request("rpc_methods", rpc_params![]))
+            .await
     }
 
     /// Attempt to submit a transaction, returning events about its progress.
@@ -278,12 +298,16 @@ impl<T: Config> UnstableRpcMethods<T> {
         tx: &[u8],
     ) -> Result<TransactionSubscription<T::Hash>, Error> {
         let sub = self
-            .client
-            .subscribe(
-                "transactionWatch_unstable_submitAndWatch",
-                rpc_params![to_hex(tx)],
-                "transactionWatch_unstable_unwatch",
-            )
+            .retry
+            .call(|| async {
+                self.client
+                    .subscribe(
+                        "transactionWatch_unstable_submitAndWatch",
+                        rpc_params![to_hex(tx)],
+                        "transactionWatch_unstable_unwatch",
+                    )
+                    .await
+            })
             .await?;
 
         Ok(TransactionSubscription { sub, done: false })

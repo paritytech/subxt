@@ -136,7 +136,260 @@ impl<T: Config> UnstableBackend<T> {
         UnstableBackendBuilder::new()
     }
 
-    fn inner_subscribe_runtime_stream(&self) -> StreamOfResults<RuntimeVersion> {
+    /// Stream block headers based on the provided filter fn
+    async fn stream_headers<F, I>(
+        &self,
+        f: F,
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>
+    where
+        F: Fn(FollowEvent<follow_stream_unpin::BlockRef<T::Hash>>) -> I + Copy + Send + 'static,
+        I: IntoIterator<Item = follow_stream_unpin::BlockRef<T::Hash>> + Send + 'static,
+        <I as IntoIterator>::IntoIter: Send,
+    {
+        let methods = self.methods.clone();
+        let follow_handle = self.follow_handle.clone();
+
+        let headers = self.follow_handle.subscribe().events().flat_map(move |ev| {
+            let methods = methods.clone();
+            let follow_handle = follow_handle.clone();
+            let block_refs = f(ev).into_iter();
+
+            futures::stream::iter(block_refs).filter_map(move |block_ref| {
+                let methods = methods.clone();
+                let follow_handle = follow_handle.clone();
+
+                async move {
+                    // TODO(niklasad1): naive impl which will fetch the subscription ID for every block
+                    //
+                    // Can we expose Shared::as_subscription_id() -> Option<String> or something?
+                    //
+                    // In most scenarios the subscription is already initialized and it seems
+                    // quite unefficient to subscribe to it on every block.
+                    let sub_id = match get_subscription_id(&follow_handle).await {
+                        Ok(sub_id) => sub_id,
+                        Err(e) => return Some(Err(e)),
+                    };
+
+                    let res = methods
+                        .chainhead_unstable_header(&sub_id, block_ref.hash())
+                        .await
+                        .transpose()?;
+
+                    let header = match res {
+                        Ok(header) => header,
+                        Err(e) => return Some(Err(e)),
+                    };
+
+                    Some(Ok((header, block_ref.into())))
+                }
+            })
+        });
+
+        Ok(StreamOf(Box::pin(headers)))
+    }
+}
+
+impl<Hash: BlockHash + 'static> BlockRefT for follow_stream_unpin::BlockRef<Hash> {}
+impl<Hash: BlockHash + 'static> From<follow_stream_unpin::BlockRef<Hash>> for BlockRef<Hash> {
+    fn from(b: follow_stream_unpin::BlockRef<Hash>) -> Self {
+        BlockRef::new(b.hash(), b)
+    }
+}
+
+impl<T: Config> super::sealed::Sealed for UnstableBackend<T> {}
+
+#[async_trait]
+impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
+    async fn storage_fetch_values(
+        &self,
+        keys: Vec<Vec<u8>>,
+        at: T::Hash,
+    ) -> Result<StreamOfResults<StorageResponse>, Error> {
+        self.methods
+            .retry()
+            .call(|| async {
+                let queries = keys.iter().map(|key| StorageQuery {
+                    key: &**key,
+                    query_type: StorageQueryType::Value,
+                });
+
+                let storage_items = StorageItems::from_methods(
+                    queries,
+                    at,
+                    &self.follow_handle,
+                    self.methods.clone(),
+                )
+                .await?;
+
+                let storage_result_stream = storage_items.filter_map(|val| async move {
+                    let val = match val {
+                        Ok(val) => val,
+                        Err(e) => return Some(Err(e)),
+                    };
+
+                    let StorageResultType::Value(result) = val.result else {
+                        return None;
+                    };
+                    Some(Ok(StorageResponse {
+                        key: val.key.0,
+                        value: result.0,
+                    }))
+                });
+
+                Ok(StreamOf(Box::pin(storage_result_stream)))
+            })
+            .await
+    }
+
+    async fn storage_fetch_descendant_keys(
+        &self,
+        key: Vec<u8>,
+        at: T::Hash,
+    ) -> Result<StreamOfResults<Vec<u8>>, Error> {
+        self.methods
+            .retry()
+            .call(|| async {
+                // Ask for hashes, and then just ignore them and return the keys that come back.
+                let query = StorageQuery {
+                    key: &*key,
+                    query_type: StorageQueryType::DescendantsHashes,
+                };
+
+                let storage_items = StorageItems::from_methods(
+                    std::iter::once(query),
+                    at,
+                    &self.follow_handle,
+                    self.methods.clone(),
+                )
+                .await?;
+
+                let storage_result_stream = storage_items.map(|val| val.map(|v| v.key.0));
+                Ok(StreamOf(Box::pin(storage_result_stream)))
+            })
+            .await
+    }
+
+    async fn storage_fetch_descendant_values(
+        &self,
+        key: Vec<u8>,
+        at: T::Hash,
+    ) -> Result<StreamOfResults<StorageResponse>, Error> {
+        self.methods
+            .retry()
+            .call(|| async {
+                let query = StorageQuery {
+                    key: &*key,
+                    query_type: StorageQueryType::DescendantsValues,
+                };
+
+                let storage_items = StorageItems::from_methods(
+                    std::iter::once(query),
+                    at,
+                    &self.follow_handle,
+                    self.methods.clone(),
+                )
+                .await?;
+
+                let storage_result_stream = storage_items.filter_map(|val| async move {
+                    let val = match val {
+                        Ok(val) => val,
+                        Err(e) => return Some(Err(e)),
+                    };
+
+                    let StorageResultType::Value(result) = val.result else {
+                        return None;
+                    };
+                    Some(Ok(StorageResponse {
+                        key: val.key.0,
+                        value: result.0,
+                    }))
+                });
+
+                Ok(StreamOf(Box::pin(storage_result_stream)))
+            })
+            .await
+    }
+
+    async fn genesis_hash(&self) -> Result<T::Hash, Error> {
+        // `methods` already retries the call.
+        self.methods.chainspec_v1_genesis_hash().await
+    }
+
+    async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
+        let sub_id = get_subscription_id(&self.follow_handle).await?;
+
+        // `methods` already retries the call.
+        //
+        // NOTE: the sub_id could be "out-dated" if a reconnection occurs
+        // between the sub_id is fetched and the unstable header call.
+        self.methods.chainhead_unstable_header(&sub_id, at).await
+    }
+
+    async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
+        let sub_id = get_subscription_id(&self.follow_handle).await?;
+
+        // Subscribe to the body response and get our operationId back.
+        let follow_events = self.follow_handle.subscribe().events();
+
+        // `methods` already retries the call.
+        //
+        // NOTE: the sub_id could be "out-dated" if a reconnection occurs
+        // between the sub_id is fetched and the unstable header call.
+        let status = self.methods.chainhead_unstable_body(&sub_id, at).await?;
+
+        let operation_id = match status {
+            MethodResponse::LimitReached => {
+                return Err(RpcError::request_rejected("limit reached").into())
+            }
+            MethodResponse::Started(s) => s.operation_id,
+        };
+
+        // Wait for the response to come back with the correct operationId.
+        let mut exts_stream = follow_events.filter_map(|ev| {
+            let FollowEvent::OperationBodyDone(body) = ev else {
+                return std::future::ready(None);
+            };
+            if body.operation_id != operation_id {
+                return std::future::ready(None);
+            }
+            let exts: Vec<_> = body.value.into_iter().map(|ext| ext.0).collect();
+            std::future::ready(Some(exts))
+        });
+
+        Ok(exts_stream.next().await)
+    }
+
+    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
+        let next_ref: Option<BlockRef<T::Hash>> = self
+            .follow_handle
+            .subscribe()
+            .events()
+            .filter_map(|ev| {
+                let out = match ev {
+                    FollowEvent::Initialized(init) => {
+                        init.finalized_block_hashes.last().map(|b| b.clone().into())
+                    }
+                    _ => None,
+                };
+                std::future::ready(out)
+            })
+            .next()
+            .await;
+
+        next_ref.ok_or_else(|| RpcError::SubscriptionDropped.into())
+    }
+
+    async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
+        // Just start a stream of version infos, and return the first value we get from it.
+        let runtime_version = self.stream_runtime_version().await?.next().await;
+        match runtime_version {
+            None => Err(Error::Rpc(RpcError::SubscriptionDropped)),
+            Some(Err(e)) => Err(e),
+            Some(Ok(version)) => Ok(version),
+        }
+    }
+
+    async fn stream_runtime_version(&self) -> Result<RetrySubscription<RuntimeVersion>, Error> {
         // Keep track of runtime details announced in new blocks, and then when blocks
         // are finalized, find the latest of these that has runtime details, and clear the rest.
         let mut runtimes = HashMap::new();
@@ -212,38 +465,16 @@ impl<T: Config> UnstableBackend<T> {
                 std::future::ready(Some(Ok(runtime_version)))
             });
 
-        StreamOf(Box::pin(runtime_stream))
+        // This is re-initialized by the driver, so no need for
+        // retry callback here.
+        Ok(RetrySubscription::new(StreamOf::new(Box::pin(
+            runtime_stream,
+        ))))
     }
 
-    async fn inner_subscribe_finalized_blocks(
+    async fn stream_all_block_headers(
         &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let stream = self
-            .stream_headers(|ev| match ev {
-                FollowEvent::Initialized(init) => init.finalized_block_hashes,
-                FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
-                _ => vec![],
-            })
-            .await?;
-        Ok(stream)
-    }
-
-    async fn inner_subscribe_best_blocks(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let stream = self
-            .stream_headers(|ev| match ev {
-                FollowEvent::Initialized(init) => init.finalized_block_hashes,
-                FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
-                _ => vec![],
-            })
-            .await?;
-        Ok(stream)
-    }
-
-    async fn inner_subscribe_all_blocks(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
         let stream = self
             .stream_headers(|ev| match ev {
                 FollowEvent::Initialized(init) => init.finalized_block_hashes,
@@ -253,319 +484,42 @@ impl<T: Config> UnstableBackend<T> {
                 _ => vec![],
             })
             .await?;
-        Ok(stream)
-    }
 
-    /// Stream block headers based on the provided filter fn
-    async fn stream_headers<F, I>(
-        &self,
-        f: F,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>
-    where
-        F: Fn(FollowEvent<follow_stream_unpin::BlockRef<T::Hash>>) -> I + Copy + Send + 'static,
-        I: IntoIterator<Item = follow_stream_unpin::BlockRef<T::Hash>> + Send + 'static,
-        <I as IntoIterator>::IntoIter: Send,
-    {
-        let methods = self.methods.clone();
-        let follow_handle = self.follow_handle.clone();
-
-        let headers = self.follow_handle.subscribe().events().flat_map(move |ev| {
-            let methods = methods.clone();
-            let follow_handle = follow_handle.clone();
-
-            let block_refs = f(ev).into_iter();
-
-            futures::stream::iter(block_refs).filter_map(move |block_ref| {
-                let methods = methods.clone();
-                let follow_handle = follow_handle.clone();
-
-                async move {
-                    // TODO(niklasad1): naive impl which will fetch the subscription ID for every block
-                    //
-                    // Can we expose Shared::as_subscription_id() -> Option<String> or something?
-                    //
-                    // In most scenarios the subscription is already initialized and it seems
-                    // quite unefficient to subscribe to it again and again.
-                    let sub_id = match get_subscription_id(&follow_handle).await {
-                        Ok(sub_id) => sub_id,
-                        Err(e) => return Some(Err(e)),
-                    };
-
-                    let res = methods
-                        .chainhead_unstable_header(&sub_id, block_ref.hash())
-                        .await
-                        .transpose()?;
-
-                    let header = match res {
-                        Ok(header) => header,
-                        Err(e) => return Some(Err(e)),
-                    };
-
-                    Some(Ok((header, block_ref.into())))
-                }
-            })
-        });
-
-        Ok(StreamOf(Box::pin(headers)))
-    }
-}
-
-impl<Hash: BlockHash + 'static> BlockRefT for follow_stream_unpin::BlockRef<Hash> {}
-impl<Hash: BlockHash + 'static> From<follow_stream_unpin::BlockRef<Hash>> for BlockRef<Hash> {
-    fn from(b: follow_stream_unpin::BlockRef<Hash>) -> Self {
-        BlockRef::new(b.hash(), b)
-    }
-}
-
-impl<T: Config> super::sealed::Sealed for UnstableBackend<T> {}
-
-#[async_trait]
-impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
-    async fn storage_fetch_values(
-        &self,
-        keys: Vec<Vec<u8>>,
-        at: T::Hash,
-    ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        let queries = keys.iter().map(|key| StorageQuery {
-            key: &**key,
-            query_type: StorageQueryType::Value,
-        });
-
-        let storage_items =
-            StorageItems::from_methods(queries, at, &self.follow_handle, self.methods.clone())
-                .await?;
-
-        let storage_result_stream = storage_items.filter_map(|val| async move {
-            let val = match val {
-                Ok(val) => val,
-                Err(e) => return Some(Err(e)),
-            };
-
-            let StorageResultType::Value(result) = val.result else {
-                return None;
-            };
-            Some(Ok(StorageResponse {
-                key: val.key.0,
-                value: result.0,
-            }))
-        });
-
-        Ok(StreamOf(Box::pin(storage_result_stream)))
-    }
-
-    async fn storage_fetch_descendant_keys(
-        &self,
-        key: Vec<u8>,
-        at: T::Hash,
-    ) -> Result<StreamOfResults<Vec<u8>>, Error> {
-        // Ask for hashes, and then just ignore them and return the keys that come back.
-        let query = StorageQuery {
-            key: &*key,
-            query_type: StorageQueryType::DescendantsHashes,
-        };
-
-        let storage_items = StorageItems::from_methods(
-            std::iter::once(query),
-            at,
-            &self.follow_handle,
-            self.methods.clone(),
-        )
-        .await?;
-
-        let storage_result_stream = storage_items.map(|val| val.map(|v| v.key.0));
-        Ok(StreamOf(Box::pin(storage_result_stream)))
-    }
-
-    async fn storage_fetch_descendant_values(
-        &self,
-        key: Vec<u8>,
-        at: T::Hash,
-    ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        let query = StorageQuery {
-            key: &*key,
-            query_type: StorageQueryType::DescendantsValues,
-        };
-
-        let storage_items = StorageItems::from_methods(
-            std::iter::once(query),
-            at,
-            &self.follow_handle,
-            self.methods.clone(),
-        )
-        .await?;
-
-        let storage_result_stream = storage_items.filter_map(|val| async move {
-            let val = match val {
-                Ok(val) => val,
-                Err(e) => return Some(Err(e)),
-            };
-
-            let StorageResultType::Value(result) = val.result else {
-                return None;
-            };
-            Some(Ok(StorageResponse {
-                key: val.key.0,
-                value: result.0,
-            }))
-        });
-
-        Ok(StreamOf(Box::pin(storage_result_stream)))
-    }
-
-    async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        self.methods.chainspec_v1_genesis_hash().await
-    }
-
-    async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
-        self.methods.chainhead_unstable_header(&sub_id, at).await
-    }
-
-    async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
-
-        // Subscribe to the body response and get our operationId back.
-        let follow_events = self.follow_handle.subscribe().events();
-        let status = self.methods.chainhead_unstable_body(&sub_id, at).await?;
-        let operation_id = match status {
-            MethodResponse::LimitReached => {
-                return Err(RpcError::request_rejected("limit reached").into())
-            }
-            MethodResponse::Started(s) => s.operation_id,
-        };
-
-        // Wait for the response to come back with the correct operationId.
-        let mut exts_stream = follow_events.filter_map(|ev| {
-            let FollowEvent::OperationBodyDone(body) = ev else {
-                return std::future::ready(None);
-            };
-            if body.operation_id != operation_id {
-                return std::future::ready(None);
-            }
-            let exts: Vec<_> = body.value.into_iter().map(|ext| ext.0).collect();
-            std::future::ready(Some(exts))
-        });
-
-        Ok(exts_stream.next().await)
-    }
-
-    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
-        let next_ref: Option<BlockRef<T::Hash>> = self
-            .follow_handle
-            .subscribe()
-            .events()
-            .filter_map(|ev| {
-                let out = match ev {
-                    FollowEvent::Initialized(init) => {
-                        init.finalized_block_hashes.last().map(|b| b.clone().into())
-                    }
-                    _ => None,
-                };
-                std::future::ready(out)
-            })
-            .next()
-            .await;
-
-        next_ref.ok_or_else(|| RpcError::SubscriptionDropped.into())
-    }
-
-    async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
-        // Just start a stream of version infos, and return the first value we get from it.
-        let runtime_version = self.stream_runtime_version().await?.next().await;
-        match runtime_version {
-            None => Err(Error::Rpc(RpcError::SubscriptionDropped)),
-            Some(Err(e)) => Err(e),
-            Some(Ok(version)) => Ok(version),
-        }
-    }
-
-    async fn stream_runtime_version(&self) -> Result<RetrySubscription<RuntimeVersion>, Error> {
-        let stream = self.inner_subscribe_runtime_stream();
-
-        let this = UnstableBackend {
-            methods: self.methods.clone(),
-            follow_handle: self.follow_handle.clone(),
-        };
-
-        Ok(RetrySubscription::new(
-            StreamOf::new(Box::pin(stream)),
-            Box::new(move || {
-                let this = UnstableBackend {
-                    methods: this.methods.clone(),
-                    follow_handle: this.follow_handle.clone(),
-                };
-                Box::pin(async move {
-                    let sub = this.inner_subscribe_runtime_stream();
-                    Ok(sub)
-                })
-            }),
-        ))
-    }
-
-    async fn stream_all_block_headers(
-        &self,
-    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let stream = self.inner_subscribe_all_blocks().await?;
-
-        let this = UnstableBackend {
-            methods: self.methods.clone(),
-            follow_handle: self.follow_handle.clone(),
-        };
-
-        Ok(RetrySubscription::new(
-            StreamOf::new(Box::pin(stream)),
-            Box::new(move || {
-                let this = UnstableBackend {
-                    methods: this.methods.clone(),
-                    follow_handle: this.follow_handle.clone(),
-                };
-                Box::pin(async move { this.inner_subscribe_all_blocks().await })
-            }),
-        ))
+        // This is re-initialized by the driver, so no need for
+        // retry callback here.
+        Ok(RetrySubscription::new(stream))
     }
 
     async fn stream_best_block_headers(
         &self,
     ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let stream = self.inner_subscribe_best_blocks().await?;
+        let stream = self
+            .stream_headers(|ev| match ev {
+                FollowEvent::Initialized(init) => init.finalized_block_hashes,
+                FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
+                _ => vec![],
+            })
+            .await?;
 
-        let this = UnstableBackend {
-            methods: self.methods.clone(),
-            follow_handle: self.follow_handle.clone(),
-        };
-
-        Ok(RetrySubscription::new(
-            StreamOf::new(Box::pin(stream)),
-            Box::new(move || {
-                let this = UnstableBackend {
-                    methods: this.methods.clone(),
-                    follow_handle: this.follow_handle.clone(),
-                };
-                Box::pin(async move { this.inner_subscribe_best_blocks().await })
-            }),
-        ))
+        // This is re-initialized by the driver, so no need for
+        // retry callback here.
+        Ok(RetrySubscription::new(stream))
     }
 
     async fn stream_finalized_block_headers(
         &self,
     ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let stream = self.inner_subscribe_finalized_blocks().await?;
+        let stream = self
+            .stream_headers(|ev| match ev {
+                FollowEvent::Initialized(init) => init.finalized_block_hashes,
+                FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
+                _ => vec![],
+            })
+            .await?;
 
-        let this = UnstableBackend {
-            methods: self.methods.clone(),
-            follow_handle: self.follow_handle.clone(),
-        };
-
-        Ok(RetrySubscription::new(
-            stream,
-            Box::new(move || {
-                let this = UnstableBackend {
-                    methods: this.methods.clone(),
-                    follow_handle: this.follow_handle.clone(),
-                };
-                Box::pin(async move { this.inner_subscribe_finalized_blocks().await })
-            }),
-        ))
+        // This is re-initialized by the driver, so no need for
+        // retry callback here.
+        Ok(RetrySubscription::new(stream))
     }
 
     async fn submit_transaction(

@@ -47,9 +47,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let api: OnlineClient<PolkadotConfig> = OnlineClient::from_backend(Arc::new(backend)).await?;
 
-    subscribe_to_a_few_blocks(&api).await?;
+    let a = api.clone();
+    tokio::spawn(async move { subscribe_runtime_versions(a).await.unwrap() });
+    let a = api.clone();
+    tokio::spawn(async move { subscribe_to_a_few_blocks(a).await.unwrap() });
+
     submit_retry_transaction(&api).await?;
 
+    futures::future::pending::<()>().await;
     println!("RPC client reconnected `{}` times", rpc.reconnect_count());
 
     Ok(())
@@ -63,13 +68,19 @@ async fn drive_rpc_backend(mut driver: UnstableBackendDriver<PolkadotConfig>) {
     }
 }
 
+async fn subscribe_runtime_versions(api: OnlineClient<PolkadotConfig>) -> Result<(), Error> {
+    let mut sub = api.backend().stream_runtime_version().await?;
+
+    while let Some(rt) = sub.next().await {
+        println!("runtime: {:?}", rt);
+    }
+
+    Ok(())
+}
+
 // The retry-able rpc backend will re-run this until it's succesful.
-// It's also possible to run custom retry_logic without the retry-backend
-//
-// Then you can use `subxt::backend::utils::retry` or `subxt::backend::utils::retry_with_strategy`
-// to retry rpc calls or write your own retry logic.
-async fn subscribe_to_a_few_blocks(api: &OnlineClient<PolkadotConfig>) -> Result<(), Error> {
-    let mut blocks_sub = api.blocks().subscribe_finalized().await?.take(10);
+async fn subscribe_to_a_few_blocks(api: OnlineClient<PolkadotConfig>) -> Result<(), Error> {
+    let mut blocks_sub = api.blocks().subscribe_finalized().await?;
 
     // For each block, print a bunch of information about it:
     // This is automatically re-start when the unstable backend is re-started.

@@ -317,7 +317,7 @@ impl<T: Config> LegacyRpcMethods<T> {
         let client = self.client.clone();
         let retry = self.retry.clone();
 
-        Ok(RetrySubscription::new(
+        Ok(RetrySubscription::with_resubscribe_callback(
             StreamOf::new(Box::pin(stream)),
             Box::new(move || {
                 let client = client.clone();
@@ -355,7 +355,7 @@ impl<T: Config> LegacyRpcMethods<T> {
         let client = self.client.clone();
         let retry = self.retry.clone();
 
-        Ok(RetrySubscription::new(
+        Ok(RetrySubscription::with_resubscribe_callback(
             StreamOf::new(Box::pin(stream)),
             Box::new(move || {
                 let client = client.clone();
@@ -397,7 +397,7 @@ impl<T: Config> LegacyRpcMethods<T> {
         let client = self.client.clone();
         let retry = self.retry.clone();
 
-        Ok(RetrySubscription::new(
+        Ok(RetrySubscription::with_resubscribe_callback(
             StreamOf::new(Box::pin(stream)),
             Box::new(move || {
                 let client = client.clone();
@@ -437,7 +437,7 @@ impl<T: Config> LegacyRpcMethods<T> {
         let client = self.client.clone();
         let retry = self.retry.clone();
 
-        Ok(RetrySubscription::new(
+        Ok(RetrySubscription::with_resubscribe_callback(
             StreamOf::new(Box::pin(stream)),
             Box::new(move || {
                 let client = client.clone();

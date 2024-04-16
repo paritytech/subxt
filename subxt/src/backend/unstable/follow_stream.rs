@@ -132,8 +132,6 @@ impl<Hash> Stream for FollowStream<Hash> {
         let this = self.get_mut();
 
         loop {
-            tracing::trace!("stream: {:?}", this.stream);
-
             match &mut this.stream {
                 InnerStreamState::New => {
                     let fut = (this.stream_getter)();

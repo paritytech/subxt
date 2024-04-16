@@ -23,17 +23,34 @@ pub(crate) enum WaitingOrStream {
 
 /// Retry subscription.
 pub struct RetrySubscription<T> {
-    pub(crate) resubscribe: ResubscribeGetter<T>,
+    pub(crate) resubscribe: Option<ResubscribeGetter<T>>,
     pub(crate) stream: Option<StreamOfResults<T>>,
     pub(crate) pending: Option<BoxFuture<'static, Result<StreamOfResults<T>, Error>>>,
 }
 
 impl<T> RetrySubscription<T> {
     /// Create a new retry-able subscription.
-    pub fn new(stream: StreamOfResults<T>, resubscribe: ResubscribeGetter<T>) -> Self {
+    ///
+    /// The stream itself re-starts the subscription
+    /// if the connection was closed.
+    pub fn new(stream: StreamOfResults<T>) -> Self {
         Self {
             stream: Some(stream),
-            resubscribe,
+            resubscribe: None,
+            pending: None,
+        }
+    }
+
+    /// Create a new retry-able subscription.
+    ///
+    /// The callback is invoked if a reconnection occurs.
+    pub fn with_resubscribe_callback(
+        stream: StreamOfResults<T>,
+        resubscribe: ResubscribeGetter<T>,
+    ) -> Self {
+        Self {
+            stream: Some(stream),
+            resubscribe: Some(resubscribe),
             pending: None,
         }
     }
@@ -72,7 +89,12 @@ impl<T> Stream for RetrySubscription<T> {
 
             if need_resubscribe {
                 self.stream = None;
-                self.pending = Some((self.resubscribe)());
+
+                if self.resubscribe.is_none() {
+                    tracing::error!("No callback configured for RetrySubscription that emitted Error::DisconnectedWillReconnect; This a bug please file an issue");
+                }
+
+                return Poll::Ready(None);
             }
 
             // Poll the resubscription.

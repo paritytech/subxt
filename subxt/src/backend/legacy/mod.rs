@@ -267,7 +267,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         let sub = subscribe_runtime_version(&self.methods).await?;
         let methods = self.methods.clone();
 
-        Ok(RetrySubscription::new(
+        Ok(RetrySubscription::with_resubscribe_callback(
             sub,
             Box::new(move || {
                 let methods = methods.clone();
@@ -297,7 +297,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         let sub = subscribe_all_block_headers(&self.methods).await?;
         let methods = self.methods.clone();
 
-        Ok(RetrySubscription::new(
+        Ok(RetrySubscription::with_resubscribe_callback(
             StreamOf::new(Box::pin(sub)),
             Box::new(move || {
                 let methods = methods.clone();
@@ -330,7 +330,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         let sub = subscribe_best_block_headers(&self.methods).await?;
         let methods = self.methods.clone();
 
-        Ok(RetrySubscription::new(
+        Ok(RetrySubscription::with_resubscribe_callback(
             StreamOf::new(Box::pin(sub)),
             Box::new(move || {
                 let methods = methods.clone();
@@ -353,7 +353,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             retry: self.retry.clone(),
         };
 
-        Ok(RetrySubscription::new(
+        Ok(RetrySubscription::with_resubscribe_callback(
             sub,
             Box::new(move || {
                 let this = LegacyBackend {
