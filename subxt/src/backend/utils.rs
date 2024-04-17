@@ -2,7 +2,7 @@
 
 pub use finito::ExponentialBackoff;
 
-use super::{RuntimeVersion, StreamOfResults};
+use super::StreamOfResults;
 use crate::error::Error;
 use finito::{Action, RetryIf};
 use futures::future::BoxFuture;
@@ -16,10 +16,10 @@ pub type ResubscribeGetter<T> = Box<dyn FnMut() -> ResubscribeFuture<T> + Send>;
 pub type ResubscribeFuture<T> =
     Pin<Box<dyn Future<Output = Result<StreamOfResults<T>, Error>> + Send>>;
 
-pub(crate) enum WaitingOrStream {
+/*pub(crate) enum WaitingOrStream {
     Waiting(BoxFuture<'static, StreamOfResults<RuntimeVersion>>),
     Stream(StreamOfResults<RuntimeVersion>),
-}
+}*/
 
 /// Retry subscription.
 pub struct RetrySubscription<T> {
