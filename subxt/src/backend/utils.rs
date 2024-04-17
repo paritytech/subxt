@@ -1,13 +1,13 @@
 //! RPC utils.
 
-use futures::future::BoxFuture;
-pub use tokio_retry::strategy::ExponentialBackoff;
+pub use finito::ExponentialBackoff;
 
 use super::{RuntimeVersion, StreamOfResults};
 use crate::error::Error;
+use finito::{Action, RetryIf};
+use futures::future::BoxFuture;
 use futures::{ready, FutureExt, Stream, StreamExt};
 use std::{future::Future, pin::Pin, task::Poll, time::Duration};
-use tokio_retry::{Action, RetryIf};
 
 /// Resubscribe callback.
 pub type ResubscribeGetter<T> = Box<dyn FnMut() -> ResubscribeFuture<T> + Send>;
@@ -119,13 +119,13 @@ impl<T> Stream for RetrySubscription<T> {
 
 /// Retry a future with custom strategy.
 pub async fn retry_with_strategy<T, A>(
-    strategy: tokio_retry::strategy::ExponentialBackoff,
+    strategy: ExponentialBackoff,
     mut retry_future: A,
 ) -> Result<T, Error>
 where
     A: Action<Item = T, Error = Error>,
 {
-    RetryIf::spawn(
+    RetryIf::new(
         strategy,
         || retry_future.run(),
         |err: &Error| err.is_disconnected_will_reconnect(),
@@ -137,7 +137,7 @@ where
 ///
 /// Does nothing if a non-reconnecting rpc client hasn't been enabled.
 #[derive(Debug, Clone)]
-pub struct RetryPolicy(tokio_retry::strategy::ExponentialBackoff);
+pub struct RetryPolicy(ExponentialBackoff);
 
 impl Default for RetryPolicy {
     fn default() -> Self {
@@ -156,6 +156,6 @@ impl RetryPolicy {
     where
         A: Action<Item = T, Error = Error>,
     {
-        retry_with_strategy(self.0.clone(), retry_future).await
+        retry_with_strategy(self.0, retry_future).await
     }
 }

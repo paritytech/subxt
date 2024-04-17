@@ -1651,6 +1651,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c007b1ae3abe1cb6f85a16305acd418b7ca6343b953633fee2b76d8f108b830f"
 
 [[package]]
+name = "finito"
+version = "0.1.0"
+source = "git+https://github.com/niklasad1/finito/#ad8f1e502dd75fcbaf16b05c992f913c66a72b8a"
+dependencies = [
+ "futures",
+ "futures-timer",
+ "pin-project",
+]
+
+[[package]]
 name = "fixed-hash"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4816,6 +4826,7 @@ dependencies = [
  "bitvec",
  "derive-where",
  "either",
+ "finito",
  "frame-metadata 16.0.0",
  "futures",
  "getrandom",
@@ -4844,7 +4855,6 @@ dependencies = [
  "subxt-signer",
  "thiserror",
  "tokio",
- "tokio-retry",
  "tokio-util",
  "tracing",
  "tracing-subscriber 0.3.18",
@@ -5189,17 +5199,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.58",
-]
-
-[[package]]
-name = "tokio-retry"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f57eb36ecbe0fc510036adff84824dd3c24bb781e21bfa67b69d556aa85214f"
-dependencies = [
- "pin-project",
- "rand",
- "tokio",
 ]
 
 [[package]]

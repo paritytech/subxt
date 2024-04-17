@@ -29,7 +29,7 @@ native = [
     "jsonrpsee?/client-ws-transport-native-tls",
     "subxt-lightclient?/native",
     "tokio-util",
-    "tokio-retry"
+    "finito"
 ]
 
 # Enable this for web/wasm builds.
@@ -40,7 +40,8 @@ web = [
     "getrandom/js",
     "subxt-lightclient?/web",
     "subxt-macro/web",
-    "instant/wasm-bindgen"
+    "instant/wasm-bindgen",
+    "finito"
 ]
 
 # Enable this to use the reconnecting rpc client
@@ -101,7 +102,7 @@ subxt-lightclient = { workspace = true, optional = true, default-features = fals
 
 # Reconnecting jsonrpc ws client
 reconnecting-jsonrpsee-ws-client = { git = "https://github.com/niklasad1/reconnecting-jsonrpsee-ws-client", branch = "na-experimental-branch", optional = true }
-tokio-retry = { version = "0.3", optional = true }
+finito = { git = "https://github.com/niklasad1/finito/", optional = true }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
