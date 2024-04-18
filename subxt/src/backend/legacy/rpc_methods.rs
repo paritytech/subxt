@@ -63,11 +63,11 @@ impl<T: Config> LegacyRpcMethods<T> {
     /// only contain values for any keys which have changed since the last.
     pub async fn state_query_storage(
         &self,
-        keys: impl IntoIterator<Item = &[u8]> + Clone,
+        keys: impl IntoIterator<Item = &[u8]>,
         from: T::Hash,
         to: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
-        let keys: Vec<String> = keys.clone().into_iter().map(to_hex).collect();
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, from, to];
         self.client
             .request("state_queryStorage", params)
@@ -80,10 +80,10 @@ impl<T: Config> LegacyRpcMethods<T> {
     /// despite the name of the [`StorageChangeSet`] type.
     pub async fn state_query_storage_at(
         &self,
-        keys: impl IntoIterator<Item = &[u8]> + Clone,
+        keys: impl IntoIterator<Item = &[u8]>,
         at: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
-        let keys: Vec<String> = keys.clone().into_iter().map(to_hex).collect();
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, at];
         self.client
             .request("state_queryStorageAt", params)
@@ -205,10 +205,10 @@ impl<T: Config> LegacyRpcMethods<T> {
     /// Get proof of storage entries at a specific block's state.
     pub async fn state_get_read_proof(
         &self,
-        keys: impl IntoIterator<Item = &[u8]> + Clone,
+        keys: impl IntoIterator<Item = &[u8]>,
         hash: Option<T::Hash>,
     ) -> Result<ReadProof<T::Hash>, Error> {
-        let keys: Vec<String> = keys.clone().into_iter().map(to_hex).collect();
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, hash];
         let proof = self.client.request("state_getReadProof", params).await?;
         Ok(proof)
@@ -321,7 +321,6 @@ impl<T: Config> LegacyRpcMethods<T> {
                 "author_unwatchExtrinsic",
             )
             .await?;
-
         Ok(subscription)
     }
 
@@ -332,9 +331,7 @@ impl<T: Config> LegacyRpcMethods<T> {
         suri: String,
         public: Vec<u8>,
     ) -> Result<(), Error> {
-        let public = Bytes(public);
-
-        let params = rpc_params![&key_type, &suri, &public];
+        let params = rpc_params![key_type, suri, Bytes(public)];
         self.client.request("author_insertKey", params).await?;
         Ok(())
     }
@@ -354,9 +351,7 @@ impl<T: Config> LegacyRpcMethods<T> {
     ///
     /// Returns `true` if all private keys could be found.
     pub async fn author_has_session_keys(&self, session_keys: Vec<u8>) -> Result<bool, Error> {
-        let session_keys = Bytes(session_keys);
-
-        let params = rpc_params![&session_keys];
+        let params = rpc_params![Bytes(session_keys)];
         self.client.request("author_hasSessionKeys", params).await
     }
 
@@ -368,9 +363,7 @@ impl<T: Config> LegacyRpcMethods<T> {
         public_key: Vec<u8>,
         key_type: String,
     ) -> Result<bool, Error> {
-        let public_key = Bytes(public_key);
-
-        let params = rpc_params![&public_key, &key_type];
+        let params = rpc_params![Bytes(public_key), key_type];
         self.client.request("author_hasKey", params).await
     }
 
@@ -381,11 +374,13 @@ impl<T: Config> LegacyRpcMethods<T> {
         call_parameters: Option<&[u8]>,
         at: Option<T::Hash>,
     ) -> Result<Vec<u8>, Error> {
-        let call_parameters = to_hex(call_parameters.unwrap_or_default());
-
+        let call_parameters = call_parameters.unwrap_or_default();
         let bytes: Bytes = self
             .client
-            .request("state_call", rpc_params![&function, &call_parameters, &at])
+            .request(
+                "state_call",
+                rpc_params![function, to_hex(call_parameters), at],
+            )
             .await?;
         Ok(bytes.0)
     }
@@ -398,9 +393,7 @@ impl<T: Config> LegacyRpcMethods<T> {
         encoded_signed: &[u8],
         at: Option<T::Hash>,
     ) -> Result<DryRunResultBytes, Error> {
-        let encoded_signed = to_hex(encoded_signed);
-
-        let params = rpc_params![&encoded_signed, &at];
+        let params = rpc_params![to_hex(encoded_signed), at];
         let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
         Ok(DryRunResultBytes(result_bytes.0))
     }

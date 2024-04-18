@@ -77,7 +77,9 @@ impl<T: Config> UnstableRpcMethods<T> {
                 "chainHead_unstable_continue",
                 rpc_params![follow_subscription, operation_id],
             )
-            .await
+            .await?;
+
+        Ok(())
     }
 
     /// Stops an operation started with `chainHead_unstable_body`, `chainHead_unstable_call`, or
@@ -95,7 +97,9 @@ impl<T: Config> UnstableRpcMethods<T> {
                 "chainHead_unstable_stopOperation",
                 rpc_params![follow_subscription, operation_id],
             )
-            .await
+            .await?;
+
+        Ok(())
     }
 
     /// Call the `chainHead_unstable_body` method and return an operation ID to obtain the block's body.
@@ -112,12 +116,15 @@ impl<T: Config> UnstableRpcMethods<T> {
         subscription_id: &str,
         hash: T::Hash,
     ) -> Result<MethodResponse, Error> {
-        self.client
+        let response = self
+            .client
             .request(
                 "chainHead_unstable_body",
                 rpc_params![subscription_id, hash],
             )
-            .await
+            .await?;
+
+        Ok(response)
     }
 
     /// Get the block's header using the `chainHead_unstable_header` method.
@@ -170,14 +177,15 @@ impl<T: Config> UnstableRpcMethods<T> {
             })
             .collect();
 
-        let child_key = child_key.map(to_hex);
-
-        self.client
+        let response = self
+            .client
             .request(
                 "chainHead_unstable_storage",
-                rpc_params![&subscription_id, &hash, &items, &child_key],
+                rpc_params![subscription_id, hash, items, child_key.map(to_hex)],
             )
-            .await
+            .await?;
+
+        Ok(response)
     }
 
     /// Call the `chainhead_unstable_storage` method and return an operation ID to obtain the runtime API result.
@@ -196,14 +204,15 @@ impl<T: Config> UnstableRpcMethods<T> {
         function: &str,
         call_parameters: &[u8],
     ) -> Result<MethodResponse, Error> {
-        let call_params = to_hex(call_parameters);
-
-        self.client
+        let response = self
+            .client
             .request(
                 "chainHead_unstable_call",
-                rpc_params![&subscription_id, &hash, &function, &call_params],
+                rpc_params![subscription_id, hash, function, to_hex(call_parameters)],
             )
-            .await
+            .await?;
+
+        Ok(response)
     }
 
     /// Unpin a block reported by the `chainHead_follow` subscription.
@@ -222,21 +231,27 @@ impl<T: Config> UnstableRpcMethods<T> {
                 "chainHead_unstable_unpin",
                 rpc_params![subscription_id, hash],
             )
-            .await
+            .await?;
+
+        Ok(())
     }
 
     /// Return the genesis hash.
     pub async fn chainspec_v1_genesis_hash(&self) -> Result<T::Hash, Error> {
-        self.client
+        let hash = self
+            .client
             .request("chainSpec_v1_genesisHash", rpc_params![])
-            .await
+            .await?;
+        Ok(hash)
     }
 
     /// Return a string containing the human-readable name of the chain.
     pub async fn chainspec_v1_chain_name(&self) -> Result<String, Error> {
-        self.client
+        let hash = self
+            .client
             .request("chainSpec_v1_chainName", rpc_params![])
-            .await
+            .await?;
+        Ok(hash)
     }
 
     /// Returns the JSON payload found in the chain specification under the key properties.
