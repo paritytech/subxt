@@ -14,7 +14,7 @@ use subxt::backend::rpc::reconnecting_rpc_client::{Client, RetryPolicy};
 use subxt::backend::rpc::RpcClient;
 use subxt::backend::unstable::{UnstableBackend, UnstableBackendDriver};
 use subxt::config::Header;
-use subxt::error::{Error, RpcError};
+use subxt::error::Error;
 use subxt::tx::TxStatus;
 use subxt::{OnlineClient, PolkadotConfig};
 use subxt_signer::sr25519::dev;
@@ -45,17 +45,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The unstable backend needs driving:
     tokio::spawn(drive_rpc_backend(driver));
 
+    // Print when the RPC client starts to reconnect.
+    tokio::spawn(async move {
+        loop {
+            rpc.on_reconnect().await;
+            println!("RPC client reconnect initiated");
+        }
+    });
+
     let api: OnlineClient<PolkadotConfig> = OnlineClient::from_backend(Arc::new(backend)).await?;
 
-    let a = api.clone();
-    tokio::spawn(async move { subscribe_runtime_versions(a).await.unwrap() });
-    let a = api.clone();
-    tokio::spawn(async move { subscribe_to_a_few_blocks(a).await.unwrap() });
+    tokio::spawn(subscribe_runtime_versions(api.clone()));
+    tokio::spawn(subscribe_to_blocks(api.clone()));
 
     submit_retry_transaction(&api).await?;
-
-    futures::future::pending::<()>().await;
-    println!("RPC client reconnected `{}` times", rpc.reconnect_count());
 
     Ok(())
 }
@@ -79,7 +82,7 @@ async fn subscribe_runtime_versions(api: OnlineClient<PolkadotConfig>) -> Result
 }
 
 // The retry-able rpc backend will re-run this until it's succesful.
-async fn subscribe_to_a_few_blocks(api: OnlineClient<PolkadotConfig>) -> Result<(), Error> {
+async fn subscribe_to_blocks(api: OnlineClient<PolkadotConfig>) -> Result<(), Error> {
     let mut blocks_sub = api.blocks().subscribe_finalized().await?;
 
     // For each block, print a bunch of information about it:

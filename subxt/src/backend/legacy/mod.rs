@@ -209,48 +209,50 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        // Legacy methods are already retried.
-
-        self.methods.genesis_hash().await
+        self.retry.call(|| self.methods.genesis_hash()).await
     }
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
-        // Legacy methods are already retried.
-
-        self.methods.chain_get_header(Some(at)).await
+        self.retry
+            .call(|| self.methods.chain_get_header(Some(at)))
+            .await
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
-        // Legacy methods are already retried.
-
-        let Some(details) = self.methods.chain_get_block(Some(at)).await? else {
-            return Ok(None);
-        };
-        Ok(Some(
-            details.block.extrinsics.into_iter().map(|b| b.0).collect(),
-        ))
+        self.retry
+            .call(|| async {
+                let Some(details) = self.methods.chain_get_block(Some(at)).await? else {
+                    return Ok(None);
+                };
+                Ok(Some(
+                    details.block.extrinsics.into_iter().map(|b| b.0).collect(),
+                ))
+            })
+            .await
     }
 
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
-        // Legacy methods are already retried.
-
-        let hash = self.methods.chain_get_finalized_head().await?;
-        Ok(BlockRef::from_hash(hash))
+        self.retry
+            .call(|| async {
+                let hash = self.methods.chain_get_finalized_head().await?;
+                Ok(BlockRef::from_hash(hash))
+            })
+            .await
     }
 
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
-        // Legacy methods are already retried.
-
-        let details = self.methods.state_get_runtime_version(None).await?;
-        Ok(RuntimeVersion {
-            spec_version: details.spec_version,
-            transaction_version: details.transaction_version,
-        })
+        self.retry
+            .call(|| async {
+                let details = self.methods.state_get_runtime_version(None).await?;
+                Ok(RuntimeVersion {
+                    spec_version: details.spec_version,
+                    transaction_version: details.transaction_version,
+                })
+            })
+            .await
     }
 
-    async fn stream_runtime_version(&self) -> Result<RetrySubscription<RuntimeVersion>, Error> {
-        // Legacy methods are already retried.
-
+    async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
         async fn subscribe_runtime_version<T: Config>(
             methods: &LegacyRpcMethods<T>,
         ) -> Result<StreamOfResults<RuntimeVersion>, Error> {
@@ -264,21 +266,26 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             Ok(StreamOf(Box::pin(sub)))
         }
 
-        let sub = subscribe_runtime_version(&self.methods).await?;
+        let sub = self
+            .retry
+            .call(|| subscribe_runtime_version(&self.methods))
+            .await?;
         let methods = self.methods.clone();
 
-        Ok(RetrySubscription::with_resubscribe_callback(
+        let retry_sub = RetrySubscription::new(
             sub,
             Box::new(move || {
                 let methods = methods.clone();
                 Box::pin(async move { subscribe_runtime_version(&methods).await })
             }),
-        ))
+        );
+
+        Ok(StreamOf::new(Box::pin(retry_sub)))
     }
 
     async fn stream_all_block_headers(
         &self,
-    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         // Legacy methods are already retried.
 
         async fn subscribe_all_block_headers<T: Config>(
@@ -297,7 +304,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         let sub = subscribe_all_block_headers(&self.methods).await?;
         let methods = self.methods.clone();
 
-        Ok(RetrySubscription::with_resubscribe_callback(
+        let retry_sub = RetrySubscription::new(
             StreamOf::new(Box::pin(sub)),
             Box::new(move || {
                 let methods = methods.clone();
@@ -306,12 +313,14 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                     Ok(StreamOf::new(Box::pin(sub)))
                 })
             }),
-        ))
+        );
+
+        Ok(StreamOf(Box::pin(retry_sub)))
     }
 
     async fn stream_best_block_headers(
         &self,
-    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         // Legacy methods are already retried.
 
         async fn subscribe_best_block_headers<T: Config>(
@@ -330,7 +339,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         let sub = subscribe_best_block_headers(&self.methods).await?;
         let methods = self.methods.clone();
 
-        Ok(RetrySubscription::with_resubscribe_callback(
+        let retry_sub = RetrySubscription::new(
             StreamOf::new(Box::pin(sub)),
             Box::new(move || {
                 let methods = methods.clone();
@@ -339,12 +348,14 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                     Ok(StreamOf::new(Box::pin(sub)))
                 })
             }),
-        ))
+        );
+
+        Ok(StreamOf(Box::pin(retry_sub)))
     }
 
     async fn stream_finalized_block_headers(
         &self,
-    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let sub = self.retry.call(|| self.subscribe_finalized()).await?;
 
         let this = LegacyBackend {
@@ -353,7 +364,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             retry: self.retry.clone(),
         };
 
-        Ok(RetrySubscription::with_resubscribe_callback(
+        let retry_sub = RetrySubscription::new(
             sub,
             Box::new(move || {
                 let this = LegacyBackend {
@@ -367,17 +378,18 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                     Ok(sub)
                 })
             }),
-        ))
+        );
+
+        Ok(StreamOf(Box::pin(retry_sub)))
     }
 
     async fn submit_transaction(
         &self,
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
-        // Legacy methods are already retried.
         let sub = self
-            .methods
-            .author_submit_and_watch_extrinsic(extrinsic)
+            .retry
+            .call(|| self.methods.author_submit_and_watch_extrinsic(extrinsic))
             .await?;
 
         let sub = sub.filter_map(|r| {
@@ -438,10 +450,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         call_parameters: Option<&[u8]>,
         at: T::Hash,
     ) -> Result<Vec<u8>, Error> {
-        // Legacy methods are already retried.
-
-        self.methods
-            .state_call(method, call_parameters, Some(at))
+        self.retry
+            .call(|| self.methods.state_call(method, call_parameters, Some(at)))
             .await
     }
 }

@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::{OfflineClient, OfflineClientT};
-use crate::backend::utils::RetrySubscription;
+use crate::backend::StreamOfResults;
 use crate::custom_values::CustomValuesClient;
 use crate::{
     backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt},
@@ -442,7 +442,7 @@ impl<T: Config> ClientRuntimeUpdater<T> {
 
 /// Stream to perform runtime upgrades.
 pub struct RuntimeUpdaterStream<T: Config> {
-    stream: RetrySubscription<RuntimeVersion>,
+    stream: StreamOfResults<RuntimeVersion>,
     client: OnlineClient<T>,
 }
 

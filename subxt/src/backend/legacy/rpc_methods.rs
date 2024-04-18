@@ -5,8 +5,6 @@
 //! An interface to call the raw legacy RPC methods.
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
-use crate::backend::utils::{RetryPolicy, RetrySubscription};
-use crate::backend::StreamOf;
 use crate::metadata::Metadata;
 use crate::{Config, Error};
 use codec::Decode;
@@ -21,7 +19,6 @@ use serde::{Deserialize, Serialize};
 pub struct LegacyRpcMethods<T> {
     client: RpcClient,
     _marker: std::marker::PhantomData<T>,
-    retry: RetryPolicy,
 }
 
 impl<T: Config> LegacyRpcMethods<T> {
@@ -30,7 +27,6 @@ impl<T: Config> LegacyRpcMethods<T> {
         LegacyRpcMethods {
             client,
             _marker: std::marker::PhantomData,
-            retry: RetryPolicy::default(),
         }
     }
 
@@ -40,13 +36,9 @@ impl<T: Config> LegacyRpcMethods<T> {
         key: &[u8],
         hash: Option<T::Hash>,
     ) -> Result<Option<StorageData>, Error> {
-        self.retry
-            .call(|| async {
-                let params = rpc_params![to_hex(key), hash];
-                let data: Option<Bytes> = self.client.request("state_getStorage", params).await?;
-                Ok(data.map(|b| b.0))
-            })
-            .await
+        let params = rpc_params![to_hex(key), hash];
+        let data: Option<Bytes> = self.client.request("state_getStorage", params).await?;
+        Ok(data.map(|b| b.0))
     }
 
     /// Returns the keys with prefix with pagination support.
@@ -59,14 +51,10 @@ impl<T: Config> LegacyRpcMethods<T> {
         start_key: Option<&[u8]>,
         at: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, Error> {
-        self.retry
-            .call(|| async {
-                let start_key = start_key.map(to_hex);
-                let params = rpc_params![to_hex(key), count, start_key, at];
-                let data: Vec<Bytes> = self.client.request("state_getKeysPaged", params).await?;
-                Ok(data.into_iter().map(|b| b.0).collect())
-            })
-            .await
+        let start_key = start_key.map(to_hex);
+        let params = rpc_params![to_hex(key), count, start_key, at];
+        let data: Vec<Bytes> = self.client.request("state_getKeysPaged", params).await?;
+        Ok(data.into_iter().map(|b| b.0).collect())
     }
 
     /// Query historical storage entries in the range from the start block to the end block,
@@ -79,16 +67,12 @@ impl<T: Config> LegacyRpcMethods<T> {
         from: T::Hash,
         to: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
-        self.retry
-            .call(|| async {
-                let keys: Vec<String> = keys.clone().into_iter().map(to_hex).collect();
-                let params = rpc_params![keys, from, to];
-                self.client
-                    .request("state_queryStorage", params)
-                    .await
-                    .map_err(Into::into)
-            })
+        let keys: Vec<String> = keys.clone().into_iter().map(to_hex).collect();
+        let params = rpc_params![keys, from, to];
+        self.client
+            .request("state_queryStorage", params)
             .await
+            .map_err(Into::into)
     }
 
     /// Query storage entries at some block, using the best block if none is given.
@@ -99,77 +83,57 @@ impl<T: Config> LegacyRpcMethods<T> {
         keys: impl IntoIterator<Item = &[u8]> + Clone,
         at: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
-        self.retry
-            .call(|| async {
-                let keys: Vec<String> = keys.clone().into_iter().map(to_hex).collect();
-                let params = rpc_params![keys, at];
-                self.client
-                    .request("state_queryStorageAt", params)
-                    .await
-                    .map_err(Into::into)
-            })
+        let keys: Vec<String> = keys.clone().into_iter().map(to_hex).collect();
+        let params = rpc_params![keys, at];
+        self.client
+            .request("state_queryStorageAt", params)
             .await
+            .map_err(Into::into)
     }
 
     /// Fetch the genesis hash
     pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        self.retry
-            .call(|| async {
-                let block_zero = 0u32;
-                let params = rpc_params![block_zero];
-                let genesis_hash: Option<T::Hash> =
-                    self.client.request("chain_getBlockHash", params).await?;
-                genesis_hash.ok_or_else(|| "Genesis hash not found".into())
-            })
-            .await
+        let block_zero = 0u32;
+        let params = rpc_params![block_zero];
+        let genesis_hash: Option<T::Hash> =
+            self.client.request("chain_getBlockHash", params).await?;
+        genesis_hash.ok_or_else(|| "Genesis hash not found".into())
     }
 
     /// Fetch the metadata via the legacy `state_getMetadata` RPC method.
     pub async fn state_get_metadata(&self, at: Option<T::Hash>) -> Result<Metadata, Error> {
-        self.retry
-            .call(|| async {
-                let bytes: Bytes = self
-                    .client
-                    .request("state_getMetadata", rpc_params![at])
-                    .await?;
-                let metadata = Metadata::decode(&mut &bytes[..])?;
-                Ok(metadata)
-            })
-            .await
+        let bytes: Bytes = self
+            .client
+            .request("state_getMetadata", rpc_params![at])
+            .await?;
+        let metadata = Metadata::decode(&mut &bytes[..])?;
+        Ok(metadata)
     }
 
     /// Fetch system health
     pub async fn system_health(&self) -> Result<SystemHealth, Error> {
-        self.retry
-            .call(|| self.client.request("system_health", rpc_params![]))
-            .await
+        self.client.request("system_health", rpc_params![]).await
     }
 
     /// Fetch system chain
     pub async fn system_chain(&self) -> Result<String, Error> {
-        self.retry
-            .call(|| self.client.request("system_chain", rpc_params![]))
-            .await
+        self.client.request("system_chain", rpc_params![]).await
     }
 
     /// Fetch system name
     pub async fn system_name(&self) -> Result<String, Error> {
-        self.retry
-            .call(|| self.client.request("system_name", rpc_params![]))
-            .await
+        self.client.request("system_name", rpc_params![]).await
     }
 
     /// Fetch system version
     pub async fn system_version(&self) -> Result<String, Error> {
-        self.retry
-            .call(|| self.client.request("system_version", rpc_params![]))
-            .await
+        self.client.request("system_version", rpc_params![]).await
     }
 
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
-        self.retry
-            .call(|| self.client.request("system_properties", rpc_params![]))
+        self.client
+            .request("system_properties", rpc_params![])
             .await
     }
 
@@ -180,11 +144,8 @@ impl<T: Config> LegacyRpcMethods<T> {
     where
         T::AccountId: Serialize,
     {
-        self.retry
-            .call(|| {
-                self.client
-                    .request("system_accountNextIndex", rpc_params![&account_id])
-            })
+        self.client
+            .request("system_accountNextIndex", rpc_params![&account_id])
             .await
     }
 
@@ -193,13 +154,9 @@ impl<T: Config> LegacyRpcMethods<T> {
         &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<T::Header>, Error> {
-        self.retry
-            .call(|| async {
-                let params = rpc_params![hash];
-                let header = self.client.request("chain_getHeader", params).await?;
-                Ok(header)
-            })
-            .await
+        let params = rpc_params![hash];
+        let header = self.client.request("chain_getHeader", params).await?;
+        Ok(header)
     }
 
     /// Get a block hash, returns hash of latest _best_ block by default.
@@ -207,26 +164,18 @@ impl<T: Config> LegacyRpcMethods<T> {
         &self,
         block_number: Option<BlockNumber>,
     ) -> Result<Option<T::Hash>, Error> {
-        self.retry
-            .call(|| async {
-                let params = rpc_params![block_number];
-                let block_hash = self.client.request("chain_getBlockHash", params).await?;
-                Ok(block_hash)
-            })
-            .await
+        let params = rpc_params![block_number];
+        let block_hash = self.client.request("chain_getBlockHash", params).await?;
+        Ok(block_hash)
     }
 
     /// Get a block hash of the latest finalized block
     pub async fn chain_get_finalized_head(&self) -> Result<T::Hash, Error> {
-        self.retry
-            .call(|| async {
-                let hash = self
-                    .client
-                    .request("chain_getFinalizedHead", rpc_params![])
-                    .await?;
-                Ok(hash)
-            })
-            .await
+        let hash = self
+            .client
+            .request("chain_getFinalizedHead", rpc_params![])
+            .await?;
+        Ok(hash)
     }
 
     /// Get a Block
@@ -234,13 +183,9 @@ impl<T: Config> LegacyRpcMethods<T> {
         &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<BlockDetails<T>>, Error> {
-        self.retry
-            .call(|| async {
-                let params = rpc_params![hash];
-                let block = self.client.request("chain_getBlock", params).await?;
-                Ok(block)
-            })
-            .await
+        let params = rpc_params![hash];
+        let block = self.client.request("chain_getBlock", params).await?;
+        Ok(block)
     }
 
     /// Reexecute the specified `block_hash` and gather statistics while doing so.
@@ -252,13 +197,9 @@ impl<T: Config> LegacyRpcMethods<T> {
         &self,
         block_hash: T::Hash,
     ) -> Result<Option<BlockStats>, Error> {
-        self.retry
-            .call(|| async {
-                let params = rpc_params![block_hash];
-                let stats = self.client.request("dev_getBlockStats", params).await?;
-                Ok(stats)
-            })
-            .await
+        let params = rpc_params![block_hash];
+        let stats = self.client.request("dev_getBlockStats", params).await?;
+        Ok(stats)
     }
 
     /// Get proof of storage entries at a specific block's state.
@@ -267,14 +208,10 @@ impl<T: Config> LegacyRpcMethods<T> {
         keys: impl IntoIterator<Item = &[u8]> + Clone,
         hash: Option<T::Hash>,
     ) -> Result<ReadProof<T::Hash>, Error> {
-        self.retry
-            .call(|| async {
-                let keys: Vec<String> = keys.clone().into_iter().map(to_hex).collect();
-                let params = rpc_params![keys, hash];
-                let proof = self.client.request("state_getReadProof", params).await?;
-                Ok(proof)
-            })
-            .await
+        let keys: Vec<String> = keys.clone().into_iter().map(to_hex).collect();
+        let params = rpc_params![keys, hash];
+        let proof = self.client.request("state_getReadProof", params).await?;
+        Ok(proof)
     }
 
     /// Fetch the runtime version
@@ -282,89 +219,46 @@ impl<T: Config> LegacyRpcMethods<T> {
         &self,
         at: Option<T::Hash>,
     ) -> Result<RuntimeVersion, Error> {
-        self.retry
-            .call(|| async {
-                let params = rpc_params![at];
-                let version = self
-                    .client
-                    .request("state_getRuntimeVersion", params)
-                    .await?;
-                Ok(version)
-            })
-            .await
+        let params = rpc_params![at];
+        let version = self
+            .client
+            .request("state_getRuntimeVersion", params)
+            .await?;
+        Ok(version)
     }
 
     /// Subscribe to all new best block headers.
-    pub async fn chain_subscribe_new_heads(&self) -> Result<RetrySubscription<T::Header>, Error> {
-        async fn subscribe_new_heads<T: Config>(
-            client: &RpcClient,
-        ) -> Result<RpcSubscription<T::Header>, Error> {
-            client
-                .subscribe(
-                    "chain_subscribeNewHeads",
-                    rpc_params![],
-                    "chain_unsubscribeNewHeads",
-                )
-                .await
-        }
-
-        let stream = self
-            .retry
-            .call(|| subscribe_new_heads::<T>(&self.client))
+    pub async fn chain_subscribe_new_heads(&self) -> Result<RpcSubscription<T::Header>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                // Despite the name, this returns a stream of all new blocks
+                // imported by the node that happen to be added to the current best chain
+                // (ie all best blocks).
+                "chain_subscribeNewHeads",
+                rpc_params![],
+                "chain_unsubscribeNewHeads",
+            )
             .await?;
 
-        let client = self.client.clone();
-        let retry = self.retry.clone();
-
-        Ok(RetrySubscription::with_resubscribe_callback(
-            StreamOf::new(Box::pin(stream)),
-            Box::new(move || {
-                let client = client.clone();
-                let retry = retry.clone();
-                Box::pin(async move {
-                    let stream = retry.call(|| subscribe_new_heads::<T>(&client)).await?;
-                    Ok(StreamOf::new(Box::pin(stream)))
-                })
-            }),
-        ))
+        Ok(subscription)
     }
 
     /// Subscribe to all new block headers.
-    pub async fn chain_subscribe_all_heads(&self) -> Result<RetrySubscription<T::Header>, Error> {
-        async fn subscribe_all_heads<T: Config>(
-            client: &RpcClient,
-        ) -> Result<RpcSubscription<T::Header>, Error> {
-            client
-                .subscribe(
-                    // Despite the name, this returns a stream of all new blocks
-                    // imported by the node that happen to be added to the current best chain
-                    // (ie all best blocks).
-                    "chain_subscribeAllHeads",
-                    rpc_params![],
-                    "chain_unsubscribeAllHeads",
-                )
-                .await
-        }
-
-        let stream = self
-            .retry
-            .call(|| subscribe_all_heads::<T>(&self.client))
+    pub async fn chain_subscribe_all_heads(&self) -> Result<RpcSubscription<T::Header>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                // Despite the name, this returns a stream of all new blocks
+                // imported by the node that happen to be added to the current best chain
+                // (ie all best blocks).
+                "chain_subscribeAllHeads",
+                rpc_params![],
+                "chain_unsubscribeAllHeads",
+            )
             .await?;
 
-        let client = self.client.clone();
-        let retry = self.retry.clone();
-
-        Ok(RetrySubscription::with_resubscribe_callback(
-            StreamOf::new(Box::pin(stream)),
-            Box::new(move || {
-                let client = client.clone();
-                let retry = retry.clone();
-                Box::pin(async move {
-                    let stream = retry.call(|| subscribe_all_heads::<T>(&client)).await?;
-                    Ok(StreamOf::new(Box::pin(stream)))
-                })
-            }),
-        ))
+        Ok(subscription)
     }
 
     /// Subscribe to finalized block headers.
@@ -375,92 +269,42 @@ impl<T: Config> LegacyRpcMethods<T> {
     /// gaps for us.
     pub async fn chain_subscribe_finalized_heads(
         &self,
-    ) -> Result<RetrySubscription<T::Header>, Error> {
-        async fn subscribe_finalized_heads<T: Config>(
-            client: &RpcClient,
-        ) -> Result<RpcSubscription<T::Header>, Error> {
-            client
-                .subscribe(
-                    "chain_subscribeFinalizedHeads",
-                    rpc_params![],
-                    "chain_unsubscribeFinalizedHeads",
-                )
-                .await
-        }
-
-        let stream = self
-            .retry
-            .call(|| subscribe_finalized_heads::<T>(&self.client))
+    ) -> Result<RpcSubscription<T::Header>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chain_subscribeFinalizedHeads",
+                rpc_params![],
+                "chain_unsubscribeFinalizedHeads",
+            )
             .await?;
-
-        let client = self.client.clone();
-        let retry = self.retry.clone();
-
-        Ok(RetrySubscription::with_resubscribe_callback(
-            StreamOf::new(Box::pin(stream)),
-            Box::new(move || {
-                let client = client.clone();
-                let retry = retry.clone();
-                Box::pin(async move {
-                    let stream = retry
-                        .call(|| subscribe_finalized_heads::<T>(&client))
-                        .await?;
-                    Ok(StreamOf::new(Box::pin(stream)))
-                })
-            }),
-        ))
+        Ok(subscription)
     }
 
     /// Subscribe to runtime version updates that produce changes in the metadata.
     /// The first item emitted by the stream is the current runtime version.
     pub async fn state_subscribe_runtime_version(
         &self,
-    ) -> Result<RetrySubscription<RuntimeVersion>, Error> {
-        async fn subscribe_runtime_version(
-            client: &RpcClient,
-        ) -> Result<RpcSubscription<RuntimeVersion>, Error> {
-            client
-                .subscribe(
-                    "state_subscribeRuntimeVersion",
-                    rpc_params![],
-                    "state_unsubscribeRuntimeVersion",
-                )
-                .await
-        }
-
-        let stream = self
-            .retry
-            .call(|| subscribe_runtime_version(&self.client))
+    ) -> Result<RpcSubscription<RuntimeVersion>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "state_subscribeRuntimeVersion",
+                rpc_params![],
+                "state_unsubscribeRuntimeVersion",
+            )
             .await?;
-
-        let client = self.client.clone();
-        let retry = self.retry.clone();
-
-        Ok(RetrySubscription::with_resubscribe_callback(
-            StreamOf::new(Box::pin(stream)),
-            Box::new(move || {
-                let client = client.clone();
-                let retry = retry.clone();
-                Box::pin(async move {
-                    let stream = retry.call(|| subscribe_runtime_version(&client)).await?;
-                    Ok(StreamOf::new(Box::pin(stream)))
-                })
-            }),
-        ))
+        Ok(subscription)
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
     pub async fn author_submit_extrinsic(&self, extrinsic: &[u8]) -> Result<T::Hash, Error> {
-        self.retry
-            .call(|| async {
-                let params = rpc_params![to_hex(extrinsic)];
-                let xt_hash = self
-                    .client
-                    .request("author_submitExtrinsic", params)
-                    .await?;
-                Ok(xt_hash)
-            })
-            .await
+        let params = rpc_params![to_hex(extrinsic)];
+        let xt_hash = self
+            .client
+            .request("author_submitExtrinsic", params)
+            .await?;
+        Ok(xt_hash)
     }
 
     /// Create and submit an extrinsic and return a subscription to the events triggered.
@@ -468,21 +312,17 @@ impl<T: Config> LegacyRpcMethods<T> {
         &self,
         extrinsic: &[u8],
     ) -> Result<RpcSubscription<TransactionStatus<T::Hash>>, Error> {
-        self.retry
-            .call(|| async {
-                let params = rpc_params![to_hex(extrinsic)];
-                let subscription = self
-                    .client
-                    .subscribe(
-                        "author_submitAndWatchExtrinsic",
-                        params,
-                        "author_unwatchExtrinsic",
-                    )
-                    .await?;
+        let params = rpc_params![to_hex(extrinsic)];
+        let subscription = self
+            .client
+            .subscribe(
+                "author_submitAndWatchExtrinsic",
+                params,
+                "author_unwatchExtrinsic",
+            )
+            .await?;
 
-                Ok(subscription)
-            })
-            .await
+        Ok(subscription)
     }
 
     /// Insert a key into the keystore.
@@ -494,26 +334,18 @@ impl<T: Config> LegacyRpcMethods<T> {
     ) -> Result<(), Error> {
         let public = Bytes(public);
 
-        self.retry
-            .call(|| async {
-                let params = rpc_params![&key_type, &suri, &public];
-                self.client.request("author_insertKey", params).await?;
-                Ok(())
-            })
-            .await
+        let params = rpc_params![&key_type, &suri, &public];
+        self.client.request("author_insertKey", params).await?;
+        Ok(())
     }
 
     /// Generate new session keys and returns the corresponding public keys.
     pub async fn author_rotate_keys(&self) -> Result<Vec<u8>, Error> {
-        self.retry
-            .call(|| async {
-                let bytes: Bytes = self
-                    .client
-                    .request("author_rotateKeys", rpc_params![])
-                    .await?;
-                Ok(bytes.0)
-            })
-            .await
+        let bytes: Bytes = self
+            .client
+            .request("author_rotateKeys", rpc_params![])
+            .await?;
+        Ok(bytes.0)
     }
 
     /// Checks if the keystore has private keys for the given session public keys.
@@ -524,12 +356,8 @@ impl<T: Config> LegacyRpcMethods<T> {
     pub async fn author_has_session_keys(&self, session_keys: Vec<u8>) -> Result<bool, Error> {
         let session_keys = Bytes(session_keys);
 
-        self.retry
-            .call(|| async {
-                let params = rpc_params![&session_keys];
-                self.client.request("author_hasSessionKeys", params).await
-            })
-            .await
+        let params = rpc_params![&session_keys];
+        self.client.request("author_hasSessionKeys", params).await
     }
 
     /// Checks if the keystore has private keys for the given public key and key type.
@@ -542,12 +370,8 @@ impl<T: Config> LegacyRpcMethods<T> {
     ) -> Result<bool, Error> {
         let public_key = Bytes(public_key);
 
-        self.retry
-            .call(|| async {
-                let params = rpc_params![&public_key, &key_type];
-                self.client.request("author_hasKey", params).await
-            })
-            .await
+        let params = rpc_params![&public_key, &key_type];
+        self.client.request("author_hasKey", params).await
     }
 
     /// Execute a runtime API call via `state_call` RPC method.
@@ -559,15 +383,11 @@ impl<T: Config> LegacyRpcMethods<T> {
     ) -> Result<Vec<u8>, Error> {
         let call_parameters = to_hex(call_parameters.unwrap_or_default());
 
-        self.retry
-            .call(|| async {
-                let bytes: Bytes = self
-                    .client
-                    .request("state_call", rpc_params![&function, &call_parameters, &at])
-                    .await?;
-                Ok(bytes.0)
-            })
-            .await
+        let bytes: Bytes = self
+            .client
+            .request("state_call", rpc_params![&function, &call_parameters, &at])
+            .await?;
+        Ok(bytes.0)
     }
 
     /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
@@ -580,13 +400,9 @@ impl<T: Config> LegacyRpcMethods<T> {
     ) -> Result<DryRunResultBytes, Error> {
         let encoded_signed = to_hex(encoded_signed);
 
-        self.retry
-            .call(|| async {
-                let params = rpc_params![&encoded_signed, &at];
-                let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
-                Ok(DryRunResultBytes(result_bytes.0))
-            })
-            .await
+        let params = rpc_params![&encoded_signed, &at];
+        let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
+        Ok(DryRunResultBytes(result_bytes.0))
     }
 }
 

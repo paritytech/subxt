@@ -16,42 +16,23 @@ pub type ResubscribeGetter<T> = Box<dyn FnMut() -> ResubscribeFuture<T> + Send>;
 pub type ResubscribeFuture<T> =
     Pin<Box<dyn Future<Output = Result<StreamOfResults<T>, Error>> + Send>>;
 
-/*pub(crate) enum WaitingOrStream {
-    Waiting(BoxFuture<'static, StreamOfResults<RuntimeVersion>>),
-    Stream(StreamOfResults<RuntimeVersion>),
-}*/
+pub(crate) enum PendingOrStream<T> {
+    Pending(BoxFuture<'static, Result<StreamOfResults<T>, Error>>),
+    Stream(StreamOfResults<T>),
+}
 
 /// Retry subscription.
 pub struct RetrySubscription<T> {
-    pub(crate) resubscribe: Option<ResubscribeGetter<T>>,
-    pub(crate) stream: Option<StreamOfResults<T>>,
-    pub(crate) pending: Option<BoxFuture<'static, Result<StreamOfResults<T>, Error>>>,
+    resubscribe: ResubscribeGetter<T>,
+    state: PendingOrStream<T>,
 }
 
 impl<T> RetrySubscription<T> {
     /// Create a new retry-able subscription.
-    ///
-    /// The stream itself re-starts the subscription
-    /// if the connection was closed.
-    pub fn new(stream: StreamOfResults<T>) -> Self {
+    pub fn new(stream: StreamOfResults<T>, resubscribe: ResubscribeGetter<T>) -> Self {
         Self {
-            stream: Some(stream),
-            resubscribe: None,
-            pending: None,
-        }
-    }
-
-    /// Create a new retry-able subscription.
-    ///
-    /// The callback is invoked if a reconnection occurs.
-    pub fn with_resubscribe_callback(
-        stream: StreamOfResults<T>,
-        resubscribe: ResubscribeGetter<T>,
-    ) -> Self {
-        Self {
-            stream: Some(stream),
-            resubscribe: Some(resubscribe),
-            pending: None,
+            resubscribe,
+            state: PendingOrStream::Stream(stream),
         }
     }
 
@@ -71,47 +52,42 @@ impl<T> Stream for RetrySubscription<T> {
         mut self: Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> Poll<Option<Self::Item>> {
+        enum NextState<T> {
+            Stream(StreamOfResults<T>),
+            Resubscribe(BoxFuture<'static, Result<StreamOfResults<T>, Error>>),
+        }
+
         loop {
-            // Poll the stream.
-            let need_resubscribe = match self.stream.as_mut() {
-                Some(s) => match s.poll_next_unpin(cx) {
+            let next_state = match self.state {
+                PendingOrStream::Stream(ref mut s) => match s.poll_next_unpin(cx) {
                     Poll::Ready(Some(Err(e))) => {
                         if e.is_disconnected_will_reconnect() {
-                            true
+                            NextState::Resubscribe((self.resubscribe)())
                         } else {
                             return Poll::Ready(Some(Err(e)));
                         }
                     }
                     other => return other,
                 },
-                None => false,
+                PendingOrStream::Pending(ref mut fut) => match ready!(fut.poll_unpin(cx)) {
+                    Ok(stream) => NextState::Stream(stream),
+                    Err(e) => {
+                        if !e.is_disconnected_will_reconnect() {
+                            return Poll::Ready(None);
+                        }
+
+                        NextState::Resubscribe((self.resubscribe)())
+                    }
+                },
             };
 
-            if need_resubscribe {
-                self.stream = None;
-
-                let Some(f) = self.resubscribe.as_mut() else {
-                    tracing::error!("No callback configured for RetrySubscription that emitted Error::DisconnectedWillReconnect; This a bug please file an issue");
-                    return Poll::Ready(None);
-                };
-
-                self.pending = Some(f());
-            }
-
-            // Poll the resubscription.
-            let not_pending = if let Some(p) = self.pending.as_mut() {
-                if let Ok(stream) = ready!(p.poll_unpin(cx)) {
-                    self.stream = Some(stream);
-                    true
-                } else {
-                    false
+            match next_state {
+                NextState::Resubscribe(fut) => {
+                    self.state = PendingOrStream::Pending(fut);
                 }
-            } else {
-                false
-            };
-
-            if not_pending {
-                self.pending = None;
+                NextState::Stream(stream) => {
+                    self.state = PendingOrStream::Stream(stream);
+                }
             }
         }
     }
@@ -157,5 +133,56 @@ impl RetryPolicy {
         A: Action<Item = T, Error = Error>,
     {
         retry_with_strategy(self.0, retry_future).await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::backend::StreamOf;
+
+    fn disconnect_err() -> Error {
+        Error::Rpc(crate::error::RpcError::DisconnectedWillReconnect(
+            String::new(),
+        ))
+    }
+
+    fn custom_err() -> Error {
+        Error::Other(String::new())
+    }
+
+    #[tokio::test]
+    async fn retry_stream_works() {
+        let stream = futures::stream::iter([Ok(1), Err(disconnect_err())]);
+
+        let resubscribe = Box::new(move || {
+            async move { Ok(StreamOf::new(Box::pin(futures::stream::iter([Ok(2)])))) }.boxed()
+        });
+
+        let retry_stream = RetrySubscription::new(StreamOf::new(Box::pin(stream)), resubscribe);
+
+        let result: Vec<_> = retry_stream
+            .filter_map(|v| async move {
+                if let Ok(v) = v {
+                    Some(v)
+                } else {
+                    None
+                }
+            })
+            .collect()
+            .await;
+
+        // After the subscription gets disconnected
+        // we should fetch another element before it's done.
+        assert_eq!(result, vec![1, 2]);
+    }
+
+    #[tokio::test]
+    async fn failed_resubscribe_terminates_stream() {
+        let stream = futures::stream::iter([Ok(1)]);
+        let resubscribe = Box::new(move || async move { Err(custom_err()) }.boxed());
+
+        let retry_stream = RetrySubscription::new(StreamOf::new(Box::pin(stream)), resubscribe);
+        assert_eq!(1, retry_stream.count().await);
     }
 }

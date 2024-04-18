@@ -95,8 +95,8 @@ where
     {
         let client = self.client.clone();
         header_sub_fut_to_block_sub(self.clone(), async move {
-            let sub = client.backend().stream_all_block_headers().await?;
-            BlockStreamRes::Ok(sub.stream.expect("TODO use retry subscription here???"))
+            let stream = client.backend().stream_all_block_headers().await?;
+            BlockStreamRes::Ok(stream)
         })
     }
 
@@ -112,8 +112,8 @@ where
     {
         let client = self.client.clone();
         header_sub_fut_to_block_sub(self.clone(), async move {
-            let sub = client.backend().stream_best_block_headers().await?;
-            BlockStreamRes::Ok(sub.stream.expect("TODO use retry subscription here???"))
+            let stream = client.backend().stream_best_block_headers().await?;
+            BlockStreamRes::Ok(stream)
         })
     }
 
@@ -126,8 +126,8 @@ where
     {
         let client = self.client.clone();
         header_sub_fut_to_block_sub(self.clone(), async move {
-            let sub = client.backend().stream_finalized_block_headers().await?;
-            BlockStreamRes::Ok(sub.stream.expect("TODO use retry subscription here???"))
+            let stream = client.backend().stream_finalized_block_headers().await?;
+            BlockStreamRes::Ok(stream)
         })
     }
 }

@@ -7,7 +7,6 @@
 //! methods exposed here.
 
 use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
-use crate::backend::utils::RetryPolicy;
 use crate::config::BlockHash;
 use crate::{Config, Error};
 use derive_where::derive_where;
@@ -23,7 +22,6 @@ use std::task::Poll;
 pub struct UnstableRpcMethods<T> {
     client: RpcClient,
     _marker: std::marker::PhantomData<T>,
-    retry: RetryPolicy,
 }
 
 impl<T: Config> UnstableRpcMethods<T> {
@@ -32,12 +30,7 @@ impl<T: Config> UnstableRpcMethods<T> {
         UnstableRpcMethods {
             client,
             _marker: std::marker::PhantomData,
-            retry: RetryPolicy::default(),
         }
-    }
-
-    pub(crate) fn retry(&self) -> RetryPolicy {
-        self.retry.clone()
     }
 
     /// Subscribe to `chainHead_unstable_follow` to obtain all reported blocks by the chain.
@@ -57,20 +50,16 @@ impl<T: Config> UnstableRpcMethods<T> {
         &self,
         with_runtime: bool,
     ) -> Result<FollowSubscription<T::Hash>, Error> {
-        self.retry
-            .call(|| async {
-                let sub = self
-                    .client
-                    .subscribe(
-                        "chainHead_unstable_follow",
-                        rpc_params![with_runtime],
-                        "chainHead_unstable_unfollow",
-                    )
-                    .await?;
+        let sub = self
+            .client
+            .subscribe(
+                "chainHead_unstable_follow",
+                rpc_params![with_runtime],
+                "chainHead_unstable_unfollow",
+            )
+            .await?;
 
-                Ok(FollowSubscription { sub, done: false })
-            })
-            .await
+        Ok(FollowSubscription { sub, done: false })
     }
 
     /// Resumes a storage fetch started with chainHead_unstable_storage after it has generated an
@@ -83,13 +72,11 @@ impl<T: Config> UnstableRpcMethods<T> {
         follow_subscription: &str,
         operation_id: &str,
     ) -> Result<(), Error> {
-        self.retry
-            .call(|| {
-                self.client.request(
-                    "chainHead_unstable_continue",
-                    rpc_params![follow_subscription, operation_id],
-                )
-            })
+        self.client
+            .request(
+                "chainHead_unstable_continue",
+                rpc_params![follow_subscription, operation_id],
+            )
             .await
     }
 
@@ -103,13 +90,11 @@ impl<T: Config> UnstableRpcMethods<T> {
         follow_subscription: &str,
         operation_id: &str,
     ) -> Result<(), Error> {
-        self.retry
-            .call(|| {
-                self.client.request(
-                    "chainHead_unstable_stopOperation",
-                    rpc_params![follow_subscription, operation_id],
-                )
-            })
+        self.client
+            .request(
+                "chainHead_unstable_stopOperation",
+                rpc_params![follow_subscription, operation_id],
+            )
             .await
     }
 
@@ -127,13 +112,11 @@ impl<T: Config> UnstableRpcMethods<T> {
         subscription_id: &str,
         hash: T::Hash,
     ) -> Result<MethodResponse, Error> {
-        self.retry
-            .call(|| {
-                self.client.request(
-                    "chainHead_unstable_body",
-                    rpc_params![subscription_id, hash],
-                )
-            })
+        self.client
+            .request(
+                "chainHead_unstable_body",
+                rpc_params![subscription_id, hash],
+            )
             .await
     }
 
@@ -148,23 +131,19 @@ impl<T: Config> UnstableRpcMethods<T> {
         subscription_id: &str,
         hash: T::Hash,
     ) -> Result<Option<T::Header>, Error> {
-        self.retry
-            .call(|| async {
-                // header returned as hex encoded SCALE encoded bytes.
-                let header: Option<Bytes> = self
-                    .client
-                    .request(
-                        "chainHead_unstable_header",
-                        rpc_params![subscription_id, hash],
-                    )
-                    .await?;
+        // header returned as hex encoded SCALE encoded bytes.
+        let header: Option<Bytes> = self
+            .client
+            .request(
+                "chainHead_unstable_header",
+                rpc_params![subscription_id, hash],
+            )
+            .await?;
 
-                let header = header
-                    .map(|h| codec::Decode::decode(&mut &*h.0))
-                    .transpose()?;
-                Ok(header)
-            })
-            .await
+        let header = header
+            .map(|h| codec::Decode::decode(&mut &*h.0))
+            .transpose()?;
+        Ok(header)
     }
 
     /// Call the `chainhead_unstable_storage` method and return an operation ID to obtain the block's storage.
@@ -193,13 +172,11 @@ impl<T: Config> UnstableRpcMethods<T> {
 
         let child_key = child_key.map(to_hex);
 
-        self.retry
-            .call(|| {
-                self.client.request(
-                    "chainHead_unstable_storage",
-                    rpc_params![&subscription_id, &hash, &items, &child_key],
-                )
-            })
+        self.client
+            .request(
+                "chainHead_unstable_storage",
+                rpc_params![&subscription_id, &hash, &items, &child_key],
+            )
             .await
     }
 
@@ -221,13 +198,11 @@ impl<T: Config> UnstableRpcMethods<T> {
     ) -> Result<MethodResponse, Error> {
         let call_params = to_hex(call_parameters);
 
-        self.retry
-            .call(|| {
-                self.client.request(
-                    "chainHead_unstable_call",
-                    rpc_params![&subscription_id, &hash, &function, &call_params],
-                )
-            })
+        self.client
+            .request(
+                "chainHead_unstable_call",
+                rpc_params![&subscription_id, &hash, &function, &call_params],
+            )
             .await
     }
 
@@ -242,30 +217,25 @@ impl<T: Config> UnstableRpcMethods<T> {
         subscription_id: &str,
         hash: T::Hash,
     ) -> Result<(), Error> {
-        self.retry
-            .call(|| {
-                self.client.request(
-                    "chainHead_unstable_unpin",
-                    rpc_params![subscription_id, hash],
-                )
-            })
+        self.client
+            .request(
+                "chainHead_unstable_unpin",
+                rpc_params![subscription_id, hash],
+            )
             .await
     }
 
     /// Return the genesis hash.
     pub async fn chainspec_v1_genesis_hash(&self) -> Result<T::Hash, Error> {
-        self.retry
-            .call(|| {
-                self.client
-                    .request("chainSpec_v1_genesisHash", rpc_params![])
-            })
+        self.client
+            .request("chainSpec_v1_genesisHash", rpc_params![])
             .await
     }
 
     /// Return a string containing the human-readable name of the chain.
     pub async fn chainspec_v1_chain_name(&self) -> Result<String, Error> {
-        self.retry
-            .call(|| self.client.request("chainSpec_v1_chainName", rpc_params![]))
+        self.client
+            .request("chainSpec_v1_chainName", rpc_params![])
             .await
     }
 
@@ -275,20 +245,15 @@ impl<T: Config> UnstableRpcMethods<T> {
     pub async fn chainspec_v1_properties<Props: serde::de::DeserializeOwned>(
         &self,
     ) -> Result<Props, Error> {
-        self.retry
-            .call(|| {
-                self.client
-                    .request("chainSpec_v1_properties", rpc_params![])
-            })
+        self.client
+            .request("chainSpec_v1_properties", rpc_params![])
             .await
     }
 
     /// Returns an array of strings indicating the names of all the JSON-RPC functions supported by
     /// the JSON-RPC server.
     pub async fn rpc_methods(&self) -> Result<Vec<String>, Error> {
-        self.retry
-            .call(|| self.client.request("rpc_methods", rpc_params![]))
-            .await
+        self.client.request("rpc_methods", rpc_params![]).await
     }
 
     /// Attempt to submit a transaction, returning events about its progress.
@@ -297,16 +262,12 @@ impl<T: Config> UnstableRpcMethods<T> {
         tx: &[u8],
     ) -> Result<TransactionSubscription<T::Hash>, Error> {
         let sub = self
-            .retry
-            .call(|| async {
-                self.client
-                    .subscribe(
-                        "transactionWatch_unstable_submitAndWatch",
-                        rpc_params![to_hex(tx)],
-                        "transactionWatch_unstable_unwatch",
-                    )
-                    .await
-            })
+            .client
+            .subscribe(
+                "transactionWatch_unstable_submitAndWatch",
+                rpc_params![to_hex(tx)],
+                "transactionWatch_unstable_unwatch",
+            )
             .await?;
 
         Ok(TransactionSubscription { sub, done: false })

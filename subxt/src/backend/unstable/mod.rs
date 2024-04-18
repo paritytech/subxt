@@ -38,7 +38,7 @@ use storage_items::StorageItems;
 // Expose the RPC methods.
 pub use rpc_methods::UnstableRpcMethods;
 
-use super::utils::RetrySubscription;
+use crate::backend::utils::RetryPolicy;
 
 /// Configure and build an [`UnstableBackend`].
 pub struct UnstableBackendBuilder<T> {
@@ -95,6 +95,7 @@ impl<T: Config> UnstableBackendBuilder<T> {
         let backend = UnstableBackend {
             methods: rpc_methods,
             follow_handle: follow_stream_driver.handle(),
+            retry: RetryPolicy::default(),
         };
         let driver = UnstableBackendDriver {
             driver: follow_stream_driver,
@@ -128,6 +129,8 @@ pub struct UnstableBackend<T: Config> {
     methods: UnstableRpcMethods<T>,
     // A handle to the chainHead_follow subscription:
     follow_handle: FollowStreamDriverHandle<T::Hash>,
+    /// Retry policy
+    retry: RetryPolicy,
 }
 
 impl<T: Config> UnstableBackend<T> {
@@ -205,8 +208,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         keys: Vec<Vec<u8>>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        self.methods
-            .retry()
+        self.retry
             .call(|| async {
                 let queries = keys.iter().map(|key| StorageQuery {
                     key: &**key,
@@ -246,8 +248,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         key: Vec<u8>,
         at: T::Hash,
     ) -> Result<StreamOfResults<Vec<u8>>, Error> {
-        self.methods
-            .retry()
+        self.retry
             .call(|| async {
                 // Ask for hashes, and then just ignore them and return the keys that come back.
                 let query = StorageQuery {
@@ -274,8 +275,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         key: Vec<u8>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        self.methods
-            .retry()
+        self.retry
             .call(|| async {
                 let query = StorageQuery {
                     key: &*key,
@@ -311,52 +311,56 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        // `methods` already retries the call.
-        self.methods.chainspec_v1_genesis_hash().await
+        self.retry
+            .call(|| self.methods.chainspec_v1_genesis_hash())
+            .await
     }
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
-
-        // `methods` already retries the call.
-        //
-        // NOTE: the sub_id could be "out-dated" if a reconnection occurs
-        // between the sub_id is fetched and the unstable header call.
-        self.methods.chainhead_unstable_header(&sub_id, at).await
+        self.retry
+            .call(|| async {
+                let sub_id = get_subscription_id(&self.follow_handle).await?;
+                self.methods.chainhead_unstable_header(&sub_id, at).await
+            })
+            .await
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
+        self.retry
+            .call(|| async {
+                let sub_id = get_subscription_id(&self.follow_handle).await?;
 
-        // Subscribe to the body response and get our operationId back.
-        let follow_events = self.follow_handle.subscribe().events();
+                // Subscribe to the body response and get our operationId back.
+                let follow_events = self.follow_handle.subscribe().events();
 
-        // `methods` already retries the call.
-        //
-        // NOTE: the sub_id could be "out-dated" if a reconnection occurs
-        // between the sub_id is fetched and the unstable header call.
-        let status = self.methods.chainhead_unstable_body(&sub_id, at).await?;
+                // `methods` already retries the call.
+                //
+                // NOTE: the sub_id could be "out-dated" if a reconnection occurs
+                // between the sub_id is fetched and the unstable header call.
+                let status = self.methods.chainhead_unstable_body(&sub_id, at).await?;
 
-        let operation_id = match status {
-            MethodResponse::LimitReached => {
-                return Err(RpcError::request_rejected("limit reached").into())
-            }
-            MethodResponse::Started(s) => s.operation_id,
-        };
+                let operation_id = match status {
+                    MethodResponse::LimitReached => {
+                        return Err(RpcError::request_rejected("limit reached").into())
+                    }
+                    MethodResponse::Started(s) => s.operation_id,
+                };
 
-        // Wait for the response to come back with the correct operationId.
-        let mut exts_stream = follow_events.filter_map(|ev| {
-            let FollowEvent::OperationBodyDone(body) = ev else {
-                return std::future::ready(None);
-            };
-            if body.operation_id != operation_id {
-                return std::future::ready(None);
-            }
-            let exts: Vec<_> = body.value.into_iter().map(|ext| ext.0).collect();
-            std::future::ready(Some(exts))
-        });
+                // Wait for the response to come back with the correct operationId.
+                let mut exts_stream = follow_events.filter_map(|ev| {
+                    let FollowEvent::OperationBodyDone(body) = ev else {
+                        return std::future::ready(None);
+                    };
+                    if body.operation_id != operation_id {
+                        return std::future::ready(None);
+                    }
+                    let exts: Vec<_> = body.value.into_iter().map(|ext| ext.0).collect();
+                    std::future::ready(Some(exts))
+                });
 
-        Ok(exts_stream.next().await)
+                Ok(exts_stream.next().await)
+            })
+            .await
     }
 
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
@@ -389,7 +393,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         }
     }
 
-    async fn stream_runtime_version(&self) -> Result<RetrySubscription<RuntimeVersion>, Error> {
+    async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
         // Keep track of runtime details announced in new blocks, and then when blocks
         // are finalized, find the latest of these that has runtime details, and clear the rest.
         let mut runtimes = HashMap::new();
@@ -465,16 +469,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 std::future::ready(Some(Ok(runtime_version)))
             });
 
-        // This is re-initialized by the driver, so no need for
-        // retry callback here.
-        Ok(RetrySubscription::new(StreamOf::new(Box::pin(
-            runtime_stream,
-        ))))
+        Ok(StreamOf::new(Box::pin(runtime_stream)))
     }
 
     async fn stream_all_block_headers(
         &self,
-    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let stream = self
             .stream_headers(|ev| match ev {
                 FollowEvent::Initialized(init) => init.finalized_block_hashes,
@@ -485,14 +485,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             })
             .await?;
 
-        // This is re-initialized by the driver, so no need for
-        // retry callback here.
-        Ok(RetrySubscription::new(stream))
+        Ok(StreamOf::new(Box::pin(stream)))
     }
 
     async fn stream_best_block_headers(
         &self,
-    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let stream = self
             .stream_headers(|ev| match ev {
                 FollowEvent::Initialized(init) => init.finalized_block_hashes,
@@ -501,14 +499,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             })
             .await?;
 
-        // This is re-initialized by the driver, so no need for
-        // retry callback here.
-        Ok(RetrySubscription::new(stream))
+        Ok(StreamOf::new(Box::pin(stream)))
     }
 
     async fn stream_finalized_block_headers(
         &self,
-    ) -> Result<RetrySubscription<(T::Header, BlockRef<T::Hash>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let stream = self
             .stream_headers(|ev| match ev {
                 FollowEvent::Initialized(init) => init.finalized_block_hashes,
@@ -517,9 +513,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             })
             .await?;
 
-        // This is re-initialized by the driver, so no need for
-        // retry callback here.
-        Ok(RetrySubscription::new(stream))
+        Ok(StreamOf::new(Box::pin(stream)))
     }
 
     async fn submit_transaction(
