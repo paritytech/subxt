@@ -13,7 +13,6 @@ use futures::StreamExt;
 use subxt::backend::rpc::reconnecting_rpc_client::{Client, RetryPolicy};
 use subxt::backend::rpc::RpcClient;
 use subxt::backend::unstable::{UnstableBackend, UnstableBackendDriver};
-use subxt::config::Header;
 use subxt::error::Error;
 use subxt::tx::TxStatus;
 use subxt::{OnlineClient, PolkadotConfig};

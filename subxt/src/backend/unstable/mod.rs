@@ -18,6 +18,7 @@ mod storage_items;
 
 pub mod rpc_methods;
 
+use self::follow_stream_unpin::FollowStreamMsg;
 use self::rpc_methods::{
     FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
 };
@@ -32,6 +33,7 @@ use async_trait::async_trait;
 use follow_stream_driver::{FollowStreamDriver, FollowStreamDriverHandle};
 use futures::{Stream, StreamExt};
 use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 use std::task::Poll;
 use storage_items::StorageItems;
 
@@ -151,42 +153,49 @@ impl<T: Config> UnstableBackend<T> {
     {
         let methods = self.methods.clone();
         let follow_handle = self.follow_handle.clone();
+        let sub_id = get_subscription_id(&follow_handle).await?;
 
-        let headers = self.follow_handle.subscribe().events().flat_map(move |ev| {
-            let methods = methods.clone();
-            let follow_handle = follow_handle.clone();
-            let block_refs = f(ev).into_iter();
-
-            futures::stream::iter(block_refs).filter_map(move |block_ref| {
-                let methods = methods.clone();
-                let follow_handle = follow_handle.clone();
-
-                async move {
-                    // TODO(niklasad1): naive impl which will fetch the subscription ID for every block
-                    //
-                    // Can we expose Shared::as_subscription_id() -> Option<String> or something?
-                    //
-                    // In most scenarios the subscription is already initialized and it seems
-                    // quite unefficient to subscribe to it on every block.
-                    let sub_id = match get_subscription_id(&follow_handle).await {
-                        Ok(sub_id) => sub_id,
-                        Err(e) => return Some(Err(e)),
-                    };
-
-                    let res = methods
-                        .chainhead_unstable_header(&sub_id, block_ref.hash())
-                        .await
-                        .transpose()?;
-
-                    let header = match res {
-                        Ok(header) => header,
-                        Err(e) => return Some(Err(e)),
-                    };
-
-                    Some(Ok((header, block_ref.into())))
+        // TODO(niklasad1): get rid of the Arc<RwLock> if possible...
+        let headers = self
+            .follow_handle
+            .subscribe()
+            .scan(Arc::new(RwLock::new(sub_id)), |id, v| {
+                let sub_id = id.clone();
+                async { Some((sub_id, v)) }
+            })
+            .filter_map(|(sub_id, v)| async {
+                match v {
+                    FollowStreamMsg::Event(ev) => Some((sub_id, ev)),
+                    FollowStreamMsg::Ready(id) => {
+                        *sub_id.write().unwrap() = id;
+                        None
+                    }
                 }
             })
-        });
+            .flat_map(move |(sub_id, ev)| {
+                let methods = methods.clone();
+                let block_refs = f(ev).into_iter();
+                let sub_id = sub_id.clone();
+
+                futures::stream::iter(block_refs).filter_map(move |block_ref| {
+                    let methods = methods.clone();
+                    let sub_id = sub_id.read().unwrap().clone();
+
+                    async move {
+                        let res = methods
+                            .chainhead_unstable_header(&sub_id, block_ref.hash())
+                            .await
+                            .transpose()?;
+
+                        let header = match res {
+                            Ok(header) => header,
+                            Err(e) => return Some(Err(e)),
+                        };
+
+                        Some(Ok((header, block_ref.into())))
+                    }
+                })
+            });
 
         Ok(StreamOf(Box::pin(headers)))
     }

@@ -94,12 +94,10 @@ impl<T> Stream for RetrySubscription<T> {
 }
 
 /// Retry a future with custom strategy.
-pub async fn retry_with_strategy<T, A>(
-    strategy: ExponentialBackoff,
-    mut retry_future: A,
-) -> Result<T, Error>
+pub async fn retry_with_policy<T, A, S>(strategy: S, mut retry_future: A) -> Result<T, Error>
 where
     A: Action<Item = T, Error = Error>,
+    S: Iterator<Item = Duration>,
 {
     RetryIf::new(
         strategy,
@@ -132,7 +130,7 @@ impl RetryPolicy {
     where
         A: Action<Item = T, Error = Error>,
     {
-        retry_with_strategy(self.0, retry_future).await
+        retry_with_policy(self.0, retry_future).await
     }
 }
 
