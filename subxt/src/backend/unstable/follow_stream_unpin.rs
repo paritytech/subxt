@@ -394,7 +394,7 @@ type UnpinFlags<Hash> = Arc<Mutex<HashSet<Hash>>>;
 
 #[derive(Debug)]
 struct PinnedDetails<Hash: BlockHash> {
-    /// Realtively speaking, how old is the block? When we start following
+    /// Relatively speaking, how old is the block? When we start following
     /// blocks, the first finalized block gets an age of 0, the second an age
     /// of 1 and so on.
     rel_block_age: usize,
