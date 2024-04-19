@@ -160,7 +160,7 @@ impl<T: Config> UnstableBackend<T> {
 
                 async move {
                     let res = methods
-                        .chainHead_v1_header(&sub_id, block_ref.hash())
+                        .chainhead_v1_header(&sub_id, block_ref.hash())
                         .await
                         .transpose()?;
 
@@ -286,7 +286,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
         let sub_id = get_subscription_id(&self.follow_handle).await?;
-        self.methods.chainHead_v1_header(&sub_id, at).await
+        self.methods.chainhead_v1_header(&sub_id, at).await
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
@@ -294,7 +294,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
 
         // Subscribe to the body response and get our operationId back.
         let follow_events = self.follow_handle.subscribe().events();
-        let status = self.methods.chainHead_v1_body(&sub_id, at).await?;
+        let status = self.methods.chainhead_v1_body(&sub_id, at).await?;
         let operation_id = match status {
             MethodResponse::LimitReached => {
                 return Err(RpcError::request_rejected("limit reached").into())
@@ -645,7 +645,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let call_parameters = call_parameters.unwrap_or(&[]);
         let status = self
             .methods
-            .chainHead_v1_call(&sub_id, at, method, call_parameters)
+            .chainhead_v1_call(&sub_id, at, method, call_parameters)
             .await?;
         let operation_id = match status {
             MethodResponse::LimitReached => {

@@ -22,13 +22,13 @@ use subxt::{
 use subxt_signer::sr25519::dev;
 
 #[subxt_test]
-async fn chainHead_v1_follow() {
+async fn chainhead_v1_follow() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
     let legacy_rpc = ctx.legacy_rpc_methods().await;
 
     // Check subscription with runtime updates set on false.
-    let mut blocks = rpc.chainHead_v1_follow(false).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     // The initialized event should contain the finalized block hash.
     let finalized_block_hash = legacy_rpc.chain_get_finalized_head().await.unwrap();
@@ -41,7 +41,7 @@ async fn chainHead_v1_follow() {
     );
 
     // Expect subscription to produce runtime versions.
-    let mut blocks = rpc.chainHead_v1_follow(true).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     // The initialized event should contain the finalized block hash.
     let finalized_block_hash = legacy_rpc.chain_get_finalized_head().await.unwrap();
@@ -62,11 +62,11 @@ async fn chainHead_v1_follow() {
 }
 
 #[subxt_test]
-async fn chainHead_v1_body() {
+async fn chainhead_v1_body() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
 
-    let mut blocks = rpc.chainHead_v1_follow(false).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
         FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
@@ -75,7 +75,7 @@ async fn chainHead_v1_body() {
     let sub_id = blocks.subscription_id().unwrap();
 
     // Fetch the block's body.
-    let response = rpc.chainHead_v1_body(sub_id, hash).await.unwrap();
+    let response = rpc.chainhead_v1_body(sub_id, hash).await.unwrap();
     let operation_id = match response {
         MethodResponse::Started(started) => started.operation_id,
         MethodResponse::LimitReached => panic!("Expected started response"),
@@ -90,12 +90,12 @@ async fn chainHead_v1_body() {
 }
 
 #[subxt_test]
-async fn chainHead_v1_header() {
+async fn chainhead_v1_header() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
     let legacy_rpc = ctx.legacy_rpc_methods().await;
 
-    let mut blocks = rpc.chainHead_v1_follow(false).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
         FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
@@ -109,7 +109,7 @@ async fn chainHead_v1_header() {
         .unwrap()
         .unwrap();
     let old_header = rpc
-        .chainHead_v1_header(sub_id, hash)
+        .chainhead_v1_header(sub_id, hash)
         .await
         .unwrap()
         .unwrap();
@@ -118,12 +118,12 @@ async fn chainHead_v1_header() {
 }
 
 #[subxt_test]
-async fn chainHead_v1_storage() {
+async fn chainhead_v1_storage() {
     let ctx = test_context().await;
     let api = ctx.client();
     let rpc = ctx.unstable_rpc_methods().await;
 
-    let mut blocks = rpc.chainHead_v1_follow(false).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
         FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
@@ -142,7 +142,7 @@ async fn chainHead_v1_storage() {
 
     // Fetch storage.
     let response = rpc
-        .chainHead_v1_storage(sub_id, hash, items, None)
+        .chainhead_v1_storage(sub_id, hash, items, None)
         .await
         .unwrap();
     let operation_id = match response {
@@ -164,11 +164,11 @@ async fn chainHead_v1_storage() {
 }
 
 #[subxt_test]
-async fn chainHead_v1_call() {
+async fn chainhead_v1_call() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
 
-    let mut blocks = rpc.chainHead_v1_follow(true).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
         FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
@@ -179,7 +179,7 @@ async fn chainHead_v1_call() {
     let alice_id = dev::alice().public_key().to_account_id();
     // Runtime API call.
     let response = rpc
-        .chainHead_v1_call(
+        .chainhead_v1_call(
             sub_id,
             hash,
             "AccountNonceApi_account_nonce",
@@ -201,11 +201,11 @@ async fn chainHead_v1_call() {
 }
 
 #[subxt_test]
-async fn chainHead_v1_unpin() {
+async fn chainhead_v1_unpin() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
 
-    let mut blocks = rpc.chainHead_v1_follow(true).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
         FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
@@ -213,9 +213,9 @@ async fn chainHead_v1_unpin() {
     };
     let sub_id = blocks.subscription_id().unwrap();
 
-    assert!(rpc.chainHead_v1_unpin(sub_id, hash).await.is_ok());
+    assert!(rpc.chainhead_v1_unpin(sub_id, hash).await.is_ok());
     // The block was already unpinned.
-    assert!(rpc.chainHead_v1_unpin(sub_id, hash).await.is_err());
+    assert!(rpc.chainhead_v1_unpin(sub_id, hash).await.is_err());
 }
 
 #[cfg(fullclient)]

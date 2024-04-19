@@ -46,7 +46,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// When the user is no longer interested in a block, the user is responsible
     /// for calling the [`chainHead_v1_unpin`](UnstableRpcMethods::chainHead_v1_unpin) method.
     /// Failure to do so will result in the subscription being stopped by generating the `Stop` event.
-    pub async fn chainHead_v1_follow(
+    pub async fn chainhead_v1_follow(
         &self,
         with_runtime: bool,
     ) -> Result<FollowSubscription<T::Hash>, Error> {
@@ -67,7 +67,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     ///
     /// Has no effect if the operationId is invalid or refers to an operation that has emitted a
     /// `{"event": "operationInaccessible"` event, or if the followSubscription is invalid or stale.
-    pub async fn chainHead_v1_continue(
+    pub async fn chainhead_v1_continue(
         &self,
         follow_subscription: &str,
         operation_id: &str,
@@ -87,7 +87,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// If the operation was already finished, this call has no effect.
     ///
     /// Has no effect if the `followSubscription` is invalid or stale.
-    pub async fn chainHead_v1_stop_operation(
+    pub async fn chainhead_v1_stop_operation(
         &self,
         follow_subscription: &str,
         operation_id: &str,
@@ -111,7 +111,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     ///
     /// The subscription ID is obtained from an open subscription created by
     /// [`chainHead_v1_follow`](UnstableRpcMethods::chainHead_v1_follow).
-    pub async fn chainHead_v1_body(
+    pub async fn chainhead_v1_body(
         &self,
         subscription_id: &str,
         hash: T::Hash,
@@ -130,7 +130,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     ///
     /// The subscription ID is obtained from an open subscription created by
     /// [`chainHead_v1_follow`](UnstableRpcMethods::chainHead_v1_follow).
-    pub async fn chainHead_v1_header(
+    pub async fn chainhead_v1_header(
         &self,
         subscription_id: &str,
         hash: T::Hash,
@@ -156,7 +156,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     ///
     /// The subscription ID is obtained from an open subscription created by
     /// [`chainHead_v1_follow`](UnstableRpcMethods::chainHead_v1_follow).
-    pub async fn chainHead_v1_storage(
+    pub async fn chainhead_v1_storage(
         &self,
         subscription_id: &str,
         hash: T::Hash,
@@ -191,7 +191,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     ///
     /// The subscription ID is obtained from an open subscription created by
     /// [`chainHead_v1_follow`](UnstableRpcMethods::chainHead_v1_follow).
-    pub async fn chainHead_v1_call(
+    pub async fn chainhead_v1_call(
         &self,
         subscription_id: &str,
         hash: T::Hash,
@@ -215,7 +215,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     ///
     /// The subscription ID is obtained from an open subscription created by
     /// [`chainHead_v1_follow`](UnstableRpcMethods::chainHead_v1_follow).
-    pub async fn chainHead_v1_unpin(
+    pub async fn chainhead_v1_unpin(
         &self,
         subscription_id: &str,
         hash: T::Hash,

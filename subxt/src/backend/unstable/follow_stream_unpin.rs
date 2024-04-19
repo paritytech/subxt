@@ -282,7 +282,7 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
             let methods = methods.clone();
             let fut: UnpinFut = Box::pin(async move {
                 // We ignore any errors trying to unpin at the moment.
-                let _ = methods.chainHead_v1_unpin(&sub_id, hash).await;
+                let _ = methods.chainhead_v1_unpin(&sub_id, hash).await;
             });
             fut
         });
