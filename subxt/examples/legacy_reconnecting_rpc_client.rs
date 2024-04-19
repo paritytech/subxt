@@ -10,7 +10,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use subxt::backend::legacy::LegacyBackend;
-use subxt::backend::rpc::reconnecting_rpc_client::{Client, RetryPolicy};
+use subxt::backend::rpc::reconnecting_rpc_client::{Client, ExponentialBackoff};
 use subxt::backend::rpc::RpcClient;
 use subxt::error::Error;
 use subxt::tx::TxStatus;
@@ -25,15 +25,11 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    // Create a new client with with a reconnecting RPC client.
+    // Create a new client automatic reconnection/retry.
     let rpc = Arc::new(
         Client::builder()
-            // Reconnect with exponential backoff
-            .retry_policy_for_reconnect(
-                RetryPolicy::exponential(Duration::from_millis(100))
-                    .with_max_delay(Duration::from_secs(10))
-                    .with_max_retries(usize::MAX),
-            )
+            // Retry reconnections and calls with exponential backoff.
+            .retry_policy(ExponentialBackoff::from_millis(10).max_delay(Duration::from_secs(60)))
             .build("ws://localhost:9944".to_string())
             .await?,
     );
@@ -46,8 +42,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Print when the RPC client starts to reconnect.
     tokio::spawn(async move {
         loop {
-            rpc.on_reconnect().await;
-            println!("RPC client reconnect initiated");
+            rpc.reconnect_started().await;
+            let now = std::time::Instant::now();
+            rpc.reconnected().await;
+            println!(
+                "RPC client reconnection took `{}s`",
+                now.elapsed().as_secs()
+            );
         }
     });
 
