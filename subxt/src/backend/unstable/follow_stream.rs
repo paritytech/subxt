@@ -105,7 +105,7 @@ impl<Hash> FollowStream<Hash> {
                 let methods = methods.clone();
                 Box::pin(async move {
                     // Make the RPC call:
-                    let stream = methods.chainhead_unstable_follow(true).await?;
+                    let stream = methods.chainHead_v1_follow(true).await?;
                     // Extract the subscription ID:
                     let Some(sub_id) = stream.subscription_id().map(ToOwned::to_owned) else {
                         return Err(Error::Other(

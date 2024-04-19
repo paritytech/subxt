@@ -42,7 +42,7 @@ impl<T: Config> StorageItems<T> {
         // Subscribe to events and make the initial request to get an operation ID.
         let follow_events = follow_handle.subscribe().events();
         let status = methods
-            .chainhead_unstable_storage(&sub_id, at, queries, None)
+            .chainHead_v1_storage(&sub_id, at, queries, None)
             .await?;
         let operation_id: Arc<str> = match status {
             MethodResponse::LimitReached => {
@@ -59,11 +59,7 @@ impl<T: Config> StorageItems<T> {
                 let operation_id = operation_id.clone();
                 let methods = methods.clone();
 
-                Box::pin(async move {
-                    methods
-                        .chainhead_unstable_continue(&sub_id, &operation_id)
-                        .await
-                })
+                Box::pin(async move { methods.chainHead_v1_continue(&sub_id, &operation_id).await })
             })
         };
 
