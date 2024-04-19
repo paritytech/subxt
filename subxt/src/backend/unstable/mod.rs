@@ -313,10 +313,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // Subscribe to the body response and get our operationId back.
         let follow_events = self.follow_handle.subscribe().events();
 
-        // `methods` already retries the call.
-        //
-        // NOTE: the sub_id could be "out-dated" if a reconnection occurs
-        // between the sub_id is fetched and the unstable header call.
         let status = self.methods.chainhead_unstable_body(&sub_id, at).await?;
 
         let operation_id = match status {
