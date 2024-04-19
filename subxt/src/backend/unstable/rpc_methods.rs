@@ -272,7 +272,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     }
 
     /// Attempt to submit a transaction, returning events about its progress.
-    pub async fn transaction_watch_v1_submit_and_watch(
+    pub async fn transactionwatch_v1_submit_and_watch(
         &self,
         tx: &[u8],
     ) -> Result<TransactionSubscription<T::Hash>, Error> {
