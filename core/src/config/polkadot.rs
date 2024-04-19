@@ -11,7 +11,7 @@ pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
 pub use primitive_types::{H256, U256};
 
 /// Default set of commonly used types by Polkadot nodes.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum PolkadotConfig {}
 
 impl Config for PolkadotConfig {
