@@ -263,16 +263,16 @@ impl<T: Config> UnstableRpcMethods<T> {
     }
 
     /// Attempt to submit a transaction, returning events about its progress.
-    pub async fn transaction_unstable_submit_and_watch(
+    pub async fn transactionwatch_v1_submit_and_watch(
         &self,
         tx: &[u8],
     ) -> Result<TransactionSubscription<T::Hash>, Error> {
         let sub = self
             .client
             .subscribe(
-                "transactionWatch_unstable_submitAndWatch",
+                "transactionWatch_v1_submitAndWatch",
                 rpc_params![to_hex(tx)],
-                "transactionWatch_unstable_unwatch",
+                "transactionWatch_v1_unwatch",
             )
             .await?;
 

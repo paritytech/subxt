@@ -477,7 +477,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // Then, submit the transaction.
         let mut tx_progress = self
             .methods
-            .transaction_unstable_submit_and_watch(extrinsic)
+            .transactionwatch_v1_submit_and_watch(extrinsic)
             .await?;
 
         let mut seen_blocks = HashMap::new();

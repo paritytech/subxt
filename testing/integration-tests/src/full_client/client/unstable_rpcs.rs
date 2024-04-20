@@ -259,7 +259,7 @@ async fn chainspec_v1_properties() {
 
 #[cfg(fullclient)]
 #[subxt_test]
-async fn transaction_unstable_submit_and_watch() {
+async fn transactionwatch_v1_submit_and_watch() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
 
@@ -274,7 +274,7 @@ async fn transaction_unstable_submit_and_watch() {
 
     // Test submitting it:
     let mut sub = rpc
-        .transaction_unstable_submit_and_watch(&tx_bytes)
+        .transactionwatch_v1_submit_and_watch(&tx_bytes)
         .await
         .unwrap();
 
