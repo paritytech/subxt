@@ -545,7 +545,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         }
                         FollowEvent::Stop => {
                             // If we get this event, we'll lose all of our existing pinned blocks and have a gap
-                            // in which we may lose the finaliuzed block that the TX is in. For now, just error if
+                            // in which we may lose the finalized block that the TX is in. For now, just error if
                             // this happens, to prevent the case in which we never see a finalized block and wait
                             // forever.
                             return Poll::Ready(err_other("chainHead_follow emitted 'stop' event during transaction submission"));
