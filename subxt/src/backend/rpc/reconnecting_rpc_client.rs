@@ -181,7 +181,7 @@ impl RpcClientT for Client {
     ) -> RawRpcFuture<'a, Box<RawValue>> {
         async {
             self.inner
-                .request_raw_with_policy(method.to_string(), params, CallRetryPolicy::Retry)
+                .request_raw_with_policy(method.to_string(), params, CallRetryPolicy::Drop)
                 .await
                 .map_err(|e| RpcError::ClientError(Box::new(e)))
         }
@@ -201,7 +201,7 @@ impl RpcClientT for Client {
                     sub.to_string(),
                     params,
                     unsub.to_string(),
-                    CallRetryPolicy::Retry,
+                    CallRetryPolicy::Drop,
                 )
                 .await
                 .map_err(|e| RpcError::ClientError(Box::new(e)))?;

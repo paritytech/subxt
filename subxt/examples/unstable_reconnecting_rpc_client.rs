@@ -55,10 +55,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let api: OnlineClient<PolkadotConfig> = OnlineClient::from_backend(Arc::new(backend)).await?;
 
-    tokio::spawn(subscribe_runtime_versions(api.clone()));
+    /*tokio::spawn(subscribe_runtime_versions(api.clone()));
     tokio::spawn(subscribe_to_blocks(api.clone()));
 
-    submit_retry_transaction(&api).await?;
+    submit_retry_transaction(&api).await?;*/
+
+    loop {
+        let v = api.backend().current_runtime_version().await?;
+        println!("version: {:?}", v);
+        tokio::time::sleep(Duration::from_secs(5)).await;  
+    }
 
     Ok(())
 }
