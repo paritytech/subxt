@@ -96,7 +96,7 @@ where
     F: FnMut() -> T,
     T: Future<Output = Result<R, Error>>,
 {
-   loop {
+    loop {
         match retry_future().await {
             Ok(v) => return Ok(v),
             Err(e) => {
@@ -105,9 +105,8 @@ where
                 }
             }
         }
-   }
+    }
 }
-
 
 #[cfg(test)]
 mod tests {

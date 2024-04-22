@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rpc = Arc::new(
         Client::builder()
             // Retry reconnections and calls with exponential backoff.
-            .retry_policy(ExponentialBackoff::from_millis(10).max_delay(Duration::from_secs(60)))
+            .retry_policy(ExponentialBackoff::from_millis(10).max_delay(Duration::from_secs(10)))
             .build("ws://localhost:9944".to_string())
             .await?,
     );

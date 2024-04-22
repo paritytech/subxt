@@ -92,7 +92,7 @@ impl<T: Config> LegacyBackend<T> {
                 .block_header(last_finalized_block_ref.hash())
                 .await?
                 .map(|h| h.number().into());
-    
+
             // Fill in any missing blocks, because the backend may not emit every finalized block; just the latest ones which
             // are finalized each time.
             let sub = subscribe_to_block_headers_filling_in_gaps(
@@ -106,9 +106,10 @@ impl<T: Config> LegacyBackend<T> {
                     (h, BlockRef::from_hash(hash))
                 })
             });
-    
+
             Ok(StreamOf(Box::pin(sub)))
-        }).await
+        })
+        .await
     }
 }
 
@@ -160,7 +161,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 keys_fut: Default::default(),
                 pagination_start_key: None,
             };
-    
+
             let keys = keys.flat_map(|keys| {
                 match keys {
                     Err(e) => {
@@ -173,10 +174,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                     }
                 }
             });
-    
-            Ok(StreamOf(Box::pin(keys)))
-        }).await
 
+            Ok(StreamOf(Box::pin(keys)))
+        })
+        .await
     }
 
     async fn storage_fetch_descendant_values(
@@ -194,13 +195,14 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 keys_fut: Default::default(),
                 pagination_start_key: None,
             };
-    
+
             Ok(StreamOf(Box::pin(StorageFetchDescendantValuesStream {
                 keys: keys_stream,
                 results_fut: None,
                 results: Default::default(),
             })))
-        }).await
+        })
+        .await
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
@@ -219,16 +221,18 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             Ok(Some(
                 details.block.extrinsics.into_iter().map(|b| b.0).collect(),
             ))
-        }).await
+        })
+        .await
     }
 
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
         retry(|| async {
             let hash = self.methods.chain_get_finalized_head().await?;
             Ok(BlockRef::from_hash(hash))
-        }).await
+        })
+        .await
     }
-        
+
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
         retry(|| async {
             let details = self.methods.state_get_runtime_version(None).await?;
@@ -236,7 +240,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 spec_version: details.spec_version,
                 transaction_version: details.transaction_version,
             })
-        }).await
+        })
+        .await
     }
 
     async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
@@ -365,10 +370,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         &self,
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
-        let sub = retry(|| self
-            .methods
-            .author_submit_and_watch_extrinsic(extrinsic))
-            .await?;
+        let sub = retry(|| self.methods.author_submit_and_watch_extrinsic(extrinsic)).await?;
 
         let sub = sub.filter_map(|r| {
             let mapped = r
@@ -428,9 +430,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         call_parameters: Option<&[u8]>,
         at: T::Hash,
     ) -> Result<Vec<u8>, Error> {
-        retry(|| self.methods
-            .state_call(method, call_parameters, Some(at)))
-            .await
+        retry(|| self.methods.state_call(method, call_parameters, Some(at))).await
     }
 }
 

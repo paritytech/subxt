@@ -209,7 +209,6 @@ impl<T: Config> super::sealed::Sealed for UnstableBackend<T> {}
 
 #[async_trait]
 impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
-
     async fn storage_fetch_values(
         &self,
         keys: Vec<Vec<u8>>,
@@ -220,17 +219,17 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 key: &**key,
                 query_type: StorageQueryType::Value,
             });
-    
+
             let storage_items =
                 StorageItems::from_methods(queries, at, &self.follow_handle, self.methods.clone())
                     .await?;
-    
+
             let stream = storage_items.filter_map(|val| async move {
                 let val = match val {
                     Ok(val) => val,
                     Err(e) => return Some(Err(e)),
                 };
-    
+
                 let StorageResultType::Value(result) = val.result else {
                     return None;
                 };
@@ -241,8 +240,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
             });
 
             Ok(StreamOf(Box::pin(stream)))
-
-        }).await        
+        })
+        .await
     }
 
     async fn storage_fetch_descendant_keys(
@@ -262,11 +261,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 at,
                 &self.follow_handle,
                 self.methods.clone(),
-            ).await?;
+            )
+            .await?;
 
             let storage_result_stream = storage_items.map(|val| val.map(|v| v.key.0));
             Ok(StreamOf(Box::pin(storage_result_stream)))
-        }).await
+        })
+        .await
     }
 
     async fn storage_fetch_descendant_values(
@@ -279,7 +280,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 key: &*key,
                 query_type: StorageQueryType::DescendantsValues,
             };
-    
+
             let storage_items = StorageItems::from_methods(
                 std::iter::once(query),
                 at,
@@ -287,13 +288,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 self.methods.clone(),
             )
             .await?;
-    
+
             let storage_result_stream = storage_items.filter_map(|val| async move {
                 let val = match val {
                     Ok(val) => val,
                     Err(e) => return Some(Err(e)),
                 };
-    
+
                 let StorageResultType::Value(result) = val.result else {
                     return None;
                 };
@@ -302,9 +303,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                     value: result.0,
                 }))
             });
-    
+
             Ok(StreamOf(Box::pin(storage_result_stream)))
-        }).await
+        })
+        .await
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
@@ -315,7 +317,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         retry(|| async {
             let sub_id = get_subscription_id(&self.follow_handle).await?;
             self.methods.chainhead_v1_header(&sub_id, at).await
-        }).await
+        })
+        .await
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
@@ -331,7 +334,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 }
                 MethodResponse::Started(s) => s.operation_id,
             };
-    
+
             // Wait for the response to come back with the correct operationId.
             let mut exts_stream = follow_events.filter_map(|ev| {
                 let FollowEvent::OperationBodyDone(body) = ev else {
@@ -343,10 +346,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 let exts: Vec<_> = body.value.into_iter().map(|ext| ext.0).collect();
                 std::future::ready(Some(exts))
             });
-    
-            Ok(exts_stream.next().await)
-        }).await
 
+            Ok(exts_stream.next().await)
+        })
+        .await
     }
 
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
@@ -521,10 +524,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let mut seen_blocks_sub = self.follow_handle.subscribe().events();
 
         // Then, submit the transaction.
-        let mut tx_progress = retry(|| self
-            .methods
-            .transactionwatch_v1_submit_and_watch(extrinsic))
-            .await?;
+        let mut tx_progress =
+            retry(|| self.methods.transactionwatch_v1_submit_and_watch(extrinsic)).await?;
 
         let mut seen_blocks = HashMap::new();
         let mut done = false;

@@ -7,11 +7,12 @@
 #![allow(missing_docs)]
 
 use std::sync::Arc;
+use std::time::Duration;
 
 use futures::StreamExt;
 use subxt::backend::rpc::reconnecting_rpc_client::{Client, ExponentialBackoff};
 use subxt::backend::rpc::RpcClient;
-use subxt::backend::unstable::{UnstableBackend, UnstableBackendDriver, UnstableRpcMethods};
+use subxt::backend::unstable::{UnstableBackend, UnstableBackendDriver};
 use subxt::error::Error;
 use subxt::tx::TxStatus;
 use subxt::{OnlineClient, PolkadotConfig};
@@ -29,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rpc = Arc::new(
         Client::builder()
             // Retry re-connections with exponential backoff.
-            .retry_policy(ExponentialBackoff::from_millis(10))
+            .retry_policy(ExponentialBackoff::from_millis(10).max_delay(Duration::from_secs(10)))
             .build("ws://localhost:9944".to_string())
             .await?,
     );
@@ -55,18 +56,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let api: OnlineClient<PolkadotConfig> = OnlineClient::from_backend(Arc::new(backend)).await?;
 
-    /*tokio::spawn(subscribe_runtime_versions(api.clone()));
+    tokio::spawn(subscribe_runtime_versions(api.clone()));
     tokio::spawn(subscribe_to_blocks(api.clone()));
-
-    submit_retry_transaction(&api).await?;*/
-
-    loop {
-        let methods: UnstableRpcMethods<PolkadotConfig> = UnstableRpcMethods::new(r.clone());
-        //let v = methods.chainspec_v1_genesis_hash().await?;
-        let v = api.backend().genesis_hash().await?;
-        println!("genesis_hash: {:?}", v);
-        //tokio::time::sleep(Duration::from_secs(5)).await;  
-    }
+    submit_retry_transaction(&api).await?;
 
     Ok(())
 }
