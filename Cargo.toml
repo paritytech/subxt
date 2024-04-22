@@ -74,7 +74,7 @@ console_error_panic_hook = "0.1.7"
 darling = "0.20.8"
 derive-where = "1.2.7"
 derive_more = "0.99.17"
-either = { version = "1.10.0", default-features = false }
+either = { version = "1.11.0", default-features = false }
 frame-metadata = { version = "16.0.0", default-features = false }
 futures = { version = "0.3.30", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
@@ -87,7 +87,7 @@ jsonrpsee = { version = "0.22" }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.2", default-features = false }
 proc-macro-error = "1.0.4"
-proc-macro2 = "1.0.80"
+proc-macro2 = "1.0.81"
 quote = "1.0.35"
 regex = { version = "1.10.4", default-features = false }
 scale-info = { version = "2.11.0", default-features = false }
@@ -97,10 +97,10 @@ scale-decode = { version = "0.11.1", default-features = false }
 scale-encode = { version = "0.6.0", default-features = false }
 scale-typegen = "0.4.2"
 scale-typegen-description = "0.4.3"
-serde = { version = "1.0.197", default-features = false, features = ["derive"] }
+serde = { version = "1.0.198", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.114", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
-thiserror = "1.0.58"
+thiserror = "1.0.59"
 tokio = { version = "1.37", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
