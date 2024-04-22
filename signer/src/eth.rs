@@ -268,7 +268,7 @@ pub mod dev {
 #[cfg(feature = "subxt")]
 mod subxt_compat {
     use subxt_core::config::Config;
-    use subxt_core::tx::Signer as SignerT;
+    use subxt_core::tx::signer::Signer as SignerT;
 
     use super::*;
 
