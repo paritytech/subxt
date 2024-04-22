@@ -40,6 +40,7 @@ web = [
     "subxt-lightclient?/web",
     "subxt-macro/web",
     "instant/wasm-bindgen",
+    "reconnecting-jsonrpsee-ws-client?/web",
 ]
 
 # Enable this to use the reconnecting rpc client

@@ -9,9 +9,9 @@ use reconnecting_jsonrpsee_ws_client::{CallRetryPolicy, Client as InnerClient, S
 use serde_json::value::RawValue;
 use std::time::Duration;
 
-pub use reconnecting_jsonrpsee_ws_client::{ExponentialBackoff, IdKind};
+pub use reconnecting_jsonrpsee_ws_client::{ExponentialBackoff, IdKind, FixedInterval, FibonacciBackoff};
 
-/// Reconnecting rpc client builder.
+/// Builder for [`Client`].
 #[derive(Clone)]
 pub struct Builder<P> {
     max_request_size: u32,
@@ -142,14 +142,12 @@ where
             .await
             .map_err(|e| RpcError::ClientError(Box::new(e)))?;
 
-        Ok(Client { inner: client })
+        Ok(Client(client))
     }
 }
 
 /// Reconnecting rpc client.
-pub struct Client {
-    inner: InnerClient,
-}
+pub struct Client(InnerClient);
 
 impl Client {
     /// Create a builder.
@@ -157,19 +155,23 @@ impl Client {
         Builder::new()
     }
 
-    /// ..
+    /// A future that returns once the client has started to reconnect.
+    ///
+    /// This may be called multiple times.
     pub async fn reconnect_started(&self) {
-        self.inner.reconnect_started().await
+        self.0.reconnect_started().await
     }
 
-    /// ..
+    /// A future that return once the client has reconnected.
+    ///
+    /// This may be called multiple times.
     pub async fn reconnected(&self) {
-        self.inner.reconnected().await
+        self.0.reconnected().await
     }
 
-    /// Counter to determine how many times the client has reconnected.
+    /// Get how many times the client has reconnected successfully.
     pub fn reconnect_count(&self) -> usize {
-        self.inner.reconnect_count()
+        self.0.reconnect_count()
     }
 }
 
@@ -180,7 +182,7 @@ impl RpcClientT for Client {
         params: Option<Box<RawValue>>,
     ) -> RawRpcFuture<'a, Box<RawValue>> {
         async {
-            self.inner
+            self.0
                 .request_raw_with_policy(method.to_string(), params, CallRetryPolicy::Drop)
                 .await
                 .map_err(|e| RpcError::DisconnectedWillReconnect(e.to_string()))
@@ -196,7 +198,7 @@ impl RpcClientT for Client {
     ) -> RawRpcFuture<'a, RawRpcSubscription> {
         async {
             let sub = self
-                .inner
+                .0
                 .subscribe_raw_with_policy(
                     sub.to_string(),
                     params,
