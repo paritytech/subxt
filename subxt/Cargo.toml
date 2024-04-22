@@ -29,7 +29,6 @@ native = [
     "jsonrpsee?/client-ws-transport-native-tls",
     "subxt-lightclient?/native",
     "tokio-util",
-    "finito"
 ]
 
 # Enable this for web/wasm builds.
@@ -41,7 +40,6 @@ web = [
     "subxt-lightclient?/web",
     "subxt-macro/web",
     "instant/wasm-bindgen",
-    "finito"
 ]
 
 # Enable this to use the reconnecting rpc client
@@ -102,7 +100,6 @@ subxt-lightclient = { workspace = true, optional = true, default-features = fals
 
 # Reconnecting jsonrpc ws client
 reconnecting-jsonrpsee-ws-client = { version = "0.4", optional = true }
-finito = { version = "0.1.0", optional = true }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }

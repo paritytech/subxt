@@ -1,13 +1,10 @@
 //! RPC utils.
 
-pub use finito::ExponentialBackoff;
-
 use super::StreamOfResults;
 use crate::error::Error;
-use finito::{Action, RetryIf};
 use futures::future::BoxFuture;
 use futures::{ready, FutureExt, Stream, StreamExt};
-use std::{future::Future, pin::Pin, task::Poll, time::Duration};
+use std::{future::Future, pin::Pin, task::Poll};
 
 /// Resubscribe callback.
 pub type ResubscribeGetter<T> = Box<dyn FnMut() -> ResubscribeFuture<T> + Send>;
@@ -93,46 +90,24 @@ impl<T> Stream for RetrySubscription<T> {
     }
 }
 
-/// Retry a future with custom strategy.
-pub async fn retry_with_policy<T, A, S>(strategy: S, mut retry_future: A) -> Result<T, Error>
+/// Retry a future until it doesn't return a disconnected error.
+pub async fn retry<T, F, R>(mut retry_future: F) -> Result<R, Error>
 where
-    A: Action<Item = T, Error = Error>,
-    S: Iterator<Item = Duration>,
+    F: FnMut() -> T,
+    T: Future<Output = Result<R, Error>>,
 {
-    RetryIf::new(
-        strategy,
-        || retry_future.run(),
-        |err: &Error| err.is_disconnected_will_reconnect(),
-    )
-    .await
+   loop {
+        match retry_future().await {
+            Ok(v) => return Ok(v),
+            Err(e) => {
+                if !e.is_disconnected_will_reconnect() {
+                    return Err(e);
+                }
+            }
+        }
+   }
 }
 
-/// Retry policy
-///
-/// Does nothing if a non-reconnecting rpc client hasn't been enabled.
-#[derive(Debug, Clone)]
-pub struct RetryPolicy(ExponentialBackoff);
-
-impl Default for RetryPolicy {
-    fn default() -> Self {
-        Self(ExponentialBackoff::from_millis(10).max_delay(Duration::from_secs(60)))
-    }
-}
-
-impl RetryPolicy {
-    /// Create new retry policy
-    pub fn new(policy: ExponentialBackoff) -> Self {
-        Self(policy)
-    }
-
-    /// Run a retry-able call.
-    pub async fn call<T, A>(&self, retry_future: A) -> Result<T, Error>
-    where
-        A: Action<Item = T, Error = Error>,
-    {
-        retry_with_policy(self.0, retry_future).await
-    }
-}
 
 #[cfg(test)]
 mod tests {

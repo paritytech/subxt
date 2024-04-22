@@ -40,6 +40,8 @@ use storage_items::StorageItems;
 // Expose the RPC methods.
 pub use rpc_methods::UnstableRpcMethods;
 
+use super::utils::retry;
+
 /// Configure and build an [`UnstableBackend`].
 pub struct UnstableBackendBuilder<T> {
     max_block_life: usize,
@@ -207,36 +209,40 @@ impl<T: Config> super::sealed::Sealed for UnstableBackend<T> {}
 
 #[async_trait]
 impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
+
     async fn storage_fetch_values(
         &self,
         keys: Vec<Vec<u8>>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        let queries = keys.iter().map(|key| StorageQuery {
-            key: &**key,
-            query_type: StorageQueryType::Value,
-        });
+        retry(|| async {
+            let queries = keys.iter().map(|key| StorageQuery {
+                key: &**key,
+                query_type: StorageQueryType::Value,
+            });
+    
+            let storage_items =
+                StorageItems::from_methods(queries, at, &self.follow_handle, self.methods.clone())
+                    .await?;
+    
+            let stream = storage_items.filter_map(|val| async move {
+                let val = match val {
+                    Ok(val) => val,
+                    Err(e) => return Some(Err(e)),
+                };
+    
+                let StorageResultType::Value(result) = val.result else {
+                    return None;
+                };
+                Some(Ok(StorageResponse {
+                    key: val.key.0,
+                    value: result.0,
+                }))
+            });
 
-        let storage_items =
-            StorageItems::from_methods(queries, at, &self.follow_handle, self.methods.clone())
-                .await?;
+            Ok(StreamOf(Box::pin(stream)))
 
-        let storage_result_stream = storage_items.filter_map(|val| async move {
-            let val = match val {
-                Ok(val) => val,
-                Err(e) => return Some(Err(e)),
-            };
-
-            let StorageResultType::Value(result) = val.result else {
-                return None;
-            };
-            Some(Ok(StorageResponse {
-                key: val.key.0,
-                value: result.0,
-            }))
-        });
-
-        Ok(StreamOf(Box::pin(storage_result_stream)))
+        }).await        
     }
 
     async fn storage_fetch_descendant_keys(
@@ -244,22 +250,23 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         key: Vec<u8>,
         at: T::Hash,
     ) -> Result<StreamOfResults<Vec<u8>>, Error> {
-        // Ask for hashes, and then just ignore them and return the keys that come back.
-        let query = StorageQuery {
-            key: &*key,
-            query_type: StorageQueryType::DescendantsHashes,
-        };
+        retry(|| async {
+            // Ask for hashes, and then just ignore them and return the keys that come back.
+            let query = StorageQuery {
+                key: &*key,
+                query_type: StorageQueryType::DescendantsHashes,
+            };
 
-        let storage_items = StorageItems::from_methods(
-            std::iter::once(query),
-            at,
-            &self.follow_handle,
-            self.methods.clone(),
-        )
-        .await?;
+            let storage_items = StorageItems::from_methods(
+                std::iter::once(query),
+                at,
+                &self.follow_handle,
+                self.methods.clone(),
+            ).await?;
 
-        let storage_result_stream = storage_items.map(|val| val.map(|v| v.key.0));
-        Ok(StreamOf(Box::pin(storage_result_stream)))
+            let storage_result_stream = storage_items.map(|val| val.map(|v| v.key.0));
+            Ok(StreamOf(Box::pin(storage_result_stream)))
+        }).await
     }
 
     async fn storage_fetch_descendant_values(
@@ -267,75 +274,83 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         key: Vec<u8>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        let query = StorageQuery {
-            key: &*key,
-            query_type: StorageQueryType::DescendantsValues,
-        };
-
-        let storage_items = StorageItems::from_methods(
-            std::iter::once(query),
-            at,
-            &self.follow_handle,
-            self.methods.clone(),
-        )
-        .await?;
-
-        let storage_result_stream = storage_items.filter_map(|val| async move {
-            let val = match val {
-                Ok(val) => val,
-                Err(e) => return Some(Err(e)),
+        retry(|| async {
+            let query = StorageQuery {
+                key: &*key,
+                query_type: StorageQueryType::DescendantsValues,
             };
-
-            let StorageResultType::Value(result) = val.result else {
-                return None;
-            };
-            Some(Ok(StorageResponse {
-                key: val.key.0,
-                value: result.0,
-            }))
-        });
-
-        Ok(StreamOf(Box::pin(storage_result_stream)))
+    
+            let storage_items = StorageItems::from_methods(
+                std::iter::once(query),
+                at,
+                &self.follow_handle,
+                self.methods.clone(),
+            )
+            .await?;
+    
+            let storage_result_stream = storage_items.filter_map(|val| async move {
+                let val = match val {
+                    Ok(val) => val,
+                    Err(e) => return Some(Err(e)),
+                };
+    
+                let StorageResultType::Value(result) = val.result else {
+                    return None;
+                };
+                Some(Ok(StorageResponse {
+                    key: val.key.0,
+                    value: result.0,
+                }))
+            });
+    
+            Ok(StreamOf(Box::pin(storage_result_stream)))
+        }).await
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        self.methods.chainspec_v1_genesis_hash().await
+        retry(|| self.methods.chainspec_v1_genesis_hash()).await
     }
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
-        self.methods.chainhead_v1_header(&sub_id, at).await
+        retry(|| async {
+            let sub_id = get_subscription_id(&self.follow_handle).await?;
+            self.methods.chainhead_v1_header(&sub_id, at).await
+        }).await
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
+        retry(|| async {
+            let sub_id = get_subscription_id(&self.follow_handle).await?;
 
-        // Subscribe to the body response and get our operationId back.
-        let follow_events = self.follow_handle.subscribe().events();
-        let status = self.methods.chainhead_v1_body(&sub_id, at).await?;
-        let operation_id = match status {
-            MethodResponse::LimitReached => {
-                return Err(RpcError::request_rejected("limit reached").into())
-            }
-            MethodResponse::Started(s) => s.operation_id,
-        };
-
-        // Wait for the response to come back with the correct operationId.
-        let mut exts_stream = follow_events.filter_map(|ev| {
-            let FollowEvent::OperationBodyDone(body) = ev else {
-                return std::future::ready(None);
+            // Subscribe to the body response and get our operationId back.
+            let follow_events = self.follow_handle.subscribe().events();
+            let status = self.methods.chainhead_v1_body(&sub_id, at).await?;
+            let operation_id = match status {
+                MethodResponse::LimitReached => {
+                    return Err(RpcError::request_rejected("limit reached").into())
+                }
+                MethodResponse::Started(s) => s.operation_id,
             };
-            if body.operation_id != operation_id {
-                return std::future::ready(None);
-            }
-            let exts: Vec<_> = body.value.into_iter().map(|ext| ext.0).collect();
-            std::future::ready(Some(exts))
-        });
+    
+            // Wait for the response to come back with the correct operationId.
+            let mut exts_stream = follow_events.filter_map(|ev| {
+                let FollowEvent::OperationBodyDone(body) = ev else {
+                    return std::future::ready(None);
+                };
+                if body.operation_id != operation_id {
+                    return std::future::ready(None);
+                }
+                let exts: Vec<_> = body.value.into_iter().map(|ext| ext.0).collect();
+                std::future::ready(Some(exts))
+            });
+    
+            Ok(exts_stream.next().await)
+        }).await
 
-        Ok(exts_stream.next().await)
     }
 
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
+        // The backend driver already re-starts the subscription if gets re-connected.
         let next_ref: Option<BlockRef<T::Hash>> = self
             .follow_handle
             .subscribe()
@@ -356,6 +371,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     }
 
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
+        // The backend driver already re-starts the subscription if gets re-connected.
+        //
         // Just start a stream of version infos, and return the first value we get from it.
         let runtime_version = self.stream_runtime_version().await?.next().await;
         match runtime_version {
@@ -368,6 +385,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
         // Keep track of runtime details announced in new blocks, and then when blocks
         // are finalized, find the latest of these that has runtime details, and clear the rest.
+        //
+        // The backend driver already re-starts the subscription if gets re-connected.
         let mut runtimes = HashMap::new();
         let runtime_stream = self
             .follow_handle
@@ -502,9 +521,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let mut seen_blocks_sub = self.follow_handle.subscribe().events();
 
         // Then, submit the transaction.
-        let mut tx_progress = self
+        let mut tx_progress = retry(|| self
             .methods
-            .transactionwatch_v1_submit_and_watch(extrinsic)
+            .transactionwatch_v1_submit_and_watch(extrinsic))
             .await?;
 
         let mut seen_blocks = HashMap::new();

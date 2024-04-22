@@ -7,12 +7,11 @@
 #![allow(missing_docs)]
 
 use std::sync::Arc;
-use std::time::Duration;
 
 use futures::StreamExt;
 use subxt::backend::rpc::reconnecting_rpc_client::{Client, ExponentialBackoff};
 use subxt::backend::rpc::RpcClient;
-use subxt::backend::unstable::{UnstableBackend, UnstableBackendDriver};
+use subxt::backend::unstable::{UnstableBackend, UnstableBackendDriver, UnstableRpcMethods};
 use subxt::error::Error;
 use subxt::tx::TxStatus;
 use subxt::{OnlineClient, PolkadotConfig};
@@ -26,16 +25,17 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    // Create a new client with with a reconnecting RPC client.
+    // Use a reconnecting RPC client.
     let rpc = Arc::new(
         Client::builder()
-            // Retry reconnections and calls with exponential backoff.
-            .retry_policy(ExponentialBackoff::from_millis(10).max_delay(Duration::from_secs(60)))
+            // Retry re-connections with exponential backoff.
+            .retry_policy(ExponentialBackoff::from_millis(10))
             .build("ws://localhost:9944".to_string())
             .await?,
     );
 
-    let (backend, driver) = UnstableBackend::builder().build(RpcClient::new(rpc.clone()));
+    let r = RpcClient::new(rpc.clone());
+    let (backend, driver) = UnstableBackend::builder().build(r.clone());
 
     // The unstable backend needs driving:
     tokio::spawn(drive_rpc_backend(driver));
@@ -61,9 +61,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     submit_retry_transaction(&api).await?;*/
 
     loop {
-        let v = api.backend().current_runtime_version().await?;
-        println!("version: {:?}", v);
-        tokio::time::sleep(Duration::from_secs(5)).await;  
+        let methods: UnstableRpcMethods<PolkadotConfig> = UnstableRpcMethods::new(r.clone());
+        //let v = methods.chainspec_v1_genesis_hash().await?;
+        let v = api.backend().genesis_hash().await?;
+        println!("genesis_hash: {:?}", v);
+        //tokio::time::sleep(Duration::from_secs(5)).await;  
     }
 
     Ok(())
@@ -87,7 +89,7 @@ async fn subscribe_runtime_versions(api: OnlineClient<PolkadotConfig>) -> Result
     Ok(())
 }
 
-// The retry-able rpc backend will re-run this until it's succesful.
+// The retry-able rpc backend will re-run this until it's successful.
 async fn subscribe_to_blocks(api: OnlineClient<PolkadotConfig>) -> Result<(), Error> {
     let mut blocks_sub = api.blocks().subscribe_finalized().await?;
 

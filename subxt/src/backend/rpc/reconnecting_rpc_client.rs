@@ -183,7 +183,7 @@ impl RpcClientT for Client {
             self.inner
                 .request_raw_with_policy(method.to_string(), params, CallRetryPolicy::Drop)
                 .await
-                .map_err(|e| RpcError::ClientError(Box::new(e)))
+                .map_err(|e| RpcError::DisconnectedWillReconnect(e.to_string()))
         }
         .boxed()
     }

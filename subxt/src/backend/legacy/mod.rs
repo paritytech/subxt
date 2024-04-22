@@ -22,7 +22,7 @@ use std::task::{Context, Poll};
 // Expose the RPC methods.
 pub use rpc_methods::LegacyRpcMethods;
 
-use super::utils::RetrySubscription;
+use super::utils::{retry, RetrySubscription};
 
 /// Configure and build an [`LegacyBackend`].
 pub struct LegacyBackendBuilder<T> {
@@ -83,30 +83,32 @@ impl<T: Config> LegacyBackend<T> {
     async fn subscribe_finalized(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let sub = self.methods.chain_subscribe_finalized_heads().await?;
+        retry(|| async {
+            let sub = self.methods.chain_subscribe_finalized_heads().await?;
 
-        // Get the last finalized block immediately so that the stream will emit every finalized block after this.
-        let last_finalized_block_ref = self.latest_finalized_block_ref().await?;
-        let last_finalized_block_num = self
-            .block_header(last_finalized_block_ref.hash())
-            .await?
-            .map(|h| h.number().into());
-
-        // Fill in any missing blocks, because the backend may not emit every finalized block; just the latest ones which
-        // are finalized each time.
-        let sub = subscribe_to_block_headers_filling_in_gaps(
-            self.methods.clone(),
-            sub,
-            last_finalized_block_num,
-        );
-        let sub = sub.map(|r| {
-            r.map(|h| {
-                let hash = h.hash();
-                (h, BlockRef::from_hash(hash))
-            })
-        });
-
-        Ok(StreamOf(Box::pin(sub)))
+            // Get the last finalized block immediately so that the stream will emit every finalized block after this.
+            let last_finalized_block_ref = self.latest_finalized_block_ref().await?;
+            let last_finalized_block_num = self
+                .block_header(last_finalized_block_ref.hash())
+                .await?
+                .map(|h| h.number().into());
+    
+            // Fill in any missing blocks, because the backend may not emit every finalized block; just the latest ones which
+            // are finalized each time.
+            let sub = subscribe_to_block_headers_filling_in_gaps(
+                self.methods.clone(),
+                sub,
+                last_finalized_block_num,
+            );
+            let sub = sub.map(|r| {
+                r.map(|h| {
+                    let hash = h.hash();
+                    (h, BlockRef::from_hash(hash))
+                })
+            });
+    
+            Ok(StreamOf(Box::pin(sub)))
+        }).await
     }
 }
 
@@ -117,23 +119,30 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         keys: Vec<Vec<u8>>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        let methods = self.methods.clone();
+        async fn fut<T: Config>(
+            keys: Vec<Vec<u8>>,
+            at: T::Hash,
+            methods: LegacyRpcMethods<T>,
+        ) -> Result<StreamOfResults<StorageResponse>, Error> {
+            // For each key, return it + a future to get the result.
+            let iter = keys.into_iter().map(move |key| {
+                let methods = methods.clone();
+                async move {
+                    let res = methods.state_get_storage(&key, Some(at)).await?;
+                    Ok(res.map(|value| StorageResponse { key, value }))
+                }
+            });
 
-        let iter = keys.into_iter().map(move |key| {
-            let methods = methods.clone();
-            async move {
-                let res = methods.state_get_storage(&key, Some(at)).await?;
-                Ok(res.map(|value| StorageResponse { key, value }))
-            }
-        });
+            let s = stream::iter(iter)
+                // Resolve the future
+                .then(|fut| fut)
+                // Filter any Options out (ie if we didn't find a value at some key we return nothing for it).
+                .filter_map(|r| future::ready(r.transpose()));
 
-        let s = stream::iter(iter)
-            // Resolve the future
-            .then(|fut| fut)
-            // Filter any Options out (ie if we didn't find a value at some key we return nothing for it).
-            .filter_map(|r| future::ready(r.transpose()));
+            Ok(StreamOf(Box::pin(s)))
+        }
 
-        Ok(StreamOf(Box::pin(s)))
+        retry(|| fut(keys.clone(), at, self.methods.clone())).await
     }
 
     async fn storage_fetch_descendant_keys(
@@ -141,30 +150,33 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         key: Vec<u8>,
         at: T::Hash,
     ) -> Result<StreamOfResults<Vec<u8>>, Error> {
-        let keys = StorageFetchDescendantKeysStream {
-            at,
-            key,
-            storage_page_size: self.storage_page_size,
-            methods: self.methods.clone(),
-            done: Default::default(),
-            keys_fut: Default::default(),
-            pagination_start_key: None,
-        };
-
-        let keys = keys.flat_map(|keys| {
-            match keys {
-                Err(e) => {
-                    // If there's an error, return that next:
-                    Either::Left(stream::iter(std::iter::once(Err(e))))
+        retry(|| async {
+            let keys = StorageFetchDescendantKeysStream {
+                at,
+                key: key.clone(),
+                storage_page_size: self.storage_page_size,
+                methods: self.methods.clone(),
+                done: Default::default(),
+                keys_fut: Default::default(),
+                pagination_start_key: None,
+            };
+    
+            let keys = keys.flat_map(|keys| {
+                match keys {
+                    Err(e) => {
+                        // If there's an error, return that next:
+                        Either::Left(stream::iter(std::iter::once(Err(e))))
+                    }
+                    Ok(keys) => {
+                        // Or, stream each "ok" value:
+                        Either::Right(stream::iter(keys.into_iter().map(Ok)))
+                    }
                 }
-                Ok(keys) => {
-                    // Or, stream each "ok" value:
-                    Either::Right(stream::iter(keys.into_iter().map(Ok)))
-                }
-            }
-        });
+            });
+    
+            Ok(StreamOf(Box::pin(keys)))
+        }).await
 
-        Ok(StreamOf(Box::pin(keys)))
     }
 
     async fn storage_fetch_descendant_values(
@@ -172,51 +184,59 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         key: Vec<u8>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        let keys_stream = StorageFetchDescendantKeysStream {
-            at,
-            key,
-            storage_page_size: self.storage_page_size,
-            methods: self.methods.clone(),
-            done: Default::default(),
-            keys_fut: Default::default(),
-            pagination_start_key: None,
-        };
-
-        Ok(StreamOf(Box::pin(StorageFetchDescendantValuesStream {
-            keys: keys_stream,
-            results_fut: None,
-            results: Default::default(),
-        })))
+        retry(|| async {
+            let keys_stream = StorageFetchDescendantKeysStream {
+                at,
+                key: key.clone(),
+                storage_page_size: self.storage_page_size,
+                methods: self.methods.clone(),
+                done: Default::default(),
+                keys_fut: Default::default(),
+                pagination_start_key: None,
+            };
+    
+            Ok(StreamOf(Box::pin(StorageFetchDescendantValuesStream {
+                keys: keys_stream,
+                results_fut: None,
+                results: Default::default(),
+            })))
+        }).await
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        self.methods.genesis_hash().await
+        retry(|| self.methods.genesis_hash()).await
     }
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
-        self.methods.chain_get_header(Some(at)).await
+        retry(|| self.methods.chain_get_header(Some(at))).await
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
-        let Some(details) = self.methods.chain_get_block(Some(at)).await? else {
-            return Ok(None);
-        };
-        Ok(Some(
-            details.block.extrinsics.into_iter().map(|b| b.0).collect(),
-        ))
+        retry(|| async {
+            let Some(details) = self.methods.chain_get_block(Some(at)).await? else {
+                return Ok(None);
+            };
+            Ok(Some(
+                details.block.extrinsics.into_iter().map(|b| b.0).collect(),
+            ))
+        }).await
     }
 
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
-        let hash = self.methods.chain_get_finalized_head().await?;
-        Ok(BlockRef::from_hash(hash))
+        retry(|| async {
+            let hash = self.methods.chain_get_finalized_head().await?;
+            Ok(BlockRef::from_hash(hash))
+        }).await
     }
-
+        
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
-        let details = self.methods.state_get_runtime_version(None).await?;
-        Ok(RuntimeVersion {
-            spec_version: details.spec_version,
-            transaction_version: details.transaction_version,
-        })
+        retry(|| async {
+            let details = self.methods.state_get_runtime_version(None).await?;
+            Ok(RuntimeVersion {
+                spec_version: details.spec_version,
+                transaction_version: details.transaction_version,
+            })
+        }).await
     }
 
     async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
@@ -233,7 +253,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             Ok(StreamOf(Box::pin(sub)))
         }
 
-        let sub = subscribe_runtime_version(&self.methods).await?;
+        let sub = retry(|| subscribe_runtime_version(&self.methods)).await?;
         let methods = self.methods.clone();
 
         let retry_sub = RetrySubscription::new(
@@ -263,7 +283,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             Ok(StreamOf(Box::pin(sub)))
         }
 
-        let sub = subscribe_all_block_headers(&self.methods).await?;
+        let sub = retry(|| subscribe_all_block_headers(&self.methods)).await?;
         let methods = self.methods.clone();
 
         let retry_sub = RetrySubscription::new(
@@ -283,8 +303,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_best_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        // Legacy methods are already retried.
-
         async fn subscribe_best_block_headers<T: Config>(
             methods: &LegacyRpcMethods<T>,
         ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
@@ -298,7 +316,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             Ok(StreamOf(Box::pin(sub)))
         }
 
-        let sub = subscribe_best_block_headers(&self.methods).await?;
+        let sub = retry(|| subscribe_best_block_headers(&self.methods)).await?;
         let methods = self.methods.clone();
 
         let retry_sub = RetrySubscription::new(
@@ -318,7 +336,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_finalized_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let sub = self.subscribe_finalized().await?;
+        let sub = retry(|| self.subscribe_finalized()).await?;
 
         let this = LegacyBackend {
             methods: self.methods.clone(),
@@ -347,9 +365,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         &self,
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
-        let sub = self
+        let sub = retry(|| self
             .methods
-            .author_submit_and_watch_extrinsic(extrinsic)
+            .author_submit_and_watch_extrinsic(extrinsic))
             .await?;
 
         let sub = sub.filter_map(|r| {
@@ -410,8 +428,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         call_parameters: Option<&[u8]>,
         at: T::Hash,
     ) -> Result<Vec<u8>, Error> {
-        self.methods
-            .state_call(method, call_parameters, Some(at))
+        retry(|| self.methods
+            .state_call(method, call_parameters, Some(at)))
             .await
     }
 }
