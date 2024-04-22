@@ -16,7 +16,9 @@ pub use primitive_types::{H256, U256};
 /// Default set of commonly used types by Substrate runtimes.
 // Note: We only use this at the type level, so it should be impossible to
 // create an instance of it.
-#[derive(Debug, Clone, Copy)]
+// The trait implementations exist just to make life easier,
+// but shouldn't strictly be necessary since users can't instantiate this type.
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum SubstrateConfig {}
 
 impl Config for SubstrateConfig {
