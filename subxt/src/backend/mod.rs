@@ -104,7 +104,7 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     ) -> Result<Vec<u8>, Error>;
 }
 
-/// helpeful utility methods derived from those provided on [`Backend`]
+/// helpful utility methods derived from those provided on [`Backend`]
 #[async_trait]
 pub trait BackendExt<T: Config>: Backend<T> {
     /// Fetch a single value from storage.

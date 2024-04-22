@@ -165,6 +165,7 @@ impl<T: Config> UnstableBackend<T> {
                         *sub_id.write().unwrap() = id;
                         None
                     }
+
                 }
             })
             .flat_map(move |(sub_id, ev)| {
@@ -304,7 +305,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
         let sub_id = get_subscription_id(&self.follow_handle).await?;
-        self.methods.chainhead_unstable_header(&sub_id, at).await
+        self.methods.chainhead_v1_header(&sub_id, at).await
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
@@ -312,9 +313,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
 
         // Subscribe to the body response and get our operationId back.
         let follow_events = self.follow_handle.subscribe().events();
-
-        let status = self.methods.chainhead_unstable_body(&sub_id, at).await?;
-
+        let status = self.methods.chainhead_v1_body(&sub_id, at).await?;
         let operation_id = match status {
             MethodResponse::LimitReached => {
                 return Err(RpcError::request_rejected("limit reached").into())
@@ -506,7 +505,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // Then, submit the transaction.
         let mut tx_progress = self
             .methods
-            .transaction_unstable_submit_and_watch(extrinsic)
+            .transactionwatch_v1_submit_and_watch(extrinsic)
             .await?;
 
         let mut seen_blocks = HashMap::new();
@@ -574,7 +573,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                         }
                         FollowEvent::Stop => {
                             // If we get this event, we'll lose all of our existing pinned blocks and have a gap
-                            // in which we may lose the finaliuzed block that the TX is in. For now, just error if
+                            // in which we may lose the finalized block that the TX is in. For now, just error if
                             // this happens, to prevent the case in which we never see a finalized block and wait
                             // forever.
                             return Poll::Ready(err_other("chainHead_follow emitted 'stop' event during transaction submission"));
@@ -674,7 +673,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let call_parameters = call_parameters.unwrap_or(&[]);
         let status = self
             .methods
-            .chainhead_unstable_call(&sub_id, at, method, call_parameters)
+            .chainhead_v1_call(&sub_id, at, method, call_parameters)
             .await?;
         let operation_id = match status {
             MethodResponse::LimitReached => {
