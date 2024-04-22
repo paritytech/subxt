@@ -165,7 +165,6 @@ impl<T: Config> UnstableBackend<T> {
                         *sub_id.write().unwrap() = id;
                         None
                     }
-
                 }
             })
             .flat_map(move |(sub_id, ev)| {
@@ -179,7 +178,7 @@ impl<T: Config> UnstableBackend<T> {
 
                     async move {
                         let res = methods
-                            .chainhead_unstable_header(&sub_id, block_ref.hash())
+                            .chainhead_v1_header(&sub_id, block_ref.hash())
                             .await
                             .transpose()?;
 
