@@ -213,7 +213,6 @@ impl std::error::Error for Error {}
 /// since the secret keys are known.
 pub mod dev {
     use super::*;
-    use core::str::FromStr;
 
     once_static_cloned! {
         /// Equivalent to `{DEV_PHRASE}//Alice`.
