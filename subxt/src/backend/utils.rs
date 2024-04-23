@@ -1,17 +1,16 @@
 //! RPC utils.
 
-use super::StreamOfResults;
+use super::{StreamOf, StreamOfResults};
 use crate::error::Error;
 use futures::future::BoxFuture;
 use futures::{ready, FutureExt, Stream, StreamExt};
 use std::{future::Future, pin::Pin, task::Poll};
 
 /// Resubscribe callback.
-pub type ResubscribeGetter<T> = Box<dyn FnMut() -> ResubscribeFuture<T> + Send>;
+type ResubscribeGetter<T> = Box<dyn FnMut() -> ResubscribeFuture<T> + Send>;
 
 /// Future that resolves to a subscription stream.
-pub type ResubscribeFuture<T> =
-    Pin<Box<dyn Future<Output = Result<StreamOfResults<T>, Error>> + Send>>;
+type ResubscribeFuture<T> = Pin<Box<dyn Future<Output = Result<StreamOfResults<T>, Error>> + Send>>;
 
 pub(crate) enum PendingOrStream<T> {
     Pending(BoxFuture<'static, Result<StreamOfResults<T>, Error>>),
@@ -19,25 +18,9 @@ pub(crate) enum PendingOrStream<T> {
 }
 
 /// Retry subscription.
-pub struct RetrySubscription<T> {
+struct RetrySubscription<T> {
     resubscribe: ResubscribeGetter<T>,
     state: PendingOrStream<T>,
-}
-
-impl<T> RetrySubscription<T> {
-    /// Create a new retry-able subscription.
-    pub fn new(stream: StreamOfResults<T>, resubscribe: ResubscribeGetter<T>) -> Self {
-        Self {
-            resubscribe,
-            state: PendingOrStream::Stream(stream),
-        }
-    }
-
-    /// Returns the next item in the stream. This is just a wrapper around
-    /// [`StreamExt::next()`] so that you can avoid the extra import.
-    pub async fn next(&mut self) -> Option<Result<T, Error>> {
-        StreamExt::next(self).await
-    }
 }
 
 impl<T> std::marker::Unpin for RetrySubscription<T> {}
@@ -128,6 +111,41 @@ where
     }
 }
 
+/// Create a retry stream that will resubscribe on disconnect.
+///
+/// Warning works for only stateless subscriptions i.e, if takes input or modifying state
+/// this should not be used.
+pub(crate) async fn retry_stream<F, R>(mut sub_stream: F) -> Result<StreamOfResults<R>, Error>
+where
+    F: FnMut() -> ResubscribeFuture<R> + Send + 'static,
+    R: Send + 'static,
+{
+    loop {
+        match sub_stream().await {
+            Ok(v) => {
+                let resubscribe = Box::new(move || {
+                    // The stream implementation takes care of resubscribing if it fails
+                    // because of a disconnect error.
+                    sub_stream()
+                });
+
+                // The extra Box is to encapsulate the retry subscription type
+                return Ok(StreamOf::new(Box::pin(RetrySubscription {
+                    state: PendingOrStream::Stream(v),
+                    resubscribe,
+                })));
+            }
+            Err(e) => {
+                if e.is_disconnected_will_reconnect() {
+                    continue;
+                }
+
+                return Err(e);
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -151,7 +169,10 @@ mod tests {
             async move { Ok(StreamOf::new(Box::pin(futures::stream::iter([Ok(2)])))) }.boxed()
         });
 
-        let retry_stream = RetrySubscription::new(StreamOf::new(Box::pin(stream)), resubscribe);
+        let retry_stream = RetrySubscription {
+            state: PendingOrStream::Stream(StreamOf::new(Box::pin(stream))),
+            resubscribe,
+        };
 
         let result: Vec<_> = retry_stream
             .filter_map(|v| async move {
@@ -174,7 +195,10 @@ mod tests {
         let stream = futures::stream::iter([Ok(1)]);
         let resubscribe = Box::new(move || async move { Err(custom_err()) }.boxed());
 
-        let retry_stream = RetrySubscription::new(StreamOf::new(Box::pin(stream)), resubscribe);
+        let retry_stream = RetrySubscription {
+            state: PendingOrStream::Stream(StreamOf::new(Box::pin(stream))),
+            resubscribe,
+        };
         assert_eq!(1, retry_stream.count().await);
     }
 }

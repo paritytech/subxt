@@ -8,6 +8,7 @@
 pub mod rpc_methods;
 
 use self::rpc_methods::TransactionStatus as RpcTransactionStatus;
+use crate::backend::utils::{retry, retry_stream};
 use crate::backend::{
     rpc::RpcClient, Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
     TransactionStatus,
@@ -21,8 +22,6 @@ use std::task::{Context, Poll};
 
 // Expose the RPC methods.
 pub use rpc_methods::LegacyRpcMethods;
-
-use super::utils::{retry, RetrySubscription};
 
 /// Configure and build an [`LegacyBackend`].
 pub struct LegacyBackendBuilder<T> {
@@ -258,18 +257,15 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             Ok(StreamOf(Box::pin(sub)))
         }
 
-        let sub = retry(|| subscribe_runtime_version(&self.methods)).await?;
         let methods = self.methods.clone();
 
-        let retry_sub = RetrySubscription::new(
-            sub,
-            Box::new(move || {
-                let methods = methods.clone();
-                Box::pin(async move { subscribe_runtime_version(&methods).await })
-            }),
-        );
+        let retry_sub = retry_stream(move || {
+            let methods = methods.clone();
+            Box::pin(async move { subscribe_runtime_version(&methods).await })
+        })
+        .await?;
 
-        Ok(StreamOf::new(Box::pin(retry_sub)))
+        Ok(retry_sub)
     }
 
     async fn stream_all_block_headers(
@@ -288,21 +284,15 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             Ok(StreamOf(Box::pin(sub)))
         }
 
-        let sub = retry(|| subscribe_all_block_headers(&self.methods)).await?;
         let methods = self.methods.clone();
 
-        let retry_sub = RetrySubscription::new(
-            StreamOf::new(Box::pin(sub)),
-            Box::new(move || {
-                let methods = methods.clone();
-                Box::pin(async move {
-                    let sub = subscribe_all_block_headers(&methods).await?;
-                    Ok(StreamOf::new(Box::pin(sub)))
-                })
-            }),
-        );
+        let retry_sub = retry_stream(move || {
+            let methods = methods.clone();
+            Box::pin(async move { subscribe_all_block_headers(&methods).await })
+        })
+        .await?;
 
-        Ok(StreamOf(Box::pin(retry_sub)))
+        Ok(retry_sub)
     }
 
     async fn stream_best_block_headers(
@@ -321,49 +311,35 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             Ok(StreamOf(Box::pin(sub)))
         }
 
-        let sub = retry(|| subscribe_best_block_headers(&self.methods)).await?;
         let methods = self.methods.clone();
 
-        let retry_sub = RetrySubscription::new(
-            StreamOf::new(Box::pin(sub)),
-            Box::new(move || {
-                let methods = methods.clone();
-                Box::pin(async move {
-                    let sub = subscribe_best_block_headers(&methods).await?;
-                    Ok(StreamOf::new(Box::pin(sub)))
-                })
-            }),
-        );
+        let retry_sub = retry_stream(move || {
+            let methods = methods.clone();
+            Box::pin(async move { subscribe_best_block_headers(&methods).await })
+        })
+        .await?;
 
-        Ok(StreamOf(Box::pin(retry_sub)))
+        Ok(retry_sub)
     }
 
     async fn stream_finalized_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let sub = retry(|| self.subscribe_finalized()).await?;
-
         let this = LegacyBackend {
             methods: self.methods.clone(),
             storage_page_size: self.storage_page_size,
         };
 
-        let retry_sub = RetrySubscription::new(
-            sub,
-            Box::new(move || {
-                let this = LegacyBackend {
-                    methods: this.methods.clone(),
-                    storage_page_size: this.storage_page_size,
-                };
+        let retry_sub = retry_stream(move || {
+            let this = LegacyBackend {
+                methods: this.methods.clone(),
+                storage_page_size: this.storage_page_size,
+            };
+            Box::pin(async move { this.subscribe_finalized().await })
+        })
+        .await?;
 
-                Box::pin(async move {
-                    let sub = this.subscribe_finalized().await?;
-                    Ok(sub)
-                })
-            }),
-        );
-
-        Ok(StreamOf(Box::pin(retry_sub)))
+        Ok(retry_sub)
     }
 
     async fn submit_transaction(
