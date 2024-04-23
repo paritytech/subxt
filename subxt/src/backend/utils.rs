@@ -107,16 +107,16 @@ where
                     continue;
                 }
 
-                // This applies only for the rpc v2 method calls.
+                // This applies only to the rpc v2 method calls/unstable backend.
                 //
-                // If the `chainhead_follow` and other operations are awaited on at the
-                // "same time" such as `chainhead_v1_storage`, the subscription ID may be outdated
-                // and the RPC server will reject the request.
+                // Once the backend sees `Error::DisconnectedWillReconnect` it will
+                // update the state, and subsequent `subscribe` will not proceed until
+                // a new subscription ID is obtained.
                 //
-                // Ideally, we should synchronize that the `chainhead_follow` has been answered
-                // to ensure that the subscription ID is up-to-date but no way to do that.
+                // It's still possible that subscription ID could be read before
+                // the backend has updated the state, but it is quite unlikely.
                 //
-                // Thus, we retry a few times before giving up.
+                // Thus, we retry the call a few times to be on the safe-side.
                 if e.is_rejected() && rejected_retries < REJECTED_MAX_RETRIES {
                     rejected_retries += 1;
                     continue;
