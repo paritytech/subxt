@@ -96,13 +96,33 @@ where
     F: FnMut() -> T,
     T: Future<Output = Result<R, Error>>,
 {
+    const REJECTED_MAX_RETRIES: usize = 10;
+    let mut rejected_retries = 0;
+
     loop {
         match retry_future().await {
             Ok(v) => return Ok(v),
             Err(e) => {
-                if !e.is_disconnected_will_reconnect() {
-                    return Err(e);
+                if e.is_disconnected_will_reconnect() {
+                    continue;
                 }
+
+                // This applies only for the rpc v2 method calls.
+                //
+                // If the `chainhead_follow` and other operations are awaited on at the
+                // "same time" such as `chainhead_v1_storage`, the subscription ID may be outdated
+                // and the RPC server will reject the request.
+                //
+                // Ideally, we should synchronize that the `chainhead_follow` has been answered
+                // to ensure that the subscription ID is up-to-date but no way to do that.
+                //
+                // Thus, we retry a few times before giving up.
+                if e.is_rejected() && rejected_retries < REJECTED_MAX_RETRIES {
+                    rejected_retries += 1;
+                    continue;
+                }
+
+                return Err(e);
             }
         }
     }

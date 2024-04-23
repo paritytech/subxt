@@ -125,6 +125,11 @@ impl Error {
     pub fn is_disconnected_will_reconnect(&self) -> bool {
         matches!(self, Error::Rpc(RpcError::DisconnectedWillReconnect(_)))
     }
+
+    /// Checks whether the error was caused by a RPC request being rejected.
+    pub fn is_rejected(&self) -> bool {
+        matches!(self, Error::Rpc(RpcError::RequestRejected(_)))
+    }
 }
 
 /// An RPC error. Since we are generic over the RPC client that is used,
