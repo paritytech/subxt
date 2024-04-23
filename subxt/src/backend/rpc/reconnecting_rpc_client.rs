@@ -9,10 +9,12 @@ use reconnecting_jsonrpsee_ws_client::{CallRetryPolicy, Client as InnerClient, S
 use serde_json::value::RawValue;
 use std::time::Duration;
 
-pub use reconnecting_jsonrpsee_ws_client::{ExponentialBackoff, IdKind, FixedInterval, FibonacciBackoff};
+pub use reconnecting_jsonrpsee_ws_client::{
+    ExponentialBackoff, FibonacciBackoff, FixedInterval, IdKind,
+};
 
 /// Builder for [`Client`].
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Builder<P> {
     max_request_size: u32,
     max_response_size: u32,
@@ -147,6 +149,7 @@ where
 }
 
 /// Reconnecting rpc client.
+#[derive(Debug, Clone)]
 pub struct Client(InnerClient);
 
 impl Client {
