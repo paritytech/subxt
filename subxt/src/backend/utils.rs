@@ -113,20 +113,33 @@ where
 
 /// Create a retry stream that will resubscribe on disconnect.
 ///
-/// Warning works for only stateless subscriptions i.e, if takes input or modifying state
-/// this should not be used.
+/// It's important to note that this function is intended to work only for stateless subscriptions.
+/// If the subscription takes input or modifies state, this function should not be used.
 pub(crate) async fn retry_stream<F, R>(mut sub_stream: F) -> Result<StreamOfResults<R>, Error>
 where
-    F: FnMut() -> ResubscribeFuture<R> + Send + 'static,
+    F: FnMut() -> ResubscribeFuture<R> + Send + 'static + Clone,
     R: Send + 'static,
 {
     loop {
         match sub_stream().await {
             Ok(v) => {
                 let resubscribe = Box::new(move || {
-                    // The stream implementation takes care of resubscribing if it fails
-                    // because of a disconnect error.
-                    sub_stream()
+                    let mut sub_stream = sub_stream.clone();
+                    async move {
+                        loop {
+                            match sub_stream().await {
+                                Ok(v) => return Ok(v),
+                                Err(e) => {
+                                    if e.is_disconnected_will_reconnect() {
+                                        continue;
+                                    }
+
+                                    return Err(e);
+                                }
+                            }
+                        }
+                    }
+                    .boxed()
                 });
 
                 // The extra Box is to encapsulate the retry subscription type
@@ -148,6 +161,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use futures::TryStreamExt;
+
     use super::*;
     use crate::backend::StreamOf;
 
@@ -163,6 +178,25 @@ mod tests {
 
     #[tokio::test]
     async fn retry_stream_works() {
+        let retry_stream = retry_stream(|| {
+            async {
+                Ok(StreamOf::new(Box::pin(futures::stream::iter([
+                    Ok(1),
+                    Err(disconnect_err()),
+                ]))))
+            }
+            .boxed()
+        })
+        .await
+        .unwrap();
+
+        let result: Vec<_> = retry_stream.take(2).try_collect().await.unwrap();
+
+        assert_eq!(result, vec![1, 1], "Disconnect error should be ignored");
+    }
+
+    #[tokio::test]
+    async fn retry_sub_works() {
         let stream = futures::stream::iter([Ok(1), Err(disconnect_err())]);
 
         let resubscribe = Box::new(move || {
@@ -185,13 +219,15 @@ mod tests {
             .collect()
             .await;
 
-        // After the subscription gets disconnected
-        // we should fetch another element before it's done.
-        assert_eq!(result, vec![1, 2]);
+        assert_eq!(
+            result,
+            vec![1, 2],
+            "Stream should contain values from both subscription and resubscription"
+        );
     }
 
     #[tokio::test]
-    async fn failed_resubscribe_terminates_stream() {
+    async fn retry_sub_resubscribe_err_terminates_stream() {
         let stream = futures::stream::iter([Ok(1)]);
         let resubscribe = Box::new(move || async move { Err(custom_err()) }.boxed());
 
@@ -199,6 +235,10 @@ mod tests {
             state: PendingOrStream::Stream(StreamOf::new(Box::pin(stream))),
             resubscribe,
         };
-        assert_eq!(1, retry_stream.count().await);
+        assert_eq!(
+            1,
+            retry_stream.count().await,
+            "Stream should terminate after custom error"
+        );
     }
 }

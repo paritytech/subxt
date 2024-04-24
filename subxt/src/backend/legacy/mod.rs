@@ -78,40 +78,6 @@ impl<T: Config> LegacyBackend<T> {
 
 impl<T: Config> super::sealed::Sealed for LegacyBackend<T> {}
 
-impl<T: Config> LegacyBackend<T> {
-    async fn subscribe_finalized(
-        &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        retry(|| async {
-            let sub = self.methods.chain_subscribe_finalized_heads().await?;
-
-            // Get the last finalized block immediately so that the stream will emit every finalized block after this.
-            let last_finalized_block_ref = self.latest_finalized_block_ref().await?;
-            let last_finalized_block_num = self
-                .block_header(last_finalized_block_ref.hash())
-                .await?
-                .map(|h| h.number().into());
-
-            // Fill in any missing blocks, because the backend may not emit every finalized block; just the latest ones which
-            // are finalized each time.
-            let sub = subscribe_to_block_headers_filling_in_gaps(
-                self.methods.clone(),
-                sub,
-                last_finalized_block_num,
-            );
-            let sub = sub.map(|r| {
-                r.map(|h| {
-                    let hash = h.hash();
-                    (h, BlockRef::from_hash(hash))
-                })
-            });
-
-            Ok(StreamOf(Box::pin(sub)))
-        })
-        .await
-    }
-}
-
 #[async_trait]
 impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn storage_fetch_values(
@@ -244,24 +210,21 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     }
 
     async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
-        async fn subscribe_runtime_version<T: Config>(
-            methods: &LegacyRpcMethods<T>,
-        ) -> Result<StreamOfResults<RuntimeVersion>, Error> {
-            let sub = methods.state_subscribe_runtime_version().await?;
-            let sub = sub.map(|r| {
-                r.map(|v| RuntimeVersion {
-                    spec_version: v.spec_version,
-                    transaction_version: v.transaction_version,
-                })
-            });
-            Ok(StreamOf(Box::pin(sub)))
-        }
-
         let methods = self.methods.clone();
 
         let retry_sub = retry_stream(move || {
             let methods = methods.clone();
-            Box::pin(async move { subscribe_runtime_version(&methods).await })
+
+            Box::pin(async move {
+                let sub = methods.state_subscribe_runtime_version().await?;
+                let sub = sub.map(|r| {
+                    r.map(|v| RuntimeVersion {
+                        spec_version: v.spec_version,
+                        transaction_version: v.transaction_version,
+                    })
+                });
+                Ok(StreamOf(Box::pin(sub)))
+            })
         })
         .await?;
 
@@ -271,24 +234,20 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_all_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        async fn subscribe_all_block_headers<T: Config>(
-            methods: &LegacyRpcMethods<T>,
-        ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-            let sub = methods.chain_subscribe_all_heads().await?;
-            let sub = sub.map(|r| {
-                r.map(|h| {
-                    let hash = h.hash();
-                    (h, BlockRef::from_hash(hash))
-                })
-            });
-            Ok(StreamOf(Box::pin(sub)))
-        }
-
         let methods = self.methods.clone();
 
         let retry_sub = retry_stream(move || {
             let methods = methods.clone();
-            Box::pin(async move { subscribe_all_block_headers(&methods).await })
+            Box::pin(async move {
+                let sub = methods.chain_subscribe_all_heads().await?;
+                let sub = sub.map(|r| {
+                    r.map(|h| {
+                        let hash = h.hash();
+                        (h, BlockRef::from_hash(hash))
+                    })
+                });
+                Ok(StreamOf(Box::pin(sub)))
+            })
         })
         .await?;
 
@@ -298,24 +257,20 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_best_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        async fn subscribe_best_block_headers<T: Config>(
-            methods: &LegacyRpcMethods<T>,
-        ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-            let sub = methods.chain_subscribe_new_heads().await?;
-            let sub = sub.map(|r| {
-                r.map(|h| {
-                    let hash = h.hash();
-                    (h, BlockRef::from_hash(hash))
-                })
-            });
-            Ok(StreamOf(Box::pin(sub)))
-        }
-
         let methods = self.methods.clone();
 
         let retry_sub = retry_stream(move || {
             let methods = methods.clone();
-            Box::pin(async move { subscribe_best_block_headers(&methods).await })
+            Box::pin(async move {
+                let sub = methods.chain_subscribe_new_heads().await?;
+                let sub = sub.map(|r| {
+                    r.map(|h| {
+                        let hash = h.hash();
+                        (h, BlockRef::from_hash(hash))
+                    })
+                });
+                Ok(StreamOf(Box::pin(sub)))
+            })
         })
         .await?;
 
@@ -335,7 +290,32 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 methods: this.methods.clone(),
                 storage_page_size: this.storage_page_size,
             };
-            Box::pin(async move { this.subscribe_finalized().await })
+            Box::pin(async move {
+                let sub = this.methods.chain_subscribe_finalized_heads().await?;
+
+                // Get the last finalized block immediately so that the stream will emit every finalized block after this.
+                let last_finalized_block_ref = this.latest_finalized_block_ref().await?;
+                let last_finalized_block_num = this
+                    .block_header(last_finalized_block_ref.hash())
+                    .await?
+                    .map(|h| h.number().into());
+
+                // Fill in any missing blocks, because the backend may not emit every finalized block; just the latest ones which
+                // are finalized each time.
+                let sub = subscribe_to_block_headers_filling_in_gaps(
+                    this.methods.clone(),
+                    sub,
+                    last_finalized_block_num,
+                );
+                let sub = sub.map(|r| {
+                    r.map(|h| {
+                        let hash = h.hash();
+                        (h, BlockRef::from_hash(hash))
+                    })
+                });
+
+                Ok(StreamOf(Box::pin(sub)))
+            })
         })
         .await?;
 
