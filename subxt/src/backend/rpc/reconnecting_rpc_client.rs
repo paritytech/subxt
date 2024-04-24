@@ -14,7 +14,7 @@ pub use reconnecting_jsonrpsee_ws_client::{
 };
 
 #[cfg(feature = "native")]
-use reconnecting_jsonrpsee_ws_client::{Headers, PingConfig};
+use reconnecting_jsonrpsee_ws_client::{HeaderMap, PingConfig};
 
 /// Builder for [`Client`].
 #[derive(Debug, Clone)]
@@ -29,9 +29,9 @@ pub struct Builder<P> {
     request_timeout: Duration,
     connection_timeout: Duration,
     #[cfg(feature = "native")]
-    ping_config: PingConfig,
+    ping_config: Option<PingConfig>,
     #[cfg(feature = "native")]
-    headers: Headers,
+    headers: HeaderMap,
 }
 
 impl Default for Builder<ExponentialBackoff> {
@@ -46,6 +46,10 @@ impl Default for Builder<ExponentialBackoff> {
             max_concurrent_requests: 1024,
             request_timeout: Duration::from_secs(60),
             connection_timeout: Duration::from_secs(10),
+            #[cfg(feature = "native")]
+            ping_config: Some(PingConfig::new()),
+            #[cfg(feature = "native")]
+            headers: HeaderMap::new(),
         }
     }
 }
@@ -140,6 +144,10 @@ where
             max_concurrent_requests: self.max_concurrent_requests,
             request_timeout: self.request_timeout,
             connection_timeout: self.connection_timeout,
+            #[cfg(feature = "native")]
+            ping_config: self.ping_config,
+            #[cfg(feature = "native")]
+            headers: self.headers,
         }
     }
 
@@ -163,7 +171,7 @@ where
         self
     }
 
-    #[cfg(native)]
+    #[cfg(feature = "native")]
     #[cfg_attr(docsrs, doc(cfg(native)))]
     /// Configure custom headers to use in the WebSocket handshake.
     pub fn set_headers(mut self, headers: HeaderMap) -> Self {
