@@ -85,11 +85,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         keys: Vec<Vec<u8>>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        async fn fut<T: Config>(
-            keys: Vec<Vec<u8>>,
-            at: T::Hash,
-            methods: LegacyRpcMethods<T>,
-        ) -> Result<StreamOfResults<StorageResponse>, Error> {
+        retry(|| async {
+            let keys = keys.clone();
+            let methods = self.methods.clone();
+
             // For each key, return it + a future to get the result.
             let iter = keys.into_iter().map(move |key| {
                 let methods = methods.clone();
@@ -106,9 +105,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 .filter_map(|r| future::ready(r.transpose()));
 
             Ok(StreamOf(Box::pin(s)))
-        }
-
-        retry(|| fut(keys.clone(), at, self.methods.clone())).await
+        })
+        .await
     }
 
     async fn storage_fetch_descendant_keys(
