@@ -42,7 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dest = baltathar.account_id();
 
     println!("baltathar pub:  {}", hex::encode(baltathar.public_key().0));
-    println!("baltathar addr: {}", hex::encode(&dest));
+    println!("baltathar addr: {}", hex::encode(dest));
 
     let balance_transfer_tx = eth_runtime::tx()
         .balances()
