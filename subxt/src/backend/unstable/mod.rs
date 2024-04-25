@@ -33,7 +33,6 @@ use async_trait::async_trait;
 use follow_stream_driver::{FollowStreamDriver, FollowStreamDriverHandle};
 use futures::{Stream, StreamExt};
 use std::collections::HashMap;
-use std::sync::{Arc, RwLock};
 use std::task::Poll;
 use storage_items::StorageItems;
 
@@ -149,24 +148,27 @@ impl<T: Config> UnstableBackend<T> {
         <I as IntoIterator>::IntoIter: Send,
     {
         let methods = self.methods.clone();
-        let follow_handle = self.follow_handle.clone();
-        let sub_id = get_subscription_id(&follow_handle).await?;
 
-        // TODO(niklasad1): get rid of the Arc<RwLock> if possible...
         let headers = self
             .follow_handle
             .subscribe()
-            .scan(Arc::new(RwLock::new(sub_id)), |id, v| {
-                let sub_id = id.clone();
-                async { Some((sub_id, v)) }
+            .scan(None, |sub_id, ev| {
+                let next_sub_id = if let FollowStreamMsg::Ready(id) = &ev {
+                    *sub_id = Some(id.clone());
+                    id.clone()
+                } else {
+                    sub_id
+                        .clone()
+                        .expect("FollowStreamMsg::Ready is always sent before any other event; qed")
+                };
+
+                async { Some((next_sub_id, ev)) }
             })
-            .filter_map(|(sub_id, v)| async {
-                match v {
-                    FollowStreamMsg::Event(ev) => Some((sub_id, ev)),
-                    FollowStreamMsg::Ready(id) => {
-                        *sub_id.write().unwrap() = id;
-                        None
-                    }
+            .filter_map(|(sub_id, ev)| async {
+                if let FollowStreamMsg::Event(ev) = ev {
+                    Some((sub_id, ev))
+                } else {
+                    None
                 }
             })
             .flat_map(move |(sub_id, ev)| {
@@ -176,7 +178,7 @@ impl<T: Config> UnstableBackend<T> {
 
                 futures::stream::iter(block_refs).filter_map(move |block_ref| {
                     let methods = methods.clone();
-                    let sub_id = sub_id.read().unwrap().clone();
+                    let sub_id = sub_id.clone();
 
                     async move {
                         let res = methods
