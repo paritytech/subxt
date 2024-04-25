@@ -118,7 +118,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     ) -> Result<StreamOfResults<Vec<u8>>, Error> {
         let keys = StorageFetchDescendantKeysStream {
             at,
-            key: key.clone(),
+            key,
             storage_page_size: self.storage_page_size,
             methods: self.methods.clone(),
             done: Default::default(),
