@@ -355,7 +355,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     }
 
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
-        // The backend driver already re-starts the subscription if gets re-connected.
         let next_ref: Option<BlockRef<T::Hash>> = self
             .follow_handle
             .subscribe()
@@ -376,8 +375,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     }
 
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
-        // The backend driver already re-starts the subscription if gets re-connected.
-        //
         // Just start a stream of version infos, and return the first value we get from it.
         let runtime_version = self.stream_runtime_version().await?.next().await;
         match runtime_version {
@@ -390,8 +387,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
         // Keep track of runtime details announced in new blocks, and then when blocks
         // are finalized, find the latest of these that has runtime details, and clear the rest.
-        //
-        // The backend driver already re-starts the subscription if gets re-connected.
         let mut runtimes = HashMap::new();
         let runtime_stream = self
             .follow_handle
