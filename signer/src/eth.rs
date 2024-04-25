@@ -298,7 +298,7 @@ mod test {
     use proptest::prelude::*;
     use secp256k1::Secp256k1;
 
-    use subxt_core::{config::*, tx::Signer as SignerT, utils::H256};
+    use subxt_core::{config::*, tx::signer::Signer as SignerT, utils::H256};
 
     use super::*;
 
