@@ -524,8 +524,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         let mut seen_blocks_sub = self.follow_handle.subscribe().events();
 
         // Then, submit the transaction.
-        let mut tx_progress =
-            retry(|| self.methods.transactionwatch_v1_submit_and_watch(extrinsic)).await?;
+        let mut tx_progress = self
+            .methods
+            .transactionwatch_v1_submit_and_watch(extrinsic)
+            .await?;
 
         let mut seen_blocks = HashMap::new();
         let mut done = false;

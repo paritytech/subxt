@@ -320,7 +320,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         &self,
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
-        let sub = retry(|| self.methods.author_submit_and_watch_extrinsic(extrinsic)).await?;
+        let sub = self
+            .methods
+            .author_submit_and_watch_extrinsic(extrinsic)
+            .await?;
 
         let sub = sub.filter_map(|r| {
             let mapped = r
