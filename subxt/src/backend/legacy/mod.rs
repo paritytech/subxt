@@ -149,7 +149,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
         let keys_stream = StorageFetchDescendantKeysStream {
             at,
-            key: key.clone(),
+            key,
             storage_page_size: self.storage_page_size,
             methods: self.methods.clone(),
             done: Default::default(),
