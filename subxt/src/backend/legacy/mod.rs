@@ -116,33 +116,30 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         key: Vec<u8>,
         at: T::Hash,
     ) -> Result<StreamOfResults<Vec<u8>>, Error> {
-        retry(|| async {
-            let keys = StorageFetchDescendantKeysStream {
-                at,
-                key: key.clone(),
-                storage_page_size: self.storage_page_size,
-                methods: self.methods.clone(),
-                done: Default::default(),
-                keys_fut: Default::default(),
-                pagination_start_key: None,
-            };
+        let keys = StorageFetchDescendantKeysStream {
+            at,
+            key: key.clone(),
+            storage_page_size: self.storage_page_size,
+            methods: self.methods.clone(),
+            done: Default::default(),
+            keys_fut: Default::default(),
+            pagination_start_key: None,
+        };
 
-            let keys = keys.flat_map(|keys| {
-                match keys {
-                    Err(e) => {
-                        // If there's an error, return that next:
-                        Either::Left(stream::iter(std::iter::once(Err(e))))
-                    }
-                    Ok(keys) => {
-                        // Or, stream each "ok" value:
-                        Either::Right(stream::iter(keys.into_iter().map(Ok)))
-                    }
+        let keys = keys.flat_map(|keys| {
+            match keys {
+                Err(e) => {
+                    // If there's an error, return that next:
+                    Either::Left(stream::iter(std::iter::once(Err(e))))
                 }
-            });
+                Ok(keys) => {
+                    // Or, stream each "ok" value:
+                    Either::Right(stream::iter(keys.into_iter().map(Ok)))
+                }
+            }
+        });
 
-            Ok(StreamOf(Box::pin(keys)))
-        })
-        .await
+        Ok(StreamOf(Box::pin(keys)))
     }
 
     async fn storage_fetch_descendant_values(
@@ -150,24 +147,21 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         key: Vec<u8>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        retry(|| async {
-            let keys_stream = StorageFetchDescendantKeysStream {
-                at,
-                key: key.clone(),
-                storage_page_size: self.storage_page_size,
-                methods: self.methods.clone(),
-                done: Default::default(),
-                keys_fut: Default::default(),
-                pagination_start_key: None,
-            };
+        let keys_stream = StorageFetchDescendantKeysStream {
+            at,
+            key: key.clone(),
+            storage_page_size: self.storage_page_size,
+            methods: self.methods.clone(),
+            done: Default::default(),
+            keys_fut: Default::default(),
+            pagination_start_key: None,
+        };
 
-            Ok(StreamOf(Box::pin(StorageFetchDescendantValuesStream {
-                keys: keys_stream,
-                results_fut: None,
-                results: Default::default(),
-            })))
-        })
-        .await
+        Ok(StreamOf(Box::pin(StorageFetchDescendantValuesStream {
+            keys: keys_stream,
+            results_fut: None,
+            results: Default::default(),
+        })))
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
