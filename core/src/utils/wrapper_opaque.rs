@@ -72,26 +72,27 @@ impl<T> WrapperKeepOpaque<T> {
 impl<T> EncodeAsType for WrapperKeepOpaque<T> {
     fn encode_as_type_to<R: TypeResolver>(
         &self,
-        type_id: &R::TypeId,
+        type_id: R::TypeId,
         types: &R,
         out: &mut Vec<u8>,
     ) -> Result<(), scale_encode::Error> {
         use scale_encode::error::{Error, ErrorKind, Kind};
 
-        let visitor = visitor::new(out, |_, _| {
+        let ctx = (type_id.clone(), out);
+        let visitor = visitor::new(ctx, |(type_id, _out), _| {
             // Check that the target shape lines up: any other shape but composite is wrong.
             Err(Error::new(ErrorKind::WrongShape {
                 actual: Kind::Struct,
-                expected_id: format!("{:?}", type_id),
+                expected_id: format!("{type_id:?}"),
             }))
         })
-        .visit_composite(|out, _fields| {
+        .visit_composite(|(_type_id,out), _path, _fields| {
             self.data.encode_to(out);
             Ok(())
         });
 
         types
-            .resolve_type(type_id, visitor)
+            .resolve_type(type_id.clone(), visitor)
             .map_err(|_| Error::new(ErrorKind::TypeNotFound(format!("{:?}", type_id))))?
     }
 }
@@ -105,7 +106,7 @@ impl<T, R: TypeResolver> Visitor for WrapperKeepOpaqueVisitor<T, R> {
     fn visit_composite<'scale, 'info>(
         self,
         value: &mut scale_decode::visitor::types::Composite<'scale, 'info, R>,
-        _type_id: &R::TypeId,
+        _type_id: R::TypeId,
     ) -> Result<Self::Value<'scale, 'info>, Self::Error> {
         use scale_decode::error::{Error, ErrorKind};
 
@@ -193,7 +194,7 @@ mod test {
         let (type_id, types) = make_type::<T>();
 
         let scale_codec_encoded = t.encode();
-        let encode_as_type_encoded = t.encode_as_type(&type_id, &types).unwrap();
+        let encode_as_type_encoded = t.encode_as_type(type_id, &types).unwrap();
 
         assert_eq!(
             scale_codec_encoded, encode_as_type_encoded,
@@ -201,7 +202,7 @@ mod test {
         );
 
         let decode_as_type_bytes = &mut &*scale_codec_encoded;
-        let decoded_as_type = T::decode_as_type(decode_as_type_bytes, &type_id, &types)
+        let decoded_as_type = T::decode_as_type(decode_as_type_bytes, type_id, &types)
             .expect("decode-as-type decodes");
 
         let decode_scale_codec_bytes = &mut &*scale_codec_encoded;

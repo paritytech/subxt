@@ -272,7 +272,7 @@ impl<T: Config> EventDetails<T> {
             // Skip over the bytes for this field:
             scale_decode::visitor::decode_with_visitor(
                 input,
-                &field_metadata.ty.id,
+                field_metadata.ty.id,
                 metadata.types(),
                 scale_decode::visitor::IgnoreVisitor::new(),
             )
@@ -373,7 +373,7 @@ impl<T: Config> EventDetails<T> {
             .variant
             .fields
             .iter()
-            .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
+            .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
 
         let decoded =
             scale_value::scale::decode_as_fields(bytes, &mut fields, self.metadata.types())?;
@@ -390,7 +390,7 @@ impl<T: Config> EventDetails<T> {
                 .variant
                 .fields
                 .iter()
-                .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
+                .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
             let decoded =
                 E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())?;
             Ok(Some(decoded))
@@ -407,7 +407,7 @@ impl<T: Config> EventDetails<T> {
 
         let decoded = E::decode_as_type(
             &mut &bytes[..],
-            &self.metadata.outer_enums().event_enum_ty(),
+            self.metadata.outer_enums().event_enum_ty(),
             self.metadata.types(),
         )?;
 

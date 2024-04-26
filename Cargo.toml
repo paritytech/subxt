@@ -169,3 +169,9 @@ opt-level = 2
 opt-level = 2
 [profile.test.package.smoldot]
 opt-level = 2
+
+[patch.crates-io]
+scale-type-resolver = { path = "../scale-type-resolver" }
+scale-encode = { path = "../scale-encode/scale-encode" }
+scale-decode = { path = "../scale-decode/scale-decode" }
+scale-value = { path = "../scale-value" }

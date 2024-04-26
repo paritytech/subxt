@@ -25,7 +25,7 @@ pub fn explore_constants(
         Usage:
             subxt explore pallet {pallet_name} constants <CONSTANT>
                 explore a specific constant of this pallet
-        
+
         {constants}
         "}
     };
@@ -53,7 +53,7 @@ pub fn explore_constants(
         writedoc! {output, "
         Description:
         {doc_string}
-        
+
         "}?;
     }
 
@@ -66,7 +66,7 @@ pub fn explore_constants(
     // value
     let value = scale_value::scale::decode_as_type(
         &mut constant.value(),
-        &constant.ty(),
+        constant.ty(),
         metadata.types(),
     )?;
     let value = format_scale_value(&value).indent(4);

@@ -152,7 +152,7 @@ impl<CallData: EncodeAsFields> Payload for DefaultPayload<CallData> {
         let mut fields = call
             .fields
             .iter()
-            .map(|f| scale_encode::Field::new(&f.ty.id, f.name.as_deref()));
+            .map(|f| scale_encode::Field::new(f.ty.id, f.name.as_deref()));
 
         self.call_data
             .encode_as_fields_to(&mut fields, metadata.types(), out)

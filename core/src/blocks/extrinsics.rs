@@ -194,7 +194,7 @@ where
                 // Skip over the address, signature and extra fields.
                 scale_decode::visitor::decode_with_visitor(
                     cursor,
-                    &ids.address,
+                    ids.address,
                     metadata.types(),
                     scale_decode::visitor::IgnoreVisitor::new(),
                 )
@@ -203,7 +203,7 @@ where
 
                 scale_decode::visitor::decode_with_visitor(
                     cursor,
-                    &ids.signature,
+                    ids.signature,
                     metadata.types(),
                     scale_decode::visitor::IgnoreVisitor::new(),
                 )
@@ -212,7 +212,7 @@ where
 
                 scale_decode::visitor::decode_with_visitor(
                     cursor,
-                    &ids.extra,
+                    ids.extra,
                     metadata.types(),
                     scale_decode::visitor::IgnoreVisitor::new(),
                 )
@@ -370,7 +370,7 @@ where
             .variant
             .fields
             .iter()
-            .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
+            .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
         let decoded =
             scale_value::scale::decode_as_fields(bytes, &mut fields, self.metadata.types())?;
 
@@ -388,7 +388,7 @@ where
                 .variant
                 .fields
                 .iter()
-                .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
+                .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
             let decoded =
                 E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())?;
             Ok(Some(decoded))
@@ -403,7 +403,7 @@ where
     pub fn as_root_extrinsic<E: DecodeAsType>(&self) -> Result<E, Error> {
         let decoded = E::decode_as_type(
             &mut &self.call_bytes()[..],
-            &self.metadata.outer_enums().call_enum_ty(),
+            self.metadata.outer_enums().call_enum_ty(),
             self.metadata.types(),
         )?;
 
