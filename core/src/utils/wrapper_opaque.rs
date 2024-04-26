@@ -109,8 +109,15 @@ impl<T, R: TypeResolver> Visitor for WrapperKeepOpaqueVisitor<T, R> {
         _type_id: R::TypeId,
     ) -> Result<Self::Value<'scale, 'info>, Self::Error> {
         use scale_decode::error::{Error, ErrorKind};
+        use scale_decode::visitor::DecodeError;
 
-        // TODO: When `scale-type-resolver` [provides struct names](https://github.com/paritytech/scale-type-resolver/issues/4), check that this struct name is `WrapperKeepOpaque`
+        if value.name().as_ref() !== Some("WrapperKeepOpaque") {
+            return Err(Error::new(ErrorKind::VisitorDecodeError {
+                DecodeError::TypeResolvingError(
+                    format!("Expected a type named 'WrapperKeepOpaque', got: {:?}", value.name())
+                )
+            ));
+        }
 
         if value.remaining() != 2 {
             return Err(Error::new(ErrorKind::WrongLength {
