@@ -3403,9 +3403,9 @@ dependencies = [
 
 [[package]]
 name = "reconnecting-jsonrpsee-ws-client"
-version = "0.4.1"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1506220461d62d69380b869e65ac1846b38b5357b363b640e46af9672abc7d6"
+checksum = "a89cc4a6f1e641017e300c050f0c4c46a198627fb39ec03e7a028d20256b5e54"
 dependencies = [
  "cfg_aliases",
  "finito",
