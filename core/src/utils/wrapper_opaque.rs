@@ -86,7 +86,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
                 expected_id: format!("{type_id:?}"),
             }))
         })
-        .visit_composite(|(_type_id,out), _path, _fields| {
+        .visit_composite(|(_type_id, out), _path, _fields| {
             self.data.encode_to(out);
             Ok(())
         });
@@ -111,12 +111,13 @@ impl<T, R: TypeResolver> Visitor for WrapperKeepOpaqueVisitor<T, R> {
         use scale_decode::error::{Error, ErrorKind};
         use scale_decode::visitor::DecodeError;
 
-        if value.name().as_ref() !== Some("WrapperKeepOpaque") {
-            return Err(Error::new(ErrorKind::VisitorDecodeError {
-                DecodeError::TypeResolvingError(
-                    format!("Expected a type named 'WrapperKeepOpaque', got: {:?}", value.name())
-                )
-            ));
+        if value.name() != Some("WrapperKeepOpaque") {
+            return Err(Error::new(ErrorKind::VisitorDecodeError(
+                DecodeError::TypeResolvingError(format!(
+                    "Expected a type named 'WrapperKeepOpaque', got: {:?}",
+                    value.name()
+                )),
+            )));
         }
 
         if value.remaining() != 2 {
