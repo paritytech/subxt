@@ -6,7 +6,7 @@ use super::{OfflineClient, OfflineClientT};
 use crate::backend::StreamOfResults;
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt},
+    backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, StreamOfResults},
     blocks::{BlockRef, BlocksClient},
     constants::ConstantsClient,
     error::Error,
