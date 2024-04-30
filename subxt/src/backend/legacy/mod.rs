@@ -13,6 +13,7 @@ use crate::backend::{
     rpc::RpcClient, Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
     TransactionStatus,
 };
+use crate::error::RpcError;
 use crate::{config::Header, Config, Error};
 use async_trait::async_trait;
 use futures::{future, future::Either, stream, Future, FutureExt, Stream, StreamExt};
@@ -63,10 +64,19 @@ impl<T: Config> LegacyBackendBuilder<T> {
 }
 
 /// The legacy backend.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct LegacyBackend<T> {
     storage_page_size: u32,
     methods: LegacyRpcMethods<T>,
+}
+
+impl<T> Clone for LegacyBackend<T> {
+    fn clone(&self) -> LegacyBackend<T> {
+        LegacyBackend {
+            storage_page_size: self.storage_page_size,
+            methods: self.methods.clone(),
+        }
+    }
 }
 
 impl<T: Config> LegacyBackend<T> {
@@ -220,7 +230,17 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         })
         .await?;
 
-        Ok(retry_sub)
+        // For runtime version subscriptions we omit the `DisconnectedWillReconnect` error
+        // because the once it resubscribes it will emit the latest runtime version.
+        //
+        // Thus, it's technically possible that a runtime version can be missed if
+        // two runtime upgrades happen in quick succession, but this is very unlikely.
+        let stream = retry_sub.filter(|r| {
+            let forward = !matches!(r, Err(Error::Rpc(RpcError::DisconnectedWillReconnect(_))));
+            async move { forward }
+        });
+
+        Ok(StreamOf(Box::pin(stream)))
     }
 
     async fn stream_all_block_headers(
@@ -272,16 +292,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_finalized_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let this = LegacyBackend {
-            methods: self.methods.clone(),
-            storage_page_size: self.storage_page_size,
-        };
+        let this = self.clone();
 
         let retry_sub = retry_stream(move || {
-            let this = LegacyBackend {
-                methods: this.methods.clone(),
-                storage_page_size: this.storage_page_size,
-            };
+            let this = this.clone();
             Box::pin(async move {
                 let sub = this.methods.chain_subscribe_finalized_heads().await?;
 

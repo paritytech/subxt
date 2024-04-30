@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // This API is "iterator-like" and we use `take` to limit the number of retries.
         .retry_policy(
             ExponentialBackoff::from_millis(100)
-                .max_delay(Duration::from_secs(60))
+                .max_delay(Duration::from_secs(10))
                 .take(100),
         )
         // There are other configurations as well that can be found at [`reconnecting_rpc_client::ClientBuilder`].
@@ -42,7 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // use subxt::backend::unstable::UnstableBackend;
     // use subxt::OnlineClient;
     //
-    // let (backend, driver) = UnstableBackend::builder().build(RpcClient::new(rpc.clone()));
+    // let (backend, mut driver) = UnstableBackend::builder().build(RpcClient::new(rpc.clone()));
     // tokio::spawn(async move {
     //     while let Some(val) = driver.next().await {
     //         if let Err(e) = val {
@@ -84,6 +84,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let block = match block {
             Ok(b) => b,
             Err(e) => {
+                // This can only happen on the legacy backend and the unstable backend
+                // will handle this internally.
                 if e.is_disconnected_will_reconnect() {
                     println!("The RPC connection was lost and we may loose a few blocks");
                     continue;
