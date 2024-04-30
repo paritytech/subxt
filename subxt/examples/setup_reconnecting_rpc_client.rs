@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // This API is "iterator-like" and we use `take` to limit the number of retries.
         .retry_policy(
             ExponentialBackoff::from_millis(100)
-                .max_delay(Duration::from_secs(10))
+                .max_delay(Duration::from_secs(60))
                 .take(100),
         )
         // There are other configurations as well that can be found at [`reconnecting_rpc_client::ClientBuilder`].
@@ -77,12 +77,34 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The subscription is automatically re-started when the RPC client has reconnected.
     // You can test that by stopping the polkadot node and restarting it.
     let mut blocks_sub = api.blocks().subscribe_finalized().await?.take(100);
+    // Track the last block to determine how many blocks that were missed when reconnecting.
+    let mut last_seen_block = None;
 
     while let Some(block) = blocks_sub.next().await {
-        let block = block?;
+        let block = match block {
+            Ok(b) => b,
+            Err(e) => {
+                if e.is_disconnected_will_reconnect() {
+                    println!("The RPC connection was lost and we may loose a few blocks");
+                    continue;
+                }
+
+                return Err(e.into());
+            }
+        };
 
         let block_number = block.number();
         let block_hash = block.hash();
+
+        if let Some(b) = last_seen_block {
+            let diff = block_number.saturating_sub(b);
+
+            if diff > 1 {
+                println!("Missed {} blocks during the connection was lost", diff - 1);
+            }
+        }
+
+        last_seen_block = Some(block_number);
 
         println!("Block #{block_number} ({block_hash})");
     }

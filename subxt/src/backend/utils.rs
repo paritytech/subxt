@@ -15,6 +15,36 @@ type ResubscribeFuture<T> = Pin<Box<dyn Future<Output = Result<StreamOfResults<T
 pub(crate) enum PendingOrStream<T> {
     Pending(BoxFuture<'static, Result<StreamOfResults<T>, Error>>),
     Stream(StreamOfResults<T>),
+    Closed,
+}
+
+impl<T> std::fmt::Debug for PendingOrStream<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PendingOrStream::Pending(_) => write!(f, "Pending"),
+            PendingOrStream::Stream(_) => write!(f, "Stream"),
+            PendingOrStream::Closed => write!(f, "Closed"),
+        }
+    }
+}
+
+enum NextState<T> {
+    Stream(StreamOfResults<T>),
+    Resubscribe {
+        pending: BoxFuture<'static, Result<StreamOfResults<T>, Error>>,
+        err: Error,
+    },
+    Closed(Option<Error>),
+}
+
+impl<T> std::fmt::Debug for NextState<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Stream(_) => write!(f, "Stream"),
+            Self::Resubscribe { .. } => write!(f, "Resubscribe"),
+            Self::Closed(_) => write!(f, "Closed"),
+        }
+    }
 }
 
 /// Retry subscription.
@@ -32,41 +62,54 @@ impl<T> Stream for RetrySubscription<T> {
         mut self: Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> Poll<Option<Self::Item>> {
-        enum NextState<T> {
-            Stream(StreamOfResults<T>),
-            Resubscribe(BoxFuture<'static, Result<StreamOfResults<T>, Error>>),
-        }
-
         loop {
             let next_state = match self.state {
-                PendingOrStream::Stream(ref mut s) => match s.poll_next_unpin(cx) {
-                    Poll::Ready(Some(Err(e))) => {
-                        if e.is_disconnected_will_reconnect() {
-                            NextState::Resubscribe((self.resubscribe)())
+                PendingOrStream::Stream(ref mut s) => match ready!(s.poll_next_unpin(cx)) {
+                    Some(Err(err)) => {
+                        if !err.is_disconnected_will_reconnect() {
+                            NextState::Closed(Some(err))
                         } else {
-                            return Poll::Ready(Some(Err(e)));
+                            NextState::Resubscribe {
+                                pending: (self.resubscribe)(),
+                                err,
+                            }
                         }
                     }
-                    other => return other,
+                    None => NextState::Closed(None),
+                    Some(Ok(val)) => return Poll::Ready(Some(Ok(val))),
                 },
                 PendingOrStream::Pending(ref mut fut) => match ready!(fut.poll_unpin(cx)) {
                     Ok(stream) => NextState::Stream(stream),
-                    Err(e) => {
-                        if !e.is_disconnected_will_reconnect() {
-                            return Poll::Ready(None);
+                    Err(err) => {
+                        if !err.is_disconnected_will_reconnect() {
+                            NextState::Closed(Some(err))
+                        } else {
+                            NextState::Resubscribe {
+                                pending: (self.resubscribe)(),
+                                err,
+                            }
                         }
-
-                        NextState::Resubscribe((self.resubscribe)())
                     }
                 },
+                PendingOrStream::Closed => NextState::Closed(None),
             };
 
             match next_state {
-                NextState::Resubscribe(fut) => {
-                    self.state = PendingOrStream::Pending(fut);
+                NextState::Resubscribe { pending, err } => {
+                    self.state = PendingOrStream::Pending(pending);
+                    return Poll::Ready(Some(Err(err)));
                 }
                 NextState::Stream(stream) => {
                     self.state = PendingOrStream::Stream(stream);
+                }
+                NextState::Closed(maybe_err) => {
+                    self.state = PendingOrStream::Closed;
+
+                    if let Some(err) = maybe_err {
+                        return Poll::Ready(Some(Err(err)));
+                    } else {
+                        return Poll::Ready(None);
+                    }
                 }
             }
         }
@@ -161,8 +204,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use futures::TryStreamExt;
-
     use super::*;
     use crate::backend::StreamOf;
 
@@ -190,9 +231,14 @@ mod tests {
         .await
         .unwrap();
 
-        let result: Vec<_> = retry_stream.take(2).try_collect().await.unwrap();
+        let result = retry_stream
+            .take(3)
+            .collect::<Vec<Result<usize, Error>>>()
+            .await;
 
-        assert_eq!(result, vec![1, 1], "Disconnect error should be ignored");
+        assert!(matches!(result[0], Ok(r) if r == 1));
+        assert!(matches!(result[1], Err(ref e) if e.is_disconnected_will_reconnect()));
+        assert!(matches!(result[2], Ok(r) if r == 1));
     }
 
     #[tokio::test]
@@ -208,26 +254,15 @@ mod tests {
             resubscribe,
         };
 
-        let result: Vec<_> = retry_stream
-            .filter_map(|v| async move {
-                if let Ok(v) = v {
-                    Some(v)
-                } else {
-                    None
-                }
-            })
-            .collect()
-            .await;
+        let result: Vec<_> = retry_stream.collect().await;
 
-        assert_eq!(
-            result,
-            vec![1, 2],
-            "Stream should contain values from both subscription and resubscription"
-        );
+        assert!(matches!(result[0], Ok(r) if r == 1));
+        assert!(matches!(result[1], Err(ref e) if e.is_disconnected_will_reconnect()));
+        assert!(matches!(result[2], Ok(r) if r == 2));
     }
 
     #[tokio::test]
-    async fn retry_sub_resubscribe_err_terminates_stream() {
+    async fn retry_sub_err_terminates_stream() {
         let stream = futures::stream::iter([Ok(1)]);
         let resubscribe = Box::new(move || async move { Err(custom_err()) }.boxed());
 
@@ -235,10 +270,24 @@ mod tests {
             state: PendingOrStream::Stream(StreamOf::new(Box::pin(stream))),
             resubscribe,
         };
-        assert_eq!(
-            1,
-            retry_stream.count().await,
-            "Stream should terminate after custom error"
-        );
+
+        assert_eq!(retry_stream.count().await, 1);
+    }
+
+    #[tokio::test]
+    async fn retry_sub_resubscribe_err() {
+        let stream = futures::stream::iter([Ok(1), Err(disconnect_err())]);
+        let resubscribe = Box::new(move || async move { Err(custom_err()) }.boxed());
+
+        let retry_stream = RetrySubscription {
+            state: PendingOrStream::Stream(StreamOf::new(Box::pin(stream))),
+            resubscribe,
+        };
+
+        let result: Vec<_> = retry_stream.collect().await;
+
+        assert!(matches!(result[0], Ok(r) if r == 1));
+        assert!(matches!(result[1], Err(ref e) if e.is_disconnected_will_reconnect()));
+        assert!(matches!(result[2], Err(ref e) if matches!(e, Error::Other(_))));
     }
 }
