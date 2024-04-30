@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .retry_policy(
             ExponentialBackoff::from_millis(100)
                 .max_delay(Duration::from_secs(10))
-                .take(100),
+                .take(3),
         )
         // There are other configurations as well that can be found at [`reconnecting_rpc_client::ClientBuilder`].
         .build("ws://localhost:9944".to_string())
