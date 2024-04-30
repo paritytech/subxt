@@ -579,7 +579,9 @@ impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
                     let at = this.keys.at;
                     let results_fut = async move {
                         let keys = keys.iter().map(|k| &**k);
-                        let values = methods.state_query_storage_at(keys, Some(at)).await?;
+                        let values =
+                            retry(|| methods.state_query_storage_at(keys.clone(), Some(at)))
+                                .await?;
                         let values: VecDeque<_> = values
                             .into_iter()
                             .flat_map(|v| {
