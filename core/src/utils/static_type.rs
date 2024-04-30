@@ -22,7 +22,7 @@ pub struct Static<T>(pub T);
 impl<T: Encode> EncodeAsType for Static<T> {
     fn encode_as_type_to<R: TypeResolver>(
         &self,
-        _type_id: &R::TypeId,
+        _type_id: R::TypeId,
         _types: &R,
         out: &mut Vec<u8>,
     ) -> Result<(), scale_encode::Error> {
@@ -41,7 +41,7 @@ impl<T: Decode, R: TypeResolver> Visitor for StaticDecodeAsTypeVisitor<T, R> {
     fn unchecked_decode_as_type<'scale, 'info>(
         self,
         input: &mut &'scale [u8],
-        _type_id: &R::TypeId,
+        _type_id: R::TypeId,
         _types: &'info R,
     ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'info>, Self::Error>> {
         use scale_decode::{visitor::DecodeError, Error};

@@ -206,7 +206,7 @@ impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
         types: &PortableRegistry,
     ) -> Result<(), Error> {
         let (hasher, ty_id) = hashers.next_or_err()?;
-        let encoded_value = self.bytes.encode_as_type(&ty_id, types)?;
+        let encoded_value = self.bytes.encode_as_type(ty_id, types)?;
         hash_bytes(&encoded_value, hasher, bytes);
         Ok(())
     }
@@ -245,7 +245,7 @@ impl StorageKey for Vec<scale_value::Value> {
     ) -> Result<(), Error> {
         for value in self.iter() {
             let (hasher, ty_id) = hashers.next_or_err()?;
-            let encoded_value = value.encode_as_type(&ty_id, types)?;
+            let encoded_value = value.encode_as_type(ty_id, types)?;
             hash_bytes(&encoded_value, hasher, bytes);
         }
         Ok(())
@@ -264,7 +264,7 @@ impl StorageKey for Vec<scale_value::Value> {
             match consume_hash_returning_key_bytes(bytes, hasher, ty_id, types)? {
                 Some(value_bytes) => {
                     let value =
-                        scale_value::scale::decode_as_type(&mut &*value_bytes, &ty_id, types)?;
+                        scale_value::scale::decode_as_type(&mut &*value_bytes, ty_id, types)?;
                     result.push(value.remove_context());
                 }
                 None => {
@@ -302,7 +302,7 @@ fn consume_hash_returning_key_bytes<'a>(
     if hasher.ends_with_key() {
         scale_decode::visitor::decode_with_visitor(
             bytes,
-            &ty_id,
+            ty_id,
             types,
             IgnoreVisitor::<PortableRegistry>::new(),
         )

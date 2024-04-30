@@ -67,7 +67,7 @@ impl DecodedValueThunk {
     pub fn to_value(&self) -> Result<DecodedValue, scale_decode::Error> {
         let val = scale_value::scale::decode_as_type(
             &mut &*self.scale_bytes,
-            &self.type_id,
+            self.type_id,
             self.metadata.types(),
         )?;
         Ok(val)
@@ -76,7 +76,7 @@ impl DecodedValueThunk {
     pub fn as_type<T: DecodeAsType>(&self) -> Result<T, scale_decode::Error> {
         T::decode_as_type(
             &mut &self.scale_bytes[..],
-            &self.type_id,
+            self.type_id,
             self.metadata.types(),
         )
     }

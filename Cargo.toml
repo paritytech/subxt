@@ -91,12 +91,12 @@ proc-macro2 = "1.0.81"
 quote = "1.0.36"
 regex = { version = "1.10.4", default-features = false }
 scale-info = { version = "2.11.0", default-features = false }
-scale-value = { version = "0.14.1", default-features = false }
-scale-bits = { version = "0.5.0", default-features = false }
-scale-decode = { version = "0.11.1", default-features = false }
-scale-encode = { version = "0.6.0", default-features = false }
-scale-typegen = "0.4.2"
-scale-typegen-description = "0.4.3"
+scale-value = { version = "0.15.0", default-features = false }
+scale-bits = { version = "0.6.0", default-features = false }
+scale-decode = { version = "0.12.0", default-features = false }
+scale-encode = { version = "0.7.0", default-features = false }
+scale-typegen = "0.5.0"
+scale-typegen-description = "0.5.0"
 serde = { version = "1.0.199", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.116", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }

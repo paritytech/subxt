@@ -210,7 +210,7 @@ impl ModuleError {
     pub fn as_root_error<E: DecodeAsType>(&self) -> Result<E, Error> {
         let decoded = E::decode_as_type(
             &mut &self.bytes[..],
-            &self.metadata.outer_enums().error_enum_ty(),
+            self.metadata.outer_enums().error_enum_ty(),
             self.metadata.types(),
         )?;
 
@@ -272,7 +272,7 @@ impl DispatchError {
             fn unchecked_decode_as_type<'scale, 'info>(
                 self,
                 input: &mut &'scale [u8],
-                _type_id: &R::TypeId,
+                _type_id: R::TypeId,
                 _types: &'info R,
             ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'info>, Self::Error>>
             {
