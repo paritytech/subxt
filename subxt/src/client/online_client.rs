@@ -3,7 +3,6 @@
 // see LICENSE for license details.
 
 use super::{OfflineClient, OfflineClientT};
-use crate::backend::StreamOfResults;
 use crate::custom_values::CustomValuesClient;
 use crate::{
     backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, StreamOfResults},
