@@ -121,8 +121,44 @@ async fn dynamic_events(api: &Client) -> Result<(), subxt::Error> {
 async fn light_client_testing() -> Result<(), subxt::Error> {
     tracing_subscriber::fmt::init();
 
-    let ctx = test_context().await;
-    let api = ctx.client();
+    use subxt::backend::unstable::UnstableBackend;
+    use std::sync::Arc;
+    use subxt::lightclient::{ChainConfig, LightClient};
+
+    let chain_spec = subxt::utils::fetch_chainspec_from_rpc_node("ws://127.0.0.1:9999")
+        .await
+        .unwrap();
+
+    let chain_config = ChainConfig::chain_spec(chain_spec.get())
+        .set_bootnodes([
+            "/ip4/127.0.0.1/udp/8888/webrtc-direct/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD"
+        ])
+        .unwrap();
+
+    let (_lightclient, rpc) = LightClient::relay_chain(chain_config).unwrap();
+
+    let (backend, mut driver) = UnstableBackend::builder().build(rpc);
+
+    // The unstable backend needs driving:
+    tokio::spawn(async move {
+        use futures::StreamExt;
+        while let Some(val) = driver.next().await {
+            if let Err(e) = val {
+                // This is a test; bail if something does wrong and try to
+                // ensure that the message makes it to some logs.
+                eprintln!("Error driving unstable backend in tests (will panic): {e}");
+                panic!("Error driving unstable backend in tests: {e}");
+            }
+        }
+    });
+
+    let api = OnlineClient::from_backend(Arc::new(backend))
+        .await
+        .unwrap();
+
+
+    // let ctx = test_context().await;
+    // let api = ctx.client();
 
     non_finalized_headers_subscription(&api).await?;
     finalized_headers_subscription(&api).await?;
