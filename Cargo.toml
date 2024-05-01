@@ -113,8 +113,8 @@ which = "5.0.0"
 strip-ansi-escapes = "0.2.0"
 
 # Light client support:
-smoldot = { version = "0.17.0", default-features = false }
-smoldot-light = { version = "0.15.0", default-features = false }
+smoldot = { git = "https://github.com/smol-dot/smoldot.git", default-features = false }
+smoldot-light = { git = "https://github.com/smol-dot/smoldot.git", default-features = false }
 
 tokio-stream = "0.1.15"
 
