@@ -5,8 +5,9 @@
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
 use crate::backend::unstable::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
 use crate::config::BlockHash;
-use crate::error::Error;
+use crate::error::{Error, RpcError};
 use futures::stream::{Stream, StreamExt};
+use pin_project_lite::pin_project;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::ops::DerefMut;
 use std::pin::Pin;
@@ -377,6 +378,77 @@ impl<Hash: BlockHash> Shared<Hash> {
 struct SubscriberDetails<Hash: BlockHash> {
     items: VecDeque<FollowStreamMsg<BlockRef<Hash>>>,
     waker: Option<Waker>,
+}
+
+pin_project! {
+    /// A stream that subscribes to finalized blocks
+    /// and indicates whether a block was missed if the connection was lost.
+    #[derive(Debug)]
+    pub struct FollowStreamFinalizedHeads<Hash: BlockHash> {
+        #[pin]
+        stream: FollowStreamDriverSubscription<Hash>,
+        sub_id: Option<String>,
+        last_seen_block: Option<BlockRef<Hash>>,
+    }
+}
+
+impl<Hash: BlockHash> FollowStreamFinalizedHeads<Hash> {
+    pub fn new(stream: FollowStreamDriverSubscription<Hash>) -> Self {
+        Self {
+            stream,
+            sub_id: None,
+            last_seen_block: None,
+        }
+    }
+}
+
+impl<Hash: BlockHash> Stream for FollowStreamFinalizedHeads<Hash> {
+    type Item = Result<(String, Vec<BlockRef<Hash>>), Error>;
+
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        let mut this = self.project();
+
+        loop {
+            match futures::ready!(this.stream.poll_next_unpin(cx)) {
+                Some(FollowStreamMsg::Ready(sub_id)) => {
+                    *this.sub_id = Some(sub_id);
+                }
+                Some(FollowStreamMsg::Event(FollowEvent::Finalized(finalized))) => {
+                    *this.last_seen_block = finalized.finalized_block_hashes.last().cloned();
+                    let sub_id = this
+                        .sub_id
+                        .clone()
+                        .expect("Ready is always emitted before Finalized; qed");
+                    return Poll::Ready(Some(Ok((
+                        sub_id,
+                        finalized.finalized_block_hashes.clone(),
+                    ))));
+                }
+                Some(FollowStreamMsg::Event(FollowEvent::Initialized(init))) => {
+                    let prev = this.last_seen_block.take();
+                    *this.last_seen_block = init.finalized_block_hashes.last().cloned();
+
+                    if let Some(p) = prev {
+                        if !init.finalized_block_hashes.contains(&p) {
+                            return Poll::Ready(Some(Err(RpcError::DisconnectedWillReconnect(
+                                "Missed at least one block when the connection was lost".to_owned(),
+                            )
+                            .into())));
+                        }
+                    }
+
+                    let sub_id = this
+                        .sub_id
+                        .clone()
+                        .expect("Ready is always emitted before Initialized; qed");
+
+                    return Poll::Ready(Some(Ok((sub_id, init.finalized_block_hashes))));
+                }
+                // Ignore other events.
+                _ => (),
+            };
+        }
+    }
 }
 
 #[cfg(test)]

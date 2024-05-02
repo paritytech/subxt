@@ -474,7 +474,7 @@ pub(super) mod test_utils {
 
     pub type UnpinRx<Hash> = std::sync::mpsc::Receiver<(Hash, Arc<str>)>;
 
-    /// Get a `FolowStreamUnpin` from an iterator over events.
+    /// Get a [`FollowStreamUnpin`] from an iterator over events.
     pub fn test_unpin_stream_getter<Hash, F, I>(
         events: F,
         max_life: usize,

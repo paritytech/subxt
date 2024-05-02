@@ -18,6 +18,7 @@ mod storage_items;
 
 pub mod rpc_methods;
 
+use self::follow_stream_driver::FollowStreamFinalizedHeads;
 use self::follow_stream_unpin::FollowStreamMsg;
 use self::rpc_methods::{
     FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
@@ -31,6 +32,7 @@ use crate::error::{Error, RpcError};
 use crate::Config;
 use async_trait::async_trait;
 use follow_stream_driver::{FollowStreamDriver, FollowStreamDriverHandle};
+use futures::future::Either;
 use futures::{Stream, StreamExt};
 use std::collections::HashMap;
 use std::task::Poll;
@@ -496,15 +498,40 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     async fn stream_finalized_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let stream = self
-            .stream_headers(|ev| match ev {
-                FollowEvent::Initialized(init) => init.finalized_block_hashes,
-                FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
-                _ => vec![],
-            })
-            .await?;
+        let methods = self.methods.clone();
 
-        Ok(StreamOf::new(Box::pin(stream)))
+        let headers =
+            FollowStreamFinalizedHeads::new(self.follow_handle.subscribe()).flat_map(move |r| {
+                let methods = methods.clone();
+
+                let (sub_id, block_refs) = match r {
+                    Ok(ev) => ev,
+                    Err(e) => return Either::Left(futures::stream::once(async { Err(e) })),
+                };
+
+                Either::Right(
+                    futures::stream::iter(block_refs).filter_map(move |block_ref| {
+                        let methods = methods.clone();
+                        let sub_id = sub_id.clone();
+
+                        async move {
+                            let res = methods
+                                .chainhead_v1_header(&sub_id, block_ref.hash())
+                                .await
+                                .transpose()?;
+
+                            let header = match res {
+                                Ok(header) => header,
+                                Err(e) => return Some(Err(e)),
+                            };
+
+                            Some(Ok((header, block_ref.into())))
+                        }
+                    }),
+                )
+            });
+
+        Ok(StreamOf::new(Box::pin(headers)))
     }
 
     async fn submit_transaction(
