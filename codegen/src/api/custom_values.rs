@@ -27,7 +27,7 @@ pub fn generate_custom_values(
         };
         let ty = ty.to_token_stream(type_gen.settings());
         quote! {
-            type #name = #ty;
+            pub type #name = #ty;
         }
     });
 
@@ -43,6 +43,8 @@ pub fn generate_custom_values(
         }
 
         pub mod custom_types {
+            pub use super::*;
+
             #(#custom_types)*
         }
     }
