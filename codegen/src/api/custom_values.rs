@@ -19,6 +19,17 @@ pub fn generate_custom_values(
 ) -> TokenStream2 {
     let mut fn_names_taken = HashSet::new();
     let custom = metadata.custom();
+    let custom_types = custom.iter().map(|custom| {
+        let name = custom.name();
+        let Ok(ty) = type_gen.resolve_type_path(custom.type_id()) else {
+            return quote! {};
+        };
+        let ty = ty.to_token_stream(type_gen.settings());
+        quote! {
+            type #name = #ty;
+        }
+    });
+
     let custom_values_fns = custom.iter().filter_map(|custom_value| {
         generate_custom_value_fn(custom_value, type_gen, crate_path, &mut fn_names_taken)
     });
@@ -28,6 +39,10 @@ pub fn generate_custom_values(
 
         impl CustomValuesApi {
             #(#custom_values_fns)*
+        }
+
+        pub mod custom_types {
+            #(#custom_types)*
         }
     }
 }
