@@ -24,8 +24,8 @@ use self::rpc_methods::{
     FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
 };
 use crate::backend::{
-    rpc::RpcClient, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf,
-    StreamOfResults, TransactionStatus,
+    rpc::RpcClient, utils::retry, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse,
+    StreamOf, StreamOfResults, TransactionStatus,
 };
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
@@ -40,8 +40,6 @@ use storage_items::StorageItems;
 
 // Expose the RPC methods.
 pub use rpc_methods::UnstableRpcMethods;
-
-use super::utils::retry;
 
 /// Configure and build an [`UnstableBackend`].
 pub struct UnstableBackendBuilder<T> {
@@ -711,37 +709,40 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         call_parameters: Option<&[u8]>,
         at: T::Hash,
     ) -> Result<Vec<u8>, Error> {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
+        retry(|| async {
+            let sub_id = get_subscription_id(&self.follow_handle).await?;
 
-        // Subscribe to the body response and get our operationId back.
-        let follow_events = self.follow_handle.subscribe().events();
-        let call_parameters = call_parameters.unwrap_or(&[]);
-        let status = self
-            .methods
-            .chainhead_v1_call(&sub_id, at, method, call_parameters)
-            .await?;
-        let operation_id = match status {
-            MethodResponse::LimitReached => {
-                return Err(RpcError::request_rejected("limit reached").into())
-            }
-            MethodResponse::Started(s) => s.operation_id,
-        };
-
-        // Wait for the response to come back with the correct operationId.
-        let mut call_data_stream = follow_events.filter_map(|ev| {
-            let FollowEvent::OperationCallDone(body) = ev else {
-                return std::future::ready(None);
+            // Subscribe to the body response and get our operationId back.
+            let follow_events = self.follow_handle.subscribe().events();
+            let call_parameters = call_parameters.unwrap_or(&[]);
+            let status = self
+                .methods
+                .chainhead_v1_call(&sub_id, at, method, call_parameters)
+                .await?;
+            let operation_id = match status {
+                MethodResponse::LimitReached => {
+                    return Err(RpcError::request_rejected("limit reached").into())
+                }
+                MethodResponse::Started(s) => s.operation_id,
             };
-            if body.operation_id != operation_id {
-                return std::future::ready(None);
-            }
-            std::future::ready(Some(body.output.0))
-        });
 
-        call_data_stream
-            .next()
-            .await
-            .ok_or_else(|| RpcError::SubscriptionDropped.into())
+            // Wait for the response to come back with the correct operationId.
+            let mut call_data_stream = follow_events.filter_map(|ev| {
+                let FollowEvent::OperationCallDone(body) = ev else {
+                    return std::future::ready(None);
+                };
+                if body.operation_id != operation_id {
+                    return std::future::ready(None);
+                }
+                std::future::ready(Some(body.output.0))
+            });
+
+            call_data_stream
+                .next()
+                .await
+                .ok_or_else(|| RpcError::SubscriptionDropped.into())
+        })
+        .await
     }
 }
 
