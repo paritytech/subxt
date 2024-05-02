@@ -133,16 +133,14 @@ where
                     continue;
                 }
 
-                // This applies only to the rpc v2 method calls/unstable backend.
+                // This is a hack because if a reconnection occurs
+                // the order of pending calls is not guaranteed.
                 //
-                // Once the backend sees `Error::DisconnectedWillReconnect` it will
-                // update the state, and subsequent `subscribe` will not proceed until
-                // a new subscription ID is obtained.
+                // Such that it's possible the a pending future completes
+                // before `chainHead_follow` is established with fresh
+                // subscription id.
                 //
-                // It's still possible that subscription ID could be read before
-                // the backend has updated the state, but it is quite unlikely.
-                //
-                // Thus, we retry the call a few times to be on the safe-side.
+                // TODO: https://github.com/paritytech/subxt/issues/1567
                 if e.is_rejected() && rejected_retries < REJECTED_MAX_RETRIES {
                     rejected_retries += 1;
                     continue;
