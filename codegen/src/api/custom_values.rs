@@ -9,7 +9,7 @@ use std::collections::HashSet;
 use subxt_metadata::{CustomValueMetadata, Metadata};
 
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
+use quote::{format_ident, quote};
 
 /// Generate the custom values mod, if there are any custom values in the metadata. Else returns None.
 pub fn generate_custom_values(
@@ -20,7 +20,8 @@ pub fn generate_custom_values(
     let mut fn_names_taken = HashSet::new();
     let custom = metadata.custom();
     let custom_types = custom.iter().map(|custom| {
-        let name = custom.name();
+        let name = format_ident!("{}", custom.name());
+
         let Ok(ty) = type_gen.resolve_type_path(custom.type_id()) else {
             return quote! {};
         };
