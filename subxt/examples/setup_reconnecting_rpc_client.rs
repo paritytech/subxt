@@ -62,9 +62,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rpc2 = rpc.clone();
     tokio::spawn(async move {
         loop {
-            rpc2.reconnect_started().await;
+            let reconnected = rpc2.reconnect_started().await;
             let now = std::time::Instant::now();
-            rpc2.reconnected().await;
+            reconnected.await;
             println!(
                 "RPC client reconnection took `{}s`",
                 now.elapsed().as_secs()

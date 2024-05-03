@@ -4,7 +4,7 @@
 
 use super::{RawRpcFuture, RawRpcSubscription, RpcClientT};
 use crate::error::RpcError;
-use futures::{FutureExt, StreamExt, TryStreamExt};
+use futures::{Future, FutureExt, StreamExt, TryStreamExt};
 use reconnecting_jsonrpsee_ws_client::{CallRetryPolicy, Client as InnerClient, SubscriptionId};
 use serde_json::value::RawValue;
 use std::time::Duration;
@@ -201,18 +201,13 @@ impl Client {
         Builder::new()
     }
 
-    /// A future that returns once the client has started to reconnect.
+    /// A future that returns once the client has started to reconnect
+    /// which in turn returns another future that resolves once the client has reconnected.
     ///
     /// This may be called multiple times.
-    pub async fn reconnect_started(&self) {
-        self.0.reconnect_started().await
-    }
-
-    /// A future that return once the client has reconnected.
-    ///
-    /// This may be called multiple times.
-    pub async fn reconnected(&self) {
-        self.0.reconnected().await
+    pub async fn reconnect_started(&self) -> impl Future<Output = ()> + '_ {
+        self.0.reconnect_started().await;
+        self.0.reconnected()
     }
 
     /// Get how many times the client has reconnected successfully.

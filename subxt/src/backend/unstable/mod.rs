@@ -455,7 +455,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // TODO: https://github.com/paritytech/subxt/issues/1568
         //
         // It's possible that blocks may be silently missed if
-        // a reconnection occurs because it's restarted by unstable backend.
+        // a reconnection occurs because it's restarted by the unstable backend.
         self.stream_headers(|ev| match ev {
             FollowEvent::Initialized(init) => init.finalized_block_hashes,
             FollowEvent::NewBlock(ev) => {
@@ -472,7 +472,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         // TODO: https://github.com/paritytech/subxt/issues/1568
         //
         // It's possible that blocks may be silently missed if
-        // a reconnection occurs because it's restarted by unstable backend.
+        // a reconnection occurs because it's restarted by the unstable backend.
         self.stream_headers(|ev| match ev {
             FollowEvent::Initialized(init) => init.finalized_block_hashes,
             FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
