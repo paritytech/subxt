@@ -19,7 +19,6 @@ mod storage_items;
 pub mod rpc_methods;
 
 use self::follow_stream_driver::FollowStreamFinalizedHeads;
-use self::follow_stream_unpin::FollowStreamMsg;
 use self::rpc_methods::{
     FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
 };
@@ -138,62 +137,49 @@ impl<T: Config> UnstableBackend<T> {
     }
 
     /// Stream block headers based on the provided filter fn
-    async fn stream_headers<F, I>(
+    async fn stream_headers<F>(
         &self,
         f: F,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>
     where
-        F: Fn(FollowEvent<follow_stream_unpin::BlockRef<T::Hash>>) -> I + Copy + Send + 'static,
-        I: IntoIterator<Item = follow_stream_unpin::BlockRef<T::Hash>> + Send + 'static,
-        <I as IntoIterator>::IntoIter: Send,
+        F: Fn(
+                FollowEvent<follow_stream_unpin::BlockRef<T::Hash>>,
+            ) -> Vec<follow_stream_unpin::BlockRef<T::Hash>>
+            + Send
+            + Sync
+            + 'static,
     {
         let methods = self.methods.clone();
 
-        let headers = self
-            .follow_handle
-            .subscribe()
-            .scan(None, |sub_id, ev| {
-                let next_sub_id = if let FollowStreamMsg::Ready(id) = &ev {
-                    *sub_id = Some(id.clone());
-                    id.clone()
-                } else {
-                    sub_id
-                        .clone()
-                        .expect("FollowStreamMsg::Ready is always sent before any other event; qed")
+        let headers =
+            FollowStreamFinalizedHeads::new(self.follow_handle.subscribe(), f).flat_map(move |r| {
+                let methods = methods.clone();
+
+                let (sub_id, block_refs) = match r {
+                    Ok(ev) => ev,
+                    Err(e) => return Either::Left(futures::stream::once(async { Err(e) })),
                 };
 
-                async { Some((next_sub_id, ev)) }
-            })
-            .filter_map(|(sub_id, ev)| async {
-                if let FollowStreamMsg::Event(ev) = ev {
-                    Some((sub_id, ev))
-                } else {
-                    None
-                }
-            })
-            .flat_map(move |(sub_id, ev)| {
-                let methods = methods.clone();
-                let block_refs = f(ev).into_iter();
-                let sub_id = sub_id.clone();
+                Either::Right(
+                    futures::stream::iter(block_refs).filter_map(move |block_ref| {
+                        let methods = methods.clone();
+                        let sub_id = sub_id.clone();
 
-                futures::stream::iter(block_refs).filter_map(move |block_ref| {
-                    let methods = methods.clone();
-                    let sub_id = sub_id.clone();
+                        async move {
+                            let res = methods
+                                .chainhead_v1_header(&sub_id, block_ref.hash())
+                                .await
+                                .transpose()?;
 
-                    async move {
-                        let res = methods
-                            .chainhead_v1_header(&sub_id, block_ref.hash())
-                            .await
-                            .transpose()?;
+                            let header = match res {
+                                Ok(header) => header,
+                                Err(e) => return Some(Err(e)),
+                            };
 
-                        let header = match res {
-                            Ok(header) => header,
-                            Err(e) => return Some(Err(e)),
-                        };
-
-                        Some(Ok((header, block_ref.into())))
-                    }
-                })
+                            Some(Ok((header, block_ref.into())))
+                        }
+                    }),
+                )
             });
 
         Ok(StreamOf(Box::pin(headers)))
@@ -498,40 +484,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     async fn stream_finalized_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let methods = self.methods.clone();
-
-        let headers =
-            FollowStreamFinalizedHeads::new(self.follow_handle.subscribe()).flat_map(move |r| {
-                let methods = methods.clone();
-
-                let (sub_id, block_refs) = match r {
-                    Ok(ev) => ev,
-                    Err(e) => return Either::Left(futures::stream::once(async { Err(e) })),
-                };
-
-                Either::Right(
-                    futures::stream::iter(block_refs).filter_map(move |block_ref| {
-                        let methods = methods.clone();
-                        let sub_id = sub_id.clone();
-
-                        async move {
-                            let res = methods
-                                .chainhead_v1_header(&sub_id, block_ref.hash())
-                                .await
-                                .transpose()?;
-
-                            let header = match res {
-                                Ok(header) => header,
-                                Err(e) => return Some(Err(e)),
-                            };
-
-                            Some(Ok((header, block_ref.into())))
-                        }
-                    }),
-                )
-            });
-
-        Ok(StreamOf::new(Box::pin(headers)))
+        self.stream_headers(|ev| match ev {
+            FollowEvent::Initialized(init) => init.finalized_block_hashes,
+            FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
+            _ => vec![],
+        })
+        .await
     }
 
     async fn submit_transaction(

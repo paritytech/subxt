@@ -385,69 +385,102 @@ pin_project! {
     /// A stream that subscribes to finalized blocks
     /// and indicates whether a block was missed if was restarted.
     #[derive(Debug)]
-    pub struct FollowStreamFinalizedHeads<Hash: BlockHash> {
+    pub struct FollowStreamFinalizedHeads<Hash: BlockHash, F> {
         #[pin]
         stream: FollowStreamDriverSubscription<Hash>,
         sub_id: Option<String>,
         last_seen_block: Option<BlockRef<Hash>>,
+        f: F,
+        is_done: bool,
     }
 }
 
-impl<Hash: BlockHash> FollowStreamFinalizedHeads<Hash> {
-    pub fn new(stream: FollowStreamDriverSubscription<Hash>) -> Self {
+impl<Hash, F> FollowStreamFinalizedHeads<Hash, F>
+where
+    Hash: BlockHash,
+    F: Fn(
+        FollowEvent<super::follow_stream_unpin::BlockRef<Hash>>,
+    ) -> Vec<super::follow_stream_unpin::BlockRef<Hash>>,
+{
+    pub fn new(stream: FollowStreamDriverSubscription<Hash>, f: F) -> Self {
         Self {
             stream,
             sub_id: None,
             last_seen_block: None,
+            f,
+            is_done: false,
         }
     }
 }
 
-impl<Hash: BlockHash> Stream for FollowStreamFinalizedHeads<Hash> {
-    type Item = Result<(String, Vec<BlockRef<Hash>>), Error>;
+impl<Hash, F> Stream for FollowStreamFinalizedHeads<Hash, F>
+where
+    Hash: BlockHash,
+    F: Fn(
+        FollowEvent<super::follow_stream_unpin::BlockRef<Hash>>,
+    ) -> Vec<super::follow_stream_unpin::BlockRef<Hash>>,
+{
+    type Item = Result<(String, Vec<super::follow_stream_unpin::BlockRef<Hash>>), Error>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        if self.is_done {
+            return Poll::Ready(None);
+        }
+
         let mut this = self.project();
 
         loop {
-            match futures::ready!(this.stream.poll_next_unpin(cx)) {
-                Some(FollowStreamMsg::Ready(sub_id)) => {
+            let Some(ev) = futures::ready!(this.stream.poll_next_unpin(cx)) else {
+                *this.is_done = true;
+                return Poll::Ready(None);
+            };
+
+            let block_refs = match ev {
+                FollowStreamMsg::Ready(sub_id) => {
                     *this.sub_id = Some(sub_id);
+                    continue;
                 }
-                Some(FollowStreamMsg::Event(FollowEvent::Finalized(finalized))) => {
+                FollowStreamMsg::Event(FollowEvent::Finalized(finalized)) => {
                     *this.last_seen_block = finalized.finalized_block_hashes.last().cloned();
-                    let sub_id = this
-                        .sub_id
-                        .clone()
-                        .expect("Ready is always emitted before Finalized; qed");
-                    return Poll::Ready(Some(Ok((
-                        sub_id,
-                        finalized.finalized_block_hashes.clone(),
-                    ))));
+
+                    (this.f)(FollowEvent::Finalized(finalized))
                 }
-                Some(FollowStreamMsg::Event(FollowEvent::Initialized(init))) => {
+                FollowStreamMsg::Event(FollowEvent::Initialized(mut init)) => {
                     let prev = this.last_seen_block.take();
                     *this.last_seen_block = init.finalized_block_hashes.last().cloned();
 
                     if let Some(p) = prev {
-                        if !init.finalized_block_hashes.contains(&p) {
+                        let Some(pos) = init
+                            .finalized_block_hashes
+                            .iter()
+                            .position(|b| b.hash() == p.hash())
+                        else {
                             return Poll::Ready(Some(Err(RpcError::DisconnectedWillReconnect(
                                 "Missed at least one block when the connection was lost".to_owned(),
                             )
                             .into())));
-                        }
+                        };
+
+                        // If we got older blocks than `prev`, we need to remove them
+                        // because they should already have been sent at this point.
+                        init.finalized_block_hashes.drain(0..=pos);
                     }
 
-                    let sub_id = this
-                        .sub_id
-                        .clone()
-                        .expect("Ready is always emitted before Initialized; qed");
-
-                    return Poll::Ready(Some(Ok((sub_id, init.finalized_block_hashes))));
+                    (this.f)(FollowEvent::Initialized(init))
                 }
-                // Ignore other events.
-                _ => (),
+                FollowStreamMsg::Event(ev) => (this.f)(ev),
             };
+
+            if block_refs.is_empty() {
+                continue;
+            }
+
+            let sub_id = this
+                .sub_id
+                .clone()
+                .expect("Ready is always emitted before any other event");
+
+            return Poll::Ready(Some(Ok((sub_id, block_refs))));
         }
     }
 }
@@ -474,6 +507,9 @@ mod test_utils {
 
 #[cfg(test)]
 mod test {
+    use futures::TryStreamExt;
+    use sp_core::H256;
+
     use super::super::follow_stream::test_utils::{
         ev_best_block, ev_finalized, ev_initialized, ev_new_block,
     };
@@ -616,5 +652,102 @@ mod test {
             FollowStreamMsg::Event(ev_new_block_ref(2, 3)),
         ];
         assert_eq!(evs, expected);
+    }
+
+    #[tokio::test]
+    async fn subscribe_finalized_blocks_restart_works() {
+        let mut driver = test_follow_stream_driver_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_new_block(0, 1)),
+                    Ok(ev_best_block(1)),
+                    Ok(ev_finalized([1], [])),
+                    Ok(FollowEvent::Stop),
+                    Ok(ev_initialized(1)),
+                    Ok(ev_finalized([2], [])),
+                    Err(Error::Other("ended".to_owned())),
+                ]
+            },
+            10,
+        );
+
+        let handle = driver.handle();
+
+        tokio::spawn(async move { while driver.next().await.is_some() {} });
+
+        let f = |ev| match ev {
+            FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
+            FollowEvent::Initialized(ev) => ev.finalized_block_hashes,
+            _ => vec![],
+        };
+
+        let stream = FollowStreamFinalizedHeads::new(handle.subscribe(), f);
+        let evs: Vec<_> = stream.try_collect().await.unwrap();
+
+        let expected = vec![
+            (
+                "sub_id_0".to_string(),
+                vec![BlockRef::new(H256::from_low_u64_le(0))],
+            ),
+            (
+                "sub_id_0".to_string(),
+                vec![BlockRef::new(H256::from_low_u64_le(1))],
+            ),
+            (
+                "sub_id_5".to_string(),
+                vec![BlockRef::new(H256::from_low_u64_le(2))],
+            ),
+        ];
+        assert_eq!(evs, expected);
+    }
+
+    #[tokio::test]
+    async fn subscribe_finalized_blocks_restart_with_missed_blocks() {
+        let mut driver = test_follow_stream_driver_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(FollowEvent::Stop),
+                    // Emulate that we missed some blocks.
+                    Ok(ev_initialized(13)),
+                    Ok(ev_finalized([14], [])),
+                    Err(Error::Other("ended".to_owned())),
+                ]
+            },
+            10,
+        );
+
+        let handle = driver.handle();
+
+        tokio::spawn(async move { while driver.next().await.is_some() {} });
+
+        let f = |ev| match ev {
+            FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
+            FollowEvent::Initialized(ev) => ev.finalized_block_hashes,
+            _ => vec![],
+        };
+
+        let evs: Vec<_> = FollowStreamFinalizedHeads::new(handle.subscribe(), f)
+            .collect()
+            .await;
+
+        assert_eq!(
+            evs[0].as_ref().unwrap(),
+            &(
+                "sub_id_0".to_string(),
+                vec![BlockRef::new(H256::from_low_u64_le(0))]
+            )
+        );
+        assert!(
+            matches!(&evs[1], Err(Error::Rpc(RpcError::DisconnectedWillReconnect(e))) if e.contains("Missed at least one block when the connection was lost"))
+        );
+        assert_eq!(
+            evs[2].as_ref().unwrap(),
+            &(
+                "sub_id_2".to_string(),
+                vec![BlockRef::new(H256::from_low_u64_le(14))]
+            )
+        );
     }
 }
