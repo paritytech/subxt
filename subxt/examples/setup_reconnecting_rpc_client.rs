@@ -87,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 // This can only happen on the legacy backend and the unstable backend
                 // will handle this internally.
                 if e.is_disconnected_will_reconnect() {
-                    println!("The RPC connection was lost and we may loose a few blocks");
+                    println!("The RPC connection was lost and we may lose a few blocks");
                     continue;
                 }
 
