@@ -466,31 +466,33 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     async fn stream_all_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let stream = self
-            .stream_headers(|ev| match ev {
-                FollowEvent::Initialized(init) => init.finalized_block_hashes,
-                FollowEvent::NewBlock(ev) => {
-                    vec![ev.block_hash]
-                }
-                _ => vec![],
-            })
-            .await?;
-
-        Ok(StreamOf::new(Box::pin(stream)))
+        // TODO: https://github.com/paritytech/subxt/issues/1568
+        //
+        // It's possible that blocks may be silently missed if
+        // a reconnection occurs because it's restarted by unstable backend.
+        self.stream_headers(|ev| match ev {
+            FollowEvent::Initialized(init) => init.finalized_block_hashes,
+            FollowEvent::NewBlock(ev) => {
+                vec![ev.block_hash]
+            }
+            _ => vec![],
+        })
+        .await
     }
 
     async fn stream_best_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
-        let stream = self
-            .stream_headers(|ev| match ev {
-                FollowEvent::Initialized(init) => init.finalized_block_hashes,
-                FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
-                _ => vec![],
-            })
-            .await?;
-
-        Ok(StreamOf::new(Box::pin(stream)))
+        // TODO: https://github.com/paritytech/subxt/issues/1568
+        //
+        // It's possible that blocks may be silently missed if
+        // a reconnection occurs because it's restarted by unstable backend.
+        self.stream_headers(|ev| match ev {
+            FollowEvent::Initialized(init) => init.finalized_block_hashes,
+            FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
+            _ => vec![],
+        })
+        .await
     }
 
     async fn stream_finalized_block_headers(

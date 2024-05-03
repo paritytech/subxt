@@ -383,7 +383,7 @@ struct SubscriberDetails<Hash: BlockHash> {
 
 pin_project! {
     /// A stream that subscribes to finalized blocks
-    /// and indicates whether a block was missed if the connection was lost.
+    /// and indicates whether a block was missed if was restarted.
     #[derive(Debug)]
     pub struct FollowStreamFinalizedHeads<Hash: BlockHash> {
         #[pin]

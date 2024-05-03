@@ -133,6 +133,7 @@ where
                     continue;
                 }
 
+                // TODO: https://github.com/paritytech/subxt/issues/1567
                 // This is a hack because if a reconnection occurs
                 // the order of pending calls is not guaranteed.
                 //
@@ -140,7 +141,6 @@ where
                 // before `chainHead_follow` is established with fresh
                 // subscription id.
                 //
-                // TODO: https://github.com/paritytech/subxt/issues/1567
                 if e.is_rejected() && rejected_retries < REJECTED_MAX_RETRIES {
                     rejected_retries += 1;
                     continue;
