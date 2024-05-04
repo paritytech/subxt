@@ -7,7 +7,6 @@ use crate::backend::unstable::rpc_methods::{FollowEvent, Initialized, RuntimeEve
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
 use futures::stream::{Stream, StreamExt};
-use pin_project_lite::pin_project;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::ops::DerefMut;
 use std::pin::Pin;
@@ -381,19 +380,18 @@ struct SubscriberDetails<Hash: BlockHash> {
     waker: Option<Waker>,
 }
 
-pin_project! {
-    /// A stream that subscribes to finalized blocks
-    /// and indicates whether a block was missed if was restarted.
-    #[derive(Debug)]
-    pub struct FollowStreamFinalizedHeads<Hash: BlockHash, F> {
-        #[pin]
-        stream: FollowStreamDriverSubscription<Hash>,
-        sub_id: Option<String>,
-        last_seen_block: Option<BlockRef<Hash>>,
-        f: F,
-        is_done: bool,
-    }
+/// A stream that subscribes to finalized blocks
+/// and indicates whether a block was missed if was restarted.
+#[derive(Debug)]
+pub struct FollowStreamFinalizedHeads<Hash: BlockHash, F> {
+    stream: FollowStreamDriverSubscription<Hash>,
+    sub_id: Option<String>,
+    last_seen_block: Option<BlockRef<Hash>>,
+    f: F,
+    is_done: bool,
 }
+
+impl<Hash: BlockHash, F> Unpin for FollowStreamFinalizedHeads<Hash, F> {}
 
 impl<Hash, F> FollowStreamFinalizedHeads<Hash, F>
 where
@@ -422,32 +420,30 @@ where
 {
     type Item = Result<(String, Vec<super::follow_stream_unpin::BlockRef<Hash>>), Error>;
 
-    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         if self.is_done {
             return Poll::Ready(None);
         }
 
-        let mut this = self.project();
-
         loop {
-            let Some(ev) = futures::ready!(this.stream.poll_next_unpin(cx)) else {
-                *this.is_done = true;
+            let Some(ev) = futures::ready!(self.stream.poll_next_unpin(cx)) else {
+                self.is_done = true;
                 return Poll::Ready(None);
             };
 
             let block_refs = match ev {
                 FollowStreamMsg::Ready(sub_id) => {
-                    *this.sub_id = Some(sub_id);
+                    self.sub_id = Some(sub_id);
                     continue;
                 }
                 FollowStreamMsg::Event(FollowEvent::Finalized(finalized)) => {
-                    *this.last_seen_block = finalized.finalized_block_hashes.last().cloned();
+                    self.last_seen_block = finalized.finalized_block_hashes.last().cloned();
 
-                    (this.f)(FollowEvent::Finalized(finalized))
+                    (self.f)(FollowEvent::Finalized(finalized))
                 }
                 FollowStreamMsg::Event(FollowEvent::Initialized(mut init)) => {
-                    let prev = this.last_seen_block.take();
-                    *this.last_seen_block = init.finalized_block_hashes.last().cloned();
+                    let prev = self.last_seen_block.take();
+                    self.last_seen_block = init.finalized_block_hashes.last().cloned();
 
                     if let Some(p) = prev {
                         let Some(pos) = init
@@ -466,16 +462,16 @@ where
                         init.finalized_block_hashes.drain(0..=pos);
                     }
 
-                    (this.f)(FollowEvent::Initialized(init))
+                    (self.f)(FollowEvent::Initialized(init))
                 }
-                FollowStreamMsg::Event(ev) => (this.f)(ev),
+                FollowStreamMsg::Event(ev) => (self.f)(ev),
             };
 
             if block_refs.is_empty() {
                 continue;
             }
 
-            let sub_id = this
+            let sub_id = self
                 .sub_id
                 .clone()
                 .expect("Ready is always emitted before any other event");

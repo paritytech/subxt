@@ -85,7 +85,6 @@ tracing = { workspace = true }
 frame-metadata = { workspace = true }
 either = { workspace = true }
 instant = { workspace = true }
-pin-project-lite = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }

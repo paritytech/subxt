@@ -4789,7 +4789,6 @@ dependencies = [
  "instant",
  "jsonrpsee",
  "parity-scale-codec",
- "pin-project-lite",
  "primitive-types",
  "reconnecting-jsonrpsee-ws-client",
  "scale-bits",
