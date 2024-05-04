@@ -201,11 +201,11 @@ impl Client {
         Builder::new()
     }
 
-    /// A future that returns once the client has started to reconnect
-    /// which in turn returns another future that resolves once the client has reconnected.
+    /// A future that resolves when the client has initiated a reconnection.
+    /// This method returns another future that resolves when the client has reconnected.
     ///
     /// This may be called multiple times.
-    pub async fn reconnect_started(&self) -> impl Future<Output = ()> + '_ {
+    pub async fn reconnect_initiated(&self) -> impl Future<Output = ()> + '_ {
         self.0.reconnect_started().await;
         self.0.reconnected()
     }

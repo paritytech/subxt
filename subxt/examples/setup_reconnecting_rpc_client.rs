@@ -62,8 +62,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rpc2 = rpc.clone();
     tokio::spawn(async move {
         loop {
-            let reconnected = rpc2.reconnect_started().await;
+            // The connection was lost and the client is trying to reconnect.
+            let reconnected = rpc2.reconnect_initiated().await;
             let now = std::time::Instant::now();
+            // The connection was re-established.
             reconnected.await;
             println!(
                 "RPC client reconnection took `{}s`",
@@ -77,8 +79,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The subscription is automatically re-started when the RPC client has reconnected.
     // You can test that by stopping the polkadot node and restarting it.
     let mut blocks_sub = api.blocks().subscribe_finalized().await?.take(100);
-    // Track the last block to determine how many blocks that were missed when reconnecting.
-    let mut last_seen_block = None;
 
     while let Some(block) = blocks_sub.next().await {
         let block = match block {
@@ -87,7 +87,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 // This can only happen on the legacy backend and the unstable backend
                 // will handle this internally.
                 if e.is_disconnected_will_reconnect() {
-                    println!("The RPC connection was lost and we may lose a few blocks");
+                    println!("The RPC connection was lost and we may have missed a few blocks");
                     continue;
                 }
 
@@ -97,16 +97,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let block_number = block.number();
         let block_hash = block.hash();
-
-        if let Some(b) = last_seen_block {
-            let diff = block_number.saturating_sub(b);
-
-            if diff > 1 {
-                println!("Missed {} blocks during the connection was lost", diff - 1);
-            }
-        }
-
-        last_seen_block = Some(block_number);
 
         println!("Block #{block_number} ({block_hash})");
     }
