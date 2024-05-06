@@ -267,9 +267,9 @@ impl<Hash: BlockHash> Shared<Hash> {
 
                     shared.seen_runtime_events.clear();
 
-                    finalized_ev
+                    init_message
                         .finalized_block_hashes
-                        .clone_into(&mut init_message.finalized_block_hashes);
+                        .clone_from(&finalized_ev.finalized_block_hashes);
 
                     if let Some(runtime_ev) = newest_runtime {
                         init_message.finalized_block_runtime = Some(runtime_ev);

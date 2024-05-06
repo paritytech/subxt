@@ -27,7 +27,7 @@ use subxt_metadata::RuntimeApiMetadata;
 ///                       exectute is:
 ///                         false => Show input type description + Example Value
 ///                         true  => validate (trailing args + build node connection)
-///                           validation is:  
+///                           validation is:
 ///                             Err => Show Error
 ///                             Ok  => Make a runtime api call witht the provided args.
 ///                               response is:
@@ -51,7 +51,7 @@ pub async fn run<'a>(
         Usage:
             subxt explore api {api_name} <METHOD>
                 explore a specific runtime api method
-        
+
         {methods}
         "}
     };
@@ -63,7 +63,7 @@ pub async fn run<'a>(
             writedoc! {output, "
             Description:
             {doc_string}
-    
+
             "}?;
         }
         writeln!(output, "{}", usage())?;
@@ -89,7 +89,7 @@ pub async fn run<'a>(
         writedoc! {output, "
         Description:
         {doc_string}
-        
+
         "}?;
     }
 
@@ -116,7 +116,7 @@ pub async fn run<'a>(
         formatdoc! {"
         The method expects an {input_value_placeholder} with this shape:
         {fields_description}
-    
+
         For example you could provide this {input_value_placeholder}:
         {fields_example}"}
     };
@@ -156,13 +156,13 @@ pub async fn run<'a>(
             let value_str = value.indent(4);
             // convert to bytes:
             writedoc! {output, "
-            
+
             You submitted the following {input_value_placeholder}:
             {value_str}
             "}?;
             // encode, then decode. This ensures that the scale value is of the correct shape for the param:
-            let bytes = value.encode_as_type(&ty.ty, metadata.types())?;
-            let value = Value::decode_as_type(&mut &bytes[..], &ty.ty, metadata.types())?;
+            let bytes = value.encode_as_type(ty.ty, metadata.types())?;
+            let value = Value::decode_as_type(&mut &bytes[..], ty.ty, metadata.types())?;
             Ok(value)
         })
         .collect::<color_eyre::Result<Vec<Value>>>()?;
@@ -178,7 +178,7 @@ pub async fn run<'a>(
 
     let output_value = output_value.to_value()?.to_string().highlight();
     writedoc! {output, "
-    
+
     Returned value:
         {output_value}
     "}?;

@@ -47,7 +47,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
             let cursor = &mut &bytes[byte_start_idx..];
             if let Err(err) = scale_decode::visitor::decode_with_visitor(
                 cursor,
-                &ty_id,
+                ty_id,
                 metadata.types(),
                 scale_decode::visitor::IgnoreVisitor::new(),
             )
@@ -146,7 +146,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     pub fn value(&self) -> Result<Value<u32>, Error> {
         let value = scale_value::scale::decode_as_type(
             &mut &self.bytes[..],
-            &self.ty_id,
+            self.ty_id,
             self.metadata.types(),
         )?;
         Ok(value)
@@ -163,7 +163,7 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     }
 
     fn as_type<E: DecodeAsType>(&self) -> Result<E, Error> {
-        let value = E::decode_as_type(&mut &self.bytes[..], &self.ty_id, self.metadata.types())?;
+        let value = E::decode_as_type(&mut &self.bytes[..], self.ty_id, self.metadata.types())?;
         Ok(value)
     }
 }

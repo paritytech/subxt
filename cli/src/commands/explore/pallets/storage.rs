@@ -57,7 +57,7 @@ pub async fn explore_storage(
         Usage:
             subxt explore pallet {pallet_name} storage {storage_entry_placeholder}
                 explore a specific storage entry of this pallet
-        
+
         {storage_entries}
         "}
     };
@@ -139,7 +139,7 @@ pub async fn explore_storage(
         "}?;
     } else {
         writedoc! {output,"
-        
+
         Can be accessed without providing a {key_value_placeholder}.
         "}?;
     }
@@ -164,12 +164,12 @@ pub async fn explore_storage(
             let value = parse_string_into_scale_value(trailing_args)?;
             let value_str = value.indent(4);
             writedoc! {output, "
-    
+
             You submitted the following {key_value_placeholder}:
             {value_str}
             "}?;
 
-            let key_bytes = value.encode_as_type(&type_id, metadata.types())?;
+            let key_bytes = value.encode_as_type(type_id, metadata.types())?;
             let bytes_composite = Value::from_bytes(key_bytes);
             vec![bytes_composite]
         }
@@ -191,7 +191,7 @@ pub async fn explore_storage(
 
     let value = decoded_value_thunk.to_value()?.to_string().highlight();
     writedoc! {output, "
-    
+
     The value of the storage entry is:
         {value}
     "}?;
