@@ -133,7 +133,10 @@ where
     /// Configure which retry policy to use.
     ///
     /// Default: Exponential backoff 10ms
-    pub fn retry_policy<T>(self, retry_policy: T) -> Builder<T> {
+    pub fn retry_policy<T: Iterator<Item = Duration> + Send + Sync + 'static + Clone>(
+        self,
+        retry_policy: T,
+    ) -> Builder<T> {
         Builder {
             max_request_size: self.max_request_size,
             max_response_size: self.max_response_size,
