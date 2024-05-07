@@ -156,48 +156,23 @@ where
 ///
 /// It's important to note that this function is intended to work only for stateless subscriptions.
 /// If the subscription takes input or modifies state, this function should not be used.
-pub(crate) async fn retry_stream<F, R>(mut sub_stream: F) -> Result<StreamOfResults<R>, Error>
+pub(crate) async fn retry_stream<F, R>(sub_stream: F) -> Result<StreamOfResults<R>, Error>
 where
     F: FnMut() -> ResubscribeFuture<R> + Send + 'static + Clone,
     R: Send + 'static,
 {
-    loop {
-        match sub_stream().await {
-            Ok(v) => {
-                let resubscribe = Box::new(move || {
-                    let mut sub_stream = sub_stream.clone();
-                    async move {
-                        loop {
-                            match sub_stream().await {
-                                Ok(v) => return Ok(v),
-                                Err(e) => {
-                                    if e.is_disconnected_will_reconnect() {
-                                        continue;
-                                    }
+    let stream = retry(sub_stream.clone()).await?;
 
-                                    return Err(e);
-                                }
-                            }
-                        }
-                    }
-                    .boxed()
-                });
+    let resubscribe = Box::new(move || {
+        let sub_stream = sub_stream.clone();
+        async move { retry(sub_stream).await }.boxed()
+    });
 
-                // The extra Box is to encapsulate the retry subscription type
-                return Ok(StreamOf::new(Box::pin(RetrySubscription {
-                    state: PendingOrStream::Stream(v),
-                    resubscribe,
-                })));
-            }
-            Err(e) => {
-                if e.is_disconnected_will_reconnect() {
-                    continue;
-                }
-
-                return Err(e);
-            }
-        }
-    }
+    // The extra Box is to encapsulate the retry subscription type
+    Ok(StreamOf::new(Box::pin(RetrySubscription {
+        state: PendingOrStream::Stream(stream),
+        resubscribe,
+    })))
 }
 
 #[cfg(test)]
