@@ -6,12 +6,10 @@
 
 #![allow(missing_docs)]
 
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 
 use futures::StreamExt;
-use subxt::backend::legacy::LegacyBackend;
 use subxt::backend::rpc::reconnecting_rpc_client::{Client, ExponentialBackoff};
-use subxt::backend::rpc::RpcClient;
 use subxt::{OnlineClient, PolkadotConfig};
 
 // Generate an interface that we can use from the node's metadata.
@@ -53,10 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // let api: OnlineClient<PolkadotConfig> = OnlineClient::from_backend(Arc::new(backend)).await?;
     // ```
 
-    let backend: LegacyBackend<PolkadotConfig> =
-        LegacyBackend::builder().build(RpcClient::new(rpc.clone()));
-
-    let api: OnlineClient<PolkadotConfig> = OnlineClient::from_backend(Arc::new(backend)).await?;
+    let api: OnlineClient<PolkadotConfig> = OnlineClient::from_rpc_client(rpc.clone()).await?;
 
     // Optionally print if the RPC client reconnects.
     let rpc2 = rpc.clone();
