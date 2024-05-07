@@ -15,7 +15,6 @@ type ResubscribeFuture<T> = Pin<Box<dyn Future<Output = Result<StreamOfResults<T
 pub(crate) enum PendingOrStream<T> {
     Pending(BoxFuture<'static, Result<StreamOfResults<T>, Error>>),
     Stream(StreamOfResults<T>),
-    Closed,
 }
 
 impl<T> std::fmt::Debug for PendingOrStream<T> {
@@ -23,26 +22,6 @@ impl<T> std::fmt::Debug for PendingOrStream<T> {
         match self {
             PendingOrStream::Pending(_) => write!(f, "Pending"),
             PendingOrStream::Stream(_) => write!(f, "Stream"),
-            PendingOrStream::Closed => write!(f, "Closed"),
-        }
-    }
-}
-
-enum NextState<T> {
-    Stream(StreamOfResults<T>),
-    Resubscribe {
-        pending: BoxFuture<'static, Result<StreamOfResults<T>, Error>>,
-        err: Error,
-    },
-    Closed(Option<Error>),
-}
-
-impl<T> std::fmt::Debug for NextState<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Stream(_) => write!(f, "Stream"),
-            Self::Resubscribe { .. } => write!(f, "Resubscribe"),
-            Self::Closed(_) => write!(f, "Closed"),
         }
     }
 }
@@ -50,7 +29,7 @@ impl<T> std::fmt::Debug for NextState<T> {
 /// Retry subscription.
 struct RetrySubscription<T> {
     resubscribe: ResubscribeGetter<T>,
-    state: PendingOrStream<T>,
+    state: Option<PendingOrStream<T>>,
 }
 
 impl<T> std::marker::Unpin for RetrySubscription<T> {}
@@ -63,55 +42,37 @@ impl<T> Stream for RetrySubscription<T> {
         cx: &mut std::task::Context<'_>,
     ) -> Poll<Option<Self::Item>> {
         loop {
-            let next_state = match self.state {
-                PendingOrStream::Stream(ref mut s) => match ready!(s.poll_next_unpin(cx)) {
-                    Some(Err(err)) => {
-                        if !err.is_disconnected_will_reconnect() {
-                            NextState::Closed(Some(err))
-                        } else {
-                            NextState::Resubscribe {
-                                pending: (self.resubscribe)(),
-                                err,
-                            }
-                        }
-                    }
-                    None => NextState::Closed(None),
-                    Some(Ok(val)) => return Poll::Ready(Some(Ok(val))),
-                },
-                PendingOrStream::Pending(ref mut fut) => match ready!(fut.poll_unpin(cx)) {
-                    Ok(stream) => NextState::Stream(stream),
-                    Err(err) => {
-                        if !err.is_disconnected_will_reconnect() {
-                            NextState::Closed(Some(err))
-                        } else {
-                            NextState::Resubscribe {
-                                pending: (self.resubscribe)(),
-                                err,
-                            }
-                        }
-                    }
-                },
-                PendingOrStream::Closed => NextState::Closed(None),
+            let Some(mut this) = self.state.take() else {
+                return Poll::Ready(None);
             };
 
-            match next_state {
-                NextState::Resubscribe { pending, err } => {
-                    self.state = PendingOrStream::Pending(pending);
-                    return Poll::Ready(Some(Err(err)));
-                }
-                NextState::Stream(stream) => {
-                    self.state = PendingOrStream::Stream(stream);
-                }
-                NextState::Closed(maybe_err) => {
-                    self.state = PendingOrStream::Closed;
-
-                    if let Some(err) = maybe_err {
+            match this {
+                PendingOrStream::Stream(ref mut s) => match ready!(s.poll_next_unpin(cx)) {
+                    Some(Err(err)) => {
+                        if err.is_disconnected_will_reconnect() {
+                            self.state = Some(PendingOrStream::Pending((self.resubscribe)()));
+                        }
                         return Poll::Ready(Some(Err(err)));
-                    } else {
-                        return Poll::Ready(None);
                     }
-                }
-            }
+                    None => return Poll::Ready(None),
+                    Some(Ok(val)) => {
+                        self.state = Some(this);
+                        return Poll::Ready(Some(Ok(val)));
+                    }
+                },
+                PendingOrStream::Pending(ref mut fut) => match ready!(fut.poll_unpin(cx)) {
+                    Ok(stream) => {
+                        self.state = Some(PendingOrStream::Stream(stream));
+                        continue;
+                    }
+                    Err(err) => {
+                        if err.is_disconnected_will_reconnect() {
+                            self.state = Some(PendingOrStream::Pending((self.resubscribe)()));
+                        }
+                        return Poll::Ready(Some(Err(err)));
+                    }
+                },
+            };
         }
     }
 }
@@ -170,7 +131,7 @@ where
 
     // The extra Box is to encapsulate the retry subscription type
     Ok(StreamOf::new(Box::pin(RetrySubscription {
-        state: PendingOrStream::Stream(stream),
+        state: Some(PendingOrStream::Stream(stream)),
         resubscribe,
     })))
 }
@@ -223,7 +184,7 @@ mod tests {
         });
 
         let retry_stream = RetrySubscription {
-            state: PendingOrStream::Stream(StreamOf::new(Box::pin(stream))),
+            state: Some(PendingOrStream::Stream(StreamOf::new(Box::pin(stream)))),
             resubscribe,
         };
 
@@ -240,7 +201,7 @@ mod tests {
         let resubscribe = Box::new(move || async move { Err(custom_err()) }.boxed());
 
         let retry_stream = RetrySubscription {
-            state: PendingOrStream::Stream(StreamOf::new(Box::pin(stream))),
+            state: Some(PendingOrStream::Stream(StreamOf::new(Box::pin(stream)))),
             resubscribe,
         };
 
@@ -253,7 +214,7 @@ mod tests {
         let resubscribe = Box::new(move || async move { Err(custom_err()) }.boxed());
 
         let retry_stream = RetrySubscription {
-            state: PendingOrStream::Stream(StreamOf::new(Box::pin(stream))),
+            state: Some(PendingOrStream::Stream(StreamOf::new(Box::pin(stream)))),
             resubscribe,
         };
 
