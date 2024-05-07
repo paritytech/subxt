@@ -508,7 +508,7 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
                     Err(e) => {
                         if e.is_disconnected_will_reconnect() {
                             this.keys_fut = Some(keys_fut);
-                            return Poll::Pending;
+                            continue;
                         }
 
                         // Error getting keys? Return it.
