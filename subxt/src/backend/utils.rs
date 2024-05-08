@@ -86,6 +86,21 @@ impl<T> Stream for RetrySubscription<T> {
 }
 
 /// Retry a future until it doesn't return a disconnected error.
+///
+/// # Example
+///
+/// ```no_run
+/// use subxt::backend::utils::retry;
+///
+/// async fn some_future() -> Result<(), subxt::error::Error> {
+///    Ok(())
+/// }
+///
+/// #[tokio::main]
+/// async fn main() {
+///    let result = retry(|| some_future()).await;
+/// }
+/// ```
 pub async fn retry<T, F, R>(mut retry_future: F) -> Result<R, Error>
 where
     F: FnMut() -> T,
@@ -125,7 +140,25 @@ where
 ///
 /// It's important to note that this function is intended to work only for stateless subscriptions.
 /// If the subscription takes input or modifies state, this function should not be used.
-pub(crate) async fn retry_stream<F, R>(sub_stream: F) -> Result<StreamOfResults<R>, Error>
+///
+/// # Example
+///
+/// ```no_run
+/// use subxt::backend::{utils::retry_stream, StreamOf};
+/// use futures::future::FutureExt;
+///
+///
+/// #[tokio::main]
+/// async fn main() {
+///    retry_stream(|| {
+///         // This needs to return a stream of results but if you are using
+///         // the subxt backend already it will return StreamOf so you can just
+///         // return it directly in the async block below.
+///         async move { Ok(StreamOf::new(Box::pin(futures::stream::iter([Ok(2)])))) }.boxed()
+///    }).await;
+/// }
+/// ```
+pub async fn retry_stream<F, R>(sub_stream: F) -> Result<StreamOfResults<R>, Error>
 where
     F: FnMut() -> ResubscribeFuture<R> + Send + 'static + Clone,
     R: Send + 'static,
