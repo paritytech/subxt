@@ -9,6 +9,7 @@
 pub mod legacy;
 pub mod rpc;
 pub mod unstable;
+pub mod utils;
 
 use subxt_core::client::RuntimeVersion;
 

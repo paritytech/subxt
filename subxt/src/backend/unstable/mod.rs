@@ -18,21 +18,22 @@ mod storage_items;
 
 pub mod rpc_methods;
 
+use self::follow_stream_driver::FollowStreamFinalizedHeads;
 use self::rpc_methods::{
     FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
 };
 use crate::backend::{
-    rpc::RpcClient, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf,
-    StreamOfResults, TransactionStatus,
+    rpc::RpcClient, utils::retry, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse,
+    StreamOf, StreamOfResults, TransactionStatus,
 };
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
 use crate::Config;
 use async_trait::async_trait;
 use follow_stream_driver::{FollowStreamDriver, FollowStreamDriverHandle};
+use futures::future::Either;
 use futures::{Stream, StreamExt};
 use std::collections::HashMap;
-use std::sync::Arc;
 use std::task::Poll;
 use storage_items::StorageItems;
 
@@ -136,43 +137,50 @@ impl<T: Config> UnstableBackend<T> {
     }
 
     /// Stream block headers based on the provided filter fn
-    async fn stream_headers<F, I>(
+    async fn stream_headers<F>(
         &self,
         f: F,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>
     where
-        F: Fn(FollowEvent<follow_stream_unpin::BlockRef<T::Hash>>) -> I + Copy + Send + 'static,
-        I: IntoIterator<Item = follow_stream_unpin::BlockRef<T::Hash>> + Send + 'static,
-        <I as IntoIterator>::IntoIter: Send,
+        F: Fn(
+                FollowEvent<follow_stream_unpin::BlockRef<T::Hash>>,
+            ) -> Vec<follow_stream_unpin::BlockRef<T::Hash>>
+            + Send
+            + Sync
+            + 'static,
     {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
-        let sub_id = Arc::new(sub_id);
         let methods = self.methods.clone();
-        let headers = self.follow_handle.subscribe().events().flat_map(move |ev| {
-            let sub_id = sub_id.clone();
-            let methods = methods.clone();
 
-            let block_refs = f(ev).into_iter();
-
-            futures::stream::iter(block_refs).filter_map(move |block_ref| {
-                let sub_id = sub_id.clone();
+        let headers =
+            FollowStreamFinalizedHeads::new(self.follow_handle.subscribe(), f).flat_map(move |r| {
                 let methods = methods.clone();
 
-                async move {
-                    let res = methods
-                        .chainhead_v1_header(&sub_id, block_ref.hash())
-                        .await
-                        .transpose()?;
+                let (sub_id, block_refs) = match r {
+                    Ok(ev) => ev,
+                    Err(e) => return Either::Left(futures::stream::once(async { Err(e) })),
+                };
 
-                    let header = match res {
-                        Ok(header) => header,
-                        Err(e) => return Some(Err(e)),
-                    };
+                Either::Right(
+                    futures::stream::iter(block_refs).filter_map(move |block_ref| {
+                        let methods = methods.clone();
+                        let sub_id = sub_id.clone();
 
-                    Some(Ok((header, block_ref.into())))
-                }
-            })
-        });
+                        async move {
+                            let res = methods
+                                .chainhead_v1_header(&sub_id, block_ref.hash())
+                                .await
+                                .transpose()?;
+
+                            let header = match res {
+                                Ok(header) => header,
+                                Err(e) => return Some(Err(e)),
+                            };
+
+                            Some(Ok((header, block_ref.into())))
+                        }
+                    }),
+                )
+            });
 
         Ok(StreamOf(Box::pin(headers)))
     }
@@ -194,31 +202,34 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         keys: Vec<Vec<u8>>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        let queries = keys.iter().map(|key| StorageQuery {
-            key: &**key,
-            query_type: StorageQueryType::Value,
-        });
+        retry(|| async {
+            let queries = keys.iter().map(|key| StorageQuery {
+                key: &**key,
+                query_type: StorageQueryType::Value,
+            });
 
-        let storage_items =
-            StorageItems::from_methods(queries, at, &self.follow_handle, self.methods.clone())
-                .await?;
+            let storage_items =
+                StorageItems::from_methods(queries, at, &self.follow_handle, self.methods.clone())
+                    .await?;
 
-        let storage_result_stream = storage_items.filter_map(|val| async move {
-            let val = match val {
-                Ok(val) => val,
-                Err(e) => return Some(Err(e)),
-            };
+            let stream = storage_items.filter_map(|val| async move {
+                let val = match val {
+                    Ok(val) => val,
+                    Err(e) => return Some(Err(e)),
+                };
 
-            let StorageResultType::Value(result) = val.result else {
-                return None;
-            };
-            Some(Ok(StorageResponse {
-                key: val.key.0,
-                value: result.0,
-            }))
-        });
+                let StorageResultType::Value(result) = val.result else {
+                    return None;
+                };
+                Some(Ok(StorageResponse {
+                    key: val.key.0,
+                    value: result.0,
+                }))
+            });
 
-        Ok(StreamOf(Box::pin(storage_result_stream)))
+            Ok(StreamOf(Box::pin(stream)))
+        })
+        .await
     }
 
     async fn storage_fetch_descendant_keys(
@@ -226,22 +237,25 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         key: Vec<u8>,
         at: T::Hash,
     ) -> Result<StreamOfResults<Vec<u8>>, Error> {
-        // Ask for hashes, and then just ignore them and return the keys that come back.
-        let query = StorageQuery {
-            key: &*key,
-            query_type: StorageQueryType::DescendantsHashes,
-        };
+        retry(|| async {
+            // Ask for hashes, and then just ignore them and return the keys that come back.
+            let query = StorageQuery {
+                key: &*key,
+                query_type: StorageQueryType::DescendantsHashes,
+            };
 
-        let storage_items = StorageItems::from_methods(
-            std::iter::once(query),
-            at,
-            &self.follow_handle,
-            self.methods.clone(),
-        )
-        .await?;
+            let storage_items = StorageItems::from_methods(
+                std::iter::once(query),
+                at,
+                &self.follow_handle,
+                self.methods.clone(),
+            )
+            .await?;
 
-        let storage_result_stream = storage_items.map(|val| val.map(|v| v.key.0));
-        Ok(StreamOf(Box::pin(storage_result_stream)))
+            let storage_result_stream = storage_items.map(|val| val.map(|v| v.key.0));
+            Ok(StreamOf(Box::pin(storage_result_stream)))
+        })
+        .await
     }
 
     async fn storage_fetch_descendant_values(
@@ -249,72 +263,81 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         key: Vec<u8>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        let query = StorageQuery {
-            key: &*key,
-            query_type: StorageQueryType::DescendantsValues,
-        };
-
-        let storage_items = StorageItems::from_methods(
-            std::iter::once(query),
-            at,
-            &self.follow_handle,
-            self.methods.clone(),
-        )
-        .await?;
-
-        let storage_result_stream = storage_items.filter_map(|val| async move {
-            let val = match val {
-                Ok(val) => val,
-                Err(e) => return Some(Err(e)),
+        retry(|| async {
+            let query = StorageQuery {
+                key: &*key,
+                query_type: StorageQueryType::DescendantsValues,
             };
 
-            let StorageResultType::Value(result) = val.result else {
-                return None;
-            };
-            Some(Ok(StorageResponse {
-                key: val.key.0,
-                value: result.0,
-            }))
-        });
+            let storage_items = StorageItems::from_methods(
+                std::iter::once(query),
+                at,
+                &self.follow_handle,
+                self.methods.clone(),
+            )
+            .await?;
 
-        Ok(StreamOf(Box::pin(storage_result_stream)))
+            let storage_result_stream = storage_items.filter_map(|val| async move {
+                let val = match val {
+                    Ok(val) => val,
+                    Err(e) => return Some(Err(e)),
+                };
+
+                let StorageResultType::Value(result) = val.result else {
+                    return None;
+                };
+                Some(Ok(StorageResponse {
+                    key: val.key.0,
+                    value: result.0,
+                }))
+            });
+
+            Ok(StreamOf(Box::pin(storage_result_stream)))
+        })
+        .await
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        self.methods.chainspec_v1_genesis_hash().await
+        retry(|| self.methods.chainspec_v1_genesis_hash()).await
     }
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
-        self.methods.chainhead_v1_header(&sub_id, at).await
+        retry(|| async {
+            let sub_id = get_subscription_id(&self.follow_handle).await?;
+            self.methods.chainhead_v1_header(&sub_id, at).await
+        })
+        .await
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
+        retry(|| async {
+            let sub_id = get_subscription_id(&self.follow_handle).await?;
 
-        // Subscribe to the body response and get our operationId back.
-        let follow_events = self.follow_handle.subscribe().events();
-        let status = self.methods.chainhead_v1_body(&sub_id, at).await?;
-        let operation_id = match status {
-            MethodResponse::LimitReached => {
-                return Err(RpcError::request_rejected("limit reached").into())
-            }
-            MethodResponse::Started(s) => s.operation_id,
-        };
-
-        // Wait for the response to come back with the correct operationId.
-        let mut exts_stream = follow_events.filter_map(|ev| {
-            let FollowEvent::OperationBodyDone(body) = ev else {
-                return std::future::ready(None);
+            // Subscribe to the body response and get our operationId back.
+            let follow_events = self.follow_handle.subscribe().events();
+            let status = self.methods.chainhead_v1_body(&sub_id, at).await?;
+            let operation_id = match status {
+                MethodResponse::LimitReached => {
+                    return Err(RpcError::request_rejected("limit reached").into())
+                }
+                MethodResponse::Started(s) => s.operation_id,
             };
-            if body.operation_id != operation_id {
-                return std::future::ready(None);
-            }
-            let exts: Vec<_> = body.value.into_iter().map(|ext| ext.0).collect();
-            std::future::ready(Some(exts))
-        });
 
-        Ok(exts_stream.next().await)
+            // Wait for the response to come back with the correct operationId.
+            let mut exts_stream = follow_events.filter_map(|ev| {
+                let FollowEvent::OperationBodyDone(body) = ev else {
+                    return std::future::ready(None);
+                };
+                if body.operation_id != operation_id {
+                    return std::future::ready(None);
+                }
+                let exts: Vec<_> = body.value.into_iter().map(|ext| ext.0).collect();
+                std::future::ready(Some(exts))
+            });
+
+            Ok(exts_stream.next().await)
+        })
+        .await
     }
 
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
@@ -423,12 +446,16 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
                 std::future::ready(Some(Ok(runtime_version)))
             });
 
-        Ok(StreamOf(Box::pin(runtime_stream)))
+        Ok(StreamOf::new(Box::pin(runtime_stream)))
     }
 
     async fn stream_all_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+        // TODO: https://github.com/paritytech/subxt/issues/1568
+        //
+        // It's possible that blocks may be silently missed if
+        // a reconnection occurs because it's restarted by the unstable backend.
         self.stream_headers(|ev| match ev {
             FollowEvent::Initialized(init) => init.finalized_block_hashes,
             FollowEvent::NewBlock(ev) => {
@@ -442,6 +469,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     async fn stream_best_block_headers(
         &self,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+        // TODO: https://github.com/paritytech/subxt/issues/1568
+        //
+        // It's possible that blocks may be silently missed if
+        // a reconnection occurs because it's restarted by the unstable backend.
         self.stream_headers(|ev| match ev {
             FollowEvent::Initialized(init) => init.finalized_block_hashes,
             FollowEvent::BestBlockChanged(ev) => vec![ev.best_block_hash],
@@ -638,37 +669,40 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         call_parameters: Option<&[u8]>,
         at: T::Hash,
     ) -> Result<Vec<u8>, Error> {
-        let sub_id = get_subscription_id(&self.follow_handle).await?;
+        retry(|| async {
+            let sub_id = get_subscription_id(&self.follow_handle).await?;
 
-        // Subscribe to the body response and get our operationId back.
-        let follow_events = self.follow_handle.subscribe().events();
-        let call_parameters = call_parameters.unwrap_or(&[]);
-        let status = self
-            .methods
-            .chainhead_v1_call(&sub_id, at, method, call_parameters)
-            .await?;
-        let operation_id = match status {
-            MethodResponse::LimitReached => {
-                return Err(RpcError::request_rejected("limit reached").into())
-            }
-            MethodResponse::Started(s) => s.operation_id,
-        };
-
-        // Wait for the response to come back with the correct operationId.
-        let mut call_data_stream = follow_events.filter_map(|ev| {
-            let FollowEvent::OperationCallDone(body) = ev else {
-                return std::future::ready(None);
+            // Subscribe to the body response and get our operationId back.
+            let follow_events = self.follow_handle.subscribe().events();
+            let call_parameters = call_parameters.unwrap_or(&[]);
+            let status = self
+                .methods
+                .chainhead_v1_call(&sub_id, at, method, call_parameters)
+                .await?;
+            let operation_id = match status {
+                MethodResponse::LimitReached => {
+                    return Err(RpcError::request_rejected("limit reached").into())
+                }
+                MethodResponse::Started(s) => s.operation_id,
             };
-            if body.operation_id != operation_id {
-                return std::future::ready(None);
-            }
-            std::future::ready(Some(body.output.0))
-        });
 
-        call_data_stream
-            .next()
-            .await
-            .ok_or_else(|| RpcError::SubscriptionDropped.into())
+            // Wait for the response to come back with the correct operationId.
+            let mut call_data_stream = follow_events.filter_map(|ev| {
+                let FollowEvent::OperationCallDone(body) = ev else {
+                    return std::future::ready(None);
+                };
+                if body.operation_id != operation_id {
+                    return std::future::ready(None);
+                }
+                std::future::ready(Some(body.output.0))
+            });
+
+            call_data_stream
+                .next()
+                .await
+                .ok_or_else(|| RpcError::SubscriptionDropped.into())
+        })
+        .await
     }
 }
 

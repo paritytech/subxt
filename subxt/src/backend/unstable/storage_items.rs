@@ -111,6 +111,11 @@ impl<T: Config> Stream for StorageItems<T> {
                         return Poll::Pending;
                     }
                     Poll::Ready(Err(e)) => {
+                        if e.is_disconnected_will_reconnect() {
+                            self.continue_fut = Some((self.continue_call)());
+                            continue;
+                        }
+
                         self.done = true;
                         return Poll::Ready(Some(Err(e)));
                     }

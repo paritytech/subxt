@@ -148,6 +148,12 @@ impl<Hash> Stream for FollowStream<Hash> {
                             continue;
                         }
                         Poll::Ready(Err(e)) => {
+                            // Re-start if a reconnecting backend was enabled.
+                            if e.is_disconnected_will_reconnect() {
+                                this.stream = InnerStreamState::Stopped;
+                                continue;
+                            }
+
                             // Finish forever if there's an error, passing it on.
                             this.stream = InnerStreamState::Finished;
                             return Poll::Ready(Some(Err(e)));
@@ -182,6 +188,12 @@ impl<Hash> Stream for FollowStream<Hash> {
                             return Poll::Ready(Some(Ok(FollowStreamMsg::Event(ev))));
                         }
                         Poll::Ready(Some(Err(e))) => {
+                            // Re-start if a reconnecting backend was enabled.
+                            if e.is_disconnected_will_reconnect() {
+                                this.stream = InnerStreamState::Stopped;
+                                continue;
+                            }
+
                             // Finish forever if there's an error, passing it on.
                             this.stream = InnerStreamState::Finished;
                             return Poll::Ready(Some(Err(e)));
