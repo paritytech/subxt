@@ -3,7 +3,7 @@
 use super::{StreamOf, StreamOfResults};
 use crate::error::Error;
 use futures::future::BoxFuture;
-use futures::{ready, FutureExt, Stream, StreamExt};
+use futures::{FutureExt, Stream, StreamExt};
 use std::{future::Future, pin::Pin, task::Poll};
 
 /// Resubscribe callback.
@@ -47,29 +47,37 @@ impl<T> Stream for RetrySubscription<T> {
             };
 
             match this {
-                PendingOrStream::Stream(ref mut s) => match ready!(s.poll_next_unpin(cx)) {
-                    Some(Err(err)) => {
+                PendingOrStream::Stream(ref mut s) => match s.poll_next_unpin(cx) {
+                    Poll::Ready(Some(Err(err))) => {
                         if err.is_disconnected_will_reconnect() {
                             self.state = Some(PendingOrStream::Pending((self.resubscribe)()));
                         }
                         return Poll::Ready(Some(Err(err)));
                     }
-                    None => return Poll::Ready(None),
-                    Some(Ok(val)) => {
+                    Poll::Ready(None) => return Poll::Ready(None),
+                    Poll::Ready(Some(Ok(val))) => {
                         self.state = Some(this);
                         return Poll::Ready(Some(Ok(val)));
                     }
+                    Poll::Pending => {
+                        self.state = Some(this);
+                        return Poll::Pending;
+                    }
                 },
-                PendingOrStream::Pending(ref mut fut) => match ready!(fut.poll_unpin(cx)) {
-                    Ok(stream) => {
+                PendingOrStream::Pending(mut fut) => match fut.poll_unpin(cx) {
+                    Poll::Ready(Ok(stream)) => {
                         self.state = Some(PendingOrStream::Stream(stream));
                         continue;
                     }
-                    Err(err) => {
+                    Poll::Ready(Err(err)) => {
                         if err.is_disconnected_will_reconnect() {
                             self.state = Some(PendingOrStream::Pending((self.resubscribe)()));
                         }
                         return Poll::Ready(Some(Err(err)));
+                    }
+                    Poll::Pending => {
+                        self.state = Some(PendingOrStream::Pending(fut));
+                        return Poll::Pending;
                     }
                 },
             };
@@ -157,6 +165,8 @@ mod tests {
             async {
                 Ok(StreamOf::new(Box::pin(futures::stream::iter([
                     Ok(1),
+                    Ok(2),
+                    Ok(3),
                     Err(disconnect_err()),
                 ]))))
             }
@@ -166,13 +176,15 @@ mod tests {
         .unwrap();
 
         let result = retry_stream
-            .take(3)
+            .take(5)
             .collect::<Vec<Result<usize, Error>>>()
             .await;
 
         assert!(matches!(result[0], Ok(r) if r == 1));
-        assert!(matches!(result[1], Err(ref e) if e.is_disconnected_will_reconnect()));
-        assert!(matches!(result[2], Ok(r) if r == 1));
+        assert!(matches!(result[1], Ok(r) if r == 2));
+        assert!(matches!(result[2], Ok(r) if r == 3));
+        assert!(matches!(result[3], Err(ref e) if e.is_disconnected_will_reconnect()));
+        assert!(matches!(result[4], Ok(r) if r == 1));
     }
 
     #[tokio::test]
