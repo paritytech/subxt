@@ -1,5 +1,6 @@
 #![allow(missing_docs)]
 use subxt::{OnlineClient, SubstrateConfig};
+use subxt_core::config::substrate::SubstrateHeader;
 use subxt_core::config::{Config, DefaultExtrinsicParams};
 use subxt_signer::sr25519::dev;
 
@@ -20,10 +21,25 @@ impl Config for MetadataConfig {
 
     // Present in metadata but this PoC needs to add
     // fn specific per name of type to impl the hashing fn.
-    type Hasher = <SubstrateConfig as Config>::Hasher;
+    // type Hasher = <SubstrateConfig as Config>::Hasher;
+    //
+    // TODO: Eventually extend this to a DynamicHasher object instead.
+    // Similar logic already exists for StorageHasher.
+    type Hasher = polkadot::custom_types::Hashing;
+
     // Present in metadata but this PoC needs to impl the header
     // trait to make use of this.
-    type Header = <SubstrateConfig as Config>::Header;
+    // type Header = <SubstrateConfig as Config>::Header;
+
+    // The metadata header type must implement `Deserialize`, which
+    // must be manually implemented for the Digest logs of the header.
+    // An alternative is to extract the header number and use the
+    // generated hasher to expose the same information, this is not
+    // as robust and codgen can be used instead.
+    // type Header = polkadot::custom_types::Header;
+    type Header =
+        SubstrateHeader<polkadot::custom_types::HeaderNumber, polkadot::custom_types::Hashing>;
+
     // Same story, present in md but needs subxt::tx::Signer<T>.
     // type Signature = polkadot::custom_types::Signature;
     type Signature = <SubstrateConfig as Config>::Signature;
