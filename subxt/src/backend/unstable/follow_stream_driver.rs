@@ -396,9 +396,7 @@ impl<Hash: BlockHash, F> Unpin for FollowStreamFinalizedHeads<Hash, F> {}
 impl<Hash, F> FollowStreamFinalizedHeads<Hash, F>
 where
     Hash: BlockHash,
-    F: Fn(
-        FollowEvent<super::follow_stream_unpin::BlockRef<Hash>>,
-    ) -> Vec<super::follow_stream_unpin::BlockRef<Hash>>,
+    F: Fn(FollowEvent<BlockRef<Hash>>) -> Vec<BlockRef<Hash>>,
 {
     pub fn new(stream: FollowStreamDriverSubscription<Hash>, f: F) -> Self {
         Self {
@@ -414,11 +412,9 @@ where
 impl<Hash, F> Stream for FollowStreamFinalizedHeads<Hash, F>
 where
     Hash: BlockHash,
-    F: Fn(
-        FollowEvent<super::follow_stream_unpin::BlockRef<Hash>>,
-    ) -> Vec<super::follow_stream_unpin::BlockRef<Hash>>,
+    F: Fn(FollowEvent<BlockRef<Hash>>) -> Vec<BlockRef<Hash>>,
 {
-    type Item = Result<(String, Vec<super::follow_stream_unpin::BlockRef<Hash>>), Error>;
+    type Item = Result<(String, Vec<BlockRef<Hash>>), Error>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         if self.is_done {
