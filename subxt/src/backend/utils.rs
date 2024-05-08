@@ -147,7 +147,6 @@ where
 /// use subxt::backend::{utils::retry_stream, StreamOf};
 /// use futures::future::FutureExt;
 ///
-///
 /// #[tokio::main]
 /// async fn main() {
 ///    retry_stream(|| {
