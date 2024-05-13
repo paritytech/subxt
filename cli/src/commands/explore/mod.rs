@@ -174,7 +174,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                 Usage:
                     subxt explore pallet {pallet_placeholder}
                         explore a specific pallet
-    
+
                 {pallets}
                 "}?;
                 return Ok(());
@@ -336,6 +336,8 @@ pub mod tests {
                 SessionKeys
                 TaggedTransactionQueue
                 TransactionPaymentApi
+                XcmDryRunApi
+                XcmPaymentApi
         "};
         assert_eq!(output, expected_output);
         // if incorrect pallet, error:
@@ -367,7 +369,7 @@ pub mod tests {
             Usage:
                 subxt explore pallet Balances calls <CALL>
                     explore a specific call of this pallet
-            
+
             Available <CALL>'s in the \"Balances\" pallet:"};
         assert_eq_start!(output, start);
         let output = run_against_file("pallet Balances storage")
@@ -378,7 +380,7 @@ pub mod tests {
             Usage:
                 subxt explore pallet Balances storage <STORAGE_ENTRY>
                     explore a specific storage entry of this pallet
-            
+
             Available <STORAGE_ENTRY>'s in the \"Balances\" pallet:
         "};
         assert_eq_start!(output, start);
@@ -390,7 +392,7 @@ pub mod tests {
         Usage:
             subxt explore pallet Balances constants <CONSTANT>
                 explore a specific constant of this pallet
-        
+
         Available <CONSTANT>'s in the \"Balances\" pallet:
         "};
         assert_eq_start!(output, start);
@@ -402,7 +404,7 @@ pub mod tests {
         Usage:
             subxt explore pallet Balances events <EVENT>
                 explore a specific event of this pallet
-        
+
         Available <EVENT>'s in the \"Balances\" pallet:
         "};
         assert_eq_start!(output, start);
@@ -427,11 +429,11 @@ pub mod tests {
         let start = formatdoc! {"
             Description:
                 The `Metadata` api trait that returns metadata for the runtime.
-            
+
             Usage:
                 subxt explore api Metadata <METHOD>
                     explore a specific runtime api method
-            
+
             Available <METHOD>'s available for the \"Metadata\" runtime api:
         "};
         assert_eq_start!(output, start);
