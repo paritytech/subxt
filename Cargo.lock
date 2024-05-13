@@ -2893,7 +2893,7 @@ checksum = "4e69bf016dc406eff7d53a7d3f7cf1c2e72c82b9088aac1118591e36dd2cd3e9"
 dependencies = [
  "bitcoin_hashes 0.13.0",
  "rand",
- "rand_core 0.5.1",
+ "rand_core 0.6.4",
  "serde",
  "unicode-normalization",
 ]
@@ -3851,9 +3851,9 @@ dependencies = [
 
 [[package]]
 name = "scale-value"
-version = "0.15.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c9e20eb2f3b02cb16f7ccb575c599f4624567c9ad58206d61995e7fc2a0efb7"
+checksum = "64129c6401da72fe84c24ca2070f5439efe0244d485198ea4889a194b7b58e98"
 dependencies = [
  "base58",
  "blake2",
