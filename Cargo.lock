@@ -3728,9 +3728,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7e10e0d345101a013ca3af62c2d44d20213d543cc64d96080c68d931e54360c5"
+checksum = "b12ebca36cec2a3f983c46295b282b35e5f8496346fb859a8776dad5389e5389"
 dependencies = [
  "derive_more",
  "parity-scale-codec",
@@ -3743,9 +3743,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode-derive"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ab7c6965f4559944d8b957e3a7bedd9f2ff10ac7f55f7bda9dc9b4a0e9fa60c"
+checksum = "06a387a62a2be6ec532eb4f9e1fc800f26d462c06b335d9c3ee54559a355b9fb"
 dependencies = [
  "darling 0.14.4",
  "proc-macro2",
@@ -3819,9 +3819,9 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen"
-version = "0.5.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e050beece943a0d103a2a248e57fc475e1e68499d9079bdc6c3e76106bc3055e"
+checksum = "9abba3c40137e1244c0f29ed648199bc8ec32569ee349673828e7a060c8e0298"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3833,9 +3833,9 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen-description"
-version = "0.5.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee738c1dc6159972b6a22d0e041b6045dc803d88fd13e12e00adedfd6d41424f"
+checksum = "2bdb6368c3f096fecb2ec6ca9798c0cc3b13842fd39c1e3d5f74e1bfac3de6c0"
 dependencies = [
  "anyhow",
  "peekmore",
@@ -3851,9 +3851,9 @@ dependencies = [
 
 [[package]]
 name = "scale-value"
-version = "0.15.1"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64129c6401da72fe84c24ca2070f5439efe0244d485198ea4889a194b7b58e98"
+checksum = "f2cf9738c263c665144177201126bdad39d3d62512152f178f35002228026976"
 dependencies = [
  "base58",
  "blake2",
