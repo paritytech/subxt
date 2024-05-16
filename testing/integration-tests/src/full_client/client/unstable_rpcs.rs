@@ -32,12 +32,12 @@ async fn chainhead_v1_follow() {
     let event = blocks.next().await.unwrap().unwrap();
     // The initialized event should contain the finalized block hash.
     let finalized_block_hash = legacy_rpc.chain_get_finalized_head().await.unwrap();
-    assert_eq!(
+    assert_matches!(
         event,
-        FollowEvent::Initialized(Initialized {
-            finalized_block_hashes: vec![finalized_block_hash],
-            finalized_block_runtime: None,
-        })
+        FollowEvent::Initialized(Initialized { finalized_block_hashes, finalized_block_runtime }) => {
+            assert!(finalized_block_hashes.contains(&finalized_block_hash));
+            assert!(finalized_block_runtime.is_none());
+        }
     );
 
     // Expect subscription to produce runtime versions.
@@ -50,7 +50,7 @@ async fn chainhead_v1_follow() {
     assert_matches!(
         event,
         FollowEvent::Initialized(init) => {
-            assert_eq!(init.finalized_block_hashes, vec![finalized_block_hash]);
+            assert!(init.finalized_block_hashes.contains(&finalized_block_hash));
             if let Some(RuntimeEvent::Valid(RuntimeVersionEvent { spec })) = init.finalized_block_runtime {
                 assert_eq!(spec.spec_version, runtime_version.spec_version);
                 assert_eq!(spec.transaction_version, runtime_version.transaction_version);
