@@ -1,6 +1,16 @@
 # subxt &middot; ![build](https://github.com/paritytech/subxt/workflows/Rust/badge.svg) [![Latest Version](https://img.shields.io/crates/v/subxt.svg)](https://crates.io/crates/subxt) [![Documentation](https://docs.rs/subxt/badge.svg)](https://docs.rs/subxt)
 
-A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/paritytech/substrate) node via RPC.
+Subxt is a library for interacting with [Substrate](https://github.com/paritytech/polkadot-sdk) based nodes in Rust and WebAssembly. It can:
+
+- Submit Extrinsics (this is where the name comes from).
+- Subscribe to blocks, reading the extrinsics and associated events from them.
+- Read and iterate over storage values.
+- Read constants and custom values from the metadata.
+- Call runtime APIs, returning the results.
+- Do all of the above via a safe, statically types interface or via a dynamic one when you need the flexibility.
+- Compile to WASM and run entirely in the browser.
+- Do a bunch of things in a `#[no_std]` environment via the `subxt-core` crate.
+- Use a built-in light client (`smoldot`) to interact with chains.
 
 ## Usage
 
