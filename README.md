@@ -1,6 +1,6 @@
 # subxt &middot; ![build](https://github.com/paritytech/subxt/workflows/Rust/badge.svg) [![Latest Version](https://img.shields.io/crates/v/subxt.svg)](https://crates.io/crates/subxt) [![Documentation](https://docs.rs/subxt/badge.svg)](https://docs.rs/subxt)
 
-Subxt is a library for interacting with [Substrate](https://github.com/paritytech/polkadot-sdk) based nodes in Rust. It can:
+Subxt is a library for interacting with [Substrate](https://github.com/paritytech/polkadot-sdk) based nodes in Rust and WebAssembly. It can:
 
 - Submit Extrinsics (this is where the name comes from).
 - Subscribe to blocks, reading the extrinsics and associated events from them.
