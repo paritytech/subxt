@@ -29,8 +29,8 @@ A breaking change that comes from migrating a bunch of logic to this new crate i
 
 We've baked in a bunch of support for automatically reconnecting after a connection loss into Subxt. This comes in three parts:
 1. An RPC client that is capable of reconnecting. This is gated behind the `unstable-reconnecting-rpc-client` feature flag at the moment, and
-2. Handling in the subxt Backends such that when the RPC client notifies it that it is reconnecting, the backend will transparently handle this behind the scenes, or else pass on a `DisconnectedWillReconnect` error to the user where it cannot.
-3. A couple of util helpers (`subxt::backend::retry` and `subxt::backend::retry_stream`) which can be used in conjunction with a reconnecting RPC client to make it easy to automatically retry manual RPC method calls (which don't themselves make any attempt to reconnect) where needed.
+2. Handling in the subxt Backends such that when the RPC client notifies it that it is reconnecting, the backend will transparently handle this behind the scenes, or else pass on a `DisconnectedWillReconnect` error to the user where it cannot. Note that the individual `LegacyRpcMethods` and `UnstableRpcMethods` are _not_ automatically retried on reconnection. Which leads us to..
+3. A couple of util helpers (`subxt::backend::retry` and `subxt::backend::retry_stream`) which can be used in conjunction with a reconnecting RPC client to make it easy to automatically retry RPC method calls where needed.
 
 We'd love feedback on this reconnecting work! To try it out, enable the `unstable-reconnecting-rpc-client` feature flag and then you can make use of this like so:
 
