@@ -73,6 +73,12 @@ Check out a full example [here](https://github.com/paritytech/subxt/blob/327b70a
 
 We plan to improve on this in the future, baking in better Ethereum support if possible so that it's as seamless to use `AccountId20` as it is `AccountId32`.
 
+### Stabilizing the new V2 RPCs ([#1540](https://github.com/paritytech/subxt/pull/1540), [#1539](https://github.com/paritytech/subxt/pull/1539), [#1538](https://github.com/paritytech/subxt/pull/1538))
+
+A bunch of the new RPCs are now stable in the spec, and have consequently been stabilized here, bringing the `unstable-backend` a step closer to being stabilized itself! We'll probably first remove the feature flag and next make it the default backend, in upcoming releases.
+
+All of the notable changes in this release are as follows:
+
 ### Added
 
 - Add `frontier/ethereum` example ([#1557](https://github.com/paritytech/subxt/pull/1557))
