@@ -40,6 +40,37 @@ pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
     fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool;
 }
 
+/// The [`CheckMetadataHash`] signed extension.
+pub struct CheckMetadataHash {
+    // Currently, we don't hash the metadata and don't encode any
+    // bytes to the additional signed payload. Later, we can use
+    // https://github.com/bkchr/merkleized-metadata to generate a metadata
+    // hash, which we might pass in and insert here.
+}
+
+impl<T: Config> ExtrinsicParams<T> for CheckMetadataHash {
+    type Params = ();
+
+    fn new(_client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+        Ok(CheckMetadataHash {})
+    }
+}
+
+impl ExtrinsicParamsEncoder for CheckMetadataHash {
+    fn encode_extra_to(&self, v: &mut Vec<u8>) {
+        // A single 0 byte in the TX payload indicates that the chain should
+        // _not_ expect any metadata hash to exist in the signer payload.
+        0u8.encode_to(v);
+    }
+}
+
+impl<T: Config> SignedExtension<T> for CheckMetadataHash {
+    type Decoded = ();
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
+        identifier == "CheckMetadataHash"
+    }
+}
+
 /// The [`CheckSpecVersion`] signed extension.
 pub struct CheckSpecVersion(u32);
 
