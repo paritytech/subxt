@@ -106,11 +106,15 @@ impl Keypair {
 
     /// Signs an arbitrary message payload.
     pub fn sign(&self, signer_payload: &[u8]) -> Signature {
-        let message_hash = keccak(signer_payload);
+        self.sign_prehashed(&keccak(signer_payload))
+    }
+
+    /// Signs a pre-hashed message.
+    pub fn sign_prehashed(&self, message_hash: &H256) -> Signature {
         let wrapped =
             Message::from_digest_slice(message_hash.as_bytes()).expect("Message is 32 bytes; qed");
         Signature(ecdsa::internal::sign(&self.0 .0.secret_key(), &wrapped))
-    }
+    } 
 }
 
 /// A derivation path. This can be parsed from a valid derivation path string like
