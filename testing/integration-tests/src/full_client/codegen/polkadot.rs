@@ -2933,7 +2933,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " Note this function will use on-chain MMR root hash and check if the proof matches the hash."]
                 #[doc = " Note, the leaves should be sorted such that corresponding leaves and leaf indices have the"]
-                #[doc = " same position in both the `leaves` vector and the `leaf_indices` vector contained in the [Proof]"]
+                #[doc = " same position in both the `leaves` vector and the `leaf_indices` vector contained in the [LeafProof]"]
                 pub fn verify_proof(
                     &self,
                     leaves: types::verify_proof::Leaves,
@@ -2960,7 +2960,7 @@ pub mod api {
                 #[doc = " proof is verified against given MMR root hash."]
                 #[doc = ""]
                 #[doc = " Note, the leaves should be sorted such that corresponding leaves and leaf indices have the"]
-                #[doc = " same position in both the `leaves` vector and the `leaf_indices` vector contained in the [Proof]"]
+                #[doc = " same position in both the `leaves` vector and the `leaf_indices` vector contained in the [LeafProof]"]
                 pub fn verify_proof_stateless(
                     &self,
                     root: types::verify_proof_stateless::Root,
@@ -3050,7 +3050,7 @@ pub mod api {
                                 ::subxt::ext::subxt_core::alloc::vec::Vec<
                                     runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf,
                                 >,
-                                runtime_types::sp_mmr_primitives::Proof<
+                                runtime_types::sp_mmr_primitives::LeafProof<
                                     ::subxt::ext::subxt_core::utils::H256,
                                 >,
                             ),
@@ -3081,7 +3081,7 @@ pub mod api {
                     pub type Leaves = ::subxt::ext::subxt_core::alloc::vec::Vec<
                         runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf,
                     >;
-                    pub type Proof = runtime_types::sp_mmr_primitives::Proof<
+                    pub type Proof = runtime_types::sp_mmr_primitives::LeafProof<
                         ::subxt::ext::subxt_core::utils::H256,
                     >;
                     pub mod output {
@@ -3114,7 +3114,7 @@ pub mod api {
                     pub type Leaves = ::subxt::ext::subxt_core::alloc::vec::Vec<
                         runtime_types::sp_mmr_primitives::EncodableOpaqueLeaf,
                     >;
-                    pub type Proof = runtime_types::sp_mmr_primitives::Proof<
+                    pub type Proof = runtime_types::sp_mmr_primitives::LeafProof<
                         ::subxt::ext::subxt_core::utils::H256,
                     >;
                     pub mod output {
@@ -68006,7 +68006,7 @@ pub mod api {
             # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            pub struct Proof<_0> {
+            pub struct LeafProof<_0> {
                 pub leaf_indices: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u64>,
                 pub leaf_count: ::core::primitive::u64,
                 pub items: ::subxt::ext::subxt_core::alloc::vec::Vec<_0>,
