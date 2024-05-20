@@ -114,7 +114,7 @@ impl Keypair {
         let wrapped =
             Message::from_digest_slice(message_hash.as_bytes()).expect("Message is 32 bytes; qed");
         Signature(ecdsa::internal::sign(&self.0 .0.secret_key(), &wrapped))
-    } 
+    }
 }
 
 /// A derivation path. This can be parsed from a valid derivation path string like
