@@ -10,7 +10,7 @@ use alloc::string::String;
 use core::fmt::{Display, Formatter};
 use core::str::FromStr;
 use derive_more::Display;
-use keccak_hash::keccak;
+use keccak_hash::{keccak, H256};
 use secp256k1::Message;
 
 const SECRET_KEY_LENGTH: usize = 32;
