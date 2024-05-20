@@ -62,6 +62,10 @@ impl ExtrinsicParamsEncoder for CheckMetadataHash {
         // _not_ expect any metadata hash to exist in the signer payload.
         0u8.encode_to(v);
     }
+    fn encode_additional_to(&self, v: &mut Vec<u8>) {
+        // We provide no metadata hash in the signer payload to align with the above.
+        None::<()>.encode_to(v);
+    }
 }
 
 impl<T: Config> SignedExtension<T> for CheckMetadataHash {
