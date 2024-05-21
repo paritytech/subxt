@@ -6,11 +6,11 @@
 
 use alloc::boxed::Box;
 use alloc::string::String;
-use derive_more::{Display, From};
+use derive_more::Display;
 use subxt_metadata::StorageHasher;
 
 /// The error emitted when something goes wrong.
-#[derive(Debug, Display, From)]
+#[derive(Debug, Display)]
 pub enum Error {
     /// Codec error.
     #[display(fmt = "Scale codec error: {_0}")]
@@ -38,11 +38,14 @@ pub enum Error {
 #[cfg(feature = "std")]
 impl std::error::Error for Error {}
 
-impl From<scale_decode::visitor::DecodeError> for Error {
-    fn from(value: scale_decode::visitor::DecodeError) -> Self {
-        Error::Decode(value.into())
-    }
-}
+convert_error!(ExtrinsicParamsError as Error::ExtrinsicParams);
+convert_error!(BlockError as Error::Block);
+convert_error!(MetadataError as Error::Metadata);
+convert_error!(scale_decode::Error as Error::Decode);
+convert_error!(scale_decode::visitor::DecodeError as Error::Decode);
+convert_error!(scale_encode::Error as Error::Encode);
+convert_error!(StorageAddressError as Error::StorageAddress);
+convert_error!(codec::Error as Error::Codec);
 
 /// Block error
 #[derive(Clone, Debug, Display, Eq, PartialEq)]
