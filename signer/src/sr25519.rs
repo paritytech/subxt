@@ -8,7 +8,7 @@ use core::str::FromStr;
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 
-use derive_more::{Display, From};
+use derive_more::Display;
 use hex::FromHex;
 use schnorrkel::{
     derive::{ChainCode, Derivation},
@@ -192,11 +192,10 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug, Display, From)]
+#[derive(Debug, Display)]
 pub enum Error {
     /// Invalid seed.
     #[display(fmt = "Invalid seed (was it the wrong length?)")]
-    #[from(ignore)]
     InvalidSeed,
     /// Invalid phrase.
     #[display(fmt = "Cannot parse phrase: {_0}")]
@@ -205,6 +204,9 @@ pub enum Error {
     #[display(fmt = "Cannot parse hex string: {_0}")]
     Hex(hex::FromHexError),
 }
+
+convert_error!(bip39::Error as Error::Phrase);
+convert_error!(hex::FromHexError as Error::Hex);
 
 #[cfg(feature = "std")]
 impl std::error::Error for Error {}
