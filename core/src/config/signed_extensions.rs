@@ -40,26 +40,10 @@ pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
     fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool;
 }
 
-/// Is metadata checking enabled or disabled? This indicates whether metadata hash bytes
-/// will have been provided in the signer payload or not for this transaction.
-// The "Disabled" and "Enabled" variant names match those that the signed extension will
-// be encoded with, in order that DecodeAsType will work properly.
-#[derive(DecodeAsType)]
-pub enum CheckMetadataHashMode {
-    /// No hash was provided in the signer payload.
-    Disabled,
-    /// A hash was provided in the signer payload.
-    Enabled,
-}
-
-impl<T: Config> RefineParams<T> for CheckMetadataHashMode {}
-
 /// The [`CheckMetadataHash`] signed extension.
 pub struct CheckMetadataHash {
-    // Currently, we don't hash the metadata and don't encode any
-    // bytes to the additional signed payload. Later, we can use
-    // https://github.com/bkchr/merkleized-metadata to generate a metadata
-    // hash, which we might pass in and insert here.
+    // Eventually we might provide or calculate the metadata hash here,
+    // but for now we never provide a hash and so this is empty.
 }
 
 impl<T: Config> ExtrinsicParams<T> for CheckMetadataHash {
@@ -86,6 +70,28 @@ impl<T: Config> SignedExtension<T> for CheckMetadataHash {
     type Decoded = CheckMetadataHashMode;
     fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
         identifier == "CheckMetadataHash"
+    }
+}
+
+/// Is metadata checking enabled or disabled?
+// Dev note: The "Disabled" and "Enabled" variant names match those that the
+// signed extension will be encoded with, in order that DecodeAsType will work
+// properly.
+#[derive(Copy, Clone, Debug, DecodeAsType)]
+pub enum CheckMetadataHashMode {
+    /// No hash was provided in the signer payload.
+    Disabled,
+    /// A hash was provided in the signer payload.
+    Enabled,
+}
+
+impl CheckMetadataHashMode {
+    /// Is metadata checking enabled or disabled for this transaction?
+    pub fn is_enabled(&self) -> bool {
+        match self {
+            CheckMetadataHashMode::Disabled => false,
+            CheckMetadataHashMode::Enabled => true,
+        }
     }
 }
 
