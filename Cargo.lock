@@ -4278,6 +4278,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "snafu"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75976f4748ab44f6e5332102be424e7c2dc18daeaf7e725f2040c3ebb133512e"
+dependencies = [
+ "snafu-derive",
+]
+
+[[package]]
+name = "snafu-derive"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4b19911debfb8c2fb1107bc6cb2d61868aaf53a988449213959bb1b5b1ed95f"
+dependencies = [
+ "heck 0.4.1",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.60",
+]
+
+[[package]]
 name = "socket2"
 version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4855,7 +4876,6 @@ dependencies = [
  "bitvec",
  "blake2",
  "derive-where",
- "derive_more",
  "frame-metadata 16.0.0",
  "hashbrown 0.14.5",
  "hex",
@@ -4869,6 +4889,7 @@ dependencies = [
  "scale-value",
  "serde",
  "serde_json",
+ "snafu",
  "sp-core",
  "sp-crypto-hashing",
  "sp-keyring",
@@ -4924,11 +4945,11 @@ dependencies = [
  "assert_matches",
  "bitvec",
  "criterion",
- "derive_more",
  "frame-metadata 16.0.0",
  "hashbrown 0.14.5",
  "parity-scale-codec",
  "scale-info",
+ "snafu",
  "sp-crypto-hashing",
 ]
 
@@ -4939,7 +4960,6 @@ dependencies = [
  "bip32",
  "bip39",
  "cfg-if",
- "derive_more",
  "getrandom",
  "hex",
  "hex-literal",
@@ -4953,6 +4973,7 @@ dependencies = [
  "secp256k1",
  "secrecy",
  "sha2 0.10.8",
+ "snafu",
  "sp-core",
  "sp-crypto-hashing",
  "sp-keyring",

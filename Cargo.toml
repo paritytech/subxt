@@ -74,6 +74,7 @@ console_error_panic_hook = "0.1.7"
 darling = "0.20.8"
 derive-where = "1.2.7"
 derive_more = "0.99.17"
+snafu = { version = "0.8.2", default-features = false, features = ["rust_1_65"] }
 either = { version = "1.11.0", default-features = false }
 frame-metadata = { version = "16.0.0", default-features = false }
 futures = { version = "0.3.30", default-features = false, features = ["std"] }
