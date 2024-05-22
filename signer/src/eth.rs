@@ -111,9 +111,7 @@ impl Keypair {
 
     /// Signs a pre-hashed message.
     pub fn sign_prehashed(&self, message_hash: &H256) -> Signature {
-        let wrapped =
-            Message::from_digest_slice(message_hash.as_bytes()).expect("Message is 32 bytes; qed");
-        Signature(ecdsa::internal::sign(&self.0 .0.secret_key(), &wrapped))
+        self.0.sign_prehashed(message_hash).into()
     }
 }
 
@@ -168,6 +166,12 @@ pub struct Signature(pub [u8; 65]);
 impl AsRef<[u8; 65]> for Signature {
     fn as_ref(&self) -> &[u8; 65] {
         &self.0
+    }
+}
+
+impl From<ecdsa::Signature> for Signature {
+    fn from(s: ecdsa::Signature) -> Self {
+        Self(s.0)
     }
 }
 

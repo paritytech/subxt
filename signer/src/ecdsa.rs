@@ -160,7 +160,11 @@ impl Keypair {
 
     /// Sign some message. These bytes can be used directly in a Substrate `MultiSignature::Ecdsa(..)`.
     pub fn sign(&self, message: &[u8]) -> Signature {
-        let message_hash = sp_crypto_hashing::blake2_256(message);
+        self.sign_prehashed(&sp_crypto_hashing::blake2_256(message));
+    }
+
+    /// Signs a pre-hashed message.
+    pub fn sign_prehashed(&self, message_hash: &H256) -> Signature {
         let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
         Signature(internal::sign(&self.0.secret_key(), &wrapped))
     }
