@@ -23,7 +23,7 @@ frame-metadata = { workspace = true, default-features = false, features = ["curr
 codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
 sp-crypto-hashing = { workspace = true }
 hashbrown = { workspace = true }
-derive_more = { workspace = true }
+snafu = { workspace = true }
 
 [dev-dependencies]
 bitvec = { workspace = true, features = ["alloc"] }

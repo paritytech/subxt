@@ -3,31 +3,45 @@
 // see LICENSE for license details.
 
 use alloc::string::String;
-use derive_more::Display;
-
+use snafu::Snafu;
 mod v14;
 mod v15;
 
 /// An error emitted if something goes wrong converting [`frame_metadata`]
 /// types into [`crate::Metadata`].
-#[derive(Debug, Display, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Snafu)]
 #[non_exhaustive]
 pub enum TryFromError {
     /// Type missing from type registry
-    #[display(fmt = "Type id {_0} is expected but not found in the type registry")]
-    TypeNotFound(u32),
+    #[snafu(display("Type id {type_id} is expected but not found in the type registry"))]
+    TypeNotFound {
+        /// Id of the type
+        type_id: u32,
+    },
     /// Type was not a variant/enum type
-    #[display(fmt = "Type {_0} was not a variant/enum type, but is expected to be one")]
-    VariantExpected(u32),
+    #[snafu(display("Type {type_id} was not a variant/enum type, but is expected to be one"))]
+    VariantExpected {
+        /// Id of the type
+        type_id: u32,
+    },
     /// An unsupported metadata version was provided.
-    #[display(fmt = "Cannot convert v{_0} metadata into Metadata type")]
-    UnsupportedMetadataVersion(u32),
+    #[snafu(display("Cannot convert v{version} metadata into Metadata type"))]
+    UnsupportedMetadataVersion {
+        /// Metadata version
+        version: u32,
+    },
     /// Type name missing from type registry
-    #[display(fmt = "Type name {_0} is expected but not found in the type registry")]
-    TypeNameNotFound(String),
+    #[snafu(display("Type name {name} is expected but not found in the type registry"))]
+    TypeNameNotFound {
+        /// Name of the type
+        name: String,
+    },
     /// Invalid type path.
-    #[display(fmt = "Type has an invalid path {_0}")]
-    InvalidTypePath(String),
+    #[snafu(display("Type has an invalid path {path}"))]
+    InvalidTypePath {
+        /// Path of the type
+        path: String,
+    },
 }
 
 #[cfg(feature = "std")]
@@ -46,46 +60,46 @@ impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for crate::Metadata {
     fn try_from(value: frame_metadata::RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
         match value.1 {
             frame_metadata::RuntimeMetadata::V0(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(0))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 0 })
             }
             frame_metadata::RuntimeMetadata::V1(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(1))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 1 })
             }
             frame_metadata::RuntimeMetadata::V2(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(2))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 2 })
             }
             frame_metadata::RuntimeMetadata::V3(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(3))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 3 })
             }
             frame_metadata::RuntimeMetadata::V4(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(4))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 4 })
             }
             frame_metadata::RuntimeMetadata::V5(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(5))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 5 })
             }
             frame_metadata::RuntimeMetadata::V6(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(6))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 6 })
             }
             frame_metadata::RuntimeMetadata::V7(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(7))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 7 })
             }
             frame_metadata::RuntimeMetadata::V8(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(8))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 8 })
             }
             frame_metadata::RuntimeMetadata::V9(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(9))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 9 })
             }
             frame_metadata::RuntimeMetadata::V10(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(10))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 10 })
             }
             frame_metadata::RuntimeMetadata::V11(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(11))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 11 })
             }
             frame_metadata::RuntimeMetadata::V12(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(12))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 12 })
             }
             frame_metadata::RuntimeMetadata::V13(_) => {
-                Err(TryFromError::UnsupportedMetadataVersion(13))
+                Err(TryFromError::UnsupportedMetadataVersion { version: 13 })
             }
             frame_metadata::RuntimeMetadata::V14(m) => m.try_into(),
             frame_metadata::RuntimeMetadata::V15(m) => m.try_into(),

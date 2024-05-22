@@ -274,7 +274,9 @@ impl ExtrinsicPartTypeIds {
 
         let extrinsic_id = metadata.extrinsic.ty.id;
         let Some(extrinsic_ty) = metadata.types.resolve(extrinsic_id) else {
-            return Err(TryFromError::TypeNotFound(extrinsic_id));
+            return Err(TryFromError::TypeNotFound {
+                type_id: extrinsic_id,
+            });
         };
 
         let params: HashMap<_, _> = extrinsic_ty
@@ -282,7 +284,9 @@ impl ExtrinsicPartTypeIds {
             .iter()
             .map(|ty_param| {
                 let Some(ty) = ty_param.ty else {
-                    return Err(TryFromError::TypeNameNotFound(ty_param.name.clone()));
+                    return Err(TryFromError::TypeNameNotFound {
+                        name: ty_param.name.clone(),
+                    });
                 };
 
                 Ok((ty_param.name.as_str(), ty.id))
@@ -290,16 +294,20 @@ impl ExtrinsicPartTypeIds {
             .collect::<Result<_, _>>()?;
 
         let Some(address) = params.get(ADDRESS) else {
-            return Err(TryFromError::TypeNameNotFound(ADDRESS.into()));
+            return Err(TryFromError::TypeNameNotFound {
+                name: ADDRESS.into(),
+            });
         };
         let Some(call) = params.get(CALL) else {
-            return Err(TryFromError::TypeNameNotFound(CALL.into()));
+            return Err(TryFromError::TypeNameNotFound { name: CALL.into() });
         };
         let Some(signature) = params.get(SIGNATURE) else {
-            return Err(TryFromError::TypeNameNotFound(SIGNATURE.into()));
+            return Err(TryFromError::TypeNameNotFound {
+                name: SIGNATURE.into(),
+            });
         };
         let Some(extra) = params.get(EXTRA) else {
-            return Err(TryFromError::TypeNameNotFound(EXTRA.into()));
+            return Err(TryFromError::TypeNameNotFound { name: EXTRA.into() });
         };
 
         Ok(ExtrinsicPartTypeIds {
@@ -331,18 +339,24 @@ fn generate_outer_enums(
     };
 
     let Some((call_enum, mut call_path)) = find_type("RuntimeCall") else {
-        return Err(TryFromError::TypeNameNotFound("RuntimeCall".into()));
+        return Err(TryFromError::TypeNameNotFound {
+            name: "RuntimeCall".into(),
+        });
     };
 
     let Some((event_enum, _)) = find_type("RuntimeEvent") else {
-        return Err(TryFromError::TypeNameNotFound("RuntimeEvent".into()));
+        return Err(TryFromError::TypeNameNotFound {
+            name: "RuntimeEvent".into(),
+        });
     };
 
     let error_enum = if let Some((error_enum, _)) = find_type("RuntimeError") {
         error_enum
     } else {
         let Some(last) = call_path.last_mut() else {
-            return Err(TryFromError::InvalidTypePath("RuntimeCall".into()));
+            return Err(TryFromError::InvalidTypePath {
+                path: "RuntimeCall".into(),
+            });
         };
         "RuntimeError".clone_into(last);
         generate_outer_error_enum_type(metadata, call_path)
@@ -631,7 +645,12 @@ mod tests {
 
         let metadata = generate_metadata(meta_type::<()>());
         let err = v14_to_v15(metadata).unwrap_err();
-        assert_eq!(err, TryFromError::TypeNameNotFound("Address".into()));
+        assert_eq!(
+            err,
+            TryFromError::TypeNameNotFound {
+                name: "Address".into()
+            }
+        );
 
         #[derive(TypeInfo)]
         struct ExtrinsicNoCall<Address, Signature, Extra> {
@@ -639,7 +658,12 @@ mod tests {
         }
         let metadata = generate_metadata(meta_type::<ExtrinsicNoCall<(), (), ()>>());
         let err = v14_to_v15(metadata).unwrap_err();
-        assert_eq!(err, TryFromError::TypeNameNotFound("Call".into()));
+        assert_eq!(
+            err,
+            TryFromError::TypeNameNotFound {
+                name: "Call".into()
+            }
+        );
 
         #[derive(TypeInfo)]
         struct ExtrinsicNoSign<Call, Address, Extra> {
@@ -647,7 +671,12 @@ mod tests {
         }
         let metadata = generate_metadata(meta_type::<ExtrinsicNoSign<(), (), ()>>());
         let err = v14_to_v15(metadata).unwrap_err();
-        assert_eq!(err, TryFromError::TypeNameNotFound("Signature".into()));
+        assert_eq!(
+            err,
+            TryFromError::TypeNameNotFound {
+                name: "Signature".into()
+            }
+        );
 
         #[derive(TypeInfo)]
         struct ExtrinsicNoExtra<Call, Address, Signature> {
@@ -655,7 +684,12 @@ mod tests {
         }
         let metadata = generate_metadata(meta_type::<ExtrinsicNoExtra<(), (), ()>>());
         let err = v14_to_v15(metadata).unwrap_err();
-        assert_eq!(err, TryFromError::TypeNameNotFound("Extra".into()));
+        assert_eq!(
+            err,
+            TryFromError::TypeNameNotFound {
+                name: "Extra".into()
+            }
+        );
     }
 
     #[test]
@@ -696,7 +730,12 @@ mod tests {
             };
 
             let err = v14_to_v15(metadata).unwrap_err();
-            assert_eq!(err, TryFromError::TypeNameNotFound("RuntimeCall".into()));
+            assert_eq!(
+                err,
+                TryFromError::TypeNameNotFound {
+                    name: "RuntimeCall".into()
+                }
+            );
         }
 
         // Missing runtime event.
@@ -720,7 +759,12 @@ mod tests {
             };
 
             let err = v14_to_v15(metadata).unwrap_err();
-            assert_eq!(err, TryFromError::TypeNameNotFound("RuntimeEvent".into()));
+            assert_eq!(
+                err,
+                TryFromError::TypeNameNotFound {
+                    name: "RuntimeEvent".into()
+                }
+            );
         }
     }
 }
