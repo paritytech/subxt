@@ -5,12 +5,15 @@
 //! An ecdsa keypair implementation.
 use codec::Encode;
 
-use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
+use crate::{
+    crypto::{seed_from_entropy, DeriveJunction, SecretUri},
+    utils::DisplayError,
+};
 use core::str::FromStr;
-use derive_more::{Display, From};
 use hex::FromHex;
 use secp256k1::{ecdsa::RecoverableSignature, Message, Secp256k1, SecretKey};
 use secrecy::ExposeSecret;
+use snafu::Snafu;
 
 const SECRET_KEY_LENGTH: usize = 32;
 
@@ -213,22 +216,26 @@ pub(crate) mod internal {
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug, PartialEq, Display, From)]
+#[derive(Debug, PartialEq, Snafu)]
 pub enum Error {
     /// Invalid seed.
-    #[display(fmt = "Invalid seed (was it the wrong length?)")]
-    #[from(ignore)]
+    #[snafu(display("Invalid seed (was it the wrong length?)"))]
     InvalidSeed,
     /// Invalid seed.
-    #[display(fmt = "Invalid seed for ECDSA, contained soft junction")]
-    #[from(ignore)]
+    #[snafu(display("Invalid seed for ECDSA, contained soft junction"))]
     SoftJunction,
     /// Invalid phrase.
-    #[display(fmt = "Cannot parse phrase: {_0}")]
-    Phrase(bip39::Error),
+    #[snafu(display("Cannot parse phrase: {source}"), context(false))]
+    Phrase {
+        #[snafu(source(from(bip39::Error, DisplayError)))]
+        source: DisplayError<bip39::Error>,
+    },
     /// Invalid hex.
-    #[display(fmt = "Cannot parse hex string: {_0}")]
-    Hex(hex::FromHexError),
+    #[snafu(display("Cannot parse hex string: {source}"), context(false))]
+    Hex {
+        #[snafu(source(from(hex::FromHexError, DisplayError)))]
+        source: DisplayError<hex::FromHexError>,
+    },
 }
 
 #[cfg(feature = "std")]

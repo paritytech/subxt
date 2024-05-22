@@ -52,7 +52,7 @@ hex = { workspace = true, features = ["alloc"] }
 cfg-if = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 sp-crypto-hashing = { workspace = true }
-derive_more = { workspace = true }
+snafu = { workspace = true }
 pbkdf2 = { workspace = true }
 sha2 = { workspace = true }
 hmac = { workspace = true }

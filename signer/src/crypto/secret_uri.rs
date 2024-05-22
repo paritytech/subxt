@@ -4,9 +4,9 @@
 
 use super::DeriveJunction;
 use alloc::vec::Vec;
-use derive_more::Display;
 use regex::Regex;
 use secrecy::SecretString;
+use snafu::Snafu;
 
 // This code is taken from sp_core::crypto::DeriveJunction. The logic should be identical,
 // though the code is tweaked a touch!
@@ -117,10 +117,10 @@ impl core::str::FromStr for SecretUri {
 }
 
 /// This is returned if `FromStr` cannot parse a string into a `SecretUri`.
-#[derive(Debug, Copy, Clone, PartialEq, Display)]
+#[derive(Debug, Copy, Clone, PartialEq, Snafu)]
 pub enum SecretUriError {
     /// Parsing the secret URI from a string failed; wrong format.
-    #[display(fmt = "Invalid secret phrase format")]
+    #[snafu(display("Invalid secret phrase format"))]
     InvalidFormat,
 }
 

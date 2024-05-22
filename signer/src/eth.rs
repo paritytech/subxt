@@ -9,9 +9,9 @@ use alloc::format;
 use alloc::string::String;
 use core::fmt::{Display, Formatter};
 use core::str::FromStr;
-use derive_more::Display;
 use keccak_hash::keccak;
 use secp256k1::Message;
+use snafu::Snafu;
 
 const SECRET_KEY_LENGTH: usize = 32;
 
@@ -215,13 +215,15 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &ecdsa::Publi
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug, PartialEq, Display)]
+#[derive(Debug, PartialEq, Snafu)]
 pub enum Error {
     /// Invalid seed.
-    #[display(fmt = "Invalid seed (was it the wrong length?)")]
+    #[snafu(display("Invalid seed (was it the wrong length?)"))]
     InvalidSeed,
     /// Invalid derivation path.
-    #[display(fmt = "Could not derive from path; some valeus in the path may have been >= 2^31?")]
+    #[snafu(display(
+        "Could not derive from path; some valeus in the path may have been >= 2^31?"
+    ))]
     DeriveFromPath,
 }
 

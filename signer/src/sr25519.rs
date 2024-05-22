@@ -6,15 +6,18 @@
 
 use core::str::FromStr;
 
-use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
+use crate::{
+    crypto::{seed_from_entropy, DeriveJunction, SecretUri},
+    utils::DisplayError,
+};
 
-use derive_more::{Display, From};
 use hex::FromHex;
 use schnorrkel::{
     derive::{ChainCode, Derivation},
     ExpansionMode, MiniSecretKey,
 };
 use secrecy::ExposeSecret;
+use snafu::Snafu;
 
 const SECRET_KEY_LENGTH: usize = schnorrkel::keys::MINI_SECRET_KEY_LENGTH;
 const SIGNING_CTX: &[u8] = b"substrate";
@@ -192,18 +195,23 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug, Display, From)]
+#[derive(Debug, Snafu)]
 pub enum Error {
     /// Invalid seed.
-    #[display(fmt = "Invalid seed (was it the wrong length?)")]
-    #[from(ignore)]
+    #[snafu(display("Invalid seed (was it the wrong length?)"))]
     InvalidSeed,
     /// Invalid phrase.
-    #[display(fmt = "Cannot parse phrase: {_0}")]
-    Phrase(bip39::Error),
+    #[snafu(display("Cannot parse phrase: {source}"), context(false))]
+    Phrase {
+        #[snafu(source(from(bip39::Error, DisplayError)))]
+        source: DisplayError<bip39::Error>,
+    },
     /// Invalid hex.
-    #[display(fmt = "Cannot parse hex string: {_0}")]
-    Hex(hex::FromHexError),
+    #[snafu(display("Cannot parse hex string: {source}"), context(false))]
+    Hex {
+        #[snafu(source(from(hex::FromHexError, DisplayError)))]
+        source: DisplayError<hex::FromHexError>,
+    },
 }
 
 #[cfg(feature = "std")]
