@@ -10,7 +10,7 @@ use alloc::string::String;
 use core::fmt::{Display, Formatter};
 use core::str::FromStr;
 use derive_more::Display;
-use keccak_hash::{keccak, H256};
+use keccak_hash::keccak;
 use secp256k1::Message;
 
 const SECRET_KEY_LENGTH: usize = 32;
@@ -106,11 +106,11 @@ impl Keypair {
 
     /// Signs an arbitrary message payload.
     pub fn sign(&self, signer_payload: &[u8]) -> Signature {
-        self.sign_prehashed(&keccak(signer_payload))
+        self.sign_prehashed(&keccak(signer_payload).0)
     }
 
     /// Signs a pre-hashed message.
-    pub fn sign_prehashed(&self, message_hash: &H256) -> Signature {
+    pub fn sign_prehashed(&self, message_hash: &[u8; 32]) -> Signature {
         self.0.sign_prehashed(message_hash).into()
     }
 }

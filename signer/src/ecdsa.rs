@@ -164,7 +164,7 @@ impl Keypair {
     }
 
     /// Signs a pre-hashed message.
-    pub fn sign_prehashed(&self, message_hash: &H256) -> Signature {
+    pub fn sign_prehashed(&self, message_hash: &[u8; 32]) -> Signature {
         let wrapped = Message::from_digest_slice(&message_hash).expect("Message is 32 bytes; qed");
         Signature(internal::sign(&self.0.secret_key(), &wrapped))
     }
