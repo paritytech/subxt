@@ -228,7 +228,7 @@ impl Display for Error {
             Error::InvalidSeed => write!(f, "Invalid seed (was it the wrong length?)"),
             Error::DeriveFromPath => write!(
                 f,
-                "Could not derive from path; some valeus in the path may have been >= 2^31?"
+                "Could not derive from path; some values in the path may have been >= 2^31?"
             ),
         }
     }
