@@ -4,11 +4,10 @@
 
 //! An sr25519 keypair implementation.
 
-use core::str::FromStr;
+use core::{fmt::Display, str::FromStr};
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 
-use derive_more::Display;
 use hex::FromHex;
 use schnorrkel::{
     derive::{ChainCode, Derivation},
@@ -192,21 +191,28 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug, Display)]
+#[derive(Debug)]
 pub enum Error {
     /// Invalid seed.
-    #[display(fmt = "Invalid seed (was it the wrong length?)")]
     InvalidSeed,
     /// Invalid phrase.
-    #[display(fmt = "Cannot parse phrase: {_0}")]
     Phrase(bip39::Error),
     /// Invalid hex.
-    #[display(fmt = "Cannot parse hex string: {_0}")]
     Hex(hex::FromHexError),
 }
 
 convert_error!(bip39::Error as Error::Phrase);
 convert_error!(hex::FromHexError as Error::Hex);
+
+impl Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Error::InvalidSeed => write!(f, "Invalid seed (was it the wrong length?)"),
+            Error::Phrase(e) => write!(f, "Cannot parse phrase: {e}"),
+            Error::Hex(e) => write!(f, "Cannot parse hex string: {e}"),
+        }
+    }
+}
 
 #[cfg(feature = "std")]
 impl std::error::Error for Error {}
