@@ -85,13 +85,13 @@ pub enum Error {
 impl From<CoreError> for Error {
     fn from(value: CoreError) -> Self {
         match value {
-            CoreError::Codec(e) => Error::Codec(e),
-            CoreError::Metadata(e) => Error::Metadata(e),
-            CoreError::StorageAddress(e) => Error::StorageAddress(e),
-            CoreError::Decode(e) => Error::Decode(e),
-            CoreError::Encode(e) => Error::Encode(e),
-            CoreError::ExtrinsicParams(e) => Error::ExtrinsicParams(e),
-            CoreError::Block(e) => Error::Block(e.into()),
+            CoreError::Codec { source: e } => Error::Codec(e.0),
+            CoreError::Metadata { source: e } => Error::Metadata(e),
+            CoreError::StorageAddress { source: e } => Error::StorageAddress(e),
+            CoreError::Decode { source: e } => Error::Decode(e.0),
+            CoreError::Encode { source: e } => Error::Encode(e.0),
+            CoreError::ExtrinsicParams { source: e } => Error::ExtrinsicParams(e),
+            CoreError::Block { source: e } => Error::Block(e.into()),
         }
     }
 }
@@ -187,8 +187,8 @@ impl From<CoreBlockError> for BlockError {
     fn from(value: CoreBlockError) -> Self {
         match value {
             CoreBlockError::MissingType => BlockError::MissingType,
-            CoreBlockError::UnsupportedVersion(n) => BlockError::UnsupportedVersion(n),
-            CoreBlockError::DecodingError(e) => BlockError::DecodingError(e),
+            CoreBlockError::UnsupportedVersion { version: n } => BlockError::UnsupportedVersion(n),
+            CoreBlockError::DecodingError { source: e } => BlockError::DecodingError(e.0),
         }
     }
 }

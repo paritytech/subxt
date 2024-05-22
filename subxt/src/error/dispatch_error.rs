@@ -171,7 +171,9 @@ impl ModuleError {
         let pallet = self.metadata.pallet_by_index_err(self.pallet_index())?;
         let variant = pallet
             .error_variant_by_index(self.error_index())
-            .ok_or_else(|| MetadataError::VariantIndexNotFound(self.error_index()))?;
+            .ok_or_else(|| MetadataError::VariantIndexNotFound {
+                variant_idx: self.error_index(),
+            })?;
 
         Ok(ModuleErrorDetails { pallet, variant })
     }

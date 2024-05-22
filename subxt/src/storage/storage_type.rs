@@ -268,7 +268,9 @@ where
         self.client
             .metadata()
             .pallet_by_name(pallet_name.as_ref())
-            .ok_or_else(|| MetadataError::PalletNameNotFound(pallet_name.as_ref().into()))?;
+            .ok_or_else(|| MetadataError::PalletNameNotFound {
+                name: pallet_name.as_ref().into(),
+            })?;
 
         // construct the storage key. This is done similarly in `frame_support::traits::metadata::StorageVersion::storage_key()`.
         pub const STORAGE_VERSION_STORAGE_KEY_POSTFIX: &[u8] = b":__STORAGE_VERSION__:";
