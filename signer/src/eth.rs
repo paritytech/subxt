@@ -111,7 +111,7 @@ impl Keypair {
 
     /// Signs a pre-hashed message.
     pub fn sign_prehashed(&self, message_hash: &[u8; 32]) -> Signature {
-        self.0.sign_prehashed(message_hash).into()
+        Signature(self.0.sign_prehashed(message_hash).0)
     }
 }
 
@@ -166,12 +166,6 @@ pub struct Signature(pub [u8; 65]);
 impl AsRef<[u8; 65]> for Signature {
     fn as_ref(&self) -> &[u8; 65] {
         &self.0
-    }
-}
-
-impl From<ecdsa::Signature> for Signature {
-    fn from(s: ecdsa::Signature) -> Self {
-        Self(s.0)
     }
 }
 
