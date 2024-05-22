@@ -258,9 +258,11 @@ impl<T: Config> EventDetails<T> {
 
         // Get metadata for the event:
         let event_pallet = metadata.pallet_by_index_err(pallet_index)?;
-        let event_variant = event_pallet
-            .event_variant_by_index(variant_index)
-            .ok_or(MetadataError::VariantIndexNotFound(variant_index))?;
+        let event_variant = event_pallet.event_variant_by_index(variant_index).ok_or(
+            MetadataError::VariantIndexNotFound {
+                variant_idx: variant_index,
+            },
+        )?;
         tracing::debug!(
             "Decoding Event '{}::{}'",
             event_pallet.name(),

@@ -180,7 +180,7 @@ where
 
         let version = first_byte & VERSION_MASK;
         if version != LATEST_EXTRINSIC_VERSION {
-            return Err(BlockError::UnsupportedVersion(version).into());
+            return Err(BlockError::UnsupportedVersion { version }.into());
         }
 
         let is_signed = first_byte & SIGNATURE_MASK != 0;
@@ -355,7 +355,9 @@ where
         let pallet = self.metadata.pallet_by_index_err(self.pallet_index())?;
         let variant = pallet
             .call_variant_by_index(self.variant_index())
-            .ok_or_else(|| MetadataError::VariantIndexNotFound(self.variant_index()))?;
+            .ok_or_else(|| MetadataError::VariantIndexNotFound {
+                variant_idx: self.variant_index(),
+            })?;
 
         Ok(ExtrinsicMetadataDetails { pallet, variant })
     }
@@ -610,7 +612,7 @@ mod tests {
 
         // Decode with empty bytes.
         let result = ExtrinsicDetails::<SubstrateConfig>::decode_from(0, &[], metadata, ids);
-        assert_matches!(result.err(), Some(crate::Error::Codec(_)));
+        assert_matches!(result.err(), Some(crate::Error::Codec { source: _ }));
     }
 
     #[test]
@@ -624,9 +626,9 @@ mod tests {
 
         assert_matches!(
             result.err(),
-            Some(crate::Error::Block(
-                crate::error::BlockError::UnsupportedVersion(3)
-            ))
+            Some(crate::Error::Block {
+                source: crate::error::BlockError::UnsupportedVersion { version: 3 }
+            })
         );
     }
 

@@ -43,9 +43,12 @@ use alloc::vec::Vec;
 pub fn validate<Addr: Address + ?Sized>(address: &Addr, metadata: &Metadata) -> Result<(), Error> {
     if let Some(actual_hash) = address.validation_hash() {
         let custom = metadata.custom();
-        let custom_value = custom
-            .get(address.name())
-            .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().into()))?;
+        let custom_value =
+            custom
+                .get(address.name())
+                .ok_or_else(|| MetadataError::CustomValueNameNotFound {
+                    name: address.name().into(),
+                })?;
         let expected_hash = custom_value.hash();
         if actual_hash != expected_hash {
             return Err(MetadataError::IncompatibleCodegen.into());

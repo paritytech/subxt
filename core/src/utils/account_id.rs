@@ -11,8 +11,8 @@ use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
 use codec::{Decode, Encode};
-use derive_more::Display;
 use serde::{Deserialize, Serialize};
+use snafu::Snafu;
 
 /// A 32-byte cryptographic identifier. This is a simplified version of Substrate's
 /// `sp_core::crypto::AccountId32`. To obtain more functionality, convert this into
@@ -105,16 +105,16 @@ impl AccountId32 {
 }
 
 /// An error obtained from trying to interpret an SS58 encoded string into an AccountId32
-#[derive(Clone, Copy, Eq, PartialEq, Debug, Display)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug, Snafu)]
 #[allow(missing_docs)]
 pub enum FromSs58Error {
-    #[display(fmt = "Base 58 requirement is violated")]
+    #[snafu(display("Base 58 requirement is violated"))]
     BadBase58,
-    #[display(fmt = "Length is bad")]
+    #[snafu(display("Length is bad"))]
     BadLength,
-    #[display(fmt = "Invalid checksum")]
+    #[snafu(display("Invalid checksum"))]
     InvalidChecksum,
-    #[display(fmt = "Invalid SS58 prefix byte.")]
+    #[snafu(display("Invalid SS58 prefix byte."))]
     InvalidPrefix,
 }
 

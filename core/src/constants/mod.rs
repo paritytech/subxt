@@ -55,8 +55,8 @@ pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<()
         let expected_hash = metadata
             .pallet_by_name_err(address.pallet_name())?
             .constant_hash(address.constant_name())
-            .ok_or_else(|| {
-                MetadataError::ConstantNameNotFound(address.constant_name().to_owned())
+            .ok_or_else(|| MetadataError::ConstantNameNotFound {
+                name: address.constant_name().to_owned(),
             })?;
         if actual_hash != expected_hash {
             return Err(MetadataError::IncompatibleCodegen.into());
@@ -75,7 +75,9 @@ pub fn get<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<Addr::T
     let constant = metadata
         .pallet_by_name_err(address.pallet_name())?
         .constant_by_name(address.constant_name())
-        .ok_or_else(|| MetadataError::ConstantNameNotFound(address.constant_name().to_owned()))?;
+        .ok_or_else(|| MetadataError::ConstantNameNotFound {
+            name: address.constant_name().to_owned(),
+        })?;
     let value = <Addr::Target as DecodeWithMetadata>::decode_with_metadata(
         &mut constant.value(),
         constant.ty(),

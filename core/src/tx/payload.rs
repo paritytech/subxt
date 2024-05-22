@@ -141,7 +141,9 @@ impl<CallData: EncodeAsFields> Payload for DefaultPayload<CallData> {
         let pallet = metadata.pallet_by_name_err(&self.pallet_name)?;
         let call = pallet
             .call_variant_by_name(&self.call_name)
-            .ok_or_else(|| MetadataError::CallNameNotFound((*self.call_name).to_owned()))?;
+            .ok_or_else(|| MetadataError::CallNameNotFound {
+                name: (*self.call_name).to_owned(),
+            })?;
 
         let pallet_index = pallet.index();
         let call_index = call.index;

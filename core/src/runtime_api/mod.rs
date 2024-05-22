@@ -90,7 +90,9 @@ pub fn decode_value<P: Payload>(
     let api_method = metadata
         .runtime_api_trait_by_name_err(payload.trait_name())?
         .method_by_name(payload.method_name())
-        .ok_or_else(|| MetadataError::RuntimeMethodNotFound(payload.method_name().to_owned()))?;
+        .ok_or_else(|| MetadataError::RuntimeMethodNotFound {
+            name: payload.method_name().to_owned(),
+        })?;
 
     let val = <P::ReturnType as DecodeWithMetadata>::decode_with_metadata(
         &mut &bytes[..],

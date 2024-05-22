@@ -46,11 +46,16 @@ pub fn lookup_storage_entry_details<'a>(
     metadata: &'a Metadata,
 ) -> Result<(PalletMetadata<'a>, &'a StorageEntryMetadata), Error> {
     let pallet_metadata = metadata.pallet_by_name_err(pallet_name)?;
-    let storage_metadata = pallet_metadata
-        .storage()
-        .ok_or_else(|| MetadataError::StorageNotFoundInPallet(pallet_name.to_owned()))?;
-    let storage_entry = storage_metadata
-        .entry_by_name(entry_name)
-        .ok_or_else(|| MetadataError::StorageEntryNotFound(entry_name.to_owned()))?;
+    let storage_metadata =
+        pallet_metadata
+            .storage()
+            .ok_or_else(|| MetadataError::StorageNotFoundInPallet {
+                name: pallet_name.to_owned(),
+            })?;
+    let storage_entry = storage_metadata.entry_by_name(entry_name).ok_or_else(|| {
+        MetadataError::StorageEntryNotFound {
+            entry_name: entry_name.to_owned(),
+        }
+    })?;
     Ok((pallet_metadata, storage_entry))
 }

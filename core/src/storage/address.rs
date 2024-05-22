@@ -154,10 +154,14 @@ where
         let pallet = metadata.pallet_by_name_err(self.pallet_name())?;
         let storage = pallet
             .storage()
-            .ok_or_else(|| MetadataError::StorageNotFoundInPallet(self.pallet_name().to_owned()))?;
-        let entry = storage
-            .entry_by_name(self.entry_name())
-            .ok_or_else(|| MetadataError::StorageEntryNotFound(self.entry_name().to_owned()))?;
+            .ok_or_else(|| MetadataError::StorageNotFoundInPallet {
+                name: self.pallet_name().to_owned(),
+            })?;
+        let entry = storage.entry_by_name(self.entry_name()).ok_or_else(|| {
+            MetadataError::StorageEntryNotFound {
+                entry_name: self.entry_name().to_owned(),
+            }
+        })?;
 
         let hashers = StorageHashers::new(entry.entry_type(), metadata.types())?;
         self.keys

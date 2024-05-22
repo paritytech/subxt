@@ -5,6 +5,7 @@
 use super::utils::hash_bytes;
 use crate::{
     error::{Error, MetadataError, StorageAddressError},
+    error_utils::DisplayError,
     utils::{Encoded, Static},
 };
 use alloc::vec;
@@ -34,7 +35,7 @@ impl StorageHashers {
         {
             let ty = types
                 .resolve(*key_ty)
-                .ok_or(MetadataError::TypeNotFound(*key_ty))?;
+                .ok_or(MetadataError::TypeNotFound { type_id: *key_ty })?;
 
             if let TypeDef::Tuple(tuple) = &ty.type_def {
                 if hashers.len() == 1 {
@@ -306,7 +307,9 @@ fn consume_hash_returning_key_bytes<'a>(
             types,
             IgnoreVisitor::<PortableRegistry>::new(),
         )
-        .map_err(|err| Error::Decode(err.into()))?;
+        .map_err(|err| Error::Decode {
+            source: DisplayError(err.into()),
+        })?;
         // Return the key bytes, having advanced the input cursor past them.
         let key_bytes = &before_key[..before_key.len() - bytes.len()];
 

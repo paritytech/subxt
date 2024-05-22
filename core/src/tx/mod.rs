@@ -80,7 +80,9 @@ pub fn validate<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<(), E
         let expected_hash = metadata
             .pallet_by_name_err(details.pallet_name)?
             .call_hash(details.call_name)
-            .ok_or_else(|| MetadataError::CallNameNotFound(details.call_name.to_owned()))?;
+            .ok_or_else(|| MetadataError::CallNameNotFound {
+                name: details.call_name.to_owned(),
+            })?;
 
         if details.hash != expected_hash {
             return Err(MetadataError::IncompatibleCodegen.into());

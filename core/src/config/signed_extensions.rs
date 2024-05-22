@@ -429,7 +429,9 @@ macro_rules! impl_tuples {
                         if is_type_empty(e.extra_ty(), types) {
                             continue
                         } else {
-                            return Err(ExtrinsicParamsError::UnknownSignedExtension(e.identifier().to_owned()));
+                            return Err(ExtrinsicParamsError::UnknownSignedExtension {
+                                extension: e.identifier().to_owned()
+                            });
                         }
                     };
                     params.push(ext);

@@ -105,7 +105,9 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> Payload
         let api_method = metadata
             .runtime_api_trait_by_name_err(&self.trait_name)?
             .method_by_name(&self.method_name)
-            .ok_or_else(|| MetadataError::RuntimeMethodNotFound((*self.method_name).to_owned()))?;
+            .ok_or_else(|| MetadataError::RuntimeMethodNotFound {
+                name: (*self.method_name).to_owned(),
+            })?;
         let mut fields = api_method
             .inputs()
             .map(|input| scale_encode::Field::named(input.ty, &input.name));

@@ -51,8 +51,9 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
                 metadata.types(),
                 scale_decode::visitor::IgnoreVisitor::new(),
             )
-            .map_err(|e| Error::Decode(e.into()))
-            {
+            .map_err(|e| Error::Decode {
+                source: crate::error_utils::DisplayError(e.into()),
+            }) {
                 index = num_signed_extensions; // (such that None is returned in next iteration)
                 return Some(Err(err));
             }
