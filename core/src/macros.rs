@@ -18,8 +18,8 @@ macro_rules! cfg_substrate_compat {
 	};
 }
 
-macro_rules! convert_error {
-    ($module_path:path as $delegate_ty:ident :: $variant:ident) => {
+macro_rules! impl_from {
+    ($module_path:path => $delegate_ty:ident :: $variant:ident) => {
         impl From<$module_path> for $delegate_ty {
             fn from(val: $module_path) -> Self {
                 $delegate_ty::$variant(val.into())

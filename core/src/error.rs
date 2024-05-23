@@ -46,14 +46,14 @@ impl core::fmt::Display for Error {
 #[cfg(feature = "std")]
 impl std::error::Error for Error {}
 
-convert_error!(ExtrinsicParamsError as Error::ExtrinsicParams);
-convert_error!(BlockError as Error::Block);
-convert_error!(MetadataError as Error::Metadata);
-convert_error!(scale_decode::Error as Error::Decode);
-convert_error!(scale_decode::visitor::DecodeError as Error::Decode);
-convert_error!(scale_encode::Error as Error::Encode);
-convert_error!(StorageAddressError as Error::StorageAddress);
-convert_error!(codec::Error as Error::Codec);
+impl_from!(ExtrinsicParamsError => Error::ExtrinsicParams);
+impl_from!(BlockError => Error::Block);
+impl_from!(MetadataError => Error::Metadata);
+impl_from!(scale_decode::Error => Error::Decode);
+impl_from!(scale_decode::visitor::DecodeError => Error::Decode);
+impl_from!(scale_encode::Error => Error::Encode);
+impl_from!(StorageAddressError => Error::StorageAddress);
+impl_from!(codec::Error => Error::Codec);
 
 /// Block error
 #[derive(Clone, Debug, Eq, PartialEq)]
