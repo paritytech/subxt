@@ -37,6 +37,7 @@ impl Config for CustomConfig {
             signed_extensions::CheckMortality<Self>,
             signed_extensions::ChargeAssetTxPayment<Self>,
             signed_extensions::ChargeTransactionPayment,
+            signed_extensions::CheckMetadataHash,
             // And add a new one of our own:
             CustomSignedExtension,
         ),
@@ -83,8 +84,8 @@ impl ExtrinsicParamsEncoder for CustomSignedExtension {
 pub fn custom(
     params: DefaultExtrinsicParamsBuilder<CustomConfig>,
 ) -> <<CustomConfig as Config>::ExtrinsicParams as ExtrinsicParams<CustomConfig>>::Params {
-    let (a, b, c, d, e, f, g) = params.build();
-    (a, b, c, d, e, f, g, ())
+    let (a, b, c, d, e, f, g, h) = params.build();
+    (a, b, c, d, e, f, g, h, ())
 }
 
 #[tokio::main]
