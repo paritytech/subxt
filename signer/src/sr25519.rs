@@ -201,8 +201,8 @@ pub enum Error {
     Hex(hex::FromHexError),
 }
 
-convert_error!(bip39::Error as Error::Phrase);
-convert_error!(hex::FromHexError as Error::Hex);
+impl_from!(bip39::Error => Error::Phrase);
+impl_from!(hex::FromHexError => Error::Hex);
 
 impl Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {

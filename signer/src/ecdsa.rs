@@ -234,8 +234,8 @@ impl Display for Error {
     }
 }
 
-convert_error!(bip39::Error as Error::Phrase);
-convert_error!(hex::FromHexError as Error::Hex);
+impl_from!(bip39::Error => Error::Phrase);
+impl_from!(hex::FromHexError => Error::Hex);
 
 #[cfg(feature = "std")]
 impl std::error::Error for Error {}
