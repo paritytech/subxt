@@ -329,6 +329,7 @@ async fn decode_signed_extensions_from_blocks() {
         "CheckNonce",
         "CheckWeight",
         "ChargeAssetTxPayment",
+        "CheckMetadataHash",
     ];
 
     assert_eq!(extensions1.iter().count(), expected_signed_extensions.len());
