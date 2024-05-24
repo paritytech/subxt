@@ -6,8 +6,7 @@
 use codec::Encode;
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
-use core::str::FromStr;
-use derive_more::{Display, From};
+use core::{fmt::Display, str::FromStr};
 use hex::FromHex;
 use secp256k1::{ecdsa::RecoverableSignature, Message, Secp256k1, SecretKey};
 use secrecy::ExposeSecret;
@@ -217,23 +216,30 @@ pub(crate) mod internal {
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug, PartialEq, Display, From)]
+#[derive(Debug, PartialEq)]
 pub enum Error {
     /// Invalid seed.
-    #[display(fmt = "Invalid seed (was it the wrong length?)")]
-    #[from(ignore)]
     InvalidSeed,
     /// Invalid seed.
-    #[display(fmt = "Invalid seed for ECDSA, contained soft junction")]
-    #[from(ignore)]
     SoftJunction,
     /// Invalid phrase.
-    #[display(fmt = "Cannot parse phrase: {_0}")]
     Phrase(bip39::Error),
     /// Invalid hex.
-    #[display(fmt = "Cannot parse hex string: {_0}")]
     Hex(hex::FromHexError),
 }
+impl Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Error::InvalidSeed => write!(f, "Invalid seed (was it the wrong length?)"),
+            Error::SoftJunction => write!(f, "Invalid seed for ECDSA, contained soft junction"),
+            Error::Phrase(e) => write!(f, "Cannot parse phrase: {e}"),
+            Error::Hex(e) => write!(f, "Cannot parse hex string: {e}"),
+        }
+    }
+}
+
+impl_from!(bip39::Error => Error::Phrase);
+impl_from!(hex::FromHexError => Error::Hex);
 
 #[cfg(feature = "std")]
 impl std::error::Error for Error {}
