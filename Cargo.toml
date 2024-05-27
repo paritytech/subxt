@@ -73,7 +73,7 @@ color-eyre = "0.6.3"
 console_error_panic_hook = "0.1.7"
 darling = "0.20.8"
 derive-where = "1.2.7"
-either = { version = "1.11.0", default-features = false }
+either = { version = "1.12.0", default-features = false }
 frame-metadata = { version = "16.0.0", default-features = false }
 futures = { version = "0.3.30", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
@@ -89,14 +89,14 @@ proc-macro-error = "1.0.4"
 proc-macro2 = "1.0.82"
 quote = "1.0.36"
 regex = { version = "1.10.4", default-features = false }
-scale-info = { version = "2.11.0", default-features = false }
+scale-info = { version = "2.11.3", default-features = false }
 scale-value = { version = "0.16.0", default-features = false }
 scale-bits = { version = "0.6.0", default-features = false }
 scale-decode = { version = "0.13.0", default-features = false }
 scale-encode = { version = "0.7.0", default-features = false }
 scale-typegen = "0.8.0"
 scale-typegen-description = "0.8.0"
-serde = { version = "1.0.202", default-features = false, features = ["derive"] }
+serde = { version = "1.0.203", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.117", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.61"
