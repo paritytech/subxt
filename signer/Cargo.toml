@@ -25,7 +25,6 @@ std = [
     "bip39/std",
     "schnorrkel/std",
     "secp256k1/std",
-    "sp-core/std"
 ]
 
 # Pick the signer implementation(s) you need by enabling the
