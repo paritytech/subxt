@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.36.1] - 2024-05-27
+
+This release mainly adds support for the sign extension `CheckMetadataHash` and fixes a regression introduced in v0.36.0
+where the type de-duplication was too aggressive and lots of the same type such as `BoundedVec` was duplicated to
+plenty of different types such as BoundedVec1, BoundedVec2, .. BoundedVec<N>.
+
+### Added
+- Implemented `sign_prehashed` for `ecdsa::Keypair` and `eth::Keypair` ([#1598](https://github.com/paritytech/subxt/pull/1598))
+- Add a basic version of the CheckMetadataHash signed extension ([#1590](https://github.com/paritytech/subxt/pull/1590))
+
+## Changed
+- Remove `derive_more` ([#1600](https://github.com/paritytech/subxt/pull/1600))
+- chore(deps): bump scale-typegen v0.8.0 ([#1615](https://github.com/paritytech/subxt/pull/1615))
+
 ## [0.36.0] - 2024-05-16
 
 This release adds a few new features, which I'll go over below in more detail.
