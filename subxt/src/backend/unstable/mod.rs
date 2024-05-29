@@ -728,7 +728,7 @@ where
 {
     loop {
         let reconnected = follow_handle.reconnected().fuse();
-        let action = retry(|| fun()).fuse();
+        let action = retry(&mut fun).fuse();
 
         pin_mut!(reconnected, action);
 
