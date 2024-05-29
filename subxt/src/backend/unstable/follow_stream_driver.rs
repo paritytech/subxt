@@ -76,8 +76,8 @@ impl<Hash: BlockHash> FollowStreamDriverHandle<Hash> {
     }
 
     /// Returns if Followstream has reconnected
-    pub async fn reconnected(&self) {
-        self.shared.subscribe(false).reconnected().await;
+    pub fn reconnected(&self) -> impl Stream<Item = bool> {
+        self.shared.subscribe(false).reconnected()
     }
 }
 
@@ -142,22 +142,19 @@ impl<Hash: BlockHash> FollowStreamDriverSubscription<Hash> {
         }
     }
 
-    /// Returns if the backend has reconnected
-    pub async fn reconnected(self) -> bool {
-        let ready_event = self
-            .skip_while(|ev| {
-                std::future::ready(!matches!(
-                    ev,
-                    FollowStreamMsg::Event(FollowEvent::Initialized(_))
-                ))
-            })
-            .next()
-            .await;
-
-        matches!(
-            ready_event,
-            Some(FollowStreamMsg::Event(FollowEvent::Initialized(_)))
-        )
+    /// Returns if the backend has reconnected/is reconnecting
+    pub fn reconnected(self) -> impl Stream<Item = bool> {
+        self.filter_map(|ev| {
+            let result = match ev {
+                FollowStreamMsg::Ready(_) => None,
+                FollowStreamMsg::Event(ev) => match ev {
+                    FollowEvent::Initialized(_) => Some(true),
+                    FollowEvent::Stop => Some(false),
+                    _ => None,
+                },
+            };
+            std::future::ready(result)
+        })
     }
 
     /// Subscribe to the follow events, ignoring any other messages.

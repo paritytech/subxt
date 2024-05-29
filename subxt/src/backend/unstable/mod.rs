@@ -34,6 +34,7 @@ use follow_stream_driver::{FollowStreamDriver, FollowStreamDriverHandle};
 use futures::future::Either;
 use futures::{pin_mut, Future, FutureExt, Stream, StreamExt};
 use std::collections::HashMap;
+use std::pin::Pin;
 use std::task::Poll;
 use storage_items::StorageItems;
 
@@ -726,21 +727,58 @@ where
     F: FnMut() -> T,
     T: Future<Output = Result<R, Error>>,
 {
-    loop {
-        let reconnected = follow_handle.reconnected().fuse();
-        let action = retry(&mut fun).fuse();
+    let reconnected = follow_handle.reconnected().fuse();
+    pin_mut!(reconnected);
 
-        pin_mut!(reconnected, action);
-
-        let result = futures::future::select(reconnected, action).await;
-        match result {
-            Either::Left((_, _)) => (),
-            Either::Right((result, reset)) => {
-                let is_reconnected = reset.now_or_never().is_some();
-                if !is_reconnected {
-                    break result;
+    async fn check_for_reconnect(
+        mut reconnected: Pin<&mut impl Stream<Item = bool>>,
+    ) -> Result<(), Error> {
+        loop {
+            match reconnected.next().await {
+                Some(true) => {
+                    break;
+                }
+                Some(false) => (),
+                None => {
+                    return Err(RpcError::SubscriptionDropped.into());
                 }
             }
         }
+        Ok(())
     }
+
+    loop {
+        let action = retry(&mut fun).fuse();
+
+        pin_mut!(action);
+
+        let result = futures::future::select(reconnected.next(), action).await;
+        match result {
+            // We reconnected and received FollowEvent::Initialized()
+            Either::Left((Some(has_reconnected), _)) if has_reconnected => {}
+            Either::Left((Some(_), _)) => {
+                // Wait until we see Initialized Event
+                check_for_reconnect(reconnected.as_mut()).await?
+            }
+            Either::Right((result, reset)) => {
+                let is_reconnected = reset.now_or_never();
+                if is_reconnected.is_none() {
+                    return result;
+                }
+                let is_reconnected = is_reconnected.flatten();
+                if let Some(has_reconnected) = is_reconnected {
+                    // Wait until we see Initialized Event
+                    if !has_reconnected {
+                        check_for_reconnect(reconnected.as_mut()).await?
+                    }
+                } else {
+                    break;
+                }
+            }
+            Either::Left((None, _)) => {
+                break;
+            }
+        }
+    }
+    Err(RpcError::SubscriptionDropped.into())
 }
