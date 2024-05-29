@@ -106,27 +106,11 @@ where
     F: FnMut() -> T,
     T: Future<Output = Result<R, Error>>,
 {
-    const REJECTED_MAX_RETRIES: usize = 10;
-    let mut rejected_retries = 0;
-
     loop {
         match retry_future().await {
             Ok(v) => return Ok(v),
             Err(e) => {
                 if e.is_disconnected_will_reconnect() {
-                    continue;
-                }
-
-                // TODO: https://github.com/paritytech/subxt/issues/1567
-                // This is a hack because if a reconnection occurs
-                // the order of pending calls is not guaranteed.
-                //
-                // Such that it's possible the a pending future completes
-                // before `chainHead_follow` is established with fresh
-                // subscription id.
-                //
-                if e.is_rejected() && rejected_retries < REJECTED_MAX_RETRIES {
-                    rejected_retries += 1;
                     continue;
                 }
 

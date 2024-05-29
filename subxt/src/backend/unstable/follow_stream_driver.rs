@@ -72,7 +72,12 @@ pub struct FollowStreamDriverHandle<Hash: BlockHash> {
 impl<Hash: BlockHash> FollowStreamDriverHandle<Hash> {
     /// Subscribe to follow events.
     pub fn subscribe(&self) -> FollowStreamDriverSubscription<Hash> {
-        self.shared.subscribe()
+        self.shared.subscribe(true)
+    }
+
+    /// Returns if Followstream has reconnected
+    pub async fn reconnected(&self) {
+        self.shared.subscribe(false).reconnected().await;
     }
 }
 
@@ -137,6 +142,24 @@ impl<Hash: BlockHash> FollowStreamDriverSubscription<Hash> {
         }
     }
 
+    /// Returns if the backend has reconnected
+    pub async fn reconnected(self) -> bool {
+        let ready_event = self
+            .skip_while(|ev| {
+                std::future::ready(!matches!(
+                    ev,
+                    FollowStreamMsg::Event(FollowEvent::Initialized(_))
+                ))
+            })
+            .next()
+            .await;
+
+        matches!(
+            ready_event,
+            Some(FollowStreamMsg::Event(FollowEvent::Initialized(_)))
+        )
+    }
+
     /// Subscribe to the follow events, ignoring any other messages.
     pub fn events(self) -> impl Stream<Item = FollowEvent<BlockRef<Hash>>> + Send + Sync {
         self.filter_map(|ev| std::future::ready(ev.into_event()))
@@ -145,7 +168,7 @@ impl<Hash: BlockHash> FollowStreamDriverSubscription<Hash> {
 
 impl<Hash: BlockHash> Clone for FollowStreamDriverSubscription<Hash> {
     fn clone(&self) -> Self {
-        self.shared.subscribe()
+        self.shared.subscribe(true)
     }
 }
 
@@ -330,7 +353,10 @@ impl<Hash: BlockHash> Shared<Hash> {
     }
 
     /// Create a new subscription.
-    pub fn subscribe(&self) -> FollowStreamDriverSubscription<Hash> {
+    pub fn subscribe(
+        &self,
+        insert_subscription_data: bool,
+    ) -> FollowStreamDriverSubscription<Hash> {
         let mut shared = self.0.lock().unwrap();
 
         let id = shared.next_id;
@@ -349,16 +375,18 @@ impl<Hash: BlockHash> Shared<Hash> {
         // it means the subscription is currently stopped, and we should expect new Ready/Init
         // messages anyway once it restarts.
         let mut local_items = VecDeque::new();
-        if let Some(sub_id) = &shared.current_subscription_id {
-            local_items.push_back(FollowStreamMsg::Ready(sub_id.clone()));
-        }
-        if let Some(init_msg) = &shared.current_init_message {
-            local_items.push_back(FollowStreamMsg::Event(FollowEvent::Initialized(
-                init_msg.clone(),
-            )));
-        }
-        for ev in &shared.block_events_for_new_subscriptions {
-            local_items.push_back(FollowStreamMsg::Event(ev.clone()));
+        if insert_subscription_data {
+            if let Some(sub_id) = &shared.current_subscription_id {
+                local_items.push_back(FollowStreamMsg::Ready(sub_id.clone()));
+            }
+            if let Some(init_msg) = &shared.current_init_message {
+                local_items.push_back(FollowStreamMsg::Event(FollowEvent::Initialized(
+                    init_msg.clone(),
+                )));
+            }
+            for ev in &shared.block_events_for_new_subscriptions {
+                local_items.push_back(FollowStreamMsg::Event(ev.clone()));
+            }
         }
 
         drop(shared);
