@@ -78,7 +78,7 @@ pub mod api {
     pub static RUNTIME_APIS: [&str; 18usize] = [
         "Core",
         "XcmPaymentApi",
-        "XcmDryRunApi",
+        "DryRunApi",
         "Metadata",
         "BlockBuilder",
         "TaggedTransactionQueue",
@@ -127,8 +127,8 @@ pub mod api {
             pub fn xcm_payment_api(&self) -> xcm_payment_api::XcmPaymentApi {
                 xcm_payment_api::XcmPaymentApi
             }
-            pub fn xcm_dry_run_api(&self) -> xcm_dry_run_api::XcmDryRunApi {
-                xcm_dry_run_api::XcmDryRunApi
+            pub fn dry_run_api(&self) -> dry_run_api::DryRunApi {
+                dry_run_api::DryRunApi
             }
             pub fn metadata(&self) -> metadata::Metadata {
                 metadata::Metadata
@@ -272,7 +272,7 @@ pub mod api {
                 pub struct Version {}
                 pub mod execute_block {
                     use super::runtime_types;
-                    pub type Block = runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment ,) > > ;
+                    pub type Block = runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash ,) > > ;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ();
@@ -478,7 +478,7 @@ pub mod api {
                 }
                 pub mod query_xcm_weight {
                     use super::runtime_types;
-                    pub type Message = runtime_types::xcm::VersionedXcm1;
+                    pub type Message = runtime_types::xcm::VersionedXcm;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::result::Result<
@@ -537,7 +537,7 @@ pub mod api {
                 pub mod query_delivery_fees {
                     use super::runtime_types;
                     pub type Destination = runtime_types::xcm::VersionedLocation;
-                    pub type Message = runtime_types::xcm::VersionedXcm1;
+                    pub type Message = runtime_types::xcm::VersionedXcm;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::result::Result<
@@ -566,7 +566,7 @@ pub mod api {
                 }
             }
         }
-        pub mod xcm_dry_run_api {
+        pub mod dry_run_api {
             use super::root_mod;
             use super::runtime_types;
             #[doc = " API for dry-running extrinsics and XCM programs to get the programs that need to be passed to the fees API."]
@@ -575,27 +575,29 @@ pub mod api {
             #[doc = " If there's local execution, the location will be \"Here\"."]
             #[doc = " This vector can be used to calculate both execution and delivery fees."]
             #[doc = ""]
-            #[doc = " Extrinsics or XCMs might fail when executed, this doesn't mean the result of these calls will be an `Err`."]
+            #[doc = " Calls or XCMs might fail when executed, this doesn't mean the result of these calls will be an `Err`."]
             #[doc = " In those cases, there might still be a valid result, with the execution error inside it."]
             #[doc = " The only reasons why these calls might return an error are listed in the [`Error`] enum."]
-            pub struct XcmDryRunApi;
-            impl XcmDryRunApi {
-                #[doc = " Dry run extrinsic."]
-                pub fn dry_run_extrinsic(
+            pub struct DryRunApi;
+            impl DryRunApi {
+                #[doc = " Dry run call."]
+                pub fn dry_run_call(
                     &self,
-                    extrinsic: types::dry_run_extrinsic::Extrinsic,
+                    origin: types::dry_run_call::Origin,
+                    call: types::dry_run_call::Call,
                 ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
-                    types::DryRunExtrinsic,
-                    types::dry_run_extrinsic::output::Output,
+                    types::DryRunCall,
+                    types::dry_run_call::output::Output,
                 > {
                     ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
-                        "XcmDryRunApi",
-                        "dry_run_extrinsic",
-                        types::DryRunExtrinsic { extrinsic },
+                        "DryRunApi",
+                        "dry_run_call",
+                        types::DryRunCall { origin, call },
                         [
-                            24u8, 53u8, 81u8, 162u8, 167u8, 91u8, 190u8, 223u8, 205u8, 65u8, 60u8,
-                            208u8, 121u8, 112u8, 128u8, 209u8, 131u8, 228u8, 187u8, 89u8, 8u8,
-                            183u8, 166u8, 44u8, 3u8, 82u8, 148u8, 237u8, 14u8, 89u8, 221u8, 150u8,
+                            216u8, 74u8, 56u8, 49u8, 211u8, 45u8, 238u8, 105u8, 158u8, 231u8,
+                            176u8, 139u8, 41u8, 173u8, 225u8, 204u8, 116u8, 160u8, 216u8, 112u8,
+                            92u8, 77u8, 199u8, 217u8, 145u8, 193u8, 62u8, 13u8, 64u8, 142u8, 217u8,
+                            17u8,
                         ],
                     )
                 }
@@ -609,29 +611,34 @@ pub mod api {
                     types::dry_run_xcm::output::Output,
                 > {
                     ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
-                        "XcmDryRunApi",
+                        "DryRunApi",
                         "dry_run_xcm",
                         types::DryRunXcm {
                             origin_location,
                             xcm,
                         },
                         [
-                            149u8, 217u8, 21u8, 118u8, 78u8, 99u8, 117u8, 101u8, 189u8, 120u8,
-                            191u8, 244u8, 32u8, 19u8, 126u8, 221u8, 33u8, 192u8, 17u8, 199u8,
-                            147u8, 137u8, 70u8, 55u8, 17u8, 173u8, 189u8, 190u8, 137u8, 196u8,
-                            102u8, 59u8,
+                            173u8, 176u8, 89u8, 121u8, 158u8, 147u8, 94u8, 99u8, 97u8, 207u8, 90u8,
+                            58u8, 109u8, 128u8, 75u8, 143u8, 137u8, 89u8, 84u8, 23u8, 62u8, 157u8,
+                            141u8, 104u8, 240u8, 181u8, 76u8, 139u8, 5u8, 29u8, 188u8, 35u8,
                         ],
                     )
                 }
             }
             pub mod types {
                 use super::runtime_types;
-                pub mod dry_run_extrinsic {
+                pub mod dry_run_call {
                     use super::runtime_types;
-                    pub type Extrinsic = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment ,) > ;
+                    pub type Origin = runtime_types::rococo_runtime::OriginCaller;
+                    pub type Call = runtime_types::rococo_runtime::RuntimeCall;
                     pub mod output {
                         use super::runtime_types;
-                        pub type Output = :: core :: result :: Result < runtime_types :: xcm_fee_payment_runtime_api :: dry_run :: ExtrinsicDryRunEffects < runtime_types :: rococo_runtime :: RuntimeEvent > , runtime_types :: xcm_fee_payment_runtime_api :: dry_run :: Error > ;
+                        pub type Output = ::core::result::Result<
+                            runtime_types::xcm_fee_payment_runtime_api::dry_run::CallDryRunEffects<
+                                runtime_types::rococo_runtime::RuntimeEvent,
+                            >,
+                            runtime_types::xcm_fee_payment_runtime_api::dry_run::Error,
+                        >;
                     }
                 }
                 #[derive(
@@ -648,13 +655,14 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct DryRunExtrinsic {
-                    pub extrinsic: dry_run_extrinsic::Extrinsic,
+                pub struct DryRunCall {
+                    pub origin: dry_run_call::Origin,
+                    pub call: dry_run_call::Call,
                 }
                 pub mod dry_run_xcm {
                     use super::runtime_types;
                     pub type OriginLocation = runtime_types::xcm::VersionedLocation;
-                    pub type Xcm = runtime_types::xcm::VersionedXcm2;
+                    pub type Xcm = runtime_types::xcm::VersionedXcm;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::result::Result<
@@ -921,7 +929,7 @@ pub mod api {
                 use super::runtime_types;
                 pub mod apply_extrinsic {
                     use super::runtime_types;
-                    pub type Extrinsic = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment ,) > ;
+                    pub type Extrinsic = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash ,) > ;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = :: core :: result :: Result < :: core :: result :: Result < () , runtime_types :: sp_runtime :: DispatchError > , runtime_types :: sp_runtime :: transaction_validity :: TransactionValidityError > ;
@@ -973,7 +981,7 @@ pub mod api {
                     pub type Inherent = runtime_types::sp_inherents::InherentData;
                     pub mod output {
                         use super::runtime_types;
-                        pub type Output = :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment ,) > > ;
+                        pub type Output = :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash ,) > > ;
                     }
                 }
                 #[derive(
@@ -995,7 +1003,7 @@ pub mod api {
                 }
                 pub mod check_inherents {
                     use super::runtime_types;
-                    pub type Block = runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment ,) > > ;
+                    pub type Block = runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash ,) > > ;
                     pub type Data = runtime_types::sp_inherents::InherentData;
                     pub mod output {
                         use super::runtime_types;
@@ -1068,7 +1076,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type Source =
                         runtime_types::sp_runtime::transaction_validity::TransactionSource;
-                    pub type Tx = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment ,) > ;
+                    pub type Tx = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash ,) > ;
                     pub type BlockHash = ::subxt::ext::subxt_core::utils::H256;
                     pub mod output {
                         use super::runtime_types;
@@ -2803,8 +2811,7 @@ pub mod api {
                             runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
                             runtime_types::sp_consensus_beefy::ecdsa_crypto::Signature,
                         >;
-                    pub type KeyOwnerProof =
-                        runtime_types::sp_consensus_beefy::OpaqueKeyOwnershipProof;
+                    pub type KeyOwnerProof = runtime_types::sp_runtime::OpaqueValue;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::option::Option<()>;
@@ -2836,9 +2843,8 @@ pub mod api {
                     pub type AuthorityId = runtime_types::sp_consensus_beefy::ecdsa_crypto::Public;
                     pub mod output {
                         use super::runtime_types;
-                        pub type Output = ::core::option::Option<
-                            runtime_types::sp_consensus_beefy::OpaqueKeyOwnershipProof,
-                        >;
+                        pub type Output =
+                            ::core::option::Option<runtime_types::sp_runtime::OpaqueValue>;
                     }
                 }
                 #[derive(
@@ -3298,8 +3304,7 @@ pub mod api {
                             ::subxt::ext::subxt_core::utils::H256,
                             ::core::primitive::u32,
                         >;
-                    pub type KeyOwnerProof =
-                        runtime_types::sp_consensus_grandpa::OpaqueKeyOwnershipProof;
+                    pub type KeyOwnerProof = runtime_types::sp_runtime::OpaqueValue;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::option::Option<()>;
@@ -3331,9 +3336,8 @@ pub mod api {
                     pub type AuthorityId = runtime_types::sp_consensus_grandpa::app::Public;
                     pub mod output {
                         use super::runtime_types;
-                        pub type Output = ::core::option::Option<
-                            runtime_types::sp_consensus_grandpa::OpaqueKeyOwnershipProof,
-                        >;
+                        pub type Output =
+                            ::core::option::Option<runtime_types::sp_runtime::OpaqueValue>;
                     }
                 }
                 #[derive(
@@ -3993,7 +3997,7 @@ pub mod api {
                 use super::runtime_types;
                 pub mod query_info {
                     use super::runtime_types;
-                    pub type Uxt = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment ,) > ;
+                    pub type Uxt = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash ,) > ;
                     pub type Len = ::core::primitive::u32;
                     pub mod output {
                         use super::runtime_types;
@@ -4024,7 +4028,7 @@ pub mod api {
                 }
                 pub mod query_fee_details {
                     use super::runtime_types;
-                    pub type Uxt = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment ,) > ;
+                    pub type Uxt = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash ,) > ;
                     pub type Len = ::core::primitive::u32;
                     pub mod output {
                         use super::runtime_types;
@@ -4855,9 +4859,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                70u8, 211u8, 173u8, 12u8, 184u8, 10u8, 108u8, 202u8, 14u8, 243u8, 236u8, 64u8,
-                189u8, 194u8, 175u8, 206u8, 89u8, 19u8, 236u8, 197u8, 124u8, 189u8, 198u8, 124u8,
-                203u8, 154u8, 6u8, 107u8, 195u8, 46u8, 97u8, 3u8,
+                192u8, 46u8, 142u8, 23u8, 103u8, 108u8, 158u8, 147u8, 23u8, 94u8, 4u8, 184u8,
+                205u8, 32u8, 0u8, 109u8, 155u8, 227u8, 41u8, 139u8, 45u8, 152u8, 39u8, 123u8,
+                254u8, 161u8, 66u8, 7u8, 162u8, 95u8, 67u8, 6u8,
             ]
     }
     pub mod system {
@@ -5998,9 +6002,10 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            84u8, 28u8, 250u8, 81u8, 40u8, 13u8, 135u8, 170u8, 3u8, 113u8, 248u8,
-                            222u8, 138u8, 9u8, 41u8, 241u8, 61u8, 18u8, 77u8, 116u8, 249u8, 90u8,
-                            236u8, 58u8, 59u8, 40u8, 199u8, 30u8, 216u8, 167u8, 198u8, 208u8,
+                            245u8, 58u8, 200u8, 229u8, 220u8, 178u8, 35u8, 111u8, 226u8, 237u8,
+                            116u8, 147u8, 103u8, 176u8, 244u8, 247u8, 237u8, 5u8, 5u8, 241u8,
+                            246u8, 210u8, 196u8, 255u8, 253u8, 147u8, 239u8, 251u8, 190u8, 226u8,
+                            127u8, 221u8,
                         ],
                     )
                 }
@@ -6530,7 +6535,7 @@ pub mod api {
                 pub mod authorities {
                     use super::runtime_types;
                     pub type Authorities =
-                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec2<(
+                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec<(
                             runtime_types::sp_consensus_babe::app::Public,
                             ::core::primitive::u64,
                         )>;
@@ -6559,7 +6564,7 @@ pub mod api {
                 pub mod next_authorities {
                     use super::runtime_types;
                     pub type NextAuthorities =
-                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec2<(
+                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec<(
                             runtime_types::sp_consensus_babe::app::Public,
                             ::core::primitive::u64,
                         )>;
@@ -6571,7 +6576,7 @@ pub mod api {
                 pub mod under_construction {
                     use super::runtime_types;
                     pub type UnderConstruction =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec7<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             [::core::primitive::u8; 32usize],
                         >;
                     pub type Param0 = ::core::primitive::u32;
@@ -6607,7 +6612,7 @@ pub mod api {
                 pub mod skipped_epochs {
                     use super::runtime_types;
                     pub type SkippedEpochs =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec8<(
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<(
                             ::core::primitive::u64,
                             ::core::primitive::u32,
                         )>;
@@ -8969,7 +8974,7 @@ pub mod api {
                 pub mod locks {
                     use super::runtime_types;
                     pub type Locks =
-                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec3<
+                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec<
                             runtime_types::pallet_balances::types::BalanceLock<
                                 ::core::primitive::u128,
                             >,
@@ -8978,18 +8983,17 @@ pub mod api {
                 }
                 pub mod reserves {
                     use super::runtime_types;
-                    pub type Reserves =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec9<
-                            runtime_types::pallet_balances::types::ReserveData<
-                                [::core::primitive::u8; 8usize],
-                                ::core::primitive::u128,
-                            >,
-                        >;
+                    pub type Reserves = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        runtime_types::pallet_balances::types::ReserveData<
+                            [::core::primitive::u8; 8usize],
+                            ::core::primitive::u128,
+                        >,
+                    >;
                     pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
                 }
                 pub mod holds {
                     use super::runtime_types;
-                    pub type Holds = runtime_types::bounded_collections::bounded_vec::BoundedVec10<
+                    pub type Holds = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         runtime_types::pallet_balances::types::IdAmount<
                             runtime_types::rococo_runtime::RuntimeHoldReason,
                             ::core::primitive::u128,
@@ -8999,13 +9003,12 @@ pub mod api {
                 }
                 pub mod freezes {
                     use super::runtime_types;
-                    pub type Freezes =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec11<
-                            runtime_types::pallet_balances::types::IdAmount<
-                                (),
-                                ::core::primitive::u128,
-                            >,
-                        >;
+                    pub type Freezes = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        runtime_types::pallet_balances::types::IdAmount<
+                            (),
+                            ::core::primitive::u128,
+                        >,
+                    >;
                     pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
                 }
             }
@@ -10855,7 +10858,7 @@ pub mod api {
                 pub mod authorities {
                     use super::runtime_types;
                     pub type Authorities =
-                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec4<(
+                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec<(
                             runtime_types::sp_consensus_grandpa::app::Public,
                             ::core::primitive::u64,
                         )>;
@@ -11133,14 +11136,14 @@ pub mod api {
                 pub mod keys {
                     use super::runtime_types;
                     pub type Keys =
-                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec5<
+                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec<
                             runtime_types::sp_authority_discovery::app::Public,
                         >;
                 }
                 pub mod next_keys {
                     use super::runtime_types;
                     pub type NextKeys =
-                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec5<
+                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec<
                             runtime_types::sp_authority_discovery::app::Public,
                         >;
                 }
@@ -12320,7 +12323,7 @@ pub mod api {
                 pub mod approvals {
                     use super::runtime_types;
                     pub type Approvals =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec12<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u32,
                         >;
                 }
@@ -13248,7 +13251,7 @@ pub mod api {
                 pub mod class_locks_for {
                     use super::runtime_types;
                     pub type ClassLocksFor =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec14<(
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<(
                             ::core::primitive::u16,
                             ::core::primitive::u128,
                         )>;
@@ -14403,7 +14406,7 @@ pub mod api {
                 pub mod referendum_info_for {
                     use super::runtime_types;
                     pub type ReferendumInfoFor =
-                        runtime_types::pallet_referenda::types::ReferendumInfo1<
+                        runtime_types::pallet_referenda::types::ReferendumInfo<
                             ::core::primitive::u16,
                             runtime_types::rococo_runtime::OriginCaller,
                             ::core::primitive::u32,
@@ -14423,7 +14426,7 @@ pub mod api {
                 pub mod track_queue {
                     use super::runtime_types;
                     pub type TrackQueue =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec15<(
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<(
                             ::core::primitive::u32,
                             ::core::primitive::u128,
                         )>;
@@ -15383,7 +15386,7 @@ pub mod api {
                 pub mod voting_cleanup {
                     use super::runtime_types;
                     pub type VotingCleanup =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >;
                     pub type Param0 = ::core::primitive::u32;
@@ -16751,7 +16754,7 @@ pub mod api {
                 pub mod referendum_info_for {
                     use super::runtime_types;
                     pub type ReferendumInfoFor =
-                        runtime_types::pallet_referenda::types::ReferendumInfo2<
+                        runtime_types::pallet_referenda::types::ReferendumInfo<
                             ::core::primitive::u16,
                             runtime_types::rococo_runtime::OriginCaller,
                             ::core::primitive::u32,
@@ -16769,7 +16772,7 @@ pub mod api {
                 pub mod track_queue {
                     use super::runtime_types;
                     pub type TrackQueue =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec16<(
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<(
                             ::core::primitive::u32,
                             ::core::primitive::u32,
                         )>;
@@ -19499,10 +19502,9 @@ pub mod api {
                 }
                 pub mod accept_username {
                     use super::runtime_types;
-                    pub type Username =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
-                            ::core::primitive::u8,
-                        >;
+                    pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        ::core::primitive::u8,
+                    >;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for AcceptUsername {
                     const PALLET: &'static str = "Identity";
@@ -19530,10 +19532,9 @@ pub mod api {
                 }
                 pub mod remove_expired_approval {
                     use super::runtime_types;
-                    pub type Username =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
-                            ::core::primitive::u8,
-                        >;
+                    pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        ::core::primitive::u8,
+                    >;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for RemoveExpiredApproval {
                     const PALLET: &'static str = "Identity";
@@ -19559,10 +19560,9 @@ pub mod api {
                 }
                 pub mod set_primary_username {
                     use super::runtime_types;
-                    pub type Username =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
-                            ::core::primitive::u8,
-                        >;
+                    pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        ::core::primitive::u8,
+                    >;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetPrimaryUsername {
                     const PALLET: &'static str = "Identity";
@@ -19589,10 +19589,9 @@ pub mod api {
                 }
                 pub mod remove_dangling_username {
                     use super::runtime_types;
-                    pub type Username =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
-                            ::core::primitive::u8,
-                        >;
+                    pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        ::core::primitive::u8,
+                    >;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for RemoveDanglingUsername {
                     const PALLET: &'static str = "Identity";
@@ -20463,7 +20462,7 @@ pub mod api {
             pub mod username_set {
                 use super::runtime_types;
                 pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
-                pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                     ::core::primitive::u8,
                 >;
             }
@@ -20490,7 +20489,7 @@ pub mod api {
             pub mod username_queued {
                 use super::runtime_types;
                 pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
-                pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                     ::core::primitive::u8,
                 >;
                 pub type Expiration = ::core::primitive::u32;
@@ -20539,7 +20538,7 @@ pub mod api {
             pub mod primary_username_set {
                 use super::runtime_types;
                 pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
-                pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                     ::core::primitive::u8,
                 >;
             }
@@ -20566,7 +20565,7 @@ pub mod api {
             pub mod dangling_username_removed {
                 use super::runtime_types;
                 pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
-                pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                pub type Username = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                     ::core::primitive::u8,
                 >;
             }
@@ -20587,7 +20586,7 @@ pub mod api {
                             runtime_types::pallet_identity::legacy::IdentityInfo,
                         >,
                         ::core::option::Option<
-                            runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                            runtime_types::bounded_collections::bounded_vec::BoundedVec<
                                 ::core::primitive::u8,
                             >,
                         >,
@@ -20606,7 +20605,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type SubsOf = (
                         ::core::primitive::u128,
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec18<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                         >,
                     );
@@ -20615,7 +20614,7 @@ pub mod api {
                 pub mod registrars {
                     use super::runtime_types;
                     pub type Registrars =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec19<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::option::Option<
                                 runtime_types::pallet_identity::types::RegistrarInfo<
                                     ::core::primitive::u128,
@@ -20629,7 +20628,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type UsernameAuthorities =
                         runtime_types::pallet_identity::types::AuthorityProperties<
-                            runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                            runtime_types::bounded_collections::bounded_vec::BoundedVec<
                                 ::core::primitive::u8,
                             >,
                         >;
@@ -20638,7 +20637,7 @@ pub mod api {
                 pub mod account_of_username {
                     use super::runtime_types;
                     pub type AccountOfUsername = ::subxt::ext::subxt_core::utils::AccountId32;
-                    pub type Param0 = runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                    pub type Param0 = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >;
                 }
@@ -20648,7 +20647,7 @@ pub mod api {
                         ::subxt::ext::subxt_core::utils::AccountId32,
                         ::core::primitive::u32,
                     );
-                    pub type Param0 = runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                    pub type Param0 = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >;
                 }
@@ -22735,7 +22734,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type Payouts = runtime_types::pallet_society::PayoutRecord<
                         ::core::primitive::u128,
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec15<(
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<(
                             ::core::primitive::u32,
                             ::core::primitive::u128,
                         )>,
@@ -22762,7 +22761,7 @@ pub mod api {
                 }
                 pub mod bids {
                     use super::runtime_types;
-                    pub type Bids = runtime_types::bounded_collections::bounded_vec::BoundedVec20<
+                    pub type Bids = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         runtime_types::pallet_society::Bid<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             ::core::primitive::u128,
@@ -22790,7 +22789,7 @@ pub mod api {
                 pub mod vote_clear_cursor {
                     use super::runtime_types;
                     pub type VoteClearCursor =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >;
                     pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
@@ -24484,7 +24483,7 @@ pub mod api {
                     pub type Recoverable = runtime_types::pallet_recovery::RecoveryConfig<
                         ::core::primitive::u32,
                         ::core::primitive::u128,
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec18<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                         >,
                     >;
@@ -24495,7 +24494,7 @@ pub mod api {
                     pub type ActiveRecoveries = runtime_types::pallet_recovery::ActiveRecovery<
                         ::core::primitive::u32,
                         ::core::primitive::u128,
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec18<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                         >,
                     >;
@@ -25308,13 +25307,12 @@ pub mod api {
                 use super::runtime_types;
                 pub mod vesting {
                     use super::runtime_types;
-                    pub type Vesting =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec21<
-                            runtime_types::pallet_vesting::vesting_info::VestingInfo<
-                                ::core::primitive::u128,
-                                ::core::primitive::u32,
-                            >,
-                        >;
+                    pub type Vesting = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        runtime_types::pallet_vesting::vesting_info::VestingInfo<
+                            ::core::primitive::u128,
+                            ::core::primitive::u32,
+                        >,
+                    >;
                     pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
                 }
                 pub mod storage_version {
@@ -26264,7 +26262,7 @@ pub mod api {
                 }
                 pub mod agenda {
                     use super::runtime_types;
-                    pub type Agenda = runtime_types::bounded_collections::bounded_vec::BoundedVec22<
+                    pub type Agenda = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::option::Option<
                             runtime_types::pallet_scheduler::Scheduled<
                                 [::core::primitive::u8; 32usize],
@@ -27458,7 +27456,7 @@ pub mod api {
                 pub mod proxies {
                     use super::runtime_types;
                     pub type Proxies = (
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec23<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::pallet_proxy::ProxyDefinition<
                                 ::subxt::ext::subxt_core::utils::AccountId32,
                                 runtime_types::rococo_runtime::ProxyType,
@@ -27472,7 +27470,7 @@ pub mod api {
                 pub mod announcements {
                     use super::runtime_types;
                     pub type Announcements = (
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec24<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::pallet_proxy::Announcement<
                                 ::subxt::ext::subxt_core::utils::AccountId32,
                                 ::subxt::ext::subxt_core::utils::H256,
@@ -28811,7 +28809,7 @@ pub mod api {
                 pub mod preimage_for {
                     use super::runtime_types;
                     pub type PreimageFor =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >;
                     pub type Param0 = ::subxt::ext::subxt_core::utils::H256;
@@ -30220,7 +30218,7 @@ pub mod api {
                 pub mod bounty_descriptions {
                     use super::runtime_types;
                     pub type BountyDescriptions =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >;
                     pub type Param0 = ::core::primitive::u32;
@@ -30228,7 +30226,7 @@ pub mod api {
                 pub mod bounty_approvals {
                     use super::runtime_types;
                     pub type BountyApprovals =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec12<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u32,
                         >;
                 }
@@ -31342,7 +31340,7 @@ pub mod api {
                 pub mod child_bounty_descriptions {
                     use super::runtime_types;
                     pub type ChildBountyDescriptions =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >;
                     pub type Param0 = ::core::primitive::u32;
@@ -32243,14 +32241,14 @@ pub mod api {
                 pub mod queue_totals {
                     use super::runtime_types;
                     pub type QueueTotals =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec15<(
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<(
                             ::core::primitive::u32,
                             ::core::primitive::u128,
                         )>;
                 }
                 pub mod queues {
                     use super::runtime_types;
-                    pub type Queues = runtime_types::bounded_collections::bounded_vec::BoundedVec25<
+                    pub type Queues = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         runtime_types::pallet_nis::pallet::Bid<
                             ::core::primitive::u128,
                             ::subxt::ext::subxt_core::utils::AccountId32,
@@ -33735,7 +33733,7 @@ pub mod api {
                 pub mod locks {
                     use super::runtime_types;
                     pub type Locks =
-                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec3<
+                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec<
                             runtime_types::pallet_balances::types::BalanceLock<
                                 ::core::primitive::u128,
                             >,
@@ -33744,18 +33742,17 @@ pub mod api {
                 }
                 pub mod reserves {
                     use super::runtime_types;
-                    pub type Reserves =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec9<
-                            runtime_types::pallet_balances::types::ReserveData<
-                                [::core::primitive::u8; 8usize],
-                                ::core::primitive::u128,
-                            >,
-                        >;
+                    pub type Reserves = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        runtime_types::pallet_balances::types::ReserveData<
+                            [::core::primitive::u8; 8usize],
+                            ::core::primitive::u128,
+                        >,
+                    >;
                     pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
                 }
                 pub mod holds {
                     use super::runtime_types;
-                    pub type Holds = runtime_types::bounded_collections::bounded_vec::BoundedVec10<
+                    pub type Holds = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         runtime_types::pallet_balances::types::IdAmount<
                             runtime_types::rococo_runtime::RuntimeHoldReason,
                             ::core::primitive::u128,
@@ -33765,13 +33762,12 @@ pub mod api {
                 }
                 pub mod freezes {
                     use super::runtime_types;
-                    pub type Freezes =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec11<
-                            runtime_types::pallet_balances::types::IdAmount<
-                                (),
-                                ::core::primitive::u128,
-                            >,
-                        >;
+                    pub type Freezes = runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        runtime_types::pallet_balances::types::IdAmount<
+                            (),
+                            ::core::primitive::u128,
+                        >,
+                    >;
                     pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
                 }
             }
@@ -42325,12 +42321,11 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Errors:"]
                 #[doc = "- `InsufficientBalance`: from the Currency implementation"]
-                #[doc = "- `InvalidParaId`"]
                 #[doc = "- `QueueFull`"]
                 #[doc = "- `SpotPriceHigherThanMaxAmount`"]
                 #[doc = ""]
                 #[doc = "Events:"]
-                #[doc = "- `SpotOrderPlaced`"]
+                #[doc = "- `OnDemandOrderPlaced`"]
                 pub struct PlaceOrderAllowDeath {
                     pub max_amount: place_order_allow_death::MaxAmount,
                     pub para_id: place_order_allow_death::ParaId,
@@ -42368,12 +42363,11 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Errors:"]
                 #[doc = "- `InsufficientBalance`: from the Currency implementation"]
-                #[doc = "- `InvalidParaId`"]
                 #[doc = "- `QueueFull`"]
                 #[doc = "- `SpotPriceHigherThanMaxAmount`"]
                 #[doc = ""]
                 #[doc = "Events:"]
-                #[doc = "- `SpotOrderPlaced`"]
+                #[doc = "- `OnDemandOrderPlaced`"]
                 pub struct PlaceOrderKeepAlive {
                     pub max_amount: place_order_keep_alive::MaxAmount,
                     pub para_id: place_order_keep_alive::ParaId,
@@ -42400,12 +42394,11 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Errors:"]
                 #[doc = "- `InsufficientBalance`: from the Currency implementation"]
-                #[doc = "- `InvalidParaId`"]
                 #[doc = "- `QueueFull`"]
                 #[doc = "- `SpotPriceHigherThanMaxAmount`"]
                 #[doc = ""]
                 #[doc = "Events:"]
-                #[doc = "- `SpotOrderPlaced`"]
+                #[doc = "- `OnDemandOrderPlaced`"]
                 pub fn place_order_allow_death(
                     &self,
                     max_amount: types::place_order_allow_death::MaxAmount,
@@ -42437,12 +42430,11 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Errors:"]
                 #[doc = "- `InsufficientBalance`: from the Currency implementation"]
-                #[doc = "- `InvalidParaId`"]
                 #[doc = "- `QueueFull`"]
                 #[doc = "- `SpotPriceHigherThanMaxAmount`"]
                 #[doc = ""]
                 #[doc = "Events:"]
-                #[doc = "- `SpotOrderPlaced`"]
+                #[doc = "- `OnDemandOrderPlaced`"]
                 pub fn place_order_keep_alive(
                     &self,
                     max_amount: types::place_order_keep_alive::MaxAmount,
@@ -42480,15 +42472,17 @@ pub mod api {
             # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            #[doc = "An order was placed at some spot price amount."]
+            #[doc = "An order was placed at some spot price amount by orderer ordered_by"]
             pub struct OnDemandOrderPlaced {
                 pub para_id: on_demand_order_placed::ParaId,
                 pub spot_price: on_demand_order_placed::SpotPrice,
+                pub ordered_by: on_demand_order_placed::OrderedBy,
             }
             pub mod on_demand_order_placed {
                 use super::runtime_types;
                 pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 pub type SpotPrice = ::core::primitive::u128;
+                pub type OrderedBy = ::subxt::ext::subxt_core::utils::AccountId32;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for OnDemandOrderPlaced {
                 const PALLET: &'static str = "OnDemandAssignmentProvider";
@@ -42504,17 +42498,17 @@ pub mod api {
             # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            #[doc = "The value of the spot traffic multiplier changed."]
-            pub struct SpotTrafficSet {
-                pub traffic: spot_traffic_set::Traffic,
+            #[doc = "The value of the spot price has likely changed"]
+            pub struct SpotPriceSet {
+                pub spot_price: spot_price_set::SpotPrice,
             }
-            pub mod spot_traffic_set {
+            pub mod spot_price_set {
                 use super::runtime_types;
-                pub type Traffic = runtime_types::sp_arithmetic::fixed_point::FixedU128;
+                pub type SpotPrice = ::core::primitive::u128;
             }
-            impl ::subxt::ext::subxt_core::events::StaticEvent for SpotTrafficSet {
+            impl ::subxt::ext::subxt_core::events::StaticEvent for SpotPriceSet {
                 const PALLET: &'static str = "OnDemandAssignmentProvider";
-                const EVENT: &'static str = "SpotTrafficSet";
+                const EVENT: &'static str = "SpotPriceSet";
             }
         }
         pub mod storage {
@@ -46094,7 +46088,7 @@ pub mod api {
                 pub mod send {
                     use super::runtime_types;
                     pub type Dest = runtime_types::xcm::VersionedLocation;
-                    pub type Message = runtime_types::xcm::VersionedXcm1;
+                    pub type Message = runtime_types::xcm::VersionedXcm;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for Send {
                     const PALLET: &'static str = "XcmPallet";
@@ -46245,7 +46239,7 @@ pub mod api {
                 }
                 pub mod execute {
                     use super::runtime_types;
-                    pub type Message = runtime_types::xcm::VersionedXcm2;
+                    pub type Message = runtime_types::xcm::VersionedXcm;
                     pub type MaxWeight = runtime_types::sp_weights::weight_v2::Weight;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for Execute {
@@ -46728,7 +46722,7 @@ pub mod api {
                     pub type RemoteFeesId = runtime_types::xcm::VersionedAssetId;
                     pub type FeesTransferType =
                         runtime_types::staging_xcm_executor::traits::asset_transfer::TransferType;
-                    pub type CustomXcmOnDest = runtime_types::xcm::VersionedXcm1;
+                    pub type CustomXcmOnDest = runtime_types::xcm::VersionedXcm;
                     pub type WeightLimit = runtime_types::xcm::v3::WeightLimit;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for TransferAssetsUsingTypeAndThen {
@@ -47341,7 +47335,7 @@ pub mod api {
                 use super::runtime_types;
                 pub type Origin = runtime_types::staging_xcm::v4::location::Location;
                 pub type Destination = runtime_types::staging_xcm::v4::location::Location;
-                pub type Message = runtime_types::staging_xcm::v4::Xcm1;
+                pub type Message = runtime_types::staging_xcm::v4::Xcm;
                 pub type MessageId = [::core::primitive::u8; 32usize];
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for Sent {
@@ -47989,7 +47983,7 @@ pub mod api {
                 pub mod version_discovery_queue {
                     use super::runtime_types;
                     pub type VersionDiscoveryQueue =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec26<(
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<(
                             runtime_types::xcm::VersionedLocation,
                             ::core::primitive::u32,
                         )>;
@@ -48010,7 +48004,7 @@ pub mod api {
                 pub mod locked_fungibles {
                     use super::runtime_types;
                     pub type LockedFungibles =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec28<(
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<(
                             ::core::primitive::u128,
                             runtime_types::xcm::VersionedLocation,
                         )>;
@@ -48026,7 +48020,7 @@ pub mod api {
                 }
                 pub mod recorded_xcm {
                     use super::runtime_types;
-                    pub type RecordedXcm = runtime_types::staging_xcm::v4::Xcm1;
+                    pub type RecordedXcm = runtime_types::staging_xcm::v4::Xcm;
                 }
             }
             pub struct StorageApi;
@@ -48955,7 +48949,7 @@ pub mod api {
                 pub mod authorities {
                     use super::runtime_types;
                     pub type Authorities =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec29<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
                         >;
                 }
@@ -48966,7 +48960,7 @@ pub mod api {
                 pub mod next_authorities {
                     use super::runtime_types;
                     pub type NextAuthorities =
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec29<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
                         >;
                 }
@@ -49707,7 +49701,7 @@ pub mod api {
                 pub mod sudo_queue_downward_xcm {
                     use super::runtime_types;
                     pub type Id = runtime_types::polkadot_parachain_primitives::primitives::Id;
-                    pub type Xcm = runtime_types::xcm::VersionedXcm1;
+                    pub type Xcm = runtime_types::xcm::VersionedXcm;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SudoQueueDownwardXcm {
                     const PALLET: &'static str = "ParasSudoWrapper";
@@ -51918,427 +51912,7 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct BoundedVec1<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec10<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec11<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec12<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec13<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec14<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec15<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec16<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec17<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec18<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec19<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec2<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec20<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec21<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec22<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec23<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec24<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec25<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec26<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec27<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec28<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec29<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec3<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec4<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec5<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec6<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec7<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec8<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct BoundedVec9<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
+                pub struct BoundedVec<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
             }
             pub mod weak_bounded_vec {
                 use super::runtime_types;
@@ -52356,67 +51930,7 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct WeakBoundedVec1<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct WeakBoundedVec2<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct WeakBoundedVec3<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct WeakBoundedVec4<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct WeakBoundedVec5<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
+                pub struct WeakBoundedVec<_0>(pub ::subxt::ext::subxt_core::alloc::vec::Vec<_0>);
             }
         }
         pub mod finality_grandpa {
@@ -52431,23 +51945,7 @@ pub mod api {
             # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            pub struct Equivocation1<_0, _1, _2> {
-                pub round_number: ::core::primitive::u64,
-                pub identity: _0,
-                pub first: (_1, _2),
-                pub second: (_1, _2),
-            }
-            #[derive(
-                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            pub struct Equivocation2<_0, _1, _2> {
+            pub struct Equivocation<_0, _1, _2> {
                 pub round_number: ::core::primitive::u64,
                 pub identity: _0,
                 pub first: (_1, _2),
@@ -52480,6 +51978,38 @@ pub mod api {
             pub struct Prevote<_0, _1> {
                 pub target_hash: _0,
                 pub target_number: _1,
+            }
+        }
+        pub mod frame_metadata_hash_extension {
+            use super::runtime_types;
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub struct CheckMetadataHash {
+                pub mode: runtime_types::frame_metadata_hash_extension::Mode,
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub enum Mode {
+                #[codec(index = 0)]
+                Disabled,
+                #[codec(index = 1)]
+                Enabled,
             }
         }
         pub mod frame_support {
@@ -52664,7 +52194,7 @@ pub mod api {
                         },
                         #[codec(index = 1)]
                         Inline(
-                            runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                            runtime_types::bounded_collections::bounded_vec::BoundedVec<
                                 ::core::primitive::u8,
                             >,
                         ),
@@ -55090,7 +54620,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct Casting<_0, _1, _2> {
-                    pub votes: runtime_types::bounded_collections::bounded_vec::BoundedVec13<(
+                    pub votes: runtime_types::bounded_collections::bounded_vec::BoundedVec<(
                         _1,
                         runtime_types::pallet_conviction_voting::vote::AccountVote<_0>,
                     )>,
@@ -55335,7 +54865,7 @@ pub mod api {
                 pub scheduled_at: _0,
                 pub delay: _0,
                 pub next_authorities:
-                    runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec4<(
+                    runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec<(
                         runtime_types::sp_consensus_grandpa::app::Public,
                         ::core::primitive::u64,
                     )>,
@@ -55381,7 +54911,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct IdentityInfo {
-                    pub additional: runtime_types::bounded_collections::bounded_vec::BoundedVec1<(
+                    pub additional: runtime_types::bounded_collections::bounded_vec::BoundedVec<(
                         runtime_types::pallet_identity::types::Data,
                         runtime_types::pallet_identity::types::Data,
                     )>,
@@ -55691,7 +55221,7 @@ pub mod api {
                     #[doc = "Accept a given username that an `authority` granted. The call must include the full"]
                     #[doc = "username, as in `username.suffix`."]
                     accept_username {
-                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
@@ -55700,14 +55230,14 @@ pub mod api {
                     #[doc = "accepted by the user and must now be beyond its expiration. The call must include the"]
                     #[doc = "full username, as in `username.suffix`."]
                     remove_expired_approval {
-                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
                     #[codec(index = 20)]
                     #[doc = "Set a given username as the primary. The username should include the suffix."]
                     set_primary_username {
-                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
@@ -55715,7 +55245,7 @@ pub mod api {
                     #[doc = "Remove a username that corresponds to an account with no identity. Exists when a user"]
                     #[doc = "gets a username but then calls `clear_identity`."]
                     remove_dangling_username {
-                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
@@ -55907,7 +55437,7 @@ pub mod api {
                     #[doc = "A username was set for `who`."]
                     UsernameSet {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
-                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
@@ -55915,7 +55445,7 @@ pub mod api {
                     #[doc = "A username was queued, but `who` must accept it prior to `expiration`."]
                     UsernameQueued {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
-                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                         expiration: ::core::primitive::u32,
@@ -55929,7 +55459,7 @@ pub mod api {
                     #[doc = "A username was set as a primary and can be looked up from `who`."]
                     PrimaryUsernameSet {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
-                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
@@ -55938,7 +55468,7 @@ pub mod api {
                     #[doc = "identity) has been removed."]
                     DanglingUsernameRemoved {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
-                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
@@ -56120,11 +55650,10 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct Registration<_0, _2> {
-                    pub judgements:
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec17<(
-                            ::core::primitive::u32,
-                            runtime_types::pallet_identity::types::Judgement<_0>,
-                        )>,
+                    pub judgements: runtime_types::bounded_collections::bounded_vec::BoundedVec<(
+                        ::core::primitive::u32,
+                        runtime_types::pallet_identity::types::Judgement<_0>,
+                    )>,
                     pub deposit: _0,
                     pub info: _2,
                 }
@@ -56439,7 +55968,7 @@ pub mod api {
                 pub first_index: _0,
                 pub first: _0,
                 pub last: _0,
-                pub heap: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                pub heap: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                     ::core::primitive::u8,
                 >,
             }
@@ -56739,7 +56268,7 @@ pub mod api {
                 pub when: runtime_types::pallet_multisig::Timepoint<_0>,
                 pub deposit: _1,
                 pub depositor: _2,
-                pub approvals: runtime_types::bounded_collections::bounded_vec::BoundedVec18<_2>,
+                pub approvals: runtime_types::bounded_collections::bounded_vec::BoundedVec<_2>,
             }
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -58807,78 +58336,7 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub enum ReferendumInfo1<_0, _1, _2, _3, _4, _5, _6, _7> {
-                    #[codec(index = 0)]
-                    Ongoing(
-                        runtime_types::pallet_referenda::types::ReferendumStatus<
-                            _0,
-                            _1,
-                            _2,
-                            _3,
-                            _4,
-                            _5,
-                            _6,
-                            _7,
-                        >,
-                    ),
-                    #[codec(index = 1)]
-                    Approved(
-                        _2,
-                        ::core::option::Option<
-                            runtime_types::pallet_referenda::types::Deposit<_6, _4>,
-                        >,
-                        ::core::option::Option<
-                            runtime_types::pallet_referenda::types::Deposit<_6, _4>,
-                        >,
-                    ),
-                    #[codec(index = 2)]
-                    Rejected(
-                        _2,
-                        ::core::option::Option<
-                            runtime_types::pallet_referenda::types::Deposit<_6, _4>,
-                        >,
-                        ::core::option::Option<
-                            runtime_types::pallet_referenda::types::Deposit<_6, _4>,
-                        >,
-                    ),
-                    #[codec(index = 3)]
-                    Cancelled(
-                        _2,
-                        ::core::option::Option<
-                            runtime_types::pallet_referenda::types::Deposit<_6, _4>,
-                        >,
-                        ::core::option::Option<
-                            runtime_types::pallet_referenda::types::Deposit<_6, _4>,
-                        >,
-                    ),
-                    #[codec(index = 4)]
-                    TimedOut(
-                        _2,
-                        ::core::option::Option<
-                            runtime_types::pallet_referenda::types::Deposit<_6, _4>,
-                        >,
-                        ::core::option::Option<
-                            runtime_types::pallet_referenda::types::Deposit<_6, _4>,
-                        >,
-                    ),
-                    #[codec(index = 5)]
-                    Killed(_2),
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub enum ReferendumInfo2<_0, _1, _2, _3, _4, _5, _6, _7> {
+                pub enum ReferendumInfo<_0, _1, _2, _3, _4, _5, _6, _7> {
                     #[codec(index = 0)]
                     Ongoing(
                         runtime_types::pallet_referenda::types::ReferendumStatus<
@@ -60336,7 +59794,7 @@ pub mod api {
                     ToStart,
                     #[codec(index = 1)]
                     LastKey(
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     ),
@@ -61653,7 +61111,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
-                    # [codec (index = 0)] send { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , message : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm1 > , } , # [codec (index = 1)] # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_teleport_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] teleport_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [codec (index = 2)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_reserve_transfer_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] reserve_transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Execute an XCM message from a local, signed, origin."] # [doc = ""] # [doc = "An event is deposited indicating whether `msg` could be executed completely or only"] # [doc = "partially."] # [doc = ""] # [doc = "No more than `max_weight` will be used in its attempted execution. If this is less than"] # [doc = "the maximum amount of weight that the message could take to be executed, then no"] # [doc = "execution attempt will be made."] execute { message : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm2 > , max_weight : runtime_types :: sp_weights :: weight_v2 :: Weight , } , # [codec (index = 4)] # [doc = "Extoll that a particular destination can be communicated with through a particular"] # [doc = "version of XCM."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The destination that is being described."] # [doc = "- `xcm_version`: The latest version of XCM that `location` supports."] force_xcm_version { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm :: v4 :: location :: Location > , version : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Set a safe XCM version (the version that XCM should be encoded with if the most recent"] # [doc = "version a destination can accept is unknown)."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `maybe_xcm_version`: The default XCM encoding version, or `None` to disable."] force_default_xcm_version { maybe_xcm_version : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 6)] # [doc = "Ask a location to notify us regarding their XCM version and any changes to it."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we should subscribe for XCM version notifications."] force_subscribe_version_notify { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 7)] # [doc = "Require that a particular destination should no longer notify us regarding any XCM"] # [doc = "version changes."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we are currently subscribed for XCM version"] # [doc = "  notifications which we no longer desire."] force_unsubscribe_version_notify { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 8)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_reserve_transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 9)] # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_teleport_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 10)] # [doc = "Set or unset the global suspension state of the XCM executor."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `suspended`: `true` to suspend, `false` to resume."] force_suspension { suspended : :: core :: primitive :: bool , } , # [codec (index = 11)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve, or through teleports."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item` (hence referred to as `fees`), up to enough to pay for"] # [doc = "`weight_limit` of weight. If more weight is needed than `weight_limit`, then the"] # [doc = "operation will fail and the sent assets may be at risk."] # [doc = ""] # [doc = "`assets` (excluding `fees`) must have same reserve location or otherwise be teleportable"] # [doc = "to `dest`, no limitations imposed on `fees`."] # [doc = " - for local reserve: transfer assets to sovereign account of destination chain and"] # [doc = "   forward a notification XCM to `dest` to mint and deposit reserve-based assets to"] # [doc = "   `beneficiary`."] # [doc = " - for destination reserve: burn local assets and forward a notification to `dest` chain"] # [doc = "   to withdraw the reserve assets from this chain's sovereign account and deposit them"] # [doc = "   to `beneficiary`."] # [doc = " - for remote reserve: burn local assets, forward XCM to reserve chain to move reserves"] # [doc = "   from this chain's SA to `dest` chain's SA, and forward another XCM to `dest` to mint"] # [doc = "   and deposit reserve-based assets to `beneficiary`."] # [doc = " - for teleports: burn local assets and forward XCM to `dest` chain to mint/teleport"] # [doc = "   assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `X2(Parent,"] # [doc = "  Parachain(..))` to send from parachain to parachain, or `X1(Parachain(..))` to send"] # [doc = "  from relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 12)] # [doc = "Claims assets trapped on this pallet because of leftover assets during XCM execution."] # [doc = ""] # [doc = "- `origin`: Anyone can call this extrinsic."] # [doc = "- `assets`: The exact assets that were trapped. Use the version to specify what version"] # [doc = "was the latest when they were trapped."] # [doc = "- `beneficiary`: The location/account where the claimed assets will be deposited."] claim_assets { assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 13)] # [doc = "Transfer assets from the local chain to the destination chain using explicit transfer"] # [doc = "types for assets and fees."] # [doc = ""] # [doc = "`assets` must have same reserve location or may be teleportable to `dest`. Caller must"] # [doc = "provide the `assets_transfer_type` to be used for `assets`:"] # [doc = " - `TransferType::LocalReserve`: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `TransferType::DestinationReserve`: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `TransferType::RemoteReserve(reserve)`: burn local assets, forward XCM to `reserve`"] # [doc = "   chain to move reserves from this chain's SA to `dest` chain's SA, and forward another"] # [doc = "   XCM to `dest` to mint and deposit reserve-based assets to `beneficiary`. Typically"] # [doc = "   the remote `reserve` is Asset Hub."] # [doc = " - `TransferType::Teleport`: burn local assets and forward XCM to `dest` chain to"] # [doc = "   mint/teleport assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "On the destination chain, as well as any intermediary hops, `BuyExecution` is used to"] # [doc = "buy execution using transferred `assets` identified by `remote_fees_id`."] # [doc = "Make sure enough of the specified `remote_fees_id` asset is included in the given list"] # [doc = "of `assets`. `remote_fees_id` should be enough to pay for `weight_limit`. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "`remote_fees_id` may use different transfer type than rest of `assets` and can be"] # [doc = "specified through `fees_transfer_type`."] # [doc = ""] # [doc = "The caller needs to specify what should happen to the transferred assets once they reach"] # [doc = "the `dest` chain. This is done through the `custom_xcm_on_dest` parameter, which"] # [doc = "contains the instructions to execute on `dest` as a final step."] # [doc = "  This is usually as simple as:"] # [doc = "  `Xcm(vec![DepositAsset { assets: Wild(AllCounted(assets.len())), beneficiary }])`,"] # [doc = "  but could be something more exotic like sending the `assets` even further."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain, or `(parents: 2, (GlobalConsensus(..), ..))` to send from"] # [doc = "  parachain across a bridge to another ecosystem destination."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `assets_transfer_type`: The XCM `TransferType` used to transfer the `assets`."] # [doc = "- `remote_fees_id`: One of the included `assets` to be be used to pay fees."] # [doc = "- `fees_transfer_type`: The XCM `TransferType` used to transfer the `fees` assets."] # [doc = "- `custom_xcm_on_dest`: The XCM to be executed on `dest` chain as the last step of the"] # [doc = "  transfer, which also determines what happens to the assets on the destination chain."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets_using_type_and_then { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , assets_transfer_type : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , remote_fees_id : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssetId > , fees_transfer_type : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , custom_xcm_on_dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm1 > , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , }
+                    # [codec (index = 0)] send { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , message : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , } , # [codec (index = 1)] # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_teleport_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] teleport_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [codec (index = 2)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_reserve_transfer_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] reserve_transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Execute an XCM message from a local, signed, origin."] # [doc = ""] # [doc = "An event is deposited indicating whether `msg` could be executed completely or only"] # [doc = "partially."] # [doc = ""] # [doc = "No more than `max_weight` will be used in its attempted execution. If this is less than"] # [doc = "the maximum amount of weight that the message could take to be executed, then no"] # [doc = "execution attempt will be made."] execute { message : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , max_weight : runtime_types :: sp_weights :: weight_v2 :: Weight , } , # [codec (index = 4)] # [doc = "Extoll that a particular destination can be communicated with through a particular"] # [doc = "version of XCM."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The destination that is being described."] # [doc = "- `xcm_version`: The latest version of XCM that `location` supports."] force_xcm_version { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm :: v4 :: location :: Location > , version : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Set a safe XCM version (the version that XCM should be encoded with if the most recent"] # [doc = "version a destination can accept is unknown)."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `maybe_xcm_version`: The default XCM encoding version, or `None` to disable."] force_default_xcm_version { maybe_xcm_version : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 6)] # [doc = "Ask a location to notify us regarding their XCM version and any changes to it."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we should subscribe for XCM version notifications."] force_subscribe_version_notify { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 7)] # [doc = "Require that a particular destination should no longer notify us regarding any XCM"] # [doc = "version changes."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we are currently subscribed for XCM version"] # [doc = "  notifications which we no longer desire."] force_unsubscribe_version_notify { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 8)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_reserve_transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 9)] # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_teleport_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 10)] # [doc = "Set or unset the global suspension state of the XCM executor."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `suspended`: `true` to suspend, `false` to resume."] force_suspension { suspended : :: core :: primitive :: bool , } , # [codec (index = 11)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve, or through teleports."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item` (hence referred to as `fees`), up to enough to pay for"] # [doc = "`weight_limit` of weight. If more weight is needed than `weight_limit`, then the"] # [doc = "operation will fail and the sent assets may be at risk."] # [doc = ""] # [doc = "`assets` (excluding `fees`) must have same reserve location or otherwise be teleportable"] # [doc = "to `dest`, no limitations imposed on `fees`."] # [doc = " - for local reserve: transfer assets to sovereign account of destination chain and"] # [doc = "   forward a notification XCM to `dest` to mint and deposit reserve-based assets to"] # [doc = "   `beneficiary`."] # [doc = " - for destination reserve: burn local assets and forward a notification to `dest` chain"] # [doc = "   to withdraw the reserve assets from this chain's sovereign account and deposit them"] # [doc = "   to `beneficiary`."] # [doc = " - for remote reserve: burn local assets, forward XCM to reserve chain to move reserves"] # [doc = "   from this chain's SA to `dest` chain's SA, and forward another XCM to `dest` to mint"] # [doc = "   and deposit reserve-based assets to `beneficiary`."] # [doc = " - for teleports: burn local assets and forward XCM to `dest` chain to mint/teleport"] # [doc = "   assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `X2(Parent,"] # [doc = "  Parachain(..))` to send from parachain to parachain, or `X1(Parachain(..))` to send"] # [doc = "  from relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 12)] # [doc = "Claims assets trapped on this pallet because of leftover assets during XCM execution."] # [doc = ""] # [doc = "- `origin`: Anyone can call this extrinsic."] # [doc = "- `assets`: The exact assets that were trapped. Use the version to specify what version"] # [doc = "was the latest when they were trapped."] # [doc = "- `beneficiary`: The location/account where the claimed assets will be deposited."] claim_assets { assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 13)] # [doc = "Transfer assets from the local chain to the destination chain using explicit transfer"] # [doc = "types for assets and fees."] # [doc = ""] # [doc = "`assets` must have same reserve location or may be teleportable to `dest`. Caller must"] # [doc = "provide the `assets_transfer_type` to be used for `assets`:"] # [doc = " - `TransferType::LocalReserve`: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `TransferType::DestinationReserve`: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `TransferType::RemoteReserve(reserve)`: burn local assets, forward XCM to `reserve`"] # [doc = "   chain to move reserves from this chain's SA to `dest` chain's SA, and forward another"] # [doc = "   XCM to `dest` to mint and deposit reserve-based assets to `beneficiary`. Typically"] # [doc = "   the remote `reserve` is Asset Hub."] # [doc = " - `TransferType::Teleport`: burn local assets and forward XCM to `dest` chain to"] # [doc = "   mint/teleport assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "On the destination chain, as well as any intermediary hops, `BuyExecution` is used to"] # [doc = "buy execution using transferred `assets` identified by `remote_fees_id`."] # [doc = "Make sure enough of the specified `remote_fees_id` asset is included in the given list"] # [doc = "of `assets`. `remote_fees_id` should be enough to pay for `weight_limit`. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "`remote_fees_id` may use different transfer type than rest of `assets` and can be"] # [doc = "specified through `fees_transfer_type`."] # [doc = ""] # [doc = "The caller needs to specify what should happen to the transferred assets once they reach"] # [doc = "the `dest` chain. This is done through the `custom_xcm_on_dest` parameter, which"] # [doc = "contains the instructions to execute on `dest` as a final step."] # [doc = "  This is usually as simple as:"] # [doc = "  `Xcm(vec![DepositAsset { assets: Wild(AllCounted(assets.len())), beneficiary }])`,"] # [doc = "  but could be something more exotic like sending the `assets` even further."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain, or `(parents: 2, (GlobalConsensus(..), ..))` to send from"] # [doc = "  parachain across a bridge to another ecosystem destination."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `assets_transfer_type`: The XCM `TransferType` used to transfer the `assets`."] # [doc = "- `remote_fees_id`: One of the included `assets` to be be used to pay fees."] # [doc = "- `fees_transfer_type`: The XCM `TransferType` used to transfer the `fees` assets."] # [doc = "- `custom_xcm_on_dest`: The XCM to be executed on `dest` chain as the last step of the"] # [doc = "  transfer, which also determines what happens to the assets on the destination chain."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets_using_type_and_then { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , assets_transfer_type : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , remote_fees_id : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssetId > , fees_transfer_type : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , custom_xcm_on_dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -61772,7 +61230,7 @@ pub mod api {
                     Sent {
                         origin: runtime_types::staging_xcm::v4::location::Location,
                         destination: runtime_types::staging_xcm::v4::location::Location,
-                        message: runtime_types::staging_xcm::v4::Xcm1,
+                        message: runtime_types::staging_xcm::v4::Xcm,
                         message_id: [::core::primitive::u8; 32usize],
                     },
                     #[codec(index = 2)]
@@ -62028,7 +61486,7 @@ pub mod api {
                     pub amount: ::core::primitive::u128,
                     pub owner: runtime_types::xcm::VersionedLocation,
                     pub locker: runtime_types::xcm::VersionedLocation,
-                    pub consumers: runtime_types::bounded_collections::bounded_vec::BoundedVec27<(
+                    pub consumers: runtime_types::bounded_collections::bounded_vec::BoundedVec<(
                         _0,
                         ::core::primitive::u128,
                     )>,
@@ -62670,11 +62128,11 @@ pub mod api {
                 )]
                 pub struct CandidateCommitments<_0> {
                     pub upward_messages:
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec3<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         >,
                     pub horizontal_messages:
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec4<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::polkadot_core_primitives::OutboundHrmpMessage<
                                 runtime_types::polkadot_parachain_primitives::primitives::Id,
                             >,
@@ -62932,25 +62390,7 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct IndexedVec1<_0, _1>(
-                    pub ::subxt::ext::subxt_core::alloc::vec::Vec<_1>,
-                    #[codec(skip)] pub ::core::marker::PhantomData<_0>,
-                );
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct IndexedVec2<_0, _1>(
+                pub struct IndexedVec<_0, _1>(
                     pub ::subxt::ext::subxt_core::alloc::vec::Vec<_1>,
                     #[codec(skip)] pub ::core::marker::PhantomData<_0>,
                 );
@@ -63201,7 +62641,7 @@ pub mod api {
                     >,
                     pub random_seed: [::core::primitive::u8; 32usize],
                     pub dispute_period: ::core::primitive::u32,
-                    pub validators: runtime_types::polkadot_primitives::v7::IndexedVec1<
+                    pub validators: runtime_types::polkadot_primitives::v7::IndexedVec<
                         runtime_types::polkadot_primitives::v7::ValidatorIndex,
                         runtime_types::polkadot_primitives::v7::validator_app::Public,
                     >,
@@ -63211,7 +62651,7 @@ pub mod api {
                     pub assignment_keys: ::subxt::ext::subxt_core::alloc::vec::Vec<
                         runtime_types::polkadot_primitives::v7::assignment_app::Public,
                     >,
-                    pub validator_groups: runtime_types::polkadot_primitives::v7::IndexedVec2<
+                    pub validator_groups: runtime_types::polkadot_primitives::v7::IndexedVec<
                         runtime_types::polkadot_primitives::v7::GroupIndex,
                         ::subxt::ext::subxt_core::alloc::vec::Vec<
                             runtime_types::polkadot_primitives::v7::ValidatorIndex,
@@ -64578,7 +64018,7 @@ pub mod api {
                         sudo_queue_downward_xcm {
                             id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                             xcm: ::subxt::ext::subxt_core::alloc::boxed::Box<
-                                runtime_types::xcm::VersionedXcm1,
+                                runtime_types::xcm::VersionedXcm,
                             >,
                         },
                         #[codec(index = 5)]
@@ -64931,12 +64371,11 @@ pub mod api {
                         #[doc = ""]
                         #[doc = "Errors:"]
                         #[doc = "- `InsufficientBalance`: from the Currency implementation"]
-                        #[doc = "- `InvalidParaId`"]
                         #[doc = "- `QueueFull`"]
                         #[doc = "- `SpotPriceHigherThanMaxAmount`"]
                         #[doc = ""]
                         #[doc = "Events:"]
-                        #[doc = "- `SpotOrderPlaced`"]
+                        #[doc = "- `OnDemandOrderPlaced`"]
                         place_order_allow_death {
                             max_amount: ::core::primitive::u128,
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
@@ -64952,12 +64391,11 @@ pub mod api {
                         #[doc = ""]
                         #[doc = "Errors:"]
                         #[doc = "- `InsufficientBalance`: from the Currency implementation"]
-                        #[doc = "- `InvalidParaId`"]
                         #[doc = "- `QueueFull`"]
                         #[doc = "- `SpotPriceHigherThanMaxAmount`"]
                         #[doc = ""]
                         #[doc = "Events:"]
-                        #[doc = "- `SpotOrderPlaced`"]
+                        #[doc = "- `OnDemandOrderPlaced`"]
                         place_order_keep_alive {
                             max_amount: ::core::primitive::u128,
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
@@ -65004,16 +64442,15 @@ pub mod api {
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
                         #[codec(index = 0)]
-                        #[doc = "An order was placed at some spot price amount."]
+                        #[doc = "An order was placed at some spot price amount by orderer ordered_by"]
                         OnDemandOrderPlaced {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                             spot_price: ::core::primitive::u128,
+                            ordered_by: ::subxt::ext::subxt_core::utils::AccountId32,
                         },
                         #[codec(index = 1)]
-                        #[doc = "The value of the spot traffic multiplier changed."]
-                        SpotTrafficSet {
-                            traffic: runtime_types::sp_arithmetic::fixed_point::FixedU128,
-                        },
+                        #[doc = "The value of the spot price has likely changed"]
+                        SpotPriceSet { spot_price: ::core::primitive::u128 },
                     }
                 }
                 #[derive(
@@ -67691,19 +67128,6 @@ pub mod api {
             # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            pub struct OpaqueKeyOwnershipProof(
-                pub ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
-            );
-            #[derive(
-                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub struct ValidatorSet<_0> {
                 pub validators: ::subxt::ext::subxt_core::alloc::vec::Vec<_0>,
                 pub id: ::core::primitive::u64,
@@ -67772,7 +67196,7 @@ pub mod api {
             pub enum Equivocation<_0, _1> {
                 #[codec(index = 0)]
                 Prevote(
-                    runtime_types::finality_grandpa::Equivocation1<
+                    runtime_types::finality_grandpa::Equivocation<
                         runtime_types::sp_consensus_grandpa::app::Public,
                         runtime_types::finality_grandpa::Prevote<_0, _1>,
                         runtime_types::sp_consensus_grandpa::app::Signature,
@@ -67780,7 +67204,7 @@ pub mod api {
                 ),
                 #[codec(index = 1)]
                 Precommit(
-                    runtime_types::finality_grandpa::Equivocation2<
+                    runtime_types::finality_grandpa::Equivocation<
                         runtime_types::sp_consensus_grandpa::app::Public,
                         runtime_types::finality_grandpa::Precommit<_0, _1>,
                         runtime_types::sp_consensus_grandpa::app::Signature,
@@ -67801,19 +67225,6 @@ pub mod api {
                 pub set_id: ::core::primitive::u64,
                 pub equivocation: runtime_types::sp_consensus_grandpa::Equivocation<_0, _1>,
             }
-            #[derive(
-                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            pub struct OpaqueKeyOwnershipProof(
-                pub ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
-            );
         }
         pub mod sp_consensus_slots {
             use super::runtime_types;
@@ -68929,6 +68340,19 @@ pub mod api {
             # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub struct OpaqueValue(
+                pub ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+            );
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum TokenError {
                 #[codec(index = 0)]
                 FundsUnavailable,
@@ -69490,7 +68914,7 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub enum Instruction1 {
+                pub enum Instruction {
                     #[codec(index = 0)]
                     WithdrawAsset(runtime_types::staging_xcm::v4::asset::Assets),
                     #[codec(index = 1)]
@@ -69516,11 +68940,11 @@ pub mod api {
                     TransferReserveAsset {
                         assets: runtime_types::staging_xcm::v4::asset::Assets,
                         dest: runtime_types::staging_xcm::v4::location::Location,
-                        xcm: runtime_types::staging_xcm::v4::Xcm1,
+                        xcm: runtime_types::staging_xcm::v4::Xcm,
                     },
                     #[codec(index = 6)]
                     Transact {
-                        origin_kind: runtime_types::xcm::v2::OriginKind,
+                        origin_kind: runtime_types::xcm::v3::OriginKind,
                         require_weight_at_most: runtime_types::sp_weights::weight_v2::Weight,
                         call: runtime_types::xcm::double_encoded::DoubleEncoded,
                     },
@@ -69562,7 +68986,7 @@ pub mod api {
                     DepositReserveAsset {
                         assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
                         dest: runtime_types::staging_xcm::v4::location::Location,
-                        xcm: runtime_types::staging_xcm::v4::Xcm1,
+                        xcm: runtime_types::staging_xcm::v4::Xcm,
                     },
                     #[codec(index = 15)]
                     ExchangeAsset {
@@ -69574,13 +68998,13 @@ pub mod api {
                     InitiateReserveWithdraw {
                         assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
                         reserve: runtime_types::staging_xcm::v4::location::Location,
-                        xcm: runtime_types::staging_xcm::v4::Xcm1,
+                        xcm: runtime_types::staging_xcm::v4::Xcm,
                     },
                     #[codec(index = 17)]
                     InitiateTeleport {
                         assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
                         dest: runtime_types::staging_xcm::v4::location::Location,
-                        xcm: runtime_types::staging_xcm::v4::Xcm1,
+                        xcm: runtime_types::staging_xcm::v4::Xcm,
                     },
                     #[codec(index = 18)]
                     ReportHolding {
@@ -69595,9 +69019,9 @@ pub mod api {
                     #[codec(index = 20)]
                     RefundSurplus,
                     #[codec(index = 21)]
-                    SetErrorHandler(runtime_types::staging_xcm::v4::Xcm1),
+                    SetErrorHandler(runtime_types::staging_xcm::v4::Xcm),
                     #[codec(index = 22)]
-                    SetAppendix(runtime_types::staging_xcm::v4::Xcm1),
+                    SetAppendix(runtime_types::staging_xcm::v4::Xcm),
                     #[codec(index = 23)]
                     ClearError,
                     #[codec(index = 24)]
@@ -69660,231 +69084,7 @@ pub mod api {
                     ExportMessage {
                         network: runtime_types::staging_xcm::v4::junction::NetworkId,
                         destination: runtime_types::staging_xcm::v4::junctions::Junctions,
-                        xcm: runtime_types::staging_xcm::v4::Xcm1,
-                    },
-                    #[codec(index = 39)]
-                    LockAsset {
-                        asset: runtime_types::staging_xcm::v4::asset::Asset,
-                        unlocker: runtime_types::staging_xcm::v4::location::Location,
-                    },
-                    #[codec(index = 40)]
-                    UnlockAsset {
-                        asset: runtime_types::staging_xcm::v4::asset::Asset,
-                        target: runtime_types::staging_xcm::v4::location::Location,
-                    },
-                    #[codec(index = 41)]
-                    NoteUnlockable {
-                        asset: runtime_types::staging_xcm::v4::asset::Asset,
-                        owner: runtime_types::staging_xcm::v4::location::Location,
-                    },
-                    #[codec(index = 42)]
-                    RequestUnlock {
-                        asset: runtime_types::staging_xcm::v4::asset::Asset,
-                        locker: runtime_types::staging_xcm::v4::location::Location,
-                    },
-                    #[codec(index = 43)]
-                    SetFeesMode {
-                        jit_withdraw: ::core::primitive::bool,
-                    },
-                    #[codec(index = 44)]
-                    SetTopic([::core::primitive::u8; 32usize]),
-                    #[codec(index = 45)]
-                    ClearTopic,
-                    #[codec(index = 46)]
-                    AliasOrigin(runtime_types::staging_xcm::v4::location::Location),
-                    #[codec(index = 47)]
-                    UnpaidExecution {
-                        weight_limit: runtime_types::xcm::v3::WeightLimit,
-                        check_origin: ::core::option::Option<
-                            runtime_types::staging_xcm::v4::location::Location,
-                        >,
-                    },
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub enum Instruction2 {
-                    #[codec(index = 0)]
-                    WithdrawAsset(runtime_types::staging_xcm::v4::asset::Assets),
-                    #[codec(index = 1)]
-                    ReserveAssetDeposited(runtime_types::staging_xcm::v4::asset::Assets),
-                    #[codec(index = 2)]
-                    ReceiveTeleportedAsset(runtime_types::staging_xcm::v4::asset::Assets),
-                    #[codec(index = 3)]
-                    QueryResponse {
-                        #[codec(compact)]
-                        query_id: ::core::primitive::u64,
-                        response: runtime_types::staging_xcm::v4::Response,
-                        max_weight: runtime_types::sp_weights::weight_v2::Weight,
-                        querier: ::core::option::Option<
-                            runtime_types::staging_xcm::v4::location::Location,
-                        >,
-                    },
-                    #[codec(index = 4)]
-                    TransferAsset {
-                        assets: runtime_types::staging_xcm::v4::asset::Assets,
-                        beneficiary: runtime_types::staging_xcm::v4::location::Location,
-                    },
-                    #[codec(index = 5)]
-                    TransferReserveAsset {
-                        assets: runtime_types::staging_xcm::v4::asset::Assets,
-                        dest: runtime_types::staging_xcm::v4::location::Location,
-                        xcm: runtime_types::staging_xcm::v4::Xcm1,
-                    },
-                    #[codec(index = 6)]
-                    Transact {
-                        origin_kind: runtime_types::xcm::v2::OriginKind,
-                        require_weight_at_most: runtime_types::sp_weights::weight_v2::Weight,
-                        call: runtime_types::xcm::double_encoded::DoubleEncoded,
-                    },
-                    #[codec(index = 7)]
-                    HrmpNewChannelOpenRequest {
-                        #[codec(compact)]
-                        sender: ::core::primitive::u32,
-                        #[codec(compact)]
-                        max_message_size: ::core::primitive::u32,
-                        #[codec(compact)]
-                        max_capacity: ::core::primitive::u32,
-                    },
-                    #[codec(index = 8)]
-                    HrmpChannelAccepted {
-                        #[codec(compact)]
-                        recipient: ::core::primitive::u32,
-                    },
-                    #[codec(index = 9)]
-                    HrmpChannelClosing {
-                        #[codec(compact)]
-                        initiator: ::core::primitive::u32,
-                        #[codec(compact)]
-                        sender: ::core::primitive::u32,
-                        #[codec(compact)]
-                        recipient: ::core::primitive::u32,
-                    },
-                    #[codec(index = 10)]
-                    ClearOrigin,
-                    #[codec(index = 11)]
-                    DescendOrigin(runtime_types::staging_xcm::v4::junctions::Junctions),
-                    #[codec(index = 12)]
-                    ReportError(runtime_types::staging_xcm::v4::QueryResponseInfo),
-                    #[codec(index = 13)]
-                    DepositAsset {
-                        assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
-                        beneficiary: runtime_types::staging_xcm::v4::location::Location,
-                    },
-                    #[codec(index = 14)]
-                    DepositReserveAsset {
-                        assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
-                        dest: runtime_types::staging_xcm::v4::location::Location,
-                        xcm: runtime_types::staging_xcm::v4::Xcm1,
-                    },
-                    #[codec(index = 15)]
-                    ExchangeAsset {
-                        give: runtime_types::staging_xcm::v4::asset::AssetFilter,
-                        want: runtime_types::staging_xcm::v4::asset::Assets,
-                        maximal: ::core::primitive::bool,
-                    },
-                    #[codec(index = 16)]
-                    InitiateReserveWithdraw {
-                        assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
-                        reserve: runtime_types::staging_xcm::v4::location::Location,
-                        xcm: runtime_types::staging_xcm::v4::Xcm1,
-                    },
-                    #[codec(index = 17)]
-                    InitiateTeleport {
-                        assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
-                        dest: runtime_types::staging_xcm::v4::location::Location,
-                        xcm: runtime_types::staging_xcm::v4::Xcm1,
-                    },
-                    #[codec(index = 18)]
-                    ReportHolding {
-                        response_info: runtime_types::staging_xcm::v4::QueryResponseInfo,
-                        assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
-                    },
-                    #[codec(index = 19)]
-                    BuyExecution {
-                        fees: runtime_types::staging_xcm::v4::asset::Asset,
-                        weight_limit: runtime_types::xcm::v3::WeightLimit,
-                    },
-                    #[codec(index = 20)]
-                    RefundSurplus,
-                    #[codec(index = 21)]
-                    SetErrorHandler(runtime_types::staging_xcm::v4::Xcm2),
-                    #[codec(index = 22)]
-                    SetAppendix(runtime_types::staging_xcm::v4::Xcm2),
-                    #[codec(index = 23)]
-                    ClearError,
-                    #[codec(index = 24)]
-                    ClaimAsset {
-                        assets: runtime_types::staging_xcm::v4::asset::Assets,
-                        ticket: runtime_types::staging_xcm::v4::location::Location,
-                    },
-                    #[codec(index = 25)]
-                    Trap(#[codec(compact)] ::core::primitive::u64),
-                    #[codec(index = 26)]
-                    SubscribeVersion {
-                        #[codec(compact)]
-                        query_id: ::core::primitive::u64,
-                        max_response_weight: runtime_types::sp_weights::weight_v2::Weight,
-                    },
-                    #[codec(index = 27)]
-                    UnsubscribeVersion,
-                    #[codec(index = 28)]
-                    BurnAsset(runtime_types::staging_xcm::v4::asset::Assets),
-                    #[codec(index = 29)]
-                    ExpectAsset(runtime_types::staging_xcm::v4::asset::Assets),
-                    #[codec(index = 30)]
-                    ExpectOrigin(
-                        ::core::option::Option<runtime_types::staging_xcm::v4::location::Location>,
-                    ),
-                    #[codec(index = 31)]
-                    ExpectError(
-                        ::core::option::Option<(
-                            ::core::primitive::u32,
-                            runtime_types::xcm::v3::traits::Error,
-                        )>,
-                    ),
-                    #[codec(index = 32)]
-                    ExpectTransactStatus(runtime_types::xcm::v3::MaybeErrorCode),
-                    #[codec(index = 33)]
-                    QueryPallet {
-                        module_name:
-                            ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
-                        response_info: runtime_types::staging_xcm::v4::QueryResponseInfo,
-                    },
-                    #[codec(index = 34)]
-                    ExpectPallet {
-                        #[codec(compact)]
-                        index: ::core::primitive::u32,
-                        name: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
-                        module_name:
-                            ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
-                        #[codec(compact)]
-                        crate_major: ::core::primitive::u32,
-                        #[codec(compact)]
-                        min_crate_minor: ::core::primitive::u32,
-                    },
-                    #[codec(index = 35)]
-                    ReportTransactStatus(runtime_types::staging_xcm::v4::QueryResponseInfo),
-                    #[codec(index = 36)]
-                    ClearTransactStatus,
-                    #[codec(index = 37)]
-                    UniversalOrigin(runtime_types::staging_xcm::v4::junction::Junction),
-                    #[codec(index = 38)]
-                    ExportMessage {
-                        network: runtime_types::staging_xcm::v4::junction::NetworkId,
-                        destination: runtime_types::staging_xcm::v4::junctions::Junctions,
-                        xcm: runtime_types::staging_xcm::v4::Xcm1,
+                        xcm: runtime_types::staging_xcm::v4::Xcm,
                     },
                     #[codec(index = 39)]
                     LockAsset {
@@ -69941,10 +69141,10 @@ pub mod api {
                 pub struct PalletInfo {
                     #[codec(compact)]
                     pub index: ::core::primitive::u32,
-                    pub name: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                    pub name: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
-                    pub module_name: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                    pub module_name: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
                     #[codec(compact)]
@@ -70004,7 +69204,7 @@ pub mod api {
                     Version(::core::primitive::u32),
                     #[codec(index = 4)]
                     PalletsInfo(
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec6<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::staging_xcm::v4::PalletInfo,
                         >,
                     ),
@@ -70025,28 +69225,9 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct Xcm1(
+                pub struct Xcm(
                     pub  ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::staging_xcm::v4::Instruction1,
-                    >,
-                );
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct Xcm2(
-                    pub  ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::staging_xcm::v4::Instruction2,
+                        runtime_types::staging_xcm::v4::Instruction,
                     >,
                 );
             }
@@ -70149,7 +69330,7 @@ pub mod api {
                         GeneralIndex(#[codec(compact)] ::core::primitive::u128),
                         #[codec(index = 6)]
                         GeneralKey(
-                            runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec1<
+                            runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec<
                                 ::core::primitive::u8,
                             >,
                         ),
@@ -70522,7 +69703,7 @@ pub mod api {
                     Unit,
                     #[codec(index = 1)]
                     Named(
-                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec1<
+                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec<
                             ::core::primitive::u8,
                         >,
                     ),
@@ -70601,7 +69782,7 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub enum Instruction1 {
+                pub enum Instruction {
                     #[codec(index = 0)]
                     WithdrawAsset(runtime_types::xcm::v2::multiasset::MultiAssets),
                     #[codec(index = 1)]
@@ -70625,7 +69806,7 @@ pub mod api {
                     TransferReserveAsset {
                         assets: runtime_types::xcm::v2::multiasset::MultiAssets,
                         dest: runtime_types::xcm::v2::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v2::Xcm1,
+                        xcm: runtime_types::xcm::v2::Xcm,
                     },
                     #[codec(index = 6)]
                     Transact {
@@ -70682,7 +69863,7 @@ pub mod api {
                         #[codec(compact)]
                         max_assets: ::core::primitive::u32,
                         dest: runtime_types::xcm::v2::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v2::Xcm1,
+                        xcm: runtime_types::xcm::v2::Xcm,
                     },
                     #[codec(index = 15)]
                     ExchangeAsset {
@@ -70693,13 +69874,13 @@ pub mod api {
                     InitiateReserveWithdraw {
                         assets: runtime_types::xcm::v2::multiasset::MultiAssetFilter,
                         reserve: runtime_types::xcm::v2::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v2::Xcm1,
+                        xcm: runtime_types::xcm::v2::Xcm,
                     },
                     #[codec(index = 17)]
                     InitiateTeleport {
                         assets: runtime_types::xcm::v2::multiasset::MultiAssetFilter,
                         dest: runtime_types::xcm::v2::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v2::Xcm1,
+                        xcm: runtime_types::xcm::v2::Xcm,
                     },
                     #[codec(index = 18)]
                     QueryHolding {
@@ -70718,162 +69899,9 @@ pub mod api {
                     #[codec(index = 20)]
                     RefundSurplus,
                     #[codec(index = 21)]
-                    SetErrorHandler(runtime_types::xcm::v2::Xcm1),
+                    SetErrorHandler(runtime_types::xcm::v2::Xcm),
                     #[codec(index = 22)]
-                    SetAppendix(runtime_types::xcm::v2::Xcm1),
-                    #[codec(index = 23)]
-                    ClearError,
-                    #[codec(index = 24)]
-                    ClaimAsset {
-                        assets: runtime_types::xcm::v2::multiasset::MultiAssets,
-                        ticket: runtime_types::xcm::v2::multilocation::MultiLocation,
-                    },
-                    #[codec(index = 25)]
-                    Trap(#[codec(compact)] ::core::primitive::u64),
-                    #[codec(index = 26)]
-                    SubscribeVersion {
-                        #[codec(compact)]
-                        query_id: ::core::primitive::u64,
-                        #[codec(compact)]
-                        max_response_weight: ::core::primitive::u64,
-                    },
-                    #[codec(index = 27)]
-                    UnsubscribeVersion,
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub enum Instruction2 {
-                    #[codec(index = 0)]
-                    WithdrawAsset(runtime_types::xcm::v2::multiasset::MultiAssets),
-                    #[codec(index = 1)]
-                    ReserveAssetDeposited(runtime_types::xcm::v2::multiasset::MultiAssets),
-                    #[codec(index = 2)]
-                    ReceiveTeleportedAsset(runtime_types::xcm::v2::multiasset::MultiAssets),
-                    #[codec(index = 3)]
-                    QueryResponse {
-                        #[codec(compact)]
-                        query_id: ::core::primitive::u64,
-                        response: runtime_types::xcm::v2::Response,
-                        #[codec(compact)]
-                        max_weight: ::core::primitive::u64,
-                    },
-                    #[codec(index = 4)]
-                    TransferAsset {
-                        assets: runtime_types::xcm::v2::multiasset::MultiAssets,
-                        beneficiary: runtime_types::xcm::v2::multilocation::MultiLocation,
-                    },
-                    #[codec(index = 5)]
-                    TransferReserveAsset {
-                        assets: runtime_types::xcm::v2::multiasset::MultiAssets,
-                        dest: runtime_types::xcm::v2::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v2::Xcm1,
-                    },
-                    #[codec(index = 6)]
-                    Transact {
-                        origin_type: runtime_types::xcm::v2::OriginKind,
-                        #[codec(compact)]
-                        require_weight_at_most: ::core::primitive::u64,
-                        call: runtime_types::xcm::double_encoded::DoubleEncoded,
-                    },
-                    #[codec(index = 7)]
-                    HrmpNewChannelOpenRequest {
-                        #[codec(compact)]
-                        sender: ::core::primitive::u32,
-                        #[codec(compact)]
-                        max_message_size: ::core::primitive::u32,
-                        #[codec(compact)]
-                        max_capacity: ::core::primitive::u32,
-                    },
-                    #[codec(index = 8)]
-                    HrmpChannelAccepted {
-                        #[codec(compact)]
-                        recipient: ::core::primitive::u32,
-                    },
-                    #[codec(index = 9)]
-                    HrmpChannelClosing {
-                        #[codec(compact)]
-                        initiator: ::core::primitive::u32,
-                        #[codec(compact)]
-                        sender: ::core::primitive::u32,
-                        #[codec(compact)]
-                        recipient: ::core::primitive::u32,
-                    },
-                    #[codec(index = 10)]
-                    ClearOrigin,
-                    #[codec(index = 11)]
-                    DescendOrigin(runtime_types::xcm::v2::multilocation::Junctions),
-                    #[codec(index = 12)]
-                    ReportError {
-                        #[codec(compact)]
-                        query_id: ::core::primitive::u64,
-                        dest: runtime_types::xcm::v2::multilocation::MultiLocation,
-                        #[codec(compact)]
-                        max_response_weight: ::core::primitive::u64,
-                    },
-                    #[codec(index = 13)]
-                    DepositAsset {
-                        assets: runtime_types::xcm::v2::multiasset::MultiAssetFilter,
-                        #[codec(compact)]
-                        max_assets: ::core::primitive::u32,
-                        beneficiary: runtime_types::xcm::v2::multilocation::MultiLocation,
-                    },
-                    #[codec(index = 14)]
-                    DepositReserveAsset {
-                        assets: runtime_types::xcm::v2::multiasset::MultiAssetFilter,
-                        #[codec(compact)]
-                        max_assets: ::core::primitive::u32,
-                        dest: runtime_types::xcm::v2::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v2::Xcm1,
-                    },
-                    #[codec(index = 15)]
-                    ExchangeAsset {
-                        give: runtime_types::xcm::v2::multiasset::MultiAssetFilter,
-                        receive: runtime_types::xcm::v2::multiasset::MultiAssets,
-                    },
-                    #[codec(index = 16)]
-                    InitiateReserveWithdraw {
-                        assets: runtime_types::xcm::v2::multiasset::MultiAssetFilter,
-                        reserve: runtime_types::xcm::v2::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v2::Xcm1,
-                    },
-                    #[codec(index = 17)]
-                    InitiateTeleport {
-                        assets: runtime_types::xcm::v2::multiasset::MultiAssetFilter,
-                        dest: runtime_types::xcm::v2::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v2::Xcm1,
-                    },
-                    #[codec(index = 18)]
-                    QueryHolding {
-                        #[codec(compact)]
-                        query_id: ::core::primitive::u64,
-                        dest: runtime_types::xcm::v2::multilocation::MultiLocation,
-                        assets: runtime_types::xcm::v2::multiasset::MultiAssetFilter,
-                        #[codec(compact)]
-                        max_response_weight: ::core::primitive::u64,
-                    },
-                    #[codec(index = 19)]
-                    BuyExecution {
-                        fees: runtime_types::xcm::v2::multiasset::MultiAsset,
-                        weight_limit: runtime_types::xcm::v2::WeightLimit,
-                    },
-                    #[codec(index = 20)]
-                    RefundSurplus,
-                    #[codec(index = 21)]
-                    SetErrorHandler(runtime_types::xcm::v2::Xcm2),
-                    #[codec(index = 22)]
-                    SetAppendix(runtime_types::xcm::v2::Xcm2),
+                    SetAppendix(runtime_types::xcm::v2::Xcm),
                     #[codec(index = 23)]
                     ClearError,
                     #[codec(index = 24)]
@@ -70912,7 +69940,7 @@ pub mod api {
                     Any,
                     #[codec(index = 1)]
                     Named(
-                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec1<
+                        runtime_types::bounded_collections::weak_bounded_vec::WeakBoundedVec<
                             ::core::primitive::u8,
                         >,
                     ),
@@ -71008,28 +70036,9 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct Xcm1(
+                pub struct Xcm(
                     pub  ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::xcm::v2::Instruction1,
-                    >,
-                );
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct Xcm2(
-                    pub  ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::xcm::v2::Instruction2,
+                        runtime_types::xcm::v2::Instruction,
                     >,
                 );
             }
@@ -71589,7 +70598,7 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub enum Instruction1 {
+                pub enum Instruction {
                     #[codec(index = 0)]
                     WithdrawAsset(runtime_types::xcm::v3::multiasset::MultiAssets),
                     #[codec(index = 1)]
@@ -71615,11 +70624,11 @@ pub mod api {
                     TransferReserveAsset {
                         assets: runtime_types::xcm::v3::multiasset::MultiAssets,
                         dest: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v3::Xcm1,
+                        xcm: runtime_types::xcm::v3::Xcm,
                     },
                     #[codec(index = 6)]
                     Transact {
-                        origin_kind: runtime_types::xcm::v2::OriginKind,
+                        origin_kind: runtime_types::xcm::v3::OriginKind,
                         require_weight_at_most: runtime_types::sp_weights::weight_v2::Weight,
                         call: runtime_types::xcm::double_encoded::DoubleEncoded,
                     },
@@ -71661,7 +70670,7 @@ pub mod api {
                     DepositReserveAsset {
                         assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
                         dest: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v3::Xcm1,
+                        xcm: runtime_types::xcm::v3::Xcm,
                     },
                     #[codec(index = 15)]
                     ExchangeAsset {
@@ -71673,13 +70682,13 @@ pub mod api {
                     InitiateReserveWithdraw {
                         assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
                         reserve: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v3::Xcm1,
+                        xcm: runtime_types::xcm::v3::Xcm,
                     },
                     #[codec(index = 17)]
                     InitiateTeleport {
                         assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
                         dest: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v3::Xcm1,
+                        xcm: runtime_types::xcm::v3::Xcm,
                     },
                     #[codec(index = 18)]
                     ReportHolding {
@@ -71694,9 +70703,9 @@ pub mod api {
                     #[codec(index = 20)]
                     RefundSurplus,
                     #[codec(index = 21)]
-                    SetErrorHandler(runtime_types::xcm::v3::Xcm1),
+                    SetErrorHandler(runtime_types::xcm::v3::Xcm),
                     #[codec(index = 22)]
-                    SetAppendix(runtime_types::xcm::v3::Xcm1),
+                    SetAppendix(runtime_types::xcm::v3::Xcm),
                     #[codec(index = 23)]
                     ClearError,
                     #[codec(index = 24)]
@@ -71761,233 +70770,7 @@ pub mod api {
                     ExportMessage {
                         network: runtime_types::xcm::v3::junction::NetworkId,
                         destination: runtime_types::xcm::v3::junctions::Junctions,
-                        xcm: runtime_types::xcm::v3::Xcm1,
-                    },
-                    #[codec(index = 39)]
-                    LockAsset {
-                        asset: runtime_types::xcm::v3::multiasset::MultiAsset,
-                        unlocker: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                    },
-                    #[codec(index = 40)]
-                    UnlockAsset {
-                        asset: runtime_types::xcm::v3::multiasset::MultiAsset,
-                        target: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                    },
-                    #[codec(index = 41)]
-                    NoteUnlockable {
-                        asset: runtime_types::xcm::v3::multiasset::MultiAsset,
-                        owner: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                    },
-                    #[codec(index = 42)]
-                    RequestUnlock {
-                        asset: runtime_types::xcm::v3::multiasset::MultiAsset,
-                        locker: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                    },
-                    #[codec(index = 43)]
-                    SetFeesMode {
-                        jit_withdraw: ::core::primitive::bool,
-                    },
-                    #[codec(index = 44)]
-                    SetTopic([::core::primitive::u8; 32usize]),
-                    #[codec(index = 45)]
-                    ClearTopic,
-                    #[codec(index = 46)]
-                    AliasOrigin(runtime_types::staging_xcm::v3::multilocation::MultiLocation),
-                    #[codec(index = 47)]
-                    UnpaidExecution {
-                        weight_limit: runtime_types::xcm::v3::WeightLimit,
-                        check_origin: ::core::option::Option<
-                            runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                        >,
-                    },
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub enum Instruction2 {
-                    #[codec(index = 0)]
-                    WithdrawAsset(runtime_types::xcm::v3::multiasset::MultiAssets),
-                    #[codec(index = 1)]
-                    ReserveAssetDeposited(runtime_types::xcm::v3::multiasset::MultiAssets),
-                    #[codec(index = 2)]
-                    ReceiveTeleportedAsset(runtime_types::xcm::v3::multiasset::MultiAssets),
-                    #[codec(index = 3)]
-                    QueryResponse {
-                        #[codec(compact)]
-                        query_id: ::core::primitive::u64,
-                        response: runtime_types::xcm::v3::Response,
-                        max_weight: runtime_types::sp_weights::weight_v2::Weight,
-                        querier: ::core::option::Option<
-                            runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                        >,
-                    },
-                    #[codec(index = 4)]
-                    TransferAsset {
-                        assets: runtime_types::xcm::v3::multiasset::MultiAssets,
-                        beneficiary: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                    },
-                    #[codec(index = 5)]
-                    TransferReserveAsset {
-                        assets: runtime_types::xcm::v3::multiasset::MultiAssets,
-                        dest: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v3::Xcm1,
-                    },
-                    #[codec(index = 6)]
-                    Transact {
-                        origin_kind: runtime_types::xcm::v2::OriginKind,
-                        require_weight_at_most: runtime_types::sp_weights::weight_v2::Weight,
-                        call: runtime_types::xcm::double_encoded::DoubleEncoded,
-                    },
-                    #[codec(index = 7)]
-                    HrmpNewChannelOpenRequest {
-                        #[codec(compact)]
-                        sender: ::core::primitive::u32,
-                        #[codec(compact)]
-                        max_message_size: ::core::primitive::u32,
-                        #[codec(compact)]
-                        max_capacity: ::core::primitive::u32,
-                    },
-                    #[codec(index = 8)]
-                    HrmpChannelAccepted {
-                        #[codec(compact)]
-                        recipient: ::core::primitive::u32,
-                    },
-                    #[codec(index = 9)]
-                    HrmpChannelClosing {
-                        #[codec(compact)]
-                        initiator: ::core::primitive::u32,
-                        #[codec(compact)]
-                        sender: ::core::primitive::u32,
-                        #[codec(compact)]
-                        recipient: ::core::primitive::u32,
-                    },
-                    #[codec(index = 10)]
-                    ClearOrigin,
-                    #[codec(index = 11)]
-                    DescendOrigin(runtime_types::xcm::v3::junctions::Junctions),
-                    #[codec(index = 12)]
-                    ReportError(runtime_types::xcm::v3::QueryResponseInfo),
-                    #[codec(index = 13)]
-                    DepositAsset {
-                        assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
-                        beneficiary: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                    },
-                    #[codec(index = 14)]
-                    DepositReserveAsset {
-                        assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
-                        dest: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v3::Xcm1,
-                    },
-                    #[codec(index = 15)]
-                    ExchangeAsset {
-                        give: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
-                        want: runtime_types::xcm::v3::multiasset::MultiAssets,
-                        maximal: ::core::primitive::bool,
-                    },
-                    #[codec(index = 16)]
-                    InitiateReserveWithdraw {
-                        assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
-                        reserve: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v3::Xcm1,
-                    },
-                    #[codec(index = 17)]
-                    InitiateTeleport {
-                        assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
-                        dest: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                        xcm: runtime_types::xcm::v3::Xcm1,
-                    },
-                    #[codec(index = 18)]
-                    ReportHolding {
-                        response_info: runtime_types::xcm::v3::QueryResponseInfo,
-                        assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
-                    },
-                    #[codec(index = 19)]
-                    BuyExecution {
-                        fees: runtime_types::xcm::v3::multiasset::MultiAsset,
-                        weight_limit: runtime_types::xcm::v3::WeightLimit,
-                    },
-                    #[codec(index = 20)]
-                    RefundSurplus,
-                    #[codec(index = 21)]
-                    SetErrorHandler(runtime_types::xcm::v3::Xcm2),
-                    #[codec(index = 22)]
-                    SetAppendix(runtime_types::xcm::v3::Xcm2),
-                    #[codec(index = 23)]
-                    ClearError,
-                    #[codec(index = 24)]
-                    ClaimAsset {
-                        assets: runtime_types::xcm::v3::multiasset::MultiAssets,
-                        ticket: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                    },
-                    #[codec(index = 25)]
-                    Trap(#[codec(compact)] ::core::primitive::u64),
-                    #[codec(index = 26)]
-                    SubscribeVersion {
-                        #[codec(compact)]
-                        query_id: ::core::primitive::u64,
-                        max_response_weight: runtime_types::sp_weights::weight_v2::Weight,
-                    },
-                    #[codec(index = 27)]
-                    UnsubscribeVersion,
-                    #[codec(index = 28)]
-                    BurnAsset(runtime_types::xcm::v3::multiasset::MultiAssets),
-                    #[codec(index = 29)]
-                    ExpectAsset(runtime_types::xcm::v3::multiasset::MultiAssets),
-                    #[codec(index = 30)]
-                    ExpectOrigin(
-                        ::core::option::Option<
-                            runtime_types::staging_xcm::v3::multilocation::MultiLocation,
-                        >,
-                    ),
-                    #[codec(index = 31)]
-                    ExpectError(
-                        ::core::option::Option<(
-                            ::core::primitive::u32,
-                            runtime_types::xcm::v3::traits::Error,
-                        )>,
-                    ),
-                    #[codec(index = 32)]
-                    ExpectTransactStatus(runtime_types::xcm::v3::MaybeErrorCode),
-                    #[codec(index = 33)]
-                    QueryPallet {
-                        module_name:
-                            ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
-                        response_info: runtime_types::xcm::v3::QueryResponseInfo,
-                    },
-                    #[codec(index = 34)]
-                    ExpectPallet {
-                        #[codec(compact)]
-                        index: ::core::primitive::u32,
-                        name: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
-                        module_name:
-                            ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
-                        #[codec(compact)]
-                        crate_major: ::core::primitive::u32,
-                        #[codec(compact)]
-                        min_crate_minor: ::core::primitive::u32,
-                    },
-                    #[codec(index = 35)]
-                    ReportTransactStatus(runtime_types::xcm::v3::QueryResponseInfo),
-                    #[codec(index = 36)]
-                    ClearTransactStatus,
-                    #[codec(index = 37)]
-                    UniversalOrigin(runtime_types::xcm::v3::junction::Junction),
-                    #[codec(index = 38)]
-                    ExportMessage {
-                        network: runtime_types::xcm::v3::junction::NetworkId,
-                        destination: runtime_types::xcm::v3::junctions::Junctions,
-                        xcm: runtime_types::xcm::v3::Xcm1,
+                        xcm: runtime_types::xcm::v3::Xcm,
                     },
                     #[codec(index = 39)]
                     LockAsset {
@@ -72046,13 +70829,13 @@ pub mod api {
                     Success,
                     #[codec(index = 1)]
                     Error(
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     ),
                     #[codec(index = 2)]
                     TruncatedError(
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     ),
@@ -72071,13 +70854,37 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
+                pub enum OriginKind {
+                    #[codec(index = 0)]
+                    Native,
+                    #[codec(index = 1)]
+                    SovereignAccount,
+                    #[codec(index = 2)]
+                    Superuser,
+                    #[codec(index = 3)]
+                    Xcm,
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
                 pub struct PalletInfo {
                     #[codec(compact)]
                     pub index: ::core::primitive::u32,
-                    pub name: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                    pub name: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
-                    pub module_name: runtime_types::bounded_collections::bounded_vec::BoundedVec2<
+                    pub module_name: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
                     #[codec(compact)]
@@ -72137,7 +70944,7 @@ pub mod api {
                     Version(::core::primitive::u32),
                     #[codec(index = 4)]
                     PalletsInfo(
-                        runtime_types::bounded_collections::bounded_vec::BoundedVec5<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::xcm::v3::PalletInfo,
                         >,
                     ),
@@ -72178,28 +70985,9 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct Xcm1(
+                pub struct Xcm(
                     pub  ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::xcm::v3::Instruction1,
-                    >,
-                );
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct Xcm2(
-                    pub  ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::xcm::v3::Instruction2,
+                        runtime_types::xcm::v3::Instruction,
                     >,
                 );
             }
@@ -72283,31 +71071,13 @@ pub mod api {
             # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            pub enum VersionedXcm1 {
+            pub enum VersionedXcm {
                 #[codec(index = 2)]
-                V2(runtime_types::xcm::v2::Xcm1),
+                V2(runtime_types::xcm::v2::Xcm),
                 #[codec(index = 3)]
-                V3(runtime_types::xcm::v3::Xcm1),
+                V3(runtime_types::xcm::v3::Xcm),
                 #[codec(index = 4)]
-                V4(runtime_types::staging_xcm::v4::Xcm1),
-            }
-            #[derive(
-                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            pub enum VersionedXcm2 {
-                #[codec(index = 2)]
-                V2(runtime_types::xcm::v2::Xcm2),
-                #[codec(index = 3)]
-                V3(runtime_types::xcm::v3::Xcm2),
-                #[codec(index = 4)]
-                V4(runtime_types::staging_xcm::v4::Xcm2),
+                V4(runtime_types::staging_xcm::v4::Xcm),
             }
         }
         pub mod xcm_fee_payment_runtime_api {
@@ -72328,13 +71098,19 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub enum Error {
-                    #[codec(index = 0)]
-                    Unimplemented,
-                    #[codec(index = 1)]
-                    VersionedConversionFailed,
-                    #[codec(index = 2)]
-                    InvalidExtrinsic,
+                pub struct CallDryRunEffects<_0> {
+                    pub execution_result: ::core::result::Result<
+                        runtime_types::frame_support::dispatch::PostDispatchInfo,
+                        runtime_types::sp_runtime::DispatchErrorWithPostInfo<
+                            runtime_types::frame_support::dispatch::PostDispatchInfo,
+                        >,
+                    >,
+                    pub emitted_events: ::subxt::ext::subxt_core::alloc::vec::Vec<_0>,
+                    pub local_xcm: ::core::option::Option<runtime_types::xcm::VersionedXcm>,
+                    pub forwarded_xcms: ::subxt::ext::subxt_core::alloc::vec::Vec<(
+                        runtime_types::xcm::VersionedLocation,
+                        ::subxt::ext::subxt_core::alloc::vec::Vec<runtime_types::xcm::VersionedXcm>,
+                    )>,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -72350,17 +71126,11 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct ExtrinsicDryRunEffects<_0> {
-                    pub execution_result:
-                        ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
-                    pub emitted_events: ::subxt::ext::subxt_core::alloc::vec::Vec<_0>,
-                    pub local_xcm: ::core::option::Option<runtime_types::xcm::VersionedXcm1>,
-                    pub forwarded_xcms: ::subxt::ext::subxt_core::alloc::vec::Vec<(
-                        runtime_types::xcm::VersionedLocation,
-                        ::subxt::ext::subxt_core::alloc::vec::Vec<
-                            runtime_types::xcm::VersionedXcm1,
-                        >,
-                    )>,
+                pub enum Error {
+                    #[codec(index = 0)]
+                    Unimplemented,
+                    #[codec(index = 1)]
+                    VersionedConversionFailed,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -72381,9 +71151,7 @@ pub mod api {
                     pub emitted_events: ::subxt::ext::subxt_core::alloc::vec::Vec<_0>,
                     pub forwarded_xcms: ::subxt::ext::subxt_core::alloc::vec::Vec<(
                         runtime_types::xcm::VersionedLocation,
-                        ::subxt::ext::subxt_core::alloc::vec::Vec<
-                            runtime_types::xcm::VersionedXcm1,
-                        >,
+                        ::subxt::ext::subxt_core::alloc::vec::Vec<runtime_types::xcm::VersionedXcm>,
                     )>,
                 }
             }
