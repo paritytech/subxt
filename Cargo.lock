@@ -327,7 +327,7 @@ checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
 
 [[package]]
 name = "artifacts"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "substrate-runner",
 ]
@@ -1211,12 +1211,12 @@ dependencies = [
 
 [[package]]
 name = "darling"
-version = "0.20.8"
+version = "0.20.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54e36fcd13ed84ffdfda6f5be89b31287cbb80c439841fe69e04841435464391"
+checksum = "83b2eb4d90d12bdda5ed17de686c2acb4c57914f8f921b8da7e112b5a36f3fe1"
 dependencies = [
- "darling_core 0.20.8",
- "darling_macro 0.20.8",
+ "darling_core 0.20.9",
+ "darling_macro 0.20.9",
 ]
 
 [[package]]
@@ -1235,15 +1235,15 @@ dependencies = [
 
 [[package]]
 name = "darling_core"
-version = "0.20.8"
+version = "0.20.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c2cf1c23a687a1feeb728783b993c4e1ad83d99f351801977dd809b48d0a70f"
+checksum = "622687fe0bac72a04e5599029151f5796111b90f1baaa9b544d807a5e31cd120"
 dependencies = [
  "fnv",
  "ident_case",
  "proc-macro2",
  "quote",
- "strsim 0.10.0",
+ "strsim 0.11.1",
  "syn 2.0.60",
 ]
 
@@ -1260,11 +1260,11 @@ dependencies = [
 
 [[package]]
 name = "darling_macro"
-version = "0.20.8"
+version = "0.20.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a668eda54683121533a393014d8692171709ff57a7d61f187b6e782719f8933f"
+checksum = "733cabb43482b1a1b53eee8583c2b9e8684d592215ea83efd305dd31bc2f0178"
 dependencies = [
- "darling_core 0.20.8",
+ "darling_core 0.20.9",
  "quote",
  "syn 2.0.60",
 ]
@@ -1812,7 +1812,7 @@ dependencies = [
 
 [[package]]
 name = "generate-custom-metadata"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
@@ -2309,7 +2309,7 @@ dependencies = [
 
 [[package]]
 name = "integration-tests"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
@@ -4745,7 +4745,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-runner"
-version = "0.36.1"
+version = "0.37.0"
 
 [[package]]
 name = "subtle"
@@ -4755,7 +4755,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "subxt"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "async-trait",
@@ -4798,7 +4798,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-cli"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "clap 4.5.4",
  "color-eyre",
@@ -4827,7 +4827,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "getrandom",
@@ -4847,7 +4847,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-core"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "base58",
@@ -4879,7 +4879,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "futures",
  "futures-timer",
@@ -4904,9 +4904,9 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
- "darling 0.20.8",
+ "darling 0.20.9",
  "parity-scale-codec",
  "proc-macro-error",
  "quote",
@@ -4917,7 +4917,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "bitvec",
@@ -4931,7 +4931,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "bip32",
  "bip39",
@@ -4958,7 +4958,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-test-macro"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "quote",
  "syn 2.0.60",
@@ -5021,7 +5021,7 @@ dependencies = [
 
 [[package]]
 name = "test-runtime"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "hex",
  "impl-serde",
@@ -5446,7 +5446,7 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "ui-tests"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "generate-custom-metadata",
