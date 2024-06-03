@@ -94,6 +94,11 @@ impl Keypair {
         self.0.public_key()
     }
 
+    /// Obtain the [`ecdsa::SecretKeyBytes`] of this keypair.
+    pub fn secret_key(&self) -> ecdsa::SecretKeyBytes {
+        self.0.secret_key()
+    }
+
     /// Obtains the public address of the account by taking the last 20 bytes
     /// of the Keccak-256 hash of the public key.
     pub fn account_id(&self) -> AccountId20 {
