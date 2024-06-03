@@ -327,7 +327,7 @@ checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
 
 [[package]]
 name = "artifacts"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "substrate-runner",
 ]
@@ -1812,7 +1812,7 @@ dependencies = [
 
 [[package]]
 name = "generate-custom-metadata"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
@@ -2309,7 +2309,7 @@ dependencies = [
 
 [[package]]
 name = "integration-tests"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
@@ -3755,9 +3755,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode"
-version = "0.7.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac89c68dd1142f71a5b97850b9031e9a0d3ce708f5de5e7234cddb3b6fc7c8db"
+checksum = "4ba0b9c48dc0eb20c60b083c29447c0c4617cb7c4a4c9fef72aa5c5bc539e15e"
 dependencies = [
  "derive_more",
  "parity-scale-codec",
@@ -3770,9 +3770,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode-derive"
-version = "0.7.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a4ad472c7c16e4091a08f2f9901a1c117ee865a535b3bfb019e8e53de84ddce"
+checksum = "82ab7e60e2d9c8d47105f44527b26f04418e5e624ffc034f6b4a86c0ba19c5bf"
 dependencies = [
  "darling 0.14.4",
  "proc-macro-crate 1.3.1",
@@ -4745,7 +4745,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-runner"
-version = "0.36.1"
+version = "0.37.0"
 
 [[package]]
 name = "subtle"
@@ -4755,7 +4755,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "subxt"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "async-trait",
@@ -4798,7 +4798,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-cli"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "clap 4.5.4",
  "color-eyre",
@@ -4827,7 +4827,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "getrandom",
@@ -4847,7 +4847,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-core"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "base58",
@@ -4879,7 +4879,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "futures",
  "futures-timer",
@@ -4904,7 +4904,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "darling 0.20.8",
  "parity-scale-codec",
@@ -4917,7 +4917,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "bitvec",
@@ -4931,7 +4931,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "bip32",
  "bip39",
@@ -4958,7 +4958,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-test-macro"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "quote",
  "syn 2.0.60",
@@ -5021,7 +5021,7 @@ dependencies = [
 
 [[package]]
 name = "test-runtime"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "hex",
  "impl-serde",
@@ -5446,7 +5446,7 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "ui-tests"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "generate-custom-metadata",
