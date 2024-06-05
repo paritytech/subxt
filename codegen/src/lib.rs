@@ -342,10 +342,11 @@ fn default_derives(crate_path: &syn::Path) -> DerivesRegistry {
         parse_quote!(Debug),
     ];
 
-    let attributes: [syn::Attribute; 3] = [
+    let attributes: [syn::Attribute; 4] = [
         parse_quote!(#[encode_as_type(crate_path = #encode_crate_path)]),
         parse_quote!(#[decode_as_type(crate_path = #decode_crate_path)]),
         parse_quote!(#[codec(crate = #crate_path::ext::codec)]),
+        parse_quote!(#[codec(dumb_trait_bound)]),
     ];
 
     let mut derives_registry = DerivesRegistry::new();
