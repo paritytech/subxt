@@ -327,7 +327,7 @@ checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
 
 [[package]]
 name = "artifacts"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "substrate-runner",
 ]
@@ -863,9 +863,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.4"
+version = "4.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90bc066a67923782aa8515dbaea16946c5bcc5addbd668bb80af688e53e548a0"
+checksum = "a9689a29b593160de5bc4aacab7b5d54fb52231de70122626c178e6a368994c7"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -873,9 +873,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.2"
+version = "4.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ae129e2e766ae0ec03484e609954119f123cc1fe650337e155d03b022f24f7b4"
+checksum = "2e5387378c84f6faa26890ebf9f0a92989f8873d4d380467bcd0d8d8620424df"
 dependencies = [
  "anstream",
  "anstyle",
@@ -885,9 +885,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.5.4"
+version = "4.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "528131438037fd55894f62d6e9f068b8f45ac57ffa77517819645d10aed04f64"
+checksum = "c780290ccf4fb26629baa7a1081e68ced113f1d3ec302fa5948f1c381ebf06c6"
 dependencies = [
  "heck 0.5.0",
  "proc-macro2",
@@ -1211,12 +1211,12 @@ dependencies = [
 
 [[package]]
 name = "darling"
-version = "0.20.8"
+version = "0.20.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54e36fcd13ed84ffdfda6f5be89b31287cbb80c439841fe69e04841435464391"
+checksum = "83b2eb4d90d12bdda5ed17de686c2acb4c57914f8f921b8da7e112b5a36f3fe1"
 dependencies = [
- "darling_core 0.20.8",
- "darling_macro 0.20.8",
+ "darling_core 0.20.9",
+ "darling_macro 0.20.9",
 ]
 
 [[package]]
@@ -1235,15 +1235,15 @@ dependencies = [
 
 [[package]]
 name = "darling_core"
-version = "0.20.8"
+version = "0.20.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c2cf1c23a687a1feeb728783b993c4e1ad83d99f351801977dd809b48d0a70f"
+checksum = "622687fe0bac72a04e5599029151f5796111b90f1baaa9b544d807a5e31cd120"
 dependencies = [
  "fnv",
  "ident_case",
  "proc-macro2",
  "quote",
- "strsim 0.10.0",
+ "strsim 0.11.1",
  "syn 2.0.60",
 ]
 
@@ -1260,11 +1260,11 @@ dependencies = [
 
 [[package]]
 name = "darling_macro"
-version = "0.20.8"
+version = "0.20.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a668eda54683121533a393014d8692171709ff57a7d61f187b6e782719f8933f"
+checksum = "733cabb43482b1a1b53eee8583c2b9e8684d592215ea83efd305dd31bc2f0178"
 dependencies = [
- "darling_core 0.20.8",
+ "darling_core 0.20.9",
  "quote",
  "syn 2.0.60",
 ]
@@ -1812,7 +1812,7 @@ dependencies = [
 
 [[package]]
 name = "generate-custom-metadata"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "parity-scale-codec",
@@ -2309,7 +2309,7 @@ dependencies = [
 
 [[package]]
 name = "integration-tests"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
@@ -3273,9 +3273,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.84"
+version = "1.0.85"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec96c6a92621310b51366f1e28d05ef11489516e93be030060e5fc12024a49d6"
+checksum = "22244ce15aa966053a896d1accb3a6e68469b97c7f33f284b99f0d576879fc23"
 dependencies = [
  "unicode-ident",
 ]
@@ -3443,9 +3443,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.10.4"
+version = "1.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c117dbdfde9c8308975b6a18d71f3f385c89461f7b3fb054288ecf2a2058ba4c"
+checksum = "b91213439dad192326a0d7c6ee3955910425f441d7038e0d6933b0aec5c4517f"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -3728,9 +3728,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode"
-version = "0.13.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b12ebca36cec2a3f983c46295b282b35e5f8496346fb859a8776dad5389e5389"
+checksum = "e98f3262c250d90e700bb802eb704e1f841e03331c2eb815e46516c4edbf5b27"
 dependencies = [
  "derive_more",
  "parity-scale-codec",
@@ -3743,9 +3743,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode-derive"
-version = "0.13.0"
+version = "0.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06a387a62a2be6ec532eb4f9e1fc800f26d462c06b335d9c3ee54559a355b9fb"
+checksum = "9bb22f574168103cdd3133b19281639ca65ad985e24612728f727339dcaf4021"
 dependencies = [
  "darling 0.14.4",
  "proc-macro2",
@@ -3755,9 +3755,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode"
-version = "0.7.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac89c68dd1142f71a5b97850b9031e9a0d3ce708f5de5e7234cddb3b6fc7c8db"
+checksum = "4ba0b9c48dc0eb20c60b083c29447c0c4617cb7c4a4c9fef72aa5c5bc539e15e"
 dependencies = [
  "derive_more",
  "parity-scale-codec",
@@ -3770,9 +3770,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode-derive"
-version = "0.7.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a4ad472c7c16e4091a08f2f9901a1c117ee865a535b3bfb019e8e53de84ddce"
+checksum = "82ab7e60e2d9c8d47105f44527b26f04418e5e624ffc034f6b4a86c0ba19c5bf"
 dependencies = [
  "darling 0.14.4",
  "proc-macro-crate 1.3.1",
@@ -4745,7 +4745,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-runner"
-version = "0.36.1"
+version = "0.37.0"
 
 [[package]]
 name = "subtle"
@@ -4755,7 +4755,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "subxt"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "async-trait",
@@ -4798,9 +4798,9 @@ dependencies = [
 
 [[package]]
 name = "subxt-cli"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
- "clap 4.5.4",
+ "clap 4.5.6",
  "color-eyre",
  "frame-metadata 16.0.0",
  "heck 0.5.0",
@@ -4827,7 +4827,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "getrandom",
@@ -4847,7 +4847,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-core"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "base58",
@@ -4879,7 +4879,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "futures",
  "futures-timer",
@@ -4904,9 +4904,9 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
- "darling 0.20.8",
+ "darling 0.20.9",
  "parity-scale-codec",
  "proc-macro-error",
  "quote",
@@ -4917,7 +4917,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "assert_matches",
  "bitvec",
@@ -4931,7 +4931,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "bip32",
  "bip39",
@@ -4958,7 +4958,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-test-macro"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "quote",
  "syn 2.0.60",
@@ -5021,7 +5021,7 @@ dependencies = [
 
 [[package]]
 name = "test-runtime"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "hex",
  "impl-serde",
@@ -5107,9 +5107,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.37.0"
+version = "1.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1adbebffeca75fcfd058afa480fb6c0b81e165a0323f9c9d39c9697e37c46787"
+checksum = "ba4f4a02a7a80d6f274636f0aa95c7e383b912d41fe721a31f29e29698585a4a"
 dependencies = [
  "backtrace",
  "bytes",
@@ -5124,9 +5124,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-macros"
-version = "2.2.0"
+version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b8a1e28f2deaa14e508979454cb3a223b10b938b45af148bc0986de36f1923b"
+checksum = "5f5ae998a069d4b5aba8ee9dad856af7d520c3699e6159b185c2acd48155d39a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5446,7 +5446,7 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "ui-tests"
-version = "0.36.1"
+version = "0.37.0"
 dependencies = [
  "frame-metadata 16.0.0",
  "generate-custom-metadata",
