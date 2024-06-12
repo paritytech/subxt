@@ -24,8 +24,12 @@ fn get_url(port: Option<u16>) -> String {
     match (std::env::var(URL_ENV_VAR).ok(), port) {
         (Some(host), None) => host,
         (None, Some(port)) => format!("ws://127.0.0.1:{port}"),
-        (Some(_), Some(_)) => panic!("{URL_ENV_VAR} and port provided: only one or the other should exist"),
-        (None, None) => panic!("No {URL_ENV_VAR} or port was provided, so we don't know where to connect to"),
+        (Some(_), Some(_)) => {
+            panic!("{URL_ENV_VAR} and port provided: only one or the other should exist")
+        }
+        (None, None) => {
+            panic!("No {URL_ENV_VAR} or port was provided, so we don't know where to connect to")
+        }
     }
 }
 
