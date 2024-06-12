@@ -11,10 +11,26 @@ use subxt::{
     Config, OnlineClient,
 };
 
+// The URL that we'll connect to for our tests comes
+// from SUBXT_TEXT_HOST env var or defaults to localhost.
+// In the former case, we won't spawn a binary.
+const URL_ENV_VAR: &str = "SUBXT_TEST_URL";
+fn is_url_provided() -> bool {
+    std::env::var(URL_ENV_VAR).is_ok()
+}
+fn get_url(port: Option<u16>) -> String {
+    match (std::env::var(URL_ENV_VAR).ok(), port) {
+        (Some(host), None) => host,
+        (None, Some(port)) => format!("ws://127.0.0.1:{port}"),
+        (Some(_), Some(_)) => panic!("{URL_ENV_VAR} and port provided: only one or the other should exist"),
+        (None, None) => panic!("No {URL_ENV_VAR} or port was provided, so we don't know where to connect to"),
+    }
+}
+
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
     // Keep a handle to the node; once it's dropped the node is killed.
-    proc: SubstrateNode,
+    proc: Option<SubstrateNode>,
 
     // Lazily construct these when asked for.
     unstable_client: RefCell<Option<OnlineClient<R>>>,
@@ -50,7 +66,7 @@ where
 
     /// Hand back an RPC client connected to the test node.
     pub async fn rpc_client(&self) -> rpc::RpcClient {
-        let url = format!("ws://127.0.0.1:{}", self.proc.ws_port());
+        let url = get_url(self.proc.as_ref().map(|p| p.ws_port()));
         rpc::RpcClient::from_url(url)
             .await
             .expect("Unable to connect RPC client to test node")
@@ -124,17 +140,21 @@ impl TestNodeProcessBuilder {
     where
         R: Config,
     {
-        let mut node_builder = SubstrateNode::builder();
+        // Only spawn a process if a URL to target wasn't provided as an env var.
+        let proc = if !is_url_provided() {
+            let mut node_builder = SubstrateNode::builder();
+            node_builder.binary_paths(&self.node_paths);
 
-        node_builder.binary_paths(&self.node_paths);
+            if let Some(authority) = &self.authority {
+                node_builder.arg(authority.to_lowercase());
+            }
 
-        if let Some(authority) = &self.authority {
-            node_builder.arg(authority.to_lowercase());
-        }
+            Some(node_builder.spawn().map_err(|e| e.to_string())?)
+        } else {
+            None
+        };
 
-        // Spawn the node and retrieve a URL to it:
-        let proc = node_builder.spawn().map_err(|e| e.to_string())?;
-        let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
+        let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
         let rpc_client = build_rpc_client(&ws_url)
             .await
             .map_err(|e| format!("Failed to connect to node at {ws_url}: {e}"))?;
@@ -173,7 +193,7 @@ impl TestNodeProcessBuilder {
 }
 
 async fn build_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
-    let rpc_client = rpc::RpcClient::from_url(ws_url)
+    let rpc_client = rpc::RpcClient::from_insecure_url(ws_url)
         .await
         .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
 
@@ -221,7 +241,7 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineCli
     use subxt::lightclient::{ChainConfig, LightClient};
 
     // RPC endpoint.
-    let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
+    let ws_url = format!("ws://{}:{}", get_url(), proc.ws_port());
 
     // Wait for a few blocks to be produced using the subxt client.
     let client = OnlineClient::<T>::from_url(ws_url.clone())
@@ -235,7 +255,8 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineCli
 
     // Now, configure a light client; fetch the chain spec and modify the bootnodes.
     let bootnode = format!(
-        "/ip4/127.0.0.1/tcp/{}/p2p/{}",
+        "/ip4/{}/tcp/{}/p2p/{}",
+        get_url(),
         proc.p2p_port(),
         proc.p2p_address()
     );
