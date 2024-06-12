@@ -11,9 +11,11 @@ use subxt::{
     Config, OnlineClient,
 };
 
-// The URL that we'll connect to for our tests comes
-// from SUBXT_TEXT_HOST env var or defaults to localhost.
-// In the former case, we won't spawn a binary.
+// The URL that we'll connect to for our tests comes from SUBXT_TEXT_HOST env var,
+// defaulting to localhost if not provided. If the env var is set, we won't spawn
+// a binary. Note though that some tests expect and modify a fresh state, and so will
+// fail. Fo a similar reason wyou should also use `--test-threads 1` when running tests
+// to reduce the number of conflicts between state altering tests.
 const URL_ENV_VAR: &str = "SUBXT_TEST_URL";
 fn is_url_provided() -> bool {
     std::env::var(URL_ENV_VAR).is_ok()
