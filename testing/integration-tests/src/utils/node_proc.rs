@@ -247,7 +247,7 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineCli
     use subxt::lightclient::{ChainConfig, LightClient};
 
     // RPC endpoint.
-    let ws_url = format!("ws://{}:{}", get_url(), proc.ws_port());
+    let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
 
     // Wait for a few blocks to be produced using the subxt client.
     let client = OnlineClient::<T>::from_url(ws_url.clone())
@@ -261,8 +261,7 @@ async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineCli
 
     // Now, configure a light client; fetch the chain spec and modify the bootnodes.
     let bootnode = format!(
-        "/ip4/{}/tcp/{}/p2p/{}",
-        get_url(),
+        "/ip4/127.0.0.1/tcp/{}/p2p/{}",
         proc.p2p_port(),
         proc.p2p_address()
     );
