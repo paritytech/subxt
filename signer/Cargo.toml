@@ -15,7 +15,7 @@ description = "Sign extrinsics to be submitted by Subxt"
 keywords = ["parity", "subxt", "extrinsic", "signer"]
 
 [features]
-default = ["sr25519", "ecdsa", "subxt", "std"]
+default = ["sr25519", "ecdsa", "subxt", "std", "json"]
 std = [
     "regex/std",
     "sp-crypto-hashing/std",
@@ -34,6 +34,9 @@ std = [
 sr25519 = ["schnorrkel"]
 ecdsa = ["secp256k1"]
 unstable-eth = ["keccak-hash", "ecdsa", "secp256k1", "bip32"]
+
+# Enable support for loading key pairs from polkadot-js json.
+json = ["base64", "scrypt", "crypto_secretbox", "serde", "serde_json"]
 
 # Make the keypair algorithms here compatible with Subxt's Signer trait,
 # so that they can be used to sign transactions for compatible chains.
@@ -60,6 +63,11 @@ bip32 = { workspace = true, features = ["alloc", "secp256k1"], optional = true }
 schnorrkel = { workspace = true, optional = true }
 secp256k1 = { workspace = true, optional = true, features = ["alloc", "recovery"] }
 keccak-hash = { workspace = true, optional = true }
+base64 = { version="0.22.1", optional = true }
+scrypt = { version = "0.11.0", default-features = false, optional = true }
+crypto_secretbox = { version = "0.1.1", optional = true }
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
 
 # We only pull this in to enable the JS flag for schnorrkel to use.
 getrandom = { workspace = true, optional = true }
