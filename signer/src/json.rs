@@ -12,6 +12,7 @@ use crate::sr25519;
 #[derive(Debug)]
 pub enum Error {
     Sr25519(sr25519::Error),
+    Conversion,
 }
 
 impl_from!(sr25519::Error => Error::Sr25519);
@@ -20,6 +21,7 @@ impl Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             Error::Sr25519(_) => todo!(),
+            Error::Conversion => todo!(),
         }
     }
 }
@@ -27,7 +29,7 @@ impl Display for Error {
 #[cfg(feature = "std")]
 impl std::error::Error for Error {}
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct EncryptedJsonDescriptor {
     /** Descriptor for the content */
@@ -38,7 +40,7 @@ struct EncryptedJsonDescriptor {
     version: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct Meta {
     genesis_hash: String,
@@ -49,7 +51,7 @@ struct Meta {
 }
 
 /// Defined here: https://github.com/polkadot-js/common/blob/37fa211fdb141d4f6eb32e8f377a4651ed2d9068/packages/keyring/src/types.ts#L67
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct KeyringPairJson {
     /** The encoded string */
@@ -70,14 +72,19 @@ impl KeyringPairJson {
         let decoded = base64::engine::general_purpose::STANDARD
             .decode(self.encoded)
             .unwrap();
+        println!("{:?}", decoded.len());
         // Extract scrypt parameters.
         // https://datatracker.ietf.org/doc/html/rfc7914#section-7
         let salt = &decoded[0..32];
-        let _n = u32::from_be_bytes(decoded[32..36].try_into().unwrap());
-        let _p = u32::from_be_bytes(decoded[36..40].try_into().unwrap());
-        let _r = u32::from_be_bytes(decoded[40..44].try_into().unwrap());
+        let n = u32::from_ne_bytes(decoded[32..36].try_into().unwrap());
+        let p = u32::from_ne_bytes(decoded[36..40].try_into().unwrap());
+        let r = u32::from_ne_bytes(decoded[40..44].try_into().unwrap());
+        // println!("{:?}, {:?}, {:?}", n, p, r);
+
+        if (n != 32768) || (p != 1) || (r != 8) {}
+
         // Hash password.
-        let scrypt_params = scrypt::Params::new(15, 8, 1, 64).unwrap();
+        let scrypt_params = scrypt::Params::new(15, 8, 1, 32).unwrap();
         let mut key = Key::default();
         scrypt::scrypt(password.as_bytes(), salt, &scrypt_params, &mut key).unwrap();
         // Decrypt private key.
@@ -85,9 +92,15 @@ impl KeyringPairJson {
         let ciphertext = &decoded[68..];
         let cipher = XSalsa20Poly1305::new(&key);
         let plaintext = cipher.decrypt(nonce, ciphertext).unwrap();
+
+        let header = &plaintext[0..16];
+        let seed = &plaintext[16..48];
+
+        println!("{:?}", plaintext);
+        let secret: sr25519::SecretKeyBytes = seed.try_into().unwrap();
+        println!("{:?}", secret);
         // Get pair.
-        crate::sr25519::Keypair::from_secret_key(plaintext.try_into().unwrap())
-            .map_err(|e| Error::Sr25519(e))
+        sr25519::Keypair::from_secret_key(secret).map_err(|e| Error::Sr25519(e))
     }
 }
 
@@ -95,10 +108,12 @@ impl KeyringPairJson {
 mod test {
     use std::str::FromStr;
 
+    use subxt_core::tx::signer::Signer;
+
     use super::*;
 
     #[test]
-    fn check_from_phrase_matches() {
+    fn test_get_keypair_sr25519() {
         let json = r#"
             {
               "encoded": "DumgApKCTqoCty1OZW/8WS+sgo6RdpHhCwAkA2IoDBMAgAAAAQAAAAgAAAB6IG/q24EeVf0JqWqcBd5m2tKq5BlyY84IQ8oamLn9DZe9Ouhgunr7i36J1XxUnTI801axqL/ym1gil0U8440Qvj0lFVKwGuxq38zuifgoj0B3Yru0CI6QKEvQPU5xxj4MpyxdSxP+2PnTzYao0HDH0fulaGvlAYXfqtU89xrx2/z9z7IjSwS3oDFPXRQ9kAdDebtyCVreZ9Otw9v3",
@@ -123,6 +138,15 @@ mod test {
         "#;
         let pair_json: KeyringPairJson = serde_json::from_str(json).unwrap();
 
+        println!("{:?}", pair_json);
+
         let pair = pair_json.get_keypair_sr25519("whoisalice").unwrap();
+
+        // println!("{:#?}", pair.0);
+
+        assert_eq!(
+            pair.public_key().to_account_id(),
+            AccountId32::from_str("5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY").unwrap()
+        );
     }
 }
