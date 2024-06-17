@@ -58,6 +58,7 @@ unused_extern_crates = "deny"
 [workspace.lints.clippy]
 type_complexity = "allow"
 all = "deny"
+unwrap_or_default = "allow"
 
 [workspace.dependencies]
 async-trait = "0.1.80"
