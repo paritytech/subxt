@@ -3,8 +3,7 @@
 // see LICENSE for license details.
 
 //! Subxt macro for generating Substrate runtime interfaces.
-
-extern crate proc_macro;
+#![allow(clippy::manual_unwrap_or_default, missing_docs)]
 
 use codec::Decode;
 use darling::{ast::NestedMeta, FromMeta};
