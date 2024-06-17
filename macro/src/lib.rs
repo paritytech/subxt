@@ -3,7 +3,8 @@
 // see LICENSE for license details.
 
 //! Subxt macro for generating Substrate runtime interfaces.
-#![allow(clippy::manual_unwrap_or_default, missing_docs)]
+// TODO: The workspace lint is not working properly so it's disabled here for now.
+#![allow(clippy::manual_unwrap_or_default)]
 
 use codec::Decode;
 use darling::{ast::NestedMeta, FromMeta};
