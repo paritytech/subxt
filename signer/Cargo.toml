@@ -79,3 +79,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 defalt-features = true
+
+[lints]
+workspace = true
