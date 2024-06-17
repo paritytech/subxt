@@ -85,6 +85,7 @@ struct SubstituteType {
 }
 
 // Note: docs for this are in the subxt library; don't add further docs here as they will be appended.
+#[allow(missing_docs)]
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
