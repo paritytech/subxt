@@ -58,6 +58,8 @@ unused_extern_crates = "deny"
 [workspace.lints.clippy]
 type_complexity = "allow"
 all = "deny"
+# https://github.com/rust-lang/rust-clippy/issues/12643
+manual-unwrap-or-default = "allow"
 
 [workspace.dependencies]
 async-trait = "0.1.80"

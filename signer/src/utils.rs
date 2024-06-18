@@ -21,6 +21,7 @@ macro_rules! once_static_cloned {
     ($($(#[$attr:meta])* $vis:vis fn $name:ident() -> $ty:ty { $expr:expr } )+) => {
         $(
             $(#[$attr])*
+            #[allow(missing_docs)]
             $vis fn $name() -> $ty {
                 cfg_if::cfg_if! {
                     if #[cfg(feature = "std")] {

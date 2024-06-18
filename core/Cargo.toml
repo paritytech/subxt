@@ -35,7 +35,6 @@ std = [
 substrate-compat = ["sp-core", "sp-runtime"]
 
 [dependencies]
-
 codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
 scale-info = { workspace = true, default-features = false, features = ["bit-vec"] }
 scale-value = { workspace = true, default-features = false }
@@ -83,3 +82,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 defalt-features = true
+
+[lints]
+workspace = true

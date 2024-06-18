@@ -27,3 +27,6 @@ syn = { workspace = true }
 quote = { workspace = true }
 subxt-codegen = { workspace = true, features = ["fetch-metadata"] }
 scale-typegen = { workspace = true }
+
+[lints]
+workspace = true

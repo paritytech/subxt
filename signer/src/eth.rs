@@ -207,6 +207,18 @@ impl Display for AccountId20 {
     }
 }
 
+/// Verify that some signature for a message was created by the owner of the [`PublicKey`].
+///
+/// ```rust
+/// use subxt_signer::{ bip39::Mnemonic, eth };
+///
+/// let keypair = eth::dev::alith();
+/// let message = b"Hello!";
+///
+/// let signature = keypair.sign(message);
+/// let public_key = keypair.public_key();
+/// assert!(eth::verify(&signature, message, &public_key));
+/// ```
 pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &ecdsa::PublicKey) -> bool {
     let message_hash = keccak(message.as_ref());
     let wrapped =
