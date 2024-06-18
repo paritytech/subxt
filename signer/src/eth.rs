@@ -206,6 +206,7 @@ impl Display for AccountId20 {
         write!(f, "{}", self.checksum())
     }
 }
+
 /// Verify that some signature for a message was created by the owner of the [`PublicKey`].
 ///
 /// ```rust
