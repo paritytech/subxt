@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 //! Benchmarks for metadata hashing.
-
+#![allow(missing_docs)]
 use codec::Decode;
 use criterion::*;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
@@ -92,4 +92,5 @@ criterion_group!(
         bench_get_constant_hash,
         bench_get_storage_hash,
 );
+
 criterion_main!(benches);
