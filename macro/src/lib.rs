@@ -3,8 +3,8 @@
 // see LICENSE for license details.
 
 //! Subxt macro for generating Substrate runtime interfaces.
-
-extern crate proc_macro;
+// TODO: The workspace lint is not working properly so it's disabled here for now.
+#![allow(clippy::manual_unwrap_or_default)]
 
 use codec::Decode;
 use darling::{ast::NestedMeta, FromMeta};
@@ -85,6 +85,7 @@ struct SubstituteType {
 }
 
 // Note: docs for this are in the subxt library; don't add further docs here as they will be appended.
+#[allow(missing_docs)]
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
