@@ -183,10 +183,16 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
     let message_hash = keccak(message.as_ref());
     let wrapped =
         Message::from_digest_slice(message_hash.as_bytes()).expect("Message is 32 bytes; qed");
+    let Ok(signature) = secp256k1::ecdsa::Signature::from_compact(&sig.as_ref()[..64]) else {
+        return false;
+    };
+    let Ok(pk) = secp256k1::PublicKey::from_slice(&pubkey.0) else {
+        return false;
+    };
 
-    let pubkey = secp256k1::PublicKey::from_slice(&pubkey.0).expect("test");
-
-    ecdsa::internal::verify(&sig.0, &wrapped, &ecdsa::PublicKey(pubkey.serialize()))
+    secp256k1::Secp256k1::verification_only()
+        .verify_ecdsa(&wrapped, &signature, &pk)
+        .is_ok()
 }
 
 /// An error handed back if creating a keypair fails.
