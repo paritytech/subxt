@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let alith = dev::alith();
     let baltathar = dev::baltathar();
-    let dest = baltathar.account_id();
+    let dest = baltathar.public_key().to_account_id();
 
     println!("baltathar pub:  {}", hex::encode(baltathar.public_key().0));
     println!("baltathar addr: {}", hex::encode(dest));
