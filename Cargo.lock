@@ -4995,6 +4995,7 @@ dependencies = [
  "hashbrown 0.14.5",
  "hex",
  "impl-serde",
+ "keccak-hash",
  "parity-scale-codec",
  "primitive-types",
  "scale-bits",

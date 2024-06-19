@@ -64,6 +64,9 @@ sp-core = { workspace = true, optional = true }
 sp-runtime = { workspace = true, optional = true }
 tracing = { workspace = true, default-features = false }
 
+# AccountId20
+keccak-hash = { workspace = true}
+
 [dev-dependencies]
 assert_matches = { workspace = true }
 bitvec = { workspace = true }
