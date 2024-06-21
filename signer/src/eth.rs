@@ -99,7 +99,7 @@ impl Keypair {
 
     /// Obtain the [`ecdsa::SecretKeyBytes`] of this keypair.
     pub fn secret_key(&self) -> SecretKeyBytes {
-        self.0.secret_key().as_ref()
+        self.0.secret_key()
     }
 
     /// Obtain the [`eth::PublicKey`] of this keypair.
