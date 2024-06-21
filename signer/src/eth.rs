@@ -101,7 +101,7 @@ impl Keypair {
     pub fn secret_key(&self) -> SecretKeyBytes {
         self.0.secret_key().as_ref()
     }
-  
+
     /// Obtain the [`eth::PublicKey`] of this keypair.
     pub fn public_key(&self) -> PublicKey {
         let uncompressed = self.0 .0.public_key().serialize_uncompressed();
