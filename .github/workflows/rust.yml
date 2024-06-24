@@ -47,7 +47,7 @@ jobs:
           args: --all -- --check
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   machete:
     name: "Check unused dependencies"
@@ -78,7 +78,7 @@ jobs:
           command: machete
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   clippy:
     name: Cargo clippy
@@ -110,7 +110,7 @@ jobs:
           cargo clippy -p subxt --no-default-features --features web,unstable-light-client -- -D warnings
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   wasm_clippy:
     name: Cargo clippy (WASM)
@@ -141,7 +141,7 @@ jobs:
           args: -p subxt --no-default-features --features web,unstable-light-client,jsonrpsee --target wasm32-unknown-unknown -- -D warnings
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   check:
     name: Cargo check
@@ -204,7 +204,7 @@ jobs:
         run: cargo check --manifest-path examples/parachain-example/Cargo.toml
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   wasm_check:
     name: Cargo check (WASM)
@@ -231,7 +231,7 @@ jobs:
           cargo check --manifest-path examples/wasm-example/Cargo.toml --target wasm32-unknown-unknown
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   docs:
     name: Check documentation and run doc tests
@@ -264,7 +264,7 @@ jobs:
           args: --doc
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   tests:
     name: "Test (Native)"
@@ -298,7 +298,7 @@ jobs:
           args: run --workspace
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   unstable_backend_tests:
     name: "Test (Unstable Backend)"
@@ -332,7 +332,7 @@ jobs:
           args: run --workspace --features unstable-backend-client
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   light_client_tests:
     name: "Test (Light Client)"
@@ -363,7 +363,7 @@ jobs:
           args: --release --package integration-tests --features unstable-light-client
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   wasm_tests:
     name: Test (WASM)
@@ -419,7 +419,7 @@ jobs:
         working-directory: signer/wasm-tests
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   no-std-tests:
     name: "Test (no_std)"
@@ -453,4 +453,4 @@ jobs:
         working-directory: testing/no-std-tests
 
       - if: "failure()"
-        uses: "andymckay/cancel-action@271cfbfa11ca9222f7be99a47e8f929574549e0a" # v0.4
+        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5

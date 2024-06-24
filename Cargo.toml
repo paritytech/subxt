@@ -88,7 +88,7 @@ jsonrpsee = { version = "0.22" }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.2", default-features = false }
 proc-macro-error = "1.0.4"
-proc-macro2 = "1.0.85"
+proc-macro2 = "1.0.86"
 quote = "1.0.36"
 regex = { version = "1.10.5", default-features = false }
 scale-info = { version = "2.11.3", default-features = false }
@@ -107,12 +107,12 @@ tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
 tracing-subscriber = "0.3.18"
 trybuild = "1.0.96"
-url = "2.5.1"
+url = "2.5.2"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "5.0.0"
 strip-ansi-escapes = "0.2.0"
-proptest = "1.4.0"
+proptest = "1.5.0"
 hex-literal = "0.4.1"
 
 # Light client support:
