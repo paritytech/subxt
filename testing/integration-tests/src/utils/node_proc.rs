@@ -254,8 +254,8 @@ async fn build_light_client<T: Config>(
         return Err("Cannot build light client: no substrate node is running (you can't start a light client when pointing to an external node)".into());
     };
 
-    // RPC endpoint.
-    let ws_url = proc.ws_port();
+    // RPC endpoint. Only localhost works.
+    let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
 
     // Wait for a few blocks to be produced using the subxt client.
     let client = OnlineClient::<T>::from_url(ws_url.clone())
