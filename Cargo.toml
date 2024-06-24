@@ -112,7 +112,7 @@ wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
 which = "5.0.0"
 strip-ansi-escapes = "0.2.0"
-proptest = "1.4.0"
+proptest = "1.5.0"
 hex-literal = "0.4.1"
 
 # Light client support:
