@@ -26,7 +26,7 @@ default = ["jsonrpsee", "native"]
 # Exactly 1 of "web" and "native" is expected.
 native = [
     "jsonrpsee?/async-client",
-    "jsonrpsee?/client-ws-transport-native-tls",
+    "jsonrpsee?/client-ws-transport-tls",
     "subxt-lightclient?/native",
     "tokio-util",
     "reconnecting-jsonrpsee-ws-client?/native",
