@@ -243,11 +243,19 @@ async fn build_unstable_client<T: Config>(
 }
 
 #[cfg(lightclient)]
-async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineClient<T>, String> {
+async fn build_light_client<T: Config>(
+    maybe_proc: &Option<SubstrateNode>,
+) -> Result<OnlineClient<T>, String> {
     use subxt::lightclient::{ChainConfig, LightClient};
 
+    let proc = if let Some(proc) = maybe_proc {
+        proc
+    } else {
+        return Err("Cannot build light client: no substrate node is running (you can't start a light client when pointing to an external node)".into());
+    };
+
     // RPC endpoint.
-    let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
+    let ws_url = proc.ws_port();
 
     // Wait for a few blocks to be produced using the subxt client.
     let client = OnlineClient::<T>::from_url(ws_url.clone())
