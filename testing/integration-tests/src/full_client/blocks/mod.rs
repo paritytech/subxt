@@ -235,14 +235,22 @@ async fn fetch_block_and_decode_extrinsic_details() {
     assert!(!timestamp.is_signed());
 
     // Next we expect our transfer:
-    let tx = block_extrinsics.get(1).unwrap();
-    tx.as_root_extrinsic::<node_runtime::Call>().unwrap();
-    let ext = tx
-        .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
-        .unwrap()
-        .unwrap();
-    assert_eq!(ext.value, 10_000);
-    assert!(tx.is_signed());
+    let mut balance_transfer = None;
+
+    for tx in block_extrinsics {
+        tx.as_root_extrinsic::<node_runtime::Call>().unwrap();
+
+        if let Some(ext) = tx
+            .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
+            .unwrap()
+        {
+            balance_transfer = Some((ext, tx.is_signed()));
+        }
+    }
+
+    let (tx, is_signed) = balance_transfer.expect("Balance transfer not found");
+    assert_eq!(tx.value, 10_000);
+    assert!(is_signed);
 }
 
 #[cfg(fullclient)]
