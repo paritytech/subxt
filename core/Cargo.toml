@@ -35,7 +35,6 @@ std = [
 substrate-compat = ["sp-core", "sp-runtime"]
 
 [dependencies]
-
 codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
 scale-info = { workspace = true, default-features = false, features = ["bit-vec"] }
 scale-value = { workspace = true, default-features = false }
@@ -65,6 +64,9 @@ sp-core = { workspace = true, optional = true }
 sp-runtime = { workspace = true, optional = true }
 tracing = { workspace = true, default-features = false }
 
+# AccountId20
+keccak-hash = { workspace = true}
+
 [dev-dependencies]
 assert_matches = { workspace = true }
 bitvec = { workspace = true }
@@ -83,3 +85,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 defalt-features = true
+
+[lints]
+workspace = true

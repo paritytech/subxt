@@ -358,7 +358,7 @@ fn default_derives(crate_path: &syn::Path) -> DerivesRegistry {
 fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
     let mut type_substitutes = TypeSubstitutes::new();
 
-    let defaults: [(syn::Path, syn::Path); 12] = [
+    let defaults: [(syn::Path, syn::Path); 13] = [
         (
             parse_quote!(bitvec::order::Lsb0),
             parse_quote!(#crate_path::utils::bits::Lsb0),
@@ -370,6 +370,10 @@ fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
         (
             parse_quote!(sp_core::crypto::AccountId32),
             parse_quote!(#crate_path::utils::AccountId32),
+        ),
+        (
+            parse_quote!(fp_account::AccountId20),
+            parse_quote!(#crate_path::utils::AccountId20),
         ),
         (
             parse_quote!(sp_runtime::multiaddress::MultiAddress),
