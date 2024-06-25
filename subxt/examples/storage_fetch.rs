@@ -25,6 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .fetch(&storage_query)
         .await?;
 
-    println!("Alice has free balance: {}", result.unwrap().data.free);
+    let v = result.unwrap().data.free;
+    println!("Alice: {v}");
     Ok(())
 }

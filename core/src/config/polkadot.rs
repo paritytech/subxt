@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -11,6 +11,9 @@ pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
 pub use primitive_types::{H256, U256};
 
 /// Default set of commonly used types by Polkadot nodes.
+// Note: The trait implementations exist just to make life easier,
+// but shouldn't strictly be necessary since users can't instantiate this type.
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum PolkadotConfig {}
 
 impl Config for PolkadotConfig {

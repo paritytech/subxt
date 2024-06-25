@@ -28,7 +28,8 @@ native = [
     "jsonrpsee?/async-client",
     "jsonrpsee?/client-ws-transport-native-tls",
     "subxt-lightclient?/native",
-    "tokio-util"
+    "tokio-util",
+    "reconnecting-jsonrpsee-ws-client?/native",
 ]
 
 # Enable this for web/wasm builds.
@@ -39,7 +40,8 @@ web = [
     "getrandom/js",
     "subxt-lightclient?/web",
     "subxt-macro/web",
-    "instant/wasm-bindgen"
+    "instant/wasm-bindgen",
+    "reconnecting-jsonrpsee-ws-client?/web",
 ]
 
 # Enable this to use the reconnecting rpc client
@@ -99,7 +101,7 @@ subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 
 # Reconnecting jsonrpc ws client
-reconnecting-jsonrpsee-ws-client = { version = "0.3", optional = true }
+reconnecting-jsonrpsee-ws-client = { version = "0.4", optional = true, default-features = false }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
@@ -119,7 +121,7 @@ sp-core = { workspace = true }
 sp-keyring = { workspace = true }
 sp-runtime = { workspace = true }
 assert_matches = { workspace = true }
-subxt-signer = { path = "../signer" }
+subxt-signer = { path = "../signer", features = ["unstable-eth"] }
 # Tracing subscriber is useful for light-client examples to ensure that
 # the `bootNodes` and chain spec are configured correctly. If all is fine, then
 # the light-client wlll emit INFO logs with
@@ -137,8 +139,8 @@ path = "examples/light_client_local_node.rs"
 required-features = ["unstable-light-client", "jsonrpsee", "native"]
 
 [[example]]
-name = "reconnecting_rpc_client"
-path = "examples/reconnecting_rpc_client.rs"
+name = "setup_reconnecting_rpc_client"
+path = "examples/setup_reconnecting_rpc_client.rs"
 required-features = ["unstable-reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]

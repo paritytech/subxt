@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -55,7 +55,7 @@ impl<Address, Call, Signature, Extra> scale_encode::EncodeAsType
 {
     fn encode_as_type_to<R: TypeResolver>(
         &self,
-        type_id: &R::TypeId,
+        type_id: R::TypeId,
         types: &R,
         out: &mut Vec<u8>,
     ) -> Result<(), scale_encode::Error> {
@@ -93,7 +93,7 @@ impl<Address, Call, Signature, Extra, R: TypeResolver> Visitor
     fn unchecked_decode_as_type<'scale, 'info>(
         self,
         input: &mut &'scale [u8],
-        type_id: &R::TypeId,
+        type_id: R::TypeId,
         types: &'info R,
     ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'info>, Self::Error>> {
         DecodeAsTypeResult::Decoded(Self::Value::decode_as_type(input, type_id, types))

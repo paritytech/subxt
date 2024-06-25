@@ -1,6 +1,8 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
+
+//! Construct addresses to access storage entries with.
 
 use crate::{
     dynamic::DecodedValueThunk,
@@ -14,11 +16,12 @@ use alloc::borrow::{Cow, ToOwned};
 use alloc::string::String;
 use alloc::vec::Vec;
 
-use super::{storage_key::StorageHashers, StorageKey};
+// Re-export types used here:
+pub use super::storage_key::{StaticStorageKey, StorageHashers, StorageHashersIter, StorageKey};
 
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
-pub trait StorageAddress {
+pub trait Address {
     /// The target type of the value that lives at this address.
     type Target: DecodeWithMetadata;
     /// The keys type used to construct this address.
@@ -54,7 +57,7 @@ pub trait StorageAddress {
 /// A concrete storage address. This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
 #[derive_where(Clone, Debug, Eq, Ord, PartialEq, PartialOrd; Keys)]
-pub struct Address<Keys: StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
+pub struct DefaultAddress<Keys: StorageKey, ReturnTy, Fetchable, Defaultable, Iterable> {
     pallet_name: Cow<'static, str>,
     entry_name: Cow<'static, str>,
     keys: Keys,
@@ -62,9 +65,12 @@ pub struct Address<Keys: StorageKey, ReturnTy, Fetchable, Defaultable, Iterable>
     _marker: core::marker::PhantomData<(ReturnTy, Fetchable, Defaultable, Iterable)>,
 }
 
+/// A storage address constructed by the static codegen.
+pub type StaticAddress<Keys, ReturnTy, Fetchable, Defaultable, Iterable> =
+    DefaultAddress<Keys, ReturnTy, Fetchable, Defaultable, Iterable>;
 /// A typical storage address constructed at runtime rather than via the `subxt` macro; this
 /// has no restriction on what it can be used for (since we don't statically know).
-pub type DynamicAddress<Keys> = Address<Keys, DecodedValueThunk, Yes, Yes, Yes>;
+pub type DynamicAddress<Keys> = DefaultAddress<Keys, DecodedValueThunk, Yes, Yes, Yes>;
 
 impl<Keys: StorageKey> DynamicAddress<Keys> {
     /// Creates a new dynamic address. As `Keys` you can use a `Vec<scale_value::Value>`
@@ -80,7 +86,7 @@ impl<Keys: StorageKey> DynamicAddress<Keys> {
 }
 
 impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
-    Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+    DefaultAddress<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
 where
     Keys: StorageKey,
     ReturnTy: DecodeWithMetadata,
@@ -105,7 +111,7 @@ where
 }
 
 impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
-    Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+    DefaultAddress<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
 where
     Keys: StorageKey,
     ReturnTy: DecodeWithMetadata,
@@ -120,12 +126,12 @@ where
 
     /// Return bytes representing the root of this storage entry (a hash of the pallet and entry name).
     pub fn to_root_bytes(&self) -> Vec<u8> {
-        super::utils::storage_address_root_bytes(self)
+        super::get_address_root_bytes(self)
     }
 }
 
-impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable> StorageAddress
-    for Address<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
+impl<Keys, ReturnTy, Fetchable, Defaultable, Iterable> Address
+    for DefaultAddress<Keys, ReturnTy, Fetchable, Defaultable, Iterable>
 where
     Keys: StorageKey,
     ReturnTy: DecodeWithMetadata,

@@ -1,185 +1,102 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use alloc::borrow::Cow;
+//! Encode runtime API payloads, decode the associated values returned from them, and validate
+//! static runtime API payloads.
+//!
+//! # Example
+//!
+//! ```rust
+//! use subxt_macro::subxt;
+//! use subxt_core::runtime_api;
+//! use subxt_core::metadata;
+//!
+//! // If we generate types without `subxt`, we need to point to `::subxt_core`:
+//! #[subxt(
+//!     crate = "::subxt_core",
+//!     runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale",
+//! )]
+//! pub mod polkadot {}
+//!
+//! // Some metadata we'll use to work with storage entries:
+//! let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
+//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//!
+//! // Build a storage query to access account information.
+//! let payload = polkadot::apis().metadata().metadata_versions();
+//!
+//! // We can validate that the payload is compatible with the given metadata.
+//! runtime_api::validate(&payload, &metadata).unwrap();
+//!
+//! // Encode the payload name and arguments to hand to a node:
+//! let _call_name = runtime_api::call_name(&payload);
+//! let _call_args = runtime_api::call_args(&payload, &metadata).unwrap();
+//!
+//! // If we were to obtain a value back from the node, we could
+//! // then decode it using the same payload and metadata like so:
+//! let value_bytes = hex::decode("080e0000000f000000").unwrap();
+//! let value = runtime_api::decode_value(&mut &*value_bytes, &payload, &metadata).unwrap();
+//!
+//! println!("Available metadata versions: {value:?}");
+//! ```
+
+pub mod payload;
+
+use crate::error::{Error, MetadataError};
+use crate::metadata::{DecodeWithMetadata, Metadata};
 use alloc::borrow::ToOwned;
+use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
-use core::marker::PhantomData;
-use derive_where::derive_where;
-use scale_encode::EncodeAsFields;
-use scale_value::Composite;
+use payload::Payload;
 
-use crate::dynamic::DecodedValueThunk;
-use crate::error::MetadataError;
-use crate::Error;
+/// Run the validation logic against some runtime API payload you'd like to use. Returns `Ok(())`
+/// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
+/// Return an error if the payload was not valid or something went wrong trying to validate it (ie
+/// the runtime API in question do not exist at all)
+pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), Error> {
+    let Some(static_hash) = payload.validation_hash() else {
+        return Ok(());
+    };
 
-use crate::metadata::{DecodeWithMetadata, Metadata};
+    let api_trait = metadata.runtime_api_trait_by_name_err(payload.trait_name())?;
 
-/// This represents a runtime API payload that can call into the runtime of node.
-///
-/// # Components
-///
-/// - associated return type
-///
-/// Resulting bytes of the call are interpreted into this type.
-///
-/// - runtime function name
-///
-/// The function name of the runtime API call. This is obtained by concatenating
-/// the runtime trait name with the trait's method.
-///
-/// For example, the substrate runtime trait [Metadata](https://github.com/paritytech/substrate/blob/cb954820a8d8d765ce75021e244223a3b4d5722d/primitives/api/src/lib.rs#L745)
-/// contains the `metadata_at_version` function. The corresponding runtime function
-/// is `Metadata_metadata_at_version`.
-///
-/// - encoded arguments
-///
-/// Each argument of the runtime function must be scale-encoded.
-pub trait RuntimeApiPayload {
-    /// The return type of the function call.
-    // Note: `DecodeWithMetadata` is needed to decode the function call result
-    // with the `subxt::Metadata.
-    type ReturnType: DecodeWithMetadata;
-
-    /// The runtime API trait name.
-    fn trait_name(&self) -> &str;
-
-    /// The runtime API method name.
-    fn method_name(&self) -> &str;
-
-    /// Scale encode the arguments data.
-    fn encode_args_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error>;
-
-    /// Encode arguments data and return the output. This is a convenience
-    /// wrapper around [`RuntimeApiPayload::encode_args_to`].
-    fn encode_args(&self, metadata: &Metadata) -> Result<Vec<u8>, Error> {
-        let mut v = Vec::new();
-        self.encode_args_to(metadata, &mut v)?;
-        Ok(v)
+    let Some(runtime_hash) = api_trait.method_hash(payload.method_name()) else {
+        return Err(MetadataError::IncompatibleCodegen.into());
+    };
+    if static_hash != runtime_hash {
+        return Err(MetadataError::IncompatibleCodegen.into());
     }
-
-    /// Returns the statically generated validation hash.
-    fn validation_hash(&self) -> Option<[u8; 32]> {
-        None
-    }
+    Ok(())
 }
 
-/// A runtime API payload containing the generic argument data
-/// and interpreting the result of the call as `ReturnTy`.
-///
-/// This can be created from static values (ie those generated
-/// via the `subxt` macro) or dynamic values via [`dynamic`].
-#[derive_where(Clone, Debug, Eq, Ord, PartialEq, PartialOrd; ArgsData)]
-pub struct Payload<ArgsData, ReturnTy> {
-    trait_name: Cow<'static, str>,
-    method_name: Cow<'static, str>,
-    args_data: ArgsData,
-    validation_hash: Option<[u8; 32]>,
-    _marker: PhantomData<ReturnTy>,
+/// Return the name of the runtime API call from the payload.
+pub fn call_name<P: Payload>(payload: &P) -> String {
+    format!("{}_{}", payload.trait_name(), payload.method_name())
 }
 
-impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> RuntimeApiPayload
-    for Payload<ArgsData, ReturnTy>
-{
-    type ReturnType = ReturnTy;
-
-    fn trait_name(&self) -> &str {
-        &self.trait_name
-    }
-
-    fn method_name(&self) -> &str {
-        &self.method_name
-    }
-
-    fn encode_args_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error> {
-        let api_method = metadata
-            .runtime_api_trait_by_name_err(&self.trait_name)?
-            .method_by_name(&self.method_name)
-            .ok_or_else(|| MetadataError::RuntimeMethodNotFound((*self.method_name).to_owned()))?;
-        let mut fields = api_method
-            .inputs()
-            .map(|input| scale_encode::Field::named(&input.ty, &input.name));
-
-        self.args_data
-            .encode_as_fields_to(&mut fields, metadata.types(), out)?;
-        Ok(())
-    }
-
-    fn validation_hash(&self) -> Option<[u8; 32]> {
-        self.validation_hash
-    }
+/// Return the encoded call args given a runtime API payload.
+pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>, Error> {
+    payload.encode_args(metadata)
 }
 
-/// A dynamic runtime API payload.
-pub type DynamicRuntimeApiPayload = Payload<Composite<()>, DecodedValueThunk>;
+/// Decode the value bytes at the location given by the provided runtime API payload.
+pub fn decode_value<P: Payload>(
+    bytes: &mut &[u8],
+    payload: &P,
+    metadata: &Metadata,
+) -> Result<P::ReturnType, Error> {
+    let api_method = metadata
+        .runtime_api_trait_by_name_err(payload.trait_name())?
+        .method_by_name(payload.method_name())
+        .ok_or_else(|| MetadataError::RuntimeMethodNotFound(payload.method_name().to_owned()))?;
 
-impl<ReturnTy, ArgsData> Payload<ArgsData, ReturnTy> {
-    /// Create a new [`Payload`].
-    pub fn new(
-        trait_name: impl Into<String>,
-        method_name: impl Into<String>,
-        args_data: ArgsData,
-    ) -> Self {
-        Payload {
-            trait_name: Cow::Owned(trait_name.into()),
-            method_name: Cow::Owned(method_name.into()),
-            args_data,
-            validation_hash: None,
-            _marker: PhantomData,
-        }
-    }
+    let val = <P::ReturnType as DecodeWithMetadata>::decode_with_metadata(
+        &mut &bytes[..],
+        api_method.output_ty(),
+        metadata,
+    )?;
 
-    /// Create a new static [`Payload`] using static function name
-    /// and scale-encoded argument data.
-    ///
-    /// This is only expected to be used from codegen.
-    #[doc(hidden)]
-    pub fn new_static(
-        trait_name: &'static str,
-        method_name: &'static str,
-        args_data: ArgsData,
-        hash: [u8; 32],
-    ) -> Payload<ArgsData, ReturnTy> {
-        Payload {
-            trait_name: Cow::Borrowed(trait_name),
-            method_name: Cow::Borrowed(method_name),
-            args_data,
-            validation_hash: Some(hash),
-            _marker: core::marker::PhantomData,
-        }
-    }
-
-    /// Do not validate this call prior to submitting it.
-    pub fn unvalidated(self) -> Self {
-        Self {
-            validation_hash: None,
-            ..self
-        }
-    }
-
-    /// Returns the trait name.
-    pub fn trait_name(&self) -> &str {
-        &self.trait_name
-    }
-
-    /// Returns the method name.
-    pub fn method_name(&self) -> &str {
-        &self.method_name
-    }
-
-    /// Returns the arguments data.
-    pub fn args_data(&self) -> &ArgsData {
-        &self.args_data
-    }
-}
-
-/// Create a new [`DynamicRuntimeApiPayload`].
-pub fn dynamic(
-    trait_name: impl Into<String>,
-    method_name: impl Into<String>,
-    args_data: impl Into<Composite<()>>,
-) -> DynamicRuntimeApiPayload {
-    Payload::new(trait_name, method_name, args_data.into())
+    Ok(val)
 }

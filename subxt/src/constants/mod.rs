@@ -7,4 +7,6 @@
 mod constants_client;
 
 pub use constants_client::ConstantsClient;
-pub use subxt_core::constants::{dynamic, Address, ConstantAddress, DynamicAddress};
+pub use subxt_core::constants::address::{
+    dynamic, Address, DefaultAddress, DynamicAddress, StaticAddress,
+};

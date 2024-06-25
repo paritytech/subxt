@@ -49,4 +49,4 @@ substrate-runner = { workspace = true }
 subxt-test-macro = { path = "subxt-test-macro" }
 
 [build-dependencies]
-cfg_aliases = "0.2.0"
+cfg_aliases = "0.2.1"

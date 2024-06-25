@@ -2,9 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use core::fmt::Display;
+
 use super::DeriveJunction;
 use alloc::vec::Vec;
-use derive_more::Display;
 use regex::Regex;
 use secrecy::SecretString;
 
@@ -117,11 +118,18 @@ impl core::str::FromStr for SecretUri {
 }
 
 /// This is returned if `FromStr` cannot parse a string into a `SecretUri`.
-#[derive(Debug, Copy, Clone, PartialEq, Display)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum SecretUriError {
     /// Parsing the secret URI from a string failed; wrong format.
-    #[display(fmt = "Invalid secret phrase format")]
     InvalidFormat,
+}
+
+impl Display for SecretUriError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            SecretUriError::InvalidFormat => write!(f, "Invalid secret phrase format"),
+        }
+    }
 }
 
 #[cfg(feature = "std")]

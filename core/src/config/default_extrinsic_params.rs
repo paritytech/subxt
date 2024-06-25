@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -18,6 +18,7 @@ pub type DefaultExtrinsicParams<T> = signed_extensions::AnyOf<
         signed_extensions::CheckMortality<T>,
         signed_extensions::ChargeAssetTxPayment<T>,
         signed_extensions::ChargeTransactionPayment,
+        signed_extensions::CheckMetadataHash,
     ),
 >;
 
@@ -151,6 +152,7 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
             check_mortality_params,
             charge_asset_tx_params,
             charge_transaction_params,
+            (),
         )
     }
 }

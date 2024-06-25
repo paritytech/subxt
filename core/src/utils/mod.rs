@@ -1,10 +1,11 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 //! Miscellaneous utility helpers.
 
 mod account_id;
+mod account_id20;
 pub mod bits;
 mod era;
 mod multi_address;
@@ -21,16 +22,14 @@ use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
 
 pub use account_id::AccountId32;
+pub use account_id20::AccountId20;
 pub use era::Era;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
+pub use primitive_types::{H160, H256, H512};
 pub use static_type::Static;
 pub use unchecked_extrinsic::UncheckedExtrinsic;
 pub use wrapper_opaque::WrapperKeepOpaque;
-
-// Used in codegen
-#[doc(hidden)]
-pub use primitive_types::{H160, H256, H512};
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
@@ -74,7 +73,7 @@ unsafe impl<T> Sync for PhantomDataSendSync<T> {}
 /// as `BTreeMap` which allows us to easily swap the two during codegen.
 pub type KeyedVec<K, V> = Vec<(K, V)>;
 
-/// A unit marker struct signalling that some property is true
+/// A unit marker struct.
 pub struct Yes;
 
 /// A quick helper to encode some bytes to hex.

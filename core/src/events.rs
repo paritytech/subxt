@@ -1,3 +1,43 @@
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
+
+//! Decode and work with events.
+//!
+//! # Example
+//!
+//! ```rust
+//! use subxt_macro::subxt;
+//! use subxt_core::config::PolkadotConfig;
+//! use subxt_core::events;
+//! use subxt_core::metadata;
+//!
+//! // If we generate types without `subxt`, we need to point to `::subxt_core`:
+//! #[subxt(
+//!     crate = "::subxt_core",
+//!     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
+//! )]
+//! pub mod polkadot {}
+//!
+//! // Some metadata we'll use to work with storage entries:
+//! let metadata_bytes = include_bytes!("../../artifacts/polkadot_metadata_full.scale");
+//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//!
+//! // Some bytes representing events (located in System.Events storage):
+//! let event_bytes = hex::decode("1c00000000000000a2e9b53d5517020000000100000000000310c96d901d0102000000020000000408d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27dbeea5a030000000000000000000000000000020000000402d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48102700000000000000000000000000000000020000000407be5ddb1579b72e84524fc29e78609e3caf42e85aa118ebfe0b0ad404b5bdd25fbeea5a030000000000000000000000000000020000002100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27dbeea5a03000000000000000000000000000000000000000000000000000000000000020000000000426df03e00000000").unwrap();
+//!
+//! // We can decode these bytes like so:
+//! let evs = events::decode_from::<PolkadotConfig>(event_bytes, metadata);
+//!
+//! // And then do things like iterate over them and inspect details:
+//! for ev in evs.iter() {
+//!     let ev = ev.unwrap();
+//!     println!("Index: {}", ev.index());
+//!     println!("Name: {}.{}", ev.pallet_name(), ev.variant_name());
+//!     println!("Fields: {:?}", ev.field_values().unwrap());
+//! }
+//! ```
+
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use codec::{Compact, Decode, Encode};
@@ -6,6 +46,13 @@ use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_metadata::PalletMetadata;
 
 use crate::{error::MetadataError, Config, Error, Metadata};
+
+/// Create a new [`Events`] instance from the given bytes.
+///
+/// This is a shortcut for [`Events::decode_from`].
+pub fn decode_from<T: Config>(event_bytes: Vec<u8>, metadata: Metadata) -> Events<T> {
+    Events::decode_from(event_bytes, metadata)
+}
 
 /// Trait to uniquely identify the events's identity from the runtime metadata.
 ///
@@ -52,7 +99,7 @@ impl<T: Config> core::fmt::Debug for Events<T> {
 
 impl<T: Config> Events<T> {
     /// Create a new [`Events`] instance from the given bytes.
-    pub fn decode_from(metadata: Metadata, event_bytes: Vec<u8>) -> Self {
+    pub fn decode_from(event_bytes: Vec<u8>, metadata: Metadata) -> Self {
         // event_bytes is a SCALE encoded vector of events. So, pluck the
         // compact encoded length from the front, leaving the remaining bytes
         // for our iterating to decode.
@@ -83,6 +130,11 @@ impl<T: Config> Events<T> {
     // Note: mainly here to satisfy clippy.
     pub fn is_empty(&self) -> bool {
         self.num_events == 0
+    }
+
+    /// Return the bytes representing all of the events.
+    pub fn bytes(&self) -> &[u8] {
+        &self.event_bytes
     }
 
     /// Iterate over all of the events, using metadata to dynamically
@@ -220,7 +272,7 @@ impl<T: Config> EventDetails<T> {
             // Skip over the bytes for this field:
             scale_decode::visitor::decode_with_visitor(
                 input,
-                &field_metadata.ty.id,
+                field_metadata.ty.id,
                 metadata.types(),
                 scale_decode::visitor::IgnoreVisitor::new(),
             )
@@ -276,12 +328,12 @@ impl<T: Config> EventDetails<T> {
 
     /// The name of the pallet from whence the Event originated.
     pub fn pallet_name(&self) -> &str {
-        self.event_metadata().pallet().name()
+        self.event_metadata().pallet.name()
     }
 
     /// The name of the event (ie the name of the variant that it corresponds to).
     pub fn variant_name(&self) -> &str {
-        &self.event_metadata().variant().name
+        &self.event_metadata().variant.name
     }
 
     /// Fetch details from the metadata for this event.
@@ -321,7 +373,7 @@ impl<T: Config> EventDetails<T> {
             .variant
             .fields
             .iter()
-            .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
+            .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
 
         let decoded =
             scale_value::scale::decode_as_fields(bytes, &mut fields, self.metadata.types())?;
@@ -338,7 +390,7 @@ impl<T: Config> EventDetails<T> {
                 .variant
                 .fields
                 .iter()
-                .map(|f| scale_decode::Field::new(&f.ty.id, f.name.as_deref()));
+                .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
             let decoded =
                 E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())?;
             Ok(Some(decoded))
@@ -355,7 +407,7 @@ impl<T: Config> EventDetails<T> {
 
         let decoded = E::decode_as_type(
             &mut &bytes[..],
-            &self.metadata.outer_enums().event_enum_ty(),
+            self.metadata.outer_enums().event_enum_ty(),
             self.metadata.types(),
         )?;
 
@@ -370,17 +422,10 @@ impl<T: Config> EventDetails<T> {
 
 /// Details for the given event plucked from the metadata.
 pub struct EventMetadataDetails<'a> {
-    pallet: PalletMetadata<'a>,
-    variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
-}
-
-impl<'a> EventMetadataDetails<'a> {
-    pub fn pallet(&self) -> PalletMetadata<'a> {
-        self.pallet
-    }
-    pub fn variant(&self) -> &'a scale_info::Variant<scale_info::form::PortableForm> {
-        self.variant
-    }
+    /// Metadata for the pallet that the event belongs to.
+    pub pallet: PalletMetadata<'a>,
+    /// Metadata for the variant which describes the pallet events.
+    pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }
 
 /// Event related test utilities used outside this module.
@@ -504,8 +549,9 @@ pub(crate) mod test_utils {
             },
         );
         let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
+        let metadata: subxt_metadata::Metadata = runtime_metadata.try_into().unwrap();
 
-        Metadata::new(runtime_metadata.try_into().unwrap())
+        Metadata::from(metadata)
     }
 
     /// Build an `Events` object for test purposes, based on the details provided,
@@ -532,7 +578,7 @@ pub(crate) mod test_utils {
         // Prepend compact encoded length to event bytes:
         let mut all_event_bytes = Compact(num_events).encode();
         all_event_bytes.extend(event_bytes);
-        Events::decode_from(metadata, all_event_bytes)
+        Events::decode_from(all_event_bytes, metadata)
     }
 }
 

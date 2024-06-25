@@ -70,8 +70,8 @@ fn generate_custom_value_fn(
     };
 
     Some(quote!(
-        pub fn #fn_name_ident(&self) -> #crate_path::custom_values::StaticAddress<#return_ty, #decodable> {
-            #crate_path::custom_values::StaticAddress::new_static(#name, [#(#custom_value_hash,)*])
+        pub fn #fn_name_ident(&self) -> #crate_path::custom_values::address::StaticAddress<#return_ty, #decodable> {
+            #crate_path::custom_values::address::StaticAddress::new_static(#name, [#(#custom_value_hash,)*])
         }
     ))
 }

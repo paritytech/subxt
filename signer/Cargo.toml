@@ -16,7 +16,16 @@ keywords = ["parity", "subxt", "extrinsic", "signer"]
 
 [features]
 default = ["sr25519", "ecdsa", "subxt", "std"]
-std = ["regex/std", "sp-crypto-hashing/std", "pbkdf2/std", "sha2/std", "hmac/std", "bip39/std", "schnorrkel/std", "secp256k1/std", "sp-core/std"]
+std = [
+    "regex/std",
+    "sp-crypto-hashing/std",
+    "pbkdf2/std",
+    "sha2/std",
+    "hmac/std",
+    "bip39/std",
+    "schnorrkel/std",
+    "secp256k1/std",
+]
 
 # Pick the signer implementation(s) you need by enabling the
 # corresponding features. Note: I had more difficulties getting
@@ -24,6 +33,7 @@ std = ["regex/std", "sp-crypto-hashing/std", "pbkdf2/std", "sha2/std", "hmac/std
 # https://github.com/rust-bitcoin/rust-bitcoin/issues/930#issuecomment-1215538699
 sr25519 = ["schnorrkel"]
 ecdsa = ["secp256k1"]
+unstable-eth = ["keccak-hash", "ecdsa", "secp256k1", "bip32"]
 
 # Make the keypair algorithms here compatible with Subxt's Signer trait,
 # so that they can be used to sign transactions for compatible chains.
@@ -37,25 +47,32 @@ web = ["getrandom/js"]
 subxt-core = { workspace = true, optional = true, default-features = false }
 secrecy = { workspace = true }
 regex = { workspace = true, features = ["unicode"] }
-hex = { workspace = true }
+hex = { workspace = true, features = ["alloc"] }
 cfg-if = { workspace = true }
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
+codec = { package = "parity-scale-codec", workspace = true, features = [
+    "derive",
+] }
 sp-crypto-hashing = { workspace = true }
-derive_more = { workspace = true }
 pbkdf2 = { workspace = true }
 sha2 = { workspace = true }
 hmac = { workspace = true }
 zeroize = { workspace = true }
 bip39 = { workspace = true }
+bip32 = { workspace = true, features = ["alloc", "secp256k1"], optional = true }
 schnorrkel = { workspace = true, optional = true }
-secp256k1 = { workspace = true, optional = true, features = ["alloc", "recovery"] }
-
+secp256k1 = { workspace = true, optional = true, features = [
+    "alloc",
+    "recovery",
+] }
+keccak-hash = { workspace = true, optional = true }
 
 # We only pull this in to enable the JS flag for schnorrkel to use.
 getrandom = { workspace = true, optional = true }
 
 [dev-dependencies]
 sp-keyring = { workspace = true }
+proptest = { workspace = true }
+hex-literal = { workspace = true }
 sp-core = { workspace = true }
 
 [package.metadata.cargo-machete]
@@ -67,3 +84,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 defalt-features = true
+
+[lints]
+workspace = true

@@ -130,8 +130,8 @@ pub async fn extension_signature_for_extrinsic(
 ) -> Result<Vec<u8>, anyhow::Error> {
     let genesis_hash = encode_then_hex(&api.genesis_hash());
     // These numbers aren't SCALE encoded; their bytes are just converted to hex:
-    let spec_version = to_hex(&api.runtime_version().spec_version().to_be_bytes());
-    let transaction_version = to_hex(&api.runtime_version().transaction_version().to_be_bytes());
+    let spec_version = to_hex(&api.runtime_version().spec_version.to_be_bytes());
+    let transaction_version = to_hex(&api.runtime_version().transaction_version.to_be_bytes());
     let nonce = to_hex(&account_nonce.to_be_bytes());
     // If you construct a mortal transaction, then this block hash needs to correspond
     // to the block number passed to `Era::mortal()`.

@@ -5,7 +5,7 @@
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
 use crate::backend::unstable::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
 use crate::config::BlockHash;
-use crate::error::Error;
+use crate::error::{Error, RpcError};
 use futures::stream::{Stream, StreamExt};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::ops::DerefMut;
@@ -267,8 +267,9 @@ impl<Hash: BlockHash> Shared<Hash> {
 
                     shared.seen_runtime_events.clear();
 
-                    init_message.finalized_block_hashes =
-                        finalized_ev.finalized_block_hashes.clone();
+                    init_message
+                        .finalized_block_hashes
+                        .clone_from(&finalized_ev.finalized_block_hashes);
 
                     if let Some(runtime_ev) = newest_runtime {
                         init_message.finalized_block_runtime = Some(runtime_ev);
@@ -379,6 +380,103 @@ struct SubscriberDetails<Hash: BlockHash> {
     waker: Option<Waker>,
 }
 
+/// A stream that subscribes to finalized blocks
+/// and indicates whether a block was missed if was restarted.
+#[derive(Debug)]
+pub struct FollowStreamFinalizedHeads<Hash: BlockHash, F> {
+    stream: FollowStreamDriverSubscription<Hash>,
+    sub_id: Option<String>,
+    last_seen_block: Option<BlockRef<Hash>>,
+    f: F,
+    is_done: bool,
+}
+
+impl<Hash: BlockHash, F> Unpin for FollowStreamFinalizedHeads<Hash, F> {}
+
+impl<Hash, F> FollowStreamFinalizedHeads<Hash, F>
+where
+    Hash: BlockHash,
+    F: Fn(FollowEvent<BlockRef<Hash>>) -> Vec<BlockRef<Hash>>,
+{
+    pub fn new(stream: FollowStreamDriverSubscription<Hash>, f: F) -> Self {
+        Self {
+            stream,
+            sub_id: None,
+            last_seen_block: None,
+            f,
+            is_done: false,
+        }
+    }
+}
+
+impl<Hash, F> Stream for FollowStreamFinalizedHeads<Hash, F>
+where
+    Hash: BlockHash,
+    F: Fn(FollowEvent<BlockRef<Hash>>) -> Vec<BlockRef<Hash>>,
+{
+    type Item = Result<(String, Vec<BlockRef<Hash>>), Error>;
+
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        if self.is_done {
+            return Poll::Ready(None);
+        }
+
+        loop {
+            let Some(ev) = futures::ready!(self.stream.poll_next_unpin(cx)) else {
+                self.is_done = true;
+                return Poll::Ready(None);
+            };
+
+            let block_refs = match ev {
+                FollowStreamMsg::Ready(sub_id) => {
+                    self.sub_id = Some(sub_id);
+                    continue;
+                }
+                FollowStreamMsg::Event(FollowEvent::Finalized(finalized)) => {
+                    self.last_seen_block = finalized.finalized_block_hashes.last().cloned();
+
+                    (self.f)(FollowEvent::Finalized(finalized))
+                }
+                FollowStreamMsg::Event(FollowEvent::Initialized(mut init)) => {
+                    let prev = self.last_seen_block.take();
+                    self.last_seen_block = init.finalized_block_hashes.last().cloned();
+
+                    if let Some(p) = prev {
+                        let Some(pos) = init
+                            .finalized_block_hashes
+                            .iter()
+                            .position(|b| b.hash() == p.hash())
+                        else {
+                            return Poll::Ready(Some(Err(RpcError::DisconnectedWillReconnect(
+                                "Missed at least one block when the connection was lost".to_owned(),
+                            )
+                            .into())));
+                        };
+
+                        // If we got older blocks than `prev`, we need to remove them
+                        // because they should already have been sent at this point.
+                        init.finalized_block_hashes.drain(0..=pos);
+                    }
+
+                    (self.f)(FollowEvent::Initialized(init))
+                }
+                FollowStreamMsg::Event(ev) => (self.f)(ev),
+            };
+
+            if block_refs.is_empty() {
+                continue;
+            }
+
+            let sub_id = self
+                .sub_id
+                .clone()
+                .expect("Ready is always emitted before any other event");
+
+            return Poll::Ready(Some(Ok((sub_id, block_refs))));
+        }
+    }
+}
+
 #[cfg(test)]
 mod test_utils {
     use super::super::follow_stream_unpin::test_utils::test_unpin_stream_getter;
@@ -401,6 +499,9 @@ mod test_utils {
 
 #[cfg(test)]
 mod test {
+    use futures::TryStreamExt;
+    use sp_core::H256;
+
     use super::super::follow_stream::test_utils::{
         ev_best_block, ev_finalized, ev_initialized, ev_new_block,
     };
@@ -543,5 +644,102 @@ mod test {
             FollowStreamMsg::Event(ev_new_block_ref(2, 3)),
         ];
         assert_eq!(evs, expected);
+    }
+
+    #[tokio::test]
+    async fn subscribe_finalized_blocks_restart_works() {
+        let mut driver = test_follow_stream_driver_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_new_block(0, 1)),
+                    Ok(ev_best_block(1)),
+                    Ok(ev_finalized([1], [])),
+                    Ok(FollowEvent::Stop),
+                    Ok(ev_initialized(1)),
+                    Ok(ev_finalized([2], [])),
+                    Err(Error::Other("ended".to_owned())),
+                ]
+            },
+            10,
+        );
+
+        let handle = driver.handle();
+
+        tokio::spawn(async move { while driver.next().await.is_some() {} });
+
+        let f = |ev| match ev {
+            FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
+            FollowEvent::Initialized(ev) => ev.finalized_block_hashes,
+            _ => vec![],
+        };
+
+        let stream = FollowStreamFinalizedHeads::new(handle.subscribe(), f);
+        let evs: Vec<_> = stream.try_collect().await.unwrap();
+
+        let expected = vec![
+            (
+                "sub_id_0".to_string(),
+                vec![BlockRef::new(H256::from_low_u64_le(0))],
+            ),
+            (
+                "sub_id_0".to_string(),
+                vec![BlockRef::new(H256::from_low_u64_le(1))],
+            ),
+            (
+                "sub_id_5".to_string(),
+                vec![BlockRef::new(H256::from_low_u64_le(2))],
+            ),
+        ];
+        assert_eq!(evs, expected);
+    }
+
+    #[tokio::test]
+    async fn subscribe_finalized_blocks_restart_with_missed_blocks() {
+        let mut driver = test_follow_stream_driver_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(FollowEvent::Stop),
+                    // Emulate that we missed some blocks.
+                    Ok(ev_initialized(13)),
+                    Ok(ev_finalized([14], [])),
+                    Err(Error::Other("ended".to_owned())),
+                ]
+            },
+            10,
+        );
+
+        let handle = driver.handle();
+
+        tokio::spawn(async move { while driver.next().await.is_some() {} });
+
+        let f = |ev| match ev {
+            FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
+            FollowEvent::Initialized(ev) => ev.finalized_block_hashes,
+            _ => vec![],
+        };
+
+        let evs: Vec<_> = FollowStreamFinalizedHeads::new(handle.subscribe(), f)
+            .collect()
+            .await;
+
+        assert_eq!(
+            evs[0].as_ref().unwrap(),
+            &(
+                "sub_id_0".to_string(),
+                vec![BlockRef::new(H256::from_low_u64_le(0))]
+            )
+        );
+        assert!(
+            matches!(&evs[1], Err(Error::Rpc(RpcError::DisconnectedWillReconnect(e))) if e.contains("Missed at least one block when the connection was lost"))
+        );
+        assert_eq!(
+            evs[2].as_ref().unwrap(),
+            &(
+                "sub_id_2".to_string(),
+                vec![BlockRef::new(H256::from_low_u64_le(14))]
+            )
+        );
     }
 }

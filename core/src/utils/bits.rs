@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -156,7 +156,7 @@ impl<Store, Order, R: TypeResolver> scale_decode::Visitor for DecodedBitsVisitor
     fn unchecked_decode_as_type<'scale, 'info>(
         self,
         input: &mut &'scale [u8],
-        type_id: &R::TypeId,
+        type_id: R::TypeId,
         types: &'info R,
     ) -> scale_decode::visitor::DecodeAsTypeResult<
         Self,
@@ -181,7 +181,7 @@ impl<Store, Order> scale_decode::IntoVisitor for DecodedBits<Store, Order> {
 impl<Store, Order> scale_encode::EncodeAsType for DecodedBits<Store, Order> {
     fn encode_as_type_to<R: TypeResolver>(
         &self,
-        type_id: &R::TypeId,
+        type_id: R::TypeId,
         types: &R,
         out: &mut Vec<u8>,
     ) -> Result<(), scale_encode::Error> {

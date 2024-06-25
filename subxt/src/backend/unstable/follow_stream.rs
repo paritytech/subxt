@@ -105,7 +105,7 @@ impl<Hash> FollowStream<Hash> {
                 let methods = methods.clone();
                 Box::pin(async move {
                     // Make the RPC call:
-                    let stream = methods.chainhead_unstable_follow(true).await?;
+                    let stream = methods.chainhead_v1_follow(true).await?;
                     // Extract the subscription ID:
                     let Some(sub_id) = stream.subscription_id().map(ToOwned::to_owned) else {
                         return Err(Error::Other(
@@ -148,6 +148,12 @@ impl<Hash> Stream for FollowStream<Hash> {
                             continue;
                         }
                         Poll::Ready(Err(e)) => {
+                            // Re-start if a reconnecting backend was enabled.
+                            if e.is_disconnected_will_reconnect() {
+                                this.stream = InnerStreamState::Stopped;
+                                continue;
+                            }
+
                             // Finish forever if there's an error, passing it on.
                             this.stream = InnerStreamState::Finished;
                             return Poll::Ready(Some(Err(e)));
@@ -182,6 +188,12 @@ impl<Hash> Stream for FollowStream<Hash> {
                             return Poll::Ready(Some(Ok(FollowStreamMsg::Event(ev))));
                         }
                         Poll::Ready(Some(Err(e))) => {
+                            // Re-start if a reconnecting backend was enabled.
+                            if e.is_disconnected_will_reconnect() {
+                                this.stream = InnerStreamState::Stopped;
+                                continue;
+                            }
+
                             // Finish forever if there's an error, passing it on.
                             this.stream = InnerStreamState::Finished;
                             return Poll::Ready(Some(Err(e)));

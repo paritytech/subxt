@@ -33,48 +33,48 @@ impl<T: Config> UnstableRpcMethods<T> {
         }
     }
 
-    /// Subscribe to `chainHead_unstable_follow` to obtain all reported blocks by the chain.
+    /// Subscribe to `chainHead_v1_follow` to obtain all reported blocks by the chain.
     ///
     /// The subscription ID can be used to make queries for the
-    /// block's body ([`chainhead_unstable_body`](UnstableRpcMethods::chainhead_unstable_follow)),
-    /// block's header ([`chainhead_unstable_header`](UnstableRpcMethods::chainhead_unstable_header)),
-    /// block's storage ([`chainhead_unstable_storage`](UnstableRpcMethods::chainhead_unstable_storage)) and submitting
-    /// runtime API calls at this block ([`chainhead_unstable_call`](UnstableRpcMethods::chainhead_unstable_call)).
+    /// block's body ([`chainHead_v1_body`](UnstableRpcMethods::chainhead_v1_follow)),
+    /// block's header ([`chainHead_v1_header`](UnstableRpcMethods::chainhead_v1_header)),
+    /// block's storage ([`chainHead_v1_storage`](UnstableRpcMethods::chainhead_v1_storage)) and submitting
+    /// runtime API calls at this block ([`chainHead_v1_call`](UnstableRpcMethods::chainhead_v1_call)).
     ///
     /// # Note
     ///
     /// When the user is no longer interested in a block, the user is responsible
-    /// for calling the [`chainhead_unstable_unpin`](UnstableRpcMethods::chainhead_unstable_unpin) method.
+    /// for calling the [`chainHead_v1_unpin`](UnstableRpcMethods::chainhead_v1_unpin) method.
     /// Failure to do so will result in the subscription being stopped by generating the `Stop` event.
-    pub async fn chainhead_unstable_follow(
+    pub async fn chainhead_v1_follow(
         &self,
         with_runtime: bool,
     ) -> Result<FollowSubscription<T::Hash>, Error> {
         let sub = self
             .client
             .subscribe(
-                "chainHead_unstable_follow",
+                "chainHead_v1_follow",
                 rpc_params![with_runtime],
-                "chainHead_unstable_unfollow",
+                "chainHead_v1_unfollow",
             )
             .await?;
 
         Ok(FollowSubscription { sub, done: false })
     }
 
-    /// Resumes a storage fetch started with chainHead_unstable_storage after it has generated an
+    /// Resumes a storage fetch started with chainHead_v1_storage after it has generated an
     /// `operationWaitingForContinue` event.
     ///
     /// Has no effect if the operationId is invalid or refers to an operation that has emitted a
     /// `{"event": "operationInaccessible"` event, or if the followSubscription is invalid or stale.
-    pub async fn chainhead_unstable_continue(
+    pub async fn chainhead_v1_continue(
         &self,
         follow_subscription: &str,
         operation_id: &str,
     ) -> Result<(), Error> {
         self.client
             .request(
-                "chainHead_unstable_continue",
+                "chainHead_v1_continue",
                 rpc_params![follow_subscription, operation_id],
             )
             .await?;
@@ -82,19 +82,19 @@ impl<T: Config> UnstableRpcMethods<T> {
         Ok(())
     }
 
-    /// Stops an operation started with `chainHead_unstable_body`, `chainHead_unstable_call`, or
-    /// `chainHead_unstable_storage¦. If the operation was still in progress, this interrupts it.
+    /// Stops an operation started with `chainHead_v1_body`, `chainHead_v1_call`, or
+    /// `chainHead_v1_storage¦. If the operation was still in progress, this interrupts it.
     /// If the operation was already finished, this call has no effect.
     ///
     /// Has no effect if the `followSubscription` is invalid or stale.
-    pub async fn chainhead_unstable_stop_operation(
+    pub async fn chainhead_v1_stop_operation(
         &self,
         follow_subscription: &str,
         operation_id: &str,
     ) -> Result<(), Error> {
         self.client
             .request(
-                "chainHead_unstable_stopOperation",
+                "chainHead_v1_stopOperation",
                 rpc_params![follow_subscription, operation_id],
             )
             .await?;
@@ -102,7 +102,7 @@ impl<T: Config> UnstableRpcMethods<T> {
         Ok(())
     }
 
-    /// Call the `chainHead_unstable_body` method and return an operation ID to obtain the block's body.
+    /// Call the `chainHead_v1_body` method and return an operation ID to obtain the block's body.
     ///
     /// The response events are provided on the `chainHead_follow` subscription and identified by
     /// the returned operation ID.
@@ -110,30 +110,27 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`](UnstableRpcMethods::chainhead_unstable_follow).
-    pub async fn chainhead_unstable_body(
+    /// [`chainHead_v1_follow`](UnstableRpcMethods::chainhead_v1_follow).
+    pub async fn chainhead_v1_body(
         &self,
         subscription_id: &str,
         hash: T::Hash,
     ) -> Result<MethodResponse, Error> {
         let response = self
             .client
-            .request(
-                "chainHead_unstable_body",
-                rpc_params![subscription_id, hash],
-            )
+            .request("chainHead_v1_body", rpc_params![subscription_id, hash])
             .await?;
 
         Ok(response)
     }
 
-    /// Get the block's header using the `chainHead_unstable_header` method.
+    /// Get the block's header using the `chainHead_v1_header` method.
     ///
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`](UnstableRpcMethods::chainhead_unstable_follow).
-    pub async fn chainhead_unstable_header(
+    /// [`chainHead_v1_follow`](UnstableRpcMethods::chainhead_v1_follow).
+    pub async fn chainhead_v1_header(
         &self,
         subscription_id: &str,
         hash: T::Hash,
@@ -141,10 +138,7 @@ impl<T: Config> UnstableRpcMethods<T> {
         // header returned as hex encoded SCALE encoded bytes.
         let header: Option<Bytes> = self
             .client
-            .request(
-                "chainHead_unstable_header",
-                rpc_params![subscription_id, hash],
-            )
+            .request("chainHead_v1_header", rpc_params![subscription_id, hash])
             .await?;
 
         let header = header
@@ -153,7 +147,7 @@ impl<T: Config> UnstableRpcMethods<T> {
         Ok(header)
     }
 
-    /// Call the `chainhead_unstable_storage` method and return an operation ID to obtain the block's storage.
+    /// Call the `chainHead_v1_storage` method and return an operation ID to obtain the block's storage.
     ///
     /// The response events are provided on the `chainHead_follow` subscription and identified by
     /// the returned operation ID.
@@ -161,8 +155,8 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`](UnstableRpcMethods::chainhead_unstable_follow).
-    pub async fn chainhead_unstable_storage(
+    /// [`chainHead_v1_follow`](UnstableRpcMethods::chainhead_v1_follow).
+    pub async fn chainhead_v1_storage(
         &self,
         subscription_id: &str,
         hash: T::Hash,
@@ -180,7 +174,7 @@ impl<T: Config> UnstableRpcMethods<T> {
         let response = self
             .client
             .request(
-                "chainHead_unstable_storage",
+                "chainHead_v1_storage",
                 rpc_params![subscription_id, hash, items, child_key.map(to_hex)],
             )
             .await?;
@@ -188,7 +182,7 @@ impl<T: Config> UnstableRpcMethods<T> {
         Ok(response)
     }
 
-    /// Call the `chainhead_unstable_storage` method and return an operation ID to obtain the runtime API result.
+    /// Call the `chainHead_v1_storage` method and return an operation ID to obtain the runtime API result.
     ///
     /// The response events are provided on the `chainHead_follow` subscription and identified by
     /// the returned operation ID.
@@ -196,8 +190,8 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`](UnstableRpcMethods::chainhead_unstable_follow).
-    pub async fn chainhead_unstable_call(
+    /// [`chainHead_v1_follow`](UnstableRpcMethods::chainhead_v1_follow).
+    pub async fn chainhead_v1_call(
         &self,
         subscription_id: &str,
         hash: T::Hash,
@@ -207,7 +201,7 @@ impl<T: Config> UnstableRpcMethods<T> {
         let response = self
             .client
             .request(
-                "chainHead_unstable_call",
+                "chainHead_v1_call",
                 rpc_params![subscription_id, hash, function, to_hex(call_parameters)],
             )
             .await?;
@@ -220,17 +214,14 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainhead_unstable_follow`](UnstableRpcMethods::chainhead_unstable_follow).
-    pub async fn chainhead_unstable_unpin(
+    /// [`chainHead_v1_follow`](UnstableRpcMethods::chainhead_v1_follow).
+    pub async fn chainhead_v1_unpin(
         &self,
         subscription_id: &str,
         hash: T::Hash,
     ) -> Result<(), Error> {
         self.client
-            .request(
-                "chainHead_unstable_unpin",
-                rpc_params![subscription_id, hash],
-            )
+            .request("chainHead_v1_unpin", rpc_params![subscription_id, hash])
             .await?;
 
         Ok(())
@@ -272,16 +263,16 @@ impl<T: Config> UnstableRpcMethods<T> {
     }
 
     /// Attempt to submit a transaction, returning events about its progress.
-    pub async fn transaction_unstable_submit_and_watch(
+    pub async fn transactionwatch_v1_submit_and_watch(
         &self,
         tx: &[u8],
     ) -> Result<TransactionSubscription<T::Hash>, Error> {
         let sub = self
             .client
             .subscribe(
-                "transactionWatch_unstable_submitAndWatch",
+                "transactionWatch_v1_submitAndWatch",
                 rpc_params![to_hex(tx)],
-                "transactionWatch_unstable_unwatch",
+                "transactionWatch_v1_unwatch",
             )
             .await?;
 
@@ -289,24 +280,24 @@ impl<T: Config> UnstableRpcMethods<T> {
     }
 
     /// Broadcast the transaction on the p2p network until the
-    /// [`Self::transaction_unstable_stop`] is called.
+    /// [`Self::transaction_v1_stop`] is called.
     ///
     /// Returns an operation ID that can be used to stop the broadcasting process.
     /// Returns `None` if the server cannot handle the request at the moment.
-    pub async fn transaction_unstable_broadcast(&self, tx: &[u8]) -> Result<Option<String>, Error> {
+    pub async fn transaction_v1_broadcast(&self, tx: &[u8]) -> Result<Option<String>, Error> {
         self.client
-            .request("transaction_unstable_broadcast", rpc_params![to_hex(tx)])
+            .request("transaction_v1_broadcast", rpc_params![to_hex(tx)])
             .await
     }
 
     /// Stop the broadcasting process of the transaction.
     ///
-    /// The operation ID is obtained from the [`Self::transaction_unstable_broadcast`] method.
+    /// The operation ID is obtained from the [`Self::transaction_v1_broadcast`] method.
     ///
     /// Returns an error if the operation ID does not correspond to any active transaction for this connection.
-    pub async fn transaction_unstable_stop(&self, operation_id: &str) -> Result<(), Error> {
+    pub async fn transaction_v1_stop(&self, operation_id: &str) -> Result<(), Error> {
         self.client
-            .request("transaction_unstable_stop", rpc_params![operation_id])
+            .request("transaction_v1_stop", rpc_params![operation_id])
             .await
     }
 }

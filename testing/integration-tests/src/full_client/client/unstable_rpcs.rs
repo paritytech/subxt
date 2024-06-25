@@ -22,26 +22,26 @@ use subxt::{
 use subxt_signer::sr25519::dev;
 
 #[subxt_test]
-async fn chainhead_unstable_follow() {
+async fn chainhead_v1_follow() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
     let legacy_rpc = ctx.legacy_rpc_methods().await;
 
     // Check subscription with runtime updates set on false.
-    let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     // The initialized event should contain the finalized block hash.
     let finalized_block_hash = legacy_rpc.chain_get_finalized_head().await.unwrap();
-    assert_eq!(
+    assert_matches!(
         event,
-        FollowEvent::Initialized(Initialized {
-            finalized_block_hashes: vec![finalized_block_hash],
-            finalized_block_runtime: None,
-        })
+        FollowEvent::Initialized(Initialized { finalized_block_hashes, finalized_block_runtime }) => {
+            assert!(finalized_block_hashes.contains(&finalized_block_hash));
+            assert!(finalized_block_runtime.is_none());
+        }
     );
 
     // Expect subscription to produce runtime versions.
-    let mut blocks = rpc.chainhead_unstable_follow(true).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     // The initialized event should contain the finalized block hash.
     let finalized_block_hash = legacy_rpc.chain_get_finalized_head().await.unwrap();
@@ -50,10 +50,10 @@ async fn chainhead_unstable_follow() {
     assert_matches!(
         event,
         FollowEvent::Initialized(init) => {
-            assert_eq!(init.finalized_block_hashes, vec![finalized_block_hash]);
+            assert!(init.finalized_block_hashes.contains(&finalized_block_hash));
             if let Some(RuntimeEvent::Valid(RuntimeVersionEvent { spec })) = init.finalized_block_runtime {
-                assert_eq!(spec.spec_version, runtime_version.spec_version());
-                assert_eq!(spec.transaction_version, runtime_version.transaction_version());
+                assert_eq!(spec.spec_version, runtime_version.spec_version);
+                assert_eq!(spec.transaction_version, runtime_version.transaction_version);
             } else {
                 panic!("runtime details not provided with init event, got {:?}", init.finalized_block_runtime);
             }
@@ -62,20 +62,20 @@ async fn chainhead_unstable_follow() {
 }
 
 #[subxt_test]
-async fn chainhead_unstable_body() {
+async fn chainhead_v1_body() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
 
-    let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
+        FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
 
     // Fetch the block's body.
-    let response = rpc.chainhead_unstable_body(sub_id, hash).await.unwrap();
+    let response = rpc.chainhead_v1_body(sub_id, hash).await.unwrap();
     let operation_id = match response {
         MethodResponse::Started(started) => started.operation_id,
         MethodResponse::LimitReached => panic!("Expected started response"),
@@ -90,15 +90,15 @@ async fn chainhead_unstable_body() {
 }
 
 #[subxt_test]
-async fn chainhead_unstable_header() {
+async fn chainhead_v1_header() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
     let legacy_rpc = ctx.legacy_rpc_methods().await;
 
-    let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
+        FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -109,7 +109,7 @@ async fn chainhead_unstable_header() {
         .unwrap()
         .unwrap();
     let old_header = rpc
-        .chainhead_unstable_header(sub_id, hash)
+        .chainhead_v1_header(sub_id, hash)
         .await
         .unwrap()
         .unwrap();
@@ -118,15 +118,15 @@ async fn chainhead_unstable_header() {
 }
 
 #[subxt_test]
-async fn chainhead_unstable_storage() {
+async fn chainhead_v1_storage() {
     let ctx = test_context().await;
     let api = ctx.client();
     let rpc = ctx.unstable_rpc_methods().await;
 
-    let mut blocks = rpc.chainhead_unstable_follow(false).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
+        FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -142,7 +142,7 @@ async fn chainhead_unstable_storage() {
 
     // Fetch storage.
     let response = rpc
-        .chainhead_unstable_storage(sub_id, hash, items, None)
+        .chainhead_v1_storage(sub_id, hash, items, None)
         .await
         .unwrap();
     let operation_id = match response {
@@ -164,14 +164,14 @@ async fn chainhead_unstable_storage() {
 }
 
 #[subxt_test]
-async fn chainhead_unstable_call() {
+async fn chainhead_v1_call() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
 
-    let mut blocks = rpc.chainhead_unstable_follow(true).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
+        FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
@@ -179,7 +179,7 @@ async fn chainhead_unstable_call() {
     let alice_id = dev::alice().public_key().to_account_id();
     // Runtime API call.
     let response = rpc
-        .chainhead_unstable_call(
+        .chainhead_v1_call(
             sub_id,
             hash,
             "AccountNonceApi_account_nonce",
@@ -201,21 +201,21 @@ async fn chainhead_unstable_call() {
 }
 
 #[subxt_test]
-async fn chainhead_unstable_unpin() {
+async fn chainhead_v1_unpin() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
 
-    let mut blocks = rpc.chainhead_unstable_follow(true).await.unwrap();
+    let mut blocks = rpc.chainhead_v1_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
     let hash = match event {
-        FollowEvent::Initialized(init) => init.finalized_block_hashes.last().unwrap().clone(),
+        FollowEvent::Initialized(init) => *init.finalized_block_hashes.last().unwrap(),
         _ => panic!("Unexpected event"),
     };
     let sub_id = blocks.subscription_id().unwrap();
 
-    assert!(rpc.chainhead_unstable_unpin(sub_id, hash).await.is_ok());
+    assert!(rpc.chainhead_v1_unpin(sub_id, hash).await.is_ok());
     // The block was already unpinned.
-    assert!(rpc.chainhead_unstable_unpin(sub_id, hash).await.is_err());
+    assert!(rpc.chainhead_v1_unpin(sub_id, hash).await.is_err());
 }
 
 #[cfg(fullclient)]
@@ -259,7 +259,7 @@ async fn chainspec_v1_properties() {
 
 #[cfg(fullclient)]
 #[subxt_test]
-async fn transaction_unstable_submit_and_watch() {
+async fn transactionwatch_v1_submit_and_watch() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
 
@@ -274,7 +274,7 @@ async fn transaction_unstable_submit_and_watch() {
 
     // Test submitting it:
     let mut sub = rpc
-        .transaction_unstable_submit_and_watch(&tx_bytes)
+        .transactionwatch_v1_submit_and_watch(&tx_bytes)
         .await
         .unwrap();
 
@@ -318,7 +318,7 @@ async fn next_operation_event<
 }
 
 #[tokio::test]
-async fn transaction_unstable_broadcast() {
+async fn transaction_v1_broadcast() {
     let bob = dev::bob();
     let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
 
@@ -346,7 +346,7 @@ async fn transaction_unstable_broadcast() {
 
     // Submit the transaction.
     let _operation_id = rpc
-        .transaction_unstable_broadcast(&tx_bytes)
+        .transaction_v1_broadcast(&tx_bytes)
         .await
         .unwrap()
         .expect("Server is not overloaded by 1 tx; qed");
@@ -383,7 +383,7 @@ async fn transaction_unstable_broadcast() {
 }
 
 #[tokio::test]
-async fn transaction_unstable_stop() {
+async fn transaction_v1_stop() {
     let bob = dev::bob();
     let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
 
@@ -392,7 +392,7 @@ async fn transaction_unstable_stop() {
 
     // Cannot stop an operation that was not started.
     let _err = rpc
-        .transaction_unstable_stop("non-existent-operation-id")
+        .transaction_v1_stop("non-existent-operation-id")
         .await
         .unwrap_err();
 
@@ -409,15 +409,12 @@ async fn transaction_unstable_stop() {
 
     // Submit the transaction.
     let operation_id = rpc
-        .transaction_unstable_broadcast(&tx_bytes)
+        .transaction_v1_broadcast(&tx_bytes)
         .await
         .unwrap()
         .expect("Server is not overloaded by 1 tx; qed");
 
-    let _ = rpc.transaction_unstable_stop(&operation_id).await.unwrap();
+    rpc.transaction_v1_stop(&operation_id).await.unwrap();
     // Cannot stop it twice.
-    let _err = rpc
-        .transaction_unstable_stop(&operation_id)
-        .await
-        .unwrap_err();
+    let _err = rpc.transaction_v1_stop(&operation_id).await.unwrap_err();
 }

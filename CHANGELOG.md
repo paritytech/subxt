@@ -4,6 +4,130 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.37.0] - 2024-05-28
+
+This release mainly adds support for the sign extension `CheckMetadataHash` and fixes a regression introduced in v0.36.0
+where the type de-duplication was too aggressive and lots of the same type such as `BoundedVec` was duplicated to
+plenty of different types such as BoundedVec1, BoundedVec2, .. BoundedVec<N>.
+
+### Added
+- Implemented `sign_prehashed` for `ecdsa::Keypair` and `eth::Keypair` ([#1598](https://github.com/paritytech/subxt/pull/1598))
+- Add a basic version of the CheckMetadataHash signed extension ([#1590](https://github.com/paritytech/subxt/pull/1590))
+
+## Changed
+- Remove `derive_more` ([#1600](https://github.com/paritytech/subxt/pull/1600))
+- chore(deps): bump scale-typegen v0.8.0 ([#1615](https://github.com/paritytech/subxt/pull/1615))
+
+## [0.36.1] - 2024-05-28 [YANKED]
+
+Yanked because the typegen changed, it's a breaking change.
+
+## [0.36.0] - 2024-05-16
+
+This release adds a few new features, which I'll go over below in more detail.
+
+### [`subxt-core`](https://github.com/paritytech/subxt/pull/1508)
+
+We now have a brand new `subxt-core` crate, which is `#[no-std]` compatible, and contains a lot of the core logic that is needed in Subxt. Using this crate, you can do things in a no-std environment like:
+
+- `blocks`: decode and explore block bodies.
+- `constants`: access and validate the constant addresses in some metadata.
+- `custom_values`: access and validate the custom value addresses in some metadata.
+- `metadata`: decode bytes into the metadata used throughout this library.
+- `storage`: construct storage request payloads and decode the results you'd get back.
+- `tx`: construct and sign transactions (extrinsics).
+- `runtime_api`: construct runtime API request payloads and decode the results you'd get back.
+- `events`: decode and explore events.
+
+Check out [the docs](https://docs.rs/subxt-core/latest/subxt_core/) for more, including examples of each case.
+
+A breaking change that comes from migrating a bunch of logic to this new crate is that the `ExtrinsicParams` trait is now handed `&ClientState<T>` rather than a `Client`. `ClientState` is just a concrete struct containing the state that one needs for things like signed extensions.
+
+### [Support for reconnecting](https://github.com/paritytech/subxt/pull/1505)
+
+We've baked in a bunch of support for automatically reconnecting after a connection loss into Subxt. This comes in three parts:
+1. An RPC client that is capable of reconnecting. This is gated behind the `unstable-reconnecting-rpc-client` feature flag at the moment, and
+2. Handling in the subxt Backends such that when the RPC client notifies it that it is reconnecting, the backend will transparently handle this behind the scenes, or else pass on a `DisconnectedWillReconnect` error to the user where it cannot. Note that the individual `LegacyRpcMethods` and `UnstableRpcMethods` are _not_ automatically retried on reconnection. Which leads us to..
+3. A couple of util helpers (`subxt::backend::retry` and `subxt::backend::retry_stream`) which can be used in conjunction with a reconnecting RPC client to make it easy to automatically retry RPC method calls where needed.
+
+We'd love feedback on this reconnecting work! To try it out, enable the `unstable-reconnecting-rpc-client` feature flag and then you can make use of this like so:
+
+```rust
+use std::time::Duration;
+use futures::StreamExt;
+use subxt::backend::rpc::reconnecting_rpc_client::{Client, ExponentialBackoff};
+use subxt::{OnlineClient, PolkadotConfig};
+
+// Generate an interface that we can use from the node's metadata.
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
+pub mod polkadot {}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create a new client with with a reconnecting RPC client.
+    let rpc = Client::builder()
+        // We can configure the retry policy; here to an exponential backoff.
+        // This API accepts an iterator of retry delays, and here we use `take`
+        // to limit the number of retries.
+        .retry_policy(
+            ExponentialBackoff::from_millis(100)
+                .max_delay(Duration::from_secs(10))
+                .take(3),
+        )
+        .build("ws://localhost:9944".to_string())
+        .await?;
+
+    // Use this reconnecting client when instantiating a Subxt client:
+    let api: OnlineClient<PolkadotConfig> = OnlineClient::from_rpc_client(rpc.clone()).await?;
+```
+
+Check out the full example [here](https://github.com/paritytech/subxt/blob/64d3aae521112c8bc7366385c54a9340185d81ac/subxt/examples/setup_reconnecting_rpc_client.rs).
+
+### [Better Ethereum support](https://github.com/paritytech/subxt/pull/1501)
+
+We've added built-in support for Ethereum style chains (eg Frontier and Moonbeam) in `subxt-signer`, making it easier to sign transactions for these chains now.
+
+Check out a full example [here](https://github.com/paritytech/subxt/blob/327b70ac94c4d925c8529a1e301d596d7db181ea/subxt/examples/tx_basic_frontier.rs).
+
+We plan to improve on this in the future, baking in better Ethereum support if possible so that it's as seamless to use `AccountId20` as it is `AccountId32`.
+
+### Stabilizing the new V2 RPCs ([#1540](https://github.com/paritytech/subxt/pull/1540), [#1539](https://github.com/paritytech/subxt/pull/1539), [#1538](https://github.com/paritytech/subxt/pull/1538))
+
+A bunch of the new RPCs are now stable in the spec, and have consequently been stabilized here, bringing the `unstable-backend` a step closer to being stabilized itself! We'll probably first remove the feature flag and next make it the default backend, in upcoming releases.
+
+All of the notable changes in this release are as follows:
+
+### Added
+
+- Add `frontier/ethereum` example ([#1557](https://github.com/paritytech/subxt/pull/1557))
+- Rpc: add full support reconnecting rpc client ([#1505](https://github.com/paritytech/subxt/pull/1505))
+- Signer: ethereum implementation ([#1501](https://github.com/paritytech/subxt/pull/1501))
+- `subxt-core` crate ([#1466](https://github.com/paritytech/subxt/pull/1466))
+
+### Changed
+
+- Bump scale-decode and related deps to latest ([#1583](https://github.com/paritytech/subxt/pull/1583))
+- Update Artifacts (auto-generated) ([#1577](https://github.com/paritytech/subxt/pull/1577))
+- Update deps to use `scale-type-resolver` 0.2 ([#1565](https://github.com/paritytech/subxt/pull/1565))
+- Stabilize transactionBroadcast methods ([#1540](https://github.com/paritytech/subxt/pull/1540))
+- Stabilize transactionWatch methods ([#1539](https://github.com/paritytech/subxt/pull/1539))
+- Stabilize chainHead methods ([#1538](https://github.com/paritytech/subxt/pull/1538))
+- Rename traits to remove T suffix ([#1535](https://github.com/paritytech/subxt/pull/1535))
+- Add Debug/Clone/etc for common Configs for convenience ([#1542](https://github.com/paritytech/subxt/pull/1542))
+- Unstable_rpc: Add transactionBroadcast and transactionStop ([#1497](https://github.com/paritytech/subxt/pull/1497))
+
+### Fixed
+
+- metadata: Fix cargo clippy ([#1574](https://github.com/paritytech/subxt/pull/1574))
+- Fixed import in `subxt-signer::eth` ([#1553](https://github.com/paritytech/subxt/pull/1553))
+- chore: fix typos and link broken ([#1541](https://github.com/paritytech/subxt/pull/1541))
+- Make subxt-core ready for publishing ([#1508](https://github.com/paritytech/subxt/pull/1508))
+- Remove dupe storage item if we get one back, to be compatible with Smoldot + legacy RPCs ([#1534](https://github.com/paritytech/subxt/pull/1534))
+- fix: substrate runner libp2p port ([#1533](https://github.com/paritytech/subxt/pull/1533))
+- Swap BinaryHeap for Vec to avoid Ord constraint issue ([#1523](https://github.com/paritytech/subxt/pull/1523))
+- storage_type: Strip key proper hash and entry bytes (32 instead of 16) ([#1522](https://github.com/paritytech/subxt/pull/1522))
+- testing: Prepare light client testing with substrate binary and add subxt-test macro ([#1507](https://github.com/paritytech/subxt/pull/1507))
+
 ## [0.35.0] - 2024-03-21
 
 This release contains several fixes, adds `no_std` support to a couple of crates (`subxt-signer` and `subxt-metadata`) and introduces a few quality of life improvements, which I'll quickly cover:

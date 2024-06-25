@@ -228,7 +228,7 @@ impl<T: Config> OnlineClient<T> {
     ///     let mut update_stream = updater.runtime_updates().await.unwrap();
     ///
     ///     while let Some(Ok(update)) = update_stream.next().await {
-    ///         let version = update.runtime_version().spec_version();
+    ///         let version = update.runtime_version().spec_version;
     ///
     ///         match updater.apply_update(update) {
     ///             Ok(()) => {
@@ -284,16 +284,6 @@ impl<T: Config> OnlineClient<T> {
     pub fn runtime_version(&self) -> RuntimeVersion {
         let inner = self.inner.read().expect("shouldn't be poisoned");
         inner.runtime_version
-    }
-
-    /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
-    pub fn client_state(&self) -> ClientState<T> {
-        let inner = self.inner.read().expect("shouldn't be poisoned");
-        ClientState::new(
-            inner.genesis_hash,
-            inner.runtime_version,
-            inner.metadata.clone(),
-        )
     }
 
     /// Change the [`RuntimeVersion`] used in this client.
@@ -371,9 +361,14 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     fn runtime_version(&self) -> RuntimeVersion {
         self.runtime_version()
     }
-
+    // This is provided by default, but we can optimise here and only lock once:
     fn client_state(&self) -> ClientState<T> {
-        self.client_state()
+        let inner = self.inner.read().expect("shouldn't be poisoned");
+        ClientState {
+            genesis_hash: inner.genesis_hash,
+            runtime_version: inner.runtime_version,
+            metadata: inner.metadata.clone(),
+        }
     }
 }
 
@@ -437,9 +432,8 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     /// Instead that's up to the user of this API to decide when to update and
     /// to perform the actual updating.
     pub async fn runtime_updates(&self) -> Result<RuntimeUpdaterStream<T>, Error> {
-        let stream = self.0.backend().stream_runtime_version().await?;
         Ok(RuntimeUpdaterStream {
-            stream,
+            stream: self.0.backend().stream_runtime_version().await?,
             client: self.0.clone(),
         })
     }
@@ -551,7 +545,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
 
         // We are waiting for the chain to have the same spec version
         // as sent out via the runtime subscription.
-        if spec_version == runtime_version.spec_version() {
+        if spec_version == runtime_version.spec_version {
             break block_ref;
         }
     };

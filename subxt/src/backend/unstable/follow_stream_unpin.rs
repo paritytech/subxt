@@ -282,7 +282,7 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
             let methods = methods.clone();
             let fut: UnpinFut = Box::pin(async move {
                 // We ignore any errors trying to unpin at the moment.
-                let _ = methods.chainhead_unstable_unpin(&sub_id, hash).await;
+                let _ = methods.chainhead_v1_unpin(&sub_id, hash).await;
             });
             fut
         });
@@ -394,7 +394,7 @@ type UnpinFlags<Hash> = Arc<Mutex<HashSet<Hash>>>;
 
 #[derive(Debug)]
 struct PinnedDetails<Hash: BlockHash> {
-    /// Realtively speaking, how old is the block? When we start following
+    /// Relatively speaking, how old is the block? When we start following
     /// blocks, the first finalized block gets an age of 0, the second an age
     /// of 1 and so on.
     rel_block_age: usize,
@@ -474,7 +474,7 @@ pub(super) mod test_utils {
 
     pub type UnpinRx<Hash> = std::sync::mpsc::Receiver<(Hash, Arc<str>)>;
 
-    /// Get a `FolowStreamUnpin` from an iterator over events.
+    /// Get a [`FollowStreamUnpin`] from an iterator over events.
     pub fn test_unpin_stream_getter<Hash, F, I>(
         events: F,
         max_life: usize,

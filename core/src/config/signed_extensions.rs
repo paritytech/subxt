@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -40,6 +40,61 @@ pub trait SignedExtension<T: Config>: ExtrinsicParams<T> {
     fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool;
 }
 
+/// The [`CheckMetadataHash`] signed extension.
+pub struct CheckMetadataHash {
+    // Eventually we might provide or calculate the metadata hash here,
+    // but for now we never provide a hash and so this is empty.
+}
+
+impl<T: Config> ExtrinsicParams<T> for CheckMetadataHash {
+    type Params = ();
+
+    fn new(_client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+        Ok(CheckMetadataHash {})
+    }
+}
+
+impl ExtrinsicParamsEncoder for CheckMetadataHash {
+    fn encode_extra_to(&self, v: &mut Vec<u8>) {
+        // A single 0 byte in the TX payload indicates that the chain should
+        // _not_ expect any metadata hash to exist in the signer payload.
+        0u8.encode_to(v);
+    }
+    fn encode_additional_to(&self, v: &mut Vec<u8>) {
+        // We provide no metadata hash in the signer payload to align with the above.
+        None::<()>.encode_to(v);
+    }
+}
+
+impl<T: Config> SignedExtension<T> for CheckMetadataHash {
+    type Decoded = CheckMetadataHashMode;
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
+        identifier == "CheckMetadataHash"
+    }
+}
+
+/// Is metadata checking enabled or disabled?
+// Dev note: The "Disabled" and "Enabled" variant names match those that the
+// signed extension will be encoded with, in order that DecodeAsType will work
+// properly.
+#[derive(Copy, Clone, Debug, DecodeAsType)]
+pub enum CheckMetadataHashMode {
+    /// No hash was provided in the signer payload.
+    Disabled,
+    /// A hash was provided in the signer payload.
+    Enabled,
+}
+
+impl CheckMetadataHashMode {
+    /// Is metadata checking enabled or disabled for this transaction?
+    pub fn is_enabled(&self) -> bool {
+        match self {
+            CheckMetadataHashMode::Disabled => false,
+            CheckMetadataHashMode::Enabled => true,
+        }
+    }
+}
+
 /// The [`CheckSpecVersion`] signed extension.
 pub struct CheckSpecVersion(u32);
 
@@ -47,7 +102,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
     type Params = ();
 
     fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckSpecVersion(client.runtime_version().spec_version()))
+        Ok(CheckSpecVersion(client.runtime_version.spec_version))
     }
 }
 
@@ -109,9 +164,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
     type Params = ();
 
     fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckTxVersion(
-            client.runtime_version().transaction_version(),
-        ))
+        Ok(CheckTxVersion(client.runtime_version.transaction_version))
     }
 }
 
@@ -135,7 +188,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
     type Params = ();
 
     fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
-        Ok(CheckGenesis(client.genesis_hash()))
+        Ok(CheckGenesis(client.genesis_hash))
     }
 }
 
@@ -209,12 +262,12 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
         let check_mortality = if let Some(params) = params.0 {
             CheckMortality {
                 era: params.era,
-                checkpoint: params.checkpoint.unwrap_or(client.genesis_hash()),
+                checkpoint: params.checkpoint.unwrap_or(client.genesis_hash),
             }
         } else {
             CheckMortality {
                 era: Era::Immortal,
-                checkpoint: client.genesis_hash(),
+                checkpoint: client.genesis_hash,
             }
         };
         Ok(check_mortality)
@@ -402,7 +455,7 @@ macro_rules! impl_tuples {
                 client: &ClientState<T>,
                 params: Self::Params,
             ) -> Result<Self, ExtrinsicParamsError> {
-                let metadata = client.metadata();
+                let metadata = &client.metadata;
                 let types = metadata.types();
 
                 // For each signed extension in the tuple, find the matching index in the metadata, if

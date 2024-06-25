@@ -45,7 +45,7 @@ pub fn explore_calls(
         Usage:
             subxt explore pallet {pallet_name} calls <CALL>
                 explore a specific call of this pallet
-        
+
         {calls}
         "}
     };
@@ -154,7 +154,10 @@ fn mocked_offline_client(metadata: Metadata) -> OfflineClient<SubstrateConfig> {
         H256::from_str("91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3")
             .expect("Valid hash; qed");
 
-    let runtime_version = subxt::client::RuntimeVersion::new(9370, 20);
+    let runtime_version = subxt::client::RuntimeVersion {
+        spec_version: 9370,
+        transaction_version: 20,
+    };
 
     OfflineClient::<SubstrateConfig>::new(genesis_hash, runtime_version, metadata)
 }
