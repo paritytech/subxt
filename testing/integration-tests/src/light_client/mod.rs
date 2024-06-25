@@ -183,8 +183,7 @@ async fn light_client_testing() -> Result<(), subxt::Error> {
     let chainspec = subxt::utils::fetch_chainspec_from_rpc_node("wss://rpc.polkadot.io:443")
         .await
         .unwrap();
-
-    println!("Chain Spec: {:?}", chainspec);
+    // println!("Chain Spec: {:?}", chainspec);
 
     let chain_config = chainspec.get();
 
