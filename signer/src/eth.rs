@@ -6,7 +6,6 @@
 
 use crate::ecdsa;
 use alloc::format;
-use alloc::string::String;
 use core::fmt::{Display, Formatter};
 use core::str::FromStr;
 use keccak_hash::keccak;
@@ -16,6 +15,15 @@ const SECRET_KEY_LENGTH: usize = 32;
 
 /// Bytes representing a private key.
 pub type SecretKeyBytes = [u8; SECRET_KEY_LENGTH];
+
+/// The public key for an [`Keypair`] key pair. This is the uncompressed variant of [`ecdsa::PublicKey`].
+pub struct PublicKey(pub [u8; 65]);
+
+impl AsRef<[u8]> for PublicKey {
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
+}
 
 /// An ethereum keypair implementation.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -89,18 +97,10 @@ impl Keypair {
             .map_err(|_| Error::InvalidSeed)
     }
 
-    /// Obtain the [`ecdsa::PublicKey`] of this keypair.
-    pub fn public_key(&self) -> ecdsa::PublicKey {
-        self.0.public_key()
-    }
-
-    /// Obtains the public address of the account by taking the last 20 bytes
-    /// of the Keccak-256 hash of the public key.
-    pub fn account_id(&self) -> AccountId20 {
+    /// Obtain the [`eth::PublicKey`] of this keypair.
+    pub fn public_key(&self) -> PublicKey {
         let uncompressed = self.0 .0.public_key().serialize_uncompressed();
-        let hash = keccak(&uncompressed[1..]).0;
-        let hash20 = hash[12..].try_into().expect("should be 20 bytes");
-        AccountId20(hash20)
+        PublicKey(uncompressed)
     }
 
     /// Signs an arbitrary message payload.
@@ -113,7 +113,6 @@ impl Keypair {
         Signature(self.0.sign_prehashed(message_hash).0)
     }
 }
-
 /// A derivation path. This can be parsed from a valid derivation path string like
 /// `"m/44'/60'/0'/0/0"`, or we can construct one using the helpers [`DerivationPath::empty()`]
 /// and [`DerivationPath::eth()`].
@@ -168,51 +167,32 @@ impl AsRef<[u8; 65]> for Signature {
     }
 }
 
-/// A 20-byte cryptographic identifier.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, codec::Encode)]
-pub struct AccountId20(pub [u8; 20]);
-
-impl AccountId20 {
-    fn checksum(&self) -> String {
-        let hex_address = hex::encode(self.0);
-        let hash = keccak(hex_address.as_bytes());
-
-        let mut checksum_address = String::with_capacity(42);
-        checksum_address.push_str("0x");
-
-        for (i, ch) in hex_address.chars().enumerate() {
-            // Get the corresponding nibble from the hash
-            let nibble = hash[i / 2] >> (if i % 2 == 0 { 4 } else { 0 }) & 0xf;
-
-            if nibble >= 8 {
-                checksum_address.push(ch.to_ascii_uppercase());
-            } else {
-                checksum_address.push(ch);
-            }
-        }
-
-        checksum_address
-    }
-}
-
-impl AsRef<[u8]> for AccountId20 {
-    fn as_ref(&self) -> &[u8] {
-        &self.0
-    }
-}
-
-impl Display for AccountId20 {
-    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}", self.checksum())
-    }
-}
-
-pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &ecdsa::PublicKey) -> bool {
+/// Verify that some signature for a message was created by the owner of the [`PublicKey`].
+///
+/// ```rust
+/// use subxt_signer::{ bip39::Mnemonic, eth };
+///
+/// let keypair = eth::dev::alith();
+/// let message = b"Hello!";
+///
+/// let signature = keypair.sign(message);
+/// let public_key = keypair.public_key();
+/// assert!(eth::verify(&signature, message, &public_key));
+/// ```
+pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -> bool {
     let message_hash = keccak(message.as_ref());
     let wrapped =
         Message::from_digest_slice(message_hash.as_bytes()).expect("Message is 32 bytes; qed");
+    let Ok(signature) = secp256k1::ecdsa::Signature::from_compact(&sig.as_ref()[..64]) else {
+        return false;
+    };
+    let Ok(pk) = secp256k1::PublicKey::from_slice(&pubkey.0) else {
+        return false;
+    };
 
-    ecdsa::internal::verify(&sig.0, &wrapped, pubkey)
+    secp256k1::Secp256k1::verification_only()
+        .verify_ecdsa(&wrapped, &signature, &pk)
+        .is_ok()
 }
 
 /// An error handed back if creating a keypair fails.
@@ -278,36 +258,68 @@ pub mod dev {
 
 #[cfg(feature = "subxt")]
 mod subxt_compat {
+    use super::*;
     use subxt_core::config::Config;
     use subxt_core::tx::signer::Signer as SignerT;
-
-    use super::*;
+    use subxt_core::utils::AccountId20;
+    use subxt_core::utils::MultiAddress;
 
     impl<T: Config> SignerT<T> for Keypair
     where
-        T::AccountId: From<AccountId20>,
-        T::Address: From<AccountId20>,
+        T::AccountId: From<PublicKey>,
+        T::Address: From<PublicKey>,
         T::Signature: From<Signature>,
     {
         fn account_id(&self) -> T::AccountId {
-            self.account_id().into()
+            self.public_key().into()
         }
 
         fn address(&self) -> T::Address {
-            self.account_id().into()
+            self.public_key().into()
         }
 
         fn sign(&self, signer_payload: &[u8]) -> T::Signature {
             self.sign(signer_payload).into()
         }
     }
+
+    impl PublicKey {
+        /// Obtains the public address of the account by taking the last 20 bytes
+        /// of the Keccak-256 hash of the public key.
+        pub fn to_account_id(&self) -> AccountId20 {
+            let hash = keccak(&self.0[1..]).0;
+            let hash20 = hash[12..].try_into().expect("should be 20 bytes");
+            AccountId20(hash20)
+        }
+        /// A shortcut to obtain a [`MultiAddress`] from a [`PublicKey`].
+        /// We often want this type, and using this method avoids any
+        /// ambiguous type resolution issues.
+        pub fn to_address<T>(self) -> MultiAddress<AccountId20, T> {
+            MultiAddress::Address20(self.to_account_id().0)
+        }
+    }
+
+    impl From<PublicKey> for AccountId20 {
+        fn from(value: PublicKey) -> Self {
+            value.to_account_id()
+        }
+    }
+
+    impl<T> From<PublicKey> for MultiAddress<AccountId20, T> {
+        fn from(value: PublicKey) -> Self {
+            let address: AccountId20 = value.into();
+            MultiAddress::Address20(address.0)
+        }
+    }
 }
 
 #[cfg(test)]
+#[cfg(feature = "subxt")]
 mod test {
     use bip39::Mnemonic;
     use proptest::prelude::*;
     use secp256k1::Secp256k1;
+    use subxt_core::utils::AccountId20;
 
     use subxt_core::{config::*, tx::signer::Signer as SignerT, utils::H256};
 
@@ -380,7 +392,7 @@ mod test {
         fn check_subxt_signer_implementation_matches(keypair in keypair(), msg in ".*") {
             let msg_as_bytes = msg.as_bytes();
 
-            assert_eq!(SubxtSigner::account_id(&keypair), keypair.account_id());
+            assert_eq!(SubxtSigner::account_id(&keypair), keypair.public_key().to_account_id());
             assert_eq!(SubxtSigner::sign(&keypair, msg_as_bytes), keypair.sign(msg_as_bytes));
         }
 
@@ -393,8 +405,9 @@ mod test {
                 let hash20 = hash[12..].try_into().expect("should be 20 bytes");
                 AccountId20(hash20)
             };
-
-            assert_eq!(keypair.account_id(), account_id);
+            let account_id_derived_from_pk: AccountId20 = keypair.public_key().to_account_id();
+            assert_eq!(account_id_derived_from_pk, account_id);
+            assert_eq!(keypair.public_key().to_account_id(), account_id);
 
         }
 
@@ -453,7 +466,7 @@ mod test {
         ];
 
         for (case_idx, (keypair, exp_account_id, exp_priv_key)) in cases.into_iter().enumerate() {
-            let act_account_id = keypair.account_id().to_string();
+            let act_account_id = keypair.public_key().to_account_id().checksum();
             let act_priv_key = format!("0x{}", &keypair.0 .0.display_secret());
 
             assert_eq!(
@@ -598,7 +611,7 @@ mod test {
         fn test_account_derivation_1() {
             let kp = Keypair::from_secret_key(KEY_1).expect("valid keypair");
             assert_eq!(
-                kp.account_id().to_string(),
+                kp.public_key().to_account_id().checksum(),
                 "0x976f8456E4e2034179B284A23C0e0c8f6d3da50c"
             );
         }
@@ -607,7 +620,7 @@ mod test {
         fn test_account_derivation_2() {
             let kp = Keypair::from_secret_key(KEY_2).expect("valid keypair");
             assert_eq!(
-                kp.account_id().to_string(),
+                kp.public_key().to_account_id().checksum(),
                 "0x420e9F260B40aF7E49440ceAd3069f8e82A5230f"
             );
         }
@@ -616,7 +629,7 @@ mod test {
         fn test_account_derivation_3() {
             let kp = Keypair::from_secret_key(KEY_3).expect("valid keypair");
             assert_eq!(
-                kp.account_id().to_string(),
+                kp.public_key().to_account_id().checksum(),
                 "0x9cce34F7aB185c7ABA1b7C8140d620B4BDA941d6"
             );
         }

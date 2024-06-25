@@ -327,6 +327,7 @@ pub mod tests {
                 BeefyMmrApi
                 BlockBuilder
                 Core
+                DryRunApi
                 GenesisBuilder
                 GrandpaApi
                 Metadata
@@ -336,7 +337,6 @@ pub mod tests {
                 SessionKeys
                 TaggedTransactionQueue
                 TransactionPaymentApi
-                XcmDryRunApi
                 XcmPaymentApi
         "};
         assert_eq!(output, expected_output);

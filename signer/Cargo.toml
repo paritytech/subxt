@@ -52,7 +52,9 @@ secrecy = { workspace = true }
 regex = { workspace = true, features = ["unicode"] }
 hex = { workspace = true, features = ["alloc"] }
 cfg-if = { workspace = true }
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
+codec = { package = "parity-scale-codec", workspace = true, features = [
+    "derive",
+] }
 sp-crypto-hashing = { workspace = true }
 pbkdf2 = { workspace = true }
 sha2 = { workspace = true }
@@ -61,7 +63,10 @@ zeroize = { workspace = true }
 bip39 = { workspace = true }
 bip32 = { workspace = true, features = ["alloc", "secp256k1"], optional = true }
 schnorrkel = { workspace = true, optional = true }
-secp256k1 = { workspace = true, optional = true, features = ["alloc", "recovery"] }
+secp256k1 = { workspace = true, optional = true, features = [
+    "alloc",
+    "recovery",
+] }
 keccak-hash = { workspace = true, optional = true }
 base64 = { version="0.22.1", optional = true }
 scrypt = { version = "0.11.0", default-features = false, optional = true }
@@ -87,3 +92,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 defalt-features = true
+
+[lints]
+workspace = true
