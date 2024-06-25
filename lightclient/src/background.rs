@@ -13,6 +13,7 @@ use tokio::sync::{mpsc, oneshot};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 const LOG_TARGET: &str = "subxt-light-client-background-task";
+const MAX_LOG_SIZE: usize = 1024;
 
 /// Response from [`BackgroundTaskHandle::request()`].
 pub type MethodResponse = Result<Box<RawValue>, LightClientRpcError>;
@@ -176,10 +177,15 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                         tracing::trace!(target: LOG_TARGET, "Smoldot RPC responses channel closed");
                         break;
                     };
+                    let (maybe_truncated, delim) = if back_message.len() > MAX_LOG_SIZE {
+                        (&back_message[0..MAX_LOG_SIZE], "...")
+                    } else {
+                        (&back_message[..], "")
+                    };
+
                     tracing::trace!(
                         target: LOG_TARGET,
-                        "Received smoldot RPC chain {:?} result {:?}",
-                        chain_id, back_message
+                        "Received smoldot RPC chain {chain_id:?} result {maybe_truncated:?}{delim}",
                     );
 
                     data.handle_rpc_response(back_message);
