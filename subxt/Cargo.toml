@@ -101,7 +101,7 @@ subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 
 # Reconnecting jsonrpc ws client
-reconnecting-jsonrpsee-ws-client = { version = "0.4", optional = true, default-features = false }
+reconnecting-jsonrpsee-ws-client = { version = "0.4.3", optional = true, default-features = false }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
