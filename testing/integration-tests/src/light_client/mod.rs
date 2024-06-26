@@ -27,7 +27,7 @@
 //! For more context see: https://github.com/tokio-rs/tokio/issues/2374.
 //!
 
-use crate::{subxt_test, test_context, utils::node_runtime};
+use crate::utils::node_runtime;
 use codec::Compact;
 use subxt::{client::OnlineClient, config::PolkadotConfig, lightclient::LightClient};
 use subxt_metadata::Metadata;
@@ -167,37 +167,23 @@ async fn light_client_testing() -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
 
     println!("Init lightclient");
-    // let chainspec = subxt::utils::fetch_chainspec_from_rpc_node("wss://rpc.polkadot.io:443")
-
-    // let chainspec = subxt::utils::fetch_chainspec_from_rpc_node("ws://127.0.0.1:9944")
-    //     .await
-    //     .unwrap();
-    // println!("Fetch spec took {:?}\n", now.elapsed());
-    // let bootnode = format!(
-    //     "/ip4/127.0.0.1/tcp/30333/p2p/12D3KooWHdiAxVd8uMQR1hGWXccidmfCwLqcMpGwR6QcTP6QRMuD",
-    // );
-    // let chain_config = subxt::lightclient::ChainConfig::chain_spec(chainspec.get())
-    //     .set_bootnodes([bootnode.as_str()])
-    //     .map_err(|e| format!("Light client: cannot update boot nodes: {e}"))?;
 
     let chainspec = subxt::utils::fetch_chainspec_from_rpc_node("wss://rpc.polkadot.io:443")
         .await
         .unwrap();
-    // println!("Chain Spec: {:?}", chainspec);
 
     let chain_config = chainspec.get();
-
     let (_lc, rpc) = LightClient::relay_chain(chain_config)?;
     let api = Client::from_rpc_client(rpc).await?;
 
     println!("Light client initialization took {:?}\n", now.elapsed());
 
-    // non_finalized_headers_subscription(&api).await?;
+    non_finalized_headers_subscription(&api).await?;
     finalized_headers_subscription(&api).await?;
-    // runtime_api_call(&api).await?;
-    // storage_plain_lookup(&api).await?;
-    // dynamic_constant_query(&api).await?;
-    // dynamic_events(&api).await?;
+    runtime_api_call(&api).await?;
+    storage_plain_lookup(&api).await?;
+    dynamic_constant_query(&api).await?;
+    dynamic_events(&api).await?;
 
     Ok(())
 }
