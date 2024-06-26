@@ -37,7 +37,7 @@ pub mod ecdsa;
 #[cfg_attr(docsrs, doc(cfg(feature = "unstable-eth")))]
 pub mod eth;
 
-// A polkadot-js account json loader.
+/// A polkadot-js account json loader.
 #[cfg(feature = "json")]
 #[cfg_attr(docsrs, doc(cfg(feature = "json")))]
 pub mod json;
