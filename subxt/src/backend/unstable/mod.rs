@@ -32,8 +32,9 @@ use crate::Config;
 use async_trait::async_trait;
 use follow_stream_driver::{FollowStreamDriver, FollowStreamDriverHandle};
 use futures::future::Either;
-use futures::{Stream, StreamExt};
+use futures::{pin_mut, Future, FutureExt, Stream, StreamExt};
 use std::collections::HashMap;
+use std::pin::Pin;
 use std::task::Poll;
 use storage_items::StorageItems;
 
@@ -302,7 +303,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     }
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
-        retry(|| async {
+        retry_with_reset_on_reconnect(&self.follow_handle, || async {
             let sub_id = get_subscription_id(&self.follow_handle).await?;
             self.methods.chainhead_v1_header(&sub_id, at).await
         })
@@ -310,7 +311,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
-        retry(|| async {
+        retry_with_reset_on_reconnect(&self.follow_handle, || async {
             let sub_id = get_subscription_id(&self.follow_handle).await?;
 
             // Subscribe to the body response and get our operationId back.
@@ -669,9 +670,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
         call_parameters: Option<&[u8]>,
         at: T::Hash,
     ) -> Result<Vec<u8>, Error> {
-        retry(|| async {
+        retry_with_reset_on_reconnect(&self.follow_handle, || async {
             let sub_id = get_subscription_id(&self.follow_handle).await?;
-
             // Subscribe to the body response and get our operationId back.
             let follow_events = self.follow_handle.subscribe().events();
             let call_parameters = call_parameters.unwrap_or(&[]);
@@ -715,4 +715,70 @@ async fn get_subscription_id<Hash: BlockHash>(
     };
 
     Ok(sub_id)
+}
+
+/// A helper to restart calls on subscription reconnect.
+async fn retry_with_reset_on_reconnect<Hash, T, F, R>(
+    follow_handle: &FollowStreamDriverHandle<Hash>,
+    mut fun: F,
+) -> Result<R, Error>
+where
+    Hash: BlockHash,
+    F: FnMut() -> T,
+    T: Future<Output = Result<R, Error>>,
+{
+    let reconnected = follow_handle.reconnected().fuse();
+    pin_mut!(reconnected);
+
+    async fn check_for_reconnect(
+        mut reconnected: Pin<&mut impl Stream<Item = bool>>,
+    ) -> Result<(), Error> {
+        loop {
+            match reconnected.next().await {
+                Some(true) => {
+                    break;
+                }
+                Some(false) => (),
+                None => {
+                    return Err(RpcError::SubscriptionDropped.into());
+                }
+            }
+        }
+        Ok(())
+    }
+
+    loop {
+        let action = retry(&mut fun).fuse();
+
+        pin_mut!(action);
+
+        let result = futures::future::select(reconnected.next(), action).await;
+        match result {
+            // We reconnected and received FollowEvent::Initialized()
+            Either::Left((Some(has_reconnected), _)) if has_reconnected => {}
+            Either::Left((Some(_), _)) => {
+                // Wait until we see Initialized Event
+                check_for_reconnect(reconnected.as_mut()).await?
+            }
+            Either::Right((result, reset)) => {
+                let is_reconnected = reset.now_or_never();
+                if is_reconnected.is_none() {
+                    return result;
+                }
+                let is_reconnected = is_reconnected.flatten();
+                if let Some(has_reconnected) = is_reconnected {
+                    // Wait until we see Initialized Event
+                    if !has_reconnected {
+                        check_for_reconnect(reconnected.as_mut()).await?
+                    }
+                } else {
+                    break;
+                }
+            }
+            Either::Left((None, _)) => {
+                break;
+            }
+        }
+    }
+    Err(RpcError::SubscriptionDropped.into())
 }
