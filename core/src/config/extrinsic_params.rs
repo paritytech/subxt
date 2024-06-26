@@ -14,7 +14,7 @@ use alloc::vec::Vec;
 /// This trait allows you to configure the "signed extra" and
 /// "additional" parameters that are a part of the transaction payload
 /// or the signer payload respectively.
-pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + 'static {
+pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + Send + 'static {
     /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to
     /// help construct your [`ExtrinsicParams`] object.
