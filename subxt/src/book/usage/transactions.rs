@@ -210,7 +210,9 @@
 //! Subxt also allows you to get hold of the signer payload and hand that off to something else to be
 //! signed. The signature can then be provided back to Subxt to build the final transaction to submit:
 //!
+//! ```rust,ignore
 #![doc = include_str!("../../../examples/tx_partial.rs")]
+//! ```
 //!
 //! Take a look at the API docs for [`crate::tx::TxProgress`], [`crate::tx::TxStatus`] and
 //! [`crate::tx::TxInBlock`] for more options.
