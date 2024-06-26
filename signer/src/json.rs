@@ -16,9 +16,9 @@ pub enum Error {
     UnsupportedEncoding,
     /// Base64 decoding error.
     Base64(base64::DecodeError),
-    /// WrongParameters
+    /// Wrong Scrypt parameters
     UnsupportedScryptParameters {
-        /// n
+        /// N
         n: u32,
         /// p
         p: u32,
@@ -37,11 +37,13 @@ impl_from!(crypto_secretbox::Error => Error::Secretbox);
 impl Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Error::UnsupportedEncoding => todo!(),
-            Error::Base64(_) => todo!(),
-            Error::UnsupportedScryptParameters { n, p, r } => todo!(),
-            Error::Secretbox(_) => todo!(),
-            Error::InvalidKeys => todo!(),
+            Error::UnsupportedEncoding => write!(f, "Unsupported encoding."),
+            Error::Base64(e) => write!(f, "Base64 decoding error: {e}"),
+            Error::UnsupportedScryptParameters { n, p, r } => {
+                write!(f, "Unsupported Scrypt parameters: N: {n}, p: {p}, r: {r}")
+            }
+            Error::Secretbox(e) => write!(f, "Decryption error: {e}"),
+            Error::InvalidKeys => write!(f, "The decrypted keys are not valid."),
         }
     }
 }
@@ -107,7 +109,6 @@ impl KeyringPairJson {
         }
 
         // Extract scrypt parameters.
-        // https://datatracker.ietf.org/doc/html/rfc7914#section-7
         let salt = &decoded[0..32];
         let n = u32::from_le_bytes(decoded[32..36].try_into().unwrap());
         let p = u32::from_le_bytes(decoded[36..40].try_into().unwrap());
