@@ -116,8 +116,8 @@ proptest = "1.5.0"
 hex-literal = "0.4.1"
 
 # Light client support:
-smoldot = { git = "https://github.com/smol-dot/smoldot.git", default-features = false }
-smoldot-light = { git = "https://github.com/smol-dot/smoldot.git", default-features = false }
+smoldot = { version = "0.18.0", default-features = false }
+smoldot-light = { version = "0.16.2", default-features = false }
 
 tokio-stream = "0.1.15"
 
