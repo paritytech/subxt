@@ -9,6 +9,8 @@ pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), BoxedError> {
+    // Spawned tasks require things held across await points to impl Send,
+    // so we use one to demonstrate that this is possible with `PartialExtrinsic`
     tokio::spawn(signing_example()).await??;
     Ok(())
 }
