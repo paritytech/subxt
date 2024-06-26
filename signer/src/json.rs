@@ -54,16 +54,17 @@ impl std::error::Error for Error {}
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 struct EncryptedJsonDescriptor {
-    /** Descriptor for the content */
+    /// Descriptor for the content
     content: Vec<String>,
-    /** The encoding (in current/latest versions this is always an array) */
+    /// The encoding (in current/latest versions this is always an array)
     r#type: Vec<String>,
-    /** The version of encoding applied */
+    /// The version of encoding applied
     version: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 struct Meta {
     genesis_hash: String,
     is_hardware: Option<bool>,
@@ -73,16 +74,17 @@ struct Meta {
 }
 
 /// Defined here: https://github.com/polkadot-js/common/blob/37fa211fdb141d4f6eb32e8f377a4651ed2d9068/packages/keyring/src/types.ts#L67
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(dead_code)]
 pub struct KeyringPairJson {
-    /** The encoded string */
+    /// The encoded string
     encoded: String,
-    /** The encoding used */
+    /// The encoding used
     encoding: EncryptedJsonDescriptor,
-    /** The ss58 encoded address or the hex-encoded version (the latter is for ETH-compat chains) */
+    /// The ss58 encoded address or the hex-encoded version (the latter is for ETH-compat chains)
     address: AccountId32,
-    /** The underlying metadata associated with the keypair */
+    /// The underlying metadata associated with the keypair
     meta: Meta,
 }
 
