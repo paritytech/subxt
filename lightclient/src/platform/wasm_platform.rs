@@ -6,12 +6,13 @@ use super::wasm_socket::WasmSocket;
 
 use core::{
     fmt::{self, Write as _},
+    net::IpAddr,
     time::Duration,
 };
 use futures::prelude::*;
 use smoldot::libp2p::with_buffers;
 use smoldot_light::platform::{
-    Address, ConnectionType, IpAddr, LogLevel, MultiStreamAddress, MultiStreamWebRtcConnection,
+    Address, ConnectionType, LogLevel, MultiStreamAddress, MultiStreamWebRtcConnection,
     PlatformRef, SubstreamDirection,
 };
 
