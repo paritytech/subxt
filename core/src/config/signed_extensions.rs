@@ -435,7 +435,7 @@ impl<T: Config> SignedExtension<T> for ChargeTransactionPayment {
 /// ones are actually required for the chain in the correct order, ignoring the rest. This
 /// is a sensible default, and allows for a single configuration to work across multiple chains.
 pub struct AnyOf<T, Params> {
-    params: Vec<Box<dyn ExtrinsicParamsEncoder>>,
+    params: Vec<Box<dyn ExtrinsicParamsEncoder + Send + 'static>>,
     _marker: core::marker::PhantomData<(T, Params)>,
 }
 
@@ -470,7 +470,7 @@ macro_rules! impl_tuples {
                         // Break and record as soon as we find a match:
                         if $ident::matches(e.identifier(), e.extra_ty(), types) {
                             let ext = $ident::new(client, params.$index)?;
-                            let boxed_ext: Box<dyn ExtrinsicParamsEncoder> = Box::new(ext);
+                            let boxed_ext: Box<dyn ExtrinsicParamsEncoder + Send + 'static> = Box::new(ext);
                             exts_by_index.insert(idx, boxed_ext);
                             break
                         }
