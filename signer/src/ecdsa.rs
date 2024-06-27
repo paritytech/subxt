@@ -157,6 +157,11 @@ impl Keypair {
         PublicKey(self.0.public_key().serialize())
     }
 
+    /// Obtain the [`SecretKey`] part of this key pair. This should be kept secret.
+    pub fn secret_key(&self) -> SecretKeyBytes {
+        *self.0.secret_key().as_ref()
+    }
+
     /// Sign some message. These bytes can be used directly in a Substrate `MultiSignature::Ecdsa(..)`.
     pub fn sign(&self, message: &[u8]) -> Signature {
         self.sign_prehashed(&sp_crypto_hashing::blake2_256(message))

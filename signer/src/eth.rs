@@ -97,6 +97,11 @@ impl Keypair {
             .map_err(|_| Error::InvalidSeed)
     }
 
+    /// Obtain the [`ecdsa::SecretKeyBytes`] of this keypair.
+    pub fn secret_key(&self) -> SecretKeyBytes {
+        self.0.secret_key()
+    }
+
     /// Obtain the [`eth::PublicKey`] of this keypair.
     pub fn public_key(&self) -> PublicKey {
         let uncompressed = self.0 .0.public_key().serialize_uncompressed();
