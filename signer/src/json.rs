@@ -73,7 +73,7 @@ struct Meta {
     when_created: u64,
 }
 
-/// Defined here: https://github.com/polkadot-js/common/blob/37fa211fdb141d4f6eb32e8f377a4651ed2d9068/packages/keyring/src/types.ts#L67
+/// https://github.com/polkadot-js/common/blob/37fa211fdb141d4f6eb32e8f377a4651ed2d9068/packages/keyring/src/types.ts#L67
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(dead_code)]
@@ -92,6 +92,7 @@ impl KeyringPairJson {
     /// Decrypt JSON keypair.
     pub fn decrypt(self, password: &str) -> Result<sr25519::Keypair, Error> {
         // Check encoding.
+        // https://github.com/polkadot-js/common/blob/37fa211fdb141d4f6eb32e8f377a4651ed2d9068/packages/keyring/src/keyring.ts#L166
         if self.encoding.version != "3"
             || !self.encoding.content.contains(&"pkcs8".to_owned())
             || !self.encoding.content.contains(&"sr25519".to_owned())
@@ -111,6 +112,7 @@ impl KeyringPairJson {
         }
 
         // Extract scrypt parameters.
+        // https://github.com/polkadot-js/common/blob/master/packages/util-crypto/src/scrypt/fromU8a.ts
         let salt = &decoded[0..32];
         let n = u32::from_le_bytes(decoded[32..36].try_into().unwrap());
         let p = u32::from_le_bytes(decoded[36..40].try_into().unwrap());
@@ -126,11 +128,13 @@ impl KeyringPairJson {
         scrypt::scrypt(password.as_bytes(), salt, &scrypt_params, &mut key).unwrap();
 
         // Decrypt keys.
+        // https://github.com/polkadot-js/common/blob/master/packages/util-crypto/src/json/decryptData.ts
         let cipher = XSalsa20Poly1305::new(&key);
         let nonce = Nonce::from_slice(&decoded[44..68]);
         let ciphertext = &decoded[68..];
         let plaintext = cipher.decrypt(nonce, ciphertext)?;
 
+        // https://github.com/polkadot-js/common/blob/master/packages/keyring/src/pair/decode.ts
         if plaintext.len() != 117 {
             return Err(Error::InvalidKeys);
         }
