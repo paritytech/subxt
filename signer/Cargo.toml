@@ -25,6 +25,8 @@ std = [
     "bip39/std",
     "schnorrkel/std",
     "secp256k1/std",
+    "serde/std",
+    "serde_json/std",
     "base64/std",
     "scrypt/std",
     "crypto_secretbox/std",
@@ -39,7 +41,7 @@ ecdsa = ["secp256k1"]
 unstable-eth = ["keccak-hash", "ecdsa", "secp256k1", "bip32"]
 
 # Enable support for loading key pairs from polkadot-js json.
-json = ["default", "base64", "scrypt", "crypto_secretbox", "serde", "serde_json"]
+json = ["std", "subxt", "sr25519", "base64", "scrypt", "crypto_secretbox", "serde", "serde_json"]
 
 # Make the keypair algorithms here compatible with Subxt's Signer trait,
 # so that they can be used to sign transactions for compatible chains.
