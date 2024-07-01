@@ -122,6 +122,17 @@ impl Keypair {
         Ok(Keypair(keypair))
     }
 
+    /// Construct a keypair from a slice of bytes, corresponding to
+    /// an Ed25519 expanded secret key.
+    pub fn from_ed25519_bytes(bytes: &[u8]) -> Result<Self, Error> {
+        let secret_key = schnorrkel::SecretKey::from_ed25519_bytes(bytes)?;
+
+        Ok(Keypair(schnorrkel::Keypair {
+            public: secret_key.to_public(),
+            secret: secret_key,
+        }))
+    }
+
     /// Derive a child key from this one given a series of junctions.
     ///
     /// # Example
@@ -199,10 +210,13 @@ pub enum Error {
     Phrase(bip39::Error),
     /// Invalid hex.
     Hex(hex::FromHexError),
+    /// Signature error.
+    Signature(schnorrkel::SignatureError),
 }
 
 impl_from!(bip39::Error => Error::Phrase);
 impl_from!(hex::FromHexError => Error::Hex);
+impl_from!(schnorrkel::SignatureError => Error::Signature);
 
 impl Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -210,6 +224,7 @@ impl Display for Error {
             Error::InvalidSeed => write!(f, "Invalid seed (was it the wrong length?)"),
             Error::Phrase(e) => write!(f, "Cannot parse phrase: {e}"),
             Error::Hex(e) => write!(f, "Cannot parse hex string: {e}"),
+            Error::Signature(e) => write!(f, "Signature error: {e}"),
         }
     }
 }
