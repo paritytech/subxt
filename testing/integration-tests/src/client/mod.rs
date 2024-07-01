@@ -128,7 +128,7 @@ async fn test_iter() {
     while iter.next().await.unwrap().is_some() {
         i += 1;
     }
-    assert_eq!(i, 13);
+    assert_eq!(i, 14);
 }
 
 #[tokio::test]
