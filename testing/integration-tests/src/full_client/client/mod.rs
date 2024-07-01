@@ -67,7 +67,7 @@ async fn storage_iter() {
         .count()
         .await;
 
-    assert_eq!(len, 13);
+    assert_eq!(len, 14);
 }
 
 #[cfg(fullclient)]
