@@ -330,6 +330,7 @@ pub mod tests {
                 DryRunApi
                 GenesisBuilder
                 GrandpaApi
+                LocationToAccountApi
                 Metadata
                 MmrApi
                 OffchainWorkerApi
