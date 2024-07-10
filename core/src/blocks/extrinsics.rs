@@ -3,15 +3,14 @@
 // see LICENSE for license details.
 
 use crate::blocks::extrinsic_signed_extensions::ExtrinsicSignedExtensions;
-use crate::utils::strip_compact_prefix;
 use crate::{
-    config::Config,
+    config::{Config, Hasher},
     error::{BlockError, Error, MetadataError},
     Metadata,
 };
 use alloc::sync::Arc;
 use alloc::vec::Vec;
-use codec::Decode;
+use codec::{Compact, CompactLen, Decode};
 use scale_decode::DecodeAsType;
 use subxt_metadata::PalletMetadata;
 
@@ -169,24 +168,28 @@ where
         const VERSION_MASK: u8 = 0b0111_1111;
         const LATEST_EXTRINSIC_VERSION: u8 = 4;
 
-        // removing the compact encoded prefix:
-        let bytes: Arc<[u8]> = strip_compact_prefix(extrinsic_bytes)?.1.into();
+        // Wrap all of the bytes in Arc for easy sharing.
+        let bytes: Arc<[u8]> = Arc::from(extrinsic_bytes);
+
+        // The compact encoded length prefix.
+        let prefix = <Compact<u64>>::decode(&mut &*extrinsic_bytes)?;
+        let prefix_len = <Compact<u64>>::compact_len(&prefix.0);
 
         // Extrinsic are encoded in memory in the following way:
         //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
         //   - signature: [unknown TBD with metadata].
         //   - extrinsic data
-        let first_byte: u8 = Decode::decode(&mut &bytes[..])?;
+        let version_byte: u8 = Decode::decode(&mut &bytes[prefix_len..])?;
 
-        let version = first_byte & VERSION_MASK;
+        let version = version_byte & VERSION_MASK;
         if version != LATEST_EXTRINSIC_VERSION {
             return Err(BlockError::UnsupportedVersion(version).into());
         }
 
-        let is_signed = first_byte & SIGNATURE_MASK != 0;
+        let is_signed = version_byte & SIGNATURE_MASK != 0;
 
-        // Skip over the first byte which denotes the version and signing.
-        let cursor = &mut &bytes[1..];
+        // Skip over the prefix and first byte which denotes the version and signing.
+        let cursor = &mut &bytes[prefix_len + 1..];
 
         let signed_details = is_signed
             .then(|| -> Result<SignedExtrinsicDetails, Error> {
@@ -246,6 +249,12 @@ where
             metadata,
             _marker: core::marker::PhantomData,
         })
+    }
+
+    /// Calculate and return the hash of the extrinsic, based on the configured hasher.
+    pub fn hash(&self) -> T::Hash {
+        // Use hash(), not hash_of(), because we don't want to double encode the bytes.
+        T::Hasher::hash(&self.bytes)
     }
 
     /// Is the extrinsic signed?
@@ -628,6 +637,40 @@ mod tests {
                 crate::error::BlockError::UnsupportedVersion(3)
             ))
         );
+    }
+
+    #[test]
+    fn tx_hashes_line_up() {
+        let metadata = metadata();
+        let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
+
+        let tx = crate::dynamic::tx(
+            "Test",
+            "TestCall",
+            vec![
+                Value::u128(10),
+                Value::bool(true),
+                Value::string("SomeValue"),
+            ],
+        );
+
+        // Encoded TX ready to submit.
+        let tx_encoded = crate::tx::create_unsigned::<SubstrateConfig, _>(&tx, &metadata)
+            .expect("Valid dynamic parameters are provided");
+
+        // Extrinsic details ready to decode.
+        let extrinsic = ExtrinsicDetails::<SubstrateConfig>::decode_from(
+            1,
+            tx_encoded.encoded(),
+            metadata,
+            ids,
+        )
+        .expect("Valid extrinsic");
+
+        // Both of these types should produce the same bytes.
+        assert_eq!(tx_encoded.encoded(), extrinsic.bytes(), "bytes should eq");
+        // Both of these types should produce the same hash.
+        assert_eq!(tx_encoded.hash(), extrinsic.hash(), "hashes should eq");
     }
 
     #[test]
