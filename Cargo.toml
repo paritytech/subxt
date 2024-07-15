@@ -101,7 +101,7 @@ scale-typegen-description = "0.8.0"
 serde = { version = "1.0.204", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.120", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
-thiserror = "1.0.61"
+thiserror = "1.0.62"
 tokio = { version = "1.38", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
