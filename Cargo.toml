@@ -73,7 +73,7 @@ criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.6.9", default-features = false }
 color-eyre = "0.6.3"
 console_error_panic_hook = "0.1.7"
-darling = "0.20.9"
+darling = "0.20.10"
 derive-where = "1.2.7"
 either = { version = "1.13.0", default-features = false }
 frame-metadata = { version = "16.0.0", default-features = false }
