@@ -10,8 +10,8 @@ use url::Url;
 
 pub use subxt_core::utils::{
     bits, strip_compact_prefix, to_hex, AccountId32, Encoded, Era, KeyedVec, MultiAddress,
-    MultiSignature, PhantomDataSendSync, Static, UncheckedExtrinsic, WrapperKeepOpaque, Yes, H160,
-    H256, H512,
+    MultiSignature, MultiSigner, PhantomDataSendSync, Static, UncheckedExtrinsic, WrapperKeepOpaque,
+    Yes, H160, H256, H512,
 };
 
 cfg_jsonrpsee! {
