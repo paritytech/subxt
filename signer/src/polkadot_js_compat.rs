@@ -65,9 +65,8 @@ impl Display for Error {
 #[cfg(feature = "std")]
 impl std::error::Error for Error {}
 
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct EncryptedJsonDescriptor {
+#[derive(Deserialize)]
+struct EncryptionMetadata {
     /// Descriptor for the content
     content: Vec<String>,
     /// The encoding (in current/latest versions this is always an array)
@@ -76,30 +75,15 @@ struct EncryptedJsonDescriptor {
     version: String,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[allow(dead_code)]
-struct Meta {
-    genesis_hash: String,
-    is_hardware: Option<bool>,
-    name: String,
-    tags: Option<Vec<String>>,
-    when_created: u64,
-}
-
 /// https://github.com/polkadot-js/common/blob/37fa211fdb141d4f6eb32e8f377a4651ed2d9068/packages/keyring/src/types.ts#L67
 #[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-#[allow(dead_code)]
 struct KeyringPairJson {
     /// The encoded string
     encoded: String,
     /// The encoding used
-    encoding: EncryptedJsonDescriptor,
+    encoding: EncryptionMetadata,
     /// The ss58 encoded address or the hex-encoded version (the latter is for ETH-compat chains)
     address: AccountId32,
-    /// The underlying metadata associated with the keypair
-    meta: Meta,
 }
 
 // This can be removed once split_array is stabilized.
