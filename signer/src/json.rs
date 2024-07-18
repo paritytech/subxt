@@ -33,12 +33,15 @@ pub enum Error {
     },
     /// Decryption error.
     Secretbox(crypto_secretbox::Error),
+    /// sr25519 keypair error.
+    Sr25519(sr25519::Error),
     /// The decrypted keys are not valid.
     InvalidKeys,
 }
 
 impl_from!(base64::DecodeError => Error::Base64);
 impl_from!(crypto_secretbox::Error => Error::Secretbox);
+impl_from!(sr25519::Error => Error::Sr25519);
 
 impl Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -49,6 +52,7 @@ impl Display for Error {
                 write!(f, "Unsupported Scrypt parameters: N: {n}, p: {p}, r: {r}")
             }
             Error::Secretbox(e) => write!(f, "Decryption error: {e}"),
+            Error::Sr25519(e) => write!(f, "{e}"),
             Error::InvalidKeys => write!(f, "The decrypted keys are not valid."),
         }
     }
@@ -94,6 +98,11 @@ pub struct KeyringPairJson {
     meta: Meta,
 }
 
+// This can be removed once split_array is stabilized.
+fn slice_to_u32(slice: &[u8]) -> u32 {
+    u32::from_le_bytes(slice.try_into().expect("Slice should be 4 bytes."))
+}
+
 impl KeyringPairJson {
     /// Decrypt JSON keypair.
     pub fn decrypt(self, password: &str) -> Result<sr25519::Keypair, Error> {
@@ -113,30 +122,33 @@ impl KeyringPairJson {
 
         // Decode from Base64.
         let decoded = base64::engine::general_purpose::STANDARD.decode(self.encoded)?;
-        if decoded.len() < 68 {
-            return Err(Error::UnsupportedEncoding);
-        }
+        let params: [u8; 68] = decoded[..68]
+            .try_into()
+            .map_err(|_| Error::UnsupportedEncoding)?;
 
         // Extract scrypt parameters.
         // https://github.com/polkadot-js/common/blob/master/packages/util-crypto/src/scrypt/fromU8a.ts
-        let salt = &decoded[0..32];
-        let n = u32::from_le_bytes(decoded[32..36].try_into().unwrap());
-        let p = u32::from_le_bytes(decoded[36..40].try_into().unwrap());
-        let r = u32::from_le_bytes(decoded[40..44].try_into().unwrap());
+        let salt = &params[0..32];
+        let n = slice_to_u32(&params[32..36]);
+        let p = slice_to_u32(&params[36..40]);
+        let r = slice_to_u32(&params[40..44]);
 
+        // These restrictions may be relaxed in future.
         if n != 32768 || p != 1 || r != 8 {
             return Err(Error::UnsupportedScryptParameters { n, p, r });
         }
 
         // Hash password.
-        let scrypt_params = scrypt::Params::new(15, 8, 1, 32).unwrap();
+        let scrypt_params = scrypt::Params::new(15, 8, 1, 32)
+            .map_err(|_| Error::UnsupportedScryptParameters { n, p, r })?;
         let mut key = Key::default();
-        scrypt::scrypt(password.as_bytes(), salt, &scrypt_params, &mut key).unwrap();
+        scrypt::scrypt(password.as_bytes(), salt, &scrypt_params, &mut key)
+            .expect("Key should be 32 bytes.");
 
         // Decrypt keys.
         // https://github.com/polkadot-js/common/blob/master/packages/util-crypto/src/json/decryptData.ts
         let cipher = XSalsa20Poly1305::new(&key);
-        let nonce = Nonce::from_slice(&decoded[44..68]);
+        let nonce = Nonce::from_slice(&params[44..68]);
         let ciphertext = &decoded[68..];
         let plaintext = cipher.decrypt(nonce, ciphertext)?;
 
@@ -157,7 +169,7 @@ impl KeyringPairJson {
         }
 
         // Generate keypair.
-        let keypair = sr25519::Keypair::from_ed25519_bytes(secret_key).unwrap();
+        let keypair = sr25519::Keypair::from_ed25519_bytes(secret_key)?;
 
         // Ensure keys are correct.
         if keypair.public_key().0 != public_key
