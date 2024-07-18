@@ -144,7 +144,7 @@ impl KeyringPairJson {
 
         // Hash password.
         let scrypt_params =
-            scrypt::Params::new(15, 8, 1, 32).expect("Provided parameters are valid.");
+            scrypt::Params::new(15, 8, 1, 32).expect("Provided parameters should be valid.");
         let mut key = Key::default();
         scrypt::scrypt(password.as_bytes(), salt, &scrypt_params, &mut key)
             .expect("Key should be 32 bytes.");
