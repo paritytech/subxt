@@ -133,7 +133,11 @@ impl KeyringPairJson {
         let p = slice_to_u32(&params[36..40]);
         let r = slice_to_u32(&params[40..44]);
 
-        // These restrictions may be relaxed in future.
+        // FIXME At this moment we assume these to be fixed params, this is not a great idea
+        // since we lose flexibility and updates for greater security. However we need some
+        // protection against carefully-crafted params that can eat up CPU since these are user
+        // inputs. So we need to get very clever here, but atm we only allow the defaults
+        // and if no match, bail out.
         if n != 32768 || p != 1 || r != 8 {
             return Err(Error::UnsupportedScryptParameters { n, p, r });
         }
