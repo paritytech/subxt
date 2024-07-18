@@ -38,8 +38,8 @@ pub mod ecdsa;
 pub mod eth;
 
 /// A polkadot-js account json loader.
-#[cfg(feature = "json")]
-#[cfg_attr(docsrs, doc(cfg(feature = "json")))]
+#[cfg(feature = "polkadot-js-compat")]
+#[cfg_attr(docsrs, doc(cfg(feature = "polkadot-js-compat")))]
 pub mod json;
 
 // Re-export useful bits and pieces for generating a Pair from a phrase,
