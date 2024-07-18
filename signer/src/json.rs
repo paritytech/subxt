@@ -18,6 +18,8 @@ use crate::sr25519;
 /// Error
 #[derive(Debug)]
 pub enum Error {
+    /// Error decoding JSON.
+    Json(serde_json::Error),
     /// The keypair has an unsupported encoding.
     UnsupportedEncoding,
     /// Base64 decoding error.
@@ -39,6 +41,7 @@ pub enum Error {
     InvalidKeys,
 }
 
+impl_from!(serde_json::Error => Error::Json);
 impl_from!(base64::DecodeError => Error::Base64);
 impl_from!(crypto_secretbox::Error => Error::Secretbox);
 impl_from!(sr25519::Error => Error::Sr25519);
@@ -46,6 +49,7 @@ impl_from!(sr25519::Error => Error::Sr25519);
 impl Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
+            Error::Json(e) => write!(f, "Invalid JSON: {e}"),
             Error::UnsupportedEncoding => write!(f, "Unsupported encoding."),
             Error::Base64(e) => write!(f, "Base64 decoding error: {e}"),
             Error::UnsupportedScryptParameters { n, p, r } => {
@@ -87,7 +91,7 @@ struct Meta {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(dead_code)]
-pub struct KeyringPairJson {
+struct KeyringPairJson {
     /// The encoded string
     encoded: String,
     /// The encoding used
@@ -186,6 +190,12 @@ impl KeyringPairJson {
     }
 }
 
+/// Given a JSON keypair as exported from Polkadot-JS, this returns an [`sr25519::Keypair`]
+pub fn decrypt_json(json: &str, password: &str) -> Result<sr25519::Keypair, Error> {
+    let pair_json: KeyringPairJson = serde_json::from_str(json)?;
+    Ok(pair_json.decrypt(password)?)
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -214,7 +224,6 @@ mod test {
               }
             }
         "#;
-        let pair_json: KeyringPairJson = serde_json::from_str(json).unwrap();
-        pair_json.decrypt("whoisalice").unwrap();
+        decrypt_json(json, "whoisalice").unwrap();
     }
 }
