@@ -124,7 +124,7 @@ impl Keypair {
 
     /// Construct a keypair from a slice of bytes, corresponding to
     /// an Ed25519 expanded secret key.
-    pub fn from_ed25519_bytes(bytes: &[u8]) -> Result<Self, Error> {
+    pub(crate) fn from_ed25519_bytes(bytes: &[u8]) -> Result<Self, Error> {
         let secret_key = schnorrkel::SecretKey::from_ed25519_bytes(bytes)?;
 
         Ok(Keypair(schnorrkel::Keypair {
