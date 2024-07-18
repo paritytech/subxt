@@ -73,6 +73,8 @@ secp256k1 = { workspace = true, optional = true, features = [
     "recovery",
 ] }
 keccak-hash = { workspace = true, optional = true }
+
+# These are used if the polkadot-js-compat feature is enabled
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 base64 = { workspace = true, optional = true, features = ["alloc"] }
