@@ -67,13 +67,13 @@ assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
-clap = { version = "4.5.8", features = ["derive", "cargo"] }
+clap = { version = "4.5.9", features = ["derive", "cargo"] }
 cfg-if = "1.0.0"
 criterion = "0.4"
 codec = { package = "parity-scale-codec", version = "3.6.9", default-features = false }
 color-eyre = "0.6.3"
 console_error_panic_hook = "0.1.7"
-darling = "0.20.9"
+darling = "0.20.10"
 derive-where = "1.2.7"
 either = { version = "1.13.0", default-features = false }
 frame-metadata = { version = "16.0.0", default-features = false }
@@ -101,7 +101,7 @@ scale-typegen-description = "0.8.0"
 serde = { version = "1.0.204", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.120", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
-thiserror = "1.0.61"
+thiserror = "1.0.62"
 tokio = { version = "1.38", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
