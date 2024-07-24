@@ -10,6 +10,7 @@ use crate::metadata::Metadata;
 use crate::Error;
 use alloc::borrow::{Cow, ToOwned};
 use alloc::string::String;
+use alloc::boxed::Box;
 
 use alloc::vec::Vec;
 use codec::Encode;
@@ -58,7 +59,7 @@ macro_rules! boxed_payload {
     };
 }
 
-boxed_payload!(alloc::boxed::Box<T>);
+boxed_payload!(Box<T>);
 #[cfg(feature = "std")]
 boxed_payload!(std::sync::Arc<T>);
 #[cfg(feature = "std")]
