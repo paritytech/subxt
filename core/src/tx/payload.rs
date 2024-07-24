@@ -9,8 +9,8 @@ use crate::error::MetadataError;
 use crate::metadata::Metadata;
 use crate::Error;
 use alloc::borrow::{Cow, ToOwned};
-use alloc::string::String;
 use alloc::boxed::Box;
+use alloc::string::String;
 
 use alloc::vec::Vec;
 use codec::Encode;
