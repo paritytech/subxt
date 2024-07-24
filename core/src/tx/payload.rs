@@ -58,7 +58,7 @@ macro_rules! boxed_payload {
     };
 }
 
-boxed_payload!(Box<T>);
+boxed_payload!(alloc::boxed::Box<T>);
 #[cfg(feature = "std")]
 boxed_payload!(std::sync::Arc<T>);
 #[cfg(feature = "std")]
