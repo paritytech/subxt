@@ -46,7 +46,7 @@
 //! Using the [`#[subxt]`](crate::subxt) macro carries some downsides:
 //!
 //! - Using it to generate an interface will have a small impact on compile times (though much less of
-//! one if you only need a few pallets).
+//!   one if you only need a few pallets).
 //! - IDE support for autocompletion and documentation when using the macro interface can be poor.
 //! - It's impossible to manually look at the generated code to understand and debug things.
 //!
