@@ -92,7 +92,7 @@ proc-macro2 = "1.0.86"
 quote = "1.0.36"
 regex = { version = "1.10.5", default-features = false }
 scale-info = { version = "2.11.3", default-features = false }
-scale-value = { version = "0.16.0", default-features = false }
+scale-value = { version = "0.16.1", default-features = false }
 scale-bits = { version = "0.6.0", default-features = false }
 scale-decode = { version = "0.13.1", default-features = false }
 scale-encode = { version = "0.7.1", default-features = false }
