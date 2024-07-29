@@ -441,7 +441,7 @@ impl StorageHasher {
     ///
     /// 1. A fixed size hash. (not present for [`StorageHasher::Identity`]).
     /// 2. The SCALE encoded key that was used as an input to the hasher (only present for
-    /// [`StorageHasher::Twox64Concat`], [`StorageHasher::Blake2_128Concat`] or [`StorageHasher::Identity`]).
+    ///    [`StorageHasher::Twox64Concat`], [`StorageHasher::Blake2_128Concat`] or [`StorageHasher::Identity`]).
     ///
     /// This function returns the number of bytes used to represent the first of these.
     pub fn len_excluding_key(&self) -> usize {
