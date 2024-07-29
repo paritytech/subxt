@@ -233,7 +233,7 @@ fn codegen(
         codegen.add_derives_for_type(ty, std::iter::once(derive), d.recursive);
     }
 
-    // Configure attribtues:
+    // Configure attributes:
     let universal_attributes = raw_attributes
         .iter()
         .map(|raw| syn::parse_str(raw))

@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! `AccountId20` is a repressentation of Ethereum address derived from hashing the public key.
+//! `AccountId20` is a representation of Ethereum address derived from hashing the public key.
 
 use core::fmt::Display;
 
