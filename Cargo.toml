@@ -57,7 +57,8 @@ unused_extern_crates = "deny"
 
 [workspace.lints.clippy]
 type_complexity = "allow"
-all = "deny"
+# Priority -1 means that it can overwritten by other lints.
+all = { level = "deny", priority = -1 }
 # https://github.com/rust-lang/rust-clippy/issues/12643
 manual-unwrap-or-default = "allow"
 
