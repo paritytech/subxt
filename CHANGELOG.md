@@ -64,7 +64,7 @@ pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Create a new client with with a reconnecting RPC client.
+    // Create a new client with a reconnecting RPC client.
     let rpc = Client::builder()
         // We can configure the retry policy; here to an exponential backoff.
         // This API accepts an iterator of retry delays, and here we use `take`
