@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     // Pass this into our OnlineClient to instantiate it. This will lead to some
-    // RPC calls are being made to fetch chain details/metadata, which will immediately
+    // RPC call being made to fetch chain details/metadata, which will immediately
     // fail..
     let _ = OnlineClient::<PolkadotConfig>::from_rpc_client(rpc_client).await;
 
