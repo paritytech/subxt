@@ -42,7 +42,7 @@
 //! ```
 
 mod storage_key;
-mod utils;
+pub mod utils;
 
 pub mod address;
 

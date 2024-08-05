@@ -17,14 +17,22 @@ pub use primitive_types::{H256, U256};
 pub enum PolkadotConfig {}
 
 impl Config for PolkadotConfig {
-    type Hash = <SubstrateConfig as Config>::Hash;
-    type AccountId = <SubstrateConfig as Config>::AccountId;
-    type Address = MultiAddress<Self::AccountId, ()>;
-    type Signature = <SubstrateConfig as Config>::Signature;
-    type Hasher = <SubstrateConfig as Config>::Hasher;
-    type Header = <SubstrateConfig as Config>::Header;
+    // coming from: System::Config
+    type Hash = <SubstrateConfig as Config>::Hash; // Done
+    type AccountId = <SubstrateConfig as Config>::AccountId; // Done
+    type Hasher = <SubstrateConfig as Config>::Hasher; // Done
+
+    // coming from <runtime as traits::Block>::Extrinsic type
+    type Address = MultiAddress<Self::AccountId, ()>; // Done
+    type Signature = <SubstrateConfig as Config>::Signature; // Done
+
+    // coming from <runtime as traits::Block>::Header type
+    type Header = <SubstrateConfig as Config>::Header; // Done
+
     type ExtrinsicParams = PolkadotExtrinsicParams<Self>;
-    type AssetId = u32;
+
+    // coming from Assets::Config (interested in foreign Assets specifically)
+    type AssetId = u32; // Done
 }
 
 /// A struct representing the signed extra and additional parameters required

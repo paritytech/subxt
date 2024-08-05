@@ -11,7 +11,8 @@ use crate::error::{Error, MetadataError};
 use crate::metadata::Metadata;
 use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
-use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageHasher};
+pub use subxt_metadata::StorageHasher;
+use subxt_metadata::{PalletMetadata, StorageEntryMetadata};
 
 /// Return the root of a given [`Address`]: hash the pallet name and entry name
 /// and append those bytes to the output.
