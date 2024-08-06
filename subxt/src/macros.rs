@@ -56,7 +56,7 @@ macro_rules! cfg_jsonrpsee_web {
 macro_rules! cfg_reconnecting_rpc_client {
 	($($item:item)*) => {
 		$(
-			#[cfg(feature = "unstable-reconnecting-rpc-client")]
+			#[cfg(all(feature = "unstable-reconnecting-rpc-client", any(feature = "native", feature = "web")))]
 			#[cfg_attr(docsrs, doc(cfg(feature = "unstable-reconnecting-rpc-client")))]
 			$item
 		)*
