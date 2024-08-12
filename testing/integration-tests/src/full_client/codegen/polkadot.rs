@@ -102,7 +102,7 @@ pub mod api {
     pub type Event = runtime_types::rococo_runtime::RuntimeEvent;
     #[doc = r" The outer extrinsic enum."]
     pub type Call = runtime_types::rococo_runtime::RuntimeCall;
-    #[doc = r" The outer error enum representing the DispatchError's Module variant."]
+    #[doc = r" The outer error enum represents the DispatchError's Module variant."]
     pub type Error = runtime_types::rococo_runtime::RuntimeError;
     pub fn constants() -> ConstantsApi {
         ConstantsApi
