@@ -102,7 +102,7 @@ pub mod api {
     pub type Event = runtime_types::rococo_runtime::RuntimeEvent;
     #[doc = r" The outer extrinsic enum."]
     pub type Call = runtime_types::rococo_runtime::RuntimeCall;
-    #[doc = r" The outer error enum representing the DispatchError's Module variant."]
+    #[doc = r" The outer error enum represents the DispatchError's Module variant."]
     pub type Error = runtime_types::rococo_runtime::RuntimeError;
     pub fn constants() -> ConstantsApi {
         ConstantsApi
@@ -605,9 +605,10 @@ pub mod api {
                         "dry_run_call",
                         types::DryRunCall { origin, call },
                         [
-                            120u8, 205u8, 213u8, 8u8, 235u8, 239u8, 153u8, 40u8, 160u8, 1u8, 74u8,
-                            107u8, 172u8, 196u8, 102u8, 212u8, 45u8, 171u8, 215u8, 242u8, 98u8,
-                            29u8, 80u8, 194u8, 142u8, 183u8, 240u8, 21u8, 75u8, 18u8, 60u8, 17u8,
+                            80u8, 188u8, 47u8, 245u8, 6u8, 36u8, 58u8, 247u8, 61u8, 240u8, 143u8,
+                            198u8, 59u8, 29u8, 135u8, 138u8, 158u8, 239u8, 205u8, 154u8, 123u8,
+                            158u8, 118u8, 168u8, 76u8, 89u8, 68u8, 109u8, 218u8, 252u8, 195u8,
+                            69u8,
                         ],
                     )
                 }
@@ -628,10 +629,9 @@ pub mod api {
                             xcm,
                         },
                         [
-                            169u8, 208u8, 155u8, 170u8, 219u8, 217u8, 203u8, 112u8, 72u8, 82u8,
-                            175u8, 97u8, 100u8, 90u8, 152u8, 69u8, 214u8, 123u8, 167u8, 162u8,
-                            163u8, 191u8, 159u8, 153u8, 250u8, 216u8, 53u8, 67u8, 0u8, 230u8,
-                            129u8, 83u8,
+                            31u8, 16u8, 49u8, 194u8, 60u8, 85u8, 99u8, 173u8, 196u8, 117u8, 89u8,
+                            29u8, 106u8, 171u8, 119u8, 91u8, 163u8, 29u8, 239u8, 6u8, 12u8, 187u8,
+                            101u8, 104u8, 207u8, 170u8, 240u8, 244u8, 142u8, 214u8, 88u8, 229u8,
                         ],
                     )
                 }
@@ -2832,6 +2832,67 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = " Submits an unsigned extrinsic to report a fork voting equivocation. The caller"]
+                #[doc = " must provide the fork voting proof (the ancestry proof should be obtained using"]
+                #[doc = " `generate_ancestry_proof`) and a key ownership proof (should be obtained using"]
+                #[doc = " `generate_key_ownership_proof`). The extrinsic will be unsigned and should only"]
+                #[doc = " be accepted for local authorship (not to be broadcast to the network). This method"]
+                #[doc = " returns `None` when creation of the extrinsic fails, e.g. if equivocation"]
+                #[doc = " reporting is disabled for the given runtime (i.e. this method is"]
+                #[doc = " hardcoded to return `None`). Only useful in an offchain context."]
+                pub fn submit_report_fork_voting_unsigned_extrinsic(
+                    &self,
+                    equivocation_proof : types :: submit_report_fork_voting_unsigned_extrinsic :: EquivocationProof,
+                    key_owner_proof : types :: submit_report_fork_voting_unsigned_extrinsic :: KeyOwnerProof,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::SubmitReportForkVotingUnsignedExtrinsic,
+                    types::submit_report_fork_voting_unsigned_extrinsic::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "BeefyApi",
+                        "submit_report_fork_voting_unsigned_extrinsic",
+                        types::SubmitReportForkVotingUnsignedExtrinsic {
+                            equivocation_proof,
+                            key_owner_proof,
+                        },
+                        [
+                            148u8, 230u8, 78u8, 95u8, 219u8, 17u8, 5u8, 8u8, 254u8, 198u8, 252u8,
+                            211u8, 136u8, 20u8, 103u8, 153u8, 248u8, 144u8, 128u8, 58u8, 96u8,
+                            140u8, 245u8, 97u8, 13u8, 17u8, 19u8, 35u8, 123u8, 30u8, 24u8, 38u8,
+                        ],
+                    )
+                }
+                #[doc = " Submits an unsigned extrinsic to report a future block voting equivocation. The caller"]
+                #[doc = " must provide the future block voting proof and a key ownership proof"]
+                #[doc = " (should be obtained using `generate_key_ownership_proof`)."]
+                #[doc = " The extrinsic will be unsigned and should only be accepted for local"]
+                #[doc = " authorship (not to be broadcast to the network). This method returns"]
+                #[doc = " `None` when creation of the extrinsic fails, e.g. if equivocation"]
+                #[doc = " reporting is disabled for the given runtime (i.e. this method is"]
+                #[doc = " hardcoded to return `None`). Only useful in an offchain context."]
+                pub fn submit_report_future_block_voting_unsigned_extrinsic(
+                    &self,
+                    equivocation_proof : types :: submit_report_future_block_voting_unsigned_extrinsic :: EquivocationProof,
+                    key_owner_proof : types :: submit_report_future_block_voting_unsigned_extrinsic :: KeyOwnerProof,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::SubmitReportFutureBlockVotingUnsignedExtrinsic,
+                    types::submit_report_future_block_voting_unsigned_extrinsic::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "BeefyApi",
+                        "submit_report_future_block_voting_unsigned_extrinsic",
+                        types::SubmitReportFutureBlockVotingUnsignedExtrinsic {
+                            equivocation_proof,
+                            key_owner_proof,
+                        },
+                        [
+                            111u8, 49u8, 126u8, 212u8, 123u8, 116u8, 91u8, 235u8, 190u8, 88u8,
+                            70u8, 175u8, 50u8, 229u8, 231u8, 241u8, 10u8, 208u8, 107u8, 140u8,
+                            236u8, 225u8, 78u8, 205u8, 43u8, 218u8, 51u8, 68u8, 236u8, 247u8, 74u8,
+                            181u8,
+                        ],
+                    )
+                }
                 #[doc = " Generates a proof of key ownership for the given authority in the"]
                 #[doc = " given set. An example usage of this module is coupled with the"]
                 #[doc = " session historical module to prove that a given authority key is"]
@@ -2862,6 +2923,30 @@ pub mod api {
                             119u8, 183u8, 178u8, 109u8, 57u8, 250u8, 176u8, 255u8, 11u8, 190u8,
                             35u8, 142u8, 102u8, 112u8, 4u8, 219u8, 204u8, 81u8, 163u8, 87u8, 129u8,
                             134u8, 34u8, 227u8, 213u8, 163u8, 50u8, 90u8, 54u8, 61u8, 84u8, 215u8,
+                        ],
+                    )
+                }
+                #[doc = " Generates a proof that the `prev_block_number` is part of the canonical chain at"]
+                #[doc = " `best_known_block_number`."]
+                pub fn generate_ancestry_proof(
+                    &self,
+                    prev_block_number: types::generate_ancestry_proof::PrevBlockNumber,
+                    best_known_block_number: types::generate_ancestry_proof::BestKnownBlockNumber,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::GenerateAncestryProof,
+                    types::generate_ancestry_proof::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "BeefyApi",
+                        "generate_ancestry_proof",
+                        types::GenerateAncestryProof {
+                            prev_block_number,
+                            best_known_block_number,
+                        },
+                        [
+                            2u8, 159u8, 64u8, 196u8, 142u8, 10u8, 120u8, 189u8, 137u8, 49u8, 163u8,
+                            103u8, 5u8, 137u8, 190u8, 89u8, 232u8, 17u8, 216u8, 145u8, 99u8, 131u8,
+                            85u8, 67u8, 75u8, 234u8, 62u8, 61u8, 226u8, 61u8, 187u8, 120u8,
                         ],
                     )
                 }
@@ -2953,6 +3038,74 @@ pub mod api {
                     pub key_owner_proof:
                         submit_report_double_voting_unsigned_extrinsic::KeyOwnerProof,
                 }
+                pub mod submit_report_fork_voting_unsigned_extrinsic {
+                    use super::runtime_types;
+                    pub type EquivocationProof = runtime_types::sp_consensus_beefy::ForkVotingProof<
+                        runtime_types::sp_runtime::generic::header::Header<::core::primitive::u32>,
+                        runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
+                        runtime_types::sp_runtime::OpaqueValue,
+                    >;
+                    pub type KeyOwnerProof = runtime_types::sp_runtime::OpaqueValue;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::core::option::Option<()>;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct SubmitReportForkVotingUnsignedExtrinsic {
+                    pub equivocation_proof:
+                        submit_report_fork_voting_unsigned_extrinsic::EquivocationProof,
+                    pub key_owner_proof:
+                        submit_report_fork_voting_unsigned_extrinsic::KeyOwnerProof,
+                }
+                pub mod submit_report_future_block_voting_unsigned_extrinsic {
+                    use super::runtime_types;
+                    pub type EquivocationProof =
+                        runtime_types::sp_consensus_beefy::FutureBlockVotingProof<
+                            ::core::primitive::u32,
+                            runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
+                        >;
+                    pub type KeyOwnerProof = runtime_types::sp_runtime::OpaqueValue;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::core::option::Option<()>;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct SubmitReportFutureBlockVotingUnsignedExtrinsic {
+                    pub equivocation_proof:
+                        submit_report_future_block_voting_unsigned_extrinsic::EquivocationProof,
+                    pub key_owner_proof:
+                        submit_report_future_block_voting_unsigned_extrinsic::KeyOwnerProof,
+                }
                 pub mod generate_key_ownership_proof {
                     use super::runtime_types;
                     pub type SetId = ::core::primitive::u64;
@@ -2981,6 +3134,35 @@ pub mod api {
                 pub struct GenerateKeyOwnershipProof {
                     pub set_id: generate_key_ownership_proof::SetId,
                     pub authority_id: generate_key_ownership_proof::AuthorityId,
+                }
+                pub mod generate_ancestry_proof {
+                    use super::runtime_types;
+                    pub type PrevBlockNumber = ::core::primitive::u32;
+                    pub type BestKnownBlockNumber = ::core::option::Option<::core::primitive::u32>;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output =
+                            ::core::option::Option<runtime_types::sp_runtime::OpaqueValue>;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct GenerateAncestryProof {
+                    pub prev_block_number: generate_ancestry_proof::PrevBlockNumber,
+                    pub best_known_block_number: generate_ancestry_proof::BestKnownBlockNumber,
                 }
             }
         }
@@ -5004,9 +5186,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                15u8, 225u8, 245u8, 255u8, 19u8, 57u8, 201u8, 198u8, 228u8, 47u8, 34u8, 207u8,
-                45u8, 103u8, 163u8, 249u8, 15u8, 27u8, 130u8, 228u8, 89u8, 2u8, 179u8, 31u8, 210u8,
-                205u8, 199u8, 21u8, 39u8, 64u8, 205u8, 106u8,
+                181u8, 152u8, 254u8, 172u8, 141u8, 227u8, 59u8, 167u8, 125u8, 162u8, 198u8, 209u8,
+                160u8, 57u8, 51u8, 43u8, 237u8, 206u8, 219u8, 146u8, 253u8, 241u8, 122u8, 23u8,
+                97u8, 161u8, 65u8, 161u8, 209u8, 215u8, 85u8, 24u8,
             ]
     }
     pub mod system {
@@ -6165,9 +6347,9 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            22u8, 13u8, 27u8, 240u8, 21u8, 234u8, 234u8, 76u8, 238u8, 23u8, 186u8,
-                            68u8, 239u8, 54u8, 186u8, 201u8, 130u8, 192u8, 136u8, 90u8, 136u8,
-                            234u8, 254u8, 20u8, 69u8, 206u8, 3u8, 48u8, 250u8, 178u8, 222u8, 169u8,
+                            88u8, 221u8, 93u8, 96u8, 10u8, 166u8, 67u8, 237u8, 228u8, 179u8, 95u8,
+                            19u8, 85u8, 168u8, 182u8, 193u8, 149u8, 171u8, 37u8, 7u8, 73u8, 18u8,
+                            127u8, 31u8, 89u8, 202u8, 138u8, 23u8, 43u8, 195u8, 101u8, 217u8,
                         ],
                     )
                 }
@@ -13152,6 +13334,60 @@ pub mod api {
                 const PALLET: &'static str = "ConvictionVoting";
                 const EVENT: &'static str = "Undelegated";
             }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "An account that has voted"]
+            pub struct Voted {
+                pub who: voted::Who,
+                pub vote: voted::Vote,
+            }
+            pub mod voted {
+                use super::runtime_types;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Vote = runtime_types::pallet_conviction_voting::vote::AccountVote<
+                    ::core::primitive::u128,
+                >;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for Voted {
+                const PALLET: &'static str = "ConvictionVoting";
+                const EVENT: &'static str = "Voted";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A vote that been removed"]
+            pub struct VoteRemoved {
+                pub who: vote_removed::Who,
+                pub vote: vote_removed::Vote,
+            }
+            pub mod vote_removed {
+                use super::runtime_types;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Vote = runtime_types::pallet_conviction_voting::vote::AccountVote<
+                    ::core::primitive::u128,
+                >;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for VoteRemoved {
+                const PALLET: &'static str = "ConvictionVoting";
+                const EVENT: &'static str = "VoteRemoved";
+            }
         }
         pub mod storage {
             use super::runtime_types;
@@ -18991,7 +19227,7 @@ pub mod api {
                 #[doc = "- `max_fee`: The maximum fee that may be paid. This should just be auto-populated as:"]
                 #[doc = ""]
                 #[doc = "```nocompile"]
-                #[doc = "Self::registrars().get(reg_index).unwrap().fee"]
+                #[doc = "Registrars::<T>::get().get(reg_index).unwrap().fee"]
                 #[doc = "```"]
                 #[doc = ""]
                 #[doc = "Emits `JudgementRequested` if successful."]
@@ -19739,7 +19975,7 @@ pub mod api {
                 #[doc = "- `max_fee`: The maximum fee that may be paid. This should just be auto-populated as:"]
                 #[doc = ""]
                 #[doc = "```nocompile"]
-                #[doc = "Self::registrars().get(reg_index).unwrap().fee"]
+                #[doc = "Registrars::<T>::get().get(reg_index).unwrap().fee"]
                 #[doc = "```"]
                 #[doc = ""]
                 #[doc = "Emits `JudgementRequested` if successful."]
@@ -42623,11 +42859,9 @@ pub mod api {
         use super::root_mod;
         use super::runtime_types;
         #[doc = "The `Error` enum of this pallet."]
-        pub type Error =
-            runtime_types::polkadot_runtime_parachains::assigner_on_demand::pallet::Error;
+        pub type Error = runtime_types::polkadot_runtime_parachains::on_demand::pallet::Error;
         #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
-        pub type Call =
-            runtime_types::polkadot_runtime_parachains::assigner_on_demand::pallet::Call;
+        pub type Call = runtime_types::polkadot_runtime_parachains::on_demand::pallet::Call;
         pub mod calls {
             use super::root_mod;
             use super::runtime_types;
@@ -42797,8 +43031,7 @@ pub mod api {
             }
         }
         #[doc = "The `Event` enum of this pallet"]
-        pub type Event =
-            runtime_types::polkadot_runtime_parachains::assigner_on_demand::pallet::Event;
+        pub type Event = runtime_types::polkadot_runtime_parachains::on_demand::pallet::Event;
         pub mod events {
             use super::runtime_types;
             #[derive(
@@ -42858,20 +43091,24 @@ pub mod api {
                 use super::runtime_types;
                 pub mod para_id_affinity {
                     use super::runtime_types;
-                    pub type ParaIdAffinity = runtime_types :: polkadot_runtime_parachains :: assigner_on_demand :: types :: CoreAffinityCount ;
+                    pub type ParaIdAffinity = runtime_types :: polkadot_runtime_parachains :: on_demand :: types :: CoreAffinityCount ;
                     pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod queue_status {
                     use super::runtime_types;
-                    pub type QueueStatus = runtime_types :: polkadot_runtime_parachains :: assigner_on_demand :: types :: QueueStatusType ;
+                    pub type QueueStatus = runtime_types :: polkadot_runtime_parachains :: on_demand :: types :: QueueStatusType ;
                 }
                 pub mod free_entries {
                     use super::runtime_types;
-                    pub type FreeEntries = :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: assigner_on_demand :: types :: EnqueuedOrder > ;
+                    pub type FreeEntries = ::subxt::ext::subxt_core::alloc::vec::Vec<
+                        runtime_types::polkadot_runtime_parachains::on_demand::types::EnqueuedOrder,
+                    >;
                 }
                 pub mod affinity_entries {
                     use super::runtime_types;
-                    pub type AffinityEntries = :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: assigner_on_demand :: types :: EnqueuedOrder > ;
+                    pub type AffinityEntries = ::subxt::ext::subxt_core::alloc::vec::Vec<
+                        runtime_types::polkadot_runtime_parachains::on_demand::types::EnqueuedOrder,
+                    >;
                     pub type Param0 = runtime_types::polkadot_primitives::v7::CoreIndex;
                 }
                 pub mod revenue {
@@ -55568,6 +55805,22 @@ pub mod api {
                     #[codec(index = 1)]
                     #[doc = "An \\[account\\] has cancelled a previous delegation operation."]
                     Undelegated(::subxt::ext::subxt_core::utils::AccountId32),
+                    #[codec(index = 2)]
+                    #[doc = "An account that has voted"]
+                    Voted {
+                        who: ::subxt::ext::subxt_core::utils::AccountId32,
+                        vote: runtime_types::pallet_conviction_voting::vote::AccountVote<
+                            ::core::primitive::u128,
+                        >,
+                    },
+                    #[codec(index = 3)]
+                    #[doc = "A vote that been removed"]
+                    VoteRemoved {
+                        who: ::subxt::ext::subxt_core::utils::AccountId32,
+                        vote: runtime_types::pallet_conviction_voting::vote::AccountVote<
+                            ::core::primitive::u128,
+                        >,
+                    },
                 }
             }
             pub mod types {
@@ -56059,7 +56312,7 @@ pub mod api {
                     #[doc = "- `max_fee`: The maximum fee that may be paid. This should just be auto-populated as:"]
                     #[doc = ""]
                     #[doc = "```nocompile"]
-                    #[doc = "Self::registrars().get(reg_index).unwrap().fee"]
+                    #[doc = "Registrars::<T>::get().get(reg_index).unwrap().fee"]
                     #[doc = "```"]
                     #[doc = ""]
                     #[doc = "Emits `JudgementRequested` if successful."]
@@ -65539,211 +65792,6 @@ pub mod api {
                 )]
                 pub struct WorkState < _0 > { pub assignments : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < (runtime_types :: pallet_broker :: coretime_interface :: CoreAssignment , runtime_types :: polkadot_runtime_parachains :: assigner_coretime :: AssignmentState ,) > , pub end_hint : :: core :: option :: Option < _0 > , pub pos : :: core :: primitive :: u16 , pub step : runtime_types :: polkadot_runtime_parachains :: assigner_coretime :: PartsOf57600 , }
             }
-            pub mod assigner_on_demand {
-                use super::runtime_types;
-                pub mod pallet {
-                    use super::runtime_types;
-                    #[derive(
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                    #[codec(dumb_trait_bound)]
-                    #[decode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                    )]
-                    #[encode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                    )]
-                    #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
-                    pub enum Call {
-                        #[codec(index = 0)]
-                        #[doc = "Create a single on demand core order."]
-                        #[doc = "Will use the spot price for the current block and will reap the account if needed."]
-                        #[doc = ""]
-                        #[doc = "Parameters:"]
-                        #[doc = "- `origin`: The sender of the call, funds will be withdrawn from this account."]
-                        #[doc = "- `max_amount`: The maximum balance to withdraw from the origin to place an order."]
-                        #[doc = "- `para_id`: A `ParaId` the origin wants to provide blockspace for."]
-                        #[doc = ""]
-                        #[doc = "Errors:"]
-                        #[doc = "- `InsufficientBalance`: from the Currency implementation"]
-                        #[doc = "- `QueueFull`"]
-                        #[doc = "- `SpotPriceHigherThanMaxAmount`"]
-                        #[doc = ""]
-                        #[doc = "Events:"]
-                        #[doc = "- `OnDemandOrderPlaced`"]
-                        place_order_allow_death {
-                            max_amount: ::core::primitive::u128,
-                            para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
-                        },
-                        #[codec(index = 1)]
-                        #[doc = "Same as the [`place_order_allow_death`](Self::place_order_allow_death) call , but with a"]
-                        #[doc = "check that placing the order will not reap the account."]
-                        #[doc = ""]
-                        #[doc = "Parameters:"]
-                        #[doc = "- `origin`: The sender of the call, funds will be withdrawn from this account."]
-                        #[doc = "- `max_amount`: The maximum balance to withdraw from the origin to place an order."]
-                        #[doc = "- `para_id`: A `ParaId` the origin wants to provide blockspace for."]
-                        #[doc = ""]
-                        #[doc = "Errors:"]
-                        #[doc = "- `InsufficientBalance`: from the Currency implementation"]
-                        #[doc = "- `QueueFull`"]
-                        #[doc = "- `SpotPriceHigherThanMaxAmount`"]
-                        #[doc = ""]
-                        #[doc = "Events:"]
-                        #[doc = "- `OnDemandOrderPlaced`"]
-                        place_order_keep_alive {
-                            max_amount: ::core::primitive::u128,
-                            para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
-                        },
-                    }
-                    #[derive(
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                    #[codec(dumb_trait_bound)]
-                    #[decode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                    )]
-                    #[encode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                    )]
-                    #[doc = "The `Error` enum of this pallet."]
-                    pub enum Error {
-                        #[codec(index = 0)]
-                        #[doc = "The order queue is full, `place_order` will not continue."]
-                        QueueFull,
-                        #[codec(index = 1)]
-                        #[doc = "The current spot price is higher than the max amount specified in the `place_order`"]
-                        #[doc = "call, making it invalid."]
-                        SpotPriceHigherThanMaxAmount,
-                    }
-                    #[derive(
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                    #[codec(dumb_trait_bound)]
-                    #[decode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                    )]
-                    #[encode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                    )]
-                    #[doc = "The `Event` enum of this pallet"]
-                    pub enum Event {
-                        #[codec(index = 0)]
-                        #[doc = "An order was placed at some spot price amount by orderer ordered_by"]
-                        OnDemandOrderPlaced {
-                            para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
-                            spot_price: ::core::primitive::u128,
-                            ordered_by: ::subxt::ext::subxt_core::utils::AccountId32,
-                        },
-                        #[codec(index = 1)]
-                        #[doc = "The value of the spot price has likely changed"]
-                        SpotPriceSet { spot_price: ::core::primitive::u128 },
-                    }
-                }
-                pub mod types {
-                    use super::runtime_types;
-                    #[derive(
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                    #[codec(dumb_trait_bound)]
-                    #[decode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                    )]
-                    #[encode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                    )]
-                    pub struct CoreAffinityCount {
-                        pub core_index: runtime_types::polkadot_primitives::v7::CoreIndex,
-                        pub count: ::core::primitive::u32,
-                    }
-                    #[derive(
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                    #[codec(dumb_trait_bound)]
-                    #[decode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                    )]
-                    #[encode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                    )]
-                    pub struct EnqueuedOrder { pub para_id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , pub idx : runtime_types :: polkadot_runtime_parachains :: assigner_on_demand :: types :: QueueIndex , }
-                    #[derive(
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: CompactAs,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                    #[codec(dumb_trait_bound)]
-                    #[decode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                    )]
-                    #[encode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                    )]
-                    pub struct QueueIndex(pub ::core::primitive::u32);
-                    #[derive(
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                    #[codec(dumb_trait_bound)]
-                    #[decode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                    )]
-                    #[encode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                    )]
-                    pub struct QueueStatusType { pub traffic : runtime_types :: sp_arithmetic :: fixed_point :: FixedU128 , pub next_index : runtime_types :: polkadot_runtime_parachains :: assigner_on_demand :: types :: QueueIndex , pub smallest_index : runtime_types :: polkadot_runtime_parachains :: assigner_on_demand :: types :: QueueIndex , pub freed_indices : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: assigner_on_demand :: types :: ReverseQueueIndex > , }
-                    #[derive(
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: CompactAs,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                    #[codec(dumb_trait_bound)]
-                    #[decode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                    )]
-                    #[encode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                    )]
-                    pub struct ReverseQueueIndex(pub ::core::primitive::u32);
-                }
-            }
             pub mod configuration {
                 use super::runtime_types;
                 pub mod pallet {
@@ -66383,27 +66431,24 @@ pub mod api {
                         #[doc = "Invalid (bad signature, unknown validator, etc.) backing."]
                         InvalidBacking,
                         #[codec(index = 10)]
-                        #[doc = "Collator did not sign PoV."]
-                        NotCollatorSigned,
-                        #[codec(index = 11)]
                         #[doc = "The validation data hash does not match expected."]
                         ValidationDataHashMismatch,
-                        #[codec(index = 12)]
+                        #[codec(index = 11)]
                         #[doc = "The downward message queue is not processed correctly."]
                         IncorrectDownwardMessageHandling,
-                        #[codec(index = 13)]
+                        #[codec(index = 12)]
                         #[doc = "At least one upward message sent does not pass the acceptance criteria."]
                         InvalidUpwardMessages,
-                        #[codec(index = 14)]
+                        #[codec(index = 13)]
                         #[doc = "The candidate didn't follow the rules of HRMP watermark advancement."]
                         HrmpWatermarkMishandling,
-                        #[codec(index = 15)]
+                        #[codec(index = 14)]
                         #[doc = "The HRMP messages sent by the candidate is not valid."]
                         InvalidOutboundHrmp,
-                        #[codec(index = 16)]
+                        #[codec(index = 15)]
                         #[doc = "The validation code hash of the candidate is not valid."]
                         InvalidValidationCodeHash,
-                        #[codec(index = 17)]
+                        #[codec(index = 16)]
                         #[doc = "The `para_head` hash in the candidate descriptor doesn't match the hash of the actual"]
                         #[doc = "para head in the commitments."]
                         ParaHeadMismatch,
@@ -66585,6 +66630,211 @@ pub mod api {
                         runtime_types::polkadot_primitives::v7::validator_app::Public,
                     >,
                     pub session_index: ::core::primitive::u32,
+                }
+            }
+            pub mod on_demand {
+                use super::runtime_types;
+                pub mod pallet {
+                    use super::runtime_types;
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                    #[codec(dumb_trait_bound)]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
+                    pub enum Call {
+                        #[codec(index = 0)]
+                        #[doc = "Create a single on demand core order."]
+                        #[doc = "Will use the spot price for the current block and will reap the account if needed."]
+                        #[doc = ""]
+                        #[doc = "Parameters:"]
+                        #[doc = "- `origin`: The sender of the call, funds will be withdrawn from this account."]
+                        #[doc = "- `max_amount`: The maximum balance to withdraw from the origin to place an order."]
+                        #[doc = "- `para_id`: A `ParaId` the origin wants to provide blockspace for."]
+                        #[doc = ""]
+                        #[doc = "Errors:"]
+                        #[doc = "- `InsufficientBalance`: from the Currency implementation"]
+                        #[doc = "- `QueueFull`"]
+                        #[doc = "- `SpotPriceHigherThanMaxAmount`"]
+                        #[doc = ""]
+                        #[doc = "Events:"]
+                        #[doc = "- `OnDemandOrderPlaced`"]
+                        place_order_allow_death {
+                            max_amount: ::core::primitive::u128,
+                            para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
+                        },
+                        #[codec(index = 1)]
+                        #[doc = "Same as the [`place_order_allow_death`](Self::place_order_allow_death) call , but with a"]
+                        #[doc = "check that placing the order will not reap the account."]
+                        #[doc = ""]
+                        #[doc = "Parameters:"]
+                        #[doc = "- `origin`: The sender of the call, funds will be withdrawn from this account."]
+                        #[doc = "- `max_amount`: The maximum balance to withdraw from the origin to place an order."]
+                        #[doc = "- `para_id`: A `ParaId` the origin wants to provide blockspace for."]
+                        #[doc = ""]
+                        #[doc = "Errors:"]
+                        #[doc = "- `InsufficientBalance`: from the Currency implementation"]
+                        #[doc = "- `QueueFull`"]
+                        #[doc = "- `SpotPriceHigherThanMaxAmount`"]
+                        #[doc = ""]
+                        #[doc = "Events:"]
+                        #[doc = "- `OnDemandOrderPlaced`"]
+                        place_order_keep_alive {
+                            max_amount: ::core::primitive::u128,
+                            para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
+                        },
+                    }
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                    #[codec(dumb_trait_bound)]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    #[doc = "The `Error` enum of this pallet."]
+                    pub enum Error {
+                        #[codec(index = 0)]
+                        #[doc = "The order queue is full, `place_order` will not continue."]
+                        QueueFull,
+                        #[codec(index = 1)]
+                        #[doc = "The current spot price is higher than the max amount specified in the `place_order`"]
+                        #[doc = "call, making it invalid."]
+                        SpotPriceHigherThanMaxAmount,
+                    }
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                    #[codec(dumb_trait_bound)]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    #[doc = "The `Event` enum of this pallet"]
+                    pub enum Event {
+                        #[codec(index = 0)]
+                        #[doc = "An order was placed at some spot price amount by orderer ordered_by"]
+                        OnDemandOrderPlaced {
+                            para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
+                            spot_price: ::core::primitive::u128,
+                            ordered_by: ::subxt::ext::subxt_core::utils::AccountId32,
+                        },
+                        #[codec(index = 1)]
+                        #[doc = "The value of the spot price has likely changed"]
+                        SpotPriceSet { spot_price: ::core::primitive::u128 },
+                    }
+                }
+                pub mod types {
+                    use super::runtime_types;
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                    #[codec(dumb_trait_bound)]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    pub struct CoreAffinityCount {
+                        pub core_index: runtime_types::polkadot_primitives::v7::CoreIndex,
+                        pub count: ::core::primitive::u32,
+                    }
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                    #[codec(dumb_trait_bound)]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    pub struct EnqueuedOrder { pub para_id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , pub idx : runtime_types :: polkadot_runtime_parachains :: on_demand :: types :: QueueIndex , }
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: CompactAs,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                    #[codec(dumb_trait_bound)]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    pub struct QueueIndex(pub ::core::primitive::u32);
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                    #[codec(dumb_trait_bound)]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    pub struct QueueStatusType { pub traffic : runtime_types :: sp_arithmetic :: fixed_point :: FixedU128 , pub next_index : runtime_types :: polkadot_runtime_parachains :: on_demand :: types :: QueueIndex , pub smallest_index : runtime_types :: polkadot_runtime_parachains :: on_demand :: types :: QueueIndex , pub freed_indices : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: on_demand :: types :: ReverseQueueIndex > , }
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: CompactAs,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                    #[codec(dumb_trait_bound)]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    pub struct ReverseQueueIndex(pub ::core::primitive::u32);
                 }
             }
             pub mod origin {
@@ -67583,7 +67833,7 @@ pub mod api {
                 MessageQueue(runtime_types::pallet_message_queue::pallet::Call),
                 #[codec(index = 66)]
                 OnDemandAssignmentProvider(
-                    runtime_types::polkadot_runtime_parachains::assigner_on_demand::pallet::Call,
+                    runtime_types::polkadot_runtime_parachains::on_demand::pallet::Call,
                 ),
                 #[codec(index = 70)]
                 Registrar(runtime_types::polkadot_runtime_common::paras_registrar::pallet::Call),
@@ -67708,7 +67958,7 @@ pub mod api {
                 MessageQueue(runtime_types::pallet_message_queue::pallet::Error),
                 #[codec(index = 66)]
                 OnDemandAssignmentProvider(
-                    runtime_types::polkadot_runtime_parachains::assigner_on_demand::pallet::Error,
+                    runtime_types::polkadot_runtime_parachains::on_demand::pallet::Error,
                 ),
                 #[codec(index = 68)]
                 CoretimeAssignmentProvider(
@@ -67823,7 +68073,7 @@ pub mod api {
                 MessageQueue(runtime_types::pallet_message_queue::pallet::Event),
                 #[codec(index = 66)]
                 OnDemandAssignmentProvider(
-                    runtime_types::polkadot_runtime_parachains::assigner_on_demand::pallet::Event,
+                    runtime_types::polkadot_runtime_parachains::on_demand::pallet::Event,
                 ),
                 #[codec(index = 70)]
                 Registrar(runtime_types::polkadot_runtime_common::paras_registrar::pallet::Event),

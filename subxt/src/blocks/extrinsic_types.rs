@@ -159,6 +159,11 @@ where
         }
     }
 
+    /// See [`subxt_core::blocks::ExtrinsicDetails::hash()`].
+    pub fn hash(&self) -> T::Hash {
+        self.inner.hash()
+    }
+
     /// See [`subxt_core::blocks::ExtrinsicDetails::is_signed()`].
     pub fn is_signed(&self) -> bool {
         self.inner.is_signed()

@@ -326,18 +326,18 @@ async fn transaction_v1_broadcast() {
     let api = ctx.client();
     let rpc = ctx.unstable_rpc_methods().await;
 
-    let tx = node_runtime::tx()
+    let tx_payload = node_runtime::tx()
         .balances()
         .transfer_allow_death(bob_address.clone(), 10_001);
 
-    let tx_bytes = ctx
+    let tx = ctx
         .client()
         .tx()
-        .create_signed_offline(&tx, &dev::alice(), Default::default())
-        .unwrap()
-        .into_encoded();
+        .create_signed_offline(&tx_payload, &dev::alice(), Default::default())
+        .unwrap();
 
-    let tx_hash = <SubstrateConfig as subxt::Config>::Hasher::hash(&tx_bytes[2..]);
+    let tx_hash = tx.hash();
+    let tx_bytes = tx.into_encoded();
 
     // Subscribe to finalized blocks.
     let mut finalized_sub = api.blocks().subscribe_finalized().await.unwrap();
