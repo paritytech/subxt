@@ -3917,9 +3917,9 @@ dependencies = [
 
 [[package]]
 name = "scale-value"
-version = "0.16.1"
+version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ab68da501822d2769c4c5823535f6104a6d4cd15f0d3eba3e647e725294ae22"
+checksum = "ba4d772cfb7569e03868400344a1695d16560bf62b86b918604773607d39ec84"
 dependencies = [
  "base58",
  "blake2",
