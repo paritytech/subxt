@@ -13,7 +13,7 @@ homepage.workspace = true
 description = "Subxt integration tests that rely on the Substrate binary"
 
 [features]
-default = []
+default = [ "subxt/jsonrpsee" ]
 
 # Enable to run the tests with Light Client support.
 unstable-light-client = ["subxt/unstable-light-client"]
@@ -24,6 +24,10 @@ unstable-light-client-long-running = ["subxt/unstable-light-client"]
 # Enable this to use the unstable backend in tests _instead of_
 # the default one which relies on the "old" RPC methods.
 unstable-backend-client = []
+
+# Enable the unstable reconnecting rpc-client
+unstable-reconnecting-rpc-client = ["subxt/unstable-reconnecting-rpc-client"]
+
 
 [dev-dependencies]
 assert_matches = { workspace = true }
@@ -36,7 +40,7 @@ serde = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 sp-core = { workspace = true }
 syn = { workspace = true }
-subxt = { workspace = true, features = ["unstable-metadata", "native", "jsonrpsee", "substrate-compat"] }
+subxt = { workspace = true, features = ["unstable-metadata", "native", "substrate-compat"] }
 subxt-signer = { workspace = true, features = ["default"] }
 subxt-codegen = { workspace = true }
 subxt-metadata = { workspace = true }
