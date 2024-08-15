@@ -121,6 +121,9 @@ async fn transaction_validation() {
 
     wait_for_blocks(&api).await;
 
+    #[cfg(feature = "unstable-reconnecting-rpc-client")]
+    let _ctx = ctx.restart().await;
+
     let tx = node_runtime::tx()
         .balances()
         .transfer_allow_death(bob.public_key().into(), 10_000);

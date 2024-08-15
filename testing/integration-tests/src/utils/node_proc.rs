@@ -58,6 +58,17 @@ where
         TestNodeProcessBuilder::new(paths)
     }
 
+    pub async fn restart(mut self) -> Self {
+        tokio::task::spawn_blocking(move || {
+            if let Some(ref mut proc) = &mut self.proc {
+                let _ = proc.restart().unwrap();
+            }
+            self
+        })
+        .await
+        .expect("to succeed")
+    }
+
     /// Hand back an RPC client connected to the test node which exposes the legacy RPC methods.
     pub async fn legacy_rpc_methods(&self) -> legacy::LegacyRpcMethods<R> {
         let rpc_client = self.rpc_client().await;
@@ -73,7 +84,8 @@ where
     #[cfg(feature = "default")]
     /// Hand back an RPC client connected to the test node.
     pub async fn rpc_client(&self) -> rpc::RpcClient {
-        let url = get_url(self.proc.as_ref().map(|p| p.ws_port()));
+        let url = self.proc.as_ref().map(|p| p.ws_port());
+        let url = get_url(url);
         rpc::RpcClient::from_url(url)
             .await
             .expect("Unable to connect RPC client to test node")
@@ -82,7 +94,8 @@ where
     #[cfg(feature = "unstable-reconnecting-rpc-client")]
     /// Hand back an RPC client connected to the test node.
     pub async fn rpc_client(&self) -> rpc::RpcClient {
-        let url = get_url(self.proc.as_ref().map(|p| p.ws_port()));
+        let url = self.proc.as_ref().map(|p| p.ws_port());
+        let url = get_url(url);
         let client = subxt::backend::rpc::reconnecting_rpc_client::Client::builder()
             .build(url)
             .await
