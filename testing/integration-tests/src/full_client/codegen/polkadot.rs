@@ -5186,9 +5186,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                181u8, 152u8, 254u8, 172u8, 141u8, 227u8, 59u8, 167u8, 125u8, 162u8, 198u8, 209u8,
-                160u8, 57u8, 51u8, 43u8, 237u8, 206u8, 219u8, 146u8, 253u8, 241u8, 122u8, 23u8,
-                97u8, 161u8, 65u8, 161u8, 209u8, 215u8, 85u8, 24u8,
+                158u8, 48u8, 71u8, 167u8, 227u8, 1u8, 77u8, 26u8, 185u8, 145u8, 32u8, 196u8, 238u8,
+                43u8, 15u8, 7u8, 79u8, 6u8, 178u8, 214u8, 58u8, 241u8, 149u8, 231u8, 44u8, 59u8,
+                109u8, 111u8, 131u8, 144u8, 115u8, 169u8,
             ]
     }
     pub mod system {
@@ -58115,9 +58115,6 @@ pub mod api {
                     #[codec(index = 7)]
                     #[doc = "Too few hashes were requested to be upgraded (i.e. zero)."]
                     TooFew,
-                    #[codec(index = 8)]
-                    #[doc = "No ticket with a cost was returned by [`Config::Consideration`] to store the preimage."]
-                    NoCost,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
