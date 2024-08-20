@@ -4,10 +4,12 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fmt::Write;
 use subxt::ext::codec::{Compact, Encode};
-use subxt::{self, OnlineClient, PolkadotConfig};
+use subxt::{self, OnlineClient, PolkadotConfig, lightclient::LightClient};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use yew::{AttrValue, Callback};
+
+pub const POLKADOT_SPEC: &str = include_str!("../../../artifacts/demo_chain_specs/polkadot.json");
 
 #[subxt::subxt(runtime_metadata_path = "../../artifacts/polkadot_metadata_small.scale")]
 pub mod polkadot {}
@@ -38,7 +40,16 @@ pub(crate) async fn fetch_events_dynamically() -> Result<Vec<String>, subxt::Err
 pub(crate) async fn subscribe_to_finalized_blocks(
     cb: Callback<AttrValue>,
 ) -> Result<(), subxt::Error> {
-    let api = OnlineClient::<PolkadotConfig>::new().await?;
+    // let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+    // Use Lightclient API connection
+    let (_, lc_rpc) = LightClient::relay_chain(POLKADOT_SPEC)
+            .expect("expect valid light client");
+
+    let api = OnlineClient::<PolkadotConfig>::from_rpc_client(lc_rpc)
+            .await
+            .expect("expect valid RPC connection");
+
     // Subscribe to all finalized blocks:
     let mut blocks_sub = api.blocks().subscribe_finalized().await?;
     while let Some(block) = blocks_sub.next().await {
