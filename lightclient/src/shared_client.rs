@@ -38,7 +38,7 @@ impl<TPlat: sl::platform::PlatformRef, TChain> SharedClient<TPlat, TChain> {
     pub(crate) fn add_chain(
         &self,
         config: sl::AddChainConfig<'_, TChain, impl Iterator<Item = sl::ChainId>>,
-    ) -> Result<sl::AddChainSuccess, sl::AddChainError> {
+    ) -> Result<sl::AddChainSuccess<TPlat>, sl::AddChainError> {
         self.client
             .lock()
             .expect("mutex should not be poisoned")

@@ -44,6 +44,8 @@ web = [
     "send_wrapper",
     "web-sys",
     "wasm-bindgen",
+
+    "log"
 ]
 
 [dependencies]
@@ -68,6 +70,12 @@ pin-project = { workspace = true, optional = true }
 futures-timer = { workspace = true, optional = true }
 instant = { workspace = true, optional = true }
 getrandom = { workspace = true, optional = true }
+
+# `std` feature
+# Add here the crates that cannot function without the help of the operating system or environment.
+parking_lot = { version = "0.12.1", optional = true }
+log = { version = "0.4.18", default-features = false, optional = true }
+smol = { version = "2.0.0", optional = true }
 
 [package.metadata.docs.rs]
 defalt-features = true

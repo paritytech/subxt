@@ -8,11 +8,13 @@ use core::time::Duration;
 use futures::prelude::*;
 use smoldot::libp2p::with_buffers;
 use smoldot_light::platform::{
-    Address, ConnectionType, IpAddr, MultiStreamAddress, MultiStreamWebRtcConnection, PlatformRef,
+    Address, ConnectionType, LogLevel, MultiStreamAddress, MultiStreamWebRtcConnection, PlatformRef,
     SubstreamDirection,
 };
 
-use std::{io, net::SocketAddr, pin::Pin};
+use core::{fmt, net::IpAddr};
+
+use std::{io, fmt::Write, net::SocketAddr, pin::Pin};
 
 const LOG_TARGET: &str = "subxt-platform-wasm";
 
@@ -72,6 +74,45 @@ impl PlatformRef for SubxtPlatform {
         task: impl future::Future<Output = ()> + Send + 'static,
     ) {
         wasm_bindgen_futures::spawn_local(task);
+    }
+
+    fn log<'a>(
+        &self,
+        log_level: LogLevel,
+        log_target: &'a str,
+        message: &'a str,
+        key_values: impl Iterator<Item = (&'a str, &'a dyn fmt::Display)>,
+    ) {
+        // Note that this conversion is most likely completely optimized out by the compiler due
+        // to log levels having the same numerical values.
+        let log_level = match log_level {
+            LogLevel::Error => log::Level::Error,
+            LogLevel::Warn => log::Level::Warn,
+            LogLevel::Info => log::Level::Info,
+            LogLevel::Debug => log::Level::Debug,
+            LogLevel::Trace => log::Level::Trace,
+        };
+
+        let mut message_build = String::with_capacity(128);
+        message_build.push_str(message);
+        let mut first = true;
+        for (key, value) in key_values {
+            if first {
+                let _ = write!(message_build, "; ");
+                first = false;
+            } else {
+                let _ = write!(message_build, ", ");
+            }
+            let _ = write!(message_build, "{}={}", key, value);
+        }
+
+        log::logger().log(
+            &log::RecordBuilder::new()
+                .level(log_level)
+                .target(log_target)
+                .args(format_args!("{}", message_build))
+                .build(),
+        )
     }
 
     fn client_name(&self) -> std::borrow::Cow<str> {
