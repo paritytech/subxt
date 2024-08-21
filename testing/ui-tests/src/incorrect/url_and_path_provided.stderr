@@ -1,4 +1,4 @@
-error: Only one of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' can be provided
+error: Exclusively one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' or `wasm_file_path` must be provided
  --> src/incorrect/url_and_path_provided.rs:1:1
   |
 1 | / #[subxt::subxt(

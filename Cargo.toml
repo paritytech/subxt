@@ -115,6 +115,7 @@ which = "5.0.0"
 strip-ansi-escapes = "0.2.0"
 proptest = "1.5.0"
 hex-literal = "0.4.1"
+subwasmlib = { git = "https://github.com/chevdor/subwasm", rev = "v0.21.3" }
 
 # Light client support:
 smoldot = { version = "0.16.0", default-features = false }
