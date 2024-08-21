@@ -7,11 +7,6 @@ compile_error!(
     "The features 'unstable-light-client' and 'unstable-backend-client' cannot be used together"
 );
 
-#[cfg(all(feature = "unstable-reconnecting-rpc-client", feature = "default"))]
-compile_error!(
-    "The features 'unstable-reconnecting-rpc-client' and 'default' cannot be used together"
-);
-
 #[cfg(test)]
 pub mod utils;
 

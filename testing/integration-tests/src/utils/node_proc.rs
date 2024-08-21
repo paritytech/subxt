@@ -5,7 +5,11 @@
 use std::cell::RefCell;
 use std::ffi::{OsStr, OsString};
 use std::sync::Arc;
+use std::time::Duration;
 use substrate_runner::SubstrateNode;
+use subxt::backend::rpc::reconnecting_rpc_client::{
+    Client as UnstableReconnectingRpcClient, ExponentialBackoff,
+};
 use subxt::{
     backend::{legacy, rpc, unstable},
     Config, OnlineClient,
@@ -71,36 +75,14 @@ where
 
     /// Hand back an RPC client connected to the test node which exposes the legacy RPC methods.
     pub async fn legacy_rpc_methods(&self) -> legacy::LegacyRpcMethods<R> {
-        let rpc_client = self.rpc_client().await;
+        let rpc_client = self.rpc_client.clone();
         legacy::LegacyRpcMethods::new(rpc_client)
     }
 
     /// Hand back an RPC client connected to the test node which exposes the unstable RPC methods.
     pub async fn unstable_rpc_methods(&self) -> unstable::UnstableRpcMethods<R> {
-        let rpc_client = self.rpc_client().await;
+        let rpc_client = self.rpc_client.clone();
         unstable::UnstableRpcMethods::new(rpc_client)
-    }
-
-    #[cfg(feature = "default")]
-    /// Hand back an RPC client connected to the test node.
-    pub async fn rpc_client(&self) -> rpc::RpcClient {
-        let url = self.proc.as_ref().map(|p| p.ws_port());
-        let url = get_url(url);
-        rpc::RpcClient::from_url(url)
-            .await
-            .expect("Unable to connect RPC client to test node")
-    }
-
-    #[cfg(feature = "unstable-reconnecting-rpc-client")]
-    /// Hand back an RPC client connected to the test node.
-    pub async fn rpc_client(&self) -> rpc::RpcClient {
-        let url = self.proc.as_ref().map(|p| p.ws_port());
-        let url = get_url(url);
-        let client = subxt::backend::rpc::reconnecting_rpc_client::Client::builder()
-            .build(url)
-            .await
-            .expect("unable to connect RPC client to test node");
-        rpc::RpcClient::new(client)
     }
 
     /// Always return a client using the unstable backend.
@@ -136,10 +118,17 @@ where
     }
 }
 
+/// Kind of rpc client to use in tests
+pub enum RpcClientKind {
+    Legacy,
+    UnstableReconnecting,
+}
+
 /// Construct a test node process.
 pub struct TestNodeProcessBuilder {
     node_paths: Vec<OsString>,
     authority: Option<String>,
+    rpc_client: RpcClientKind,
 }
 
 impl TestNodeProcessBuilder {
@@ -157,7 +146,14 @@ impl TestNodeProcessBuilder {
         Self {
             node_paths: paths,
             authority: None,
+            rpc_client: RpcClientKind::Legacy,
         }
+    }
+
+    /// Set the testRunner to use a preferred RpcClient impl, ie Legacy or Unstable
+    pub fn with_rpc_client_kind(&mut self, rpc_client_kind: RpcClientKind) -> &mut Self {
+        self.rpc_client = rpc_client_kind;
+        self
     }
 
     /// Set the authority dev account for a node in validator mode e.g. --alice.
@@ -186,9 +182,11 @@ impl TestNodeProcessBuilder {
         };
 
         let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
-        let rpc_client = build_rpc_client(&ws_url)
-            .await
-            .map_err(|e| format!("Failed to connect to node at {ws_url}: {e}"))?;
+        let rpc_client = match self.rpc_client {
+            RpcClientKind::Legacy => build_rpc_client(&ws_url).await,
+            RpcClientKind::UnstableReconnecting => build_unstable_rpc_client(&ws_url).await,
+        }
+        .map_err(|e| format!("Failed to connect to node at {ws_url}: {e}"))?;
 
         // Cache whatever client we build, and None for the other.
         #[allow(unused_assignments, unused_mut)]
@@ -223,7 +221,6 @@ impl TestNodeProcessBuilder {
     }
 }
 
-#[cfg(feature = "default")]
 async fn build_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
     let rpc_client = rpc::RpcClient::from_insecure_url(ws_url)
         .await
@@ -232,9 +229,9 @@ async fn build_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
     Ok(rpc_client)
 }
 
-#[cfg(feature = "unstable-reconnecting-rpc-client")]
-async fn build_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
-    let client = subxt::backend::rpc::reconnecting_rpc_client::Client::builder()
+async fn build_unstable_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
+    let client = UnstableReconnectingRpcClient::builder()
+        .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10)))
         .build(ws_url.to_string())
         .await
         .map_err(|e| format!("Cannot construct RPC client: {e}"))?;

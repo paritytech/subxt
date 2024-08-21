@@ -362,12 +362,6 @@ jobs:
           command: test
           args: --release --package integration-tests --features unstable-light-client
 
-      - name: Run tests
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: test
-          args: --release --package integration-tests --no-default-features --features unstable-reconnecting-rpc-client
-
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 

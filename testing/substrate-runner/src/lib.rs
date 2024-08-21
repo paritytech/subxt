@@ -90,7 +90,7 @@ impl SubstrateNodeBuilder {
 
             res = SubstrateNodeBuilder::try_spawn(binary_path, &self.custom_flags);
             if res.is_ok() {
-                bin_path = binary_path.clone();
+                bin_path.clone_from(binary_path);
                 break;
             }
         }
@@ -187,7 +187,7 @@ impl SubstrateNode {
 
     /// restart the node, handing back an object which, when dropped, will stop it.
     pub fn restart(&mut self) -> Result<(), std::io::Error> {
-        let res = self.kill();
+        let res: Result<(), io::Error> = self.kill();
 
         match res {
             Ok(_) => (),

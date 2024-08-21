@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    subxt_test, test_context,
+    subxt_test, test_context, test_context_unstable_rpc_client,
     utils::{node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};
@@ -120,9 +120,6 @@ async fn transaction_validation() {
     let bob = dev::bob();
 
     wait_for_blocks(&api).await;
-
-    #[cfg(feature = "unstable-reconnecting-rpc-client")]
-    let _ctx = ctx.restart().await;
 
     let tx = node_runtime::tx()
         .balances()
@@ -411,4 +408,41 @@ async fn partial_fee_estimate_correct() {
 
     // Both methods should yield the same fee
     assert_eq!(partial_fee_1, partial_fee_2);
+}
+
+#[cfg(feature = "unstable-reconnecting-rpc-client")]
+#[subxt_test]
+async fn transaction_validation_with_reconnection() {
+    let ctx = test_context_unstable_rpc_client().await;
+    let api = ctx.client();
+
+    let alice = dev::alice();
+    let bob = dev::bob();
+
+    wait_for_blocks(&api).await;
+
+    let _ctx = ctx.restart().await;
+
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer_allow_death(bob.public_key().into(), 10_000);
+
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice, Default::default())
+        .await
+        .unwrap();
+
+    signed_extrinsic
+        .validate()
+        .await
+        .expect("validation failed");
+
+    signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .unwrap();
 }
