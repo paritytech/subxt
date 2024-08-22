@@ -15,6 +15,12 @@ use subxt_core::utils::AccountId32;
 
 use crate::sr25519;
 
+/// Given a JSON keypair as exported from Polkadot-JS, this returns an [`sr25519::Keypair`]
+pub fn decrypt_json(json: &str, password: &str) -> Result<sr25519::Keypair, Error> {
+    let pair_json: KeyringPairJson = serde_json::from_str(json)?;
+    Ok(pair_json.decrypt(password)?)
+}
+
 /// Error
 #[derive(Debug)]
 pub enum Error {
@@ -93,7 +99,7 @@ fn slice_to_u32(slice: &[u8]) -> u32 {
 
 impl KeyringPairJson {
     /// Decrypt JSON keypair.
-    pub fn decrypt(self, password: &str) -> Result<sr25519::Keypair, Error> {
+    fn decrypt(self, password: &str) -> Result<sr25519::Keypair, Error> {
         // Check encoding.
         // https://github.com/polkadot-js/common/blob/37fa211fdb141d4f6eb32e8f377a4651ed2d9068/packages/keyring/src/keyring.ts#L166
         if self.encoding.version != "3"
@@ -172,12 +178,6 @@ impl KeyringPairJson {
 
         Ok(keypair)
     }
-}
-
-/// Given a JSON keypair as exported from Polkadot-JS, this returns an [`sr25519::Keypair`]
-pub fn decrypt_json(json: &str, password: &str) -> Result<sr25519::Keypair, Error> {
-    let pair_json: KeyringPairJson = serde_json::from_str(json)?;
-    Ok(pair_json.decrypt(password)?)
 }
 
 #[cfg(test)]
