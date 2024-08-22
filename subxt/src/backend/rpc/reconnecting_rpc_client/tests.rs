@@ -6,7 +6,6 @@
 
 use super::*;
 use futures::{future::Either, stream::FuturesUnordered, FutureExt, TryStreamExt};
-
 use jsonrpsee_server::{
     http, stop_channel, ws, ConnectionGuard, ConnectionState, HttpRequest, HttpResponse, RpcModule,
     RpcServiceBuilder, ServerConfig, SubscriptionMessage,
