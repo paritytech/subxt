@@ -57,6 +57,9 @@ pub enum CodegenError {
     /// Cannot generate types.
     #[error("Type Generation failed: {0}")]
     TypeGeneration(#[from] TypegenError),
+    /// Error when generating metadata from Wasm-runtime
+    #[error("Failed to generate metadata from wasm file\nreason: {0}")]
+    Wasm(String),
 }
 
 impl CodegenError {

@@ -27,7 +27,11 @@ syn = { workspace = true }
 quote = { workspace = true }
 subxt-codegen = { workspace = true, features = ["fetch-metadata"] }
 scale-typegen = { workspace = true }
-subwasmlib = { workspace = true }
+sc-executor = { workspace = true }
+sp-maybe-compressed-blob = { workspace = true }
+sp-state-machine = { workspace = true }
+sp-io = { workspace = true }
+sc-executor-common = { workspace = true }
 
 [lints]
 workspace = true

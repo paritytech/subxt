@@ -21,27 +21,9 @@ use subxt_codegen::{
     },
     CodegenBuilder, CodegenError, Metadata,
 };
-use syn::{parse_macro_input, punctuated::Punctuated};
+use syn::{parse_macro_input, punctuated::Punctuated, LitStr};
 
-use std::path::Path;
-
-use subwasmlib::{source::Source, OutputFormat, Subwasm};
-
-fn process_wasm_file(wasm_path: &Path) -> Result<Vec<u8>, CodegenError> {
-    fn to_error<A: ToString>(err: A) -> CodegenError {
-        CodegenError::Fetch(subxt_codegen::error::FetchMetadataError::Other(
-            err.to_string(),
-        ))
-    }
-    let source =
-        Source::from_options(Some(wasm_path.to_path_buf()), None, None, None).map_err(to_error)?;
-    let subwasm = Subwasm::new(&source.try_into().map_err(to_error)?).map_err(to_error)?;
-    let mut output = vec![];
-    subwasm
-        .write_metadata(OutputFormat::Scale, None, &mut output)
-        .map_err(to_error)?;
-    Ok(output)
-}
+mod wasm_loader;
 
 #[derive(Clone, Debug)]
 struct OuterAttribute(syn::Attribute);
@@ -82,6 +64,10 @@ struct RuntimeMetadataArgs {
     unstable_metadata: darling::util::Flag,
     #[darling(default)]
     wasm_file_path: Option<String>,
+    #[darling(default)]
+    runtime_crate_name: Option<String>,
+    #[darling(default)]
+    features: Option<Vec<LitStr>>,
 }
 
 #[derive(Debug, FromMeta)]
@@ -228,6 +214,14 @@ fn validate_type_path(path: &syn::Path, metadata: &Metadata) {
 fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata, TokenStream> {
     // Do we want to fetch unstable metadata? This only works if fetching from a URL.
     let unstable_metadata = args.unstable_metadata.is_present();
+    if args.features.is_some() && args.runtime_crate_name.is_none() {
+        abort_call_site!("The 'features' attribute requires `runtime_crate_name`")
+    }
+
+    if args.runtime_crate_name.is_some() && args.wasm_file_path.is_none() {
+        abort_call_site!("The 'runtime_crate_name' attribute requires `wasm_file_path`")
+    }
+
     let metadata = match (
         &args.runtime_metadata_path,
         &args.runtime_metadata_insecure_url,
@@ -266,9 +260,18 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
             let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
             let root_path = std::path::Path::new(&root);
             let path = root_path.join(path);
-            let metadata = process_wasm_file(&path).map_err(|e| e.into_compile_error())?;
-            subxt_codegen::Metadata::decode(&mut metadata.as_ref())
-                .map_err(|e| Into::<CodegenError>::into(e).into_compile_error())?
+            let metadata = if let Some(runtime_crate_name) = &args.runtime_crate_name {
+                let features = if let Some(features) = &args.features {
+                    features.iter().map(|x| x.value()).collect()
+                } else {
+                    vec![]
+                };
+                wasm_loader::from_crate_name(&runtime_crate_name, &path, features)
+            } else {
+                wasm_loader::from_wasm_file(&path)
+            };
+
+            metadata.map_err(|e| e.into_compile_error())?
         }
         _ => {
             abort_call_site!(
