@@ -48,7 +48,7 @@ web = [
 ]
 
 # Enable this to use the reconnecting rpc client
-unstable-reconnecting-rpc-client = ["dep:finito", "dep:tokio"]
+unstable-reconnecting-rpc-client = ["dep:finito", "dep:tokio", "jsonrpsee"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = [
@@ -113,6 +113,8 @@ getrandom = { workspace = true, optional = true }
 tokio-util = { workspace = true, features = ["compat"], optional = true }
 
 # Included if the reconnecting rpc client feature is enabled
+# Only the `tokio/sync` is used in the reconnecting rpc client
+# and that compiles both for native and web.
 tokio = { workspace = true, optional = true }
 finito = { workspace = true, optional = true }
 
