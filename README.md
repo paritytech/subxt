@@ -65,7 +65,7 @@ Please add your project to this list via a PR.
 - [polkadot-introspector](https://github.com/paritytech/polkadot-introspector) Tools for monitoring Polkadot nodes.
 - [ink!](https://github.com/paritytech/ink) Smart contract language that uses `subxt` for allowing developers to conduct [End-to-End testing](https://use.ink/basics/contract-testing/end-to-end-e2e-testing) of their contracts.
 - [Chainflip](https://github.com/chainflip-io/chainflip-backend) A decentralised exchange for native cross-chain swaps.
-- [Hyperbridge](https://github.com/polytope-labs/hyperbridge)  A hyperscalable coprocessor for verifiable cross-chain interoperability.
+- [Hyperbridge](https://github.com/polytope-labs/hyperbridge) A hyperscalable coprocessor for verifiable cross-chain interoperability.
 
 **Alternatives**
 
