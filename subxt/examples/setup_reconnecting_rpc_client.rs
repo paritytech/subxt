@@ -9,7 +9,7 @@
 use std::time::Duration;
 
 use futures::StreamExt;
-use subxt::backend::rpc::reconnecting_rpc_client::{RpcClient, ExponentialBackoff};
+use subxt::backend::rpc::reconnecting_rpc_client::{ExponentialBackoff, RpcClient};
 use subxt::{OnlineClient, PolkadotConfig};
 
 // Generate an interface that we can use from the node's metadata.
