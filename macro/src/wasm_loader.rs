@@ -15,7 +15,7 @@ pub type WasmMetadataResult<A> = Result<A, CodegenError>;
 
 /// Uses wasm artifact produced by compiling the runtime to generate metadata
 pub fn from_wasm_file(wasm_file_path: &Path) -> WasmMetadataResult<Metadata> {
-    let wasm_file = fetch_metadata_from_file_blocking(&wasm_file_path)
+    let wasm_file = fetch_metadata_from_file_blocking(wasm_file_path)
         .map_err(Into::<CodegenError>::into)
         .and_then(maybe_decompress)?;
     call_and_decode(wasm_file)
@@ -49,7 +49,7 @@ fn decode(encoded_metadata: Vec<u8>) -> WasmMetadataResult<Metadata> {
 }
 
 fn maybe_decompress(file_contents: Vec<u8>) -> WasmMetadataResult<Vec<u8>> {
-    sp_maybe_compressed_blob::decompress(&file_contents.as_ref(), CODE_BLOB_BOMB_LIMIT)
+    sp_maybe_compressed_blob::decompress(file_contents.as_ref(), CODE_BLOB_BOMB_LIMIT)
         .map_err(|e| CodegenError::Wasm(e.to_string()))
         .map(Cow::into_owned)
 }
