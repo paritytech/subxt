@@ -16,18 +16,19 @@
 //! ```no_run
 //! use std::time::Duration;
 //! use futures::StreamExt;
-//! use subxt::backend::rpc::reconnecting_rpc_client::{Client, ExpontentialBackoff};
+//! use subxt::backend::rpc::reconnecting_rpc_client::{RpcClient, ExponentialBackoff};
 //! use subxt::{OnlineClient, PolkadotConfig};
 //!
+//! #[tokio::main]
 //! async fn main() {
 //!     let rpc = RpcClient::builder()
-//!         .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10))
+//!         .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10)))
 //!         .build("ws://localhost:9944".to_string())
 //!         .await
 //!         .unwrap();
 //!
 //!     let subxt_client: OnlineClient<PolkadotConfig> = OnlineClient::from_rpc_client(rpc.clone()).await.unwrap();
-//!     let blocks_sub = subxt_client.blocks().subscribe_finalized().await.unwrap();
+//!     let mut blocks_sub = subxt_client.blocks().subscribe_finalized().await.unwrap();
 //!   
 //!     while let Some(block) = blocks_sub.next().await {
 //!         let block = match block {

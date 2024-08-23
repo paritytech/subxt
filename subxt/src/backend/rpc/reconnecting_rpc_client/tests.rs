@@ -2,8 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-#![cfg(test)]
-
 use super::*;
 use futures::{future::Either, FutureExt};
 
@@ -18,7 +16,7 @@ async fn call_works() {
     tracing_subscriber::fmt::init();
     let (_handle, addr) = run_server().await.unwrap();
 
-    let client = Client::builder().build(addr).await.unwrap();
+    let client = RpcClient::builder().build(addr).await.unwrap();
 
     assert!(client.request("say_hello".to_string(), None).await.is_ok(),)
 }
@@ -28,7 +26,7 @@ async fn sub_works() {
     tracing_subscriber::fmt::init();
     let (_handle, addr) = run_server().await.unwrap();
 
-    let client = Client::builder()
+    let client = RpcClient::builder()
         .retry_policy(ExponentialBackoff::from_millis(50))
         .build(addr)
         .await
@@ -50,7 +48,7 @@ async fn sub_works() {
 async fn sub_with_reconnect() {
     tracing_subscriber::fmt::init();
     let (handle, addr) = run_server().await.unwrap();
-    let client = Client::builder().build(addr.clone()).await.unwrap();
+    let client = RpcClient::builder().build(addr.clone()).await.unwrap();
 
     let mut sub = client
         .subscribe(
@@ -94,7 +92,7 @@ async fn call_with_reconnect() {
     tracing_subscriber::fmt::init();
     let (handle, addr) = run_server_with_settings(None, true).await.unwrap();
 
-    let client = Arc::new(Client::builder().build(addr.clone()).await.unwrap());
+    let client = Arc::new(RpcClient::builder().build(addr.clone()).await.unwrap());
 
     let req_fut = client.request("say_hello".to_string(), None).boxed();
     let timeout_fut = tokio::time::sleep(Duration::from_secs(5));
