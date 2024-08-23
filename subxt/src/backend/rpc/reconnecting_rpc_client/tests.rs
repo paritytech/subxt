@@ -5,26 +5,17 @@
 #![cfg(test)]
 
 use super::*;
-use futures::{future::Either, stream::FuturesUnordered, FutureExt, TryStreamExt};
+use futures::{future::Either, FutureExt};
 
-use jsonrpsee_server::{
+use jsonrpsee::core::BoxError;
+use jsonrpsee::server::{
     http, stop_channel, ws, ConnectionGuard, ConnectionState, HttpRequest, HttpResponse, RpcModule,
     RpcServiceBuilder, ServerConfig, SubscriptionMessage,
 };
-use tower::BoxError;
-use tracing_subscriber::util::SubscriberInitExt;
-
-fn init_logger() {
-    let filter = tracing_subscriber::EnvFilter::from_default_env();
-    let _ = tracing_subscriber::fmt()
-        .with_env_filter(filter)
-        .finish()
-        .try_init();
-}
 
 #[tokio::test]
 async fn call_works() {
-    init_logger();
+    tracing_subscriber::fmt::init();
     let (_handle, addr) = run_server().await.unwrap();
 
     let client = Client::builder().build(addr).await.unwrap();
@@ -34,7 +25,7 @@ async fn call_works() {
 
 #[tokio::test]
 async fn sub_works() {
-    init_logger();
+    tracing_subscriber::fmt::init();
     let (_handle, addr) = run_server().await.unwrap();
 
     let client = Client::builder()
@@ -57,7 +48,7 @@ async fn sub_works() {
 
 #[tokio::test]
 async fn sub_with_reconnect() {
-    init_logger();
+    tracing_subscriber::fmt::init();
     let (handle, addr) = run_server().await.unwrap();
     let client = Client::builder().build(addr.clone()).await.unwrap();
 
@@ -71,7 +62,7 @@ async fn sub_with_reconnect() {
         .unwrap();
 
     let _ = handle.send(());
-    client.reconnect_initiated().await;
+    let reconnected = client.reconnect_initiated().await;
 
     assert!(matches!(sub.next().await, Some(Ok(_))));
     assert!(matches!(
@@ -81,7 +72,7 @@ async fn sub_with_reconnect() {
 
     // Restart the server.
     let (_handle, _) = run_server_with_settings(Some(&addr), false).await.unwrap();
-    client.reconnected().await;
+    reconnected.await;
 
     assert_eq!(client.reconnect_count(), 1);
 
@@ -100,7 +91,7 @@ async fn sub_with_reconnect() {
 
 #[tokio::test]
 async fn call_with_reconnect() {
-    init_logger();
+    tracing_subscriber::fmt::init();
     let (handle, addr) = run_server_with_settings(None, true).await.unwrap();
 
     let client = Arc::new(Client::builder().build(addr.clone()).await.unwrap());
@@ -116,12 +107,12 @@ async fn call_with_reconnect() {
 
     // Close the connection with a pending call.
     let _ = handle.send(());
-    client.reconnect_initiated().await;
+    let reconnected = client.reconnect_initiated().await;
 
     // Restart the server
     let (_handle, _) = run_server_with_settings(Some(&addr), false).await.unwrap();
 
-    client.reconnected().await;
+    reconnected.await;
 
     // This call should fail because reconnect.
     assert!(req_fut.await.is_err());
@@ -129,15 +120,15 @@ async fn call_with_reconnect() {
     assert!(client.request("say_hello".to_string(), None).await.is_ok());
 }
 
-async fn run_server() -> anyhow::Result<(tokio::sync::broadcast::Sender<()>, String)> {
+async fn run_server() -> Result<(tokio::sync::broadcast::Sender<()>, String), BoxError> {
     run_server_with_settings(None, false).await
 }
 
 async fn run_server_with_settings(
     url: Option<&str>,
     dont_respond_to_method_calls: bool,
-) -> anyhow::Result<(tokio::sync::broadcast::Sender<()>, String)> {
-    use jsonrpsee_server::HttpRequest;
+) -> Result<(tokio::sync::broadcast::Sender<()>, String), BoxError> {
+    use jsonrpsee::server::HttpRequest;
 
     let sockaddr = match url {
         Some(url) => url.strip_prefix("ws://").unwrap(),
@@ -278,7 +269,7 @@ async fn serve_with_graceful_shutdown<S, B, I>(
     I: tokio::io::AsyncRead + tokio::io::AsyncWrite + Send + Unpin + 'static,
 {
     if let Err(e) =
-        jsonrpsee_server::serve_with_graceful_shutdown(io, service, rx.recv().map(|_| ())).await
+        jsonrpsee::server::serve_with_graceful_shutdown(io, service, rx.recv().map(|_| ())).await
     {
         tracing::error!("Error while serving: {:?}", e);
     }

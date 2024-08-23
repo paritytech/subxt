@@ -133,6 +133,11 @@ subxt-signer = { path = "../signer", features = ["unstable-eth"] }
 # the light-client wlll emit INFO logs with
 # `GrandPa warp sync finished` and `Finalized block runtime ready.`
 tracing-subscriber = { workspace = true }
+# These deps are needed to test the reconnecting rpc client
+jsonrpsee = { workspace = true, features = ["server"] }
+tower = "0.4"
+hyper = "1"
+http-body = "1"
 
 [[example]]
 name = "light_client_basic"

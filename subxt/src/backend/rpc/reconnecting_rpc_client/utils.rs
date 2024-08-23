@@ -12,7 +12,7 @@ use std::{
 use tokio::sync::Notify;
 
 #[derive(Clone, Debug)]
-pub struct ReconnectCounter(Arc<AtomicUsize>);
+pub(crate) struct ReconnectCounter(Arc<AtomicUsize>);
 
 impl Default for ReconnectCounter {
     fn default() -> Self {
@@ -34,7 +34,7 @@ impl ReconnectCounter {
     }
 }
 
-pub fn reconnect_channel() -> (ReconnectTx, ReconnectRx) {
+pub(crate) fn reconnect_channel() -> (ReconnectTx, ReconnectRx) {
     let count = ReconnectCounter::new();
     let reconn_init = Arc::new(Notify::new());
     let reconn_compl = Arc::new(Notify::new());
@@ -53,7 +53,7 @@ pub fn reconnect_channel() -> (ReconnectTx, ReconnectRx) {
 }
 
 #[derive(Debug, Clone)]
-pub struct ReconnectTx {
+pub(crate) struct ReconnectTx {
     reconn_init: Arc<Notify>,
     reconn_compl: Arc<Notify>,
     count: ReconnectCounter,
@@ -68,14 +68,10 @@ impl ReconnectTx {
         self.reconn_compl.notify_one();
         self.count.inc();
     }
-
-    pub fn count(&self) -> usize {
-        self.count.get()
-    }
 }
 
 #[derive(Debug, Clone)]
-pub struct ReconnectRx {
+pub(crate) struct ReconnectRx {
     reconn_init: Arc<Notify>,
     reconn_compl: Arc<Notify>,
     count: ReconnectCounter,

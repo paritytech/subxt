@@ -4,6 +4,47 @@
 
 //! # reconnecting-jsonrpsee-ws-client
 //!
+//! A simple reconnecting JSON-RPC WebSocket client for subxt which
+//! automatically reconnects when the connection is lost but
+//! it doesn't retain subscriptions and pending method calls when it reconnects.
+//!
+//! The logic which action to take for individual calls and subscriptions are
+//! handled by the subxt backend implementations.
+//!
+//! # Example
+//!
+//! ```no_run
+//! use std::time::Duration;
+//! use futures::StreamExt;
+//! use subxt::backend::rpc::reconnecting_rpc_client::{Client, ExpontentialBackoff};
+//! use subxt::{OnlineClient, PolkadotConfig};
+//!
+//! async fn main() {
+//!     let rpc = Client::builder()
+//!         .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10))
+//!         .build("ws://localhost:9944".to_string())
+//!         .await
+//!         .unwrap();
+//!
+//!     let subxt_client: OnlineClient<PolkadotConfig> = OnlineClient::from_rpc_client(rpc.clone()).await.unwrap();
+//!     let blocks_sub = subxt_client.blocks().subscribe_finalized().await.unwrap();
+//!   
+//!     while let Some(block) = blocks_sub.next().await {
+//!         let block = match block {
+//!             Ok(b) => b,
+//!             Err(e) => {
+//!                 if e.is_disconnected_will_reconnect() {
+//!                     println!("The RPC connection was lost and we may have missed a few blocks");
+//!                     continue;
+//!                 } else {
+//!                   panic!("Error: {}", e);
+//!                 }
+//!             }
+//!         };
+//!         println!("Block #{} ({})", block.number(), block.hash());
+//!    }
+//! }
+//! ```
 
 mod platform;
 #[cfg(test)]
@@ -57,16 +98,9 @@ pub type SubscriptionResult = Result<Box<RawValue>, DisconnectedWillReconnect>;
 #[error("The connection was closed because of `{0:?}` and reconnect initiated")]
 pub struct DisconnectedWillReconnect(String);
 
-/// Serialized JSON-RPC params.
+/// New-type pattern which implements [`ToRpcParams`] that is required by jsonrpsee.
 #[derive(Debug, Clone)]
-pub struct RpcParams(Option<Box<RawValue>>);
-
-impl RpcParams {
-    /// Create new [`RpcParams`] from JSON.
-    pub fn new(json: Option<Box<RawValue>>) -> Self {
-        Self(json)
-    }
-}
+struct RpcParams(Option<Box<RawValue>>);
 
 impl ToRpcParams for RpcParams {
     fn to_rpc_params(self) -> Result<Option<Box<RawValue>>, serde_json::Error> {
@@ -145,7 +179,9 @@ impl Stream for Subscription {
 
 impl std::fmt::Debug for Subscription {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_fmt(format_args!("Subscription {:?}", self.id))
+        f.debug_struct("Subscription")
+            .field("id", &self.id)
+            .finish()
     }
 }
 
@@ -341,6 +377,11 @@ where
 }
 
 impl Client {
+    /// Create a builder.
+    pub fn builder() -> ClientBuilder<ExponentialBackoff> {
+        ClientBuilder::new()
+    }
+
     /// Perform a JSON-RPC method call.
     pub async fn request(
         &self,
@@ -370,7 +411,7 @@ impl Client {
         self.tx
             .send(Op::Subscription {
                 subscribe_method,
-                params: RpcParams::new(params),
+                params: RpcParams(params),
                 unsubscribe_method,
                 send_back: tx,
             })
@@ -390,13 +431,6 @@ impl Client {
     /// Get how many times the client has reconnected successfully.
     pub fn reconnect_count(&self) -> usize {
         self.reconnect.count()
-    }
-}
-
-impl Client {
-    /// Create a builder.
-    pub fn builder() -> ClientBuilder<ExponentialBackoff> {
-        ClientBuilder::new()
     }
 }
 
