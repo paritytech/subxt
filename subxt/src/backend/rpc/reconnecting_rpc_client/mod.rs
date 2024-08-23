@@ -20,7 +20,7 @@
 //! use subxt::{OnlineClient, PolkadotConfig};
 //!
 //! async fn main() {
-//!     let rpc = Client::builder()
+//!     let rpc = RpcClient::builder()
 //!         .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10))
 //!         .build("ws://localhost:9944".to_string())
 //!         .await
@@ -70,6 +70,7 @@ use jsonrpsee::core::{
     },
     traits::ToRpcParams,
 };
+use platform::spawn;
 use serde_json::value::RawValue;
 use tokio::sync::{
     mpsc::{self, UnboundedReceiver, UnboundedSender},
@@ -188,14 +189,14 @@ impl std::fmt::Debug for Subscription {
 /// JSON-RPC client that reconnects automatically and may loose
 /// subscription notifications when it reconnects.
 #[derive(Clone, Debug)]
-pub struct Client {
+pub struct RpcClient {
     tx: mpsc::UnboundedSender<Op>,
     reconnect: ReconnectRx,
 }
 
 /// Builder for [`Client`].
 #[derive(Clone, Debug)]
-pub struct ClientBuilder<P> {
+pub struct RpcClientBuilder<P> {
     max_request_size: u32,
     max_response_size: u32,
     retry_policy: P,
@@ -213,7 +214,7 @@ pub struct ClientBuilder<P> {
     connection_timeout: Duration,
 }
 
-impl Default for ClientBuilder<ExponentialBackoff> {
+impl Default for RpcClientBuilder<ExponentialBackoff> {
     fn default() -> Self {
         Self {
             max_request_size: 10 * 1024 * 1024,
@@ -233,14 +234,14 @@ impl Default for ClientBuilder<ExponentialBackoff> {
     }
 }
 
-impl ClientBuilder<ExponentialBackoff> {
+impl RpcClientBuilder<ExponentialBackoff> {
     /// Create a new builder.
     pub fn new() -> Self {
         Self::default()
     }
 }
 
-impl<P> ClientBuilder<P>
+impl<P> RpcClientBuilder<P>
 where
     P: Iterator<Item = Duration> + Send + Sync + 'static + Clone,
 {
@@ -320,8 +321,8 @@ where
     /// Configure which retry policy to use when a connection is lost.
     ///
     /// Default: Exponential backoff 10ms
-    pub fn retry_policy<T>(self, retry_policy: T) -> ClientBuilder<T> {
-        ClientBuilder {
+    pub fn retry_policy<T>(self, retry_policy: T) -> RpcClientBuilder<T> {
+        RpcClientBuilder {
             max_request_size: self.max_request_size,
             max_response_size: self.max_response_size,
             retry_policy,
@@ -359,7 +360,7 @@ where
     }
 
     /// Build and connect to the target.
-    pub async fn build(self, url: String) -> Result<Client, RpcError> {
+    pub async fn build(self, url: String) -> Result<RpcClient, RpcError> {
         let (tx, rx) = mpsc::unbounded_channel();
         let client = Retry::new(self.retry_policy.clone(), || {
             platform::ws_client(url.as_ref(), &self)
@@ -369,17 +370,17 @@ where
 
         platform::spawn(background_task(client, rx, url, reconn_tx, self));
 
-        Ok(Client {
+        Ok(RpcClient {
             tx,
             reconnect: reconn_rx,
         })
     }
 }
 
-impl Client {
+impl RpcClient {
     /// Create a builder.
-    pub fn builder() -> ClientBuilder<ExponentialBackoff> {
-        ClientBuilder::new()
+    pub fn builder() -> RpcClientBuilder<ExponentialBackoff> {
+        RpcClientBuilder::new()
     }
 
     /// Perform a JSON-RPC method call.
@@ -434,7 +435,7 @@ impl Client {
     }
 }
 
-impl RpcClientT for Client {
+impl RpcClientT for RpcClient {
     fn request_raw<'a>(
         &'a self,
         method: &'a str,
@@ -482,7 +483,7 @@ async fn background_task<P>(
     mut rx: UnboundedReceiver<Op>,
     url: String,
     reconn: ReconnectTx,
-    client_builder: ClientBuilder<P>,
+    client_builder: RpcClientBuilder<P>,
 ) where
     P: Iterator<Item = Duration> + Send + 'static + Clone,
 {
@@ -495,7 +496,7 @@ async fn background_task<P>(
                 match next_message {
                     None => break,
                     Some(op) => {
-                       tokio::spawn(dispatch_call(client.clone(), op, disconnect.clone()));
+                       spawn(dispatch_call(client.clone(), op, disconnect.clone()));
                     }
                 };
             }
@@ -632,7 +633,7 @@ async fn subscription_handler(
 struct ReconnectParams<'a, P> {
     url: &'a str,
     reconnect: ReconnectTx,
-    client_builder: &'a ClientBuilder<P>,
+    client_builder: &'a RpcClientBuilder<P>,
     close_reason: RpcError,
 }
 

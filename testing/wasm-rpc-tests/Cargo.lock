@@ -308,12 +308,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
-name = "cfg_aliases"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
-
-[[package]]
 name = "chacha20"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1794,23 +1788,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "reconnecting-jsonrpsee-ws-client"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06fa4f17e09edfc3131636082faaec633c7baa269396b4004040bc6c52f49f65"
-dependencies = [
- "cfg_aliases",
- "finito",
- "futures",
- "jsonrpsee",
- "serde_json",
- "thiserror",
- "tokio",
- "tracing",
- "wasm-bindgen-futures",
-]
-
-[[package]]
 name = "ring"
 version = "0.17.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2494,6 +2471,7 @@ dependencies = [
  "async-trait",
  "derive-where",
  "either",
+ "finito",
  "frame-metadata 16.0.0",
  "futures",
  "getrandom",
@@ -2503,7 +2481,6 @@ dependencies = [
  "jsonrpsee",
  "parity-scale-codec",
  "primitive-types",
- "reconnecting-jsonrpsee-ws-client",
  "scale-bits",
  "scale-decode",
  "scale-encode",
@@ -2517,8 +2494,10 @@ dependencies = [
  "subxt-macro",
  "subxt-metadata",
  "thiserror",
+ "tokio",
  "tracing",
  "url",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]

@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::backend::rpc::reconnecting_rpc_client::{ClientBuilder, RpcError};
+use crate::backend::rpc::reconnecting_rpc_client::{RpcClientBuilder, RpcError};
 use jsonrpsee::core::client::Client;
 use std::sync::Arc;
 
@@ -13,10 +13,13 @@ pub use tokio::spawn;
 pub use wasm_bindgen_futures::spawn_local as spawn;
 
 #[cfg(feature = "native")]
-pub async fn ws_client<P>(url: &str, builder: &ClientBuilder<P>) -> Result<Arc<Client>, RpcError> {
+pub async fn ws_client<P>(
+    url: &str,
+    builder: &RpcClientBuilder<P>,
+) -> Result<Arc<Client>, RpcError> {
     use jsonrpsee::ws_client::WsClientBuilder;
 
-    let ClientBuilder {
+    let RpcClientBuilder {
         max_request_size,
         max_response_size,
         ping_config,
@@ -53,10 +56,13 @@ pub async fn ws_client<P>(url: &str, builder: &ClientBuilder<P>) -> Result<Arc<C
 }
 
 #[cfg(feature = "web")]
-pub async fn ws_client<P>(url: &str, builder: &ClientBuilder<P>) -> Result<Arc<Client>, RpcError> {
+pub async fn ws_client<P>(
+    url: &str,
+    builder: &RpcClientBuilder<P>,
+) -> Result<Arc<Client>, RpcError> {
     use jsonrpsee::wasm_client::WasmClientBuilder;
 
-    let ClientBuilder {
+    let RpcClientBuilder {
         id_kind,
         max_concurrent_requests,
         max_log_len,
