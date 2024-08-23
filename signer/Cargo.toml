@@ -25,11 +25,11 @@ std = [
     "bip39/std",
     "schnorrkel/std",
     "secp256k1/std",
-    "serde/std",
-    "serde_json/std",
-    "base64/std",
-    "scrypt/std",
-    "crypto_secretbox/std",
+    "serde?/std",
+    "serde_json?/std",
+    "base64?/std",
+    "scrypt?/std",
+    "crypto_secretbox?/std",
 ]
 
 # Pick the signer implementation(s) you need by enabling the
