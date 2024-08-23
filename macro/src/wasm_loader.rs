@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use std::{borrow::Cow, env, path::Path, process::Command};
+use std::{borrow::Cow, path::Path};
 
 use codec::Decode;
 use sc_executor::{WasmExecutionMethod, WasmExecutor};
@@ -19,31 +19,6 @@ pub fn from_wasm_file(wasm_file_path: &Path) -> WasmMetadataResult<Metadata> {
         .map_err(Into::<CodegenError>::into)
         .and_then(maybe_decompress)?;
     call_and_decode(wasm_file)
-}
-
-/// Compiles the runtime to wasm and uses the produced artifact to generate metadata
-pub fn from_crate_name(
-    runtime_crate_name: &str,
-    wasm_file_path: &Path,
-    features: Vec<String>,
-) -> WasmMetadataResult<Metadata> {
-    let cargo = env::var("CARGO").unwrap();
-
-    let mut args = vec!["build", "-p", &runtime_crate_name, "--profile", "release"];
-    let features = features.join(",");
-    if !features.is_empty() {
-        args.push("--features");
-        args.push(&features)
-    };
-
-    // Deadlocks as we are building already
-    Command::new(cargo)
-        .env_remove("SKIP_WASM_BUILD")
-        .args(&args)
-        .status()
-        .unwrap();
-
-    from_wasm_file(wasm_file_path)
 }
 
 fn call_and_decode(wasm_file: Vec<u8>) -> WasmMetadataResult<Metadata> {

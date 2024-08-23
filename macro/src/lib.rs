@@ -21,7 +21,7 @@ use subxt_codegen::{
     },
     CodegenBuilder, CodegenError, Metadata,
 };
-use syn::{parse_macro_input, punctuated::Punctuated, LitStr};
+use syn::{parse_macro_input, punctuated::Punctuated};
 
 mod wasm_loader;
 
@@ -64,10 +64,6 @@ struct RuntimeMetadataArgs {
     unstable_metadata: darling::util::Flag,
     #[darling(default)]
     wasm_file_path: Option<String>,
-    #[darling(default)]
-    runtime_crate_name: Option<String>,
-    #[darling(default)]
-    features: Option<Vec<LitStr>>,
 }
 
 #[derive(Debug, FromMeta)]
@@ -214,13 +210,6 @@ fn validate_type_path(path: &syn::Path, metadata: &Metadata) {
 fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata, TokenStream> {
     // Do we want to fetch unstable metadata? This only works if fetching from a URL.
     let unstable_metadata = args.unstable_metadata.is_present();
-    if args.features.is_some() && args.runtime_crate_name.is_none() {
-        abort_call_site!("The 'features' attribute requires `runtime_crate_name`")
-    }
-
-    if args.runtime_crate_name.is_some() && args.wasm_file_path.is_none() {
-        abort_call_site!("The 'runtime_crate_name' attribute requires `wasm_file_path`")
-    }
 
     let metadata = match (
         &args.runtime_metadata_path,
@@ -260,18 +249,8 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
             let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
             let root_path = std::path::Path::new(&root);
             let path = root_path.join(path);
-            let metadata = if let Some(runtime_crate_name) = &args.runtime_crate_name {
-                let features = if let Some(features) = &args.features {
-                    features.iter().map(|x| x.value()).collect()
-                } else {
-                    vec![]
-                };
-                wasm_loader::from_crate_name(&runtime_crate_name, &path, features)
-            } else {
-                wasm_loader::from_wasm_file(&path)
-            };
 
-            metadata.map_err(|e| e.into_compile_error())?
+            wasm_loader::from_wasm_file(&path).map_err(|e| e.into_compile_error())?
         }
         _ => {
             abort_call_site!(
