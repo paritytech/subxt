@@ -28,7 +28,6 @@ unstable-backend-client = []
 # Enable the unstable reconnecting rpc-client
 unstable-reconnecting-rpc-client = []
 
-
 [dev-dependencies]
 assert_matches = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }
