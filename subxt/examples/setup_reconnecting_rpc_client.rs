@@ -53,22 +53,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let api: OnlineClient<PolkadotConfig> = OnlineClient::from_rpc_client(rpc.clone()).await?;
 
-    // Optionally print if the RPC client reconnects.
-    let rpc2 = rpc.clone();
-    tokio::spawn(async move {
-        loop {
-            // The connection was lost and the client is trying to reconnect.
-            let reconnected = rpc2.reconnect_initiated().await;
-            let now = std::time::Instant::now();
-            // The connection was re-established.
-            reconnected.await;
-            println!(
-                "RPC client reconnection took `{}s`",
-                now.elapsed().as_secs()
-            );
-        }
-    });
-
     // Run for at most 100 blocks and print a bunch of information about it.
     //
     // The subscription is automatically re-started when the RPC client has reconnected.
@@ -95,8 +79,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         println!("Block #{block_number} ({block_hash})");
     }
-
-    println!("RPC client reconnected `{}` times", rpc.reconnect_count());
 
     Ok(())
 }

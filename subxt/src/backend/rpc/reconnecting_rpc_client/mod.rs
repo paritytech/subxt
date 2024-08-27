@@ -63,7 +63,7 @@ use super::{RawRpcFuture, RawRpcSubscription, RpcClientT};
 use crate::error::RpcError as SubxtRpcError;
 
 use finito::Retry;
-use futures::{Future, FutureExt, Stream, StreamExt, TryStreamExt};
+use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
 use jsonrpsee::core::{
     client::{
         Client as WsClient, ClientT, Subscription as RpcSubscription, SubscriptionClientT,
@@ -78,7 +78,6 @@ use tokio::sync::{
     oneshot, Notify,
 };
 use utils::display_close_reason;
-use utils::{reconnect_channel, ReconnectRx, ReconnectTx};
 
 // re-exports
 pub use finito::{ExponentialBackoff, FibonacciBackoff, FixedInterval};
@@ -192,7 +191,6 @@ impl std::fmt::Debug for Subscription {
 #[derive(Clone, Debug)]
 pub struct RpcClient {
     tx: mpsc::UnboundedSender<Op>,
-    reconnect: ReconnectRx,
 }
 
 /// Builder for [`Client`].
@@ -367,14 +365,10 @@ where
             platform::ws_client(url.as_ref(), &self)
         })
         .await?;
-        let (reconn_tx, reconn_rx) = reconnect_channel();
 
-        platform::spawn(background_task(client, rx, url, reconn_tx, self));
+        platform::spawn(background_task(client, rx, url, self));
 
-        Ok(RpcClient {
-            tx,
-            reconnect: reconn_rx,
-        })
+        Ok(RpcClient { tx })
     }
 }
 
@@ -419,20 +413,6 @@ impl RpcClient {
             })
             .map_err(|_| Error::Dropped)?;
         rx.await.map_err(|_| Error::Dropped)?
-    }
-
-    /// A future that resolves when the client has initiated a reconnection.
-    /// This method returns another future that resolves when the client has reconnected.
-    ///
-    /// This may be called multiple times.
-    pub async fn reconnect_initiated(&self) -> impl Future<Output = ()> + '_ {
-        self.reconnect.reconnect_started().await;
-        self.reconnect.reconnected()
-    }
-
-    /// Get how many times the client has reconnected successfully.
-    pub fn reconnect_count(&self) -> usize {
-        self.reconnect.count()
     }
 }
 
@@ -483,7 +463,6 @@ async fn background_task<P>(
     mut client: Arc<WsClient>,
     mut rx: UnboundedReceiver<Op>,
     url: String,
-    reconn: ReconnectTx,
     client_builder: RpcClientBuilder<P>,
 ) where
     P: Iterator<Item = Duration> + Send + 'static + Clone,
@@ -505,7 +484,6 @@ async fn background_task<P>(
             _ = client.on_disconnect() => {
                 let params = ReconnectParams {
                     url: &url,
-                    reconnect: reconn.clone(),
                     client_builder: &client_builder,
                     close_reason: client.disconnect_reason().await,
                 };
@@ -633,7 +611,6 @@ async fn subscription_handler(
 
 struct ReconnectParams<'a, P> {
     url: &'a str,
-    reconnect: ReconnectTx,
     client_builder: &'a RpcClientBuilder<P>,
     close_reason: RpcError,
 }
@@ -644,7 +621,6 @@ where
 {
     let ReconnectParams {
         url,
-        reconnect,
         client_builder,
         close_reason,
     } = params;
@@ -652,14 +628,12 @@ where
     let retry_policy = client_builder.retry_policy.clone();
 
     tracing::debug!(target: LOG_TARGET, "Connection to {url} was closed: `{}`; starting to reconnect", display_close_reason(&close_reason));
-    reconnect.reconnect_initiated();
 
     let client = Retry::new(retry_policy.clone(), || {
         platform::ws_client(url, client_builder)
     })
     .await?;
 
-    reconnect.reconnected();
     tracing::debug!(target: LOG_TARGET, "Connection to {url} was successfully re-established");
 
     Ok(client)
