@@ -27,9 +27,10 @@ default = ["jsonrpsee", "native"]
 native = [
     "jsonrpsee?/async-client",
     "jsonrpsee?/client-ws-transport-tls",
+    "jsonrpsee?/ws-client",
     "subxt-lightclient?/native",
     "tokio-util",
-    "reconnecting-jsonrpsee-ws-client?/native",
+    "tokio?/sync",
 ]
 
 # Enable this for web/wasm builds.
@@ -37,15 +38,17 @@ native = [
 web = [
     "jsonrpsee?/async-wasm-client",
     "jsonrpsee?/client-web-transport",
+    "jsonrpsee?/wasm-client",
     "getrandom/js",
     "subxt-lightclient?/web",
     "subxt-macro/web",
     "instant/wasm-bindgen",
-    "reconnecting-jsonrpsee-ws-client?/web",
+    "tokio?/sync",
+    "finito?/wasm-bindgen",
 ]
 
 # Enable this to use the reconnecting rpc client
-unstable-reconnecting-rpc-client = ["dep:reconnecting-jsonrpsee-ws-client"]
+unstable-reconnecting-rpc-client = ["dep:finito", "dep:tokio", "jsonrpsee", "wasm-bindgen-futures"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = [
@@ -100,9 +103,6 @@ subxt-core = { workspace = true, features = ["std"] }
 subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 
-# Reconnecting jsonrpc ws client
-reconnecting-jsonrpsee-ws-client = { version = "0.4.3", optional = true, default-features = false }
-
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
 
@@ -111,6 +111,13 @@ getrandom = { workspace = true, optional = true }
 
 # Included if "native" feature is enabled
 tokio-util = { workspace = true, features = ["compat"], optional = true }
+
+# Included if the reconnecting rpc client feature is enabled
+# Only the `tokio/sync` is used in the reconnecting rpc client
+# and that compiles both for native and web.
+tokio = { workspace = true, optional = true }
+finito = { workspace = true, optional = true }
+wasm-bindgen-futures = { workspace = true, optional = true }
 
 [dev-dependencies]
 bitvec = { workspace = true }
@@ -127,6 +134,11 @@ subxt-signer = { path = "../signer", features = ["unstable-eth"] }
 # the light-client wlll emit INFO logs with
 # `GrandPa warp sync finished` and `Finalized block runtime ready.`
 tracing-subscriber = { workspace = true }
+# These deps are needed to test the reconnecting rpc client
+jsonrpsee = { workspace = true, features = ["server"] }
+tower = "0.4"
+hyper = "1"
+http-body = "1"
 
 [[example]]
 name = "light_client_basic"
