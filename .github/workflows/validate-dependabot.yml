@@ -1,0 +1,13 @@
+name: validate dependabot yml
+
+on:
+  pull_request:
+    paths:
+      - '.github/dependabot.yml'
+      - '.github/workflows/validate-dependabot.yml'
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: marocchino/validate-dependabot@v2
