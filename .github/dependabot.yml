@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "cargo"
-    directory: "/"
+    directory: "**/*"
     schedule:
       interval: weekly
     ignore:
@@ -13,6 +13,6 @@ updates:
     - dependency-name: sp-crypto-hashing
     - dependency-name: sp-version
   - package-ecosystem: github-actions
-    directory: '/'
+    directory: "**/*"
     schedule:
       interval: weekly
