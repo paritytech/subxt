@@ -1,4 +1,4 @@
-name: validate dependabot yml
+name: Dependabot
 
 on:
   pull_request:
