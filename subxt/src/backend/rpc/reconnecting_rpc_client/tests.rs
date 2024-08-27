@@ -16,7 +16,6 @@ async fn call_works() {
     tracing_subscriber::fmt::init();
     let (_handle, addr) = run_server().await.unwrap();
     let client = RpcClient::builder().build(addr).await.unwrap();
-
     assert!(client.request("say_hello".to_string(), None).await.is_ok(),)
 }
 
