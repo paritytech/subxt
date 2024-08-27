@@ -40,7 +40,6 @@ async fn wasm_ws_transport_works() {
 async fn reconnecting_rpc_client_ws_transport_works() {
     let rpc = ReconnectingRpcClient::builder().build("ws://127.0.0.1:9944".to_string()).await.unwrap();
     let client = subxt::client::OnlineClient::<SubstrateConfig>::from_rpc_client(rpc.clone()).await.unwrap();
-
     let mut stream = client.backend().stream_best_block_headers().await.unwrap();
     assert!(stream.next().await.is_some());
 }
