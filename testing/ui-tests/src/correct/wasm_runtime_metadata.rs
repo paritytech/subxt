@@ -1,11 +1,10 @@
-#[subxt::subxt(wasm_file_path = "../../../../artifacts/westend_runtime.wasm")]
+#[subxt::subxt(runtime_path = "../../../../artifacts/westend_runtime.wasm")]
 mod runtime {}
 
-#[subxt::subxt(wasm_file_path = "../../../../artifacts/westend_runtime.compact.compressed.wasm")]
+#[subxt::subxt(runtime_path = "../../../../artifacts/westend_runtime.compact.compressed.wasm")]
 mod runtime_compressed {}
 
-#[test]
-fn v() {
+fn main() {
     use runtime;
     use runtime_compressed;
 

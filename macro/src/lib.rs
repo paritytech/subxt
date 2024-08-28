@@ -23,6 +23,7 @@ use subxt_codegen::{
 };
 use syn::{parse_macro_input, punctuated::Punctuated};
 
+#[cfg(feature = "runtime-path")]
 mod wasm_loader;
 
 #[derive(Clone, Debug)]
@@ -62,8 +63,9 @@ struct RuntimeMetadataArgs {
     no_default_substitutions: bool,
     #[darling(default)]
     unstable_metadata: darling::util::Flag,
+    #[cfg(feature = "runtime-path")]
     #[darling(default)]
-    wasm_file_path: Option<String>,
+    runtime_path: Option<String>,
 }
 
 #[derive(Debug, FromMeta)]
@@ -211,12 +213,28 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
     // Do we want to fetch unstable metadata? This only works if fetching from a URL.
     let unstable_metadata = args.unstable_metadata.is_present();
 
+    #[cfg(feature = "runtime-path")]
+    if let Some(path) = &args.runtime_path {
+        if args.runtime_metadata_insecure_url.is_some() || args.runtime_metadata_path.is_some() {
+            abort_call_site!(
+                "Exclusively one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' or `runtime_path` must be provided"
+            );
+        };
+        let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
+        let root_path = std::path::Path::new(&root);
+        let path = root_path.join(path);
+
+        let metadata = wasm_loader::from_wasm_file(&path).map_err(|e| e.into_compile_error())?;
+        return Ok(metadata);
+    } else {
+        ()
+    };
+
     let metadata = match (
         &args.runtime_metadata_path,
         &args.runtime_metadata_insecure_url,
-        &args.wasm_file_path,
     ) {
-        (Some(rest_of_path), None, None) => {
+        (Some(rest_of_path), None) => {
             if unstable_metadata {
                 abort_call_site!(
                     "The 'unstable_metadata' attribute requires `runtime_metadata_insecure_url`"
@@ -230,7 +248,7 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .map_err(|e| CodegenError::from(e).into_compile_error())?
         }
-        (None, Some(url_string), None) => {
+        (None, Some(url_string)) => {
             let url = Url::parse(url_string).unwrap_or_else(|_| {
                 abort_call_site!("Cannot download metadata; invalid url: {}", url_string)
             });
@@ -245,16 +263,9 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .map_err(|e| e.into_compile_error())?
         }
-        (None, None, Some(path)) => {
-            let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
-            let root_path = std::path::Path::new(&root);
-            let path = root_path.join(path);
-
-            wasm_loader::from_wasm_file(&path).map_err(|e| e.into_compile_error())?
-        }
         _ => {
             abort_call_site!(
-                "Exclusively one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' or `wasm_file_path` must be provided"
+                "Exclusively one of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' must be provided"
             )
         }
     };
