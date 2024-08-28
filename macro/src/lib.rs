@@ -226,8 +226,6 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
 
         let metadata = wasm_loader::from_wasm_file(&path).map_err(|e| e.into_compile_error())?;
         return Ok(metadata);
-    } else {
-        ()
     };
 
     let metadata = match (
