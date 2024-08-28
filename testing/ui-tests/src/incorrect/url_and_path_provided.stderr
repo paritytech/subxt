@@ -1,4 +1,4 @@
-error: Exclusively one of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' must be provided
+error: Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided
  --> src/incorrect/url_and_path_provided.rs:1:1
   |
 1 | / #[subxt::subxt(
@@ -9,7 +9,7 @@ error: Exclusively one of 'runtime_metadata_path' or 'runtime_metadata_insecure_
   |
   = note: this error originates in the attribute macro `subxt::subxt` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: Exclusively one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' or `runtime_path` must be provided
+error: Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' or `runtime_path` must be provided
   --> src/incorrect/url_and_path_provided.rs:7:1
    |
 7  | / #[subxt::subxt(

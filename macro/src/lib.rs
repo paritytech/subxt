@@ -217,7 +217,7 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
     if let Some(path) = &args.runtime_path {
         if args.runtime_metadata_insecure_url.is_some() || args.runtime_metadata_path.is_some() {
             abort_call_site!(
-                "Exclusively one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' or `runtime_path` must be provided"
+                "Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' or `runtime_path` must be provided"
             );
         };
         let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
@@ -260,6 +260,18 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 .map_err(CodegenError::from)
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .map_err(|e| e.into_compile_error())?
+        }
+        #[cfg(feature = "runtime-path")]
+        (None, None) => {
+            abort_call_site!(
+                    "At least one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided"
+                )
+        }
+        #[cfg(not(feature = "runtime-path"))]
+        (None, None) => {
+            abort_call_site!(
+                "At least one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' can be provided"
+            )
         }
         #[cfg(feature = "runtime-path")]
         _ => {
