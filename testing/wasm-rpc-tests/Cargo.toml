@@ -15,4 +15,4 @@ futures-util = "0.3.30"
 # This crate is not a part of the workspace, because it
 # requires the "jsonrpsee web" features to be enabled, which we don't
 # want enabled for workspace builds in general.
-subxt = { path = "../../subxt", default-features = false, features = ["web", "jsonrpsee"] }
+subxt = { path = "../../subxt", default-features = false, features = ["web", "jsonrpsee", "unstable-reconnecting-rpc-client"] }
