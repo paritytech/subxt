@@ -488,5 +488,5 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
 
     // legacy client will return completely new blocks
     // intersection should be of size 2 or 3 blocks depending whether one of the subscription started later due to scheduling
-    assert!(intersection >= 2 && intersection < 4);
+    assert!((2..4).contains(&intersection));
 }

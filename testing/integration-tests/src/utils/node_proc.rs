@@ -63,7 +63,7 @@ where
     pub async fn restart(mut self) -> Self {
         tokio::task::spawn_blocking(move || {
             if let Some(ref mut proc) = &mut self.proc {
-                let _ = proc.restart().unwrap();
+                proc.restart().unwrap();
             }
             self
         })
