@@ -19,7 +19,6 @@ use subxt::{
     tx::{TransactionInvalid, ValidationResult},
 };
 use subxt_signer::sr25519::dev;
-use tokio::task::JoinError;
 
 #[cfg(fullclient)]
 mod legacy_rpcs;
@@ -421,7 +420,7 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
 
     let unstable_client_blocks = move |num: usize| {
         let api = api.clone();
-        tokio::spawn(async move {
+        async move {
             api.blocks()
                 .subscribe_finalized()
                 .await
@@ -430,63 +429,23 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
                 .map(|x| x.unwrap().hash().to_string())
                 .collect::<Vec<String>>()
                 .await
-        })
+        }
     };
 
-    let legacy_api = ctx.client();
+    let blocks = unstable_client_blocks(3).await;
+    let blocks: HashSet<String> = HashSet::from_iter(blocks.into_iter());
 
-    let legacy_client_blocks = move |num: usize| {
-        let legacy_api = legacy_api.clone();
-
-        tokio::spawn(async move {
-            legacy_api
-                .blocks()
-                .subscribe_finalized()
-                .await
-                .unwrap()
-                .take(num)
-                .map(|x| x.unwrap().hash().to_string())
-                .collect::<Vec<String>>()
-                .await
-        })
-    };
-    tokio::pin! {
-        let blocks1 = unstable_client_blocks(3);
-        let blocks2 = legacy_client_blocks(3);
-    };
-    let (blocks, legacy_blocks) = tokio::join!(blocks1, blocks2);
-    let blocks: HashSet<String> = HashSet::from_iter(blocks.unwrap().into_iter());
-    let legacy_blocks: HashSet<String> = HashSet::from_iter(legacy_blocks.unwrap().into_iter());
-    let set = blocks
-        .intersection(&legacy_blocks)
-        .collect::<Vec<&String>>();
-
-    // Union of block hashes, we use 2/3 because sometimes one of the clients might be 1 block late.
-    assert!(set.len() >= 2);
+    assert!(blocks.len() == 3);
 
     let ctx = ctx.restart().await;
 
-    // Make both clients aware that connection was dropped and force them to reconnect
-    let _ = ctx.client().backend().genesis_hash().await;
+    // Make  client aware that connection was dropped and force them to reconnect
     let _ = ctx.unstable_client().await.backend().genesis_hash().await;
 
-    tokio::pin! {
-        let blocks1 = unstable_client_blocks(6);
-        let blocks2 = legacy_client_blocks(6);
-    };
+    let unstable_blocks = unstable_client_blocks(6).await;
 
-    let (unstable_client_blocks, legacy_client_blocks): (
-        Result<Vec<String>, JoinError>,
-        Result<Vec<String>, JoinError>,
-    ) = tokio::join!(blocks1, blocks2);
+    let unstable_blocks: HashSet<String> = HashSet::from_iter(unstable_blocks.into_iter());
+    let intersection = unstable_blocks.intersection(&blocks).count();
 
-    let unstable_blocks: HashSet<String> =
-        HashSet::from_iter(unstable_client_blocks.unwrap().into_iter());
-    let legacy_blocks: HashSet<String> =
-        HashSet::from_iter(legacy_client_blocks.unwrap().into_iter());
-    let intersection = unstable_blocks.intersection(&legacy_blocks).count();
-
-    // legacy client will return completely new blocks
-    // intersection should be of size 2 or 3 blocks depending whether one of the subscription started later due to scheduling
-    assert!((2..4).contains(&intersection));
+    assert!(intersection == 3);
 }
