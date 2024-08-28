@@ -34,6 +34,6 @@ pub async fn test_context() -> TestContext {
     test_context_with("alice".to_string(), RpcClientKind::Legacy).await
 }
 
-pub async fn test_context_unstable_rpc_client() -> TestContext {
+pub async fn test_context_reconnecting_rpc_client() -> TestContext {
     test_context_with("alice".to_string(), RpcClientKind::UnstableReconnecting).await
 }

@@ -2,8 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::collections::HashSet;
+
 use crate::{
-    subxt_test, test_context, test_context_unstable_rpc_client,
+    subxt_test, test_context, test_context_reconnecting_rpc_client,
     utils::{node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};
@@ -17,6 +19,7 @@ use subxt::{
     tx::{TransactionInvalid, ValidationResult},
 };
 use subxt_signer::sr25519::dev;
+use tokio::task::JoinError;
 
 #[cfg(fullclient)]
 mod legacy_rpcs;
@@ -410,39 +413,80 @@ async fn partial_fee_estimate_correct() {
     assert_eq!(partial_fee_1, partial_fee_2);
 }
 
-#[cfg(feature = "unstable-reconnecting-rpc-client")]
 #[subxt_test]
-async fn transaction_validation_with_reconnection() {
-    let ctx = test_context_unstable_rpc_client().await;
-    let api = ctx.client();
+async fn legacy_and_unstable_block_subscription_reconnect() {
+    let ctx = test_context_reconnecting_rpc_client().await;
 
-    let alice = dev::alice();
-    let bob = dev::bob();
+    let api = ctx.unstable_client().await;
 
-    wait_for_blocks(&api).await;
+    let unstable_client_blocks = move |num: usize| {
+        let api = api.clone();
+        tokio::spawn(async move {
+            api.blocks()
+                .subscribe_finalized()
+                .await
+                .unwrap()
+                .take(num)
+                .map(|x| x.unwrap().hash().to_string())
+                .collect::<Vec<String>>()
+                .await
+        })
+    };
 
-    let _ctx = ctx.restart().await;
+    let legacy_api = ctx.client();
 
-    let tx = node_runtime::tx()
-        .balances()
-        .transfer_allow_death(bob.public_key().into(), 10_000);
+    let legacy_client_blocks = move |num: usize| {
+        let legacy_api = legacy_api.clone();
 
-    let signed_extrinsic = api
-        .tx()
-        .create_signed(&tx, &alice, Default::default())
-        .await
-        .unwrap();
+        tokio::spawn(async move {
+            legacy_api
+                .blocks()
+                .subscribe_finalized()
+                .await
+                .unwrap()
+                .take(num)
+                .map(|x| x.unwrap().hash().to_string())
+                .collect::<Vec<String>>()
+                .await
+        })
+    };
+    tokio::pin! {
+        let blocks1 = unstable_client_blocks(3);
+        let blocks2 = legacy_client_blocks(3);
+    };
+    let (blocks, legacy_blocks) = tokio::join!(blocks1, blocks2);
+    let blocks: HashSet<String> = HashSet::from_iter(blocks.unwrap().into_iter());
+    let legacy_blocks: HashSet<String> = HashSet::from_iter(legacy_blocks.unwrap().into_iter());
+    let set = blocks
+        .intersection(&legacy_blocks)
+        .collect::<Vec<&String>>();
 
-    signed_extrinsic
-        .validate()
-        .await
-        .expect("validation failed");
+    // Union of block hashes, we use 2/3 because sometimes one of the clients might be 1 block late.
+    assert!(set.len() >= 2);
 
-    signed_extrinsic
-        .submit_and_watch()
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
-        .await
-        .unwrap();
+    let ctx = ctx.restart().await;
+
+    // Make both clients aware that connection was dropped and force them to reconnect
+    let _ = ctx.client().backend().genesis_hash().await;
+    let _ = ctx.unstable_client().await.backend().genesis_hash().await;
+
+    tokio::pin! {
+        let blocks1 = unstable_client_blocks(6);
+        let blocks2 = legacy_client_blocks(6);
+    };
+
+    let (unstable_client_blocks, legacy_client_blocks): (
+        Result<Vec<String>, JoinError>,
+        Result<Vec<String>, JoinError>,
+    ) = tokio::join!(blocks1, blocks2);
+
+    let unstable_blocks: HashSet<String> =
+        HashSet::from_iter(unstable_client_blocks.unwrap().into_iter());
+    let legacy_blocks: HashSet<String> =
+        HashSet::from_iter(legacy_client_blocks.unwrap().into_iter());
+    let intersection = unstable_blocks.intersection(&legacy_blocks).count();
+
+    // legacy client will return completely new blocks
+    // intersection should be of size 2 or 3 blocks depending whether one of the subscription started later due to scheduling
+    assert!(intersection >= 2 && intersection < 4);
 }

@@ -7,9 +7,7 @@ use std::ffi::{OsStr, OsString};
 use std::sync::Arc;
 use std::time::Duration;
 use substrate_runner::SubstrateNode;
-use subxt::backend::rpc::reconnecting_rpc_client::{
-    Client as UnstableReconnectingRpcClient, ExponentialBackoff,
-};
+use subxt::backend::rpc::reconnecting_rpc_client::{ExponentialBackoff, RpcClientBuilder};
 use subxt::{
     backend::{legacy, rpc, unstable},
     Config, OnlineClient,
@@ -115,6 +113,11 @@ where
     /// test against both.
     pub fn client(&self) -> OnlineClient<R> {
         self.client.clone()
+    }
+
+    /// Returns the rpc client connected to the node
+    pub fn rpc_client(&self) -> rpc::RpcClient {
+        self.rpc_client.clone()
     }
 }
 
@@ -230,7 +233,7 @@ async fn build_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
 }
 
 async fn build_unstable_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
-    let client = UnstableReconnectingRpcClient::builder()
+    let client = RpcClientBuilder::new()
         .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10)))
         .build(ws_url.to_string())
         .await
