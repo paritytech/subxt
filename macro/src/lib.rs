@@ -261,9 +261,16 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .map_err(|e| e.into_compile_error())?
         }
+        #[cfg(feature = "runtime-path")]
         _ => {
             abort_call_site!(
-                "Exclusively one of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' must be provided"
+                    "Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided"
+                )
+        }
+        #[cfg(not(feature = "runtime-path"))]
+        _ => {
+            abort_call_site!(
+                "Only one of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' can be provided"
             )
         }
     };
