@@ -198,7 +198,7 @@ fn try_find_substrate_port_from_output(
             .map(|(_, port_str)| port_str);
 
         if let Some(line_port) = line_port {
-            // If more than one rpc server is started to the log will capture multiple ports:
+            // If more than one rpc server is started then the log will capture multiple ports:
             // `addr=127.0.0.1:9944,[::1]:9944`
             let mut ports = line_port.split(',');
             let p = ports
