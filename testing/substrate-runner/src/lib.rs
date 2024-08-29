@@ -198,8 +198,15 @@ fn try_find_substrate_port_from_output(
             .map(|(_, port_str)| port_str);
 
         if let Some(line_port) = line_port {
+            // If more than one rpc server is started to the log will capture multiple ports:
+            // `addr=127.0.0.1:9944,[::1]:9944`
+            let mut ports = line_port.split(',');
+            let p = ports
+                .nth(0)
+                .expect("Expected at least one port in log line");
+
             // trim non-numeric chars from the end of the port part of the line.
-            let port_str = line_port.trim_end_matches(|b: char| !b.is_ascii_digit());
+            let port_str = p.trim_end_matches(|b: char| !b.is_ascii_digit());
 
             // expect to have a number here (the chars after '127.0.0.1:') and parse them into a u16.
             let port_num = port_str
