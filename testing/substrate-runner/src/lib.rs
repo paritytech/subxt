@@ -197,9 +197,10 @@ fn try_find_substrate_port_from_output(
             .or_else(|| line.rsplit_once("Running JSON-RPC server: addr=127.0.0.1:"))
             .map(|(_, port_str)| port_str);
 
-        if let Some(line_port) = line_port {
-            // trim non-numeric chars from the end of the port part of the line.
-            let port_str = line_port.trim_end_matches(|b: char| !b.is_ascii_digit());
+        if let Some(ports) = line_port {
+            // If more than one rpc server is started the log will capture multiple ports
+            // such as `addr=127.0.0.1:9944,[::1]:9944`
+            let port_str: String = ports.chars().take_while(|c| c.is_numeric()).collect();
 
             // expect to have a number here (the chars after '127.0.0.1:') and parse them into a u16.
             let port_num = port_str
