@@ -202,7 +202,7 @@ fn try_find_substrate_port_from_output(
             // `addr=127.0.0.1:9944,[::1]:9944`
             let mut ports = line_port.split(',');
             let p = ports
-                .nth(0)
+                .next()
                 .expect("Expected at least one port in log line");
 
             // trim non-numeric chars from the end of the port part of the line.
