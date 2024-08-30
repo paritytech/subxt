@@ -2,8 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use std::collections::HashSet;
+
 use crate::{
-    subxt_test, test_context,
+    subxt_test, test_context, test_context_reconnecting_rpc_client,
     utils::{node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};
@@ -408,4 +410,42 @@ async fn partial_fee_estimate_correct() {
 
     // Both methods should yield the same fee
     assert_eq!(partial_fee_1, partial_fee_2);
+}
+
+#[subxt_test]
+async fn legacy_and_unstable_block_subscription_reconnect() {
+    let ctx = test_context_reconnecting_rpc_client().await;
+
+    let api = ctx.unstable_client().await;
+
+    let unstable_client_blocks = move |num: usize| {
+        let api = api.clone();
+        async move {
+            api.blocks()
+                .subscribe_finalized()
+                .await
+                .unwrap()
+                .take(num)
+                .map(|x| x.unwrap().hash().to_string())
+                .collect::<Vec<String>>()
+                .await
+        }
+    };
+
+    let blocks = unstable_client_blocks(3).await;
+    let blocks: HashSet<String> = HashSet::from_iter(blocks.into_iter());
+
+    assert!(blocks.len() == 3);
+
+    let ctx = ctx.restart().await;
+
+    // Make  client aware that connection was dropped and force them to reconnect
+    let _ = ctx.unstable_client().await.backend().genesis_hash().await;
+
+    let unstable_blocks = unstable_client_blocks(6).await;
+
+    let unstable_blocks: HashSet<String> = HashSet::from_iter(unstable_blocks.into_iter());
+    let intersection = unstable_blocks.intersection(&blocks).count();
+
+    assert!(intersection == 3);
 }
