@@ -9,7 +9,7 @@
 use std::time::Duration;
 
 use futures::StreamExt;
-use subxt::backend::rpc::reconnecting_rpc_client::{ExponentialBackoff, RpcClient};
+use subxt::backend::rpc::reconnecting_rpc_client::{ExponentialBackoff, Client};
 use subxt::{OnlineClient, PolkadotConfig};
 
 // Generate an interface that we can use from the node's metadata.
@@ -21,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
     // Create a new client with with a reconnecting RPC client.
-    let rpc = RpcClient::builder()
+    let rpc = Client::builder()
         // Reconnect with exponential backoff
         //
         // This API is "iterator-like" and we use `take` to limit the number of retries.
@@ -40,7 +40,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // use subxt::backend::unstable::UnstableBackend;
     // use subxt::OnlineClient;
     //
-    // let (backend, mut driver) = UnstableBackend::builder().build(RpcClient::new(rpc.clone()));
+    // let (backend, mut driver) = UnstableBackend::builder().build(Client::new(rpc.clone()));
     // tokio::spawn(async move {
     //     while let Some(val) = driver.next().await {
     //         if let Err(e) = val {
