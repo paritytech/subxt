@@ -2,7 +2,7 @@
 //! which hidden behind behind `--feature unstable-reconnecting-rpc-client`
 //!
 //! To utilize full logs from the RPC client use:
-//! `RUST_LOG="jsonrpsee=trace,reconnecting_jsonrpsee_ws_client=trace"`
+//! `RUST_LOG="jsonrpsee=trace,subxt-reconnecting-rpc-client=trace"`
 
 #![allow(missing_docs)]
 
