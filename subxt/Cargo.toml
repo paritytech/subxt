@@ -123,7 +123,7 @@ wasm-bindgen-futures = { workspace = true, optional = true }
 bitvec = { workspace = true }
 codec = { workspace = true, features = ["derive", "bit-vec"] }
 scale-info = { workspace = true, features = ["bit-vec"] }
-tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread"] }
+tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread", "sync"] }
 sp-core = { workspace = true }
 sp-keyring = { workspace = true }
 sp-runtime = { workspace = true }

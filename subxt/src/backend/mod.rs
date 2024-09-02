@@ -325,9 +325,395 @@ pub enum TransactionStatus<Hash> {
 
 /// A response from calls like [`Backend::storage_fetch_values`] or
 /// [`Backend::storage_fetch_descendant_values`].
+#[cfg_attr(test, derive(serde::Serialize, Clone, PartialEq, Debug))]
 pub struct StorageResponse {
     /// The key.
     pub key: Vec<u8>,
     /// The associated value.
     pub value: Vec<u8>,
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    mod legacy {
+        use std::{
+            collections::{HashMap, VecDeque},
+            sync::Arc,
+        };
+        use tokio::sync::{mpsc, Mutex};
+
+        use super::rpc::{RpcClient, RpcClientT};
+        use crate::backend::rpc::RawRpcSubscription;
+        use crate::backend::BackendExt;
+        use crate::{
+            backend::{
+                legacy::rpc_methods::Bytes, legacy::rpc_methods::RuntimeVersion,
+                legacy::LegacyBackend, StorageResponse,
+            },
+            error::RpcError,
+        };
+        use futures::StreamExt;
+        use serde::Serialize;
+        use serde_json::value::RawValue;
+        use subxt_core::{config::DefaultExtrinsicParams, Config};
+        type RpcResult<T> = Result<T, RpcError>;
+        type Item = RpcResult<String>;
+
+        struct StorageEntry {
+            items: HashMap<Vec<u8>, VecDeque<Item>>,
+        }
+
+        trait Storage {
+            fn new() -> Self;
+            fn push<I: Serialize>(&mut self, key: Vec<u8>, item: RpcResult<I>);
+
+            fn pop(&mut self, key: Vec<u8>) -> Item;
+        }
+
+        impl Storage for StorageEntry {
+            fn new() -> Self {
+                StorageEntry {
+                    items: HashMap::new(),
+                }
+            }
+            fn push<I: Serialize>(&mut self, key: Vec<u8>, item: RpcResult<I>) {
+                let item = item.map(|x| serde_json::to_string(&x).unwrap());
+                match self.items.entry(key) {
+                    std::collections::hash_map::Entry::Occupied(v) => v.into_mut().push_back(item),
+                    std::collections::hash_map::Entry::Vacant(e) => {
+                        e.insert(VecDeque::from([item]));
+                    }
+                }
+            }
+
+            fn pop(&mut self, key: Vec<u8>) -> Item {
+                self.items.get_mut(&key).unwrap().pop_front().unwrap()
+            }
+        }
+
+        struct Data<R: Storage> {
+            request: R,
+            subscription: mpsc::Receiver<RpcResult<Vec<Item>>>,
+        }
+
+        struct MockRpcClientStorage {
+            data: Arc<Mutex<Data<StorageEntry>>>,
+        }
+
+        impl RpcClientT for MockRpcClientStorage {
+            fn request_raw<'a>(
+                &'a self,
+                method: &'a str,
+                params: Option<Box<serde_json::value::RawValue>>,
+            ) -> super::rpc::RawRpcFuture<'a, Box<serde_json::value::RawValue>> {
+                Box::pin(async move {
+                    match method {
+                        "state_getStorage" => {
+                            let mut data = self.data.lock().await;
+                            let key = match serde_json::to_value(params.unwrap()).unwrap() {
+                                serde_json::Value::Array(arr) => match &arr[0] {
+                                    serde_json::Value::String(s) => s.clone(),
+                                    _ => todo!("not expected"),
+                                },
+                                _ => todo!("not expected"),
+                            };
+                            let key = key.strip_prefix("0x").unwrap().as_bytes().to_vec();
+                            let key = hex::decode(key).unwrap();
+                            let value = data.request.pop(key);
+                            value.map(|v| serde_json::value::RawValue::from_string(v).unwrap())
+                        }
+                        "chain_getBlockHash" => {
+                            let mut data = self.data.lock().await;
+                            let value = data.request.pop("chain_getBlockHash".into());
+                            value.map(|v| serde_json::value::RawValue::from_string(v).unwrap())
+                        }
+                        _ => todo!(),
+                    }
+                })
+            }
+
+            fn subscribe_raw<'a>(
+                &'a self,
+                _sub: &'a str,
+                _params: Option<Box<serde_json::value::RawValue>>,
+                _unsub: &'a str,
+            ) -> super::rpc::RawRpcFuture<'a, super::rpc::RawRpcSubscription> {
+                Box::pin(async {
+                    let mut data = self.data.lock().await;
+                    let values: RpcResult<Vec<RpcResult<Box<RawValue>>>> =
+                        data.subscription.recv().await.unwrap().map(|v| {
+                            v.into_iter()
+                                .map(|v| {
+                                    v.map(|v| serde_json::value::RawValue::from_string(v).unwrap())
+                                })
+                                .collect::<Vec<RpcResult<Box<RawValue>>>>()
+                        });
+                    values.map(|v| RawRpcSubscription {
+                        stream: futures::stream::iter(v).boxed(),
+                        id: Some("ID".to_string()),
+                    })
+                })
+            }
+        }
+        enum Conf {}
+        impl Config for Conf {
+            type Hash = crate::utils::H256;
+            type AccountId = crate::utils::AccountId32;
+            type Address = crate::utils::MultiAddress<Self::AccountId, ()>;
+            type Signature = crate::utils::MultiSignature;
+            type Hasher = crate::config::substrate::BlakeTwo256;
+            type Header = crate::config::substrate::SubstrateHeader<u32, Self::Hasher>;
+            type ExtrinsicParams = DefaultExtrinsicParams<Self>;
+
+            type AssetId = u32;
+        }
+
+        use crate::backend::Backend;
+
+        fn client_runtime_version(num: u32) -> crate::client::RuntimeVersion {
+            crate::client::RuntimeVersion {
+                spec_version: num,
+                transaction_version: num,
+            }
+        }
+
+        fn runtime_version(num: u32) -> RuntimeVersion {
+            RuntimeVersion {
+                spec_version: num,
+                transaction_version: num,
+                other: HashMap::new(),
+            }
+        }
+
+        fn bytes(str: &str) -> RpcResult<Option<Bytes>> {
+            Ok(Some(Bytes(str.into())))
+        }
+
+        fn storage_response(key: &str, value: &str) -> StorageResponse {
+            StorageResponse {
+                key: key.into(),
+                value: value.into(),
+            }
+        }
+
+        #[tokio::test]
+        async fn storage_fetch_values() {
+            // Setup
+            let mock_data: Vec<(String, String)> = (1..=3)
+                .map(|num| (format!("ID{}", num), format!("Data{}", num)))
+                .collect();
+            let mut entries = StorageEntry::new();
+            entries.push(mock_data[0].0.clone().into(), bytes(&mock_data[0].1));
+            entries.push::<()>(
+                mock_data[1].0.clone().into(),
+                Err(RpcError::DisconnectedWillReconnect(
+                    "Reconnecting".to_string(),
+                )),
+            );
+            entries.push(mock_data[1].0.clone().into(), bytes(&mock_data[1].1));
+            entries.push::<()>(
+                mock_data[2].0.clone().into(),
+                Err(RpcError::RequestRejected("Reconnecting".to_string())),
+            );
+            entries.push(mock_data[2].0.clone().into(), bytes(&mock_data[2].1));
+
+            let (_rx, tx) = tokio::sync::mpsc::channel(32);
+            let entries = Data {
+                request: entries,
+                subscription: tx,
+            };
+            let rpc_client = RpcClient::new(MockRpcClientStorage {
+                data: Arc::new(Mutex::new(entries)),
+            });
+
+            let backend: LegacyBackend<Conf> = LegacyBackend::builder().build(rpc_client);
+            let response = backend
+                .storage_fetch_values(
+                    mock_data.iter().map(|x| x.0.clone().into()).collect(),
+                    crate::utils::H256::random(),
+                )
+                .await
+                .unwrap();
+
+            let response = response
+                .map(|x| x.unwrap())
+                .collect::<Vec<StorageResponse>>()
+                .await;
+            let expected: Vec<_> = mock_data
+                .iter()
+                .map(|(key, value)| storage_response(key, value))
+                .collect();
+            assert_eq!(expected, response)
+        }
+
+        #[tokio::test]
+        async fn storage_fetch_value() {
+            // Setup
+            let mock_data = ("ID1".to_owned(), "Data1".to_owned());
+            let mut entries = StorageEntry::new();
+            entries.push::<()>(
+                mock_data.0.clone().into(),
+                Err(RpcError::DisconnectedWillReconnect(
+                    "Reconnecting".to_string(),
+                )),
+            );
+            entries.push(mock_data.0.clone().into(), bytes(&mock_data.1));
+            let (_rx, tx) = tokio::sync::mpsc::channel(32);
+            let entries = Data {
+                request: entries,
+                subscription: tx,
+            };
+            let rpc_client = RpcClient::new(MockRpcClientStorage {
+                data: Arc::new(Mutex::new(entries)),
+            });
+
+            let backend: LegacyBackend<Conf> = LegacyBackend::builder().build(rpc_client);
+            let response = backend
+                .storage_fetch_value(mock_data.0.clone().into(), crate::utils::H256::random())
+                .await
+                .unwrap();
+
+            let response = response.unwrap();
+            assert_eq!(mock_data.1, String::from_utf8(response).unwrap())
+        }
+
+        #[tokio::test]
+        /// This test should cover following methods:
+        /// - `genesis_hash`
+        /// - `block_header`
+        /// - `block_body`
+        /// - `latest_finalized_block`
+        /// - `current_runtime_version`
+        /// - `current_runtime_version`
+        /// - `call`
+        /// The test covers them because they follow the simple pattern of:
+        /// ```no_run
+        ///  async fn THE_THING(&self) -> Result<T::Hash, Error> {
+        ///    retry(|| <DO THE THING> ).await
+        ///  }
+        /// ```
+        async fn simple_fetch() {
+            let hash = crate::utils::H256::random();
+            // Setup
+            let mut entries = StorageEntry::new();
+            entries.push::<()>(
+                "chain_getBlockHash".into(),
+                Err(RpcError::DisconnectedWillReconnect(
+                    "Reconnecting".to_string(),
+                )),
+            );
+            entries.push("chain_getBlockHash".into(), Ok(Some(hash)));
+
+            let (_rx, tx) = tokio::sync::mpsc::channel(32);
+            let entries = Data {
+                request: entries,
+                subscription: tx,
+            };
+            let rpc_client = RpcClient::new(MockRpcClientStorage {
+                data: Arc::new(Mutex::new(entries)),
+            });
+
+            let backend: LegacyBackend<Conf> = LegacyBackend::builder().build(rpc_client);
+            let response = backend.genesis_hash().await.unwrap();
+
+            assert_eq!(hash, response)
+        }
+
+        #[tokio::test]
+        /// This test should cover following methods:
+        /// - `stream_runtime_version`
+        /// - `stream_all_block_headers`
+        /// - `stream_best_block_headers`
+        /// The test covers them because they follow the simple pattern of:
+        /// ```no_run
+        /// async fn stream_the_thing(
+        ///     &self,
+        /// ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+        ///     let methods = self.methods.clone();
+        ///    let retry_sub = retry_stream(move || {
+        ///         let methods = methods.clone();
+        ///         Box::pin(async move {
+        ///               methods.do_the_thing().await?
+        ///             });
+        ///             Ok(StreamOf(Box::pin(sub)))
+        ///         })
+        ///     })
+        ///     .await?;
+        ///     Ok(retry_sub)
+        /// }
+        /// ```
+        async fn stream_simple() {
+            // Setup
+            let (rx, tx) = tokio::sync::mpsc::channel(32);
+
+            let sub = vec![
+                Ok(runtime_version(0)),
+                Err(RpcError::DisconnectedWillReconnect(
+                    "Reconnecting".to_string(),
+                )),
+                Ok(runtime_version(1)),
+            ]
+            .into_iter()
+            .map(|x| x.map(|x| serde_json::to_string(&x).unwrap()))
+            .collect();
+
+            rx.send(Ok(sub)).await.unwrap();
+
+            let sub = vec![
+                Err(RpcError::DisconnectedWillReconnect(
+                    "Reconnecting".to_string(),
+                )),
+                Ok(runtime_version(2)),
+                Ok(runtime_version(3)),
+            ]
+            .into_iter()
+            .map(|x| x.map(|x| serde_json::to_string(&x).unwrap()))
+            .collect();
+
+            rx.send(Ok(sub)).await.unwrap();
+
+            let sub = vec![
+                Ok(runtime_version(4)),
+                Ok(runtime_version(5)),
+                Err(RpcError::RequestRejected("Reconnecting".to_string())),
+            ]
+            .into_iter()
+            .map(|x| x.map(|x| serde_json::to_string(&x).unwrap()))
+            .collect();
+            rx.send(Ok(sub)).await.unwrap();
+
+            // dont need them here
+            let entries = StorageEntry::new();
+
+            let entries = Data {
+                request: entries,
+                subscription: tx,
+            };
+            let rpc_client = RpcClient::new(MockRpcClientStorage {
+                data: Arc::new(Mutex::new(entries)),
+            });
+            let backend: LegacyBackend<Conf> = LegacyBackend::builder().build(rpc_client);
+
+            let mut results = backend.stream_runtime_version().await.unwrap();
+            let mut expected = VecDeque::from(vec![
+                Ok::<crate::client::RuntimeVersion, crate::Error>(client_runtime_version(0)),
+                Ok(client_runtime_version(4)),
+                Ok(client_runtime_version(5)),
+            ]);
+            while let Some(res) = results.next().await {
+                if res.is_ok() {
+                    assert_eq!(expected.pop_front().unwrap().unwrap(), res.unwrap())
+                } else {
+                    assert!(matches!(
+                        res,
+                        Err(crate::Error::Rpc(RpcError::RequestRejected(_)))
+                    ))
+                }
+            }
+            assert!(expected.is_empty());
+            assert!(results.next().await.is_none())
+        }
+    }
 }
