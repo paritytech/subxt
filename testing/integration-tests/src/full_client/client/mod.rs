@@ -415,7 +415,6 @@ async fn partial_fee_estimate_correct() {
 #[subxt_test]
 async fn legacy_and_unstable_block_subscription_reconnect() {
     let ctx = test_context_reconnecting_rpc_client().await;
-
     let api = ctx.unstable_client().await;
 
     let unstable_client_blocks = move |num: usize| {
@@ -425,6 +424,16 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
                 .subscribe_finalized()
                 .await
                 .unwrap()
+                // Ignore `disconnected events`.
+                // This will be emitted by the legacy backend for every reconnection.
+                .filter(|item| {
+                    let disconnected = match item {
+                        Ok(_) => false,
+                        Err(e) => e.is_disconnected_will_reconnect(),
+                    };
+
+                    futures::future::ready(!disconnected)
+                })
                 .take(num)
                 .map(|x| x.unwrap().hash().to_string())
                 .collect::<Vec<String>>()
