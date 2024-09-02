@@ -104,7 +104,7 @@ serde = { version = "1.0.209", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.127", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.63"
-tokio = { version = "1.39", default-features = false }
+tokio = { version = "1.40", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
 tracing-subscriber = "0.3.18"
