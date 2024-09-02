@@ -136,7 +136,7 @@ subxt-signer = { path = "../signer", features = ["unstable-eth"] }
 tracing-subscriber = { workspace = true }
 # These deps are needed to test the reconnecting rpc client
 jsonrpsee = { workspace = true, features = ["server"] }
-tower = "0.4"
+tower = "0.5"
 hyper = "1"
 http-body = "1"
 
