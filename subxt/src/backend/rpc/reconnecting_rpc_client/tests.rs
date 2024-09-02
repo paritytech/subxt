@@ -13,7 +13,6 @@ use jsonrpsee::server::{
 
 #[tokio::test]
 async fn call_works() {
-    tracing_subscriber::fmt::init();
     let (_handle, addr) = run_server().await.unwrap();
     let client = RpcClient::builder().build(addr).await.unwrap();
     assert!(client.request("say_hello".to_string(), None).await.is_ok(),)
@@ -21,7 +20,6 @@ async fn call_works() {
 
 #[tokio::test]
 async fn sub_works() {
-    tracing_subscriber::fmt::init();
     let (_handle, addr) = run_server().await.unwrap();
 
     let client = RpcClient::builder()
@@ -44,7 +42,6 @@ async fn sub_works() {
 
 #[tokio::test]
 async fn sub_with_reconnect() {
-    tracing_subscriber::fmt::init();
     let (handle, addr) = run_server().await.unwrap();
     let client = RpcClient::builder().build(addr.clone()).await.unwrap();
 
@@ -89,7 +86,6 @@ async fn sub_with_reconnect() {
 
 #[tokio::test]
 async fn call_with_reconnect() {
-    tracing_subscriber::fmt::init();
     let (handle, addr) = run_server_with_settings(None, true).await.unwrap();
 
     let client = Arc::new(RpcClient::builder().build(addr.clone()).await.unwrap());

@@ -425,6 +425,16 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
                 .subscribe_finalized()
                 .await
                 .unwrap()
+                // Filter out the blocks that are disconnected and will reconnect
+                // this will be emitted by the legacy backend for every reconnection.
+                .filter(|item| {
+                    let disconnected = match item {
+                        Ok(_) => false,
+                        Err(e) => e.is_disconnected_will_reconnect(),
+                    };
+
+                    futures::future::ready(disconnected)
+                })
                 .take(num)
                 .map(|x| x.unwrap().hash().to_string())
                 .collect::<Vec<String>>()
