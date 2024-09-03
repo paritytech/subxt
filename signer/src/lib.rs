@@ -37,6 +37,11 @@ pub mod ecdsa;
 #[cfg_attr(docsrs, doc(cfg(feature = "unstable-eth")))]
 pub mod eth;
 
+/// A polkadot-js account json loader.
+#[cfg(feature = "polkadot-js-compat")]
+#[cfg_attr(docsrs, doc(cfg(feature = "polkadot-js-compat")))]
+pub mod polkadot_js_compat;
+
 // Re-export useful bits and pieces for generating a Pair from a phrase,
 // namely the Mnemonic struct.
 pub use bip39;

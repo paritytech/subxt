@@ -261,7 +261,7 @@ jobs:
         uses: actions-rs/cargo@v1.0.3
         with:
           command: test
-          args: --doc
+          args: --doc --features unstable-reconnecting-rpc-client
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
@@ -295,7 +295,7 @@ jobs:
         uses: actions-rs/cargo@v1.0.3
         with:
           command: nextest
-          args: run --workspace
+          args: run --workspace --features unstable-reconnecting-rpc-client
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5

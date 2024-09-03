@@ -83,7 +83,7 @@ for CRATE_DIR in ${ORDER[@]}; do
 		sleep 3
 		remote_version
 		if [ "$REMOTE_VERSION" = "$VERSION" ]; then
-			echo "🥳 $NAME@$VERSION published succesfully."
+			echo "🥳 $NAME@$VERSION published successfully."
 			sleep 3
 			break
 		else

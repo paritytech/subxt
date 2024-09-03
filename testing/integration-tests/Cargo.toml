@@ -36,7 +36,7 @@ serde = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 sp-core = { workspace = true }
 syn = { workspace = true }
-subxt = { workspace = true, features = ["unstable-metadata", "native", "jsonrpsee", "substrate-compat"] }
+subxt = { workspace = true, features = ["unstable-metadata", "native", "jsonrpsee", "substrate-compat", "unstable-reconnecting-rpc-client"] }
 subxt-signer = { workspace = true, features = ["default"] }
 subxt-codegen = { workspace = true }
 subxt-metadata = { workspace = true }

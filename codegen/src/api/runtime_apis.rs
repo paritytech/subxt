@@ -22,7 +22,7 @@ fn generate_runtime_api(
     type_gen: &TypeGenerator,
     crate_path: &syn::Path,
 ) -> Result<(TokenStream2, TokenStream2), CodegenError> {
-    // Trait name must remain as is (upper case) to identity the runtime call.
+    // Trait name must remain as is (upper case) to identify the runtime call.
     let trait_name_str = api.name();
     // The snake case for the trait name.
     let trait_name_snake = format_ident!("{}", api.name().to_snake_case());
