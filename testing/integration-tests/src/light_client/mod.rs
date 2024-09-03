@@ -210,8 +210,7 @@ async fn light_client_testing() -> Result<(), subxt::Error> {
             OnlineClient::from_backend(Arc::new(backend)).await?;
         api
     } else {
-        let api = Client::from_rpc_client(rpc).await?;
-        api
+        Client::from_rpc_client(rpc).await?
     };
 
     tracing::trace!("Light client initialization took {:?}", now.elapsed());
