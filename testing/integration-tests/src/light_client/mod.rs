@@ -34,6 +34,12 @@ use subxt_metadata::Metadata;
 
 type Client = OnlineClient<PolkadotConfig>;
 
+/// The Polkadot chainspec.
+const POLKADOT_SPEC: &str = include_str!("../../../../artifacts/demo_chain_specs/polkadot.json");
+
+/// Use the unstable backend for testing.
+const USE_UNSTABLE_BACKEND: bool = true;
+
 // Check that we can subscribe to non-finalized blocks.
 async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
@@ -164,17 +170,49 @@ async fn dynamic_events(api: &Client) -> Result<(), subxt::Error> {
 #[tokio::test]
 async fn light_client_testing() -> Result<(), subxt::Error> {
     tracing_subscriber::fmt::init();
+
+    // Note: This code fetches the chainspec from the Polkadot public RPC node.
+    // This is not recommended for production use, as it may be slow and unreliable.
+    // However, this can come in handy for testing purposes.
+    //
+    // let chainspec = subxt::utils::fetch_chainspec_from_rpc_node("wss://rpc.polkadot.io:443")
+    //     .await
+    //     .unwrap();
+    // let chain_config = chainspec.get();
+
+    tracing::trace!("Init light clinet");
     let now = std::time::Instant::now();
+    let (_lc, rpc) = LightClient::relay_chain(POLKADOT_SPEC)?;
 
-    tracing::trace!("Init light client");
+    let api = if USE_UNSTABLE_BACKEND {
+        use futures::StreamExt;
+        use std::sync::Arc;
+        use subxt::backend::rpc::RpcClient;
+        use subxt::backend::unstable::UnstableBackend;
+        use subxt::OnlineClient;
 
-    let chainspec = subxt::utils::fetch_chainspec_from_rpc_node("wss://rpc.polkadot.io:443")
-        .await
-        .unwrap();
+        let (backend, mut driver) = UnstableBackend::builder().build(RpcClient::new(rpc));
+        tokio::spawn(async move {
+            while let Some(val) = driver.next().await {
+                if let Err(e) = val {
+                    if e.is_disconnected_will_reconnect() {
+                        tracing::info!(
+                            "The RPC connection was lost and we may have missed a few blocks"
+                        );
+                        continue;
+                    }
 
-    let chain_config = chainspec.get();
-    let (_lc, rpc) = LightClient::relay_chain(chain_config)?;
-    let api = Client::from_rpc_client(rpc).await?;
+                    tracing::error!("Error driving unstable backend: {e}");
+                }
+            }
+        });
+        let api: OnlineClient<PolkadotConfig> =
+            OnlineClient::from_backend(Arc::new(backend)).await?;
+        api
+    } else {
+        let api = Client::from_rpc_client(rpc).await?;
+        api
+    };
 
     tracing::trace!("Light client initialization took {:?}", now.elapsed());
 
@@ -184,6 +222,8 @@ async fn light_client_testing() -> Result<(), subxt::Error> {
     storage_plain_lookup(&api).await?;
     dynamic_constant_query(&api).await?;
     dynamic_events(&api).await?;
+
+    tracing::trace!("Light complete testing took {:?}", now.elapsed());
 
     Ok(())
 }
