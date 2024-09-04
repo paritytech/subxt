@@ -675,7 +675,7 @@ mod test {
         ///     &self,
         /// ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         ///     let methods = self.methods.clone();
-        ///    let retry_sub = retry_stream(move || {
+        ///     let retry_sub = retry_stream(move || {
         ///         let methods = methods.clone();
         ///         Box::pin(async move {
         ///               methods.do_the_thing().await?
