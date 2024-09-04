@@ -358,6 +358,7 @@ mod test {
         use serde::Serialize;
         use serde_json::value::RawValue;
         use subxt_core::{config::DefaultExtrinsicParams, Config};
+
         type RpcResult<T> = Result<T, RpcError>;
         type Item = RpcResult<String>;
 
