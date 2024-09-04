@@ -26,7 +26,7 @@ exclude = [
     "testing/wasm-lightclient-tests",
     "signer/wasm-tests",
     "examples/wasm-example",
-    "examples/parachain-example"
+    "examples/parachain-example",
 ]
 resolver = "2"
 
@@ -104,7 +104,7 @@ serde = { version = "1.0.209", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.127", default-features = false }
 syn = { version = "2.0.15", features = ["full", "extra-traits"] }
 thiserror = "1.0.63"
-tokio = { version = "1.39", default-features = false }
+tokio = { version = "1.40", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
 tracing-subscriber = "0.3.18"
@@ -116,6 +116,8 @@ which = "5.0.0"
 strip-ansi-escapes = "0.2.0"
 proptest = "1.5.0"
 hex-literal = "0.4.1"
+sc-executor = "0.40.0"
+sc-executor-common = "0.35.0"
 
 # Light client support:
 smoldot = { version = "0.16.0", default-features = false }
@@ -140,6 +142,9 @@ sp-core = { version = "31.0.0", default-features = false }
 sp-crypto-hashing = { version = "0.1.0", default-features = false }
 sp-runtime = "34.0.0"
 sp-keyring = "34.0.0"
+sp-maybe-compressed-blob = "11.0.0"
+sp-state-machine = "0.43.0"
+sp-io = "38.0.0"
 
 # Subxt workspace crates:
 subxt = { version = "0.37.0", path = "subxt", default-features = false }
@@ -166,6 +171,7 @@ zeroize = { version = "1", default-features = false }
 base64 = { version = "0.22.1", default-features = false }
 scrypt = { version = "0.11.0", default-features = false }
 crypto_secretbox = { version = "0.1.1", default-features = false }
+
 
 [profile.dev.package.smoldot-light]
 opt-level = 2

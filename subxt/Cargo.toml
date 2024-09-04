@@ -70,6 +70,9 @@ unstable-metadata = []
 # Note that this feature is experimental and things may break or not work as expected.
 unstable-light-client = ["subxt-lightclient"]
 
+# Activate this to expose the ability to generate metadata from Wasm runtime files.
+runtime-path = ["subxt-macro/runtime-path"]
+
 [dependencies]
 async-trait = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }

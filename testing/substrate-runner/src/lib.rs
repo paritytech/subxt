@@ -70,16 +70,27 @@ impl SubstrateNodeBuilder {
     }
 
     /// Spawn the node, handing back an object which, when dropped, will stop it.
-    pub fn spawn(self) -> Result<SubstrateNode, Error> {
+    pub fn spawn(mut self) -> Result<SubstrateNode, Error> {
         // Try to spawn the binary at each path, returning the
         // first "ok" or last error that we encountered.
         let mut res = Err(io::Error::new(
             io::ErrorKind::Other,
             "No binary path provided",
         ));
+
+        let path = Command::new("mktemp")
+            .arg("-d")
+            .output()
+            .expect("failed to create base dir");
+        let path = String::from_utf8(path.stdout).expect("bad path");
+        let mut bin_path = OsString::new();
         for binary_path in &self.binary_paths {
+            self.custom_flags
+                .insert("base-path".into(), Some(path.clone().into()));
+
             res = SubstrateNodeBuilder::try_spawn(binary_path, &self.custom_flags);
             if res.is_ok() {
+                bin_path.clone_from(binary_path);
                 break;
             }
         }
@@ -98,10 +109,13 @@ impl SubstrateNodeBuilder {
         let p2p_port = p2p_port.ok_or(Error::CouldNotExtractP2pPort)?;
 
         Ok(SubstrateNode {
+            binary_path: bin_path,
+            custom_flags: self.custom_flags,
             proc,
             ws_port,
             p2p_address,
             p2p_port,
+            base_path: path,
         })
     }
 
@@ -131,10 +145,13 @@ impl SubstrateNodeBuilder {
 }
 
 pub struct SubstrateNode {
+    binary_path: OsString,
+    custom_flags: HashMap<CowStr, Option<CowStr>>,
     proc: process::Child,
     ws_port: u16,
     p2p_address: String,
     p2p_port: u32,
+    base_path: String,
 }
 
 impl SubstrateNode {
@@ -167,11 +184,61 @@ impl SubstrateNode {
     pub fn kill(&mut self) -> std::io::Result<()> {
         self.proc.kill()
     }
+
+    /// restart the node, handing back an object which, when dropped, will stop it.
+    pub fn restart(&mut self) -> Result<(), std::io::Error> {
+        let res: Result<(), io::Error> = self.kill();
+
+        match res {
+            Ok(_) => (),
+            Err(e) => {
+                self.cleanup();
+                return Err(e);
+            }
+        }
+
+        let proc = self.try_spawn()?;
+
+        self.proc = proc;
+        // Wait for RPC port to be logged (it's logged to stderr).
+
+        Ok(())
+    }
+
+    // Attempt to spawn a binary with the path/flags given.
+    fn try_spawn(&mut self) -> Result<Child, std::io::Error> {
+        let mut cmd = Command::new(&self.binary_path);
+
+        cmd.env("RUST_LOG", "info,libp2p_tcp=debug")
+            .stdout(process::Stdio::piped())
+            .stderr(process::Stdio::piped())
+            .arg("--dev");
+
+        for (key, val) in &self.custom_flags {
+            let arg = match val {
+                Some(val) => format!("--{key}={val}"),
+                None => format!("--{key}"),
+            };
+            cmd.arg(arg);
+        }
+
+        cmd.arg(format!("--rpc-port={}", self.ws_port));
+        cmd.arg(format!("--port={}", self.p2p_port));
+        cmd.spawn()
+    }
+
+    fn cleanup(&self) {
+        let _ = Command::new("rm")
+            .args(["-rf", &self.base_path])
+            .output()
+            .expect("success");
+    }
 }
 
 impl Drop for SubstrateNode {
     fn drop(&mut self) {
         let _ = self.kill();
+        self.cleanup()
     }
 }
 
@@ -197,9 +264,10 @@ fn try_find_substrate_port_from_output(
             .or_else(|| line.rsplit_once("Running JSON-RPC server: addr=127.0.0.1:"))
             .map(|(_, port_str)| port_str);
 
-        if let Some(line_port) = line_port {
-            // trim non-numeric chars from the end of the port part of the line.
-            let port_str = line_port.trim_end_matches(|b: char| !b.is_ascii_digit());
+        if let Some(ports) = line_port {
+            // If more than one rpc server is started the log will capture multiple ports
+            // such as `addr=127.0.0.1:9944,[::1]:9944`
+            let port_str: String = ports.chars().take_while(|c| c.is_numeric()).collect();
 
             // expect to have a number here (the chars after '127.0.0.1:') and parse them into a u16.
             let port_num = port_str
