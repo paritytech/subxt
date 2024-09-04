@@ -693,7 +693,7 @@ mod test {
 
             let entries = Data {
                 request: entries,
-                subscription: subscription,
+                subscription,
             };
             let rpc_client = RpcClient::new(MockRpcClientStorage {
                 data: Arc::new(Mutex::new(entries)),
