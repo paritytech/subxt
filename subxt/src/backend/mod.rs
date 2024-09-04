@@ -343,7 +343,6 @@ mod test {
             sync::Arc,
         };
         use tokio::sync::{mpsc, Mutex};
-
         use super::rpc::{RpcClient, RpcClientT};
         use crate::backend::rpc::RawRpcSubscription;
         use crate::backend::BackendExt;
