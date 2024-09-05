@@ -372,7 +372,7 @@ mod test {
                 }
             }
 
-            fn from_vec<'a, T: Serialize, I: IntoIterator<Item = (&'a str, RpcResult<T>)>>(
+            fn from_iter<'a, T: Serialize, I: IntoIterator<Item = (&'a str, RpcResult<T>)>>(
                 item: I,
             ) -> Self {
                 let mut data = Self::new();
@@ -408,7 +408,7 @@ mod test {
                 Self { sender, receiver }
             }
 
-            async fn from_vec<
+            async fn from_iter<
                 T: Serialize,
                 S: IntoIterator<Item = RpcResult<Vec<RpcResult<T>>>>,
             >(
@@ -550,8 +550,8 @@ mod test {
             subscription_data: S,
         ) -> RpcClient {
             let data = Data {
-                request: MockDataTable::from_vec(table_data),
-                subscription: Subscription::from_vec(subscription_data).await,
+                request: MockDataTable::from_iter(table_data),
+                subscription: Subscription::from_iter(subscription_data).await,
             };
             RpcClient::new(MockRpcClientStorage {
                 data: Arc::new(Mutex::new(data)),
@@ -560,7 +560,6 @@ mod test {
 
         #[tokio::test]
         async fn storage_fetch_values() {
-            // Setup
             let mock_data = vec![
                 ("ID1", bytes("Data1")),
                 (
@@ -646,8 +645,6 @@ mod test {
         /// ```
         async fn simple_fetch() {
             let hash = crate::utils::H256::random();
-
-            // Setup
             let mock_data = vec![
                 (
                     "chain_getBlockHash".into(),
@@ -690,8 +687,6 @@ mod test {
         /// }
         /// ```
         async fn stream_simple() {
-            // Setup
-
             let mock_subscription_data = vec![
                 Ok(vec![
                     Ok(runtime_version(0)),
