@@ -338,11 +338,6 @@ mod test {
     use super::*;
 
     mod legacy {
-        use std::{
-            collections::{HashMap, VecDeque},
-            sync::Arc,
-        };
-        use tokio::sync::{mpsc, Mutex};
         use super::rpc::{RpcClient, RpcClientT};
         use crate::backend::rpc::RawRpcSubscription;
         use crate::backend::BackendExt;
@@ -356,7 +351,12 @@ mod test {
         use futures::StreamExt;
         use serde::Serialize;
         use serde_json::value::RawValue;
+        use std::{
+            collections::{HashMap, VecDeque},
+            sync::Arc,
+        };
         use subxt_core::{config::DefaultExtrinsicParams, Config};
+        use tokio::sync::{mpsc, Mutex};
 
         type RpcResult<T> = Result<T, RpcError>;
         type Item = RpcResult<String>;
@@ -494,6 +494,8 @@ mod test {
                 })
             }
         }
+
+        // Define dummy config
         enum Conf {}
         impl Config for Conf {
             type Hash = crate::utils::H256;
@@ -628,7 +630,7 @@ mod test {
         }
 
         #[tokio::test]
-        /// This test should cover following methods:
+        /// This test should cover the logic of the following methods:
         /// - `genesis_hash`
         /// - `block_header`
         /// - `block_body`
@@ -665,7 +667,7 @@ mod test {
         }
 
         #[tokio::test]
-        /// This test should cover following methods:
+        /// This test should cover the logic of the following methods:
         /// - `stream_runtime_version`
         /// - `stream_all_block_headers`
         /// - `stream_best_block_headers`
