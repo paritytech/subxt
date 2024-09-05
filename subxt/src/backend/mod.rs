@@ -647,12 +647,12 @@ mod test {
             let hash = crate::utils::H256::random();
             let mock_data = vec![
                 (
-                    "chain_getBlockHash".into(),
+                    "chain_getBlockHash",
                     Err(RpcError::DisconnectedWillReconnect(
                         "Reconnecting".to_string(),
                     )),
                 ),
-                ("chain_getBlockHash".into(), Ok(Some(hash))),
+                ("chain_getBlockHash", Ok(Some(hash))),
             ];
             let rpc_client = build_mock_client(mock_data, vec![]).await;
 
