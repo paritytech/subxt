@@ -29,6 +29,11 @@
 
 use crate::utils::node_runtime;
 use codec::Compact;
+use futures::StreamExt;
+use std::sync::Arc;
+use subxt::backend::rpc::RpcClient;
+use subxt::backend::unstable::UnstableBackend;
+use subxt::OnlineClient;
 use subxt::{client::OnlineClient, config::PolkadotConfig, lightclient::LightClient};
 use subxt_metadata::Metadata;
 
@@ -36,9 +41,6 @@ type Client = OnlineClient<PolkadotConfig>;
 
 /// The Polkadot chainspec.
 const POLKADOT_SPEC: &str = include_str!("../../../../artifacts/demo_chain_specs/polkadot.json");
-
-/// Use the unstable backend for testing.
-const USE_UNSTABLE_BACKEND: bool = true;
 
 // Check that we can subscribe to non-finalized blocks.
 async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
@@ -167,10 +169,7 @@ async fn dynamic_events(api: &Client) -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[tokio::test]
-async fn light_client_testing() -> Result<(), subxt::Error> {
-    tracing_subscriber::fmt::init();
-
+async fn run_test(backend: BackendType) -> Result<(), subxt::Error> {
     // Note: This code fetches the chainspec from the Polkadot public RPC node.
     // This is not recommended for production use, as it may be slow and unreliable.
     // However, this can come in handy for testing purposes.
@@ -184,33 +183,29 @@ async fn light_client_testing() -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
     let (_lc, rpc) = LightClient::relay_chain(POLKADOT_SPEC)?;
 
-    let api = if USE_UNSTABLE_BACKEND {
-        use futures::StreamExt;
-        use std::sync::Arc;
-        use subxt::backend::rpc::RpcClient;
-        use subxt::backend::unstable::UnstableBackend;
-        use subxt::OnlineClient;
+    let api = match backend {
+        BackendType::Unstable => {
+            let (backend, mut driver) = UnstableBackend::builder().build(RpcClient::new(rpc));
+            tokio::spawn(async move {
+                while let Some(val) = driver.next().await {
+                    if let Err(e) = val {
+                        if e.is_disconnected_will_reconnect() {
+                            tracing::info!(
+                                "The RPC connection was lost and we may have missed a few blocks"
+                            );
+                            continue;
+                        }
 
-        let (backend, mut driver) = UnstableBackend::builder().build(RpcClient::new(rpc));
-        tokio::spawn(async move {
-            while let Some(val) = driver.next().await {
-                if let Err(e) = val {
-                    if e.is_disconnected_will_reconnect() {
-                        tracing::info!(
-                            "The RPC connection was lost and we may have missed a few blocks"
-                        );
-                        continue;
+                        tracing::error!("Error driving unstable backend: {e}");
                     }
-
-                    tracing::error!("Error driving unstable backend: {e}");
                 }
-            }
-        });
-        let api: OnlineClient<PolkadotConfig> =
-            OnlineClient::from_backend(Arc::new(backend)).await?;
-        api
-    } else {
-        Client::from_rpc_client(rpc).await?
+            });
+            let api: OnlineClient<PolkadotConfig> =
+                OnlineClient::from_backend(Arc::new(backend)).await?;
+            api
+        }
+
+        BackendType::Legacy => Client::from_rpc_client(rpc).await?,
     };
 
     tracing::trace!("Light client initialization took {:?}", now.elapsed());
@@ -223,6 +218,23 @@ async fn light_client_testing() -> Result<(), subxt::Error> {
     dynamic_events(&api).await?;
 
     tracing::trace!("Light complete testing took {:?}", now.elapsed());
+}
+
+/// Backend type for light client testing.
+enum BackendType {
+    /// Use the unstable backend (ie chainHead).
+    Unstable,
+    /// Use the legacy backend.
+    Legacy,
+}
+
+#[tokio::test]
+async fn light_client_testing() -> Result<(), subxt::Error> {
+    tracing_subscriber::fmt::init();
+
+    // Run light client test with both backends.
+    run_test(BackendType::Unstable).await?;
+    run_test(BackendType::Legacy).await?;
 
     Ok(())
 }
