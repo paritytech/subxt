@@ -123,7 +123,6 @@ sc-executor-common = "0.35.0"
 smoldot = { version = "0.18.0", default-features = false }
 smoldot-light = { version = "0.16.2", default-features = false }
 tokio-stream = "0.1.15"
-
 futures-util = "0.3.30"
 rand = "0.8.5"
 pin-project = "1.1.5"
