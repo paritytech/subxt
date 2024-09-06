@@ -217,6 +217,7 @@ async fn run_test(backend: BackendType) -> Result<(), subxt::Error> {
     dynamic_events(&api).await?;
 
     tracing::trace!("Light complete testing took {:?}", now.elapsed());
+    Ok(())
 }
 
 /// Backend type for light client testing.
