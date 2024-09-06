@@ -77,9 +77,7 @@ impl<T: Config> UnstableRpcMethods<T> {
                 "chainHead_v1_continue",
                 rpc_params![follow_subscription, operation_id],
             )
-            .await?;
-
-        Ok(())
+            .await
     }
 
     /// Stops an operation started with `chainHead_v1_body`, `chainHead_v1_call`, or
@@ -97,9 +95,7 @@ impl<T: Config> UnstableRpcMethods<T> {
                 "chainHead_v1_stopOperation",
                 rpc_params![follow_subscription, operation_id],
             )
-            .await?;
-
-        Ok(())
+            .await
     }
 
     /// Call the `chainHead_v1_body` method and return an operation ID to obtain the block's body.
@@ -222,9 +218,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     ) -> Result<(), Error> {
         self.client
             .request("chainHead_v1_unpin", rpc_params![subscription_id, hash])
-            .await?;
-
-        Ok(())
+            .await
     }
 
     /// Return the genesis hash.
