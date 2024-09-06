@@ -332,7 +332,9 @@ impl<T: Config> LegacyRpcMethods<T> {
         public: Vec<u8>,
     ) -> Result<(), Error> {
         let params = rpc_params![key_type, suri, Bytes(public)];
-        self.client.request("author_insertKey", params).await?;
+        self.client
+            .request::<()>("author_insertKey", params)
+            .await?;
         Ok(())
     }
 

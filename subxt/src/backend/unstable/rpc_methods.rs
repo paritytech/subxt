@@ -73,7 +73,7 @@ impl<T: Config> UnstableRpcMethods<T> {
         operation_id: &str,
     ) -> Result<(), Error> {
         self.client
-            .request(
+            .request::<()>(
                 "chainHead_v1_continue",
                 rpc_params![follow_subscription, operation_id],
             )
@@ -93,7 +93,7 @@ impl<T: Config> UnstableRpcMethods<T> {
         operation_id: &str,
     ) -> Result<(), Error> {
         self.client
-            .request(
+            .request::<()>(
                 "chainHead_v1_stopOperation",
                 rpc_params![follow_subscription, operation_id],
             )
@@ -221,7 +221,7 @@ impl<T: Config> UnstableRpcMethods<T> {
         hash: T::Hash,
     ) -> Result<(), Error> {
         self.client
-            .request("chainHead_v1_unpin", rpc_params![subscription_id, hash])
+            .request::<()>("chainHead_v1_unpin", rpc_params![subscription_id, hash])
             .await?;
 
         Ok(())
