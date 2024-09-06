@@ -13,7 +13,6 @@ use tokio::sync::{mpsc, oneshot};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 const LOG_TARGET: &str = "subxt-light-client-background-task";
-const MAX_LOG_SIZE: usize = 1024;
 
 /// Response from [`BackgroundTaskHandle::request()`].
 pub type MethodResponse = Result<Box<RawValue>, LightClientRpcError>;
