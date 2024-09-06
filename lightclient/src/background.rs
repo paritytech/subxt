@@ -177,15 +177,11 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                         tracing::trace!(target: LOG_TARGET, "Smoldot RPC responses channel closed");
                         break;
                     };
-                    let (maybe_truncated, delim) = if back_message.len() > MAX_LOG_SIZE {
-                        (&back_message[0..MAX_LOG_SIZE], "...")
-                    } else {
-                        (&back_message[..], "")
-                    };
 
                     tracing::trace!(
                         target: LOG_TARGET,
-                        "Received smoldot RPC chain {chain_id:?} result {maybe_truncated:?}{delim}",
+                        "Received smoldot RPC chain {chain_id:?} result {}",
+                        trim_message(&back_message),
                     );
 
                     data.handle_rpc_response(back_message);
@@ -248,10 +244,16 @@ struct ActiveSubscription {
     unsubscribe_method: String,
 }
 
-fn trim_response(response: &str) -> &str {
-    const MAX_RESPONSE_SIZE: usize = 256;
-    let len = std::cmp::min(response.len(), MAX_RESPONSE_SIZE);
-    &response[..len]
+fn trim_message(s: &str) -> &str {
+    const MAX_SIZE: usize = 512;
+    if s.len() < MAX_SIZE {
+        return s;
+    }
+
+    match s.char_indices().nth(MAX_SIZE) {
+        None => s,
+        Some((idx, _)) => &s[..idx],
+    }
 }
 
 impl<TPlatform: PlatformRef, TChain> BackgroundTaskData<TPlatform, TChain> {
@@ -371,7 +373,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTaskData<TPlatform, TChain> {
     /// Parse the response received from the light client and sent it to the appropriate user.
     fn handle_rpc_response(&mut self, response: String) {
         let chain_id = self.chain_id;
-        tracing::trace!(target: LOG_TARGET, "Received from smoldot response='{}' chain={chain_id:?}", trim_response(&response));
+        tracing::trace!(target: LOG_TARGET, "Received from smoldot response='{}' chain={chain_id:?}", trim_message(&response));
 
         match RpcResponse::from_str(&response) {
             Ok(RpcResponse::Method { id, result }) => {
