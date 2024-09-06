@@ -455,6 +455,7 @@ pub type EncodedJustification = Vec<u8>;
 /// the RPC call `state_getRuntimeVersion`,
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(test, derive(serde::Serialize))]
 pub struct RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
     /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
