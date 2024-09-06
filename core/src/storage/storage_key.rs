@@ -182,7 +182,7 @@ impl<K: codec::Encode + ?Sized> StaticStorageKey<K> {
     }
 }
 
-impl<K: codec::Decode + ?Sized> StaticStorageKey<K> {
+impl<K: codec::Decode> StaticStorageKey<K> {
     /// Decodes the encoded inner bytes into the type `K`.
     pub fn decoded(&self) -> Result<K, Error> {
         let decoded = K::decode(&mut self.bytes())?;
