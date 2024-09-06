@@ -33,7 +33,6 @@ use futures::StreamExt;
 use std::sync::Arc;
 use subxt::backend::rpc::RpcClient;
 use subxt::backend::unstable::UnstableBackend;
-use subxt::OnlineClient;
 use subxt::{client::OnlineClient, config::PolkadotConfig, lightclient::LightClient};
 use subxt_metadata::Metadata;
 
