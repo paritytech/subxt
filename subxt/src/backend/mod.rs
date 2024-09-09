@@ -490,10 +490,9 @@ mod test {
                 meth: &str,
                 params: Option<Box<serde_json::value::RawValue>>,
             ) -> super::rpc::RawRpcFuture<'a, Box<serde_json::value::RawValue>> {
-                let method = self.method_handlers.get(meth).expect(&format!(
-                    "no method named {} registered. Params: {:?}",
-                    meth, params
-                ));
+                let method = self.method_handlers.get(meth).unwrap_or_else(|| {
+                    panic!("no method named {} registered. Params: {:?}", meth, params)
+                });
 
                 (*method)(&mut self.data_table, &mut self.subscription_channel, params)
             }
@@ -503,10 +502,12 @@ mod test {
                 sub: &str,
                 params: Option<Box<serde_json::value::RawValue>>,
             ) -> super::rpc::RawRpcFuture<'a, super::rpc::RawRpcSubscription> {
-                let sub = self.subscription_handlers.get(sub).expect(&format!(
-                    "no subscription named {} registered. Params: {:?}",
-                    sub, params
-                ));
+                let sub = self.subscription_handlers.get(sub).unwrap_or_else(|| {
+                    panic!(
+                        "no subscription named {} registered. Params: {:?}",
+                        sub, params
+                    )
+                });
 
                 (*sub)(&mut self.data_table, &mut self.subscription_channel, params)
             }
@@ -931,7 +932,7 @@ mod test {
                         }
                         let follow_event =
                             FollowEvent::Initialized(Initialized::<<Conf as Config>::Hash> {
-                                finalized_block_hashes: vec![hash.clone()],
+                                finalized_block_hashes: vec![hash],
                                 finalized_block_runtime: Some(rpc_methods::RuntimeEvent::Valid(
                                     RuntimeVersionEvent {
                                         spec: runtime_spec(),
@@ -1032,7 +1033,7 @@ mod test {
             let (backend, mut driver): (UnstableBackend<Conf>, _) =
                 UnstableBackend::builder().build(rpc_client);
 
-            let _ = tokio::spawn(async move {
+            tokio::spawn(async move {
                 while let Some(val) = driver.next().await {
                     if let Err(e) = val {
                         eprintln!("Error driving unstable backend: {e}; terminating client");
@@ -1057,7 +1058,7 @@ mod test {
 
             assert!(matches!(
                 response.as_slice(),
-                [Err(Error::Other(s) )] if *s == "errro".to_owned()
+                [Err(Error::Other(s) )] if s == "errro"
             ));
         }
 
@@ -1111,7 +1112,7 @@ mod test {
             let (backend, mut driver): (UnstableBackend<Conf>, _) =
                 UnstableBackend::builder().build(rpc_client);
 
-            let _ = tokio::spawn(async move {
+            tokio::spawn(async move {
                 while let Some(val) = driver.next().await {
                     if let Err(e) = val {
                         eprintln!("Error driving unstable backend: {e}; terminating client");
@@ -1259,7 +1260,7 @@ mod test {
             let (backend, mut driver): (UnstableBackend<Conf>, _) =
                 UnstableBackend::builder().build(rpc_client);
 
-            let _ = tokio::spawn(async move {
+            tokio::spawn(async move {
                 while let Some(val) = driver.next().await {
                     if let Err(e) = val {
                         eprintln!("Error driving unstable backend: {e}; terminating client");
@@ -1286,7 +1287,7 @@ mod test {
                     Ok(resp1 @ StorageResponse { .. }),
                     Ok(resp2 @ StorageResponse { .. }),
                     Err(Error::Other(s))
-                ] if *s == "errro".to_owned()
+                ] if s == "errro"
                   && compare_storage_responses(&storage_response("ID1", "Data1"), resp1)
                   && compare_storage_responses(&storage_response("ID2", "Data2"), resp2)
             ));
@@ -1330,7 +1331,7 @@ mod test {
                     "chainSpec_v1_genesisHash",
                     Message::Single(Err(RpcError::DisconnectedWillReconnect("Error".to_owned()))),
                 ),
-                ("chainSpec_v1_genesisHash", Message::Single(Ok(hash.into()))),
+                ("chainSpec_v1_genesisHash", Message::Single(Ok(hash))),
             ];
             let rpc_client = setup_mock_rpc_client(false)
                 .add_method(
@@ -1348,7 +1349,7 @@ mod test {
             let (backend, mut driver): (UnstableBackend<Conf>, _) =
                 UnstableBackend::builder().build(rpc_client);
 
-            let _ = tokio::spawn(async move {
+            tokio::spawn(async move {
                 while let Some(val) = driver.next().await {
                     if let Err(e) = val {
                         eprintln!("Error driving unstable backend: {e}; terminating client");
@@ -1415,7 +1416,7 @@ mod test {
                                     let rpc_params =
                                         jsonrpsee::types::Params::new(params.as_deref());
                                     let key: String = rpc_params.sequence().next().unwrap();
-                                    if key == "ID1".to_owned() {
+                                    if key == *"ID1" {
                                         return Err(RpcError::RequestRejected("stale id".into()));
                                     } else {
                                         subscription_expired
