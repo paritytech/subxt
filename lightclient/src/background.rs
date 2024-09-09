@@ -108,7 +108,7 @@ impl BackgroundTaskHandle {
 /// coming to/from Smoldot.
 #[allow(clippy::type_complexity)]
 pub struct BackgroundTask<TPlatform: PlatformRef, TChain> {
-    channels: BackgroundTaskChannels,
+    channels: BackgroundTaskChannels<TPlatform>,
     data: BackgroundTaskData<TPlatform, TChain>,
 }
 
@@ -117,7 +117,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     pub(crate) fn new(
         client: SharedClient<TPlatform, TChain>,
         chain_id: smoldot_light::ChainId,
-        from_back: smoldot_light::JsonRpcResponses,
+        from_back: smoldot_light::JsonRpcResponses<TPlatform>,
     ) -> (BackgroundTask<TPlatform, TChain>, BackgroundTaskHandle) {
         let (tx, rx) = mpsc::unbounded_channel();
 
@@ -176,10 +176,11 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
                         tracing::trace!(target: LOG_TARGET, "Smoldot RPC responses channel closed");
                         break;
                     };
+
                     tracing::trace!(
                         target: LOG_TARGET,
-                        "Received smoldot RPC chain {:?} result {:?}",
-                        chain_id, back_message
+                        "Received smoldot RPC chain {chain_id:?} result {}",
+                        trim_message(&back_message),
                     );
 
                     data.handle_rpc_response(back_message);
@@ -191,11 +192,11 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTask<TPlatform, TChain> {
     }
 }
 
-struct BackgroundTaskChannels {
+struct BackgroundTaskChannels<TPlatform: PlatformRef> {
     /// Messages sent into this background task from the front end.
     from_front: UnboundedReceiverStream<Message>,
     /// Messages sent into the background task from Smoldot.
-    from_back: smoldot_light::JsonRpcResponses,
+    from_back: smoldot_light::JsonRpcResponses<TPlatform>,
 }
 
 struct BackgroundTaskData<TPlatform: PlatformRef, TChain> {
@@ -240,6 +241,18 @@ struct ActiveSubscription {
     /// The unsubscribe method to call when the user drops the receiver
     /// part of the channel.
     unsubscribe_method: String,
+}
+
+fn trim_message(s: &str) -> &str {
+    const MAX_SIZE: usize = 512;
+    if s.len() < MAX_SIZE {
+        return s;
+    }
+
+    match s.char_indices().nth(MAX_SIZE) {
+        None => s,
+        Some((idx, _)) => &s[..idx],
+    }
 }
 
 impl<TPlatform: PlatformRef, TChain> BackgroundTaskData<TPlatform, TChain> {
@@ -359,7 +372,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTaskData<TPlatform, TChain> {
     /// Parse the response received from the light client and sent it to the appropriate user.
     fn handle_rpc_response(&mut self, response: String) {
         let chain_id = self.chain_id;
-        tracing::trace!(target: LOG_TARGET, "Received from smoldot response='{response}' chain={chain_id:?}");
+        tracing::trace!(target: LOG_TARGET, "Received from smoldot response='{}' chain={chain_id:?}", trim_message(&response));
 
         match RpcResponse::from_str(&response) {
             Ok(RpcResponse::Method { id, result }) => {
