@@ -120,8 +120,8 @@ sc-executor = "0.40.0"
 sc-executor-common = "0.35.0"
 
 # Light client support:
-smoldot = { version = "0.16.0", default-features = false }
-smoldot-light = { version = "0.14.0", default-features = false }
+smoldot = { version = "0.18.0", default-features = false }
+smoldot-light = { version = "0.16.2", default-features = false }
 tokio-stream = "0.1.15"
 futures-util = "0.3.30"
 rand = "0.8.5"
