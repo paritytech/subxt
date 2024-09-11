@@ -9,7 +9,7 @@
 use codec::Decode;
 use darling::{ast::NestedMeta, FromMeta};
 use proc_macro::TokenStream;
-use proc_macro_error::{abort_call_site, proc_macro_error};
+use proc_macro_error2::{abort_call_site, proc_macro_error};
 use quote::ToTokens;
 use scale_typegen::typegen::{
     settings::substitutes::path_segments,

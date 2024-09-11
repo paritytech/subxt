@@ -89,7 +89,7 @@ indoc = "2"
 jsonrpsee = { version = "0.24.3" }
 pretty_assertions = "1.4.0"
 primitive-types = { version = "0.12.2", default-features = false }
-proc-macro-error = "1.0.4"
+proc-macro-error2 = "2.0.0"
 proc-macro2 = "1.0.86"
 quote = "1.0.37"
 regex = { version = "1.10.6", default-features = false }
