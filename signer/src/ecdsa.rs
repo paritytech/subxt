@@ -3,13 +3,14 @@
 // see LICENSE for license details.
 
 //! An ecdsa keypair implementation.
-use codec::Encode;
-
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
+use codec::Encode;
 use core::{fmt::Display, str::FromStr};
 use hex::FromHex;
 use secp256k1::{ecdsa::RecoverableSignature, Message, Secp256k1, SecretKey};
 use secrecy::ExposeSecret;
+use sp_crypto_hashing::keccak_256;
+use subxt_core::utils::H160;
 
 const SECRET_KEY_LENGTH: usize = 32;
 
@@ -148,6 +149,13 @@ impl Keypair {
             }
         }
         Self::from_secret_key(acc)
+    }
+
+    /// Get the Ethereum address for this key pair.
+    /// See https://ethereum.org/en/developers/docs/accounts/#account-creation
+    pub fn eth_address(&self) -> H160 {
+        let pk = self.0.public_key().serialize_uncompressed();
+        H160::from_slice(&keccak_256(&pk[1..])[12..])
     }
 
     /// Obtain the [`PublicKey`] part of this key pair, which can be used in calls to [`verify()`].
@@ -452,5 +460,18 @@ mod test {
         let sp_pair = SpPair::from_string(uri_str, None).expect("should be valid");
 
         assert_eq!(pair.public_key().0, sp_pair.public().0);
+    }
+
+    #[test]
+    fn check_eth_address() {
+        // See https://goethereumbook.org/wallet-generate
+        let private_key =
+            hex_literal::hex!("fad9c8855b740a0b7ed4c221dbad0f33a83a49cad6b3fe8d5817ac83d38b6a19");
+        let pair = Keypair::from_secret_key(private_key).unwrap();
+
+        assert_eq!(
+            pair.eth_address(),
+            H160::from_str("0x96216849c49358B10257cb55b28eA603c874b05E").unwrap()
+        );
     }
 }
