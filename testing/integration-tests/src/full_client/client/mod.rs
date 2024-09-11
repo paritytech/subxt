@@ -361,7 +361,7 @@ pub struct InclusionFee {
     /// - `targeted_fee_adjustment`: This is a multiplier that can tune the final fee based on the
     ///   congestion of the network.
     /// - `weight_fee`: This amount is computed based on the weight of the transaction. Weight
-    /// accounts for the execution time of a transaction.
+    ///   accounts for the execution time of a transaction.
     ///
     /// adjusted_weight_fee = targeted_fee_adjustment * weight_fee
     pub adjusted_weight_fee: u128,
@@ -433,8 +433,8 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
                             if matches!(e, Error::Rpc(subxt::error::RpcError::DisconnectedWillReconnect(e)) if e.contains("Missed at least one block when the connection was lost")) {
                                 missed_blocks = true;
                             }
-                            e.is_disconnected_will_reconnect()}
-                            ,
+                            e.is_disconnected_will_reconnect()
+                        }
                     };
 
                     futures::future::ready(!disconnected)
