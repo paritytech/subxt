@@ -4,11 +4,10 @@
 
 //! An sr25519 keypair implementation.
 
-use core::str::FromStr;
+use core::{fmt::Display, str::FromStr};
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 
-use derive_more::{Display, From};
 use hex::FromHex;
 use schnorrkel::{
     derive::{ChainCode, Derivation},
@@ -123,6 +122,18 @@ impl Keypair {
         Ok(Keypair(keypair))
     }
 
+    /// Construct a keypair from a slice of bytes, corresponding to
+    /// an Ed25519 expanded secret key.
+    #[cfg(feature = "polkadot-js-compat")]
+    pub(crate) fn from_ed25519_bytes(bytes: &[u8]) -> Result<Self, Error> {
+        let secret_key = schnorrkel::SecretKey::from_ed25519_bytes(bytes)?;
+
+        Ok(Keypair(schnorrkel::Keypair {
+            public: secret_key.to_public(),
+            secret: secret_key,
+        }))
+    }
+
     /// Derive a child key from this one given a series of junctions.
     ///
     /// # Example
@@ -192,18 +203,31 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug, Display, From)]
+#[derive(Debug)]
 pub enum Error {
     /// Invalid seed.
-    #[display(fmt = "Invalid seed (was it the wrong length?)")]
-    #[from(ignore)]
     InvalidSeed,
     /// Invalid phrase.
-    #[display(fmt = "Cannot parse phrase: {_0}")]
     Phrase(bip39::Error),
     /// Invalid hex.
-    #[display(fmt = "Cannot parse hex string: {_0}")]
     Hex(hex::FromHexError),
+    /// Signature error.
+    Signature(schnorrkel::SignatureError),
+}
+
+impl_from!(bip39::Error => Error::Phrase);
+impl_from!(hex::FromHexError => Error::Hex);
+impl_from!(schnorrkel::SignatureError => Error::Signature);
+
+impl Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Error::InvalidSeed => write!(f, "Invalid seed (was it the wrong length?)"),
+            Error::Phrase(e) => write!(f, "Cannot parse phrase: {e}"),
+            Error::Hex(e) => write!(f, "Cannot parse hex string: {e}"),
+            Error::Signature(e) => write!(f, "Signature error: {e}"),
+        }
+    }
 }
 
 #[cfg(feature = "std")]

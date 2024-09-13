@@ -185,7 +185,7 @@ impl LightClientRpc {
     pub(crate) fn new_raw<TPlat, TChain>(
         client: impl Into<SharedClient<TPlat, TChain>>,
         chain_id: smoldot_light::ChainId,
-        rpc_responses: smoldot_light::JsonRpcResponses,
+        rpc_responses: smoldot_light::JsonRpcResponses<TPlat>,
     ) -> Self
     where
         TPlat: smoldot_light::platform::PlatformRef + Send + 'static,

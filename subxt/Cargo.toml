@@ -26,9 +26,11 @@ default = ["jsonrpsee", "native"]
 # Exactly 1 of "web" and "native" is expected.
 native = [
     "jsonrpsee?/async-client",
-    "jsonrpsee?/client-ws-transport-native-tls",
+    "jsonrpsee?/client-ws-transport-tls",
+    "jsonrpsee?/ws-client",
     "subxt-lightclient?/native",
-    "tokio-util"
+    "tokio-util",
+    "tokio?/sync",
 ]
 
 # Enable this for web/wasm builds.
@@ -36,14 +38,17 @@ native = [
 web = [
     "jsonrpsee?/async-wasm-client",
     "jsonrpsee?/client-web-transport",
+    "jsonrpsee?/wasm-client",
     "getrandom/js",
     "subxt-lightclient?/web",
     "subxt-macro/web",
-    "instant/wasm-bindgen"
+    "instant/wasm-bindgen",
+    "tokio?/sync",
+    "finito?/wasm-bindgen",
 ]
 
 # Enable this to use the reconnecting rpc client
-unstable-reconnecting-rpc-client = ["dep:reconnecting-jsonrpsee-ws-client"]
+unstable-reconnecting-rpc-client = ["dep:finito", "dep:tokio", "jsonrpsee", "wasm-bindgen-futures"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = [
@@ -64,6 +69,9 @@ unstable-metadata = []
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
 unstable-light-client = ["subxt-lightclient"]
+
+# Activate this to expose the ability to generate metadata from Wasm runtime files.
+runtime-path = ["subxt-macro/runtime-path"]
 
 [dependencies]
 async-trait = { workspace = true }
@@ -98,9 +106,6 @@ subxt-core = { workspace = true, features = ["std"] }
 subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 
-# Reconnecting jsonrpc ws client
-reconnecting-jsonrpsee-ws-client = { version = "0.4", optional = true }
-
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
 
@@ -110,11 +115,18 @@ getrandom = { workspace = true, optional = true }
 # Included if "native" feature is enabled
 tokio-util = { workspace = true, features = ["compat"], optional = true }
 
+# Included if the reconnecting rpc client feature is enabled
+# Only the `tokio/sync` is used in the reconnecting rpc client
+# and that compiles both for native and web.
+tokio = { workspace = true, optional = true }
+finito = { workspace = true, optional = true }
+wasm-bindgen-futures = { workspace = true, optional = true }
+
 [dev-dependencies]
 bitvec = { workspace = true }
 codec = { workspace = true, features = ["derive", "bit-vec"] }
 scale-info = { workspace = true, features = ["bit-vec"] }
-tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread"] }
+tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread", "sync"] }
 sp-core = { workspace = true }
 sp-keyring = { workspace = true }
 sp-runtime = { workspace = true }
@@ -125,6 +137,11 @@ subxt-signer = { path = "../signer", features = ["unstable-eth"] }
 # the light-client wlll emit INFO logs with
 # `GrandPa warp sync finished` and `Finalized block runtime ready.`
 tracing-subscriber = { workspace = true }
+# These deps are needed to test the reconnecting rpc client
+jsonrpsee = { workspace = true, features = ["server"] }
+tower = "0.4"
+hyper = "1"
+http-body = "1"
 
 [[example]]
 name = "light_client_basic"
@@ -137,8 +154,8 @@ path = "examples/light_client_local_node.rs"
 required-features = ["unstable-light-client", "jsonrpsee", "native"]
 
 [[example]]
-name = "reconnecting_rpc_client"
-path = "examples/reconnecting_rpc_client.rs"
+name = "setup_reconnecting_rpc_client"
+path = "examples/setup_reconnecting_rpc_client.rs"
 required-features = ["unstable-reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]

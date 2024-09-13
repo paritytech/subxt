@@ -226,23 +226,39 @@ async fn fetch_block_and_decode_extrinsic_details() {
         .map(|res| res.unwrap())
         .collect::<Vec<_>>();
 
-    // All blocks contain a timestamp; check this first:
-    let timestamp = block_extrinsics.first().unwrap();
-    timestamp.as_root_extrinsic::<node_runtime::Call>().unwrap();
-    timestamp
-        .as_extrinsic::<node_runtime::timestamp::calls::types::Set>()
-        .unwrap();
-    assert!(!timestamp.is_signed());
+    let mut balance = None;
+    let mut timestamp = None;
 
-    // Next we expect our transfer:
-    let tx = block_extrinsics.get(1).unwrap();
-    tx.as_root_extrinsic::<node_runtime::Call>().unwrap();
-    let ext = tx
-        .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
-        .unwrap()
-        .unwrap();
-    assert_eq!(ext.value, 10_000);
-    assert!(tx.is_signed());
+    for tx in block_extrinsics {
+        tx.as_root_extrinsic::<node_runtime::Call>().unwrap();
+
+        if let Some(ext) = tx
+            .as_extrinsic::<node_runtime::timestamp::calls::types::Set>()
+            .unwrap()
+        {
+            timestamp = Some((ext, tx.is_signed()));
+        }
+
+        if let Some(ext) = tx
+            .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
+            .unwrap()
+        {
+            balance = Some((ext, tx.is_signed()));
+        }
+    }
+
+    // Check that we found the timestamp
+    {
+        let (_, is_signed) = timestamp.expect("Timestamp not found");
+        assert!(!is_signed);
+    }
+
+    // Check that we found the balance transfer
+    {
+        let (tx, is_signed) = balance.expect("Balance transfer not found");
+        assert_eq!(tx.value, 10_000);
+        assert!(is_signed);
+    }
 }
 
 #[cfg(fullclient)]
@@ -329,6 +345,7 @@ async fn decode_signed_extensions_from_blocks() {
         "CheckNonce",
         "CheckWeight",
         "ChargeAssetTxPayment",
+        "CheckMetadataHash",
     ];
 
     assert_eq!(extensions1.iter().count(), expected_signed_extensions.len());

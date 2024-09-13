@@ -21,6 +21,7 @@ macro_rules! once_static_cloned {
     ($($(#[$attr:meta])* $vis:vis fn $name:ident() -> $ty:ty { $expr:expr } )+) => {
         $(
             $(#[$attr])*
+            #[allow(missing_docs)]
             $vis fn $name() -> $ty {
                 cfg_if::cfg_if! {
                     if #[cfg(feature = "std")] {
@@ -32,5 +33,15 @@ macro_rules! once_static_cloned {
                 }
             }
         )+
+    };
+}
+
+macro_rules! impl_from {
+    ($module_path:path => $delegate_ty:ident :: $variant:ident) => {
+        impl From<$module_path> for $delegate_ty {
+            fn from(val: $module_path) -> Self {
+                $delegate_ty::$variant(val.into())
+            }
+        }
     };
 }

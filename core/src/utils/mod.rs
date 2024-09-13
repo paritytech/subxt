@@ -5,6 +5,7 @@
 //! Miscellaneous utility helpers.
 
 mod account_id;
+mod account_id20;
 pub mod bits;
 mod era;
 mod multi_address;
@@ -21,6 +22,7 @@ use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
 
 pub use account_id::AccountId32;
+pub use account_id20::AccountId20;
 pub use era::Era;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;

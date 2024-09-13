@@ -2,32 +2,51 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use core::fmt::Display;
+
 use alloc::string::String;
-use derive_more::Display;
 
 mod v14;
 mod v15;
 
 /// An error emitted if something goes wrong converting [`frame_metadata`]
 /// types into [`crate::Metadata`].
-#[derive(Debug, Display, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum TryFromError {
     /// Type missing from type registry
-    #[display(fmt = "Type id {_0} is expected but not found in the type registry")]
     TypeNotFound(u32),
     /// Type was not a variant/enum type
-    #[display(fmt = "Type {_0} was not a variant/enum type, but is expected to be one")]
     VariantExpected(u32),
     /// An unsupported metadata version was provided.
-    #[display(fmt = "Cannot convert v{_0} metadata into Metadata type")]
     UnsupportedMetadataVersion(u32),
     /// Type name missing from type registry
-    #[display(fmt = "Type name {_0} is expected but not found in the type registry")]
     TypeNameNotFound(String),
     /// Invalid type path.
-    #[display(fmt = "Type has an invalid path {_0}")]
     InvalidTypePath(String),
+}
+
+impl Display for TryFromError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            TryFromError::TypeNotFound(e) => write!(
+                f,
+                "Type id {e} is expected but not found in the type registry"
+            ),
+            TryFromError::VariantExpected(e) => write!(
+                f,
+                "Type {e} was not a variant/enum type, but is expected to be one"
+            ),
+            TryFromError::UnsupportedMetadataVersion(e) => {
+                write!(f, "Cannot convert v{e} metadata into Metadata type")
+            }
+            TryFromError::TypeNameNotFound(e) => write!(
+                f,
+                "Type name {e} is expected but not found in the type registry"
+            ),
+            TryFromError::InvalidTypePath(e) => write!(f, "Type has an invalid path {e}"),
+        }
+    }
 }
 
 #[cfg(feature = "std")]

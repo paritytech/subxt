@@ -23,9 +23,13 @@ std = [
     "sha2/std",
     "hmac/std",
     "bip39/std",
-    "schnorrkel/std",
-    "secp256k1/std",
-    "sp-core/std"
+    "schnorrkel?/std",
+    "secp256k1?/std",
+    "serde?/std",
+    "serde_json?/std",
+    "base64?/std",
+    "scrypt?/std",
+    "crypto_secretbox?/std",
 ]
 
 # Pick the signer implementation(s) you need by enabling the
@@ -35,6 +39,9 @@ std = [
 sr25519 = ["schnorrkel"]
 ecdsa = ["secp256k1"]
 unstable-eth = ["keccak-hash", "ecdsa", "secp256k1", "bip32"]
+
+# Enable support for loading key pairs from polkadot-js json.
+polkadot-js-compat = ["std", "subxt", "sr25519", "base64", "scrypt", "crypto_secretbox", "serde", "serde_json"]
 
 # Make the keypair algorithms here compatible with Subxt's Signer trait,
 # so that they can be used to sign transactions for compatible chains.
@@ -50,9 +57,10 @@ secrecy = { workspace = true }
 regex = { workspace = true, features = ["unicode"] }
 hex = { workspace = true, features = ["alloc"] }
 cfg-if = { workspace = true }
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
+codec = { package = "parity-scale-codec", workspace = true, features = [
+    "derive",
+] }
 sp-crypto-hashing = { workspace = true }
-derive_more = { workspace = true }
 pbkdf2 = { workspace = true }
 sha2 = { workspace = true }
 hmac = { workspace = true }
@@ -60,8 +68,18 @@ zeroize = { workspace = true }
 bip39 = { workspace = true }
 bip32 = { workspace = true, features = ["alloc", "secp256k1"], optional = true }
 schnorrkel = { workspace = true, optional = true }
-secp256k1 = { workspace = true, optional = true, features = ["alloc", "recovery"] }
+secp256k1 = { workspace = true, optional = true, features = [
+    "alloc",
+    "recovery",
+] }
 keccak-hash = { workspace = true, optional = true }
+
+# These are used if the polkadot-js-compat feature is enabled
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
+base64 = { workspace = true, optional = true, features = ["alloc"] }
+scrypt = { workspace = true, default-features = false, optional = true }
+crypto_secretbox = { workspace = true, optional = true, features = ["alloc", "salsa20"] }
 
 # We only pull this in to enable the JS flag for schnorrkel to use.
 getrandom = { workspace = true, optional = true }
@@ -81,3 +99,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 defalt-features = true
+
+[lints]
+workspace = true

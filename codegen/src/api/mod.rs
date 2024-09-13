@@ -262,7 +262,7 @@ impl RuntimeGenerator {
                 /// The outer extrinsic enum.
                 pub type Call = #call_path;
 
-                /// The outer error enum representing the DispatchError's Module variant.
+                /// The outer error enum represents the DispatchError's Module variant.
                 pub type Error = #error_path;
 
                 pub fn constants() -> ConstantsApi {

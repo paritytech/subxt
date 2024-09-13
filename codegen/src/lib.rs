@@ -342,10 +342,11 @@ fn default_derives(crate_path: &syn::Path) -> DerivesRegistry {
         parse_quote!(Debug),
     ];
 
-    let attributes: [syn::Attribute; 3] = [
+    let attributes: [syn::Attribute; 4] = [
         parse_quote!(#[encode_as_type(crate_path = #encode_crate_path)]),
         parse_quote!(#[decode_as_type(crate_path = #decode_crate_path)]),
         parse_quote!(#[codec(crate = #crate_path::ext::codec)]),
+        parse_quote!(#[codec(dumb_trait_bound)]),
     ];
 
     let mut derives_registry = DerivesRegistry::new();
@@ -357,7 +358,7 @@ fn default_derives(crate_path: &syn::Path) -> DerivesRegistry {
 fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
     let mut type_substitutes = TypeSubstitutes::new();
 
-    let defaults: [(syn::Path, syn::Path); 12] = [
+    let defaults: [(syn::Path, syn::Path); 13] = [
         (
             parse_quote!(bitvec::order::Lsb0),
             parse_quote!(#crate_path::utils::bits::Lsb0),
@@ -369,6 +370,10 @@ fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
         (
             parse_quote!(sp_core::crypto::AccountId32),
             parse_quote!(#crate_path::utils::AccountId32),
+        ),
+        (
+            parse_quote!(fp_account::AccountId20),
+            parse_quote!(#crate_path::utils::AccountId20),
         ),
         (
             parse_quote!(sp_runtime::multiaddress::MultiAddress),

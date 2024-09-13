@@ -65,8 +65,8 @@ crate::macros::cfg_unstable_light_client! {
 }
 
 crate::macros::cfg_reconnecting_rpc_client! {
-    mod reconnecting_jsonrpsee_impl;
-    pub use reconnecting_jsonrpsee_ws_client as reconnecting_rpc_client;
+   /// reconnecting rpc client.
+   pub mod reconnecting_rpc_client;
 }
 
 mod rpc_client;

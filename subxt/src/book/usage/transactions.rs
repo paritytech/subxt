@@ -196,6 +196,14 @@
 //! This example doesn't wait for the transaction to be included in a block; it just submits it and
 //! hopes for the best!
 //!
+//! ### Boxing transaction payloads
+//!
+//! Transaction payloads can be boxed so that they all share a common type and can be stored together.
+//!
+//! ```rust,ignore
+#![doc = include_str!("../../../examples/tx_boxed.rs")]
+//! ```
+//!
 //! ### Custom handling of transaction status updates
 //!
 //! If you'd like more control or visibility over exactly which status updates are being emitted for
@@ -203,6 +211,15 @@
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../examples/tx_status_stream.rs")]
+//! ```
+//!
+//! ### Signing transactions externally
+//!
+//! Subxt also allows you to get hold of the signer payload and hand that off to something else to be
+//! signed. The signature can then be provided back to Subxt to build the final transaction to submit:
+//!
+//! ```rust,ignore
+#![doc = include_str!("../../../examples/tx_partial.rs")]
 //! ```
 //!
 //! Take a look at the API docs for [`crate::tx::TxProgress`], [`crate::tx::TxStatus`] and

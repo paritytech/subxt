@@ -344,7 +344,7 @@ fn generate_outer_enums(
         let Some(last) = call_path.last_mut() else {
             return Err(TryFromError::InvalidTypePath("RuntimeCall".into()));
         };
-        *last = "RuntimeError".to_owned();
+        "RuntimeError".clone_into(last);
         generate_outer_error_enum_type(metadata, call_path)
     };
 

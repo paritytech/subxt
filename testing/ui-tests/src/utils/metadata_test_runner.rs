@@ -70,7 +70,7 @@ impl MetadataTestRunnerCaseBuilder {
 
     /// Set the test name.
     pub fn name(mut self, name: impl AsRef<str>) -> Self {
-        self.name = name.as_ref().to_owned();
+        name.as_ref().clone_into(&mut self.name);
         self
     }
 

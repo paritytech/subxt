@@ -5,16 +5,40 @@
 use std::cell::RefCell;
 use std::ffi::{OsStr, OsString};
 use std::sync::Arc;
+use std::time::Duration;
 use substrate_runner::SubstrateNode;
+use subxt::backend::rpc::reconnecting_rpc_client::{ExponentialBackoff, RpcClientBuilder};
 use subxt::{
     backend::{legacy, rpc, unstable},
     Config, OnlineClient,
 };
 
+// The URL that we'll connect to for our tests comes from SUBXT_TEXT_HOST env var,
+// defaulting to localhost if not provided. If the env var is set, we won't spawn
+// a binary. Note though that some tests expect and modify a fresh state, and so will
+// fail. Fo a similar reason wyou should also use `--test-threads 1` when running tests
+// to reduce the number of conflicts between state altering tests.
+const URL_ENV_VAR: &str = "SUBXT_TEST_URL";
+fn is_url_provided() -> bool {
+    std::env::var(URL_ENV_VAR).is_ok()
+}
+fn get_url(port: Option<u16>) -> String {
+    match (std::env::var(URL_ENV_VAR).ok(), port) {
+        (Some(host), None) => host,
+        (None, Some(port)) => format!("ws://127.0.0.1:{port}"),
+        (Some(_), Some(_)) => {
+            panic!("{URL_ENV_VAR} and port provided: only one or the other should exist")
+        }
+        (None, None) => {
+            panic!("No {URL_ENV_VAR} or port was provided, so we don't know where to connect to")
+        }
+    }
+}
+
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
     // Keep a handle to the node; once it's dropped the node is killed.
-    proc: SubstrateNode,
+    proc: Option<SubstrateNode>,
 
     // Lazily construct these when asked for.
     unstable_client: RefCell<Option<OnlineClient<R>>>,
@@ -36,24 +60,27 @@ where
         TestNodeProcessBuilder::new(paths)
     }
 
+    pub async fn restart(mut self) -> Self {
+        tokio::task::spawn_blocking(move || {
+            if let Some(ref mut proc) = &mut self.proc {
+                proc.restart().unwrap();
+            }
+            self
+        })
+        .await
+        .expect("to succeed")
+    }
+
     /// Hand back an RPC client connected to the test node which exposes the legacy RPC methods.
     pub async fn legacy_rpc_methods(&self) -> legacy::LegacyRpcMethods<R> {
-        let rpc_client = self.rpc_client().await;
+        let rpc_client = self.rpc_client.clone();
         legacy::LegacyRpcMethods::new(rpc_client)
     }
 
     /// Hand back an RPC client connected to the test node which exposes the unstable RPC methods.
     pub async fn unstable_rpc_methods(&self) -> unstable::UnstableRpcMethods<R> {
-        let rpc_client = self.rpc_client().await;
+        let rpc_client = self.rpc_client.clone();
         unstable::UnstableRpcMethods::new(rpc_client)
-    }
-
-    /// Hand back an RPC client connected to the test node.
-    pub async fn rpc_client(&self) -> rpc::RpcClient {
-        let url = format!("ws://127.0.0.1:{}", self.proc.ws_port());
-        rpc::RpcClient::from_url(url)
-            .await
-            .expect("Unable to connect RPC client to test node")
     }
 
     /// Always return a client using the unstable backend.
@@ -87,12 +114,24 @@ where
     pub fn client(&self) -> OnlineClient<R> {
         self.client.clone()
     }
+
+    /// Returns the rpc client connected to the node
+    pub fn rpc_client(&self) -> rpc::RpcClient {
+        self.rpc_client.clone()
+    }
+}
+
+/// Kind of rpc client to use in tests
+pub enum RpcClientKind {
+    Legacy,
+    UnstableReconnecting,
 }
 
 /// Construct a test node process.
 pub struct TestNodeProcessBuilder {
     node_paths: Vec<OsString>,
     authority: Option<String>,
+    rpc_client: RpcClientKind,
 }
 
 impl TestNodeProcessBuilder {
@@ -110,7 +149,14 @@ impl TestNodeProcessBuilder {
         Self {
             node_paths: paths,
             authority: None,
+            rpc_client: RpcClientKind::Legacy,
         }
+    }
+
+    /// Set the testRunner to use a preferred RpcClient impl, ie Legacy or Unstable
+    pub fn with_rpc_client_kind(&mut self, rpc_client_kind: RpcClientKind) -> &mut Self {
+        self.rpc_client = rpc_client_kind;
+        self
     }
 
     /// Set the authority dev account for a node in validator mode e.g. --alice.
@@ -124,20 +170,26 @@ impl TestNodeProcessBuilder {
     where
         R: Config,
     {
-        let mut node_builder = SubstrateNode::builder();
+        // Only spawn a process if a URL to target wasn't provided as an env var.
+        let proc = if !is_url_provided() {
+            let mut node_builder = SubstrateNode::builder();
+            node_builder.binary_paths(&self.node_paths);
 
-        node_builder.binary_paths(&self.node_paths);
+            if let Some(authority) = &self.authority {
+                node_builder.arg(authority.to_lowercase());
+            }
 
-        if let Some(authority) = &self.authority {
-            node_builder.arg(authority.to_lowercase());
+            Some(node_builder.spawn().map_err(|e| e.to_string())?)
+        } else {
+            None
+        };
+
+        let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
+        let rpc_client = match self.rpc_client {
+            RpcClientKind::Legacy => build_rpc_client(&ws_url).await,
+            RpcClientKind::UnstableReconnecting => build_unstable_rpc_client(&ws_url).await,
         }
-
-        // Spawn the node and retrieve a URL to it:
-        let proc = node_builder.spawn().map_err(|e| e.to_string())?;
-        let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
-        let rpc_client = build_rpc_client(&ws_url)
-            .await
-            .map_err(|e| format!("Failed to connect to node at {ws_url}: {e}"))?;
+        .map_err(|e| format!("Failed to connect to node at {ws_url}: {e}"))?;
 
         // Cache whatever client we build, and None for the other.
         #[allow(unused_assignments, unused_mut)]
@@ -173,11 +225,21 @@ impl TestNodeProcessBuilder {
 }
 
 async fn build_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
-    let rpc_client = rpc::RpcClient::from_url(ws_url)
+    let rpc_client = rpc::RpcClient::from_insecure_url(ws_url)
         .await
         .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
 
     Ok(rpc_client)
+}
+
+async fn build_unstable_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
+    let client = RpcClientBuilder::new()
+        .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10)))
+        .build(ws_url.to_string())
+        .await
+        .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
+
+    Ok(rpc::RpcClient::new(client))
 }
 
 async fn build_legacy_client<T: Config>(
@@ -217,10 +279,18 @@ async fn build_unstable_client<T: Config>(
 }
 
 #[cfg(lightclient)]
-async fn build_light_client<T: Config>(proc: &SubstrateNode) -> Result<OnlineClient<T>, String> {
+async fn build_light_client<T: Config>(
+    maybe_proc: &Option<SubstrateNode>,
+) -> Result<OnlineClient<T>, String> {
     use subxt::lightclient::{ChainConfig, LightClient};
 
-    // RPC endpoint.
+    let proc = if let Some(proc) = maybe_proc {
+        proc
+    } else {
+        return Err("Cannot build light client: no substrate node is running (you can't start a light client when pointing to an external node)".into());
+    };
+
+    // RPC endpoint. Only localhost works.
     let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
 
     // Wait for a few blocks to be produced using the subxt client.

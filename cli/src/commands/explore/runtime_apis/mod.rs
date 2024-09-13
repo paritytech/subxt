@@ -24,7 +24,7 @@ use subxt_metadata::RuntimeApiMetadata;
 ///   None => Show pallet docs + available methods
 ///   Some (invalid) => Show Error + available methods
 ///   Some (valid)   => Show method docs + output type description
-///                       exectute is:
+///                       execute is:
 ///                         false => Show input type description + Example Value
 ///                         true  => validate (trailing args + build node connection)
 ///                           validation is:

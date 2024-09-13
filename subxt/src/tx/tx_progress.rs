@@ -11,11 +11,11 @@ use crate::{
     client::OnlineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
+    utils::strip_compact_prefix,
     Config,
 };
 use derive_where::derive_where;
 use futures::{Stream, StreamExt};
-use subxt_core::utils::strip_compact_prefix;
 
 /// This struct represents a subscription to the progress of some transaction.
 pub struct TxProgress<T: Config, C> {
