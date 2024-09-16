@@ -1833,6 +1833,8 @@ dependencies = [
 [[package]]
 name = "frame-metadata"
 version = "16.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "87cf1549fba25a6fcac22785b61698317d958e96cac72a59102ea45b9ae64692"
 dependencies = [
  "cfg-if",
  "parity-scale-codec",
@@ -1843,8 +1845,7 @@ dependencies = [
 [[package]]
 name = "frame-metadata"
 version = "16.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87cf1549fba25a6fcac22785b61698317d958e96cac72a59102ea45b9ae64692"
+source = "git+https://github.com/paritytech/frame-metadata.git?branch=lexnv/metadata-v16-associated-types#ede6a4dda012a101e46eea7a44a410a13b46867f"
 dependencies = [
  "cfg-if",
  "parity-scale-codec",
@@ -1993,7 +1994,7 @@ dependencies = [
 name = "generate-custom-metadata"
 version = "0.37.0"
 dependencies = [
- "frame-metadata 16.0.0",
+ "frame-metadata 16.0.0 (git+https://github.com/paritytech/frame-metadata.git?branch=lexnv/metadata-v16-associated-types)",
  "parity-scale-codec",
  "scale-info",
 ]
@@ -2535,7 +2536,7 @@ version = "0.37.0"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
- "frame-metadata 16.0.0",
+ "frame-metadata 16.0.0 (git+https://github.com/paritytech/frame-metadata.git?branch=lexnv/metadata-v16-associated-types)",
  "futures",
  "hex",
  "parity-scale-codec",
@@ -5615,7 +5616,7 @@ dependencies = [
  "derive-where",
  "either",
  "finito",
- "frame-metadata 16.0.0",
+ "frame-metadata 16.0.0 (git+https://github.com/paritytech/frame-metadata.git?branch=lexnv/metadata-v16-associated-types)",
  "futures",
  "getrandom",
  "hex",
@@ -5658,7 +5659,7 @@ version = "0.37.0"
 dependencies = [
  "clap 4.5.17",
  "color-eyre",
- "frame-metadata 16.0.0",
+ "frame-metadata 16.0.0 (git+https://github.com/paritytech/frame-metadata.git?branch=lexnv/metadata-v16-associated-types)",
  "heck 0.5.0",
  "hex",
  "indoc",
@@ -5685,7 +5686,7 @@ dependencies = [
 name = "subxt-codegen"
 version = "0.37.0"
 dependencies = [
- "frame-metadata 16.0.0",
+ "frame-metadata 16.0.0 (git+https://github.com/paritytech/frame-metadata.git?branch=lexnv/metadata-v16-associated-types)",
  "getrandom",
  "heck 0.5.0",
  "hex",
@@ -5710,7 +5711,7 @@ dependencies = [
  "bitvec",
  "blake2",
  "derive-where",
- "frame-metadata 16.0.0",
+ "frame-metadata 16.0.0 (git+https://github.com/paritytech/frame-metadata.git?branch=lexnv/metadata-v16-associated-types)",
  "hashbrown 0.14.5",
  "hex",
  "impl-serde",
@@ -5784,7 +5785,7 @@ dependencies = [
  "assert_matches",
  "bitvec",
  "criterion",
- "frame-metadata 16.0.0",
+ "frame-metadata 16.0.0 (git+https://github.com/paritytech/frame-metadata.git?branch=lexnv/metadata-v16-associated-types)",
  "hashbrown 0.14.5",
  "parity-scale-codec",
  "scale-info",
@@ -6316,7 +6317,7 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 name = "ui-tests"
 version = "0.37.0"
 dependencies = [
- "frame-metadata 16.0.0",
+ "frame-metadata 16.0.0 (git+https://github.com/paritytech/frame-metadata.git?branch=lexnv/metadata-v16-associated-types)",
  "generate-custom-metadata",
  "hex",
  "parity-scale-codec",
