@@ -12,6 +12,7 @@ use crate::{
     StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
 };
 use alloc::borrow::ToOwned;
+use alloc::vec;
 use frame_metadata::v16;
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;
@@ -96,7 +97,7 @@ mod from_v16 {
                 pallets,
                 pallets_by_index,
                 extrinsic: from_extrinsic_metadata(m.extrinsic),
-                runtime_ty: m.ty.id,
+                runtime_ty: 0,
                 dispatch_error_ty,
                 apis: apis.collect(),
                 outer_enums: OuterEnumsMetadata {
@@ -112,7 +113,7 @@ mod from_v16 {
     }
 
     fn from_signed_extension_metadata(
-        value: v16::SignedExtensionMetadata<PortableForm>,
+        value: v16::TransactionExtensionMetadata<PortableForm>,
     ) -> SignedExtensionMetadata {
         SignedExtensionMetadata {
             identifier: value.identifier,
@@ -123,9 +124,9 @@ mod from_v16 {
 
     fn from_extrinsic_metadata(value: v16::ExtrinsicMetadata<PortableForm>) -> ExtrinsicMetadata {
         ExtrinsicMetadata {
-            version: value.version,
+            version: value.versions[0],
             signed_extensions: value
-                .signed_extensions
+                .transaction_extensions
                 .into_iter()
                 .map(from_signed_extension_metadata)
                 .collect(),
@@ -303,7 +304,6 @@ mod into_v16 {
             v16::RuntimeMetadataV16 {
                 types: m.types,
                 pallets: pallets.collect(),
-                ty: m.runtime_ty.into(),
                 extrinsic: from_extrinsic_metadata(m.extrinsic),
                 apis: m
                     .apis
@@ -376,8 +376,8 @@ mod into_v16 {
 
     fn from_extrinsic_metadata(e: ExtrinsicMetadata) -> v16::ExtrinsicMetadata<PortableForm> {
         v16::ExtrinsicMetadata {
-            version: e.version,
-            signed_extensions: e
+            versions: vec![e.version],
+            transaction_extensions: e
                 .signed_extensions
                 .into_iter()
                 .map(from_signed_extension_metadata)
@@ -391,8 +391,8 @@ mod into_v16 {
 
     fn from_signed_extension_metadata(
         s: SignedExtensionMetadata,
-    ) -> v16::SignedExtensionMetadata<PortableForm> {
-        v16::SignedExtensionMetadata {
+    ) -> v16::TransactionExtensionMetadata<PortableForm> {
+        v16::TransactionExtensionMetadata {
             identifier: s.identifier,
             ty: s.extra_ty.into(),
             additional_signed: s.additional_ty.into(),
