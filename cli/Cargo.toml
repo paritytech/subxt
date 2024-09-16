@@ -34,7 +34,7 @@ serde = { workspace = true, features = ["derive"] }
 color-eyre = { workspace = true }
 serde_json = { workspace = true }
 hex = { workspace = true }
-frame-metadata = { workspace = true }
+frame-metadata = { workspace = true, features = ["current", "decode", "unstable"] }
 codec = { package = "parity-scale-codec", workspace = true }
 scale-info = { workspace = true }
 scale-value = { workspace = true }

@@ -230,6 +230,11 @@ impl<'a> PalletMetadata<'a> {
         )
     }
 
+    /// Return all of the associated types.
+    pub fn associated_types(&self) -> &'a [AssociatedTypeMetadata] {
+        &self.inner.associated_types
+    }
+
     /// Return all of the call variants, if a call type exists.
     pub fn call_variants(&self) -> Option<&'a [Variant<PortableForm>]> {
         VariantIndex::get(self.inner.call_ty, self.types)
@@ -318,6 +323,36 @@ struct PalletMetadataInner {
     constants: OrderedMap<ArcStr, ConstantMetadata>,
     /// Pallet documentation.
     docs: Vec<String>,
+    /// Pallet associated types.
+    associated_types: Vec<AssociatedTypeMetadata>,
+}
+
+/// Metadata for an associated type.
+#[derive(Debug, Clone)]
+pub struct AssociatedTypeMetadata {
+    /// Name of the associated type.
+    name: String,
+    /// Type of the associated type.
+    ty: u32,
+    /// Associated type documentation.
+    docs: Vec<String>,
+}
+
+impl AssociatedTypeMetadata {
+    /// Name of the associated type.
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// Type id of the associated type.
+    pub fn type_id(&self) -> u32 {
+        self.ty
+    }
+
+    /// Associated type documentation.
+    pub fn docs(&self) -> &[String] {
+        &self.docs
+    }
 }
 
 /// Metadata for the storage entries in a pallet.
@@ -773,6 +808,7 @@ impl codec::Decode for Metadata {
         let metadata = match metadata.1 {
             frame_metadata::RuntimeMetadata::V14(md) => md.try_into(),
             frame_metadata::RuntimeMetadata::V15(md) => md.try_into(),
+            frame_metadata::RuntimeMetadata::V16(md) => md.try_into(),
             _ => return Err("Cannot try_into() to Metadata: unsupported metadata version".into()),
         };
 

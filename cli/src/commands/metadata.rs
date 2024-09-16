@@ -41,6 +41,7 @@ pub struct Opts {
 }
 
 pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> {
+    println!("opts {:?}", opts);
     validate_url_security(opts.file_or_url.url.as_ref(), opts.allow_insecure)?;
     let bytes = opts.file_or_url.fetch().await?;
     let mut metadata = RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;

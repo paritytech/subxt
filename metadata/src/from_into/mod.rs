@@ -8,6 +8,7 @@ use alloc::string::String;
 
 mod v14;
 mod v15;
+mod v16;
 
 /// An error emitted if something goes wrong converting [`frame_metadata`]
 /// types into [`crate::Metadata`].
@@ -108,6 +109,7 @@ impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for crate::Metadata {
             }
             frame_metadata::RuntimeMetadata::V14(m) => m.try_into(),
             frame_metadata::RuntimeMetadata::V15(m) => m.try_into(),
+            frame_metadata::RuntimeMetadata::V16(m) => m.try_into(),
         }
     }
 }

@@ -4,6 +4,7 @@
 
 //! Generate code for submitting extrinsics and query storage of a Substrate runtime.
 
+mod associated_types;
 mod calls;
 mod constants;
 mod custom_values;
@@ -171,10 +172,21 @@ impl RuntimeGenerator {
 
                 let errors = errors::generate_error_type_alias(&type_gen, pallet)?;
 
+                let associated_types =
+                    associated_types::generate_associated_types(&type_gen, pallet, &crate_path)?;
+
                 Ok(quote! {
                     pub mod #mod_name {
                         use super::root_mod;
                         use super::#types_mod_ident;
+
+                        pub mod associated_types {
+                            use super::root_mod;
+                            use super::#types_mod_ident;
+
+                            #associated_types
+                        }
+
                         #errors
                         #calls
                         #event

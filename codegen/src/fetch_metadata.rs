@@ -143,6 +143,8 @@ async fn fetch_metadata(
             Decode::decode(&mut &raw_bytes[..])?
         };
 
+        // println!("   Metadata version: {supported_versions:?}");
+
         // Return the version the user wants if it's supported:
         let version = match version {
             MetadataVersion::Latest => *supported_versions
@@ -171,6 +173,8 @@ async fn fetch_metadata(
                 }
             }
         };
+
+        // println!("   Metadata version: {version}");
 
         let bytes = version.encode();
         let version: String = format!("0x{}", hex::encode(&bytes));

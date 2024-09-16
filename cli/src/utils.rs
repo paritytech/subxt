@@ -122,7 +122,9 @@ impl FileOrUrl {
             // Default if neither is provided; fetch from local url
             (None, None, version) => {
                 let url = Url::parse("ws://localhost:9944").expect("Valid URL; qed");
-                Ok(fetch_metadata_from_url(url, version.unwrap_or_default()).await?)
+                let version = version.unwrap_or_default();
+                // println!("Fetching metadata from {url} with version {version:?}");
+                Ok(fetch_metadata_from_url(url, version).await?)
             }
         }
     }

@@ -2,9 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-extern crate alloc;
-use alloc::vec::Vec;
-
 use super::TryFromError;
 
 use crate::utils::variant_index::VariantIndex;
@@ -15,17 +12,21 @@ use crate::{
     StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
 };
 use alloc::borrow::ToOwned;
-use frame_metadata::v15;
+use frame_metadata::v16;
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;
 
-// Converting from V15 metadata into our Subxt repr.
-mod from_v15 {
+// Converting from V16 metadata into our Subxt repr.
+mod from_v16 {
+    use frame_metadata::v15;
+
+    use crate::AssociatedTypeMetadata;
+
     use super::*;
 
-    impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
+    impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
         type Error = TryFromError;
-        fn try_from(m: v15::RuntimeMetadataV15) -> Result<Self, TryFromError> {
+        fn try_from(m: v16::RuntimeMetadataV16) -> Result<Self, TryFromError> {
             let mut pallets = OrderedMap::new();
             let mut pallets_by_index = HashMap::new();
             for (pos, p) in m.pallets.into_iter().enumerate() {
@@ -69,7 +70,11 @@ mod from_v15 {
                         error_variant_index,
                         constants: constants.collect(),
                         docs: p.docs,
-                        associated_types: Vec::new(),
+                        associated_types: p
+                            .associated_types
+                            .into_iter()
+                            .map(from_associated_type_metadata)
+                            .collect(),
                     },
                 );
             }
@@ -99,13 +104,15 @@ mod from_v15 {
                     event_enum_ty: m.outer_enums.event_enum_ty.id,
                     error_enum_ty: m.outer_enums.error_enum_ty.id,
                 },
-                custom: m.custom,
+                custom: v15::CustomMetadata {
+                    map: Default::default(),
+                },
             })
         }
     }
 
     fn from_signed_extension_metadata(
-        value: v15::SignedExtensionMetadata<PortableForm>,
+        value: v16::SignedExtensionMetadata<PortableForm>,
     ) -> SignedExtensionMetadata {
         SignedExtensionMetadata {
             identifier: value.identifier,
@@ -114,7 +121,7 @@ mod from_v15 {
         }
     }
 
-    fn from_extrinsic_metadata(value: v15::ExtrinsicMetadata<PortableForm>) -> ExtrinsicMetadata {
+    fn from_extrinsic_metadata(value: v16::ExtrinsicMetadata<PortableForm>) -> ExtrinsicMetadata {
         ExtrinsicMetadata {
             version: value.version,
             signed_extensions: value
@@ -129,22 +136,22 @@ mod from_v15 {
         }
     }
 
-    fn from_storage_hasher(value: v15::StorageHasher) -> StorageHasher {
+    fn from_storage_hasher(value: v16::StorageHasher) -> StorageHasher {
         match value {
-            v15::StorageHasher::Blake2_128 => StorageHasher::Blake2_128,
-            v15::StorageHasher::Blake2_256 => StorageHasher::Blake2_256,
-            v15::StorageHasher::Blake2_128Concat => StorageHasher::Blake2_128Concat,
-            v15::StorageHasher::Twox128 => StorageHasher::Twox128,
-            v15::StorageHasher::Twox256 => StorageHasher::Twox256,
-            v15::StorageHasher::Twox64Concat => StorageHasher::Twox64Concat,
-            v15::StorageHasher::Identity => StorageHasher::Identity,
+            v16::StorageHasher::Blake2_128 => StorageHasher::Blake2_128,
+            v16::StorageHasher::Blake2_256 => StorageHasher::Blake2_256,
+            v16::StorageHasher::Blake2_128Concat => StorageHasher::Blake2_128Concat,
+            v16::StorageHasher::Twox128 => StorageHasher::Twox128,
+            v16::StorageHasher::Twox256 => StorageHasher::Twox256,
+            v16::StorageHasher::Twox64Concat => StorageHasher::Twox64Concat,
+            v16::StorageHasher::Identity => StorageHasher::Identity,
         }
     }
 
-    fn from_storage_entry_type(value: v15::StorageEntryType<PortableForm>) -> StorageEntryType {
+    fn from_storage_entry_type(value: v16::StorageEntryType<PortableForm>) -> StorageEntryType {
         match value {
-            v15::StorageEntryType::Plain(ty) => StorageEntryType::Plain(ty.id),
-            v15::StorageEntryType::Map {
+            v16::StorageEntryType::Plain(ty) => StorageEntryType::Plain(ty.id),
+            v16::StorageEntryType::Map {
                 hashers,
                 key,
                 value,
@@ -156,16 +163,26 @@ mod from_v15 {
         }
     }
 
-    fn from_storage_entry_modifier(value: v15::StorageEntryModifier) -> StorageEntryModifier {
+    fn from_storage_entry_modifier(value: v16::StorageEntryModifier) -> StorageEntryModifier {
         match value {
-            v15::StorageEntryModifier::Optional => StorageEntryModifier::Optional,
-            v15::StorageEntryModifier::Default => StorageEntryModifier::Default,
+            v16::StorageEntryModifier::Optional => StorageEntryModifier::Optional,
+            v16::StorageEntryModifier::Default => StorageEntryModifier::Default,
+        }
+    }
+
+    fn from_associated_type_metadata(
+        value: v16::PalletAssociatedTypeMetadata<PortableForm>,
+    ) -> AssociatedTypeMetadata {
+        AssociatedTypeMetadata {
+            name: value.name,
+            ty: value.ty.id,
+            docs: value.docs,
         }
     }
 
     fn from_storage_entry_metadata(
         name: ArcStr,
-        s: v15::StorageEntryMetadata<PortableForm>,
+        s: v16::StorageEntryMetadata<PortableForm>,
     ) -> StorageEntryMetadata {
         StorageEntryMetadata {
             name,
@@ -178,7 +195,7 @@ mod from_v15 {
 
     fn from_constant_metadata(
         name: ArcStr,
-        s: v15::PalletConstantMetadata<PortableForm>,
+        s: v16::PalletConstantMetadata<PortableForm>,
     ) -> ConstantMetadata {
         ConstantMetadata {
             name,
@@ -190,7 +207,7 @@ mod from_v15 {
 
     fn from_runtime_api_metadata(
         name: ArcStr,
-        s: v15::RuntimeApiMetadata<PortableForm>,
+        s: v16::RuntimeApiMetadata<PortableForm>,
     ) -> RuntimeApiMetadataInner {
         RuntimeApiMetadataInner {
             name,
@@ -208,7 +225,7 @@ mod from_v15 {
 
     fn from_runtime_api_method_metadata(
         name: ArcStr,
-        s: v15::RuntimeApiMethodMetadata<PortableForm>,
+        s: v16::RuntimeApiMethodMetadata<PortableForm>,
     ) -> RuntimeApiMethodMetadata {
         RuntimeApiMethodMetadata {
             name,
@@ -223,7 +240,7 @@ mod from_v15 {
     }
 
     fn from_runtime_api_method_param_metadata(
-        s: v15::RuntimeApiMethodParamMetadata<PortableForm>,
+        s: v16::RuntimeApiMethodParamMetadata<PortableForm>,
     ) -> RuntimeApiMethodParamMetadata {
         RuntimeApiMethodParamMetadata {
             name: s.name,
@@ -232,14 +249,16 @@ mod from_v15 {
     }
 }
 
-// Converting from our metadata repr to V15 metadata.
-mod into_v15 {
+// Converting from our metadata repr to v16 metadata.
+mod into_v16 {
+    use crate::AssociatedTypeMetadata;
+
     use super::*;
 
-    impl From<Metadata> for v15::RuntimeMetadataV15 {
+    impl From<Metadata> for v16::RuntimeMetadataV16 {
         fn from(m: Metadata) -> Self {
             let pallets = m.pallets.into_values().into_iter().map(|p| {
-                let storage = p.storage.map(|s| v15::PalletStorageMetadata {
+                let storage = p.storage.map(|s| v16::PalletStorageMetadata {
                     prefix: s.prefix,
                     entries: s
                         .entries
@@ -249,17 +268,20 @@ mod into_v15 {
                         .collect(),
                 });
 
-                v15::PalletMetadata {
+                v16::PalletMetadata {
                     name: (*p.name).to_owned(),
-                    calls: p
-                        .call_ty
-                        .map(|id| v15::PalletCallMetadata { ty: id.into() }),
-                    event: p
-                        .event_ty
-                        .map(|id| v15::PalletEventMetadata { ty: id.into() }),
-                    error: p
-                        .error_ty
-                        .map(|id| v15::PalletErrorMetadata { ty: id.into() }),
+                    calls: p.call_ty.map(|id| v16::PalletCallMetadata {
+                        ty: id.into(),
+                        deprecation_info: v16::DeprecationInfo::NotDeprecated,
+                    }),
+                    event: p.event_ty.map(|id| v16::PalletEventMetadata {
+                        ty: id.into(),
+                        deprecation_info: v16::DeprecationInfo::NotDeprecated,
+                    }),
+                    error: p.error_ty.map(|id| v16::PalletErrorMetadata {
+                        ty: id.into(),
+                        deprecation_info: v16::DeprecationInfo::NotDeprecated,
+                    }),
                     storage,
                     constants: p
                         .constants
@@ -269,10 +291,16 @@ mod into_v15 {
                         .collect(),
                     index: p.index,
                     docs: p.docs,
+                    associated_types: p
+                        .associated_types
+                        .into_iter()
+                        .map(from_associated_type_metadata)
+                        .collect(),
+                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
                 }
             });
 
-            v15::RuntimeMetadataV15 {
+            v16::RuntimeMetadataV16 {
                 types: m.types,
                 pallets: pallets.collect(),
                 ty: m.runtime_ty.into(),
@@ -283,22 +311,32 @@ mod into_v15 {
                     .into_iter()
                     .map(from_runtime_api_metadata)
                     .collect(),
-                outer_enums: v15::OuterEnums {
+                outer_enums: v16::OuterEnums {
                     call_enum_ty: m.outer_enums.call_enum_ty.into(),
                     event_enum_ty: m.outer_enums.event_enum_ty.into(),
                     error_enum_ty: m.outer_enums.error_enum_ty.into(),
                 },
-                custom: v15::CustomMetadata {
+                custom: v16::CustomMetadata {
                     map: Default::default(),
                 },
             }
         }
     }
 
+    fn from_associated_type_metadata(
+        a: AssociatedTypeMetadata,
+    ) -> v16::PalletAssociatedTypeMetadata<PortableForm> {
+        v16::PalletAssociatedTypeMetadata {
+            name: a.name,
+            ty: a.ty.into(),
+            docs: a.docs,
+        }
+    }
+
     fn from_runtime_api_metadata(
         r: RuntimeApiMetadataInner,
-    ) -> v15::RuntimeApiMetadata<PortableForm> {
-        v15::RuntimeApiMetadata {
+    ) -> v16::RuntimeApiMetadata<PortableForm> {
+        v16::RuntimeApiMetadata {
             name: (*r.name).to_owned(),
             methods: r
                 .methods
@@ -307,13 +345,14 @@ mod into_v15 {
                 .map(from_runtime_api_method_metadata)
                 .collect(),
             docs: r.docs,
+            deprecation_info: v16::DeprecationStatus::NotDeprecated,
         }
     }
 
     fn from_runtime_api_method_metadata(
         m: RuntimeApiMethodMetadata,
-    ) -> v15::RuntimeApiMethodMetadata<PortableForm> {
-        v15::RuntimeApiMethodMetadata {
+    ) -> v16::RuntimeApiMethodMetadata<PortableForm> {
+        v16::RuntimeApiMethodMetadata {
             name: (*m.name).to_owned(),
             inputs: m
                 .inputs
@@ -322,20 +361,21 @@ mod into_v15 {
                 .collect(),
             output: m.output_ty.into(),
             docs: m.docs,
+            deprecation_info: v16::DeprecationStatus::NotDeprecated,
         }
     }
 
     fn from_runtime_api_method_param_metadata(
         p: RuntimeApiMethodParamMetadata,
-    ) -> v15::RuntimeApiMethodParamMetadata<PortableForm> {
-        v15::RuntimeApiMethodParamMetadata {
+    ) -> v16::RuntimeApiMethodParamMetadata<PortableForm> {
+        v16::RuntimeApiMethodParamMetadata {
             name: p.name,
             ty: p.ty.into(),
         }
     }
 
-    fn from_extrinsic_metadata(e: ExtrinsicMetadata) -> v15::ExtrinsicMetadata<PortableForm> {
-        v15::ExtrinsicMetadata {
+    fn from_extrinsic_metadata(e: ExtrinsicMetadata) -> v16::ExtrinsicMetadata<PortableForm> {
+        v16::ExtrinsicMetadata {
             version: e.version,
             signed_extensions: e
                 .signed_extensions
@@ -351,50 +391,52 @@ mod into_v15 {
 
     fn from_signed_extension_metadata(
         s: SignedExtensionMetadata,
-    ) -> v15::SignedExtensionMetadata<PortableForm> {
-        v15::SignedExtensionMetadata {
+    ) -> v16::SignedExtensionMetadata<PortableForm> {
+        v16::SignedExtensionMetadata {
             identifier: s.identifier,
             ty: s.extra_ty.into(),
             additional_signed: s.additional_ty.into(),
         }
     }
 
-    fn from_constant_metadata(c: ConstantMetadata) -> v15::PalletConstantMetadata<PortableForm> {
-        v15::PalletConstantMetadata {
+    fn from_constant_metadata(c: ConstantMetadata) -> v16::PalletConstantMetadata<PortableForm> {
+        v16::PalletConstantMetadata {
             name: (*c.name).to_owned(),
             ty: c.ty.into(),
             value: c.value,
             docs: c.docs,
+            deprecation_info: v16::DeprecationStatus::NotDeprecated,
         }
     }
 
     fn from_storage_entry_metadata(
         s: StorageEntryMetadata,
-    ) -> v15::StorageEntryMetadata<PortableForm> {
-        v15::StorageEntryMetadata {
+    ) -> v16::StorageEntryMetadata<PortableForm> {
+        v16::StorageEntryMetadata {
             docs: s.docs,
             default: s.default,
             name: (*s.name).to_owned(),
             ty: from_storage_entry_type(s.entry_type),
             modifier: from_storage_entry_modifier(s.modifier),
+            deprecation_info: v16::DeprecationStatus::NotDeprecated,
         }
     }
 
-    fn from_storage_entry_modifier(s: StorageEntryModifier) -> v15::StorageEntryModifier {
+    fn from_storage_entry_modifier(s: StorageEntryModifier) -> v16::StorageEntryModifier {
         match s {
-            StorageEntryModifier::Default => v15::StorageEntryModifier::Default,
-            StorageEntryModifier::Optional => v15::StorageEntryModifier::Optional,
+            StorageEntryModifier::Default => v16::StorageEntryModifier::Default,
+            StorageEntryModifier::Optional => v16::StorageEntryModifier::Optional,
         }
     }
 
-    fn from_storage_entry_type(s: StorageEntryType) -> v15::StorageEntryType<PortableForm> {
+    fn from_storage_entry_type(s: StorageEntryType) -> v16::StorageEntryType<PortableForm> {
         match s {
-            StorageEntryType::Plain(ty) => v15::StorageEntryType::Plain(ty.into()),
+            StorageEntryType::Plain(ty) => v16::StorageEntryType::Plain(ty.into()),
             StorageEntryType::Map {
                 hashers,
                 key_ty,
                 value_ty,
-            } => v15::StorageEntryType::Map {
+            } => v16::StorageEntryType::Map {
                 hashers: hashers.into_iter().map(from_storage_hasher).collect(),
                 key: key_ty.into(),
                 value: value_ty.into(),
@@ -402,15 +444,15 @@ mod into_v15 {
         }
     }
 
-    fn from_storage_hasher(s: StorageHasher) -> v15::StorageHasher {
+    fn from_storage_hasher(s: StorageHasher) -> v16::StorageHasher {
         match s {
-            StorageHasher::Blake2_128 => v15::StorageHasher::Blake2_128,
-            StorageHasher::Blake2_256 => v15::StorageHasher::Blake2_256,
-            StorageHasher::Blake2_128Concat => v15::StorageHasher::Blake2_128Concat,
-            StorageHasher::Twox128 => v15::StorageHasher::Twox128,
-            StorageHasher::Twox256 => v15::StorageHasher::Twox256,
-            StorageHasher::Twox64Concat => v15::StorageHasher::Twox64Concat,
-            StorageHasher::Identity => v15::StorageHasher::Identity,
+            StorageHasher::Blake2_128 => v16::StorageHasher::Blake2_128,
+            StorageHasher::Blake2_256 => v16::StorageHasher::Blake2_256,
+            StorageHasher::Blake2_128Concat => v16::StorageHasher::Blake2_128Concat,
+            StorageHasher::Twox128 => v16::StorageHasher::Twox128,
+            StorageHasher::Twox256 => v16::StorageHasher::Twox256,
+            StorageHasher::Twox64Concat => v16::StorageHasher::Twox64Concat,
+            StorageHasher::Identity => v16::StorageHasher::Identity,
         }
     }
 }
