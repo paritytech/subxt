@@ -4,13 +4,263 @@
 
 //! Utility functions to generate a subset of the metadata.
 
+use crate::utils::ordered_map::OrderedMap;
 use crate::{
     ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
     StorageEntryType,
 };
-use alloc::collections::BTreeMap;
+use alloc::collections::{BTreeMap, VecDeque};
+use alloc::vec::Vec;
 use hashbrown::HashSet;
-use scale_info::TypeDef;
+use scale_info::{
+    form::PortableForm, PortableType, TypeDef, TypeDefArray, TypeDefBitSequence, TypeDefCompact,
+    TypeDefComposite, TypeDefSequence, TypeDefTuple, TypeDefVariant,
+};
+
+struct TypeSet {
+    seen_ids: HashSet<u32>,
+}
+
+impl TypeSet {
+    fn collect_types(&mut self, metadata: &Metadata, t: &PortableType) {
+        let mut work_set = VecDeque::from([t]);
+        while let Some(typ) = work_set.pop_front() {
+            match &typ.ty.type_def {
+                TypeDef::Composite(TypeDefComposite { fields }) => {
+                    for field in fields {
+                        if self.seen_ids.insert(field.ty.id) {
+                            let ty = resolve_typ(metadata, field.ty.id);
+                            work_set.push_back(ty);
+                        }
+                    }
+                }
+                TypeDef::Variant(TypeDefVariant { variants }) => {
+                    for variant in variants {
+                        for field in &variant.fields {
+                            if self.seen_ids.insert(field.ty.id) {
+                                let ty = resolve_typ(metadata, field.ty.id);
+                                work_set.push_back(ty);
+                            }
+                        }
+                    }
+                }
+                TypeDef::Array(TypeDefArray { len: _, type_param })
+                | TypeDef::Sequence(TypeDefSequence { type_param })
+                | TypeDef::Compact(TypeDefCompact { type_param }) => {
+                    if self.seen_ids.insert(type_param.id) {
+                        let ty = resolve_typ(metadata, type_param.id);
+                        work_set.push_back(ty);
+                    }
+                }
+                TypeDef::Tuple(TypeDefTuple { fields }) => {
+                    for field in fields {
+                        if self.seen_ids.insert(field.id) {
+                            let ty = resolve_typ(metadata, field.id);
+                            work_set.push_back(ty);
+                        }
+                    }
+                }
+                TypeDef::Primitive(_) => (),
+                TypeDef::BitSequence(TypeDefBitSequence {
+                    bit_store_type,
+                    bit_order_type,
+                }) => {
+                    for typ in [bit_order_type, bit_store_type] {
+                        if self.seen_ids.insert(typ.id) {
+                            let ty = resolve_typ(metadata, typ.id);
+                            work_set.push_back(ty);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn update_types(metadata: &Metadata, map_ids: BTreeMap<u32, u32>, t: &PortableType) {
+    let mut work_set = VecDeque::from([t]);
+    while let Some(typ) = work_set.pop_front() {
+        match &typ.ty.type_def {
+            TypeDef::Composite(TypeDefComposite { fields }) => {
+                for field in fields {
+                    let ty = resolve_typ(metadata, field.ty.id);
+                    work_set.push_back(ty);
+                }
+            }
+            TypeDef::Variant(TypeDefVariant { variants }) => {
+                for variant in variants {
+                    for field in &variant.fields {
+                        let ty = resolve_typ(metadata, field.ty.id);
+                        work_set.push_back(ty);
+                    }
+                }
+            }
+            TypeDef::Array(TypeDefArray { len: _, type_param })
+            | TypeDef::Sequence(TypeDefSequence { type_param })
+            | TypeDef::Compact(TypeDefCompact { type_param }) => {
+                let ty = resolve_typ(metadata, type_param.id);
+                work_set.push_back(ty);
+            }
+            TypeDef::Tuple(TypeDefTuple { fields }) => {
+                for field in fields {
+                    let ty = resolve_typ(metadata, field.id);
+                    work_set.push_back(ty);
+                }
+            }
+            TypeDef::Primitive(_) => (),
+            TypeDef::BitSequence(TypeDefBitSequence {
+                bit_store_type,
+                bit_order_type,
+            }) => {
+                for typ in [bit_order_type, bit_store_type] {
+                    let ty = resolve_typ(metadata, typ.id);
+                    work_set.push_back(ty);
+                }
+            }
+        }
+    }
+}
+
+fn resolve_typ(metadata: &Metadata, typ: u32) -> &PortableType {
+    metadata
+        .types
+        .types
+        .get(typ as usize)
+        .expect("Metadata should contain enum type in registry")
+}
+/// Collect all type IDs needed to represent the provided pallet.
+fn collect_pallet_types2(
+    pallet: &PalletMetadataInner,
+    seen_set: &mut TypeSet,
+    metadata: &Metadata,
+) {
+    let mut type_ids = Vec::new();
+    if let Some(storage) = &pallet.storage {
+        for entry in storage.entries() {
+            match entry.entry_type {
+                StorageEntryType::Plain(ty) => {
+                    type_ids.push(ty);
+                }
+                StorageEntryType::Map {
+                    key_ty, value_ty, ..
+                } => {
+                    type_ids.push(key_ty);
+                    type_ids.push(value_ty);
+                }
+            }
+        }
+    }
+
+    if let Some(ty) = pallet.call_ty {
+        type_ids.push(ty);
+    }
+
+    if let Some(ty) = pallet.event_ty {
+        type_ids.push(ty);
+    }
+
+    for constant in pallet.constants.values() {
+        type_ids.push(constant.ty);
+    }
+
+    if let Some(ty) = pallet.error_ty {
+        type_ids.push(ty);
+    }
+    for id in type_ids {
+        if seen_set.seen_ids.insert(id) {
+            let typ = resolve_typ(metadata, id);
+            seen_set.collect_types(metadata, typ)
+        }
+    }
+}
+fn update_filtered_pallet(pallet: &mut PalletMetadataInner, seen_set: &mut TypeSet) {
+    pallet.storage.as_mut().and_then(|storage| {
+        storage.retain_entries(|entry| match entry.entry_type {
+            StorageEntryType::Plain(ty) => seen_set.seen_ids.contains(&ty),
+            StorageEntryType::Map {
+                key_ty, value_ty, ..
+            } => seen_set.seen_ids.contains(&key_ty) && seen_set.seen_ids.contains(&value_ty),
+        });
+        if storage.entries().len() == 0 {
+            None
+        } else {
+            Some(storage)
+        }
+    });
+    pallet.storage = None;
+    pallet.call_ty.and_then(|ty| {
+        if seen_set.seen_ids.contains(&ty) {
+            Some(ty)
+        } else {
+            None
+        }
+    });
+
+    pallet.event_ty.and_then(|ty| {
+        if seen_set.seen_ids.contains(&ty) {
+            Some(ty)
+        } else {
+            None
+        }
+    });
+
+    pallet.error_ty.and_then(|ty| {
+        if seen_set.seen_ids.contains(&ty) {
+            Some(ty)
+        } else {
+            None
+        }
+    });
+
+    pallet
+        .constants
+        .retain(|value| seen_set.seen_ids.contains(&value.ty));
+
+    pallet.constants = OrderedMap::new();
+}
+
+/// Collect all type IDs needed to represent the runtime APIs.
+fn collect_runtime_api_types2(
+    api: &RuntimeApiMetadataInner,
+    seen_set: &mut TypeSet,
+    metadata: &Metadata,
+) {
+    for method in api.methods.values() {
+        for input in &method.inputs {
+            if seen_set.seen_ids.insert(input.ty) {
+                let typ = resolve_typ(metadata, input.ty);
+                seen_set.collect_types(metadata, typ);
+            }
+        }
+        if seen_set.seen_ids.insert(method.output_ty) {
+            let typ = resolve_typ(metadata, method.output_ty);
+            seen_set.collect_types(metadata, typ);
+        }
+    }
+}
+fn collect_extrinsic_types2(
+    extrinsic: &ExtrinsicMetadata,
+    seen_set: &mut TypeSet,
+    metadata: &Metadata,
+) {
+    let mut ids = Vec::from([
+        extrinsic.address_ty,
+        extrinsic.call_ty,
+        extrinsic.signature_ty,
+        extrinsic.extra_ty,
+    ]);
+
+    for signed in &extrinsic.signed_extensions {
+        ids.push(signed.extra_ty);
+        ids.push(signed.additional_ty);
+    }
+    for id in ids {
+        if seen_set.seen_ids.insert(id) {
+            let typ = resolve_typ(metadata, id);
+            seen_set.collect_types(metadata, typ)
+        }
+    }
+}
 
 /// Collect all type IDs needed to represent the provided pallet.
 fn collect_pallet_types(pallet: &PalletMetadataInner, type_ids: &mut HashSet<u32>) {
@@ -178,6 +428,23 @@ where
     variant.variants.retain(|v| filter(&v.name));
 }
 
+fn collect_variants_in_type2<F>(seen_set: &mut TypeSet, metadata: &Metadata, id: u32, mut filter: F)
+where
+    F: FnMut(&TypeDef<PortableForm>) -> (),
+{
+    let ty = metadata
+        .types
+        .types
+        .get(id as usize)
+        .expect("Metadata should contain enum type in registry");
+
+    filter(&ty.ty.type_def);
+
+    seen_set.seen_ids.insert(id);
+
+    seen_set.collect_types(metadata, ty);
+}
+
 /// Strip any pallets out of the outer enum types that aren't the ones we want to keep.
 fn retain_pallets_in_runtime_outer_types<F>(metadata: &mut Metadata, mut filter: F)
 where
@@ -201,6 +468,129 @@ where
 /// Panics if the [`scale_info::PortableRegistry`] did not retain all needed types,
 /// or the metadata does not contain the "sp_runtime::DispatchError" type.
 pub fn retain_metadata<F, G>(
+    metadata: &mut Metadata,
+    mut pallets_filter: F,
+    mut runtime_apis_filter: G,
+) where
+    F: FnMut(&str) -> bool,
+    G: FnMut(&str) -> bool,
+{
+    let mut type_set = TypeSet {
+        seen_ids: HashSet::new(),
+    };
+    collect_variants_in_type2(
+        &mut type_set,
+        &metadata,
+        metadata.outer_enums.call_enum_ty,
+        |type_def| {
+            let TypeDef::Variant(_) = type_def else {
+                panic!("Metadata type is expected to be a variant type");
+            };
+        },
+    );
+    collect_variants_in_type2(
+        &mut type_set,
+        &metadata,
+        metadata.outer_enums.event_enum_ty,
+        |type_def| {
+            let TypeDef::Variant(_) = type_def else {
+                panic!("Metadata type is expected to be a variant type");
+            };
+        },
+    );
+    collect_variants_in_type2(
+        &mut type_set,
+        &metadata,
+        metadata.outer_enums.error_enum_ty,
+        |type_def| {
+            let TypeDef::Variant(_) = type_def else {
+                panic!("Metadata type is expected to be a variant type");
+            };
+        },
+    );
+
+    for pallet in metadata.pallets.values() {
+        let should_retain = pallets_filter(&pallet.name);
+        if should_retain {
+            collect_pallet_types2(pallet, &mut type_set, &metadata);
+        }
+    }
+
+    for api in metadata.apis.values() {
+        let should_retain = runtime_apis_filter(&api.name);
+        if should_retain {
+            collect_runtime_api_types2(api, &mut type_set, metadata);
+        }
+    }
+
+    // Additionally, subxt depends on the `DispatchError` type existing; we use the same
+    // logic here that is used when building our `Metadata`.
+    let dispatch_error_ty = metadata
+        .types
+        .types
+        .iter()
+        .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
+        .expect("Metadata must contain sp_runtime::DispatchError");
+    type_set.seen_ids.insert(dispatch_error_ty.id);
+    type_set.seen_ids.insert(metadata.runtime_ty);
+    collect_extrinsic_types2(&metadata.extrinsic, &mut type_set, &metadata);
+
+    for pallet in metadata.pallets.values_mut() {
+        if !pallets_filter(&pallet.name) {
+            update_filtered_pallet(pallet, &mut type_set);
+        }
+    }
+
+    metadata.pallets.retain(|pallet| {
+        let should_retain = pallets_filter(&pallet.name);
+        if !should_retain {
+            !matches!(
+                pallet,
+                PalletMetadataInner {
+                    storage: None,
+                    call_ty: None,
+                    event_ty: None,
+                    error_ty: None,
+                    constants: _,
+                    ..
+                }
+            )
+        } else {
+            should_retain
+        }
+    });
+    metadata.apis.retain(|api| {
+        let should_retain = runtime_apis_filter(&api.name);
+        should_retain
+    });
+
+    metadata.pallets_by_index = metadata
+        .pallets
+        .values()
+        .iter()
+        .enumerate()
+        .map(|(pos, p)| (p.index, pos))
+        .collect();
+
+    let map_ids = metadata.types.retain(|id| type_set.seen_ids.contains(&id));
+    // for (k, v) in map_ids.iter() {
+    //     if *v == 96 {
+    //         dbg!(k);
+    //         dbg!(metadata.types.resolve(*k));
+    //         dbg!(metadata.types.resolve(*v));
+    //     }
+    // }
+
+    update_outer_enums(&mut metadata.outer_enums, &map_ids);
+    for pallets in metadata.pallets.values_mut() {
+        update_pallet_types(pallets, &map_ids);
+    }
+    update_extrinsic_types(&mut metadata.extrinsic, &map_ids);
+    update_type(&mut metadata.runtime_ty, &map_ids);
+    update_runtime_api_types(metadata.apis.values_mut(), &map_ids);
+}
+
+pub fn retain_metadata_old<F, G>(
     metadata: &mut Metadata,
     mut pallets_filter: F,
     mut runtime_apis_filter: G,
@@ -276,13 +666,12 @@ pub fn retain_metadata<F, G>(
     update_type(&mut metadata.runtime_ty, &map_ids);
     update_runtime_api_types(metadata.apis.values_mut(), &map_ids);
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::Metadata;
     use assert_matches::assert_matches;
-    use codec::Decode;
+    use codec::{Decode, Encode};
     use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
     use std::{fs, path::Path};
 
@@ -306,7 +695,6 @@ mod tests {
         // Retain one pallet at a time ensuring the test does not panic.
         for pallet in metadata_cache.pallets() {
             let mut metadata = metadata_cache.clone();
-
             retain_metadata(
                 &mut metadata,
                 |pallet_name| pallet_name == pallet.name(),
@@ -356,4 +744,84 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn example() -> Result<(), Box<dyn std::error::Error>> {
+        let files = [(172, "full", "./test_data/metadata.scale.txt")];
+
+        for (type_id, name, file) in files {
+            println!("###################################");
+            println!("Metadata: {name}");
+            println!("###################################\n");
+
+            let md_file = std::fs::read(file).expect("cannot read metadata");
+            let md = Metadata::decode(&mut &*md_file).expect("cannot decode metadata");
+
+            let outer_enum_hashes = crate::OuterEnumHashes::empty();
+            let hash =
+                crate::utils::validation::get_type_hash(md.types(), type_id, &outer_enum_hashes);
+            let mut new_md = md.clone();
+            retain_metadata(
+                &mut new_md,
+                |name| {
+                    let list = "Balances,Timestamp,Contracts,ContractsEvm,System"
+                        .split(",")
+                        .collect::<Vec<&str>>();
+                    list.iter().any(|s| *s == name)
+                },
+                |_| true,
+            );
+            let outer_enum_hashes = crate::OuterEnumHashes::empty();
+            let new_hash = crate::utils::validation::get_type_hash(
+                new_md.types(),
+                type_id,
+                &outer_enum_hashes,
+            );
+
+            // let mut old_md = md.clone();
+            // retain_metadata_old(
+            //     &mut old_md,
+            //     |name| {
+            //         let list = "Balances,Timestamp,Contracts,ContractsEvm,System"
+            //             .split(",")
+            //             .collect::<Vec<&str>>();
+            //         list.iter().any(|s| *s == name)
+            //     },
+            //     |_| true,
+            // );
+
+            for typ in &new_md.types.types {
+                assert_eq!(
+                    new_md.type_hash(typ.id),
+                    md.type_hash(typ.id),
+                    "type_id {} {} \n type {:?} {:?}",
+                    typ.id,
+                    typ.ty.path.ident().unwrap(),
+                    typ.ty.type_def,
+                    md.types.resolve(typ.id).unwrap(),
+                );
+            }
+
+            println!("\n{:?}\n{:?}\n", hash, new_hash);
+        }
+
+        Ok(())
+    }
+    // #[test]
+    // fn retain_size() {
+    //     let metadata_cache = load_metadata();
+
+    //     // Retain one pallet at a time ensuring the test does not panic.
+    //     for pallet in metadata_cache.pallets() {
+    //         let mut metadata = metadata_cache.clone();
+    //         let cloned_md = metadata.clone();
+    //         retain_metadata(
+    //             &mut metadata,
+    //             |pallet_name| pallet_name == pallet.name(),
+    //             |_| true,
+    //         );
+    //         (cloned_md.types.types.len(), metadata.types.types.len());
+    //     }
+    //     assert!(false)
+    // }
 }
