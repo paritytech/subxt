@@ -4,6 +4,8 @@
 
 //! Utility functions to generate a subset of the metadata.
 
+use std::collections::BTreeSet;
+
 use crate::utils::ordered_map::OrderedMap;
 use crate::{
     ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
@@ -18,7 +20,7 @@ use scale_info::{
 };
 
 struct TypeSet {
-    seen_ids: HashSet<u32>,
+    seen_ids: BTreeSet<u32>,
 }
 
 impl TypeSet {
@@ -187,7 +189,7 @@ fn update_filtered_pallet(pallet: &mut PalletMetadataInner, seen_set: &mut TypeS
             Some(storage)
         }
     });
-    pallet.storage = None;
+
     pallet.call_ty.and_then(|ty| {
         if seen_set.seen_ids.contains(&ty) {
             Some(ty)
@@ -215,8 +217,6 @@ fn update_filtered_pallet(pallet: &mut PalletMetadataInner, seen_set: &mut TypeS
     pallet
         .constants
         .retain(|value| seen_set.seen_ids.contains(&value.ty));
-
-    pallet.constants = OrderedMap::new();
 }
 
 /// Collect all type IDs needed to represent the runtime APIs.
@@ -476,7 +476,7 @@ pub fn retain_metadata<F, G>(
     G: FnMut(&str) -> bool,
 {
     let mut type_set = TypeSet {
-        seen_ids: HashSet::new(),
+        seen_ids: BTreeSet::new(),
     };
     collect_variants_in_type2(
         &mut type_set,
@@ -542,23 +542,20 @@ pub fn retain_metadata<F, G>(
     }
 
     metadata.pallets.retain(|pallet| {
-        let should_retain = pallets_filter(&pallet.name);
-        if !should_retain {
-            !matches!(
+        pallets_filter(&pallet.name)
+            || !matches!(
                 pallet,
                 PalletMetadataInner {
                     storage: None,
                     call_ty: None,
                     event_ty: None,
                     error_ty: None,
-                    constants: _,
+                    constants: map,
                     ..
-                }
+                } if map.is_empty()
             )
-        } else {
-            should_retain
-        }
     });
+
     metadata.apis.retain(|api| {
         let should_retain = runtime_apis_filter(&api.name);
         should_retain
@@ -571,15 +568,12 @@ pub fn retain_metadata<F, G>(
         .enumerate()
         .map(|(pos, p)| (p.index, pos))
         .collect();
-
+    let mut set = BTreeSet::new();
+    for i in type_set.seen_ids.iter() {
+        metadata.types.resolve(*i).map(|x| set.insert(x));
+    }
+    dbg!(set.len(), type_set.seen_ids.len());
     let map_ids = metadata.types.retain(|id| type_set.seen_ids.contains(&id));
-    // for (k, v) in map_ids.iter() {
-    //     if *v == 96 {
-    //         dbg!(k);
-    //         dbg!(metadata.types.resolve(*k));
-    //         dbg!(metadata.types.resolve(*v));
-    //     }
-    // }
 
     update_outer_enums(&mut metadata.outer_enums, &map_ids);
     for pallets in metadata.pallets.values_mut() {
@@ -656,7 +650,6 @@ pub fn retain_metadata_old<F, G>(
     // Now, keep the type IDs we've asked for. This recursively keeps any types referenced from these.
     // This will return a map from old to new type ID, because IDs may change.
     let map_ids = metadata.types.retain(|id| type_ids.contains(&id));
-
     // And finally, we can go and update all of our type IDs in the metadata as a result of this:
     update_outer_enums(&mut metadata.outer_enums, &map_ids);
     for pallets in metadata.pallets.values_mut() {
@@ -747,7 +740,10 @@ mod tests {
 
     #[test]
     fn example() -> Result<(), Box<dyn std::error::Error>> {
-        let files = [(172, "full", "./test_data/metadata.scale.txt")];
+        let files = [
+            (172, "full", "./test_data/metadata1.scale"),
+            (172, "full-original", "./test_data/metadata.scale.txt"),
+        ];
 
         for (type_id, name, file) in files {
             println!("###################################");
@@ -794,7 +790,7 @@ mod tests {
                 assert_eq!(
                     new_md.type_hash(typ.id),
                     md.type_hash(typ.id),
-                    "type_id {} {} \n type {:?} {:?}",
+                    "type_id {} {} \n type {:?}\n old_type {:?}",
                     typ.id,
                     typ.ty.path.ident().unwrap(),
                     typ.ty.type_def,
@@ -807,21 +803,30 @@ mod tests {
 
         Ok(())
     }
-    // #[test]
-    // fn retain_size() {
-    //     let metadata_cache = load_metadata();
+    #[test]
+    fn retain_size() {
+        let metadata_cache = load_metadata();
 
-    //     // Retain one pallet at a time ensuring the test does not panic.
-    //     for pallet in metadata_cache.pallets() {
-    //         let mut metadata = metadata_cache.clone();
-    //         let cloned_md = metadata.clone();
-    //         retain_metadata(
-    //             &mut metadata,
-    //             |pallet_name| pallet_name == pallet.name(),
-    //             |_| true,
-    //         );
-    //         (cloned_md.types.types.len(), metadata.types.types.len());
-    //     }
-    //     assert!(false)
-    // }
+        // Retain one pallet at a time ensuring the test does not panic.
+        for pallet in metadata_cache.pallets() {
+            let metadata = metadata_cache.clone();
+            let mut new_retainer = metadata.clone();
+            retain_metadata(
+                &mut new_retainer,
+                |pallet_name| pallet_name == pallet.name(),
+                |_| true,
+            );
+            let mut old_retainer = metadata.clone();
+            retain_metadata_old(
+                &mut old_retainer,
+                |pallet_name| pallet_name == pallet.name(),
+                |_| true,
+            );
+            dbg!(
+                metadata.types.types.len(),
+                new_retainer.types.types.len(),
+                old_retainer.types.types.len()
+            );
+        }
+    }
 }
