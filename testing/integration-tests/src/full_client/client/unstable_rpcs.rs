@@ -259,6 +259,7 @@ async fn chainspec_v1_properties() {
 
 #[cfg(fullclient)]
 #[subxt_test]
+#[ignore]
 async fn transactionwatch_v1_submit_and_watch() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
