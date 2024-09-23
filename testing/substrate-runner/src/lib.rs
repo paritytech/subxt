@@ -254,7 +254,7 @@ fn try_find_substrate_port_from_output(
 
     let mut log = String::new();
 
-    for line in BufReader::new(r).lines().take(50) {
+    for line in BufReader::new(r).lines().take(100) {
         let line = line.expect("failed to obtain next line from stdout for port discovery");
 
         log.push_str(&line);
