@@ -88,7 +88,9 @@ async fn block_subscriptions_are_consistent_with_eachother() -> Result<(), subxt
     Ok(())
 }
 
+// TODO: flaky test https://github.com/paritytech/subxt/issues/1782.
 #[subxt_test]
+#[ignore]
 async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
