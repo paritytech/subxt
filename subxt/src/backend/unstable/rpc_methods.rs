@@ -815,19 +815,6 @@ pub(crate) mod unsigned_number_as_string {
         deserializer.deserialize_any(NumberVisitor(std::marker::PhantomData))
     }
 
-    #[cfg(test)]
-    pub mod for_test {
-        use serde::ser::Serializer;
-
-        /// Serialize a number as string
-        pub fn serialize<S>(item: &u64, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            serializer.serialize_str(&item.to_string())
-        }
-    }
-
     struct NumberVisitor<N>(std::marker::PhantomData<N>);
 
     impl<'de, N: From<u64>> Visitor<'de> for NumberVisitor<N> {
@@ -844,6 +831,18 @@ pub(crate) mod unsigned_number_as_string {
 
         fn visit_u64<E: serde::de::Error>(self, v: u64) -> Result<Self::Value, E> {
             Ok(v.into())
+        }
+    }
+    #[cfg(test)]
+    pub mod for_test {
+        use serde::ser::Serializer;
+
+        /// Serialize a number as string
+        pub fn serialize<S>(item: &u64, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_str(&item.to_string())
         }
     }
 }
@@ -879,29 +878,6 @@ pub(crate) mod hashmap_as_tuple_list {
         BH: BuildHasher + Default,
     {
         deserializer.deserialize_any(HashMapVisitor(PhantomData))
-    }
-
-    #[cfg(test)]
-    pub mod for_test {
-        use std::collections::HashMap;
-        use std::hash::Hash;
-
-        use serde::ser::{Serialize, SerializeSeq, Serializer};
-
-        /// Serialize hashmap as list of tuples
-        pub fn serialize<S, K: Eq + Hash + Serialize, V: Serialize>(
-            item: &HashMap<K, V>,
-            serializer: S,
-        ) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            let mut seq = serializer.serialize_seq(None)?;
-            for i in item {
-                seq.serialize_element(&i)?;
-            }
-            seq.end()
-        }
     }
 
     #[allow(clippy::type_complexity)]
@@ -943,6 +919,28 @@ pub(crate) mod hashmap_as_tuple_list {
                 map.insert(key, value);
             }
             Ok(map)
+        }
+    }
+    #[cfg(test)]
+    pub mod for_test {
+        use std::collections::HashMap;
+        use std::hash::Hash;
+
+        use serde::ser::{Serialize, SerializeSeq, Serializer};
+
+        /// Serialize hashmap as list of tuples
+        pub fn serialize<S, K: Eq + Hash + Serialize, V: Serialize>(
+            item: &HashMap<K, V>,
+            serializer: S,
+        ) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let mut seq = serializer.serialize_seq(None)?;
+            for i in item {
+                seq.serialize_element(&i)?;
+            }
+            seq.end()
         }
     }
 }

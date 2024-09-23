@@ -358,10 +358,8 @@ mod test {
         }
     }
     pub mod rpc_client {
-
-        use std::time::Duration;
-
         use super::*;
+        use std::time::Duration;
 
         pub type SubscriptionHandler = Box<
             dyn for<'a> Fn(
@@ -389,16 +387,16 @@ mod test {
         }
 
         impl<T> Message<T> {
-            pub fn single(self) -> T {
+            pub fn unwrap_single(self) -> T {
                 match self {
                     Self::Single(s) => s,
-                    _ => todo!(),
+                    _ => panic!(),
                 }
             }
-            pub fn many(self) -> RpcResult<Vec<T>> {
+            pub fn unwrap_many(self) -> RpcResult<Vec<T>> {
                 match self {
                     Self::Many(s) => s,
-                    _ => todo!(),
+                    _ => panic!(),
                 }
             }
         }
@@ -426,12 +424,7 @@ mod test {
                         Message::Single(item.map(|x| serde_json::to_string(&x).unwrap()))
                     }
                 };
-                match self.items.entry(key) {
-                    std::collections::hash_map::Entry::Occupied(v) => v.into_mut().push_back(item),
-                    std::collections::hash_map::Entry::Vacant(e) => {
-                        e.insert(VecDeque::from([item]));
-                    }
-                }
+                self.items.entry(key).or_default().push_back(item);
             }
 
             pub fn pop(&mut self, key: Vec<u8>) -> Message<Item> {
@@ -631,7 +624,7 @@ mod test {
                             let params = params.map(|p| p.get().to_string());
                             let rpc_params = jsonrpsee::types::Params::new(params.as_deref());
                             let key: sp_core::Bytes = rpc_params.sequence().next().unwrap();
-                            let value = data.pop(key.0).single();
+                            let value = data.pop(key.0).unwrap_single();
                             value.map(|v| serde_json::value::RawValue::from_string(v).unwrap())
                         })
                     }),
@@ -640,7 +633,7 @@ mod test {
                     "chain_getBlockHash",
                     Box::new(|data, _, _| {
                         Box::pin(async move {
-                            let value = data.pop("chain_getBlockHash".into()).single();
+                            let value = data.pop("chain_getBlockHash".into()).unwrap_single();
                             value.map(|v| serde_json::value::RawValue::from_string(v).unwrap())
                         })
                     }),
@@ -832,7 +825,9 @@ mod test {
                     "state_subscribeRuntimeVersion",
                     Box::new(|data, _, _| {
                         Box::pin(async move {
-                            let values = data.pop("state_subscribeRuntimeVersion".into()).many();
+                            let values = data
+                                .pop("state_subscribeRuntimeVersion".into())
+                                .unwrap_many();
                             let values: RpcResult<Vec<RpcResult<Box<RawValue>>>> =
                                 values.map(|v| {
                                     v.into_iter()
@@ -1039,7 +1034,7 @@ mod test {
                     "chainHead_v1_storage",
                     Box::new(|data, sub, _| {
                         Box::pin(async move {
-                            let response = data.pop("method_response".into()).single();
+                            let response = data.pop("method_response".into()).unwrap_single();
                             if response.is_ok() {
                                 let item = data.pop("chainHead_v1_storage".into());
                                 if let Some(sub) = sub {
@@ -1110,7 +1105,7 @@ mod test {
                     "chainHead_v1_storage",
                     Box::new(|data, sub, _| {
                         Box::pin(async move {
-                            let response = data.pop("method_response".into()).single();
+                            let response = data.pop("method_response".into()).unwrap_single();
                             if response.is_ok() {
                                 let item = data.pop("chainHead_v1_storage".into());
                                 if let Some(sub) = sub {
@@ -1232,7 +1227,7 @@ mod test {
                     "chainHead_v1_storage",
                     Box::new(|data, sub, _| {
                         Box::pin(async move {
-                            let response = data.pop("method_response".into()).single();
+                            let response = data.pop("method_response".into()).unwrap_single();
                             if response.is_ok() {
                                 let item = data.pop("chainHead_v1_storage".into());
                                 if let Some(sub) = sub {
@@ -1248,7 +1243,7 @@ mod test {
                     "chainHead_v1_continue",
                     Box::new(|data, sub, _| {
                         Box::pin(async move {
-                            let response = data.pop("continue_response".into()).single();
+                            let response = data.pop("continue_response".into()).unwrap_single();
                             if response.is_ok() {
                                 let item = data.pop("chainHead_v1_storage".into());
                                 if let Some(sub) = sub {
@@ -1336,7 +1331,8 @@ mod test {
                     "chainSpec_v1_genesisHash",
                     Box::new(|data, _, _| {
                         Box::pin(async move {
-                            let response = data.pop("chainSpec_v1_genesisHash".into()).single();
+                            let response =
+                                data.pop("chainSpec_v1_genesisHash".into()).unwrap_single();
                             response.map(|x| RawValue::from_string(x).unwrap())
                         })
                     }),
@@ -1412,7 +1408,7 @@ mod test {
                                             .swap(false, std::sync::atomic::Ordering::SeqCst);
                                     }
                                 }
-                                let response = data.pop("method_response".into()).single();
+                                let response = data.pop("method_response".into()).unwrap_single();
                                 if response.is_ok() {
                                     let item = data.pop("chainHead_v1_storage".into());
                                     if let Some(sub) = sub {
