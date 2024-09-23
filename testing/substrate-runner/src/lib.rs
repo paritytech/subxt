@@ -102,12 +102,11 @@ impl SubstrateNodeBuilder {
 
         // Wait for RPC port to be logged (it's logged to stderr).
         let stderr = proc.stderr.take().unwrap();
-        let (ws_port, p2p_address, p2p_port, log) = try_find_substrate_port_from_output(stderr);
+        let running_node = try_find_substrate_port_from_output(stderr);
 
-        let ws_port = ws_port.ok_or_else(|| Error::CouldNotExtractPort(log.clone()))?;
-        let p2p_address =
-            p2p_address.ok_or_else(|| Error::CouldNotExtractP2pAddress(log.clone()))?;
-        let p2p_port = p2p_port.ok_or_else(|| Error::CouldNotExtractP2pPort(log.clone()))?;
+        let ws_port = running_node.ws_port()?;
+        let p2p_address = running_node.p2p_address()?;
+        let p2p_port = running_node.p2p_port()?;
 
         Ok(SubstrateNode {
             binary_path: bin_path,
@@ -245,9 +244,7 @@ impl Drop for SubstrateNode {
 
 // Consume a stderr reader from a spawned substrate command and
 // locate the port number that is logged out to it.
-fn try_find_substrate_port_from_output(
-    r: impl Read + Send + 'static,
-) -> (Option<u16>, Option<String>, Option<u32>, String) {
+fn try_find_substrate_port_from_output(r: impl Read + Send + 'static) -> SubstrateNodeInfo {
     let mut port = None;
     let mut p2p_address = None;
     let mut p2p_port = None;
@@ -258,6 +255,7 @@ fn try_find_substrate_port_from_output(
         let line = line.expect("failed to obtain next line from stdout for port discovery");
 
         log.push_str(&line);
+        log.push('\n');
 
         // Parse the port lines
         let line_port = line
@@ -308,5 +306,37 @@ fn try_find_substrate_port_from_output(
         }
     }
 
-    (port, p2p_address, p2p_port, log)
+    SubstrateNodeInfo {
+        ws_port: port,
+        p2p_address,
+        p2p_port,
+        log,
+    }
+}
+
+/// Data extracted from the running node's stdout.
+#[derive(Debug)]
+pub struct SubstrateNodeInfo {
+    ws_port: Option<u16>,
+    p2p_address: Option<String>,
+    p2p_port: Option<u32>,
+    log: String,
+}
+
+impl SubstrateNodeInfo {
+    pub fn ws_port(&self) -> Result<u16, Error> {
+        self.ws_port
+            .ok_or_else(|| Error::CouldNotExtractPort(self.log.clone()))
+    }
+
+    pub fn p2p_address(&self) -> Result<String, Error> {
+        self.p2p_address
+            .clone()
+            .ok_or_else(|| Error::CouldNotExtractP2pAddress(self.log.clone()))
+    }
+
+    pub fn p2p_port(&self) -> Result<u32, Error> {
+        self.p2p_port
+            .ok_or_else(|| Error::CouldNotExtractP2pPort(self.log.clone()))
+    }
 }
