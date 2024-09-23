@@ -102,11 +102,11 @@ impl SubstrateNodeBuilder {
 
         // Wait for RPC port to be logged (it's logged to stderr).
         let stderr = proc.stderr.take().unwrap();
-        let (ws_port, p2p_address, p2p_port) = try_find_substrate_port_from_output(stderr);
+        let (ws_port, p2p_address, p2p_port, log) = try_find_substrate_port_from_output(stderr);
 
-        let ws_port = ws_port.ok_or(Error::CouldNotExtractPort)?;
-        let p2p_address = p2p_address.ok_or(Error::CouldNotExtractP2pAddress)?;
-        let p2p_port = p2p_port.ok_or(Error::CouldNotExtractP2pPort)?;
+        let ws_port = ws_port.ok_or_else(|| Error::CouldNotExtractPort(log.clone()))?;
+        let p2p_address = p2p_address.ok_or_else(|| Error::CouldNotExtractP2pAddress(log.clone()))?;
+        let p2p_port = p2p_port.ok_or_else(|| Error::CouldNotExtractP2pPort(log.clone()))?;
 
         Ok(SubstrateNode {
             binary_path: bin_path,
@@ -246,13 +246,17 @@ impl Drop for SubstrateNode {
 // locate the port number that is logged out to it.
 fn try_find_substrate_port_from_output(
     r: impl Read + Send + 'static,
-) -> (Option<u16>, Option<String>, Option<u32>) {
+) -> (Option<u16>, Option<String>, Option<u32>, String) {
     let mut port = None;
     let mut p2p_address = None;
     let mut p2p_port = None;
 
+    let mut log = String::new();
+
     for line in BufReader::new(r).lines().take(50) {
         let line = line.expect("failed to obtain next line from stdout for port discovery");
+
+        log.push_str(&line);
 
         // Parse the port lines
         let line_port = line
@@ -303,5 +307,5 @@ fn try_find_substrate_port_from_output(
         }
     }
 
-    (port, p2p_address, p2p_port)
+    (port, p2p_address, p2p_port, log)
 }
