@@ -105,7 +105,8 @@ impl SubstrateNodeBuilder {
         let (ws_port, p2p_address, p2p_port, log) = try_find_substrate_port_from_output(stderr);
 
         let ws_port = ws_port.ok_or_else(|| Error::CouldNotExtractPort(log.clone()))?;
-        let p2p_address = p2p_address.ok_or_else(|| Error::CouldNotExtractP2pAddress(log.clone()))?;
+        let p2p_address =
+            p2p_address.ok_or_else(|| Error::CouldNotExtractP2pAddress(log.clone()))?;
         let p2p_port = p2p_port.ok_or_else(|| Error::CouldNotExtractP2pPort(log.clone()))?;
 
         Ok(SubstrateNode {
