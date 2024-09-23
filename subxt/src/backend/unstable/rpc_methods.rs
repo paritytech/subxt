@@ -459,7 +459,11 @@ pub struct RuntimeSpec {
     ///
     /// **Note:** In Substrate, the keys in the apis field consists of the hexadecimal-encoded 8-bytes blake2
     /// hash of the name of the API. For example, the `TaggedTransactionQueue` API is 0xd2bc9897eed08f15.
-    #[serde(with = "hashmap_as_tuple_list")]
+    #[serde(deserialize_with = "hashmap_as_tuple_list::deserialize")]
+    #[cfg_attr(
+        test,
+        serde(serialize_with = "hashmap_as_tuple_list::for_test::serialize")
+    )]
     pub apis: HashMap<String, u32>,
 }
 
@@ -770,7 +774,11 @@ pub struct TransactionBlockDetails<Hash> {
     /// The block hash.
     pub hash: Hash,
     /// The index of the transaction in the block.
-    #[serde(with = "unsigned_number_as_string")]
+    #[serde(deserialize_with = "unsigned_number_as_string::deserialize")]
+    #[cfg_attr(
+        test,
+        serde(serialize_with = "unsigned_number_as_string::for_test::serialize")
+    )]
     pub index: u64,
 }
 
@@ -799,9 +807,6 @@ pub(crate) mod unsigned_number_as_string {
     use serde::de::{Deserializer, Visitor};
     use std::fmt;
 
-    #[cfg(test)]
-    use serde::ser::Serializer;
-
     /// Deserialize a number from a string or number.
     pub fn deserialize<'de, N: From<u64>, D>(deserializer: D) -> Result<N, D::Error>
     where
@@ -810,14 +815,19 @@ pub(crate) mod unsigned_number_as_string {
         deserializer.deserialize_any(NumberVisitor(std::marker::PhantomData))
     }
 
-    /// Serialize a number as string
     #[cfg(test)]
-    pub fn serialize<S>(item: &u64, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&item.to_string())
+    pub mod for_test {
+        use serde::ser::Serializer;
+
+        /// Serialize a number as string
+        pub fn serialize<S>(item: &u64, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_str(&item.to_string())
+        }
     }
+
     struct NumberVisitor<N>(std::marker::PhantomData<N>);
 
     impl<'de, N: From<u64>> Visitor<'de> for NumberVisitor<N> {
@@ -860,9 +870,6 @@ pub(crate) mod hashmap_as_tuple_list {
     use std::hash::{BuildHasher, Hash};
     use std::marker::PhantomData;
 
-    #[cfg(test)]
-    use serde::ser::{Serialize, SerializeSeq, Serializer};
-
     /// Deserialize a [`HashMap`] from a list of tuples or object
     pub fn deserialize<'de, K, V, BH, D>(deserializer: D) -> Result<HashMap<K, V, BH>, D::Error>
     where
@@ -874,20 +881,27 @@ pub(crate) mod hashmap_as_tuple_list {
         deserializer.deserialize_any(HashMapVisitor(PhantomData))
     }
 
-    /// Serialize a number as string
     #[cfg(test)]
-    pub fn serialize<S, K: Eq + Hash + Serialize, V: Serialize>(
-        item: &HashMap<K, V>,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(None)?;
-        for i in item {
-            seq.serialize_element(&i)?;
+    pub mod for_test {
+        use std::collections::HashMap;
+        use std::hash::Hash;
+
+        use serde::ser::{Serialize, SerializeSeq, Serializer};
+
+        /// Serialize hashmap as list of tuples
+        pub fn serialize<S, K: Eq + Hash + Serialize, V: Serialize>(
+            item: &HashMap<K, V>,
+            serializer: S,
+        ) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            let mut seq = serializer.serialize_seq(None)?;
+            for i in item {
+                seq.serialize_element(&i)?;
+            }
+            seq.end()
         }
-        seq.end()
     }
 
     #[allow(clippy::type_complexity)]

@@ -477,27 +477,30 @@ mod test {
             }
         }
 
-        struct Data {
+        struct InnerMockedRpcClient {
             data_table: MockDataTable,
             subscription_channel: Option<Subscription>,
             subscription_handlers: HashMap<String, SubscriptionHandler>,
             method_handlers: HashMap<String, MethodHandler>,
         }
 
-        impl Data {
-            async fn call_meth<'a>(
+        impl InnerMockedRpcClient {
+            async fn call<'a>(
                 &'a mut self,
-                meth: &str,
+                method_handler: &str,
                 params: Option<Box<serde_json::value::RawValue>>,
             ) -> super::rpc::RawRpcFuture<'a, Box<serde_json::value::RawValue>> {
-                let method = self.method_handlers.get(meth).unwrap_or_else(|| {
-                    panic!("no method named {} registered. Params: {:?}", meth, params)
+                let method = self.method_handlers.get(method_handler).unwrap_or_else(|| {
+                    panic!(
+                        "no method named {} registered. Params: {:?}",
+                        method_handler, params
+                    )
                 });
 
                 (*method)(&mut self.data_table, &mut self.subscription_channel, params)
             }
 
-            async fn call_subscription<'a>(
+            async fn subscribe<'a>(
                 &'a mut self,
                 sub: &str,
                 params: Option<Box<serde_json::value::RawValue>>,
@@ -513,13 +516,13 @@ mod test {
             }
         }
         pub struct MockRpcBuilder {
-            data: Data,
+            data: InnerMockedRpcClient,
         }
 
         impl MockRpcBuilder {
             pub fn new() -> Self {
                 Self {
-                    data: Data {
+                    data: InnerMockedRpcClient {
                         data_table: MockDataTable::new(),
                         subscription_channel: None,
                         subscription_handlers: HashMap::new(),
@@ -528,8 +531,10 @@ mod test {
                 }
             }
 
-            pub fn add_method(mut self, method_name: &str, meth: MethodHandler) -> Self {
-                self.data.method_handlers.insert(method_name.into(), meth);
+            pub fn add_method(mut self, method_name: &str, method_handler: MethodHandler) -> Self {
+                self.data
+                    .method_handlers
+                    .insert(method_name.into(), method_handler);
                 self
             }
 
@@ -544,7 +549,7 @@ mod test {
                 self
             }
 
-            pub fn add_mock_data_from_iter<
+            pub fn add_mock_data<
                 'a,
                 T: Serialize,
                 I: IntoIterator<Item = (&'a str, Message<RpcResult<T>>)>,
@@ -567,7 +572,7 @@ mod test {
         }
 
         pub struct MockRpcClient {
-            data: Arc<Mutex<Data>>,
+            data: Arc<Mutex<InnerMockedRpcClient>>,
         }
 
         impl RpcClientT for MockRpcClient {
@@ -578,7 +583,7 @@ mod test {
             ) -> super::rpc::RawRpcFuture<'a, Box<serde_json::value::RawValue>> {
                 Box::pin(async {
                     let mut data = self.data.lock().await;
-                    data.call_meth(method, params).await.await
+                    data.call(method, params).await.await
                 })
             }
 
@@ -590,7 +595,7 @@ mod test {
             ) -> super::rpc::RawRpcFuture<'a, super::rpc::RawRpcSubscription> {
                 Box::pin(async {
                     let mut data = self.data.lock().await;
-                    data.call_subscription(sub, params).await.await
+                    data.subscribe(sub, params).await.await
                 })
             }
         }
@@ -682,7 +687,7 @@ mod test {
                 ),
                 ("ID3", Message::Single(bytes("Data3"))),
             ];
-            let rpc_client = setup_mock_rpc().add_mock_data_from_iter(mock_data).build();
+            let rpc_client = setup_mock_rpc().add_mock_data(mock_data).build();
             let backend: LegacyBackend<Conf> = LegacyBackend::builder().build(rpc_client);
 
             // Test
@@ -720,7 +725,7 @@ mod test {
                 ),
                 ("ID1", Message::Single(bytes("Data1"))),
             ];
-            let rpc_client = setup_mock_rpc().add_mock_data_from_iter(mock_data).build();
+            let rpc_client = setup_mock_rpc().add_mock_data(mock_data).build();
 
             // Test
             let backend: LegacyBackend<Conf> = LegacyBackend::builder().build(rpc_client);
@@ -759,7 +764,7 @@ mod test {
                 ),
                 ("chain_getBlockHash", Message::Single(Ok(Some(hash)))),
             ];
-            let rpc_client = setup_mock_rpc().add_mock_data_from_iter(mock_data).build();
+            let rpc_client = setup_mock_rpc().add_mock_data(mock_data).build();
 
             // Test
             let backend: LegacyBackend<Conf> = LegacyBackend::builder().build(rpc_client);
@@ -845,7 +850,7 @@ mod test {
                         })
                     }),
                 )
-                .add_mock_data_from_iter(mock_subscription_data)
+                .add_mock_data(mock_subscription_data)
                 .build();
 
             // Test
@@ -887,6 +892,26 @@ mod test {
 
         use super::unstable::*;
         use super::*;
+
+        fn run_backend(
+            rpc_client: impl RpcClientT,
+        ) -> (UnstableBackend<Conf>, UnstableBackendDriver<Conf>) {
+            let (backend, driver): (UnstableBackend<Conf>, _) =
+                UnstableBackend::builder().build(rpc_client);
+            (backend, driver)
+        }
+
+        fn run_backend_spawn_background(rpc_client: impl RpcClientT) -> UnstableBackend<Conf> {
+            let (backend, mut driver) = run_backend(rpc_client);
+            tokio::spawn(async move {
+                while let Some(val) = driver.next().await {
+                    if let Err(e) = val {
+                        eprintln!("Error driving unstable backend: {e}; terminating client");
+                    }
+                }
+            });
+            backend
+        }
 
         fn runtime_spec() -> RuntimeSpec {
             let spec = serde_json::json!({
@@ -971,7 +996,7 @@ mod test {
         fn operation_error(id: &str) -> FollowEvent {
             FollowEvent::OperationError(OperationError {
                 operation_id: id.to_owned(),
-                error: "errro".to_owned(),
+                error: "error".to_owned(),
             })
         }
 
@@ -1026,20 +1051,11 @@ mod test {
                         })
                     }),
                 )
-                .add_mock_data_from_iter(mock_subscription_data)
-                .add_mock_data_from_iter(response_data)
+                .add_mock_data(mock_subscription_data)
+                .add_mock_data(response_data)
                 .build();
 
-            let (backend, mut driver): (UnstableBackend<Conf>, _) =
-                UnstableBackend::builder().build(rpc_client);
-
-            tokio::spawn(async move {
-                while let Some(val) = driver.next().await {
-                    if let Err(e) = val {
-                        eprintln!("Error driving unstable backend: {e}; terminating client");
-                    }
-                }
-            });
+            let backend = run_backend_spawn_background(rpc_client);
 
             // Test
             // This request should encounter an error on `request` and do a retry.
@@ -1058,7 +1074,7 @@ mod test {
 
             assert!(matches!(
                 response.as_slice(),
-                [Err(Error::Other(s) )] if s == "errro"
+                [Err(Error::Other(s) )] if s == "error"
             ));
         }
 
@@ -1106,19 +1122,10 @@ mod test {
                         })
                     }),
                 )
-                .add_mock_data_from_iter(mock_data)
-                .add_mock_data_from_iter(response_data)
+                .add_mock_data(mock_data)
+                .add_mock_data(response_data)
                 .build();
-            let (backend, mut driver): (UnstableBackend<Conf>, _) =
-                UnstableBackend::builder().build(rpc_client);
-
-            tokio::spawn(async move {
-                while let Some(val) = driver.next().await {
-                    if let Err(e) = val {
-                        eprintln!("Error driving unstable backend: {e}; terminating client");
-                    }
-                }
-            });
+            let backend = run_backend_spawn_background(rpc_client);
 
             // We try again and should succeed
             let response = backend
@@ -1253,20 +1260,11 @@ mod test {
                         })
                     }),
                 )
-                .add_mock_data_from_iter(mock_data)
-                .add_mock_data_from_iter(response_data)
-                .add_mock_data_from_iter(continue_data)
+                .add_mock_data(mock_data)
+                .add_mock_data(response_data)
+                .add_mock_data(continue_data)
                 .build();
-            let (backend, mut driver): (UnstableBackend<Conf>, _) =
-                UnstableBackend::builder().build(rpc_client);
-
-            tokio::spawn(async move {
-                while let Some(val) = driver.next().await {
-                    if let Err(e) = val {
-                        eprintln!("Error driving unstable backend: {e}; terminating client");
-                    }
-                }
-            });
+            let backend = run_backend_spawn_background(rpc_client);
 
             // We try again and should fail mid way
             let response = backend
@@ -1287,7 +1285,7 @@ mod test {
                     Ok(resp1 @ StorageResponse { .. }),
                     Ok(resp2 @ StorageResponse { .. }),
                     Err(Error::Other(s))
-                ] if s == "errro"
+                ] if s == "error"
                   && compare_storage_responses(&storage_response("ID1", "Data1"), resp1)
                   && compare_storage_responses(&storage_response("ID2", "Data2"), resp2)
             ));
@@ -1343,19 +1341,10 @@ mod test {
                         })
                     }),
                 )
-                .add_mock_data_from_iter(mock_data)
+                .add_mock_data(mock_data)
                 .build();
 
-            let (backend, mut driver): (UnstableBackend<Conf>, _) =
-                UnstableBackend::builder().build(rpc_client);
-
-            tokio::spawn(async move {
-                while let Some(val) = driver.next().await {
-                    if let Err(e) = val {
-                        eprintln!("Error driving unstable backend: {e}; terminating client");
-                    }
-                }
-            });
+            let backend = run_backend_spawn_background(rpc_client);
 
             // Test
             // This request should encounter an error on `request` and do a retry.
@@ -1439,11 +1428,10 @@ mod test {
                         }
                     }),
                 )
-                .add_mock_data_from_iter(mock_data)
-                .add_mock_data_from_iter(response_data)
+                .add_mock_data(mock_data)
+                .add_mock_data(response_data)
                 .build();
-            let (backend, mut driver): (UnstableBackend<Conf>, _) =
-                UnstableBackend::builder().build(rpc_client);
+            let (backend, mut driver): (UnstableBackend<Conf>, _) = run_backend(rpc_client);
 
             let _ = driver.next().await.unwrap();
             let _ = driver.next().await.unwrap();
@@ -1466,7 +1454,7 @@ mod test {
 
             assert!(matches!(
                 response,
-                Err(Error::Other(reason)) if reason == "errro"
+                Err(Error::Other(reason)) if reason == "error"
             ));
 
             // not getting new subscription id and hitting request rejected > 10 times
