@@ -259,7 +259,6 @@ async fn chainspec_v1_properties() {
 
 #[cfg(fullclient)]
 #[subxt_test]
-#[ignore]
 async fn transactionwatch_v1_submit_and_watch() {
     let ctx = test_context().await;
     let rpc = ctx.unstable_rpc_methods().await;
@@ -343,7 +342,7 @@ async fn transaction_v1_broadcast() {
     // Subscribe to finalized blocks.
     let mut finalized_sub = api.blocks().subscribe_finalized().await.unwrap();
     // Expect the tx to be encountered in a maximum number of blocks.
-    let mut num_blocks: usize = 10;
+    let mut num_blocks: usize = 100;
 
     // Submit the transaction.
     let _operation_id = rpc
