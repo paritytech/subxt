@@ -6,7 +6,7 @@ use std::collections::HashSet;
 
 use crate::{
     subxt_test, test_context, test_context_reconnecting_rpc_client,
-    utils::{consume_initial_blocks, node_runtime, wait_for_blocks},
+    utils::{node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};
 
@@ -420,14 +420,11 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
         let api = api.clone();
         async move {
             let mut missed_blocks = false;
-            let mut sub = api.blocks().subscribe_finalized().await.unwrap();
-
-            consume_initial_blocks(&mut sub).await;
 
             let blocks =
             // Ignore `disconnected events`.
             // This will be emitted by the legacy backend for every reconnection.
-            sub.filter(|item| {
+            api.blocks().subscribe_finalized().await.unwrap().filter(|item| {
                 let disconnected = match item {
                     Ok(_) => false,
                     Err(e) => {
