@@ -416,32 +416,36 @@ async fn partial_fee_estimate_correct() {
 async fn legacy_and_unstable_block_subscription_reconnect() {
     let ctx = test_context_reconnecting_rpc_client().await;
     let api = ctx.unstable_client().await;
-
     let unstable_client_blocks = move |num: usize| {
         let api = api.clone();
         async move {
-            api.blocks()
-                .subscribe_finalized()
-                .await
-                .unwrap()
-                // Ignore `disconnected events`.
-                // This will be emitted by the legacy backend for every reconnection.
-                .filter(|item| {
-                    let disconnected = match item {
-                        Ok(_) => false,
-                        Err(e) => e.is_disconnected_will_reconnect(),
-                    };
+            let mut missed_blocks = false;
 
-                    futures::future::ready(!disconnected)
-                })
-                .take(num)
-                .map(|x| x.unwrap().hash().to_string())
-                .collect::<Vec<String>>()
-                .await
+            let blocks =
+            // Ignore `disconnected events`.
+            // This will be emitted by the legacy backend for every reconnection.
+            api.blocks().subscribe_finalized().await.unwrap().filter(|item| {
+                let disconnected = match item {
+                    Ok(_) => false,
+                    Err(e) => {
+                        if matches!(e, Error::Rpc(subxt::error::RpcError::DisconnectedWillReconnect(e)) if e.contains("Missed at least one block when the connection was lost")) {
+                            missed_blocks = true;
+                        }
+                        e.is_disconnected_will_reconnect()
+                    }
+                };
+
+                futures::future::ready(!disconnected)
+            })
+            .take(num)
+            .map(|x| x.unwrap().hash().to_string())
+            .collect::<Vec<String>>().await;
+
+            (blocks, missed_blocks)
         }
     };
 
-    let blocks = unstable_client_blocks(3).await;
+    let (blocks, _) = unstable_client_blocks(3).await;
     let blocks: HashSet<String> = HashSet::from_iter(blocks.into_iter());
 
     assert!(blocks.len() == 3);
@@ -451,10 +455,11 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
     // Make  client aware that connection was dropped and force them to reconnect
     let _ = ctx.unstable_client().await.backend().genesis_hash().await;
 
-    let unstable_blocks = unstable_client_blocks(6).await;
+    let (unstable_blocks, blocks_missed) = unstable_client_blocks(6).await;
 
-    let unstable_blocks: HashSet<String> = HashSet::from_iter(unstable_blocks.into_iter());
-    let intersection = unstable_blocks.intersection(&blocks).count();
-
-    assert!(intersection == 3);
+    if !blocks_missed {
+        let unstable_blocks: HashSet<String> = HashSet::from_iter(unstable_blocks.into_iter());
+        let intersection = unstable_blocks.intersection(&blocks).count();
+        assert!(intersection >= 3, "intersections size is {}", intersection);
+    }
 }

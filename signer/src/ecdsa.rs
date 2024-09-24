@@ -430,10 +430,10 @@ mod test {
 
             let message = b"Hello world";
             let sp_sig = sp_pair.sign(message).0;
-            let sig = pair.sign(message).0;
+            let sig: [u8; 65] = pair.sign(message).0;
 
             assert!(SpPair::verify(
-                &SpSignature(sig),
+                &SpSignature::from(sig),
                 message,
                 &sp_pair.public(),
             ));
