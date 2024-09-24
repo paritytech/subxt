@@ -304,6 +304,10 @@ fn try_find_substrate_port_from_output(r: impl Read + Send + 'static) -> Substra
                 .unwrap_or_else(|_| panic!("valid port expected for log line, got '{port_str}'"));
             p2p_port = Some(port_num);
         }
+
+        if port.is_some() && p2p_address.is_some() && p2p_port.is_some() {
+            break;
+        }
     }
 
     SubstrateNodeInfo {

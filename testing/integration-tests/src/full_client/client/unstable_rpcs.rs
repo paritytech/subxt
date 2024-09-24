@@ -5,7 +5,10 @@
 //! Just sanity checking some of the new RPC methods to try and
 //! catch differences as the implementations evolve.
 
-use crate::{subxt_test, test_context, utils::node_runtime};
+use crate::{
+    subxt_test, test_context,
+    utils::{consume_initial_blocks, node_runtime},
+};
 use assert_matches::assert_matches;
 use codec::Encode;
 use futures::Stream;
@@ -341,8 +344,11 @@ async fn transaction_v1_broadcast() {
 
     // Subscribe to finalized blocks.
     let mut finalized_sub = api.blocks().subscribe_finalized().await.unwrap();
+
+    consume_initial_blocks(&mut finalized_sub).await;
+
     // Expect the tx to be encountered in a maximum number of blocks.
-    let mut num_blocks: usize = 100;
+    let mut num_blocks: usize = 20;
 
     // Submit the transaction.
     let _operation_id = rpc
@@ -353,6 +359,8 @@ async fn transaction_v1_broadcast() {
 
     while let Some(finalized) = finalized_sub.next().await {
         let finalized = finalized.unwrap();
+        tracing::info!("Finalized block: {:?}", finalized.hash());
+        tracing::info!("Number of blocks left: {}", num_blocks);
 
         // Started with positive, should not overflow.
         num_blocks = num_blocks.saturating_sub(1);

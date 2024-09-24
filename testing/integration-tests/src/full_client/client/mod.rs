@@ -6,7 +6,7 @@ use std::collections::HashSet;
 
 use crate::{
     subxt_test, test_context, test_context_reconnecting_rpc_client,
-    utils::{node_runtime, wait_for_blocks},
+    utils::{consume_initial_blocks, node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};
 
@@ -413,7 +413,6 @@ async fn partial_fee_estimate_correct() {
 }
 
 #[subxt_test]
-#[ignore]
 async fn legacy_and_unstable_block_subscription_reconnect() {
     let ctx = test_context_reconnecting_rpc_client().await;
     let api = ctx.unstable_client().await;
@@ -421,13 +420,14 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
         let api = api.clone();
         async move {
             let mut missed_blocks = false;
-            (api.blocks()
-                .subscribe_finalized()
-                .await
-                .unwrap()
+            let mut sub = api.blocks().subscribe_finalized().await.unwrap();
+
+            consume_initial_blocks(&mut sub).await;
+
+            (
                 // Ignore `disconnected events`.
                 // This will be emitted by the legacy backend for every reconnection.
-                .filter(|item| {
+                sub.filter(|item| {
                     let disconnected = match item {
                         Ok(_) => false,
                         Err(e) => {
@@ -443,7 +443,8 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
                 .take(num)
                 .map(|x| x.unwrap().hash().to_string())
                 .collect::<Vec<String>>()
-                .await, missed_blocks)
+                .await, missed_blocks
+            )
         }
     };
 
