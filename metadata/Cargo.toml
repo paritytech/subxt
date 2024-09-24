@@ -19,8 +19,13 @@ std = ["scale-info/std", "frame-metadata/std"]
 
 [dependencies]
 scale-info = { workspace = true, default-features = false }
-frame-metadata = { workspace = true, default-features = false, features = ["current", "decode"] }
-codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
+frame-metadata = { workspace = true, default-features = false, features = [
+    "current",
+    "decode",
+] }
+codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = [
+    "derive",
+] }
 sp-crypto-hashing = { workspace = true }
 hashbrown = { workspace = true }
 
@@ -28,7 +33,6 @@ hashbrown = { workspace = true }
 bitvec = { workspace = true, features = ["alloc"] }
 criterion = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
-assert_matches = { workspace = true }
 
 [lib]
 # Without this, libtest cli opts interfere with criteron benches:

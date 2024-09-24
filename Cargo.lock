@@ -5771,7 +5771,6 @@ dependencies = [
 name = "subxt-metadata"
 version = "0.37.0"
 dependencies = [
- "assert_matches",
  "bitvec",
  "criterion",
  "frame-metadata 16.0.0",

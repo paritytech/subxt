@@ -115,7 +115,6 @@ fn get_variant_hash(
 fn get_type_def_variant_hash(
     registry: &PortableRegistry,
     variant: &TypeDefVariant<PortableForm>,
-    only_these_variants: Option<&[&str]>,
     cache: &mut HashMap<u32, CachedHash>,
     outer_enum_hashes: &OuterEnumHashes,
 ) -> Hash {
@@ -123,10 +122,7 @@ fn get_type_def_variant_hash(
     let variant_field_bytes = variant.variants.iter().fold([0u8; HASH_LEN], |bytes, var| {
         // With EncodeAsType and DecodeAsType we no longer care which order the variants are in,
         // as long as all of the names+types are there. XOR to not care about ordering.
-        let should_hash = only_these_variants
-            .as_ref()
-            .map(|only_these_variants| only_these_variants.contains(&var.name.as_str()))
-            .unwrap_or(true);
+        let should_hash = true;
         if should_hash {
             xor(
                 bytes,
@@ -164,7 +160,7 @@ fn get_type_def_hash(
             concat_and_hash2(&composite_id_bytes, &composite_field_bytes)
         }
         TypeDef::Variant(variant) => {
-            get_type_def_variant_hash(registry, variant, None, cache, outer_enum_hashes)
+            get_type_def_variant_hash(registry, variant, cache, outer_enum_hashes)
         }
         TypeDef::Sequence(sequence) => concat_and_hash2(
             &[TypeBeingHashed::Sequence as u8; HASH_LEN],
@@ -588,7 +584,7 @@ impl<'a> MetadataHasher<'a> {
 
         // Get the hashes of outer enums, considering only `specific_pallets` (if any are set).
         // If any of the typed that represent outer enums are encountered later, hashes from `top_level_enum_hashes` can be substituted.
-        let outer_enum_hashes = OuterEnumHashes::new(metadata, self.specific_pallets.as_deref());
+        let outer_enum_hashes = OuterEnumHashes::new(metadata);
 
         let pallet_hash = metadata.pallets().fold([0u8; HASH_LEN], |bytes, pallet| {
             // If specific pallets are given, only include this pallet if it is in the specific pallets.
@@ -1235,9 +1231,15 @@ mod tests {
             m
         };
 
+        let name_set: Vec<String> = trimmed_metadata
+            .pallets
+            .values()
+            .iter()
+            .map(|pallet| pallet.name.to_string())
+            .collect();
         // test that the hashes are the same:
         let hash = MetadataHasher::new(&metadata)
-            .only_these_pallets(&["First"])
+            .only_these_pallets(&name_set)
             .hash();
         let hash_trimmed = MetadataHasher::new(&trimmed_metadata).hash();
 

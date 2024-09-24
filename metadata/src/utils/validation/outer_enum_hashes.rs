@@ -19,13 +19,9 @@ pub struct OuterEnumHashes {
 }
 
 impl OuterEnumHashes {
-    /// Constructs new `OuterEnumHashes` from metadata. If `only_these_variants` is set, the enums are stripped down to only these variants, before their hashes are calculated.
-    pub fn new(metadata: &Metadata, only_these_variants: Option<&[&str]>) -> Self {
-        fn get_enum_hash(
-            registry: &PortableRegistry,
-            id: u32,
-            only_these_variants: Option<&[&str]>,
-        ) -> Hash {
+    /// Constructs new `OuterEnumHashes` from metadata.
+    pub fn new(metadata: &Metadata) -> Self {
+        fn get_enum_hash(registry: &PortableRegistry, id: u32) -> Hash {
             let ty = registry
                 .types
                 .get(id as usize)
@@ -35,7 +31,6 @@ impl OuterEnumHashes {
                 get_type_def_variant_hash(
                     registry,
                     variant,
-                    only_these_variants,
                     &mut HashMap::new(),
                     // ignored, because not computed yet...
                     &OuterEnumHashes::empty(),
@@ -46,9 +41,9 @@ impl OuterEnumHashes {
         }
         let enums = &metadata.outer_enums;
 
-        let call_hash = get_enum_hash(metadata.types(), enums.call_enum_ty, only_these_variants);
-        let event_hash = get_enum_hash(metadata.types(), enums.event_enum_ty, only_these_variants);
-        let error_hash = get_enum_hash(metadata.types(), enums.error_enum_ty, only_these_variants);
+        let call_hash = get_enum_hash(metadata.types(), enums.call_enum_ty);
+        let event_hash = get_enum_hash(metadata.types(), enums.event_enum_ty);
+        let error_hash = get_enum_hash(metadata.types(), enums.error_enum_ty);
 
         Self {
             call_hash: (enums.call_enum_ty, call_hash),
