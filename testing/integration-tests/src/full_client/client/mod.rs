@@ -420,29 +420,28 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
         let api = api.clone();
         async move {
             let mut missed_blocks = false;
-            (api.blocks()
-                .subscribe_finalized()
-                .await
-                .unwrap()
-                // Ignore `disconnected events`.
-                // This will be emitted by the legacy backend for every reconnection.
-                .filter(|item| {
-                    let disconnected = match item {
-                        Ok(_) => false,
-                        Err(e) => {
-                            if matches!(e, Error::Rpc(subxt::error::RpcError::DisconnectedWillReconnect(e)) if e.contains("Missed at least one block when the connection was lost")) {
-                                missed_blocks = true;
-                            }
-                            e.is_disconnected_will_reconnect()
-                        }
-                    };
 
-                    futures::future::ready(!disconnected)
-                })
-                .take(num)
-                .map(|x| x.unwrap().hash().to_string())
-                .collect::<Vec<String>>()
-                .await, missed_blocks)
+            let blocks =
+            // Ignore `disconnected events`.
+            // This will be emitted by the legacy backend for every reconnection.
+            api.blocks().subscribe_finalized().await.unwrap().filter(|item| {
+                let disconnected = match item {
+                    Ok(_) => false,
+                    Err(e) => {
+                        if matches!(e, Error::Rpc(subxt::error::RpcError::DisconnectedWillReconnect(e)) if e.contains("Missed at least one block when the connection was lost")) {
+                            missed_blocks = true;
+                        }
+                        e.is_disconnected_will_reconnect()
+                    }
+                };
+
+                futures::future::ready(!disconnected)
+            })
+            .take(num)
+            .map(|x| x.unwrap().hash().to_string())
+            .collect::<Vec<String>>().await;
+
+            (blocks, missed_blocks)
         }
     };
 
