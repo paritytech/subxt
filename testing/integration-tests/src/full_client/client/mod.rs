@@ -424,27 +424,27 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
 
             consume_initial_blocks(&mut sub).await;
 
-            (
-                // Ignore `disconnected events`.
-                // This will be emitted by the legacy backend for every reconnection.
-                sub.filter(|item| {
-                    let disconnected = match item {
-                        Ok(_) => false,
-                        Err(e) => {
-                            if matches!(e, Error::Rpc(subxt::error::RpcError::DisconnectedWillReconnect(e)) if e.contains("Missed at least one block when the connection was lost")) {
-                                missed_blocks = true;
-                            }
-                            e.is_disconnected_will_reconnect()
+            let blocks =
+            // Ignore `disconnected events`.
+            // This will be emitted by the legacy backend for every reconnection.
+            sub.filter(|item| {
+                let disconnected = match item {
+                    Ok(_) => false,
+                    Err(e) => {
+                        if matches!(e, Error::Rpc(subxt::error::RpcError::DisconnectedWillReconnect(e)) if e.contains("Missed at least one block when the connection was lost")) {
+                            missed_blocks = true;
                         }
-                    };
+                        e.is_disconnected_will_reconnect()
+                    }
+                };
 
-                    futures::future::ready(!disconnected)
-                })
-                .take(num)
-                .map(|x| x.unwrap().hash().to_string())
-                .collect::<Vec<String>>()
-                .await, missed_blocks
-            )
+                futures::future::ready(!disconnected)
+            })
+            .take(num)
+            .map(|x| x.unwrap().hash().to_string())
+            .collect::<Vec<String>>().await;
+
+            (blocks, missed_blocks)
         }
     };
 
