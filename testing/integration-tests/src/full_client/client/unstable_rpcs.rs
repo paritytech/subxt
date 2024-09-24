@@ -359,7 +359,6 @@ async fn transaction_v1_broadcast() {
 
     while let Some(finalized) = finalized_sub.next().await {
         let finalized = finalized.unwrap();
-        tracing::info!("Finalized block: {:?}", finalized.hash());
         tracing::info!("Number of blocks left: {}", num_blocks);
 
         // Started with positive, should not overflow.
