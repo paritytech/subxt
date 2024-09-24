@@ -429,7 +429,7 @@ mod test {
             let sig = pair.sign(message).0;
 
             assert!(SpPair::verify(
-                &SpSignature(sig),
+                &SpSignature::from(sig),
                 message,
                 &sp_pair.public()
             ));
