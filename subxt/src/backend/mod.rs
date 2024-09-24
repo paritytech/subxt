@@ -336,17 +336,18 @@ pub struct StorageResponse {
 #[cfg(test)]
 mod test {
     use super::*;
+    pub use crate::backend::rpc::{RawRpcFuture, RawRpcSubscription};
     pub use crate::{backend::StorageResponse, error::RpcError};
     pub use futures::StreamExt;
+    pub use rpc::RpcClientT;
     pub use serde::Serialize;
+    pub use serde_json::value::RawValue;
     pub use std::collections::{HashMap, VecDeque};
     pub use subxt_core::{config::DefaultExtrinsicParams, Config};
     pub use tokio::sync::{mpsc, Mutex};
+
     pub type RpcResult<T> = Result<T, RpcError>;
     pub type Item = RpcResult<String>;
-    pub use crate::backend::rpc::RawRpcSubscription;
-    pub use rpc::RpcClientT;
-    pub use serde_json::value::RawValue;
 
     fn storage_response<K: Into<Vec<u8>>, V: Into<Vec<u8>>>(key: K, value: V) -> StorageResponse
     where
@@ -366,8 +367,7 @@ mod test {
                     &'a mut MockDataTable,
                     &'a mut Option<Subscription>,
                     Option<Box<serde_json::value::RawValue>>,
-                )
-                    -> super::rpc::RawRpcFuture<'a, super::rpc::RawRpcSubscription>
+                ) -> RawRpcFuture<'a, RawRpcSubscription>
                 + Send,
         >;
 
@@ -376,8 +376,7 @@ mod test {
                     &'a mut MockDataTable,
                     &'a mut Option<Subscription>,
                     Option<Box<serde_json::value::RawValue>>,
-                )
-                    -> super::rpc::RawRpcFuture<'a, Box<serde_json::value::RawValue>>
+                ) -> RawRpcFuture<'a, Box<serde_json::value::RawValue>>
                 + Send,
         >;
 
@@ -401,17 +400,12 @@ mod test {
             }
         }
 
+        #[derive(Default)]
         pub struct MockDataTable {
             items: HashMap<Vec<u8>, VecDeque<Message<Item>>>,
         }
 
         impl MockDataTable {
-            pub fn new() -> Self {
-                MockDataTable {
-                    items: HashMap::new(),
-                }
-            }
-
             pub fn push<I: Serialize>(&mut self, key: Vec<u8>, item: Message<RpcResult<I>>) {
                 let item = match item {
                     Message::Many(items) => Message::Many(items.map(|items| {
@@ -470,6 +464,7 @@ mod test {
             }
         }
 
+        #[derive(Default)]
         struct InnerMockedRpcClient {
             data_table: MockDataTable,
             subscription_channel: Option<Subscription>,
@@ -482,7 +477,7 @@ mod test {
                 &'a mut self,
                 method_handler: &str,
                 params: Option<Box<serde_json::value::RawValue>>,
-            ) -> super::rpc::RawRpcFuture<'a, Box<serde_json::value::RawValue>> {
+            ) -> RawRpcFuture<'a, Box<serde_json::value::RawValue>> {
                 let method = self.method_handlers.get(method_handler).unwrap_or_else(|| {
                     panic!(
                         "no method named {} registered. Params: {:?}",
@@ -497,7 +492,7 @@ mod test {
                 &'a mut self,
                 sub: &str,
                 params: Option<Box<serde_json::value::RawValue>>,
-            ) -> super::rpc::RawRpcFuture<'a, super::rpc::RawRpcSubscription> {
+            ) -> RawRpcFuture<'a, RawRpcSubscription> {
                 let sub = self.subscription_handlers.get(sub).unwrap_or_else(|| {
                     panic!(
                         "no subscription named {} registered. Params: {:?}",
@@ -508,22 +503,13 @@ mod test {
                 (*sub)(&mut self.data_table, &mut self.subscription_channel, params)
             }
         }
+
+        #[derive(Default)]
         pub struct MockRpcBuilder {
             data: InnerMockedRpcClient,
         }
 
         impl MockRpcBuilder {
-            pub fn new() -> Self {
-                Self {
-                    data: InnerMockedRpcClient {
-                        data_table: MockDataTable::new(),
-                        subscription_channel: None,
-                        subscription_handlers: HashMap::new(),
-                        method_handlers: HashMap::new(),
-                    },
-                }
-            }
-
             pub fn add_method(mut self, method_name: &str, method_handler: MethodHandler) -> Self {
                 self.data
                     .method_handlers
@@ -573,7 +559,7 @@ mod test {
                 &'a self,
                 method: &'a str,
                 params: Option<Box<serde_json::value::RawValue>>,
-            ) -> super::rpc::RawRpcFuture<'a, Box<serde_json::value::RawValue>> {
+            ) -> RawRpcFuture<'a, Box<serde_json::value::RawValue>> {
                 Box::pin(async {
                     let mut data = self.data.lock().await;
                     data.call(method, params).await.await
@@ -585,7 +571,7 @@ mod test {
                 sub: &'a str,
                 params: Option<Box<serde_json::value::RawValue>>,
                 _unsub: &'a str,
-            ) -> super::rpc::RawRpcFuture<'a, super::rpc::RawRpcSubscription> {
+            ) -> RawRpcFuture<'a, RawRpcSubscription> {
                 Box::pin(async {
                     let mut data = self.data.lock().await;
                     data.subscribe(sub, params).await.await
@@ -604,7 +590,6 @@ mod test {
         type Hasher = crate::config::substrate::BlakeTwo256;
         type Header = crate::config::substrate::SubstrateHeader<u32, Self::Hasher>;
         type ExtrinsicParams = DefaultExtrinsicParams<Self>;
-
         type AssetId = u32;
     }
 
@@ -616,7 +601,7 @@ mod test {
         use rpc_client::*;
 
         pub fn setup_mock_rpc() -> MockRpcBuilder {
-            MockRpcBuilder::new()
+            MockRpcBuilder::default()
                 .add_method(
                     "state_getStorage",
                     Box::new(|data, _sub, params| {
@@ -943,7 +928,7 @@ mod test {
         fn setup_mock_rpc_client(cycle_ids: bool) -> MockRpcBuilder {
             let hash = init_hash();
             let mut id = 0;
-            rpc_client::MockRpcBuilder::new().add_subscription(
+            rpc_client::MockRpcBuilder::default().add_subscription(
                 "chainHead_v1_follow",
                 Box::new(move |_, sub, _| {
                     Box::pin(async move {
@@ -1350,7 +1335,8 @@ mod test {
         }
 
         #[tokio::test]
-        // Failure as we do not wait for subscription id to be updated
+        // Failure as we do not wait for subscription id to be updated.
+        // see https://github.com/paritytech/subxt/issues/1567
         async fn stale_subscription_id_failure() {
             let response_data = vec![
                 (

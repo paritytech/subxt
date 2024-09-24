@@ -361,7 +361,7 @@ pub struct InclusionFee {
     /// - `targeted_fee_adjustment`: This is a multiplier that can tune the final fee based on the
     ///   congestion of the network.
     /// - `weight_fee`: This amount is computed based on the weight of the transaction. Weight
-    /// accounts for the execution time of a transaction.
+    ///   accounts for the execution time of a transaction.
     ///
     /// adjusted_weight_fee = targeted_fee_adjustment * weight_fee
     pub adjusted_weight_fee: u128,
