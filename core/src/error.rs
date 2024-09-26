@@ -61,14 +61,17 @@ pub enum BlockError {
     /// Leftover bytes found after decoding the extrinsic.
     LeftoverBytes(usize),
     /// Something went wrong decoding the extrinsic.
-    ExtrinsicDecodeError(ExtrinsicDecodeError)
+    ExtrinsicDecodeError(ExtrinsicDecodeError),
 }
 impl Display for BlockError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             BlockError::LeftoverBytes(n) => {
-                write!(f, "After decoding, {n} bytes were left, suggesting that decoding may have failed")
-            },
+                write!(
+                    f,
+                    "After decoding, {n} bytes were left, suggesting that decoding may have failed"
+                )
+            }
             BlockError::ExtrinsicDecodeError(e) => {
                 write!(f, "{e}")
             }
@@ -77,7 +80,7 @@ impl Display for BlockError {
 }
 
 /// An alias for [`frame_decode::extrinsics::ExtrinsicDecodeError`].
-/// 
+///
 pub type ExtrinsicDecodeError = frame_decode::extrinsics::ExtrinsicDecodeError;
 
 /// Something went wrong trying to access details in the metadata.

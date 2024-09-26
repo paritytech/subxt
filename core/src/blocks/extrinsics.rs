@@ -143,15 +143,14 @@ where
         metadata: Metadata,
     ) -> Result<ExtrinsicDetails<T>, Error> {
         let cursor = &mut &*extrinsic_bytes;
-        let decoded_info = frame_decode::extrinsics::decode_extrinsic(
-            cursor, 
-            metadata.deref(), 
-            metadata.types()
-        ).map_err(BlockError::ExtrinsicDecodeError)?.into_owned();
+        let decoded_info =
+            frame_decode::extrinsics::decode_extrinsic(cursor, metadata.deref(), metadata.types())
+                .map_err(BlockError::ExtrinsicDecodeError)?
+                .into_owned();
 
         // We didn't consume all bytes.
         if !cursor.is_empty() {
-            return Err(BlockError::LeftoverBytes(cursor.len()).into())
+            return Err(BlockError::LeftoverBytes(cursor.len()).into());
         }
 
         // Wrap all of the bytes in Arc for easy sharing.
@@ -223,16 +222,16 @@ where
     ///
     /// Returns `None` if the extrinsic is not signed.
     pub fn address_bytes(&self) -> Option<&[u8]> {
-        self.decoded_info.signature_payload().map(|s| {
-            &self.bytes[s.address_range()]
-        })
+        self.decoded_info
+            .signature_payload()
+            .map(|s| &self.bytes[s.address_range()])
     }
 
     /// Returns Some(signature_bytes) if the extrinsic was signed otherwise None is returned.
     pub fn signature_bytes(&self) -> Option<&[u8]> {
-        self.decoded_info.signature_payload().map(|s| {
-            &self.bytes[s.signature_range()]
-        })
+        self.decoded_info
+            .signature_payload()
+            .map(|s| &self.bytes[s.signature_range()])
     }
 
     /// Returns the signed extension `extra` bytes of the extrinsic.
@@ -242,16 +241,16 @@ where
     ///
     /// Note: Returns `None` if the extrinsic is not signed.
     pub fn signed_extensions_bytes(&self) -> Option<&[u8]> {
-        self.decoded_info.signature_payload().map(|_| {
-            &self.bytes[self.decoded_info.signed_extensions_range()]
-        })
+        self.decoded_info
+            .signature_payload()
+            .map(|_| &self.bytes[self.decoded_info.signed_extensions_range()])
     }
 
     /// Returns `None` if the extrinsic is not signed.
     pub fn signed_extensions(&self) -> Option<ExtrinsicSignedExtensions<'_, T>> {
-        self.decoded_info.signature_payload().map(|s| {
-            ExtrinsicSignedExtensions::new(&self.bytes, &self.metadata, s)
-        })
+        self.decoded_info
+            .signature_payload()
+            .map(|s| ExtrinsicSignedExtensions::new(&self.bytes, &self.metadata, s))
     }
 
     /// The index of the pallet that the extrinsic originated from.
@@ -519,7 +518,11 @@ mod tests {
         assert_matches!(
             result.err(),
             Some(crate::Error::Block(
-                crate::error::BlockError::ExtrinsicDecodeError(ExtrinsicDecodeError::VersionNotSupported { extrinsic_version: 3 })
+                crate::error::BlockError::ExtrinsicDecodeError(
+                    ExtrinsicDecodeError::VersionNotSupported {
+                        extrinsic_version: 3
+                    }
+                )
             ))
         );
     }
@@ -543,12 +546,9 @@ mod tests {
             .expect("Valid dynamic parameters are provided");
 
         // Extrinsic details ready to decode.
-        let extrinsic = ExtrinsicDetails::<SubstrateConfig>::decode_from(
-            1,
-            tx_encoded.encoded(),
-            metadata,
-        )
-        .expect("Valid extrinsic");
+        let extrinsic =
+            ExtrinsicDetails::<SubstrateConfig>::decode_from(1, tx_encoded.encoded(), metadata)
+                .expect("Valid extrinsic");
 
         // Both of these types should produce the same bytes.
         assert_eq!(tx_encoded.encoded(), extrinsic.bytes(), "bytes should eq");
@@ -574,12 +574,9 @@ mod tests {
 
         // Note: `create_unsigned` produces the extrinsic bytes by prefixing the extrinsic length.
         // The length is handled deserializing `ChainBlockExtrinsic`, therefore the first byte is not needed.
-        let extrinsic = ExtrinsicDetails::<SubstrateConfig>::decode_from(
-            1,
-            tx_encoded.encoded(),
-            metadata,
-        )
-        .expect("Valid extrinsic");
+        let extrinsic =
+            ExtrinsicDetails::<SubstrateConfig>::decode_from(1, tx_encoded.encoded(), metadata)
+                .expect("Valid extrinsic");
 
         assert!(!extrinsic.is_signed());
 
