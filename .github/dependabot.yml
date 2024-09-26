@@ -1,18 +1,11 @@
 version: 2
 updates:
   - package-ecosystem: "cargo"
-    directory: "/"
+    directories:
+      - "**/*"
     schedule:
       interval: weekly
-    ignore:
-    # these need to be updated together, so dependabot PRs
-    # are just noise. So, ignore them:
-    - dependency-name: sp-core
-    - dependency-name: sp-keyring
-    - dependency-name: sp-runtime
-    - dependency-name: sp-crypto-hashing
-    - dependency-name: sp-version
   - package-ecosystem: github-actions
-    directory: '/'
+    directory: "**/*"
     schedule:
       interval: weekly

@@ -48,7 +48,7 @@ jobs:
           private-key: ${{ secrets.SUBXT_PR_MAKER_APP_KEY }}
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.app-token.outputs.token }}
           base: master

@@ -95,28 +95,36 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         keys: Vec<Vec<u8>>,
         at: T::Hash,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
-        retry(|| async {
-            let keys = keys.clone();
-            let methods = self.methods.clone();
-
-            // For each key, return it + a future to get the result.
-            let iter = keys.into_iter().map(move |key| {
+        fn get_entry<T: Config>(
+            key: Vec<u8>,
+            at: T::Hash,
+            methods: LegacyRpcMethods<T>,
+        ) -> impl Future<Output = Result<Option<StorageResponse>, Error>> {
+            retry(move || {
                 let methods = methods.clone();
+                let key = key.clone();
                 async move {
                     let res = methods.state_get_storage(&key, Some(at)).await?;
-                    Ok(res.map(|value| StorageResponse { key, value }))
+                    Ok(res.map(move |value| StorageResponse { key, value }))
                 }
-            });
+            })
+        }
 
-            let s = stream::iter(iter)
-                // Resolve the future
-                .then(|fut| fut)
-                // Filter any Options out (ie if we didn't find a value at some key we return nothing for it).
-                .filter_map(|r| future::ready(r.transpose()));
+        let keys = keys.clone();
+        let methods = self.methods.clone();
 
-            Ok(StreamOf(Box::pin(s)))
-        })
-        .await
+        // For each key, return it + a future to get the result.
+        let iter = keys
+            .into_iter()
+            .map(move |key| get_entry(key, at, methods.clone()));
+
+        let s = stream::iter(iter)
+            // Resolve the future
+            .then(|fut| fut)
+            // Filter any Options out (ie if we didn't find a value at some key we return nothing for it).
+            .filter_map(|r| future::ready(r.transpose()));
+
+        Ok(StreamOf(Box::pin(s)))
     }
 
     async fn storage_fetch_descendant_keys(

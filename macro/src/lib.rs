@@ -9,7 +9,7 @@
 use codec::Decode;
 use darling::{ast::NestedMeta, FromMeta};
 use proc_macro::TokenStream;
-use proc_macro_error::{abort_call_site, proc_macro_error};
+use proc_macro_error2::{abort_call_site, proc_macro_error};
 use quote::ToTokens;
 use scale_typegen::typegen::{
     settings::substitutes::path_segments,
@@ -22,6 +22,9 @@ use subxt_codegen::{
     CodegenBuilder, CodegenError, Metadata,
 };
 use syn::{parse_macro_input, punctuated::Punctuated};
+
+#[cfg(feature = "runtime-path")]
+mod wasm_loader;
 
 #[derive(Clone, Debug)]
 struct OuterAttribute(syn::Attribute);
@@ -60,6 +63,9 @@ struct RuntimeMetadataArgs {
     no_default_substitutions: bool,
     #[darling(default)]
     unstable_metadata: darling::util::Flag,
+    #[cfg(feature = "runtime-path")]
+    #[darling(default)]
+    runtime_path: Option<String>,
 }
 
 #[derive(Debug, FromMeta)]
@@ -206,6 +212,22 @@ fn validate_type_path(path: &syn::Path, metadata: &Metadata) {
 fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata, TokenStream> {
     // Do we want to fetch unstable metadata? This only works if fetching from a URL.
     let unstable_metadata = args.unstable_metadata.is_present();
+
+    #[cfg(feature = "runtime-path")]
+    if let Some(path) = &args.runtime_path {
+        if args.runtime_metadata_insecure_url.is_some() || args.runtime_metadata_path.is_some() {
+            abort_call_site!(
+                "Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' or `runtime_path` must be provided"
+            );
+        };
+        let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
+        let root_path = std::path::Path::new(&root);
+        let path = root_path.join(path);
+
+        let metadata = wasm_loader::from_wasm_file(&path).map_err(|e| e.into_compile_error())?;
+        return Ok(metadata);
+    };
+
     let metadata = match (
         &args.runtime_metadata_path,
         &args.runtime_metadata_insecure_url,
@@ -239,12 +261,26 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .map_err(|e| e.into_compile_error())?
         }
+        #[cfg(feature = "runtime-path")]
         (None, None) => {
             abort_call_site!(
-                "One of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' must be provided"
+                    "At least one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided"
+                )
+        }
+        #[cfg(not(feature = "runtime-path"))]
+        (None, None) => {
+            abort_call_site!(
+                "At least one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' can be provided"
             )
         }
-        (Some(_), Some(_)) => {
+        #[cfg(feature = "runtime-path")]
+        _ => {
+            abort_call_site!(
+                    "Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided"
+                )
+        }
+        #[cfg(not(feature = "runtime-path"))]
+        _ => {
             abort_call_site!(
                 "Only one of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' can be provided"
             )

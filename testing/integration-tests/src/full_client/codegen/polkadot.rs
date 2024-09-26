@@ -102,7 +102,7 @@ pub mod api {
     pub type Event = runtime_types::rococo_runtime::RuntimeEvent;
     #[doc = r" The outer extrinsic enum."]
     pub type Call = runtime_types::rococo_runtime::RuntimeCall;
-    #[doc = r" The outer error enum representing the DispatchError's Module variant."]
+    #[doc = r" The outer error enum represents the DispatchError's Module variant."]
     pub type Error = runtime_types::rococo_runtime::RuntimeError;
     pub fn constants() -> ConstantsApi {
         ConstantsApi
@@ -1894,7 +1894,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                            runtime_types::polkadot_primitives::v7::validator_app::Public,
+                            runtime_types::polkadot_primitives::v8::validator_app::Public,
                         >;
                     }
                 }
@@ -1921,10 +1921,10 @@ pub mod api {
                         pub type Output = (
                             ::subxt::ext::subxt_core::alloc::vec::Vec<
                                 ::subxt::ext::subxt_core::alloc::vec::Vec<
-                                    runtime_types::polkadot_primitives::v7::ValidatorIndex,
+                                    runtime_types::polkadot_primitives::v8::ValidatorIndex,
                                 >,
                             >,
-                            runtime_types::polkadot_primitives::v7::GroupRotationInfo<
+                            runtime_types::polkadot_primitives::v8::GroupRotationInfo<
                                 ::core::primitive::u32,
                             >,
                         );
@@ -1951,7 +1951,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                            runtime_types::polkadot_primitives::v7::CoreState<
+                            runtime_types::polkadot_primitives::v8::CoreState<
                                 ::subxt::ext::subxt_core::utils::H256,
                                 ::core::primitive::u32,
                             >,
@@ -1978,11 +1978,11 @@ pub mod api {
                     use super::runtime_types;
                     pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
                     pub type Assumption =
-                        runtime_types::polkadot_primitives::v7::OccupiedCoreAssumption;
+                        runtime_types::polkadot_primitives::v8::OccupiedCoreAssumption;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::option::Option<
-                            runtime_types::polkadot_primitives::v7::PersistedValidationData<
+                            runtime_types::polkadot_primitives::v8::PersistedValidationData<
                                 ::subxt::ext::subxt_core::utils::H256,
                                 ::core::primitive::u32,
                             >,
@@ -2015,7 +2015,7 @@ pub mod api {
                         ::subxt::ext::subxt_core::utils::H256;
                     pub mod output {
                         use super::runtime_types;
-                        pub type Output = :: core :: option :: Option < (runtime_types :: polkadot_primitives :: v7 :: PersistedValidationData < :: subxt :: ext :: subxt_core :: utils :: H256 , :: core :: primitive :: u32 > , runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ,) > ;
+                        pub type Output = :: core :: option :: Option < (runtime_types :: polkadot_primitives :: v8 :: PersistedValidationData < :: subxt :: ext :: subxt_core :: utils :: H256 , :: core :: primitive :: u32 > , runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ,) > ;
                     }
                 }
                 #[derive(
@@ -2041,7 +2041,7 @@ pub mod api {
                 pub mod check_validation_outputs {
                     use super::runtime_types;
                     pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
-                    pub type Outputs = runtime_types::polkadot_primitives::v7::CandidateCommitments<
+                    pub type Outputs = runtime_types::polkadot_primitives::v8::CandidateCommitments<
                         ::core::primitive::u32,
                     >;
                     pub mod output {
@@ -2095,7 +2095,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
                     pub type Assumption =
-                        runtime_types::polkadot_primitives::v7::OccupiedCoreAssumption;
+                        runtime_types::polkadot_primitives::v8::OccupiedCoreAssumption;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = :: core :: option :: Option < runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode > ;
@@ -2126,7 +2126,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::option::Option<
-                            runtime_types::polkadot_primitives::v7::CommittedCandidateReceipt<
+                            runtime_types::polkadot_primitives::v8::CommittedCandidateReceipt<
                                 ::subxt::ext::subxt_core::utils::H256,
                             >,
                         >;
@@ -2155,7 +2155,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                            runtime_types::polkadot_primitives::v7::CandidateEvent<
+                            runtime_types::polkadot_primitives::v8::CandidateEvent<
                                 ::subxt::ext::subxt_core::utils::H256,
                             >,
                         >;
@@ -2273,7 +2273,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::option::Option<
-                            runtime_types::polkadot_primitives::v7::ScrapedOnChainVotes<
+                            runtime_types::polkadot_primitives::v8::ScrapedOnChainVotes<
                                 ::subxt::ext::subxt_core::utils::H256,
                             >,
                         >;
@@ -2301,7 +2301,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::option::Option<
-                            runtime_types::polkadot_primitives::v7::SessionInfo,
+                            runtime_types::polkadot_primitives::v8::SessionInfo,
                         >;
                     }
                 }
@@ -2325,9 +2325,9 @@ pub mod api {
                 }
                 pub mod submit_pvf_check_statement {
                     use super::runtime_types;
-                    pub type Stmt = runtime_types::polkadot_primitives::v7::PvfCheckStatement;
+                    pub type Stmt = runtime_types::polkadot_primitives::v8::PvfCheckStatement;
                     pub type Signature =
-                        runtime_types::polkadot_primitives::v7::validator_app::Signature;
+                        runtime_types::polkadot_primitives::v8::validator_app::Signature;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ();
@@ -2379,7 +2379,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
                     pub type Assumption =
-                        runtime_types::polkadot_primitives::v7::OccupiedCoreAssumption;
+                        runtime_types::polkadot_primitives::v8::OccupiedCoreAssumption;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = :: core :: option :: Option < runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash > ;
@@ -2411,7 +2411,7 @@ pub mod api {
                         pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<(
                             ::core::primitive::u32,
                             runtime_types::polkadot_core_primitives::CandidateHash,
-                            runtime_types::polkadot_primitives::v7::DisputeState<
+                            runtime_types::polkadot_primitives::v8::DisputeState<
                                 ::core::primitive::u32,
                             >,
                         )>;
@@ -2439,7 +2439,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::option::Option<
-                            runtime_types::polkadot_primitives::v7::executor_params::ExecutorParams,
+                            runtime_types::polkadot_primitives::v8::executor_params::ExecutorParams,
                         >;
                     }
                 }
@@ -2468,7 +2468,7 @@ pub mod api {
                         pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<(
                             ::core::primitive::u32,
                             runtime_types::polkadot_core_primitives::CandidateHash,
-                            runtime_types::polkadot_primitives::v7::slashing::PendingSlashes,
+                            runtime_types::polkadot_primitives::v8::slashing::PendingSlashes,
                         )>;
                     }
                 }
@@ -2491,10 +2491,10 @@ pub mod api {
                 pub mod key_ownership_proof {
                     use super::runtime_types;
                     pub type ValidatorId =
-                        runtime_types::polkadot_primitives::v7::validator_app::Public;
+                        runtime_types::polkadot_primitives::v8::validator_app::Public;
                     pub mod output {
                         use super::runtime_types;
-                        pub type Output = :: core :: option :: Option < runtime_types :: polkadot_primitives :: v7 :: slashing :: OpaqueKeyOwnershipProof > ;
+                        pub type Output = :: core :: option :: Option < runtime_types :: polkadot_primitives :: v8 :: slashing :: OpaqueKeyOwnershipProof > ;
                     }
                 }
                 #[derive(
@@ -2518,9 +2518,9 @@ pub mod api {
                 pub mod submit_report_dispute_lost {
                     use super::runtime_types;
                     pub type DisputeProof =
-                        runtime_types::polkadot_primitives::v7::slashing::DisputeProof;
+                        runtime_types::polkadot_primitives::v8::slashing::DisputeProof;
                     pub type KeyOwnershipProof =
-                        runtime_types::polkadot_primitives::v7::slashing::OpaqueKeyOwnershipProof;
+                        runtime_types::polkadot_primitives::v8::slashing::OpaqueKeyOwnershipProof;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::option::Option<()>;
@@ -2574,7 +2574,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::option::Option<
-                            runtime_types::polkadot_primitives::v7::async_backing::BackingState<
+                            runtime_types::polkadot_primitives::v8::async_backing::BackingState<
                                 ::subxt::ext::subxt_core::utils::H256,
                                 ::core::primitive::u32,
                             >,
@@ -2603,7 +2603,7 @@ pub mod api {
                     use super::runtime_types;
                     pub mod output {
                         use super::runtime_types;
-                        pub type Output = runtime_types :: polkadot_primitives :: v7 :: async_backing :: AsyncBackingParams ;
+                        pub type Output = runtime_types :: polkadot_primitives :: v8 :: async_backing :: AsyncBackingParams ;
                     }
                 }
                 #[derive(
@@ -2627,7 +2627,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                            runtime_types::polkadot_primitives::v7::ValidatorIndex,
+                            runtime_types::polkadot_primitives::v8::ValidatorIndex,
                         >;
                     }
                 }
@@ -2678,7 +2678,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output =
-                            runtime_types::polkadot_primitives::v7::ApprovalVotingParams;
+                            runtime_types::polkadot_primitives::v8::ApprovalVotingParams;
                     }
                 }
                 #[derive(
@@ -2702,7 +2702,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::subxt::ext::subxt_core::utils::KeyedVec<
-                            runtime_types::polkadot_primitives::v7::CoreIndex,
+                            runtime_types::polkadot_primitives::v8::CoreIndex,
                             ::subxt::ext::subxt_core::alloc::vec::Vec<
                                 runtime_types::polkadot_parachain_primitives::primitives::Id,
                             >,
@@ -2731,7 +2731,7 @@ pub mod api {
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                            runtime_types::polkadot_primitives::v7::CommittedCandidateReceipt<
+                            runtime_types::polkadot_primitives::v8::CommittedCandidateReceipt<
                                 ::subxt::ext::subxt_core::utils::H256,
                             >,
                         >;
@@ -5186,9 +5186,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                181u8, 152u8, 254u8, 172u8, 141u8, 227u8, 59u8, 167u8, 125u8, 162u8, 198u8, 209u8,
-                160u8, 57u8, 51u8, 43u8, 237u8, 206u8, 219u8, 146u8, 253u8, 241u8, 122u8, 23u8,
-                97u8, 161u8, 65u8, 161u8, 209u8, 215u8, 85u8, 24u8,
+                158u8, 48u8, 71u8, 167u8, 227u8, 1u8, 77u8, 26u8, 185u8, 145u8, 32u8, 196u8, 238u8,
+                43u8, 15u8, 7u8, 79u8, 6u8, 178u8, 214u8, 58u8, 241u8, 149u8, 231u8, 44u8, 59u8,
+                109u8, 111u8, 131u8, 144u8, 115u8, 169u8,
             ]
     }
     pub mod system {
@@ -35720,7 +35720,7 @@ pub mod api {
                 pub mod set_async_backing_params {
                     use super::runtime_types;
                     pub type New =
-                        runtime_types::polkadot_primitives::v7::async_backing::AsyncBackingParams;
+                        runtime_types::polkadot_primitives::v8::async_backing::AsyncBackingParams;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetAsyncBackingParams {
                     const PALLET: &'static str = "Configuration";
@@ -35748,7 +35748,7 @@ pub mod api {
                 pub mod set_executor_params {
                     use super::runtime_types;
                     pub type New =
-                        runtime_types::polkadot_primitives::v7::executor_params::ExecutorParams;
+                        runtime_types::polkadot_primitives::v8::executor_params::ExecutorParams;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetExecutorParams {
                     const PALLET: &'static str = "Configuration";
@@ -35966,7 +35966,7 @@ pub mod api {
                 }
                 pub mod set_approval_voting_params {
                     use super::runtime_types;
-                    pub type New = runtime_types::polkadot_primitives::v7::ApprovalVotingParams;
+                    pub type New = runtime_types::polkadot_primitives::v8::ApprovalVotingParams;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetApprovalVotingParams {
                     const PALLET: &'static str = "Configuration";
@@ -35993,7 +35993,7 @@ pub mod api {
                 }
                 pub mod set_scheduler_params {
                     use super::runtime_types;
-                    pub type New = runtime_types::polkadot_primitives::vstaging::SchedulerParams<
+                    pub type New = runtime_types::polkadot_primitives::v8::SchedulerParams<
                         ::core::primitive::u32,
                     >;
                 }
@@ -37009,13 +37009,13 @@ pub mod api {
                 pub mod active_validator_indices {
                     use super::runtime_types;
                     pub type ActiveValidatorIndices = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::ValidatorIndex,
+                        runtime_types::polkadot_primitives::v8::ValidatorIndex,
                     >;
                 }
                 pub mod active_validator_keys {
                     use super::runtime_types;
                     pub type ActiveValidatorKeys = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::validator_app::Public,
+                        runtime_types::polkadot_primitives::v8::validator_app::Public,
                     >;
                 }
                 pub mod allowed_relay_parents {
@@ -37157,13 +37157,13 @@ pub mod api {
             );
             pub mod candidate_backed {
                 use super::runtime_types;
-                pub type Field0 = runtime_types::polkadot_primitives::v7::CandidateReceipt<
+                pub type Field0 = runtime_types::polkadot_primitives::v8::CandidateReceipt<
                     ::subxt::ext::subxt_core::utils::H256,
                 >;
                 pub type Field1 =
                     runtime_types::polkadot_parachain_primitives::primitives::HeadData;
-                pub type Field2 = runtime_types::polkadot_primitives::v7::CoreIndex;
-                pub type Field3 = runtime_types::polkadot_primitives::v7::GroupIndex;
+                pub type Field2 = runtime_types::polkadot_primitives::v8::CoreIndex;
+                pub type Field3 = runtime_types::polkadot_primitives::v8::GroupIndex;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for CandidateBacked {
                 const PALLET: &'static str = "ParaInclusion";
@@ -37189,13 +37189,13 @@ pub mod api {
             );
             pub mod candidate_included {
                 use super::runtime_types;
-                pub type Field0 = runtime_types::polkadot_primitives::v7::CandidateReceipt<
+                pub type Field0 = runtime_types::polkadot_primitives::v8::CandidateReceipt<
                     ::subxt::ext::subxt_core::utils::H256,
                 >;
                 pub type Field1 =
                     runtime_types::polkadot_parachain_primitives::primitives::HeadData;
-                pub type Field2 = runtime_types::polkadot_primitives::v7::CoreIndex;
-                pub type Field3 = runtime_types::polkadot_primitives::v7::GroupIndex;
+                pub type Field2 = runtime_types::polkadot_primitives::v8::CoreIndex;
+                pub type Field3 = runtime_types::polkadot_primitives::v8::GroupIndex;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for CandidateIncluded {
                 const PALLET: &'static str = "ParaInclusion";
@@ -37220,12 +37220,12 @@ pub mod api {
             );
             pub mod candidate_timed_out {
                 use super::runtime_types;
-                pub type Field0 = runtime_types::polkadot_primitives::v7::CandidateReceipt<
+                pub type Field0 = runtime_types::polkadot_primitives::v8::CandidateReceipt<
                     ::subxt::ext::subxt_core::utils::H256,
                 >;
                 pub type Field1 =
                     runtime_types::polkadot_parachain_primitives::primitives::HeadData;
-                pub type Field2 = runtime_types::polkadot_primitives::v7::CoreIndex;
+                pub type Field2 = runtime_types::polkadot_primitives::v8::CoreIndex;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for CandidateTimedOut {
                 const PALLET: &'static str = "ParaInclusion";
@@ -37361,7 +37361,7 @@ pub mod api {
                 }
                 pub mod enter {
                     use super::runtime_types;
-                    pub type Data = runtime_types::polkadot_primitives::v7::InherentData<
+                    pub type Data = runtime_types::polkadot_primitives::v8::InherentData<
                         runtime_types::sp_runtime::generic::header::Header<::core::primitive::u32>,
                     >;
                 }
@@ -37402,7 +37402,7 @@ pub mod api {
                 pub mod on_chain_votes {
                     use super::runtime_types;
                     pub type OnChainVotes =
-                        runtime_types::polkadot_primitives::v7::ScrapedOnChainVotes<
+                        runtime_types::polkadot_primitives::v8::ScrapedOnChainVotes<
                             ::subxt::ext::subxt_core::utils::H256,
                         >;
                 }
@@ -37470,7 +37470,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type ValidatorGroups = ::subxt::ext::subxt_core::alloc::vec::Vec<
                         ::subxt::ext::subxt_core::alloc::vec::Vec<
-                            runtime_types::polkadot_primitives::v7::ValidatorIndex,
+                            runtime_types::polkadot_primitives::v8::ValidatorIndex,
                         >,
                     >;
                 }
@@ -37488,7 +37488,7 @@ pub mod api {
                 }
                 pub mod claim_queue {
                     use super::runtime_types;
-                    pub type ClaimQueue = :: subxt :: ext :: subxt_core :: utils :: KeyedVec < runtime_types :: polkadot_primitives :: v7 :: CoreIndex , :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: scheduler :: pallet :: ParasEntry < :: core :: primitive :: u32 > > > ;
+                    pub type ClaimQueue = :: subxt :: ext :: subxt_core :: utils :: KeyedVec < runtime_types :: polkadot_primitives :: v8 :: CoreIndex , :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: scheduler :: pallet :: ParasEntry < :: core :: primitive :: u32 > > > ;
                 }
             }
             pub struct StorageApi;
@@ -37860,9 +37860,9 @@ pub mod api {
                 }
                 pub mod include_pvf_check_statement {
                     use super::runtime_types;
-                    pub type Stmt = runtime_types::polkadot_primitives::v7::PvfCheckStatement;
+                    pub type Stmt = runtime_types::polkadot_primitives::v8::PvfCheckStatement;
                     pub type Signature =
-                        runtime_types::polkadot_primitives::v7::validator_app::Signature;
+                        runtime_types::polkadot_primitives::v8::validator_app::Signature;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for IncludePvfCheckStatement {
                     const PALLET: &'static str = "Paras";
@@ -38375,13 +38375,13 @@ pub mod api {
                 pub mod upgrade_go_ahead_signal {
                     use super::runtime_types;
                     pub type UpgradeGoAheadSignal =
-                        runtime_types::polkadot_primitives::v7::UpgradeGoAhead;
+                        runtime_types::polkadot_primitives::v8::UpgradeGoAhead;
                     pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod upgrade_restriction_signal {
                     use super::runtime_types;
                     pub type UpgradeRestrictionSignal =
-                        runtime_types::polkadot_primitives::v7::UpgradeRestriction;
+                        runtime_types::polkadot_primitives::v8::UpgradeRestriction;
                     pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod upgrade_cooldowns {
@@ -41369,7 +41369,7 @@ pub mod api {
                 pub mod assignment_keys_unsafe {
                     use super::runtime_types;
                     pub type AssignmentKeysUnsafe = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::assignment_app::Public,
+                        runtime_types::polkadot_primitives::v8::assignment_app::Public,
                     >;
                 }
                 pub mod earliest_stored_session {
@@ -41378,7 +41378,7 @@ pub mod api {
                 }
                 pub mod sessions {
                     use super::runtime_types;
-                    pub type Sessions = runtime_types::polkadot_primitives::v7::SessionInfo;
+                    pub type Sessions = runtime_types::polkadot_primitives::v8::SessionInfo;
                     pub type Param0 = ::core::primitive::u32;
                 }
                 pub mod account_keys {
@@ -41391,7 +41391,7 @@ pub mod api {
                 pub mod session_executor_params {
                     use super::runtime_types;
                     pub type SessionExecutorParams =
-                        runtime_types::polkadot_primitives::v7::executor_params::ExecutorParams;
+                        runtime_types::polkadot_primitives::v8::executor_params::ExecutorParams;
                     pub type Param0 = ::core::primitive::u32;
                 }
             }
@@ -41739,7 +41739,7 @@ pub mod api {
                 }
                 pub mod disputes {
                     use super::runtime_types;
-                    pub type Disputes = runtime_types::polkadot_primitives::v7::DisputeState<
+                    pub type Disputes = runtime_types::polkadot_primitives::v8::DisputeState<
                         ::core::primitive::u32,
                     >;
                     pub type Param0 = ::core::primitive::u32;
@@ -41748,7 +41748,7 @@ pub mod api {
                 pub mod backers_on_disputes {
                     use super::runtime_types;
                     pub type BackersOnDisputes = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::ValidatorIndex,
+                        runtime_types::polkadot_primitives::v8::ValidatorIndex,
                     >;
                     pub type Param0 = ::core::primitive::u32;
                     pub type Param1 = runtime_types::polkadot_core_primitives::CandidateHash;
@@ -42122,7 +42122,7 @@ pub mod api {
                 pub mod report_dispute_lost_unsigned {
                     use super::runtime_types;
                     pub type DisputeProof =
-                        runtime_types::polkadot_primitives::v7::slashing::DisputeProof;
+                        runtime_types::polkadot_primitives::v8::slashing::DisputeProof;
                     pub type KeyOwnerProof = runtime_types::sp_session::MembershipProof;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ReportDisputeLostUnsigned {
@@ -42164,7 +42164,7 @@ pub mod api {
                 pub mod unapplied_slashes {
                     use super::runtime_types;
                     pub type UnappliedSlashes =
-                        runtime_types::polkadot_primitives::v7::slashing::PendingSlashes;
+                        runtime_types::polkadot_primitives::v8::slashing::PendingSlashes;
                     pub type Param0 = ::core::primitive::u32;
                     pub type Param1 = runtime_types::polkadot_core_primitives::CandidateHash;
                 }
@@ -43109,7 +43109,7 @@ pub mod api {
                     pub type AffinityEntries = ::subxt::ext::subxt_core::alloc::vec::Vec<
                         runtime_types::polkadot_runtime_parachains::on_demand::types::EnqueuedOrder,
                     >;
-                    pub type Param0 = runtime_types::polkadot_primitives::v7::CoreIndex;
+                    pub type Param0 = runtime_types::polkadot_primitives::v8::CoreIndex;
                 }
                 pub mod revenue {
                     use super::runtime_types;
@@ -43363,12 +43363,12 @@ pub mod api {
                             ::core::primitive::u32,
                         >;
                     pub type Param0 = ::core::primitive::u32;
-                    pub type Param1 = runtime_types::polkadot_primitives::v7::CoreIndex;
+                    pub type Param1 = runtime_types::polkadot_primitives::v8::CoreIndex;
                 }
                 pub mod core_descriptors {
                     use super::runtime_types;
                     pub type CoreDescriptors = runtime_types :: polkadot_runtime_parachains :: assigner_coretime :: CoreDescriptor < :: core :: primitive :: u32 > ;
-                    pub type Param0 = runtime_types::polkadot_primitives::v7::CoreIndex;
+                    pub type Param0 = runtime_types::polkadot_primitives::v8::CoreIndex;
                 }
             }
             pub struct StorageApi;
@@ -46764,7 +46764,7 @@ pub mod api {
             }
             pub mod core_assigned {
                 use super::runtime_types;
-                pub type Core = runtime_types::polkadot_primitives::v7::CoreIndex;
+                pub type Core = runtime_types::polkadot_primitives::v8::CoreIndex;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for CoreAssigned {
                 const PALLET: &'static str = "Coretime";
@@ -58115,9 +58115,6 @@ pub mod api {
                     #[codec(index = 7)]
                     #[doc = "Too few hashes were requested to be upgraded (i.e. zero)."]
                     TooFew,
-                    #[codec(index = 8)]
-                    #[doc = "No ticket with a cost was returned by [`Config::Consideration`] to store the preimage."]
-                    NoCost,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -63030,7 +63027,7 @@ pub mod api {
         }
         pub mod polkadot_primitives {
             use super::runtime_types;
-            pub mod v7 {
+            pub mod v8 {
                 use super::runtime_types;
                 pub mod assignment_app {
                     use super::runtime_types;
@@ -63087,7 +63084,7 @@ pub mod api {
                     #[encode_as_type(
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
-                    pub struct BackingState < _0 , _1 > { pub constraints : runtime_types :: polkadot_primitives :: v7 :: async_backing :: Constraints < _1 > , pub pending_availability : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_primitives :: v7 :: async_backing :: CandidatePendingAvailability < _0 , _1 > > , }
+                    pub struct BackingState < _0 , _1 > { pub constraints : runtime_types :: polkadot_primitives :: v8 :: async_backing :: Constraints < _1 > , pub pending_availability : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_primitives :: v8 :: async_backing :: CandidatePendingAvailability < _0 , _1 > > , }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -63106,9 +63103,9 @@ pub mod api {
                     pub struct CandidatePendingAvailability<_0, _1> {
                         pub candidate_hash: runtime_types::polkadot_core_primitives::CandidateHash,
                         pub descriptor:
-                            runtime_types::polkadot_primitives::v7::CandidateDescriptor<_0>,
+                            runtime_types::polkadot_primitives::v8::CandidateDescriptor<_0>,
                         pub commitments:
-                            runtime_types::polkadot_primitives::v7::CandidateCommitments<_1>,
+                            runtime_types::polkadot_primitives::v8::CandidateCommitments<_1>,
                         pub relay_parent_number: _1,
                         pub max_pov_size: ::core::primitive::u32,
                     }
@@ -63127,7 +63124,7 @@ pub mod api {
                     #[encode_as_type(
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
-                    pub struct Constraints < _0 > { pub min_relay_parent_number : _0 , pub max_pov_size : :: core :: primitive :: u32 , pub max_code_size : :: core :: primitive :: u32 , pub ump_remaining : :: core :: primitive :: u32 , pub ump_remaining_bytes : :: core :: primitive :: u32 , pub max_ump_num_per_candidate : :: core :: primitive :: u32 , pub dmp_remaining_messages : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < _0 > , pub hrmp_inbound : runtime_types :: polkadot_primitives :: v7 :: async_backing :: InboundHrmpLimitations < _0 > , pub hrmp_channels_out : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < (runtime_types :: polkadot_parachain_primitives :: primitives :: Id , runtime_types :: polkadot_primitives :: v7 :: async_backing :: OutboundHrmpChannelLimitations ,) > , pub max_hrmp_num_per_candidate : :: core :: primitive :: u32 , pub required_parent : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , pub validation_code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , pub upgrade_restriction : :: core :: option :: Option < runtime_types :: polkadot_primitives :: v7 :: UpgradeRestriction > , pub future_validation_code : :: core :: option :: Option < (_0 , runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ,) > , }
+                    pub struct Constraints < _0 > { pub min_relay_parent_number : _0 , pub max_pov_size : :: core :: primitive :: u32 , pub max_code_size : :: core :: primitive :: u32 , pub ump_remaining : :: core :: primitive :: u32 , pub ump_remaining_bytes : :: core :: primitive :: u32 , pub max_ump_num_per_candidate : :: core :: primitive :: u32 , pub dmp_remaining_messages : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < _0 > , pub hrmp_inbound : runtime_types :: polkadot_primitives :: v8 :: async_backing :: InboundHrmpLimitations < _0 > , pub hrmp_channels_out : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < (runtime_types :: polkadot_parachain_primitives :: primitives :: Id , runtime_types :: polkadot_primitives :: v8 :: async_backing :: OutboundHrmpChannelLimitations ,) > , pub max_hrmp_num_per_candidate : :: core :: primitive :: u32 , pub required_parent : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , pub validation_code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , pub upgrade_restriction : :: core :: option :: Option < runtime_types :: polkadot_primitives :: v8 :: UpgradeRestriction > , pub future_validation_code : :: core :: option :: Option < (_0 , runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ,) > , }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -63229,12 +63226,12 @@ pub mod api {
                         PrecheckingMaxMemory(::core::primitive::u64),
                         #[codec(index = 5)]
                         PvfPrepTimeout(
-                            runtime_types::polkadot_primitives::v7::PvfPrepKind,
+                            runtime_types::polkadot_primitives::v8::PvfPrepKind,
                             ::core::primitive::u64,
                         ),
                         #[codec(index = 6)]
                         PvfExecTimeout(
-                            runtime_types::polkadot_primitives::v7::PvfExecKind,
+                            runtime_types::polkadot_primitives::v8::PvfExecKind,
                             ::core::primitive::u64,
                         ),
                         #[codec(index = 7)]
@@ -63257,7 +63254,7 @@ pub mod api {
                     )]
                     pub struct ExecutorParams(
                         pub  ::subxt::ext::subxt_core::alloc::vec::Vec<
-                            runtime_types::polkadot_primitives::v7::executor_params::ExecutorParam,
+                            runtime_types::polkadot_primitives::v8::executor_params::ExecutorParam,
                         >,
                     );
                 }
@@ -63280,9 +63277,9 @@ pub mod api {
                     )]
                     pub struct UncheckedSigned<_0, _1> {
                         pub payload: _0,
-                        pub validator_index: runtime_types::polkadot_primitives::v7::ValidatorIndex,
+                        pub validator_index: runtime_types::polkadot_primitives::v8::ValidatorIndex,
                         pub signature:
-                            runtime_types::polkadot_primitives::v7::validator_app::Signature,
+                            runtime_types::polkadot_primitives::v8::validator_app::Signature,
                         #[codec(skip)]
                         pub __ignore: ::core::marker::PhantomData<_1>,
                     }
@@ -63306,12 +63303,12 @@ pub mod api {
                     )]
                     pub struct DisputeProof {
                         pub time_slot:
-                            runtime_types::polkadot_primitives::v7::slashing::DisputesTimeSlot,
+                            runtime_types::polkadot_primitives::v8::slashing::DisputesTimeSlot,
                         pub kind:
-                            runtime_types::polkadot_primitives::v7::slashing::SlashingOffenceKind,
-                        pub validator_index: runtime_types::polkadot_primitives::v7::ValidatorIndex,
+                            runtime_types::polkadot_primitives::v8::slashing::SlashingOffenceKind,
+                        pub validator_index: runtime_types::polkadot_primitives::v8::ValidatorIndex,
                         pub validator_id:
-                            runtime_types::polkadot_primitives::v7::validator_app::Public,
+                            runtime_types::polkadot_primitives::v8::validator_app::Public,
                     }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -63367,11 +63364,11 @@ pub mod api {
                     )]
                     pub struct PendingSlashes {
                         pub keys: ::subxt::ext::subxt_core::utils::KeyedVec<
-                            runtime_types::polkadot_primitives::v7::ValidatorIndex,
-                            runtime_types::polkadot_primitives::v7::validator_app::Public,
+                            runtime_types::polkadot_primitives::v8::ValidatorIndex,
+                            runtime_types::polkadot_primitives::v8::validator_app::Public,
                         >,
                         pub kind:
-                            runtime_types::polkadot_primitives::v7::slashing::SlashingOffenceKind,
+                            runtime_types::polkadot_primitives::v8::slashing::SlashingOffenceKind,
                     }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -63487,9 +63484,9 @@ pub mod api {
                 )]
                 pub struct BackedCandidate<_0> {
                     pub candidate:
-                        runtime_types::polkadot_primitives::v7::CommittedCandidateReceipt<_0>,
+                        runtime_types::polkadot_primitives::v8::CommittedCandidateReceipt<_0>,
                     pub validity_votes: ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::ValidityAttestation,
+                        runtime_types::polkadot_primitives::v8::ValidityAttestation,
                     >,
                     pub validator_indices: ::subxt::ext::subxt_core::utils::bits::DecodedBits<
                         ::core::primitive::u8,
@@ -63545,7 +63542,7 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct CandidateDescriptor < _0 > { pub para_id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , pub relay_parent : _0 , pub collator : runtime_types :: polkadot_primitives :: v7 :: collator_app :: Public , pub persisted_validation_data_hash : :: subxt :: ext :: subxt_core :: utils :: H256 , pub pov_hash : :: subxt :: ext :: subxt_core :: utils :: H256 , pub erasure_root : :: subxt :: ext :: subxt_core :: utils :: H256 , pub signature : runtime_types :: polkadot_primitives :: v7 :: collator_app :: Signature , pub para_head : :: subxt :: ext :: subxt_core :: utils :: H256 , pub validation_code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , }
+                pub struct CandidateDescriptor < _0 > { pub para_id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , pub relay_parent : _0 , pub collator : runtime_types :: polkadot_primitives :: v8 :: collator_app :: Public , pub persisted_validation_data_hash : :: subxt :: ext :: subxt_core :: utils :: H256 , pub pov_hash : :: subxt :: ext :: subxt_core :: utils :: H256 , pub erasure_root : :: subxt :: ext :: subxt_core :: utils :: H256 , pub signature : runtime_types :: polkadot_primitives :: v8 :: collator_app :: Signature , pub para_head : :: subxt :: ext :: subxt_core :: utils :: H256 , pub validation_code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -63564,23 +63561,23 @@ pub mod api {
                 pub enum CandidateEvent<_0> {
                     #[codec(index = 0)]
                     CandidateBacked(
-                        runtime_types::polkadot_primitives::v7::CandidateReceipt<_0>,
+                        runtime_types::polkadot_primitives::v8::CandidateReceipt<_0>,
                         runtime_types::polkadot_parachain_primitives::primitives::HeadData,
-                        runtime_types::polkadot_primitives::v7::CoreIndex,
-                        runtime_types::polkadot_primitives::v7::GroupIndex,
+                        runtime_types::polkadot_primitives::v8::CoreIndex,
+                        runtime_types::polkadot_primitives::v8::GroupIndex,
                     ),
                     #[codec(index = 1)]
                     CandidateIncluded(
-                        runtime_types::polkadot_primitives::v7::CandidateReceipt<_0>,
+                        runtime_types::polkadot_primitives::v8::CandidateReceipt<_0>,
                         runtime_types::polkadot_parachain_primitives::primitives::HeadData,
-                        runtime_types::polkadot_primitives::v7::CoreIndex,
-                        runtime_types::polkadot_primitives::v7::GroupIndex,
+                        runtime_types::polkadot_primitives::v8::CoreIndex,
+                        runtime_types::polkadot_primitives::v8::GroupIndex,
                     ),
                     #[codec(index = 2)]
                     CandidateTimedOut(
-                        runtime_types::polkadot_primitives::v7::CandidateReceipt<_0>,
+                        runtime_types::polkadot_primitives::v8::CandidateReceipt<_0>,
                         runtime_types::polkadot_parachain_primitives::primitives::HeadData,
-                        runtime_types::polkadot_primitives::v7::CoreIndex,
+                        runtime_types::polkadot_primitives::v8::CoreIndex,
                     ),
                 }
                 #[derive(
@@ -63599,7 +63596,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct CandidateReceipt<_0> {
-                    pub descriptor: runtime_types::polkadot_primitives::v7::CandidateDescriptor<_0>,
+                    pub descriptor: runtime_types::polkadot_primitives::v8::CandidateDescriptor<_0>,
                     pub commitments_hash: ::subxt::ext::subxt_core::utils::H256,
                 }
                 #[derive(
@@ -63618,8 +63615,8 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct CommittedCandidateReceipt<_0> {
-                    pub descriptor: runtime_types::polkadot_primitives::v7::CandidateDescriptor<_0>,
-                    pub commitments: runtime_types::polkadot_primitives::v7::CandidateCommitments<
+                    pub descriptor: runtime_types::polkadot_primitives::v8::CandidateDescriptor<_0>,
+                    pub commitments: runtime_types::polkadot_primitives::v8::CandidateCommitments<
                         ::core::primitive::u32,
                     >,
                 }
@@ -63657,9 +63654,9 @@ pub mod api {
                 )]
                 pub enum CoreState<_0, _1> {
                     #[codec(index = 0)]
-                    Occupied(runtime_types::polkadot_primitives::v7::OccupiedCore<_0, _1>),
+                    Occupied(runtime_types::polkadot_primitives::v8::OccupiedCore<_0, _1>),
                     #[codec(index = 1)]
-                    Scheduled(runtime_types::polkadot_primitives::v7::ScheduledCore),
+                    Scheduled(runtime_types::polkadot_primitives::v8::ScheduledCore),
                     #[codec(index = 2)]
                     Free,
                 }
@@ -63707,9 +63704,9 @@ pub mod api {
                 )]
                 pub enum DisputeStatement {
                     #[codec(index = 0)]
-                    Valid(runtime_types::polkadot_primitives::v7::ValidDisputeStatementKind),
+                    Valid(runtime_types::polkadot_primitives::v8::ValidDisputeStatementKind),
                     #[codec(index = 1)]
-                    Invalid(runtime_types::polkadot_primitives::v7::InvalidDisputeStatementKind),
+                    Invalid(runtime_types::polkadot_primitives::v8::InvalidDisputeStatementKind),
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -63730,9 +63727,9 @@ pub mod api {
                     pub candidate_hash: runtime_types::polkadot_core_primitives::CandidateHash,
                     pub session: ::core::primitive::u32,
                     pub statements: ::subxt::ext::subxt_core::alloc::vec::Vec<(
-                        runtime_types::polkadot_primitives::v7::DisputeStatement,
-                        runtime_types::polkadot_primitives::v7::ValidatorIndex,
-                        runtime_types::polkadot_primitives::v7::validator_app::Signature,
+                        runtime_types::polkadot_primitives::v8::DisputeStatement,
+                        runtime_types::polkadot_primitives::v8::ValidatorIndex,
+                        runtime_types::polkadot_primitives::v8::validator_app::Signature,
                     )>,
                 }
                 #[derive(
@@ -63808,18 +63805,18 @@ pub mod api {
                 )]
                 pub struct InherentData<_0> {
                     pub bitfields: ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::signed::UncheckedSigned<
-                            runtime_types::polkadot_primitives::v7::AvailabilityBitfield,
-                            runtime_types::polkadot_primitives::v7::AvailabilityBitfield,
+                        runtime_types::polkadot_primitives::v8::signed::UncheckedSigned<
+                            runtime_types::polkadot_primitives::v8::AvailabilityBitfield,
+                            runtime_types::polkadot_primitives::v8::AvailabilityBitfield,
                         >,
                     >,
                     pub backed_candidates: ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::BackedCandidate<
+                        runtime_types::polkadot_primitives::v8::BackedCandidate<
                             ::subxt::ext::subxt_core::utils::H256,
                         >,
                     >,
                     pub disputes: ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::DisputeStatementSet,
+                        runtime_types::polkadot_primitives::v8::DisputeStatementSet,
                     >,
                     pub parent_header: _0,
                 }
@@ -63859,21 +63856,21 @@ pub mod api {
                 )]
                 pub struct OccupiedCore<_0, _1> {
                     pub next_up_on_available: ::core::option::Option<
-                        runtime_types::polkadot_primitives::v7::ScheduledCore,
+                        runtime_types::polkadot_primitives::v8::ScheduledCore,
                     >,
                     pub occupied_since: _1,
                     pub time_out_at: _1,
                     pub next_up_on_time_out: ::core::option::Option<
-                        runtime_types::polkadot_primitives::v7::ScheduledCore,
+                        runtime_types::polkadot_primitives::v8::ScheduledCore,
                     >,
                     pub availability: ::subxt::ext::subxt_core::utils::bits::DecodedBits<
                         ::core::primitive::u8,
                         ::subxt::ext::subxt_core::utils::bits::Lsb0,
                     >,
-                    pub group_responsible: runtime_types::polkadot_primitives::v7::GroupIndex,
+                    pub group_responsible: runtime_types::polkadot_primitives::v8::GroupIndex,
                     pub candidate_hash: runtime_types::polkadot_core_primitives::CandidateHash,
                     pub candidate_descriptor:
-                        runtime_types::polkadot_primitives::v7::CandidateDescriptor<_0>,
+                        runtime_types::polkadot_primitives::v8::CandidateDescriptor<_0>,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -63935,7 +63932,7 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct PvfCheckStatement { pub accept : :: core :: primitive :: bool , pub subject : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , pub session_index : :: core :: primitive :: u32 , pub validator_index : runtime_types :: polkadot_primitives :: v7 :: ValidatorIndex , }
+                pub struct PvfCheckStatement { pub accept : :: core :: primitive :: bool , pub subject : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , pub session_index : :: core :: primitive :: u32 , pub validator_index : runtime_types :: polkadot_primitives :: v8 :: ValidatorIndex , }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -63996,8 +63993,38 @@ pub mod api {
                 pub struct ScheduledCore {
                     pub para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                     pub collator: ::core::option::Option<
-                        runtime_types::polkadot_primitives::v7::collator_app::Public,
+                        runtime_types::polkadot_primitives::v8::collator_app::Public,
                     >,
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct SchedulerParams<_0> {
+                    pub group_rotation_frequency: _0,
+                    pub paras_availability_period: _0,
+                    pub max_validators_per_core: ::core::option::Option<_0>,
+                    pub lookahead: ::core::primitive::u32,
+                    pub num_cores: ::core::primitive::u32,
+                    pub max_availability_timeouts: ::core::primitive::u32,
+                    pub on_demand_queue_max_size: ::core::primitive::u32,
+                    pub on_demand_target_queue_utilization:
+                        runtime_types::sp_arithmetic::per_things::Perbill,
+                    pub on_demand_fee_variability:
+                        runtime_types::sp_arithmetic::per_things::Perbill,
+                    pub on_demand_base_fee: ::core::primitive::u128,
+                    pub ttl: _0,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -64018,14 +64045,14 @@ pub mod api {
                     pub session: ::core::primitive::u32,
                     pub backing_validators_per_candidate:
                         ::subxt::ext::subxt_core::alloc::vec::Vec<(
-                            runtime_types::polkadot_primitives::v7::CandidateReceipt<_0>,
+                            runtime_types::polkadot_primitives::v8::CandidateReceipt<_0>,
                             ::subxt::ext::subxt_core::alloc::vec::Vec<(
-                                runtime_types::polkadot_primitives::v7::ValidatorIndex,
-                                runtime_types::polkadot_primitives::v7::ValidityAttestation,
+                                runtime_types::polkadot_primitives::v8::ValidatorIndex,
+                                runtime_types::polkadot_primitives::v8::ValidityAttestation,
                             )>,
                         )>,
                     pub disputes: ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::DisputeStatementSet,
+                        runtime_types::polkadot_primitives::v8::DisputeStatementSet,
                     >,
                 }
                 #[derive(
@@ -64045,24 +64072,24 @@ pub mod api {
                 )]
                 pub struct SessionInfo {
                     pub active_validator_indices: ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::ValidatorIndex,
+                        runtime_types::polkadot_primitives::v8::ValidatorIndex,
                     >,
                     pub random_seed: [::core::primitive::u8; 32usize],
                     pub dispute_period: ::core::primitive::u32,
-                    pub validators: runtime_types::polkadot_primitives::v7::IndexedVec<
-                        runtime_types::polkadot_primitives::v7::ValidatorIndex,
-                        runtime_types::polkadot_primitives::v7::validator_app::Public,
+                    pub validators: runtime_types::polkadot_primitives::v8::IndexedVec<
+                        runtime_types::polkadot_primitives::v8::ValidatorIndex,
+                        runtime_types::polkadot_primitives::v8::validator_app::Public,
                     >,
                     pub discovery_keys: ::subxt::ext::subxt_core::alloc::vec::Vec<
                         runtime_types::sp_authority_discovery::app::Public,
                     >,
                     pub assignment_keys: ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::assignment_app::Public,
+                        runtime_types::polkadot_primitives::v8::assignment_app::Public,
                     >,
-                    pub validator_groups: runtime_types::polkadot_primitives::v7::IndexedVec<
-                        runtime_types::polkadot_primitives::v7::GroupIndex,
+                    pub validator_groups: runtime_types::polkadot_primitives::v8::IndexedVec<
+                        runtime_types::polkadot_primitives::v8::GroupIndex,
                         ::subxt::ext::subxt_core::alloc::vec::Vec<
-                            runtime_types::polkadot_primitives::v7::ValidatorIndex,
+                            runtime_types::polkadot_primitives::v8::ValidatorIndex,
                         >,
                     >,
                     pub n_cores: ::core::primitive::u32,
@@ -64177,42 +64204,9 @@ pub mod api {
                 )]
                 pub enum ValidityAttestation {
                     #[codec(index = 1)]
-                    Implicit(runtime_types::polkadot_primitives::v7::validator_app::Signature),
+                    Implicit(runtime_types::polkadot_primitives::v8::validator_app::Signature),
                     #[codec(index = 2)]
-                    Explicit(runtime_types::polkadot_primitives::v7::validator_app::Signature),
-                }
-            }
-            pub mod vstaging {
-                use super::runtime_types;
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct SchedulerParams<_0> {
-                    pub group_rotation_frequency: _0,
-                    pub paras_availability_period: _0,
-                    pub max_validators_per_core: ::core::option::Option<_0>,
-                    pub lookahead: ::core::primitive::u32,
-                    pub num_cores: ::core::primitive::u32,
-                    pub max_availability_timeouts: ::core::primitive::u32,
-                    pub on_demand_queue_max_size: ::core::primitive::u32,
-                    pub on_demand_target_queue_utilization:
-                        runtime_types::sp_arithmetic::per_things::Perbill,
-                    pub on_demand_fee_variability:
-                        runtime_types::sp_arithmetic::per_things::Perbill,
-                    pub on_demand_base_fee: ::core::primitive::u128,
-                    pub ttl: _0,
+                    Explicit(runtime_types::polkadot_primitives::v8::validator_app::Signature),
                 }
             }
         }
@@ -65813,7 +65807,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
-                        # [codec (index = 0)] # [doc = "Set the validation upgrade cooldown."] set_validation_upgrade_cooldown { new : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Set the validation upgrade delay."] set_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [codec (index = 2)] # [doc = "Set the acceptance period for an included candidate."] set_code_retention_period { new : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Set the max validation code size for incoming upgrades."] set_max_code_size { new : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "Set the max POV block size for incoming upgrades."] set_max_pov_size { new : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Set the max head data size for paras."] set_max_head_data_size { new : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "Set the number of coretime execution cores."] # [doc = ""] # [doc = "NOTE: that this configuration is managed by the coretime chain. Only manually change"] # [doc = "this, if you really know what you are doing!"] set_coretime_cores { new : :: core :: primitive :: u32 , } , # [codec (index = 7)] # [doc = "Set the max number of times a claim may timeout on a core before it is abandoned"] set_max_availability_timeouts { new : :: core :: primitive :: u32 , } , # [codec (index = 8)] # [doc = "Set the parachain validator-group rotation frequency"] set_group_rotation_frequency { new : :: core :: primitive :: u32 , } , # [codec (index = 9)] # [doc = "Set the availability period for paras."] set_paras_availability_period { new : :: core :: primitive :: u32 , } , # [codec (index = 11)] # [doc = "Set the scheduling lookahead, in expected number of blocks at peak throughput."] set_scheduling_lookahead { new : :: core :: primitive :: u32 , } , # [codec (index = 12)] # [doc = "Set the maximum number of validators to assign to any core."] set_max_validators_per_core { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 13)] # [doc = "Set the maximum number of validators to use in parachain consensus."] set_max_validators { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 14)] # [doc = "Set the dispute period, in number of sessions to keep for disputes."] set_dispute_period { new : :: core :: primitive :: u32 , } , # [codec (index = 15)] # [doc = "Set the dispute post conclusion acceptance period."] set_dispute_post_conclusion_acceptance_period { new : :: core :: primitive :: u32 , } , # [codec (index = 18)] # [doc = "Set the no show slots, in number of number of consensus slots."] # [doc = "Must be at least 1."] set_no_show_slots { new : :: core :: primitive :: u32 , } , # [codec (index = 19)] # [doc = "Set the total number of delay tranches."] set_n_delay_tranches { new : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Set the zeroth delay tranche width."] set_zeroth_delay_tranche_width { new : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "Set the number of validators needed to approve a block."] set_needed_approvals { new : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "Set the number of samples to do of the `RelayVRFModulo` approval assignment criterion."] set_relay_vrf_modulo_samples { new : :: core :: primitive :: u32 , } , # [codec (index = 23)] # [doc = "Sets the maximum items that can present in a upward dispatch queue at once."] set_max_upward_queue_count { new : :: core :: primitive :: u32 , } , # [codec (index = 24)] # [doc = "Sets the maximum total size of items that can present in a upward dispatch queue at"] # [doc = "once."] set_max_upward_queue_size { new : :: core :: primitive :: u32 , } , # [codec (index = 25)] # [doc = "Set the critical downward message size."] set_max_downward_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 27)] # [doc = "Sets the maximum size of an upward message that can be sent by a candidate."] set_max_upward_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 28)] # [doc = "Sets the maximum number of messages that a candidate can contain."] set_max_upward_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [codec (index = 29)] # [doc = "Sets the number of sessions after which an HRMP open channel request expires."] set_hrmp_open_request_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 30)] # [doc = "Sets the amount of funds that the sender should provide for opening an HRMP channel."] set_hrmp_sender_deposit { new : :: core :: primitive :: u128 , } , # [codec (index = 31)] # [doc = "Sets the amount of funds that the recipient should provide for accepting opening an HRMP"] # [doc = "channel."] set_hrmp_recipient_deposit { new : :: core :: primitive :: u128 , } , # [codec (index = 32)] # [doc = "Sets the maximum number of messages allowed in an HRMP channel at once."] set_hrmp_channel_max_capacity { new : :: core :: primitive :: u32 , } , # [codec (index = 33)] # [doc = "Sets the maximum total size of messages in bytes allowed in an HRMP channel at once."] set_hrmp_channel_max_total_size { new : :: core :: primitive :: u32 , } , # [codec (index = 34)] # [doc = "Sets the maximum number of inbound HRMP channels a parachain is allowed to accept."] set_hrmp_max_parachain_inbound_channels { new : :: core :: primitive :: u32 , } , # [codec (index = 36)] # [doc = "Sets the maximum size of a message that could ever be put into an HRMP channel."] set_hrmp_channel_max_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 37)] # [doc = "Sets the maximum number of outbound HRMP channels a parachain is allowed to open."] set_hrmp_max_parachain_outbound_channels { new : :: core :: primitive :: u32 , } , # [codec (index = 39)] # [doc = "Sets the maximum number of outbound HRMP messages can be sent by a candidate."] set_hrmp_max_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [codec (index = 42)] # [doc = "Set the number of session changes after which a PVF pre-checking voting is rejected."] set_pvf_voting_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 43)] # [doc = "Sets the minimum delay between announcing the upgrade block for a parachain until the"] # [doc = "upgrade taking place."] # [doc = ""] # [doc = "See the field documentation for information and constraints for the new value."] set_minimum_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [codec (index = 44)] # [doc = "Setting this to true will disable consistency checks for the configuration setters."] # [doc = "Use with caution."] set_bypass_consistency_check { new : :: core :: primitive :: bool , } , # [codec (index = 45)] # [doc = "Set the asynchronous backing parameters."] set_async_backing_params { new : runtime_types :: polkadot_primitives :: v7 :: async_backing :: AsyncBackingParams , } , # [codec (index = 46)] # [doc = "Set PVF executor parameters."] set_executor_params { new : runtime_types :: polkadot_primitives :: v7 :: executor_params :: ExecutorParams , } , # [codec (index = 47)] # [doc = "Set the on demand (parathreads) base fee."] set_on_demand_base_fee { new : :: core :: primitive :: u128 , } , # [codec (index = 48)] # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_fee_variability { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 49)] # [doc = "Set the on demand (parathreads) queue max size."] set_on_demand_queue_max_size { new : :: core :: primitive :: u32 , } , # [codec (index = 50)] # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_target_queue_utilization { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 51)] # [doc = "Set the on demand (parathreads) ttl in the claimqueue."] set_on_demand_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 52)] # [doc = "Set the minimum backing votes threshold."] set_minimum_backing_votes { new : :: core :: primitive :: u32 , } , # [codec (index = 53)] # [doc = "Set/Unset a node feature."] set_node_feature { index : :: core :: primitive :: u8 , value : :: core :: primitive :: bool , } , # [codec (index = 54)] # [doc = "Set approval-voting-params."] set_approval_voting_params { new : runtime_types :: polkadot_primitives :: v7 :: ApprovalVotingParams , } , # [codec (index = 55)] # [doc = "Set scheduler-params."] set_scheduler_params { new : runtime_types :: polkadot_primitives :: vstaging :: SchedulerParams < :: core :: primitive :: u32 > , } , }
+                        # [codec (index = 0)] # [doc = "Set the validation upgrade cooldown."] set_validation_upgrade_cooldown { new : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Set the validation upgrade delay."] set_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [codec (index = 2)] # [doc = "Set the acceptance period for an included candidate."] set_code_retention_period { new : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Set the max validation code size for incoming upgrades."] set_max_code_size { new : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "Set the max POV block size for incoming upgrades."] set_max_pov_size { new : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Set the max head data size for paras."] set_max_head_data_size { new : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "Set the number of coretime execution cores."] # [doc = ""] # [doc = "NOTE: that this configuration is managed by the coretime chain. Only manually change"] # [doc = "this, if you really know what you are doing!"] set_coretime_cores { new : :: core :: primitive :: u32 , } , # [codec (index = 7)] # [doc = "Set the max number of times a claim may timeout on a core before it is abandoned"] set_max_availability_timeouts { new : :: core :: primitive :: u32 , } , # [codec (index = 8)] # [doc = "Set the parachain validator-group rotation frequency"] set_group_rotation_frequency { new : :: core :: primitive :: u32 , } , # [codec (index = 9)] # [doc = "Set the availability period for paras."] set_paras_availability_period { new : :: core :: primitive :: u32 , } , # [codec (index = 11)] # [doc = "Set the scheduling lookahead, in expected number of blocks at peak throughput."] set_scheduling_lookahead { new : :: core :: primitive :: u32 , } , # [codec (index = 12)] # [doc = "Set the maximum number of validators to assign to any core."] set_max_validators_per_core { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 13)] # [doc = "Set the maximum number of validators to use in parachain consensus."] set_max_validators { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 14)] # [doc = "Set the dispute period, in number of sessions to keep for disputes."] set_dispute_period { new : :: core :: primitive :: u32 , } , # [codec (index = 15)] # [doc = "Set the dispute post conclusion acceptance period."] set_dispute_post_conclusion_acceptance_period { new : :: core :: primitive :: u32 , } , # [codec (index = 18)] # [doc = "Set the no show slots, in number of number of consensus slots."] # [doc = "Must be at least 1."] set_no_show_slots { new : :: core :: primitive :: u32 , } , # [codec (index = 19)] # [doc = "Set the total number of delay tranches."] set_n_delay_tranches { new : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Set the zeroth delay tranche width."] set_zeroth_delay_tranche_width { new : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "Set the number of validators needed to approve a block."] set_needed_approvals { new : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "Set the number of samples to do of the `RelayVRFModulo` approval assignment criterion."] set_relay_vrf_modulo_samples { new : :: core :: primitive :: u32 , } , # [codec (index = 23)] # [doc = "Sets the maximum items that can present in a upward dispatch queue at once."] set_max_upward_queue_count { new : :: core :: primitive :: u32 , } , # [codec (index = 24)] # [doc = "Sets the maximum total size of items that can present in a upward dispatch queue at"] # [doc = "once."] set_max_upward_queue_size { new : :: core :: primitive :: u32 , } , # [codec (index = 25)] # [doc = "Set the critical downward message size."] set_max_downward_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 27)] # [doc = "Sets the maximum size of an upward message that can be sent by a candidate."] set_max_upward_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 28)] # [doc = "Sets the maximum number of messages that a candidate can contain."] set_max_upward_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [codec (index = 29)] # [doc = "Sets the number of sessions after which an HRMP open channel request expires."] set_hrmp_open_request_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 30)] # [doc = "Sets the amount of funds that the sender should provide for opening an HRMP channel."] set_hrmp_sender_deposit { new : :: core :: primitive :: u128 , } , # [codec (index = 31)] # [doc = "Sets the amount of funds that the recipient should provide for accepting opening an HRMP"] # [doc = "channel."] set_hrmp_recipient_deposit { new : :: core :: primitive :: u128 , } , # [codec (index = 32)] # [doc = "Sets the maximum number of messages allowed in an HRMP channel at once."] set_hrmp_channel_max_capacity { new : :: core :: primitive :: u32 , } , # [codec (index = 33)] # [doc = "Sets the maximum total size of messages in bytes allowed in an HRMP channel at once."] set_hrmp_channel_max_total_size { new : :: core :: primitive :: u32 , } , # [codec (index = 34)] # [doc = "Sets the maximum number of inbound HRMP channels a parachain is allowed to accept."] set_hrmp_max_parachain_inbound_channels { new : :: core :: primitive :: u32 , } , # [codec (index = 36)] # [doc = "Sets the maximum size of a message that could ever be put into an HRMP channel."] set_hrmp_channel_max_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 37)] # [doc = "Sets the maximum number of outbound HRMP channels a parachain is allowed to open."] set_hrmp_max_parachain_outbound_channels { new : :: core :: primitive :: u32 , } , # [codec (index = 39)] # [doc = "Sets the maximum number of outbound HRMP messages can be sent by a candidate."] set_hrmp_max_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [codec (index = 42)] # [doc = "Set the number of session changes after which a PVF pre-checking voting is rejected."] set_pvf_voting_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 43)] # [doc = "Sets the minimum delay between announcing the upgrade block for a parachain until the"] # [doc = "upgrade taking place."] # [doc = ""] # [doc = "See the field documentation for information and constraints for the new value."] set_minimum_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [codec (index = 44)] # [doc = "Setting this to true will disable consistency checks for the configuration setters."] # [doc = "Use with caution."] set_bypass_consistency_check { new : :: core :: primitive :: bool , } , # [codec (index = 45)] # [doc = "Set the asynchronous backing parameters."] set_async_backing_params { new : runtime_types :: polkadot_primitives :: v8 :: async_backing :: AsyncBackingParams , } , # [codec (index = 46)] # [doc = "Set PVF executor parameters."] set_executor_params { new : runtime_types :: polkadot_primitives :: v8 :: executor_params :: ExecutorParams , } , # [codec (index = 47)] # [doc = "Set the on demand (parathreads) base fee."] set_on_demand_base_fee { new : :: core :: primitive :: u128 , } , # [codec (index = 48)] # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_fee_variability { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 49)] # [doc = "Set the on demand (parathreads) queue max size."] set_on_demand_queue_max_size { new : :: core :: primitive :: u32 , } , # [codec (index = 50)] # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_target_queue_utilization { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 51)] # [doc = "Set the on demand (parathreads) ttl in the claimqueue."] set_on_demand_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 52)] # [doc = "Set the minimum backing votes threshold."] set_minimum_backing_votes { new : :: core :: primitive :: u32 , } , # [codec (index = 53)] # [doc = "Set/Unset a node feature."] set_node_feature { index : :: core :: primitive :: u8 , value : :: core :: primitive :: bool , } , # [codec (index = 54)] # [doc = "Set approval-voting-params."] set_approval_voting_params { new : runtime_types :: polkadot_primitives :: v8 :: ApprovalVotingParams , } , # [codec (index = 55)] # [doc = "Set scheduler-params."] set_scheduler_params { new : runtime_types :: polkadot_primitives :: v8 :: SchedulerParams < :: core :: primitive :: u32 > , } , }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -65862,7 +65856,7 @@ pub mod api {
                     pub validation_upgrade_cooldown: _0,
                     pub validation_upgrade_delay: _0,
                     pub async_backing_params:
-                        runtime_types::polkadot_primitives::v7::async_backing::AsyncBackingParams,
+                        runtime_types::polkadot_primitives::v8::async_backing::AsyncBackingParams,
                     pub max_pov_size: ::core::primitive::u32,
                     pub max_downward_message_size: ::core::primitive::u32,
                     pub hrmp_max_parachain_outbound_channels: ::core::primitive::u32,
@@ -65873,7 +65867,7 @@ pub mod api {
                     pub hrmp_max_parachain_inbound_channels: ::core::primitive::u32,
                     pub hrmp_channel_max_message_size: ::core::primitive::u32,
                     pub executor_params:
-                        runtime_types::polkadot_primitives::v7::executor_params::ExecutorParams,
+                        runtime_types::polkadot_primitives::v8::executor_params::ExecutorParams,
                     pub code_retention_period: _0,
                     pub max_validators: ::core::option::Option<_0>,
                     pub dispute_period: ::core::primitive::u32,
@@ -65891,9 +65885,9 @@ pub mod api {
                         ::subxt::ext::subxt_core::utils::bits::Lsb0,
                     >,
                     pub approval_voting_params:
-                        runtime_types::polkadot_primitives::v7::ApprovalVotingParams,
+                        runtime_types::polkadot_primitives::v8::ApprovalVotingParams,
                     pub scheduler_params:
-                        runtime_types::polkadot_primitives::vstaging::SchedulerParams<_0>,
+                        runtime_types::polkadot_primitives::v8::SchedulerParams<_0>,
                 }
             }
             pub mod coretime {
@@ -65969,7 +65963,7 @@ pub mod api {
                         #[codec(index = 1)]
                         #[doc = "A core has received a new assignment from the broker chain."]
                         CoreAssigned {
-                            core: runtime_types::polkadot_primitives::v7::CoreIndex,
+                            core: runtime_types::polkadot_primitives::v8::CoreIndex,
                         },
                     }
                 }
@@ -66105,7 +66099,7 @@ pub mod api {
                             #[codec(index = 0)]
                             report_dispute_lost_unsigned {
                                 dispute_proof: ::subxt::ext::subxt_core::alloc::boxed::Box<
-                                    runtime_types::polkadot_primitives::v7::slashing::DisputeProof,
+                                    runtime_types::polkadot_primitives::v8::slashing::DisputeProof,
                                 >,
                                 key_owner_proof: runtime_types::sp_session::MembershipProof,
                             },
@@ -66473,31 +66467,31 @@ pub mod api {
                         #[codec(index = 0)]
                         #[doc = "A candidate was backed. `[candidate, head_data]`"]
                         CandidateBacked(
-                            runtime_types::polkadot_primitives::v7::CandidateReceipt<
+                            runtime_types::polkadot_primitives::v8::CandidateReceipt<
                                 ::subxt::ext::subxt_core::utils::H256,
                             >,
                             runtime_types::polkadot_parachain_primitives::primitives::HeadData,
-                            runtime_types::polkadot_primitives::v7::CoreIndex,
-                            runtime_types::polkadot_primitives::v7::GroupIndex,
+                            runtime_types::polkadot_primitives::v8::CoreIndex,
+                            runtime_types::polkadot_primitives::v8::GroupIndex,
                         ),
                         #[codec(index = 1)]
                         #[doc = "A candidate was included. `[candidate, head_data]`"]
                         CandidateIncluded(
-                            runtime_types::polkadot_primitives::v7::CandidateReceipt<
+                            runtime_types::polkadot_primitives::v8::CandidateReceipt<
                                 ::subxt::ext::subxt_core::utils::H256,
                             >,
                             runtime_types::polkadot_parachain_primitives::primitives::HeadData,
-                            runtime_types::polkadot_primitives::v7::CoreIndex,
-                            runtime_types::polkadot_primitives::v7::GroupIndex,
+                            runtime_types::polkadot_primitives::v8::CoreIndex,
+                            runtime_types::polkadot_primitives::v8::GroupIndex,
                         ),
                         #[codec(index = 2)]
                         #[doc = "A candidate timed out. `[candidate, head_data]`"]
                         CandidateTimedOut(
-                            runtime_types::polkadot_primitives::v7::CandidateReceipt<
+                            runtime_types::polkadot_primitives::v8::CandidateReceipt<
                                 ::subxt::ext::subxt_core::utils::H256,
                             >,
                             runtime_types::polkadot_parachain_primitives::primitives::HeadData,
-                            runtime_types::polkadot_primitives::v7::CoreIndex,
+                            runtime_types::polkadot_primitives::v8::CoreIndex,
                         ),
                         #[codec(index = 3)]
                         #[doc = "Some upward messages have been received and will be processed."]
@@ -66542,11 +66536,11 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct CandidatePendingAvailability<_0, _1> {
-                    pub core: runtime_types::polkadot_primitives::v7::CoreIndex,
+                    pub core: runtime_types::polkadot_primitives::v8::CoreIndex,
                     pub hash: runtime_types::polkadot_core_primitives::CandidateHash,
-                    pub descriptor: runtime_types::polkadot_primitives::v7::CandidateDescriptor<_0>,
+                    pub descriptor: runtime_types::polkadot_primitives::v8::CandidateDescriptor<_0>,
                     pub commitments:
-                        runtime_types::polkadot_primitives::v7::CandidateCommitments<_1>,
+                        runtime_types::polkadot_primitives::v8::CandidateCommitments<_1>,
                     pub availability_votes: ::subxt::ext::subxt_core::utils::bits::DecodedBits<
                         ::core::primitive::u8,
                         ::subxt::ext::subxt_core::utils::bits::Lsb0,
@@ -66557,7 +66551,7 @@ pub mod api {
                     >,
                     pub relay_parent_number: _1,
                     pub backed_in_number: _1,
-                    pub backing_group: runtime_types::polkadot_primitives::v7::GroupIndex,
+                    pub backing_group: runtime_types::polkadot_primitives::v8::GroupIndex,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -66624,10 +66618,10 @@ pub mod api {
                 )]
                 pub struct BufferedSessionChange {
                     pub validators: ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::validator_app::Public,
+                        runtime_types::polkadot_primitives::v8::validator_app::Public,
                     >,
                     pub queued: ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v7::validator_app::Public,
+                        runtime_types::polkadot_primitives::v8::validator_app::Public,
                     >,
                     pub session_index: ::core::primitive::u32,
                 }
@@ -66766,7 +66760,7 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub struct CoreAffinityCount {
-                        pub core_index: runtime_types::polkadot_primitives::v7::CoreIndex,
+                        pub core_index: runtime_types::polkadot_primitives::v8::CoreIndex,
                         pub count: ::core::primitive::u32,
                     }
                     #[derive(
@@ -66883,7 +66877,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
-                        # [codec (index = 0)] # [doc = "Set the storage for the parachain validation code immediately."] force_set_current_code { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [codec (index = 1)] # [doc = "Set the storage for the current parachain head data immediately."] force_set_current_head { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , } , # [codec (index = 2)] # [doc = "Schedule an upgrade as if it was scheduled in the given relay parent block."] force_schedule_code_upgrade { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , relay_parent_number : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Note a new block head for para within the context of the current block."] force_note_new_head { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , } , # [codec (index = 4)] # [doc = "Put a parachain directly into the next session's action queue."] # [doc = "We can't queue it any sooner than this without going into the"] # [doc = "initializer..."] force_queue_action { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 5)] # [doc = "Adds the validation code to the storage."] # [doc = ""] # [doc = "The code will not be added if it is already present. Additionally, if PVF pre-checking"] # [doc = "is running for that code, it will be instantly accepted."] # [doc = ""] # [doc = "Otherwise, the code will be added into the storage. Note that the code will be added"] # [doc = "into storage with reference count 0. This is to account the fact that there are no users"] # [doc = "for this code yet. The caller will have to make sure that this code eventually gets"] # [doc = "used by some parachain or removed from the storage to avoid storage leaks. For the"] # [doc = "latter prefer to use the `poke_unused_validation_code` dispatchable to raw storage"] # [doc = "manipulation."] # [doc = ""] # [doc = "This function is mainly meant to be used for upgrading parachains that do not follow"] # [doc = "the go-ahead signal while the PVF pre-checking feature is enabled."] add_trusted_validation_code { validation_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [codec (index = 6)] # [doc = "Remove the validation code from the storage iff the reference count is 0."] # [doc = ""] # [doc = "This is better than removing the storage directly, because it will not remove the code"] # [doc = "that was suddenly got used by some parachain while this dispatchable was pending"] # [doc = "dispatching."] poke_unused_validation_code { validation_code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , } , # [codec (index = 7)] # [doc = "Includes a statement for a PVF pre-checking vote. Potentially, finalizes the vote and"] # [doc = "enacts the results if that was the last vote before achieving the supermajority."] include_pvf_check_statement { stmt : runtime_types :: polkadot_primitives :: v7 :: PvfCheckStatement , signature : runtime_types :: polkadot_primitives :: v7 :: validator_app :: Signature , } , # [codec (index = 8)] # [doc = "Set the storage for the current parachain head data immediately."] force_set_most_recent_context { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , context : :: core :: primitive :: u32 , } , }
+                        # [codec (index = 0)] # [doc = "Set the storage for the parachain validation code immediately."] force_set_current_code { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [codec (index = 1)] # [doc = "Set the storage for the current parachain head data immediately."] force_set_current_head { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , } , # [codec (index = 2)] # [doc = "Schedule an upgrade as if it was scheduled in the given relay parent block."] force_schedule_code_upgrade { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , relay_parent_number : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Note a new block head for para within the context of the current block."] force_note_new_head { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , } , # [codec (index = 4)] # [doc = "Put a parachain directly into the next session's action queue."] # [doc = "We can't queue it any sooner than this without going into the"] # [doc = "initializer..."] force_queue_action { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 5)] # [doc = "Adds the validation code to the storage."] # [doc = ""] # [doc = "The code will not be added if it is already present. Additionally, if PVF pre-checking"] # [doc = "is running for that code, it will be instantly accepted."] # [doc = ""] # [doc = "Otherwise, the code will be added into the storage. Note that the code will be added"] # [doc = "into storage with reference count 0. This is to account the fact that there are no users"] # [doc = "for this code yet. The caller will have to make sure that this code eventually gets"] # [doc = "used by some parachain or removed from the storage to avoid storage leaks. For the"] # [doc = "latter prefer to use the `poke_unused_validation_code` dispatchable to raw storage"] # [doc = "manipulation."] # [doc = ""] # [doc = "This function is mainly meant to be used for upgrading parachains that do not follow"] # [doc = "the go-ahead signal while the PVF pre-checking feature is enabled."] add_trusted_validation_code { validation_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [codec (index = 6)] # [doc = "Remove the validation code from the storage iff the reference count is 0."] # [doc = ""] # [doc = "This is better than removing the storage directly, because it will not remove the code"] # [doc = "that was suddenly got used by some parachain while this dispatchable was pending"] # [doc = "dispatching."] poke_unused_validation_code { validation_code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , } , # [codec (index = 7)] # [doc = "Includes a statement for a PVF pre-checking vote. Potentially, finalizes the vote and"] # [doc = "enacts the results if that was the last vote before achieving the supermajority."] include_pvf_check_statement { stmt : runtime_types :: polkadot_primitives :: v8 :: PvfCheckStatement , signature : runtime_types :: polkadot_primitives :: v8 :: validator_app :: Signature , } , # [codec (index = 8)] # [doc = "Set the storage for the current parachain head data immediately."] force_set_most_recent_context { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , context : :: core :: primitive :: u32 , } , }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -67155,7 +67149,7 @@ pub mod api {
                         #[codec(index = 0)]
                         #[doc = "Enter the paras inherent. This will process bitfields and backed candidates."]
                         enter {
-                            data: runtime_types::polkadot_primitives::v7::InherentData<
+                            data: runtime_types::polkadot_primitives::v8::InherentData<
                                 runtime_types::sp_runtime::generic::header::Header<
                                     ::core::primitive::u32,
                                 >,
@@ -67222,7 +67216,7 @@ pub mod api {
                         #[codec(index = 0)]
                         Pool {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
-                            core_index: runtime_types::polkadot_primitives::v7::CoreIndex,
+                            core_index: runtime_types::polkadot_primitives::v8::CoreIndex,
                         },
                         #[codec(index = 1)]
                         Bulk(runtime_types::polkadot_parachain_primitives::primitives::Id),
@@ -68188,8 +68182,8 @@ pub mod api {
             pub struct SessionKeys {
                 pub grandpa: runtime_types::sp_consensus_grandpa::app::Public,
                 pub babe: runtime_types::sp_consensus_babe::app::Public,
-                pub para_validator: runtime_types::polkadot_primitives::v7::validator_app::Public,
-                pub para_assignment: runtime_types::polkadot_primitives::v7::assignment_app::Public,
+                pub para_validator: runtime_types::polkadot_primitives::v8::validator_app::Public,
+                pub para_assignment: runtime_types::polkadot_primitives::v8::assignment_app::Public,
                 pub authority_discovery: runtime_types::sp_authority_discovery::app::Public,
                 pub beefy: runtime_types::sp_consensus_beefy::ecdsa_crypto::Public,
             }
