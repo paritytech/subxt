@@ -349,6 +349,7 @@ mod test {
             error::RpcError,
         };
         use futures::StreamExt;
+        use polkadot_sdk::sp_core;
         use serde::Serialize;
         use serde_json::value::RawValue;
         use std::{

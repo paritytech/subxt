@@ -500,7 +500,7 @@ mod test_utils {
 #[cfg(test)]
 mod test {
     use futures::TryStreamExt;
-    use sp_core::H256;
+    use polkadot_sdk::sp_core::H256;
 
     use super::super::follow_stream::test_utils::{
         ev_best_block, ev_finalized, ev_initialized, ev_new_block,

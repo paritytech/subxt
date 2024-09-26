@@ -344,8 +344,8 @@ mod test {
 
     use super::*;
 
-    use sp_core::crypto::Pair as _;
-    use sp_core::sr25519::Pair as SpPair;
+    use polkadot_sdk::sp_core::{self, crypto::Pair as _, sr25519::Pair as SpPair};
+    use polkadot_sdk::sp_keyring;
 
     #[test]
     fn check_from_phrase_matches() {
