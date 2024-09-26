@@ -116,8 +116,6 @@ which = "5.0.0"
 strip-ansi-escapes = "0.2.0"
 proptest = "1.5.0"
 hex-literal = "0.4.1"
-sc-executor = "0.40.0"
-sc-executor-common = "0.35.0"
 
 # Light client support:
 smoldot = { version = "0.18.0", default-features = false }
@@ -138,13 +136,7 @@ instant = { version = "0.1.13", default-features = false }
 tokio-util = "0.7.12"
 
 # Substrate crates:
-sp-core = { version = "34.0.0", default-features = false }
-sp-crypto-hashing = { version = "0.1.0", default-features = false }
-sp-runtime = "39.0.0"
-sp-keyring = "39.0.0"
-sp-maybe-compressed-blob = "11.0.0"
-sp-state-machine = "0.43.0"
-sp-io = "38.0.0"
+polkadot-sdk = { version = "0.5", default-features = false }
 
 # Subxt workspace crates:
 subxt = { version = "0.37.0", path = "subxt", default-features = false }

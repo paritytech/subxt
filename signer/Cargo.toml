@@ -18,7 +18,7 @@ keywords = ["parity", "subxt", "extrinsic", "signer"]
 default = ["sr25519", "ecdsa", "subxt", "std"]
 std = [
     "regex/std",
-    "sp-crypto-hashing/std",
+    "polkadot-sdk/std",
     "pbkdf2/std",
     "sha2/std",
     "hmac/std",
@@ -60,7 +60,7 @@ cfg-if = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = [
     "derive",
 ] }
-sp-crypto-hashing = { workspace = true }
+polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
 pbkdf2 = { workspace = true }
 sha2 = { workspace = true }
 hmac = { workspace = true }
@@ -85,10 +85,9 @@ crypto_secretbox = { workspace = true, optional = true, features = ["alloc", "sa
 getrandom = { workspace = true, optional = true }
 
 [dev-dependencies]
-sp-keyring = { workspace = true }
 proptest = { workspace = true }
 hex-literal = { workspace = true }
-sp-core = { workspace = true }
+polkadot-sdk = { workspace = true, features = ["sp-core", "sp-keyring"] }
 
 [package.metadata.cargo-machete]
 ignored = ["getrandom"]

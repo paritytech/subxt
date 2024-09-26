@@ -12,6 +12,7 @@ use alloc::vec::Vec;
 use hashbrown::HashMap;
 use outer_enum_hashes::OuterEnumHashes;
 use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefVariant, Variant};
+use polkadot_sdk::sp_crypto_hashing;
 
 pub mod outer_enum_hashes;
 

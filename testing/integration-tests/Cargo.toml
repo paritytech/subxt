@@ -34,7 +34,7 @@ hex = { workspace = true }
 regex = { workspace = true }
 serde = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
-sp-core = { workspace = true }
+polkadot-sdk = { workspace = true, features = ["sp-core"] }
 syn = { workspace = true }
 subxt = { workspace = true, features = ["unstable-metadata", "native", "jsonrpsee", "substrate-compat", "unstable-reconnecting-rpc-client"] }
 subxt-signer = { workspace = true, features = ["default"] }

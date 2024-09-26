@@ -4,6 +4,7 @@
 
 //! An ecdsa keypair implementation.
 use codec::Encode;
+use polkadot_sdk::sp_crypto_hashing;
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 use core::{fmt::Display, str::FromStr};

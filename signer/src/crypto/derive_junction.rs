@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use codec::{Decode, Encode};
+use polkadot_sdk::sp_crypto_hashing;
 
 // This code is taken from sp_core::crypto::DeriveJunction. The logic should be identical,
 // though the API is tweaked a touch.

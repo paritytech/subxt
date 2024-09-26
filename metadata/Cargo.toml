@@ -15,13 +15,13 @@ description = "Command line utilities for checking metadata compatibility betwee
 
 [features]
 default = ["std"]
-std = ["scale-info/std", "frame-metadata/std"]
+std = ["scale-info/std", "frame-metadata/std", "polkadot-sdk/std"]
 
 [dependencies]
 scale-info = { workspace = true, default-features = false }
 frame-metadata = { workspace = true, default-features = false, features = ["current", "decode"] }
 codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
-sp-crypto-hashing = { workspace = true }
+polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
 hashbrown = { workspace = true }
 
 [dev-dependencies]

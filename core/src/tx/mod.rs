@@ -65,8 +65,8 @@ use alloc::borrow::{Cow, ToOwned};
 use alloc::vec::Vec;
 use codec::{Compact, Encode};
 use payload::Payload;
+use polkadot_sdk::sp_crypto_hashing::blake2_256;
 use signer::Signer as SignerT;
-use sp_crypto_hashing::blake2_256;
 
 // Expose these here since we expect them in some calls below.
 pub use crate::client::{ClientState, RuntimeVersion};
