@@ -2,8 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use core::ops::Deref;
-
+use super::BlockError;
 use crate::blocks::extrinsic_signed_extensions::ExtrinsicSignedExtensions;
 use crate::{
     config::{Config, Hasher},
@@ -12,12 +11,11 @@ use crate::{
 };
 use alloc::sync::Arc;
 use alloc::vec::Vec;
+use core::ops::Deref;
 use scale_decode::DecodeAsType;
 use subxt_metadata::PalletMetadata;
 
 pub use crate::blocks::StaticExtrinsic;
-
-use super::BlockError;
 
 /// The body of a block.
 pub struct Extrinsics<T: Config> {
