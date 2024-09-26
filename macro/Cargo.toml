@@ -28,7 +28,7 @@ syn = { workspace = true }
 quote = { workspace = true }
 subxt-codegen = { workspace = true, features = ["fetch-metadata"] }
 scale-typegen = { workspace = true }
-polkadot-sdk = { workspace = true, features = ["sp-io", "sc-executor-common", "sp-state-machine", "sp-maybe-compressed-blob", "sc-executor"], optional = true }
+polkadot-sdk = { workspace = true, optional = true, features = ["sp-io", "sc-executor-common", "sp-state-machine", "sp-maybe-compressed-blob", "sc-executor"] }
 
 [lints]
 workspace = true
