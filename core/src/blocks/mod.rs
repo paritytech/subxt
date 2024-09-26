@@ -38,7 +38,7 @@
 //! ];
 //!
 //! // Given some chain config and metadata, we know how to decode the bytes.
-//! let exts = blocks::decode_from::<PolkadotConfig>(ext_bytes, metadata).unwrap();
+//! let exts = blocks::decode_from::<PolkadotConfig>(ext_bytes, metadata);
 //!
 //! // We'll see 3 extrinsics:
 //! assert_eq!(exts.len(), 3);
