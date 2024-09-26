@@ -29,7 +29,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("  {}/{}", meta.pallet.name(), meta.variant.name);
             println!("    Signed Extensions:");
             for signed_ext in signed_extensions.iter() {
-                let signed_ext = signed_ext?;
                 // We only want to take a look at these 3 signed extensions, because the others all just have unit fields.
                 if ["CheckMortality", "CheckNonce", "ChargeTransactionPayment"]
                     .contains(&signed_ext.name())

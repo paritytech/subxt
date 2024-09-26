@@ -71,15 +71,15 @@ mod extrinsics;
 mod static_extrinsic;
 
 use crate::config::Config;
-use crate::error::BlockError;
 use crate::Metadata;
 use alloc::vec::Vec;
 
 pub use extrinsic_signed_extensions::{ExtrinsicSignedExtension, ExtrinsicSignedExtensions};
 pub use extrinsics::{
-    ExtrinsicDetails, ExtrinsicMetadataDetails, Extrinsics, FoundExtrinsic, SignedExtrinsicDetails,
+    ExtrinsicDetails, ExtrinsicMetadataDetails, Extrinsics, FoundExtrinsic,
 };
 pub use static_extrinsic::StaticExtrinsic;
+pub use crate::error::BlockError;
 
 /// Instantiate a new [`Extrinsics`] object, given a vector containing each extrinsic hash (in the
 /// form of bytes) and some metadata that we'll use to decode them.
@@ -88,6 +88,6 @@ pub use static_extrinsic::StaticExtrinsic;
 pub fn decode_from<T: Config>(
     extrinsics: Vec<Vec<u8>>,
     metadata: Metadata,
-) -> Result<Extrinsics<T>, BlockError> {
+) -> Extrinsics<T> {
     Extrinsics::decode_from(extrinsics, metadata)
 }

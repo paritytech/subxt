@@ -36,6 +36,7 @@ substrate-compat = ["sp-core", "sp-runtime"]
 
 [dependencies]
 codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
+frame-decode = { workspace = true }
 scale-info = { workspace = true, default-features = false, features = ["bit-vec"] }
 scale-value = { workspace = true, default-features = false }
 scale-bits = { workspace = true, default-features = false }

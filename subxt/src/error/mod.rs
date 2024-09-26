@@ -165,30 +165,25 @@ impl RpcError {
 }
 
 /// Block error
-#[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
+#[derive(Clone, Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum BlockError {
     /// An error containing the hash of the block that was not found.
     #[error("Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)")]
     NotFound(String),
-    /// Extrinsic type ID cannot be resolved with the provided metadata.
-    #[error("Extrinsic type ID cannot be resolved with the provided metadata. Make sure this is a valid metadata")]
-    MissingType,
-    /// Unsupported signature.
-    #[error("Unsupported extrinsic version, only version 4 is supported currently")]
-    /// The extrinsic has an unsupported version.
-    UnsupportedVersion(u8),
+    /// Leftover bytes found after decoding the extrinsic.
+    #[error("After decoding, {0} bytes were left, suggesting that decoding may have failed")]
+    LeftoverBytes(usize),
     /// Decoding error.
     #[error("Cannot decode extrinsic: {0}")]
-    DecodingError(codec::Error),
+    ExtrinsicDecodeError(subxt_core::error::ExtrinsicDecodeError),
 }
 
 impl From<CoreBlockError> for BlockError {
     fn from(value: CoreBlockError) -> Self {
         match value {
-            CoreBlockError::MissingType => BlockError::MissingType,
-            CoreBlockError::UnsupportedVersion(n) => BlockError::UnsupportedVersion(n),
-            CoreBlockError::DecodingError(e) => BlockError::DecodingError(e),
+            CoreBlockError::LeftoverBytes(n) => BlockError::LeftoverBytes(n),
+            CoreBlockError::ExtrinsicDecodeError(e) => BlockError::ExtrinsicDecodeError(e),
         }
     }
 }

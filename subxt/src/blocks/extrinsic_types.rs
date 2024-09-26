@@ -6,7 +6,7 @@ use crate::{
     blocks::block_types::{get_events, CachedEvents},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, Hasher},
-    error::{BlockError, Error},
+    error::Error,
     events,
 };
 
@@ -37,14 +37,14 @@ where
         extrinsics: Vec<Vec<u8>>,
         cached_events: CachedEvents<T>,
         hash: T::Hash,
-    ) -> Result<Self, BlockError> {
-        let inner = CoreExtrinsics::decode_from(extrinsics, client.metadata())?;
-        Ok(Self {
+    ) -> Self {
+        let inner = CoreExtrinsics::decode_from(extrinsics, client.metadata());
+        Self {
             inner,
             client,
             cached_events,
             hash,
-        })
+        }
     }
 
     /// See [`subxt_core::blocks::Extrinsics::len()`].
