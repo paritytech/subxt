@@ -342,12 +342,17 @@ mod test {
     pub use rpc::RpcClientT;
     pub use serde::Serialize;
     pub use serde_json::value::RawValue;
+    pub use sp_core::H256;
     pub use std::collections::{HashMap, VecDeque};
     pub use subxt_core::{config::DefaultExtrinsicParams, Config};
     pub use tokio::sync::{mpsc, Mutex};
 
     pub type RpcResult<T> = Result<T, RpcError>;
     pub type Item = RpcResult<String>;
+
+    fn random_hash() -> H256 {
+        H256::random()
+    }
 
     fn storage_response<K: Into<Vec<u8>>, V: Into<Vec<u8>>>(key: K, value: V) -> StorageResponse
     where
@@ -389,13 +394,13 @@ mod test {
             pub fn unwrap_single(self) -> T {
                 match self {
                     Self::Single(s) => s,
-                    _ => panic!(),
+                    _ => panic!("cannot unwrap_single on Message::Many"),
                 }
             }
             pub fn unwrap_many(self) -> RpcResult<Vec<T>> {
                 match self {
                     Self::Many(s) => s,
-                    _ => panic!(),
+                    _ => panic!("cannot unwrap_many on Message::Single"),
                 }
             }
         }
@@ -510,21 +515,40 @@ mod test {
         }
 
         impl MockRpcBuilder {
-            pub fn add_method(mut self, method_name: &str, method_handler: MethodHandler) -> Self {
+            pub fn add_method<F>(mut self, method_name: &str, method_handler: F) -> Self
+            where
+                F: Send
+                    + for<'a> Fn(
+                        &'a mut MockDataTable,
+                        &'a mut Option<Subscription>,
+                        Option<Box<serde_json::value::RawValue>>,
+                    )
+                        -> RawRpcFuture<'a, Box<serde_json::value::RawValue>>
+                    + 'static,
+            {
                 self.data
                     .method_handlers
-                    .insert(method_name.into(), method_handler);
+                    .insert(method_name.into(), Box::new(method_handler));
                 self
             }
 
-            pub fn add_subscription(
+            pub fn add_subscription<F>(
                 mut self,
                 subscription_name: &str,
-                subscription_handler: SubscriptionHandler,
-            ) -> Self {
+                subscription_handler: F,
+            ) -> Self
+            where
+                F: Send
+                    + for<'a> Fn(
+                        &'a mut MockDataTable,
+                        &'a mut Option<Subscription>,
+                        Option<Box<serde_json::value::RawValue>>,
+                    ) -> RawRpcFuture<'a, RawRpcSubscription>
+                    + 'static,
+            {
                 self.data
                     .subscription_handlers
-                    .insert(subscription_name.into(), subscription_handler);
+                    .insert(subscription_name.into(), Box::new(subscription_handler));
                 self
             }
 
@@ -583,7 +607,7 @@ mod test {
     // Define dummy config
     enum Conf {}
     impl Config for Conf {
-        type Hash = crate::utils::H256;
+        type Hash = H256;
         type AccountId = crate::utils::AccountId32;
         type Address = crate::utils::MultiAddress<Self::AccountId, ()>;
         type Signature = crate::utils::MultiSignature;
@@ -602,27 +626,21 @@ mod test {
 
         pub fn setup_mock_rpc() -> MockRpcBuilder {
             MockRpcBuilder::default()
-                .add_method(
-                    "state_getStorage",
-                    Box::new(|data, _sub, params| {
-                        Box::pin(async move {
-                            let params = params.map(|p| p.get().to_string());
-                            let rpc_params = jsonrpsee::types::Params::new(params.as_deref());
-                            let key: sp_core::Bytes = rpc_params.sequence().next().unwrap();
-                            let value = data.pop(key.0).unwrap_single();
-                            value.map(|v| serde_json::value::RawValue::from_string(v).unwrap())
-                        })
-                    }),
-                )
-                .add_method(
-                    "chain_getBlockHash",
-                    Box::new(|data, _, _| {
-                        Box::pin(async move {
-                            let value = data.pop("chain_getBlockHash".into()).unwrap_single();
-                            value.map(|v| serde_json::value::RawValue::from_string(v).unwrap())
-                        })
-                    }),
-                )
+                .add_method("state_getStorage", |data, _sub, params| {
+                    Box::pin(async move {
+                        let params = params.map(|p| p.get().to_string());
+                        let rpc_params = jsonrpsee::types::Params::new(params.as_deref());
+                        let key: sp_core::Bytes = rpc_params.sequence().next().unwrap();
+                        let value = data.pop(key.0).unwrap_single();
+                        value.map(|v| serde_json::value::RawValue::from_string(v).unwrap())
+                    })
+                })
+                .add_method("chain_getBlockHash", |data, _, _| {
+                    Box::pin(async move {
+                        let value = data.pop("chain_getBlockHash".into()).unwrap_single();
+                        value.map(|v| serde_json::value::RawValue::from_string(v).unwrap())
+                    })
+                })
         }
 
         use crate::backend::Backend;
@@ -672,7 +690,7 @@ mod test {
             let response = backend
                 .storage_fetch_values(
                     ["ID1".into(), "ID2".into(), "ID3".into()].into(),
-                    crate::utils::H256::random(),
+                    random_hash(),
                 )
                 .await
                 .unwrap();
@@ -708,7 +726,7 @@ mod test {
             // Test
             let backend: LegacyBackend<Conf> = LegacyBackend::builder().build(rpc_client);
             let response = backend
-                .storage_fetch_value("ID1".into(), crate::utils::H256::random())
+                .storage_fetch_value("ID1".into(), random_hash())
                 .await
                 .unwrap();
 
@@ -732,7 +750,7 @@ mod test {
         ///  }
         /// ```
         async fn simple_fetch() {
-            let hash = crate::utils::H256::random();
+            let hash = random_hash();
             let mock_data = vec![
                 (
                     "chain_getBlockHash",
@@ -806,30 +824,24 @@ mod test {
                 ),
             ];
             let rpc_client = setup_mock_rpc()
-                .add_subscription(
-                    "state_subscribeRuntimeVersion",
-                    Box::new(|data, _, _| {
-                        Box::pin(async move {
-                            let values = data
-                                .pop("state_subscribeRuntimeVersion".into())
-                                .unwrap_many();
-                            let values: RpcResult<Vec<RpcResult<Box<RawValue>>>> =
-                                values.map(|v| {
-                                    v.into_iter()
-                                        .map(|v| {
-                                            v.map(|v| {
-                                                serde_json::value::RawValue::from_string(v).unwrap()
-                                            })
-                                        })
-                                        .collect::<Vec<RpcResult<Box<RawValue>>>>()
-                                });
-                            values.map(|v| RawRpcSubscription {
-                                stream: futures::stream::iter(v).boxed(),
-                                id: Some("ID".to_string()),
-                            })
+                .add_subscription("state_subscribeRuntimeVersion", |data, _, _| {
+                    Box::pin(async move {
+                        let values = data
+                            .pop("state_subscribeRuntimeVersion".into())
+                            .unwrap_many();
+                        let values: RpcResult<Vec<RpcResult<Box<RawValue>>>> = values.map(|v| {
+                            v.into_iter()
+                                .map(|v| {
+                                    v.map(|v| serde_json::value::RawValue::from_string(v).unwrap())
+                                })
+                                .collect::<Vec<RpcResult<Box<RawValue>>>>()
+                        });
+                        values.map(|v| RawRpcSubscription {
+                            stream: futures::stream::iter(v).boxed(),
+                            id: Some("ID".to_string()),
                         })
-                    }),
-                )
+                    })
+                })
                 .add_mock_data(mock_subscription_data)
                 .build();
 
@@ -868,12 +880,11 @@ mod test {
             Bytes, Initialized, MethodResponse, MethodResponseStarted, OperationError, OperationId,
             OperationStorageItems, RuntimeSpec, RuntimeVersionEvent,
         };
-        use sp_core::H256;
 
         use super::unstable::*;
         use super::*;
 
-        fn run_backend(
+        fn build_backend(
             rpc_client: impl RpcClientT,
         ) -> (UnstableBackend<Conf>, UnstableBackendDriver<Conf>) {
             let (backend, driver): (UnstableBackend<Conf>, _) =
@@ -881,8 +892,8 @@ mod test {
             (backend, driver)
         }
 
-        fn run_backend_spawn_background(rpc_client: impl RpcClientT) -> UnstableBackend<Conf> {
-            let (backend, mut driver) = run_backend(rpc_client);
+        fn build_backend_spawn_background(rpc_client: impl RpcClientT) -> UnstableBackend<Conf> {
+            let (backend, mut driver) = build_backend(rpc_client);
             tokio::spawn(async move {
                 while let Some(val) = driver.next().await {
                     if let Err(e) = val {
@@ -919,18 +930,15 @@ mod test {
             });
             serde_json::from_value(spec).unwrap()
         }
-        fn init_hash() -> crate::utils::H256 {
-            crate::utils::H256::random()
-        }
 
         type FollowEvent = unstable::rpc_methods::FollowEvent<<Conf as Config>::Hash>;
 
         fn setup_mock_rpc_client(cycle_ids: bool) -> MockRpcBuilder {
-            let hash = init_hash();
+            let hash = random_hash();
             let mut id = 0;
             rpc_client::MockRpcBuilder::default().add_subscription(
                 "chainHead_v1_follow",
-                Box::new(move |_, sub, _| {
+                move |_, sub, _| {
                     Box::pin(async move {
                         if cycle_ids {
                             id += 1;
@@ -962,7 +970,7 @@ mod test {
                         };
                         Ok(stream)
                     })
-                }),
+                },
             )
         }
 
@@ -1015,34 +1023,31 @@ mod test {
                 Message::Many(Ok(vec![Ok(operation_error("Id1")), Ok(FollowEvent::Stop)])),
             )];
             let rpc_client = setup_mock_rpc_client(false)
-                .add_method(
-                    "chainHead_v1_storage",
-                    Box::new(|data, sub, _| {
-                        Box::pin(async move {
-                            let response = data.pop("method_response".into()).unwrap_single();
-                            if response.is_ok() {
-                                let item = data.pop("chainHead_v1_storage".into());
-                                if let Some(sub) = sub {
-                                    let item = item;
-                                    sub.write_delayed(item).await
-                                }
+                .add_method("chainHead_v1_storage", |data, sub, _| {
+                    Box::pin(async move {
+                        let response = data.pop("method_response".into()).unwrap_single();
+                        if response.is_ok() {
+                            let item = data.pop("chainHead_v1_storage".into());
+                            if let Some(sub) = sub {
+                                let item = item;
+                                sub.write_delayed(item).await
                             }
-                            response.map(|x| RawValue::from_string(x).unwrap())
-                        })
-                    }),
-                )
+                        }
+                        response.map(|x| RawValue::from_string(x).unwrap())
+                    })
+                })
                 .add_mock_data(mock_subscription_data)
                 .add_mock_data(response_data)
                 .build();
 
-            let backend = run_backend_spawn_background(rpc_client);
+            let backend = build_backend_spawn_background(rpc_client);
 
             // Test
             // This request should encounter an error on `request` and do a retry.
             let response = backend
                 .storage_fetch_values(
                     ["ID1".into(), "ID2".into(), "ID3".into()].into(),
-                    crate::utils::H256::random(),
+                    random_hash(),
                 )
                 .await
                 .unwrap();
@@ -1086,32 +1091,29 @@ mod test {
                 ])),
             )];
             let rpc_client = setup_mock_rpc_client(false)
-                .add_method(
-                    "chainHead_v1_storage",
-                    Box::new(|data, sub, _| {
-                        Box::pin(async move {
-                            let response = data.pop("method_response".into()).unwrap_single();
-                            if response.is_ok() {
-                                let item = data.pop("chainHead_v1_storage".into());
-                                if let Some(sub) = sub {
-                                    let item = item;
-                                    sub.write_delayed(item).await
-                                }
+                .add_method("chainHead_v1_storage", |data, sub, _| {
+                    Box::pin(async move {
+                        let response = data.pop("method_response".into()).unwrap_single();
+                        if response.is_ok() {
+                            let item = data.pop("chainHead_v1_storage".into());
+                            if let Some(sub) = sub {
+                                let item = item;
+                                sub.write_delayed(item).await
                             }
-                            response.map(|x| RawValue::from_string(x).unwrap())
-                        })
-                    }),
-                )
+                        }
+                        response.map(|x| RawValue::from_string(x).unwrap())
+                    })
+                })
                 .add_mock_data(mock_data)
                 .add_mock_data(response_data)
                 .build();
-            let backend = run_backend_spawn_background(rpc_client);
+            let backend = build_backend_spawn_background(rpc_client);
 
             // We try again and should succeed
             let response = backend
                 .storage_fetch_values(
                     ["ID1".into(), "ID2".into(), "ID3".into()].into(),
-                    crate::utils::H256::random(),
+                    random_hash(),
                 )
                 .await
                 .unwrap();
@@ -1131,8 +1133,7 @@ mod test {
             )
         }
         #[tokio::test]
-        /// Tests the error behaviour in streams based on chainHead_v1_continue calls
-        async fn storage_fetch_values_retry_continue() {
+        async fn storage_fetch_values_retry_chainhead_continue() {
             fn compare_storage_responses(
                 expected_response: &StorageResponse,
                 received_response: &StorageResponse,
@@ -1208,49 +1209,43 @@ mod test {
                 ),
             ];
             let rpc_client = setup_mock_rpc_client(false)
-                .add_method(
-                    "chainHead_v1_storage",
-                    Box::new(|data, sub, _| {
-                        Box::pin(async move {
-                            let response = data.pop("method_response".into()).unwrap_single();
-                            if response.is_ok() {
-                                let item = data.pop("chainHead_v1_storage".into());
-                                if let Some(sub) = sub {
-                                    let item = item;
-                                    sub.write_delayed(item).await
-                                }
+                .add_method("chainHead_v1_storage", |data, sub, _| {
+                    Box::pin(async move {
+                        let response = data.pop("method_response".into()).unwrap_single();
+                        if response.is_ok() {
+                            let item = data.pop("chainHead_v1_storage".into());
+                            if let Some(sub) = sub {
+                                let item = item;
+                                sub.write_delayed(item).await
                             }
-                            response.map(|x| RawValue::from_string(x).unwrap())
-                        })
-                    }),
-                )
-                .add_method(
-                    "chainHead_v1_continue",
-                    Box::new(|data, sub, _| {
-                        Box::pin(async move {
-                            let response = data.pop("continue_response".into()).unwrap_single();
-                            if response.is_ok() {
-                                let item = data.pop("chainHead_v1_storage".into());
-                                if let Some(sub) = sub {
-                                    let item = item;
-                                    sub.write_delayed(item).await
-                                }
+                        }
+                        response.map(|x| RawValue::from_string(x).unwrap())
+                    })
+                })
+                .add_method("chainHead_v1_continue", |data, sub, _| {
+                    Box::pin(async move {
+                        let response = data.pop("continue_response".into()).unwrap_single();
+                        if response.is_ok() {
+                            let item = data.pop("chainHead_v1_storage".into());
+                            if let Some(sub) = sub {
+                                let item = item;
+                                sub.write_delayed(item).await
                             }
-                            response.map(|x| RawValue::from_string(x).unwrap())
-                        })
-                    }),
-                )
+                        }
+                        response.map(|x| RawValue::from_string(x).unwrap())
+                    })
+                })
                 .add_mock_data(mock_data)
                 .add_mock_data(response_data)
                 .add_mock_data(continue_data)
                 .build();
-            let backend = run_backend_spawn_background(rpc_client);
+            let backend = build_backend_spawn_background(rpc_client);
 
             // We try again and should fail mid way
             let response = backend
                 .storage_fetch_values(
                     ["ID1".into(), "ID2".into(), "ID3".into()].into(),
-                    crate::utils::H256::random(),
+                    random_hash(),
                 )
                 .await
                 .unwrap();
@@ -1274,7 +1269,7 @@ mod test {
             let response = backend
                 .storage_fetch_values(
                     ["ID1".into(), "ID2".into(), "ID3".into()].into(),
-                    crate::utils::H256::random(),
+                    random_hash(),
                 )
                 .await
                 .unwrap();
@@ -1296,7 +1291,7 @@ mod test {
 
         #[tokio::test]
         async fn simple_fetch() {
-            let hash = init_hash();
+            let hash = random_hash();
 
             let mock_data = vec![
                 (
@@ -1312,20 +1307,16 @@ mod test {
                 ("chainSpec_v1_genesisHash", Message::Single(Ok(hash))),
             ];
             let rpc_client = setup_mock_rpc_client(false)
-                .add_method(
-                    "chainSpec_v1_genesisHash",
-                    Box::new(|data, _, _| {
-                        Box::pin(async move {
-                            let response =
-                                data.pop("chainSpec_v1_genesisHash".into()).unwrap_single();
-                            response.map(|x| RawValue::from_string(x).unwrap())
-                        })
-                    }),
-                )
+                .add_method("chainSpec_v1_genesisHash", |data, _, _| {
+                    Box::pin(async move {
+                        let response = data.pop("chainSpec_v1_genesisHash".into()).unwrap_single();
+                        response.map(|x| RawValue::from_string(x).unwrap())
+                    })
+                })
                 .add_mock_data(mock_data)
                 .build();
 
-            let backend = run_backend_spawn_background(rpc_client);
+            let backend = build_backend_spawn_background(rpc_client);
 
             // Test
             // This request should encounter an error on `request` and do a retry.
@@ -1374,46 +1365,42 @@ mod test {
                 ),
             ];
             let rpc_client = setup_mock_rpc_client(true)
-                .add_method(
-                    "chainHead_v1_storage",
-                    Box::new({
-                        let subscription_expired = Arc::new(AtomicBool::new(false));
-                        move |data, sub, params| {
+                .add_method("chainHead_v1_storage", {
+                    let subscription_expired = Arc::new(AtomicBool::new(false));
+                    move |data, sub, params| {
+                        let subscription_expired = subscription_expired.clone();
+                        Box::pin(async move {
                             let subscription_expired = subscription_expired.clone();
-                            Box::pin(async move {
-                                let subscription_expired = subscription_expired.clone();
-                                if subscription_expired.load(std::sync::atomic::Ordering::SeqCst) {
-                                    let params = params.map(|p| p.get().to_string());
-                                    let rpc_params =
-                                        jsonrpsee::types::Params::new(params.as_deref());
-                                    let key: String = rpc_params.sequence().next().unwrap();
-                                    if key == *"ID1" {
-                                        return Err(RpcError::RequestRejected("stale id".into()));
-                                    } else {
-                                        subscription_expired
-                                            .swap(false, std::sync::atomic::Ordering::SeqCst);
-                                    }
-                                }
-                                let response = data.pop("method_response".into()).unwrap_single();
-                                if response.is_ok() {
-                                    let item = data.pop("chainHead_v1_storage".into());
-                                    if let Some(sub) = sub {
-                                        let item = item;
-                                        sub.write_delayed(item).await
-                                    }
+                            if subscription_expired.load(std::sync::atomic::Ordering::SeqCst) {
+                                let params = params.map(|p| p.get().to_string());
+                                let rpc_params = jsonrpsee::types::Params::new(params.as_deref());
+                                let key: String = rpc_params.sequence().next().unwrap();
+                                if key == *"ID1" {
+                                    return Err(RpcError::RequestRejected("stale id".into()));
                                 } else {
                                     subscription_expired
-                                        .swap(true, std::sync::atomic::Ordering::SeqCst);
+                                        .swap(false, std::sync::atomic::Ordering::SeqCst);
                                 }
-                                response.map(|x| RawValue::from_string(x).unwrap())
-                            })
-                        }
-                    }),
-                )
+                            }
+                            let response = data.pop("method_response".into()).unwrap_single();
+                            if response.is_ok() {
+                                let item = data.pop("chainHead_v1_storage".into());
+                                if let Some(sub) = sub {
+                                    let item = item;
+                                    sub.write_delayed(item).await
+                                }
+                            } else {
+                                subscription_expired
+                                    .swap(true, std::sync::atomic::Ordering::SeqCst);
+                            }
+                            response.map(|x| RawValue::from_string(x).unwrap())
+                        })
+                    }
+                })
                 .add_mock_data(mock_data)
                 .add_mock_data(response_data)
                 .build();
-            let (backend, mut driver): (UnstableBackend<Conf>, _) = run_backend(rpc_client);
+            let (backend, mut driver): (UnstableBackend<Conf>, _) = build_backend(rpc_client);
 
             let _ = driver.next().await.unwrap();
             let _ = driver.next().await.unwrap();
@@ -1422,7 +1409,7 @@ mod test {
             let response = backend
                 .storage_fetch_values(
                     ["ID1".into(), "ID2".into(), "ID3".into()].into(),
-                    crate::utils::H256::random(),
+                    random_hash(),
                 )
                 .await;
 
@@ -1443,7 +1430,7 @@ mod test {
             let response = backend
                 .storage_fetch_values(
                     ["ID1".into(), "ID2".into(), "ID3".into()].into(),
-                    crate::utils::H256::random(),
+                    random_hash(),
                 )
                 .await;
 
