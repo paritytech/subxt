@@ -478,7 +478,7 @@ mod test {
         }
 
         impl InnerMockedRpcClient {
-            async fn call<'a>(
+            fn call<'a>(
                 &'a mut self,
                 method_handler: &str,
                 params: Option<Box<serde_json::value::RawValue>>,
@@ -493,7 +493,7 @@ mod test {
                 (*method)(&mut self.data_table, &mut self.subscription_channel, params)
             }
 
-            async fn subscribe<'a>(
+            fn subscribe<'a>(
                 &'a mut self,
                 sub: &str,
                 params: Option<Box<serde_json::value::RawValue>>,
@@ -586,7 +586,7 @@ mod test {
             ) -> RawRpcFuture<'a, Box<serde_json::value::RawValue>> {
                 Box::pin(async {
                     let mut data = self.data.lock().await;
-                    data.call(method, params).await.await
+                    data.call(method, params).await
                 })
             }
 
@@ -598,7 +598,7 @@ mod test {
             ) -> RawRpcFuture<'a, RawRpcSubscription> {
                 Box::pin(async {
                     let mut data = self.data.lock().await;
-                    data.subscribe(sub, params).await.await
+                    data.subscribe(sub, params).await
                 })
             }
         }
