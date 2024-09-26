@@ -109,7 +109,7 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         Ok(ExtrinsicSignatureInfo {
             address_id: self.extrinsic().address_ty(),
             signature_id: self.extrinsic().signature_ty(),
-            signed_extension_ids: self
+            transaction_extension_ids: self
                 .extrinsic()
                 .signed_extensions()
                 .iter()

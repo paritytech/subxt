@@ -8,7 +8,7 @@ use crate::config::signed_extensions::{
 use crate::config::SignedExtension;
 use crate::dynamic::Value;
 use crate::{config::Config, error::Error, Metadata};
-use frame_decode::extrinsics::ExtrinsicSignature;
+use frame_decode::extrinsics::ExtrinsicExtensions;
 use scale_decode::DecodeAsType;
 
 /// The signed extensions of an extrinsic.
@@ -16,7 +16,7 @@ use scale_decode::DecodeAsType;
 pub struct ExtrinsicSignedExtensions<'a, T: Config> {
     bytes: &'a [u8],
     metadata: &'a Metadata,
-    decoded_info: &'a ExtrinsicSignature<'static, u32>,
+    decoded_info: &'a ExtrinsicExtensions<'static, u32>,
     _marker: core::marker::PhantomData<T>,
 }
 
@@ -24,7 +24,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     pub(crate) fn new(
         bytes: &'a [u8],
         metadata: &'a Metadata,
-        decoded_info: &'a ExtrinsicSignature<'static, u32>,
+        decoded_info: &'a ExtrinsicExtensions<'static, u32>,
     ) -> Self {
         Self {
             bytes,
@@ -36,15 +36,13 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
 
     /// Returns an iterator over each of the signed extension details of the extrinsic.
     pub fn iter(&self) -> impl Iterator<Item = ExtrinsicSignedExtension<T>> {
-        self.decoded_info
-            .signed_extensions()
-            .map(|s| ExtrinsicSignedExtension {
-                bytes: &self.bytes[s.range()],
-                ty_id: *s.ty(),
-                identifier: s.name(),
-                metadata: self.metadata,
-                _marker: core::marker::PhantomData,
-            })
+        self.decoded_info.iter().map(|s| ExtrinsicSignedExtension {
+            bytes: &self.bytes[s.range()],
+            ty_id: *s.ty(),
+            identifier: s.name(),
+            metadata: self.metadata,
+            _marker: core::marker::PhantomData,
+        })
     }
 
     /// Searches through all signed extensions to find a specific one.

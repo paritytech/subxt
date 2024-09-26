@@ -1783,9 +1783,9 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.0.6"
+version = "0.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "849eebd821dbed6a05afdf96f4ab4d38bbf2c90f1d726f9c43ef21cf17cc52b5"
+checksum = "f126c6a1f3fc3856e1d6ed0322dd44a572862cf8e48f69205b090c83454b4d16"
 dependencies = [
  "frame-metadata 16.0.0",
  "hex",

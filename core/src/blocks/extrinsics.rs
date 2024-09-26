@@ -240,15 +240,15 @@ where
     /// Note: Returns `None` if the extrinsic is not signed.
     pub fn signed_extensions_bytes(&self) -> Option<&[u8]> {
         self.decoded_info
-            .signature_payload()
-            .map(|_| &self.bytes[self.decoded_info.signed_extensions_range()])
+            .transaction_extension_payload()
+            .map(|t| &self.bytes[t.range()])
     }
 
     /// Returns `None` if the extrinsic is not signed.
     pub fn signed_extensions(&self) -> Option<ExtrinsicSignedExtensions<'_, T>> {
         self.decoded_info
-            .signature_payload()
-            .map(|s| ExtrinsicSignedExtensions::new(&self.bytes, &self.metadata, s))
+            .transaction_extension_payload()
+            .map(|t| ExtrinsicSignedExtensions::new(&self.bytes, &self.metadata, t))
     }
 
     /// The index of the pallet that the extrinsic originated from.
@@ -517,9 +517,7 @@ mod tests {
             result.err(),
             Some(crate::Error::Block(
                 crate::error::BlockError::ExtrinsicDecodeError(
-                    ExtrinsicDecodeError::VersionNotSupported {
-                        extrinsic_version: 3
-                    }
+                    ExtrinsicDecodeError::VersionNotSupported(3)
                 )
             ))
         );
