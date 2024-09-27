@@ -5,6 +5,7 @@
 use crate::backend::rpc::reconnecting_rpc_client::{RpcClientBuilder, RpcError};
 use jsonrpsee::core::client::Client;
 use std::sync::Arc;
+use url::Url;
 
 #[cfg(feature = "native")]
 pub use tokio::spawn;
@@ -14,7 +15,7 @@ pub use wasm_bindgen_futures::spawn_local as spawn;
 
 #[cfg(feature = "native")]
 pub async fn ws_client<P>(
-    url: &str,
+    url: &Url,
     builder: &RpcClientBuilder<P>,
 ) -> Result<Arc<Client>, RpcError> {
     use jsonrpsee::ws_client::WsClientBuilder;
@@ -50,7 +51,7 @@ pub async fn ws_client<P>(
         ws_client_builder = ws_client_builder.enable_ws_ping(*ping);
     }
 
-    let client = ws_client_builder.build(url).await?;
+    let client = ws_client_builder.build(url.as_str()).await?;
 
     Ok(Arc::new(client))
 }
@@ -77,7 +78,7 @@ pub async fn ws_client<P>(
         .request_timeout(*request_timeout)
         .id_format(*id_kind);
 
-    let client = ws_client_builder.build(url).await?;
+    let client = ws_client_builder.build(url.as_str()).await?;
 
     Ok(Arc::new(client))
 }
