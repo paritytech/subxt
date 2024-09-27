@@ -31,6 +31,7 @@ std = [
     "tracing/std",
     "impl-serde/std",
     "primitive-types/std",
+    "polkadot-sdk/std",
 ]
 substrate-compat = ["polkadot-sdk/sp-core", "polkadot-sdk/sp-runtime"]
 
@@ -56,7 +57,7 @@ blake2 = { workspace = true }
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true, default-features = false }
 primitive-types = { workspace = true, default-features = false, features = ["codec", "serde_no_std", "scale-info"] }
-polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
+polkadot-sdk = { workspace = true, default-features = false, features = ["sp-crypto-hashing"] }
 
 # Included if the "substrate-compat" feature is enabled.
 tracing = { workspace = true, default-features = false }
