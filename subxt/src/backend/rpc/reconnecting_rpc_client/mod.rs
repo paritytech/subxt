@@ -632,7 +632,7 @@ where
     tracing::debug!(target: LOG_TARGET, "Connection to {url} was closed: `{}`; starting to reconnect", display_close_reason(&close_reason));
 
     let client = Retry::new(retry_policy.clone(), || {
-        platform::ws_client(&url, client_builder)
+        platform::ws_client(url, client_builder)
     })
     .await?;
 
