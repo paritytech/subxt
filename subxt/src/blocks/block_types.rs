@@ -89,7 +89,7 @@ where
             extrinsics,
             self.cached_events.clone(),
             block_hash,
-        ))
+        )?)
     }
 
     /// Work with storage.

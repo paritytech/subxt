@@ -17,8 +17,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Decode each signed extrinsic in the block dynamically
         let extrinsics = block.extrinsics().await?;
         for ext in extrinsics.iter() {
-            let ext = ext?;
-
             let Some(signed_extensions) = ext.signed_extensions() else {
                 continue; // we do not look at inherents in this example
             };

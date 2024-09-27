@@ -369,7 +369,6 @@ async fn transaction_v1_broadcast() {
         let extrinsics = finalized.extrinsics().await.unwrap();
         let block_extrinsics = extrinsics
             .iter()
-            .map(|res| res.unwrap())
             .collect::<Vec<_>>();
 
         let Some(ext) = block_extrinsics

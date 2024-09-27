@@ -70,6 +70,7 @@ mod extrinsic_signed_extensions;
 mod extrinsics;
 mod static_extrinsic;
 
+use crate::error::Error;
 use crate::config::Config;
 use crate::Metadata;
 use alloc::vec::Vec;
@@ -83,6 +84,6 @@ pub use static_extrinsic::StaticExtrinsic;
 /// form of bytes) and some metadata that we'll use to decode them.
 ///
 /// This is a shortcut for [`Extrinsics::decode_from`].
-pub fn decode_from<T: Config>(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Extrinsics<T> {
+pub fn decode_from<T: Config>(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Extrinsics<T>, Error> {
     Extrinsics::decode_from(extrinsics, metadata)
 }
