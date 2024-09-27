@@ -70,7 +70,7 @@ bitvec = { version = "1", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
 clap = { version = "4.5.18", features = ["derive", "cargo"] }
 cfg-if = "1.0.0"
-criterion = "0.4"
+criterion = "0.5.1"
 codec = { package = "parity-scale-codec", version = "3.6.9", default-features = false }
 color-eyre = "0.6.3"
 console_error_panic_hook = "0.1.7"
@@ -86,7 +86,7 @@ hex = { version = "0.4.3", default-features = false }
 heck = "0.5.0"
 impl-serde = { version = "0.4.0", default-features = false }
 indoc = "2"
-jsonrpsee = { version = "0.24.4" }
+jsonrpsee = { version = "0.24.5" }
 pretty_assertions = "1.4.1"
 primitive-types = { version = "0.12.2", default-features = false }
 proc-macro-error2 = "2.0.0"
@@ -102,7 +102,7 @@ scale-typegen = "0.8.0"
 scale-typegen-description = "0.8.0"
 serde = { version = "1.0.210", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.128", default-features = false }
-syn = { version = "2.0.15", features = ["full", "extra-traits"] }
+syn = { version = "2.0.77", features = ["full", "extra-traits"] }
 thiserror = "1.0.64"
 tokio = { version = "1.40", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
@@ -112,11 +112,11 @@ trybuild = "1.0.99"
 url = "2.5.2"
 wabt = "0.10.0"
 wasm-bindgen-test = "0.3.24"
-which = "5.0.0"
+which = "6.0.3"
 strip-ansi-escapes = "0.2.0"
 proptest = "1.5.0"
 hex-literal = "0.4.1"
-sc-executor = "0.40.0"
+sc-executor = "0.40.1"
 sc-executor-common = "0.35.0"
 
 # Light client support:
@@ -140,7 +140,7 @@ tokio-util = "0.7.12"
 # Substrate crates:
 sp-core = { version = "34.0.0", default-features = false }
 sp-crypto-hashing = { version = "0.1.0", default-features = false }
-sp-runtime = "39.0.0"
+sp-runtime = "39.0.1"
 sp-keyring = "39.0.0"
 sp-maybe-compressed-blob = "11.0.0"
 sp-state-machine = "0.43.0"
@@ -163,15 +163,14 @@ bip32 = { version = "0.5.2", default-features = false }
 hmac = { version = "0.12.1", default-features = false }
 pbkdf2 = { version = "0.12.2", default-features = false }
 schnorrkel = { version = "0.11.4", default-features = false }
-secp256k1 = { version = "0.28.2", default-features = false }
-keccak-hash = { version = "0.10.0", default-features = false }
-secrecy = "0.8.0"
+secp256k1 = { version = "0.29.1", default-features = false }
+keccak-hash = { version = "0.11.0", default-features = false }
+secrecy = "0.10.2"
 sha2 = { version = "0.10.8", default-features = false }
 zeroize = { version = "1", default-features = false }
 base64 = { version = "0.22.1", default-features = false }
 scrypt = { version = "0.11.0", default-features = false }
 crypto_secretbox = { version = "0.1.1", default-features = false }
-
 
 [profile.dev.package.smoldot-light]
 opt-level = 2

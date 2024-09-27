@@ -108,10 +108,8 @@ impl core::str::FromStr for SecretUri {
         let password = cap.name("password");
 
         Ok(Self {
-            phrase: SecretString::from_str(phrase).expect("Returns infallible error; qed"),
-            password: password.map(|v| {
-                SecretString::from_str(v.as_str()).expect("Returns infallible error; qed")
-            }),
+            phrase: SecretString::from(phrase.to_owned()),
+            password: password.map(|v| SecretString::from(v.as_str().to_owned())),
             junctions,
         })
     }
