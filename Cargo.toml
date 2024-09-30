@@ -86,7 +86,7 @@ hex = { version = "0.4.3", default-features = false }
 heck = "0.5.0"
 impl-serde = { version = "0.4.0", default-features = false }
 indoc = "2"
-jsonrpsee = { version = "0.24.4" }
+jsonrpsee = { version = "0.24.5" }
 pretty_assertions = "1.4.1"
 primitive-types = { version = "0.12.2", default-features = false }
 proc-macro-error2 = "2.0.0"
