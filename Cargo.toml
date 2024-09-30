@@ -116,7 +116,7 @@ which = "5.0.0"
 strip-ansi-escapes = "0.2.0"
 proptest = "1.5.0"
 hex-literal = "0.4.1"
-sc-executor = "0.40.0"
+sc-executor = "0.40.1"
 sc-executor-common = "0.35.0"
 
 # Light client support:
