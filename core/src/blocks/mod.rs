@@ -38,21 +38,19 @@
 //! ];
 //!
 //! // Given some chain config and metadata, we know how to decode the bytes.
-//! let exts = blocks::decode_from::<PolkadotConfig>(ext_bytes, metadata);
+//! let exts = blocks::decode_from::<PolkadotConfig>(ext_bytes, metadata).unwrap();
 //!
 //! // We'll see 3 extrinsics:
 //! assert_eq!(exts.len(), 3);
 //!
 //! // We can iterate over them and decode various details out of them.
 //! for ext in exts.iter() {
-//!     let ext = ext.unwrap();
 //!     println!("Pallet: {}", ext.pallet_name().unwrap());
 //!     println!("Call:   {}", ext.variant_name().unwrap());
 //! }
 //!
 //! # let ext_details: Vec<_> = exts.iter()
 //! #     .map(|ext| {
-//! #         let ext = ext.unwrap();
 //! #         let pallet = ext.pallet_name().unwrap().to_string();
 //! #         let call = ext.variant_name().unwrap().to_string();
 //! #         (pallet, call)
