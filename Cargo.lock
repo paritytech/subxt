@@ -2882,9 +2882,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.21"
+version = "0.4.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90ed8c1e510134f979dbc4f070f87d4313098b704861a105fe34231c70a3901c"
+checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "lru"
@@ -4006,9 +4006,9 @@ dependencies = [
 
 [[package]]
 name = "sc-executor"
-version = "0.40.0"
+version = "0.40.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "963c1ebaf6bd0bc4ab0603c3cd7200ed25230a897a3217928a559fedce6019df"
+checksum = "3f0cc0a3728fd033589183460c5a49b2e7545d09dc89a098216ef9e9aadcd9dc"
 dependencies = [
  "parity-scale-codec",
  "parking_lot",
@@ -4239,9 +4239,9 @@ dependencies = [
 
 [[package]]
 name = "schnellru"
-version = "0.2.1"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "772575a524feeb803e5b0fcbc6dd9f367e579488197c94c6e4023aad2305774d"
+checksum = "c9a8ef13a93c54d20580de1e5c413e624e53121d42fc7e2c11d10ef7f8b02367"
 dependencies = [
  "ahash",
  "cfg-if",
@@ -5080,9 +5080,9 @@ dependencies = [
 
 [[package]]
 name = "sp-wasm-interface"
-version = "21.0.0"
+version = "21.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b04b919e150b4736d85089d49327eab65507deb1485eec929af69daa2278eb3"
+checksum = "b066baa6d57951600b14ffe1243f54c47f9c23dd89c262e17ca00ae8dca58be9"
 dependencies = [
  "anyhow",
  "impl-trait-for-tuples",
