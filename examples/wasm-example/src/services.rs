@@ -49,7 +49,6 @@ pub(crate) async fn subscribe_to_finalized_blocks(
         writeln!(output, "  Extrinsics:").ok();
         let extrinsics = block.extrinsics().await?;
         for ext in extrinsics.iter() {
-            let ext = ext?;
             let idx = ext.index();
             let events = ext.events().await?;
             let bytes_hex = format!("0x{}", hex::encode(ext.bytes()));
