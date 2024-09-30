@@ -152,7 +152,7 @@ where
     /// Calculate and return the hash of the extrinsic, based on the configured hasher.
     pub fn hash(&self) -> T::Hash {
         // Use hash(), not hash_of(), because we don't want to double encode the bytes.
-        T::Hasher::hash(&self.bytes())
+        T::Hasher::hash(self.bytes())
     }
 
     /// Is the extrinsic signed?
