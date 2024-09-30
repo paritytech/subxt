@@ -197,7 +197,7 @@ where
     pub fn field_bytes(&self) -> &[u8] {
         // Note: this cannot panic because we checked the extrinsic bytes
         // to contain at least two bytes.
-        &self.call_bytes()[2..]
+        &self.bytes()[self.decoded_info().call_data_args_range()]
     }
 
     /// Return only the bytes of the address that signed this extrinsic.
