@@ -490,7 +490,12 @@ mod tests {
 
         // Decode with empty bytes.
         let result = Extrinsics::<SubstrateConfig>::decode_from(vec![vec![]], metadata);
-        assert_matches!(result.err(), Some(crate::Error::Codec(_)));
+        assert_matches!(
+            result.err(),
+            Some(crate::Error::Block(
+                crate::error::BlockError::ExtrinsicDecodeError(_)
+            ))
+        );
     }
 
     #[test]
@@ -573,7 +578,7 @@ mod tests {
 
         assert!(!extrinsic.is_signed());
 
-        assert_eq!(extrinsic.index(), 1);
+        assert_eq!(extrinsic.index(), 0);
 
         assert_eq!(extrinsic.pallet_index(), 0);
         assert_eq!(
