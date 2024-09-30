@@ -63,7 +63,7 @@ all = { level = "deny", priority = -1 }
 manual-unwrap-or-default = "allow"
 
 [workspace.dependencies]
-async-trait = "0.1.82"
+async-trait = "0.1.83"
 assert_matches = "1.5.0"
 base58 = { version = "0.2.0" }
 bitvec = { version = "1", default-features = false }
@@ -87,15 +87,15 @@ hex = { version = "0.4.3", default-features = false }
 heck = "0.5.0"
 impl-serde = { version = "0.4.0", default-features = false }
 indoc = "2"
-jsonrpsee = { version = "0.24.4" }
+jsonrpsee = { version = "0.24.5" }
 pretty_assertions = "1.4.1"
 primitive-types = { version = "0.12.2", default-features = false }
 proc-macro-error2 = "2.0.0"
 proc-macro2 = "1.0.86"
 quote = "1.0.37"
-regex = { version = "1.10.6", default-features = false }
+regex = { version = "1.11.0", default-features = false }
 scale-info = { version = "2.11.3", default-features = false }
-scale-value = { version = "0.16.2", default-features = false }
+scale-value = { version = "0.16.3", default-features = false }
 scale-bits = { version = "0.6.0", default-features = false }
 scale-decode = { version = "0.13.1", default-features = false }
 scale-encode = { version = "0.7.1", default-features = false }
@@ -117,7 +117,7 @@ which = "5.0.0"
 strip-ansi-escapes = "0.2.0"
 proptest = "1.5.0"
 hex-literal = "0.4.1"
-sc-executor = "0.40.0"
+sc-executor = "0.40.1"
 sc-executor-common = "0.35.0"
 
 # Light client support:
