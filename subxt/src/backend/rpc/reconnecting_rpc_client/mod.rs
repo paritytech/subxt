@@ -77,6 +77,7 @@ use tokio::sync::{
     mpsc::{self, UnboundedReceiver, UnboundedSender},
     oneshot, Notify,
 };
+use url::Url;
 use utils::display_close_reason;
 
 // re-exports
@@ -359,10 +360,11 @@ where
     }
 
     /// Build and connect to the target.
-    pub async fn build(self, url: String) -> Result<RpcClient, RpcError> {
+    pub async fn build(self, url: impl AsRef<str>) -> Result<RpcClient, RpcError> {
+        let url = Url::parse(url.as_ref()).map_err(|e| RpcError::Transport(Box::new(e)))?;
         let (tx, rx) = mpsc::unbounded_channel();
         let client = Retry::new(self.retry_policy.clone(), || {
-            platform::ws_client(url.as_ref(), &self)
+            platform::ws_client(&url, &self)
         })
         .await?;
 
@@ -462,7 +464,7 @@ impl RpcClientT for RpcClient {
 async fn background_task<P>(
     mut client: Arc<WsClient>,
     mut rx: UnboundedReceiver<Op>,
-    url: String,
+    url: Url,
     client_builder: RpcClientBuilder<P>,
 ) where
     P: Iterator<Item = Duration> + Send + 'static + Clone,
@@ -610,7 +612,7 @@ async fn subscription_handler(
 }
 
 struct ReconnectParams<'a, P> {
-    url: &'a str,
+    url: &'a Url,
     client_builder: &'a RpcClientBuilder<P>,
     close_reason: RpcError,
 }
