@@ -18,7 +18,6 @@ keywords = ["parity", "subxt", "extrinsic", "signer"]
 default = ["sr25519", "ecdsa", "subxt", "std"]
 std = [
     "regex/std",
-    "polkadot-sdk/std",
     "pbkdf2/std",
     "sha2/std",
     "hmac/std",
