@@ -11,7 +11,7 @@ use derive_where::derive_where;
 /// Use this with [`Address::IsDecodable`].
 pub use crate::utils::Yes;
 
-/// This represents the address of a custom value in in the metadata.
+/// This represents the address of a custom value in the metadata.
 /// Anything that implements it can be used to fetch custom values from the metadata.
 /// The trait is implemented by [`str`] for dynamic lookup and [`StaticAddress`] for static queries.
 pub trait Address {

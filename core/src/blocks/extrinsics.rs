@@ -691,7 +691,7 @@ mod tests {
             .expect("Valid dynamic parameters are provided");
 
         // Note: `create_unsigned` produces the extrinsic bytes by prefixing the extrinsic length.
-        // The length is handled deserializing `ChainBlockExtrinsic`, therefore the first byte is not needed.
+        // The length is handled by deserializing `ChainBlockExtrinsic`, therefore the first byte is not needed.
         let extrinsic = ExtrinsicDetails::<SubstrateConfig>::decode_from(
             1,
             tx_encoded.encoded(),
