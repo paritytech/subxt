@@ -31,7 +31,6 @@ std = [
     "tracing/std",
     "impl-serde/std",
     "primitive-types/std",
-    "polkadot-sdk/std",
 ]
 substrate-compat = ["polkadot-sdk/sp-core", "polkadot-sdk/sp-runtime", "polkadot-sdk/std"]
 
