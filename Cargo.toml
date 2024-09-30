@@ -92,7 +92,7 @@ primitive-types = { version = "0.12.2", default-features = false }
 proc-macro-error2 = "2.0.0"
 proc-macro2 = "1.0.86"
 quote = "1.0.37"
-regex = { version = "1.10.6", default-features = false }
+regex = { version = "1.11.0", default-features = false }
 scale-info = { version = "2.11.3", default-features = false }
 scale-value = { version = "0.16.3", default-features = false }
 scale-bits = { version = "0.6.0", default-features = false }
