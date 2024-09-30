@@ -21,7 +21,7 @@ std = ["scale-info/std", "frame-metadata/std"]
 scale-info = { workspace = true, default-features = false }
 frame-metadata = { workspace = true, default-features = false, features = ["current", "decode"] }
 codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
-polkadot-sdk = { workspace = true, default-features = false, features = ["sp-crypto-hashing"] }
+polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
 hashbrown = { workspace = true }
 
 [dev-dependencies]
