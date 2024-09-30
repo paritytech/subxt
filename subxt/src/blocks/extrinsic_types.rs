@@ -65,20 +65,13 @@ where
     /// Returns an iterator over the extrinsics in the block body.
     // Dev note: The returned iterator is 'static + Send so that we can box it up and make
     // use of it with our `FilterExtrinsic` stuff.
-    pub fn iter(
-        &self,
-    ) -> impl Iterator<Item = ExtrinsicDetails<T, C>> + Send + Sync + 'static {
+    pub fn iter(&self) -> impl Iterator<Item = ExtrinsicDetails<T, C>> + Send + Sync + 'static {
         let client = self.client.clone();
         let cached_events = self.cached_events.clone();
         let block_hash = self.hash;
 
         self.inner.iter().map(move |inner| {
-            ExtrinsicDetails::new(
-                inner,
-                client.clone(),
-                block_hash,
-                cached_events.clone(),
-            )
+            ExtrinsicDetails::new(inner, client.clone(), block_hash, cached_events.clone())
         })
     }
 

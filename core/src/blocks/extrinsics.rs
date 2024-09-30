@@ -12,9 +12,9 @@ use crate::{
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use core::ops::Deref;
+use frame_decode::extrinsics::Extrinsic;
 use scale_decode::DecodeAsType;
 use subxt_metadata::PalletMetadata;
-use frame_decode::extrinsics::Extrinsic;
 
 pub use crate::blocks::StaticExtrinsic;
 
@@ -30,22 +30,28 @@ impl<T: Config> Extrinsics<T> {
     /// each extrinsic hash (in the form of bytes) and some metadata that
     /// we'll use to decode them.
     pub fn decode_from(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, Error> {
-        let extrinsics = extrinsics.into_iter().map(|bytes| {
-            let cursor = &mut &*bytes;
+        let extrinsics = extrinsics
+            .into_iter()
+            .map(|bytes| {
+                let cursor = &mut &*bytes;
 
-            // Try to decode the extrinsic.
-            let decoded_info =
-                frame_decode::extrinsics::decode_extrinsic(cursor, metadata.deref(), metadata.types())
-                    .map_err(BlockError::ExtrinsicDecodeError)?
-                    .into_owned();
-    
-            // We didn't consume all bytes, so decoding probably failed.
-            if !cursor.is_empty() {
-                return Err(BlockError::LeftoverBytes(cursor.len()).into());
-            }
+                // Try to decode the extrinsic.
+                let decoded_info = frame_decode::extrinsics::decode_extrinsic(
+                    cursor,
+                    metadata.deref(),
+                    metadata.types(),
+                )
+                .map_err(BlockError::ExtrinsicDecodeError)?
+                .into_owned();
 
-            Ok(Arc::new((decoded_info, bytes)))
-        }).collect::<Result<_,Error>>()?;
+                // We didn't consume all bytes, so decoding probably failed.
+                if !cursor.is_empty() {
+                    return Err(BlockError::LeftoverBytes(cursor.len()).into());
+                }
+
+                Ok(Arc::new((decoded_info, bytes)))
+            })
+            .collect::<Result<_, Error>>()?;
 
         Ok(Self {
             extrinsics,
@@ -68,19 +74,13 @@ impl<T: Config> Extrinsics<T> {
     /// Returns an iterator over the extrinsics in the block body.
     // Dev note: The returned iterator is 'static + Send so that we can box it up and make
     // use of it with our `FilterExtrinsic` stuff.
-    pub fn iter(
-        &self,
-    ) -> impl Iterator<Item = ExtrinsicDetails<T>> + Send + Sync + 'static {
+    pub fn iter(&self) -> impl Iterator<Item = ExtrinsicDetails<T>> + Send + Sync + 'static {
         let extrinsics = self.extrinsics.clone();
         let num_extrinsics = self.extrinsics.len();
         let metadata = self.metadata.clone();
 
         (0..num_extrinsics).map(move |index| {
-            ExtrinsicDetails::new(
-                index as u32,
-                extrinsics[index].clone(),
-                metadata.clone(),
-            )
+            ExtrinsicDetails::new(index as u32, extrinsics[index].clone(), metadata.clone())
         })
     }
 
@@ -500,8 +500,7 @@ mod tests {
         let metadata = metadata();
 
         // Decode with invalid version.
-        let result =
-        Extrinsics::<SubstrateConfig>::decode_from(vec![vec![3u8].encode()], metadata);
+        let result = Extrinsics::<SubstrateConfig>::decode_from(vec![vec![3u8].encode()], metadata);
 
         assert_matches!(
             result.err(),
@@ -532,9 +531,11 @@ mod tests {
             .expect("Valid dynamic parameters are provided");
 
         // Extrinsic details ready to decode.
-        let extrinsics =
-            Extrinsics::<SubstrateConfig>::decode_from(vec![tx_encoded.encoded().to_owned()], metadata)
-                .expect("Valid extrinsic");
+        let extrinsics = Extrinsics::<SubstrateConfig>::decode_from(
+            vec![tx_encoded.encoded().to_owned()],
+            metadata,
+        )
+        .expect("Valid extrinsic");
 
         let extrinsic = extrinsics.iter().next().unwrap();
 
@@ -562,9 +563,11 @@ mod tests {
 
         // Note: `create_unsigned` produces the extrinsic bytes by prefixing the extrinsic length.
         // The length is handled deserializing `ChainBlockExtrinsic`, therefore the first byte is not needed.
-        let extrinsics =
-            Extrinsics::<SubstrateConfig>::decode_from(vec![tx_encoded.encoded().to_owned()], metadata)
-                .expect("Valid extrinsic");
+        let extrinsics = Extrinsics::<SubstrateConfig>::decode_from(
+            vec![tx_encoded.encoded().to_owned()],
+            metadata,
+        )
+        .expect("Valid extrinsic");
 
         let extrinsic = extrinsics.iter().next().unwrap();
 

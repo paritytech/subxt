@@ -222,9 +222,7 @@ async fn fetch_block_and_decode_extrinsic_details() {
         .unwrap()
         .is_some());
 
-    let block_extrinsics = extrinsics
-        .iter()
-        .collect::<Vec<_>>();
+    let block_extrinsics = extrinsics.iter().collect::<Vec<_>>();
 
     let mut balance = None;
     let mut timestamp = None;
@@ -296,10 +294,7 @@ async fn decode_signed_extensions_from_blocks() {
             let block_hash = in_block.block_hash();
             let block = api.blocks().at(block_hash).await.unwrap();
             let extrinsics = block.extrinsics().await.unwrap();
-            let extrinsic_details = extrinsics
-                .iter()
-                .find(|e| e.is_signed())
-                .unwrap();
+            let extrinsic_details = extrinsics.iter().find(|e| e.is_signed()).unwrap();
             extrinsic_details
         }};
     }
