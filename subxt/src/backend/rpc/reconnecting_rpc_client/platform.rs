@@ -58,7 +58,7 @@ pub async fn ws_client<P>(
 
 #[cfg(feature = "web")]
 pub async fn ws_client<P>(
-    url: &str,
+    url: &Url,
     builder: &RpcClientBuilder<P>,
 ) -> Result<Arc<Client>, RpcError> {
     use jsonrpsee::wasm_client::WasmClientBuilder;
