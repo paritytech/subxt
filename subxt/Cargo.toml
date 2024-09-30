@@ -95,7 +95,7 @@ instant = { workspace = true }
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }
 primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"] }
-polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing", "std"] }
+polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
 
 # Included if the "jsonrpsee" feature is enabled.
 jsonrpsee = { workspace = true, optional = true, features = ["jsonrpsee-types"] }
