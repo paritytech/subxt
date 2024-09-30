@@ -339,10 +339,10 @@ mod test {
     pub use crate::backend::rpc::{RawRpcFuture, RawRpcSubscription};
     pub use crate::{backend::StorageResponse, error::RpcError};
     pub use futures::StreamExt;
+    pub use polkadot_sdk::sp_core::H256;
     pub use rpc::RpcClientT;
     pub use serde::Serialize;
     pub use serde_json::value::RawValue;
-    pub use polkadot_sdk::sp_core::H256;
     pub use std::collections::{HashMap, VecDeque};
     pub use subxt_core::{config::DefaultExtrinsicParams, Config};
     pub use tokio::sync::{mpsc, Mutex};
