@@ -135,7 +135,7 @@ pub enum Error {
     #[error(transparent)]
     DisconnectedWillReconnect(#[from] DisconnectedWillReconnect),
     /// Other rpc error.
-    #[error("{0}")]
+    #[error(transparent)]
     RpcError(RpcError),
 }
 
