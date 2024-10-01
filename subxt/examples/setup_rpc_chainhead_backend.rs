@@ -1,4 +1,4 @@
-//! Example to utilize the ChainHeadBackend to subscribe to finalized blocks.
+//! Example to utilize the ChainHeadBackend rpc backend to subscribe to finalized blocks.
 
 #![allow(missing_docs)]
 
@@ -20,26 +20,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ChainHeadBackendBuilder::default().build_with_background_driver(rpc.clone());
     let api = OnlineClient::from_backend(std::sync::Arc::new(backend)).await?;
 
-    // Run for at most 100 blocks and print a bunch of information about it.
-    //
-    // The subscription is automatically re-started when the RPC client has reconnected.
-    // You can test that by stopping the polkadot node and restarting it.
     let mut blocks_sub = api.blocks().subscribe_finalized().await?.take(100);
 
     while let Some(block) = blocks_sub.next().await {
-        let block = match block {
-            Ok(b) => b,
-            Err(e) => {
-                // This can only happen on the legacy backend and the unstable backend
-                // will handle this internally.
-                if e.is_disconnected_will_reconnect() {
-                    println!("The RPC connection was lost and we may have missed a few blocks");
-                    continue;
-                }
-
-                return Err(e.into());
-            }
-        };
+        let block = block?;
 
         let block_number = block.number();
         let block_hash = block.hash();

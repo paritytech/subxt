@@ -6,9 +6,9 @@
 //! the necessary information (probably from a JSON-RPC API, but that's up to the
 //! implementation).
 
+pub mod chain_head;
 pub mod legacy;
 pub mod rpc;
-pub mod chain_head;
 pub mod utils;
 
 use subxt_core::client::RuntimeVersion;
@@ -999,7 +999,10 @@ mod test {
                 result: rpc_methods::StorageResultType::Value(Bytes(value.to_owned().into())),
             }
         }
-        fn storage_items(id: &str, items: &[chain_head::rpc_methods::StorageResult]) -> FollowEvent {
+        fn storage_items(
+            id: &str,
+            items: &[chain_head::rpc_methods::StorageResult],
+        ) -> FollowEvent {
             FollowEvent::OperationStorageItems(OperationStorageItems {
                 operation_id: id.to_owned(),
                 items: VecDeque::from(items.to_owned()),
