@@ -37,7 +37,7 @@ pub enum Error {
     #[error("Scale codec error: {0}")]
     Codec(#[from] codec::Error),
     /// Rpc error.
-    #[error("Rpc error: {0}")]
+    #[error(transparent)]
     Rpc(#[from] RpcError),
     /// Serde serialization error
     #[error("Serde json error: {0}")]

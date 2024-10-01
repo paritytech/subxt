@@ -8,7 +8,7 @@
 
 pub mod legacy;
 pub mod rpc;
-pub mod unstable;
+pub mod chain_head;
 pub mod utils;
 
 use subxt_core::client::RuntimeVersion;
@@ -881,7 +881,7 @@ mod test {
             OperationStorageItems, RuntimeSpec, RuntimeVersionEvent,
         };
 
-        use super::unstable::*;
+        use super::chain_head::*;
         use super::*;
 
         fn build_backend(
@@ -931,7 +931,7 @@ mod test {
             serde_json::from_value(spec).unwrap()
         }
 
-        type FollowEvent = unstable::rpc_methods::FollowEvent<<Conf as Config>::Hash>;
+        type FollowEvent = chain_head::rpc_methods::FollowEvent<<Conf as Config>::Hash>;
 
         fn setup_mock_rpc_client(cycle_ids: bool) -> MockRpcBuilder {
             let hash = random_hash();
@@ -993,13 +993,13 @@ mod test {
                 operation_id: id.to_owned(),
             })
         }
-        fn storage_result(key: &str, value: &str) -> unstable::rpc_methods::StorageResult {
-            unstable::rpc_methods::StorageResult {
+        fn storage_result(key: &str, value: &str) -> chain_head::rpc_methods::StorageResult {
+            chain_head::rpc_methods::StorageResult {
                 key: Bytes(key.to_owned().into()),
                 result: rpc_methods::StorageResultType::Value(Bytes(value.to_owned().into())),
             }
         }
-        fn storage_items(id: &str, items: &[unstable::rpc_methods::StorageResult]) -> FollowEvent {
+        fn storage_items(id: &str, items: &[chain_head::rpc_methods::StorageResult]) -> FollowEvent {
             FollowEvent::OperationStorageItems(OperationStorageItems {
                 operation_id: id.to_owned(),
                 items: VecDeque::from(items.to_owned()),

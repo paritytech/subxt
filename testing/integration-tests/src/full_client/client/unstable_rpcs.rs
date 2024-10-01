@@ -13,7 +13,7 @@ use assert_matches::assert_matches;
 use codec::Encode;
 use futures::Stream;
 use subxt::{
-    backend::unstable::rpc_methods::{
+    backend::chain_head::rpc_methods::{
         FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
         StorageQueryType,
     },

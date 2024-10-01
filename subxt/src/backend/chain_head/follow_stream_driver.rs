@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
-use crate::backend::unstable::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
+use crate::backend::chain_head::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
 use futures::stream::{Stream, StreamExt};
@@ -431,6 +431,10 @@ where
                 FollowStreamMsg::Ready(sub_id) => {
                     self.sub_id = Some(sub_id);
                     continue;
+                }
+                FollowStreamMsg::Event(FollowEvent::Stop) => {
+                    self.is_done = true;
+                    return Poll::Ready(None);
                 }
                 FollowStreamMsg::Event(FollowEvent::Finalized(finalized)) => {
                     self.last_seen_block = finalized.finalized_block_hashes.last().cloned();

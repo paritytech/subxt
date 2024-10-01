@@ -31,6 +31,7 @@ native = [
     "subxt-lightclient?/native",
     "tokio-util",
     "tokio?/sync",
+    "tokio/rt-multi-thread",
 ]
 
 # Enable this for web/wasm builds.

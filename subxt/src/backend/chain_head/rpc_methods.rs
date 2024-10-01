@@ -19,15 +19,15 @@ use std::task::Poll;
 /// some `T: Config` trait which determines some of the types that the RPC methods will
 /// take or hand back.
 #[derive_where(Clone, Debug)]
-pub struct UnstableRpcMethods<T> {
+pub struct ChainHeadRpcMethods<T> {
     client: RpcClient,
     _marker: std::marker::PhantomData<T>,
 }
 
-impl<T: Config> UnstableRpcMethods<T> {
+impl<T: Config> ChainHeadRpcMethods<T> {
     /// Instantiate the legacy RPC method interface.
     pub fn new(client: RpcClient) -> Self {
-        UnstableRpcMethods {
+        ChainHeadRpcMethods {
             client,
             _marker: std::marker::PhantomData,
         }

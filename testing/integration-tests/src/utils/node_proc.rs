@@ -9,7 +9,7 @@ use std::time::Duration;
 use substrate_runner::SubstrateNode;
 use subxt::backend::rpc::reconnecting_rpc_client::{ExponentialBackoff, RpcClientBuilder};
 use subxt::{
-    backend::{legacy, rpc, unstable},
+    backend::{legacy, rpc, chain_head},
     Config, OnlineClient,
 };
 
@@ -78,9 +78,9 @@ where
     }
 
     /// Hand back an RPC client connected to the test node which exposes the unstable RPC methods.
-    pub async fn unstable_rpc_methods(&self) -> unstable::UnstableRpcMethods<R> {
+    pub async fn unstable_rpc_methods(&self) -> chain_head::UnstableRpcMethods<R> {
         let rpc_client = self.rpc_client.clone();
-        unstable::UnstableRpcMethods::new(rpc_client)
+        chain_head::UnstableRpcMethods::new(rpc_client)
     }
 
     /// Always return a client using the unstable backend.
@@ -256,7 +256,7 @@ async fn build_legacy_client<T: Config>(
 async fn build_unstable_client<T: Config>(
     rpc_client: rpc::RpcClient,
 ) -> Result<OnlineClient<T>, String> {
-    let (backend, mut driver) = unstable::UnstableBackend::builder().build(rpc_client);
+    let (backend, mut driver) = chain_head::UnstableBackend::builder().build(rpc_client);
 
     // The unstable backend needs driving:
     tokio::spawn(async move {

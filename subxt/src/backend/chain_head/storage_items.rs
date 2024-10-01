@@ -5,7 +5,7 @@
 use super::follow_stream_driver::FollowStreamDriverHandle;
 use super::follow_stream_unpin::BlockRef;
 use super::rpc_methods::{
-    FollowEvent, MethodResponse, StorageQuery, StorageResult, UnstableRpcMethods,
+    ChainHeadRpcMethods, FollowEvent, MethodResponse, StorageQuery, StorageResult,
 };
 use crate::config::Config;
 use crate::error::{Error, RpcError};
@@ -35,7 +35,7 @@ impl<T: Config> StorageItems<T> {
         queries: impl Iterator<Item = StorageQuery<&[u8]>>,
         at: T::Hash,
         follow_handle: &FollowStreamDriverHandle<T::Hash>,
-        methods: UnstableRpcMethods<T>,
+        methods: ChainHeadRpcMethods<T>,
     ) -> Result<Self, Error> {
         let sub_id = super::get_subscription_id(follow_handle).await?;
 
