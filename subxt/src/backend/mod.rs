@@ -325,7 +325,7 @@ pub enum TransactionStatus<Hash> {
 
 /// A response from calls like [`Backend::storage_fetch_values`] or
 /// [`Backend::storage_fetch_descendant_values`].
-#[cfg_attr(test, derive(serde::Serialize, Clone, PartialEq, Debug))]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, Debug)]
 pub struct StorageResponse {
     /// The key.
     pub key: Vec<u8>,
