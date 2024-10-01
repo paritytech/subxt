@@ -253,7 +253,7 @@ impl RuntimeGenerator {
                 // Runtime APIs in the metadata by name.
                 pub static RUNTIME_APIS: [&str; #runtime_api_names_len] = [ #(#runtime_api_names,)* ];
 
-                /// The error type returned when there is a runtime issue.
+                /// The error type that is returned when there is a runtime issue.
                 pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
 
                 /// The outer event enum.

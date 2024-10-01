@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{subxt_test, test_context};
+use crate::{subxt_test, test_context, utils::consume_initial_blocks};
 use codec::{Compact, Encode};
 use futures::StreamExt;
 
@@ -94,6 +94,7 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     let api = ctx.client();
 
     let mut sub = api.blocks().subscribe_finalized().await?;
+    consume_initial_blocks(&mut sub).await;
 
     // check that the finalized block reported lines up with the `latest_finalized_block_ref`.
     for _ in 0..2 {

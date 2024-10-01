@@ -69,8 +69,8 @@ impl Keypair {
             let seed = SecretKeyBytes::from_hex(hex_str)?;
             Self::from_secret_key(seed)?
         } else {
-            let phrase = bip39::Mnemonic::from_str(phrase.expose_secret().as_str())?;
-            let pass_str = password.as_ref().map(|p| p.expose_secret().as_str());
+            let phrase = bip39::Mnemonic::from_str(phrase.expose_secret())?;
+            let pass_str = password.as_ref().map(|p| p.expose_secret());
             Self::from_phrase(&phrase, pass_str)?
         };
 
@@ -430,10 +430,10 @@ mod test {
 
             let message = b"Hello world";
             let sp_sig = sp_pair.sign(message).0;
-            let sig = pair.sign(message).0;
+            let sig: [u8; 65] = pair.sign(message).0;
 
             assert!(SpPair::verify(
-                &SpSignature(sig),
+                &SpSignature::from(sig),
                 message,
                 &sp_pair.public(),
             ));

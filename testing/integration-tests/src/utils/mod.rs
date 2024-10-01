@@ -8,9 +8,8 @@ mod wait_for_blocks;
 
 pub use context::*;
 pub use node_proc::TestNodeProcess;
-pub use wait_for_blocks::*;
-
 pub use subxt_test_macro::subxt_test;
+pub use wait_for_blocks::*;
 
 /// The test timeout is set to 1 second.
 /// However, the test is sleeping for 5 seconds.
