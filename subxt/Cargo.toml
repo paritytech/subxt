@@ -46,6 +46,7 @@ web = [
     "instant/wasm-bindgen",
     "tokio?/sync",
     "finito?/wasm-bindgen",
+    "wasm-bindgen-futures",
 ]
 
 # Enable this to use the reconnecting rpc client
