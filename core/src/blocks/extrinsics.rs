@@ -2,15 +2,17 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use super::BlockError;
 use crate::blocks::extrinsic_signed_extensions::ExtrinsicSignedExtensions;
 use crate::{
     config::{Config, Hasher},
-    error::{BlockError, Error, MetadataError},
+    error::{Error, MetadataError},
     Metadata,
 };
 use alloc::sync::Arc;
 use alloc::vec::Vec;
-use codec::{Compact, CompactLen, Decode};
+use core::ops::Deref;
+use frame_decode::extrinsics::Extrinsic;
 use scale_decode::DecodeAsType;
 use subxt_metadata::PalletMetadata;
 
@@ -18,9 +20,8 @@ pub use crate::blocks::StaticExtrinsic;
 
 /// The body of a block.
 pub struct Extrinsics<T: Config> {
-    extrinsics: Vec<Vec<u8>>,
+    extrinsics: Vec<Arc<(Extrinsic<'static, u32>, Vec<u8>)>>,
     metadata: Metadata,
-    ids: ExtrinsicPartTypeIds,
     _marker: core::marker::PhantomData<T>,
 }
 
@@ -28,13 +29,33 @@ impl<T: Config> Extrinsics<T> {
     /// Instantiate a new [`Extrinsics`] object, given a vector containing
     /// each extrinsic hash (in the form of bytes) and some metadata that
     /// we'll use to decode them.
-    pub fn decode_from(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, BlockError> {
-        let ids = ExtrinsicPartTypeIds::new(&metadata)?;
+    pub fn decode_from(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, Error> {
+        let extrinsics = extrinsics
+            .into_iter()
+            .map(|bytes| {
+                let cursor = &mut &*bytes;
+
+                // Try to decode the extrinsic.
+                let decoded_info = frame_decode::extrinsics::decode_extrinsic(
+                    cursor,
+                    metadata.deref(),
+                    metadata.types(),
+                )
+                .map_err(BlockError::ExtrinsicDecodeError)?
+                .into_owned();
+
+                // We didn't consume all bytes, so decoding probably failed.
+                if !cursor.is_empty() {
+                    return Err(BlockError::LeftoverBytes(cursor.len()).into());
+                }
+
+                Ok(Arc::new((decoded_info, bytes)))
+            })
+            .collect::<Result<_, Error>>()?;
 
         Ok(Self {
             extrinsics,
             metadata,
-            ids,
             _marker: core::marker::PhantomData,
         })
     }
@@ -53,35 +74,13 @@ impl<T: Config> Extrinsics<T> {
     /// Returns an iterator over the extrinsics in the block body.
     // Dev note: The returned iterator is 'static + Send so that we can box it up and make
     // use of it with our `FilterExtrinsic` stuff.
-    pub fn iter(
-        &self,
-    ) -> impl Iterator<Item = Result<ExtrinsicDetails<T>, Error>> + Send + Sync + 'static {
+    pub fn iter(&self) -> impl Iterator<Item = ExtrinsicDetails<T>> + Send + Sync + 'static {
         let extrinsics = self.extrinsics.clone();
         let num_extrinsics = self.extrinsics.len();
         let metadata = self.metadata.clone();
-        let ids = self.ids;
-        let mut index = 0;
 
-        core::iter::from_fn(move || {
-            if index == num_extrinsics {
-                None
-            } else {
-                match ExtrinsicDetails::decode_from(
-                    index as u32,
-                    &extrinsics[index],
-                    metadata.clone(),
-                    ids,
-                ) {
-                    Ok(extrinsic_details) => {
-                        index += 1;
-                        Some(Ok(extrinsic_details))
-                    }
-                    Err(e) => {
-                        index = num_extrinsics;
-                        Some(Err(e))
-                    }
-                }
-            }
+        (0..num_extrinsics).map(move |index| {
+            ExtrinsicDetails::new(index as u32, extrinsics[index].clone(), metadata.clone())
         })
     }
 
@@ -91,15 +90,14 @@ impl<T: Config> Extrinsics<T> {
     pub fn find<E: StaticExtrinsic>(
         &self,
     ) -> impl Iterator<Item = Result<FoundExtrinsic<T, E>, Error>> + '_ {
-        self.iter().filter_map(|res| match res {
-            Err(err) => Some(Err(err)),
-            Ok(details) => match details.as_extrinsic::<E>() {
+        self.iter().filter_map(|details| {
+            match details.as_extrinsic::<E>() {
                 // Failed to decode extrinsic:
                 Err(err) => Some(Err(err)),
                 // Extrinsic for a different pallet / different call (skip):
                 Ok(None) => None,
                 Ok(Some(value)) => Some(Ok(FoundExtrinsic { details, value })),
-            },
+            }
         })
     }
 
@@ -125,31 +123,11 @@ impl<T: Config> Extrinsics<T> {
 pub struct ExtrinsicDetails<T: Config> {
     /// The index of the extrinsic in the block.
     index: u32,
-    /// Extrinsic bytes.
-    bytes: Arc<[u8]>,
-    /// Some if the extrinsic payload is signed.
-    signed_details: Option<SignedExtrinsicDetails>,
-    /// The start index in the `bytes` from which the call is encoded.
-    call_start_idx: usize,
-    /// The pallet index.
-    pallet_index: u8,
-    /// The variant index.
-    variant_index: u8,
+    /// Extrinsic bytes and decode info.
+    ext: Arc<(Extrinsic<'static, u32>, Vec<u8>)>,
     /// Subxt metadata to fetch the extrinsic metadata.
     metadata: Metadata,
     _marker: core::marker::PhantomData<T>,
-}
-
-/// Details only available in signed extrinsics.
-pub struct SignedExtrinsicDetails {
-    /// start index of the range in `bytes` of `ExtrinsicDetails` that encodes the address.
-    address_start_idx: usize,
-    /// end index of the range in `bytes` of `ExtrinsicDetails` that encodes the address. Equivalent to signature_start_idx.
-    address_end_idx: usize,
-    /// end index of the range in `bytes` of `ExtrinsicDetails` that encodes the signature. Equivalent to extra_start_idx.
-    signature_end_idx: usize,
-    /// end index of the range in `bytes` of `ExtrinsicDetails` that encodes the signature.
-    extra_end_idx: usize,
 }
 
 impl<T> ExtrinsicDetails<T>
@@ -158,108 +136,28 @@ where
 {
     // Attempt to dynamically decode a single extrinsic from the given input.
     #[doc(hidden)]
-    pub fn decode_from(
+    pub fn new(
         index: u32,
-        extrinsic_bytes: &[u8],
+        ext: Arc<(Extrinsic<'static, u32>, Vec<u8>)>,
         metadata: Metadata,
-        ids: ExtrinsicPartTypeIds,
-    ) -> Result<ExtrinsicDetails<T>, Error> {
-        const SIGNATURE_MASK: u8 = 0b1000_0000;
-        const VERSION_MASK: u8 = 0b0111_1111;
-        const LATEST_EXTRINSIC_VERSION: u8 = 4;
-
-        // Wrap all of the bytes in Arc for easy sharing.
-        let bytes: Arc<[u8]> = Arc::from(extrinsic_bytes);
-
-        // The compact encoded length prefix.
-        let prefix = <Compact<u64>>::decode(&mut &*extrinsic_bytes)?;
-        let prefix_len = <Compact<u64>>::compact_len(&prefix.0);
-
-        // Extrinsic are encoded in memory in the following way:
-        //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
-        //   - signature: [unknown TBD with metadata].
-        //   - extrinsic data
-        let version_byte: u8 = Decode::decode(&mut &bytes[prefix_len..])?;
-
-        let version = version_byte & VERSION_MASK;
-        if version != LATEST_EXTRINSIC_VERSION {
-            return Err(BlockError::UnsupportedVersion(version).into());
-        }
-
-        let is_signed = version_byte & SIGNATURE_MASK != 0;
-
-        // Skip over the prefix and first byte which denotes the version and signing.
-        let cursor = &mut &bytes[prefix_len + 1..];
-
-        let signed_details = is_signed
-            .then(|| -> Result<SignedExtrinsicDetails, Error> {
-                let address_start_idx = bytes.len() - cursor.len();
-                // Skip over the address, signature and extra fields.
-                scale_decode::visitor::decode_with_visitor(
-                    cursor,
-                    ids.address,
-                    metadata.types(),
-                    scale_decode::visitor::IgnoreVisitor::new(),
-                )
-                .map_err(scale_decode::Error::from)?;
-                let address_end_idx = bytes.len() - cursor.len();
-
-                scale_decode::visitor::decode_with_visitor(
-                    cursor,
-                    ids.signature,
-                    metadata.types(),
-                    scale_decode::visitor::IgnoreVisitor::new(),
-                )
-                .map_err(scale_decode::Error::from)?;
-                let signature_end_idx = bytes.len() - cursor.len();
-
-                scale_decode::visitor::decode_with_visitor(
-                    cursor,
-                    ids.extra,
-                    metadata.types(),
-                    scale_decode::visitor::IgnoreVisitor::new(),
-                )
-                .map_err(scale_decode::Error::from)?;
-                let extra_end_idx = bytes.len() - cursor.len();
-
-                Ok(SignedExtrinsicDetails {
-                    address_start_idx,
-                    address_end_idx,
-                    signature_end_idx,
-                    extra_end_idx,
-                })
-            })
-            .transpose()?;
-
-        let call_start_idx = bytes.len() - cursor.len();
-
-        // Decode the pallet index, then the call variant.
-        let cursor = &mut &bytes[call_start_idx..];
-
-        let pallet_index: u8 = Decode::decode(cursor)?;
-        let variant_index: u8 = Decode::decode(cursor)?;
-
-        Ok(ExtrinsicDetails {
+    ) -> ExtrinsicDetails<T> {
+        ExtrinsicDetails {
             index,
-            bytes,
-            signed_details,
-            call_start_idx,
-            pallet_index,
-            variant_index,
+            ext,
             metadata,
             _marker: core::marker::PhantomData,
-        })
+        }
     }
 
     /// Calculate and return the hash of the extrinsic, based on the configured hasher.
     pub fn hash(&self) -> T::Hash {
         // Use hash(), not hash_of(), because we don't want to double encode the bytes.
-        T::Hasher::hash(&self.bytes)
+        T::Hasher::hash(self.bytes())
     }
 
     /// Is the extrinsic signed?
     pub fn is_signed(&self) -> bool {
-        self.signed_details.is_some()
+        self.decoded_info().is_signed()
     }
 
     /// The index of the extrinsic in the block.
@@ -275,7 +173,7 @@ where
     ///   - Extra fields
     /// - Extrinsic call bytes
     pub fn bytes(&self) -> &[u8] {
-        &self.bytes
+        &self.ext.1
     }
 
     /// Return only the bytes representing this extrinsic call:
@@ -287,7 +185,7 @@ where
     ///
     /// Please use [`Self::bytes`] if you want to get all extrinsic bytes.
     pub fn call_bytes(&self) -> &[u8] {
-        &self.bytes[self.call_start_idx..]
+        &self.bytes()[self.decoded_info().call_data_range()]
     }
 
     /// Return the bytes representing the fields stored in this extrinsic.
@@ -299,7 +197,7 @@ where
     pub fn field_bytes(&self) -> &[u8] {
         // Note: this cannot panic because we checked the extrinsic bytes
         // to contain at least two bytes.
-        &self.call_bytes()[2..]
+        &self.bytes()[self.decoded_info().call_data_args_range()]
     }
 
     /// Return only the bytes of the address that signed this extrinsic.
@@ -308,16 +206,16 @@ where
     ///
     /// Returns `None` if the extrinsic is not signed.
     pub fn address_bytes(&self) -> Option<&[u8]> {
-        self.signed_details
-            .as_ref()
-            .map(|e| &self.bytes[e.address_start_idx..e.address_end_idx])
+        self.decoded_info()
+            .signature_payload()
+            .map(|s| &self.bytes()[s.address_range()])
     }
 
     /// Returns Some(signature_bytes) if the extrinsic was signed otherwise None is returned.
     pub fn signature_bytes(&self) -> Option<&[u8]> {
-        self.signed_details
-            .as_ref()
-            .map(|e| &self.bytes[e.address_end_idx..e.signature_end_idx])
+        self.decoded_info()
+            .signature_payload()
+            .map(|s| &self.bytes()[s.signature_range()])
     }
 
     /// Returns the signed extension `extra` bytes of the extrinsic.
@@ -327,26 +225,26 @@ where
     ///
     /// Note: Returns `None` if the extrinsic is not signed.
     pub fn signed_extensions_bytes(&self) -> Option<&[u8]> {
-        self.signed_details
-            .as_ref()
-            .map(|e| &self.bytes[e.signature_end_idx..e.extra_end_idx])
+        self.decoded_info()
+            .transaction_extension_payload()
+            .map(|t| &self.bytes()[t.range()])
     }
 
     /// Returns `None` if the extrinsic is not signed.
     pub fn signed_extensions(&self) -> Option<ExtrinsicSignedExtensions<'_, T>> {
-        let signed = self.signed_details.as_ref()?;
-        let extra_bytes = &self.bytes[signed.signature_end_idx..signed.extra_end_idx];
-        Some(ExtrinsicSignedExtensions::new(extra_bytes, &self.metadata))
+        self.decoded_info()
+            .transaction_extension_payload()
+            .map(|t| ExtrinsicSignedExtensions::new(self.bytes(), &self.metadata, t))
     }
 
     /// The index of the pallet that the extrinsic originated from.
     pub fn pallet_index(&self) -> u8 {
-        self.pallet_index
+        self.decoded_info().pallet_index()
     }
 
     /// The index of the extrinsic variant that the extrinsic originated from.
     pub fn variant_index(&self) -> u8 {
-        self.variant_index
+        self.decoded_info().call_index()
     }
 
     /// The name of the pallet from whence the extrinsic originated.
@@ -418,6 +316,10 @@ where
 
         Ok(decoded)
     }
+
+    fn decoded_info(&self) -> &Extrinsic<'static, u32> {
+        &self.ext.0
+    }
 }
 
 /// A Static Extrinsic found in a block coupled with it's details.
@@ -434,36 +336,6 @@ pub struct ExtrinsicMetadataDetails<'a> {
     pub pallet: PalletMetadata<'a>,
     /// Metadata for the variant which describes the pallet extrinsics.
     pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
-}
-
-/// The type IDs extracted from the metadata that represent the
-/// generic type parameters passed to the `UncheckedExtrinsic` from
-/// the substrate-based chain.
-#[doc(hidden)]
-#[derive(Debug, Copy, Clone)]
-pub struct ExtrinsicPartTypeIds {
-    /// The address (source) of the extrinsic.
-    address: u32,
-    /// The extrinsic call type.
-    // Note: the call type can be used to skip over the extrinsic bytes to check
-    // they are in line with our metadata. This operation is currently postponed.
-    _call: u32,
-    /// The signature of the extrinsic.
-    signature: u32,
-    /// The extra parameters of the extrinsic.
-    extra: u32,
-}
-
-impl ExtrinsicPartTypeIds {
-    /// Extract the generic type parameters IDs from the extrinsic type.
-    fn new(metadata: &Metadata) -> Result<Self, BlockError> {
-        Ok(ExtrinsicPartTypeIds {
-            address: metadata.extrinsic().address_ty(),
-            _call: metadata.extrinsic().call_ty(),
-            signature: metadata.extrinsic().signature_ty(),
-            extra: metadata.extrinsic().extra_ty(),
-        })
-    }
 }
 
 #[cfg(test)]
@@ -615,26 +487,32 @@ mod tests {
     #[test]
     fn insufficient_extrinsic_bytes() {
         let metadata = metadata();
-        let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
         // Decode with empty bytes.
-        let result = ExtrinsicDetails::<SubstrateConfig>::decode_from(0, &[], metadata, ids);
-        assert_matches!(result.err(), Some(crate::Error::Codec(_)));
+        let result = Extrinsics::<SubstrateConfig>::decode_from(vec![vec![]], metadata);
+        assert_matches!(
+            result.err(),
+            Some(crate::Error::Block(
+                crate::error::BlockError::ExtrinsicDecodeError(_)
+            ))
+        );
     }
 
     #[test]
     fn unsupported_version_extrinsic() {
+        use frame_decode::extrinsics::ExtrinsicDecodeError;
+
         let metadata = metadata();
-        let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
         // Decode with invalid version.
-        let result =
-            ExtrinsicDetails::<SubstrateConfig>::decode_from(0, &vec![3u8].encode(), metadata, ids);
+        let result = Extrinsics::<SubstrateConfig>::decode_from(vec![vec![3u8].encode()], metadata);
 
         assert_matches!(
             result.err(),
             Some(crate::Error::Block(
-                crate::error::BlockError::UnsupportedVersion(3)
+                crate::error::BlockError::ExtrinsicDecodeError(
+                    ExtrinsicDecodeError::VersionNotSupported(3)
+                )
             ))
         );
     }
@@ -642,7 +520,6 @@ mod tests {
     #[test]
     fn tx_hashes_line_up() {
         let metadata = metadata();
-        let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
         let tx = crate::dynamic::tx(
             "Test",
@@ -659,13 +536,13 @@ mod tests {
             .expect("Valid dynamic parameters are provided");
 
         // Extrinsic details ready to decode.
-        let extrinsic = ExtrinsicDetails::<SubstrateConfig>::decode_from(
-            1,
-            tx_encoded.encoded(),
+        let extrinsics = Extrinsics::<SubstrateConfig>::decode_from(
+            vec![tx_encoded.encoded().to_owned()],
             metadata,
-            ids,
         )
         .expect("Valid extrinsic");
+
+        let extrinsic = extrinsics.iter().next().unwrap();
 
         // Both of these types should produce the same bytes.
         assert_eq!(tx_encoded.encoded(), extrinsic.bytes(), "bytes should eq");
@@ -676,7 +553,6 @@ mod tests {
     #[test]
     fn statically_decode_extrinsic() {
         let metadata = metadata();
-        let ids = ExtrinsicPartTypeIds::new(&metadata).unwrap();
 
         let tx = crate::dynamic::tx(
             "Test",
@@ -691,18 +567,18 @@ mod tests {
             .expect("Valid dynamic parameters are provided");
 
         // Note: `create_unsigned` produces the extrinsic bytes by prefixing the extrinsic length.
-        // The length is handled by deserializing `ChainBlockExtrinsic`, therefore the first byte is not needed.
-        let extrinsic = ExtrinsicDetails::<SubstrateConfig>::decode_from(
-            1,
-            tx_encoded.encoded(),
+        // The length is handled deserializing `ChainBlockExtrinsic`, therefore the first byte is not needed.
+        let extrinsics = Extrinsics::<SubstrateConfig>::decode_from(
+            vec![tx_encoded.encoded().to_owned()],
             metadata,
-            ids,
         )
         .expect("Valid extrinsic");
 
+        let extrinsic = extrinsics.iter().next().unwrap();
+
         assert!(!extrinsic.is_signed());
 
-        assert_eq!(extrinsic.index(), 1);
+        assert_eq!(extrinsic.index(), 0);
 
         assert_eq!(extrinsic.pallet_index(), 0);
         assert_eq!(

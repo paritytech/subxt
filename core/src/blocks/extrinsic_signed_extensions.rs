@@ -8,6 +8,7 @@ use crate::config::signed_extensions::{
 use crate::config::SignedExtension;
 use crate::dynamic::Value;
 use crate::{config::Config, error::Error, Metadata};
+use frame_decode::extrinsics::ExtrinsicExtensions;
 use scale_decode::DecodeAsType;
 
 /// The signed extensions of an extrinsic.
@@ -15,58 +16,32 @@ use scale_decode::DecodeAsType;
 pub struct ExtrinsicSignedExtensions<'a, T: Config> {
     bytes: &'a [u8],
     metadata: &'a Metadata,
+    decoded_info: &'a ExtrinsicExtensions<'static, u32>,
     _marker: core::marker::PhantomData<T>,
 }
 
 impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
-    pub(crate) fn new(bytes: &'a [u8], metadata: &'a Metadata) -> Self {
+    pub(crate) fn new(
+        bytes: &'a [u8],
+        metadata: &'a Metadata,
+        decoded_info: &'a ExtrinsicExtensions<'static, u32>,
+    ) -> Self {
         Self {
             bytes,
             metadata,
+            decoded_info,
             _marker: core::marker::PhantomData,
         }
     }
 
     /// Returns an iterator over each of the signed extension details of the extrinsic.
-    /// If the decoding of any signed extension fails, an error item is yielded and the iterator stops.
-    pub fn iter(&self) -> impl Iterator<Item = Result<ExtrinsicSignedExtension<T>, Error>> {
-        let signed_extension_types = self.metadata.extrinsic().signed_extensions();
-        let num_signed_extensions = signed_extension_types.len();
-        let bytes = self.bytes;
-        let mut index = 0;
-        let mut byte_start_idx = 0;
-        let metadata = &self.metadata;
-
-        core::iter::from_fn(move || {
-            if index == num_signed_extensions {
-                return None;
-            }
-
-            let extension = &signed_extension_types[index];
-            let ty_id = extension.extra_ty();
-            let cursor = &mut &bytes[byte_start_idx..];
-            if let Err(err) = scale_decode::visitor::decode_with_visitor(
-                cursor,
-                ty_id,
-                metadata.types(),
-                scale_decode::visitor::IgnoreVisitor::new(),
-            )
-            .map_err(|e| Error::Decode(e.into()))
-            {
-                index = num_signed_extensions; // (such that None is returned in next iteration)
-                return Some(Err(err));
-            }
-            let byte_end_idx = bytes.len() - cursor.len();
-            let bytes = &bytes[byte_start_idx..byte_end_idx];
-            byte_start_idx = byte_end_idx;
-            index += 1;
-            Some(Ok(ExtrinsicSignedExtension {
-                bytes,
-                ty_id,
-                identifier: extension.identifier(),
-                metadata,
-                _marker: core::marker::PhantomData,
-            }))
+    pub fn iter(&self) -> impl Iterator<Item = ExtrinsicSignedExtension<T>> {
+        self.decoded_info.iter().map(|s| ExtrinsicSignedExtension {
+            bytes: &self.bytes[s.range()],
+            ty_id: *s.ty(),
+            identifier: s.name(),
+            metadata: self.metadata,
+            _marker: core::marker::PhantomData,
         })
     }
 
@@ -75,9 +50,6 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     /// If the Signed Extension is found but decoding failed `Err(_)` is returned.
     pub fn find<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
         for ext in self.iter() {
-            // If we encounter an error while iterating, we won't get any more results
-            // back, so just return that error as we won't find the signed ext anyway.
-            let ext = ext?;
             match ext.as_signed_extension::<S>() {
                 // We found a match; return it:
                 Ok(Some(e)) => return Ok(Some(e)),

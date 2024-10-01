@@ -19,6 +19,7 @@ std = ["scale-info/std", "frame-metadata/std"]
 
 [dependencies]
 scale-info = { workspace = true, default-features = false }
+frame-decode = { workspace = true }
 frame-metadata = { workspace = true, default-features = false, features = ["current", "decode"] }
 codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
 sp-crypto-hashing = { workspace = true }
