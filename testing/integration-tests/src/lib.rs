@@ -2,9 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-#[cfg(all(feature = "unstable-light-client", feature = "unstable-backend-client"))]
+#[cfg(all(feature = "unstable-light-client", feature = "chainhead-backend"))]
 compile_error!(
-    "The features 'unstable-light-client' and 'unstable-backend-client' cannot be used together"
+    "The features 'unstable-light-client' and 'chainhead-backend' cannot be used together"
 );
 
 #[cfg(test)]

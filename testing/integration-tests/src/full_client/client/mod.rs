@@ -77,8 +77,8 @@ async fn storage_iter() {
 async fn storage_child_values_same_across_backends() {
     let ctx = test_context().await;
 
-    let unstable_client = ctx.unstable_client().await;
-    let legacy_client = ctx.legacy_client().await;
+    let chainhead_client = ctx.chainhead_backend().await;
+    let legacy_client = ctx.legacy_backend().await;
 
     let addr = node_runtime::storage().system().account_iter();
     let block_ref = legacy_client
@@ -88,7 +88,7 @@ async fn storage_child_values_same_across_backends() {
         .unwrap()
         .reference();
 
-    let a: Vec<_> = unstable_client
+    let a: Vec<_> = chainhead_client
         .storage()
         .at(block_ref.clone())
         .iter(addr.clone())
@@ -215,9 +215,9 @@ async fn external_signing() {
 }
 
 #[cfg(fullclient)]
-// TODO: Investigate and fix this test failure when using the UnstableBackend.
+// TODO: Investigate and fix this test failure when using the ChainHeadBackend.
 // (https://github.com/paritytech/subxt/issues/1308)
-#[cfg(not(feature = "unstable-backend-client"))]
+#[cfg(legacy_backend)]
 #[subxt_test]
 async fn submit_large_extrinsic() {
     let ctx = test_context().await;
@@ -415,8 +415,8 @@ async fn partial_fee_estimate_correct() {
 #[subxt_test]
 async fn legacy_and_unstable_block_subscription_reconnect() {
     let ctx = test_context_reconnecting_rpc_client().await;
-    let api = ctx.unstable_client().await;
-    let unstable_client_blocks = move |num: usize| {
+    let api = ctx.chainhead_backend().await;
+    let chainhead_client_blocks = move |num: usize| {
         let api = api.clone();
         async move {
             let mut missed_blocks = false;
@@ -445,17 +445,17 @@ async fn legacy_and_unstable_block_subscription_reconnect() {
         }
     };
 
-    let (blocks, _) = unstable_client_blocks(3).await;
+    let (blocks, _) = chainhead_client_blocks(3).await;
     let blocks: HashSet<String> = HashSet::from_iter(blocks.into_iter());
 
     assert!(blocks.len() == 3);
 
     let ctx = ctx.restart().await;
 
-    // Make  client aware that connection was dropped and force them to reconnect
-    let _ = ctx.unstable_client().await.backend().genesis_hash().await;
+    // Make client aware that connection was dropped and force them to reconnect
+    let _ = ctx.chainhead_backend().await.backend().genesis_hash().await;
 
-    let (unstable_blocks, blocks_missed) = unstable_client_blocks(6).await;
+    let (unstable_blocks, blocks_missed) = chainhead_client_blocks(6).await;
 
     if !blocks_missed {
         let unstable_blocks: HashSet<String> = HashSet::from_iter(unstable_blocks.into_iter());

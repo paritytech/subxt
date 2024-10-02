@@ -886,13 +886,13 @@ mod test {
 
         fn build_backend(
             rpc_client: impl RpcClientT,
-        ) -> (UnstableBackend<Conf>, UnstableBackendDriver<Conf>) {
-            let (backend, driver): (UnstableBackend<Conf>, _) =
-                UnstableBackend::builder().build(rpc_client);
+        ) -> (ChainHeadBackend<Conf>, ChainHeadBackendDriver<Conf>) {
+            let (backend, driver): (ChainHeadBackend<Conf>, _) =
+                ChainHeadBackend::builder().build(rpc_client);
             (backend, driver)
         }
 
-        fn build_backend_spawn_background(rpc_client: impl RpcClientT) -> UnstableBackend<Conf> {
+        fn build_backend_spawn_background(rpc_client: impl RpcClientT) -> ChainHeadBackend<Conf> {
             let (backend, mut driver) = build_backend(rpc_client);
             tokio::spawn(async move {
                 while let Some(val) = driver.next().await {
@@ -1403,7 +1403,7 @@ mod test {
                 .add_mock_data(mock_data)
                 .add_mock_data(response_data)
                 .build();
-            let (backend, mut driver): (UnstableBackend<Conf>, _) = build_backend(rpc_client);
+            let (backend, mut driver): (ChainHeadBackend<Conf>, _) = build_backend(rpc_client);
 
             let _ = driver.next().await.unwrap();
             let _ = driver.next().await.unwrap();

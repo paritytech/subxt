@@ -41,8 +41,8 @@ pub struct TestNodeProcess<R: Config> {
     proc: Option<SubstrateNode>,
 
     // Lazily construct these when asked for.
-    unstable_client: RefCell<Option<OnlineClient<R>>>,
-    legacy_client: RefCell<Option<OnlineClient<R>>>,
+    chainhead_backend: RefCell<Option<OnlineClient<R>>>,
+    legacy_backend: RefCell<Option<OnlineClient<R>>>,
 
     rpc_client: rpc::RpcClient,
     client: OnlineClient<R>,
@@ -78,38 +78,38 @@ where
     }
 
     /// Hand back an RPC client connected to the test node which exposes the unstable RPC methods.
-    pub async fn unstable_rpc_methods(&self) -> chain_head::UnstableRpcMethods<R> {
+    pub async fn chainhead_rpc_methods(&self) -> chain_head::ChainHeadRpcMethods<R> {
         let rpc_client = self.rpc_client.clone();
-        chain_head::UnstableRpcMethods::new(rpc_client)
+        chain_head::ChainHeadRpcMethods::new(rpc_client)
     }
 
-    /// Always return a client using the unstable backend.
+    /// Always return a client using the chainhead backend.
     /// Only use for comparing backends; use [`TestNodeProcess::client()`] normally,
     /// which enables us to run each test against both backends.
-    pub async fn unstable_client(&self) -> OnlineClient<R> {
-        if self.unstable_client.borrow().is_none() {
-            let c = build_unstable_client(self.rpc_client.clone())
+    pub async fn chainhead_backend(&self) -> OnlineClient<R> {
+        if self.chainhead_backend.borrow().is_none() {
+            let c = build_chainhead_backend(self.rpc_client.clone())
                 .await
                 .unwrap();
-            self.unstable_client.replace(Some(c));
+            self.chainhead_backend.replace(Some(c));
         }
-        self.unstable_client.borrow().as_ref().unwrap().clone()
+        self.chainhead_backend.borrow().as_ref().unwrap().clone()
     }
 
     /// Always return a client using the legacy backend.
     /// Only use for comparing backends; use [`TestNodeProcess::client()`] normally,
     /// which enables us to run each test against both backends.
-    pub async fn legacy_client(&self) -> OnlineClient<R> {
-        if self.legacy_client.borrow().is_none() {
-            let c = build_legacy_client(self.rpc_client.clone()).await.unwrap();
-            self.legacy_client.replace(Some(c));
+    pub async fn legacy_backend(&self) -> OnlineClient<R> {
+        if self.legacy_backend.borrow().is_none() {
+            let c = build_legacy_backend(self.rpc_client.clone()).await.unwrap();
+            self.legacy_backend.replace(Some(c));
         }
-        self.legacy_client.borrow().as_ref().unwrap().clone()
+        self.legacy_backend.borrow().as_ref().unwrap().clone()
     }
 
     /// Returns the subxt client connected to the running node. This client
-    /// will use the legacy backend by default or the unstable backend if the
-    /// "unstable-backend-client" feature is enabled, so that we can run each
+    /// will use the legacy backend by default or the chainhead backend if the
+    /// "chainhead-backend" feature is enabled, so that we can run each
     /// test against both.
     pub fn client(&self) -> OnlineClient<R> {
         self.client.clone()
@@ -187,38 +187,38 @@ impl TestNodeProcessBuilder {
         let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
         let rpc_client = match self.rpc_client {
             RpcClientKind::Legacy => build_rpc_client(&ws_url).await,
-            RpcClientKind::UnstableReconnecting => build_unstable_rpc_client(&ws_url).await,
+            RpcClientKind::UnstableReconnecting => build_reconnecting_rpc_client(&ws_url).await,
         }
         .map_err(|e| format!("Failed to connect to node at {ws_url}: {e}"))?;
 
         // Cache whatever client we build, and None for the other.
         #[allow(unused_assignments, unused_mut)]
-        let mut unstable_client = None;
+        let mut chainhead_backend = None;
         #[allow(unused_assignments, unused_mut)]
-        let mut legacy_client = None;
+        let mut legacy_backend = None;
 
         #[cfg(lightclient)]
         let client = build_light_client(&proc).await?;
 
-        #[cfg(feature = "unstable-backend-client")]
+        #[cfg(chainhead_backend)]
         let client = {
-            let client = build_unstable_client(rpc_client.clone()).await?;
-            unstable_client = Some(client.clone());
+            let client = build_chainhead_backend(rpc_client.clone()).await?;
+            chainhead_backend = Some(client.clone());
             client
         };
 
-        #[cfg(all(not(lightclient), not(feature = "unstable-backend-client")))]
+        #[cfg(legacy_backend)]
         let client = {
-            let client = build_legacy_client(rpc_client.clone()).await?;
-            legacy_client = Some(client.clone());
+            let client = build_legacy_backend(rpc_client.clone()).await?;
+            legacy_backend = Some(client.clone());
             client
         };
 
         Ok(TestNodeProcess {
             proc,
             client,
-            legacy_client: RefCell::new(legacy_client),
-            unstable_client: RefCell::new(unstable_client),
+            legacy_backend: RefCell::new(legacy_backend),
+            chainhead_backend: RefCell::new(chainhead_backend),
             rpc_client,
         })
     }
@@ -232,7 +232,7 @@ async fn build_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
     Ok(rpc_client)
 }
 
-async fn build_unstable_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
+async fn build_reconnecting_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
     let client = RpcClientBuilder::new()
         .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10)))
         .build(ws_url.to_string())
@@ -242,7 +242,7 @@ async fn build_unstable_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, Strin
     Ok(rpc::RpcClient::new(client))
 }
 
-async fn build_legacy_client<T: Config>(
+async fn build_legacy_backend<T: Config>(
     rpc_client: rpc::RpcClient,
 ) -> Result<OnlineClient<T>, String> {
     let backend = legacy::LegacyBackend::builder().build(rpc_client);
@@ -253,23 +253,10 @@ async fn build_legacy_client<T: Config>(
     Ok(client)
 }
 
-async fn build_unstable_client<T: Config>(
+async fn build_chainhead_backend<T: Config>(
     rpc_client: rpc::RpcClient,
 ) -> Result<OnlineClient<T>, String> {
-    let (backend, mut driver) = chain_head::UnstableBackend::builder().build(rpc_client);
-
-    // The unstable backend needs driving:
-    tokio::spawn(async move {
-        use futures::StreamExt;
-        while let Some(val) = driver.next().await {
-            if let Err(e) = val {
-                // This is a test; bail if something does wrong and try to
-                // ensure that the message makes it to some logs.
-                eprintln!("Error driving unstable backend in tests (will panic): {e}");
-                panic!("Error driving unstable backend in tests: {e}");
-            }
-        }
-    });
+    let backend = chain_head::ChainHeadBackend::builder().build_with_background_driver(rpc_client);
 
     let client = OnlineClient::from_backend(Arc::new(backend))
         .await
@@ -323,5 +310,5 @@ async fn build_light_client<T: Config>(
         .map_err(|e| format!("Light client: cannot add relay chain: {e}"))?;
 
     // Instantiate subxt client from this.
-    build_unstable_client(rpc.into()).await
+    build_chainhead_backend(rpc.into()).await
 }

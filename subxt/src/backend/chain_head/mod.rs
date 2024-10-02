@@ -40,7 +40,7 @@ use storage_items::StorageItems;
 // Expose the RPC methods.
 pub use rpc_methods::ChainHeadRpcMethods;
 
-/// Configure and build an [`UnstableBackend`].
+/// Configure and build an [`ChainHeadBackend`].
 pub struct ChainHeadBackendBuilder<T> {
     max_block_life: usize,
     _marker: std::marker::PhantomData<T>,
@@ -53,7 +53,7 @@ impl<T: Config> Default for ChainHeadBackendBuilder<T> {
 }
 
 impl<T: Config> ChainHeadBackendBuilder<T> {
-    /// Create a new [`UnstableBackendBuilder`].
+    /// Create a new [`ChainHeadBackendBuilder`].
     pub fn new() -> Self {
         Self {
             max_block_life: usize::MAX,
@@ -80,7 +80,7 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
     /// a specific runtime.
     ///
     /// If you just want to run the driver in the background until completion in on the default runtime,
-    /// use [`ChainHeadBackend::build_with_background_driver`] instead.
+    /// use [`ChainHeadBackendBuilder::build_with_background_driver`] instead.
     pub fn build(
         self,
         client: impl Into<RpcClient>,
@@ -142,7 +142,7 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
     }
 }
 
-/// Driver for the [`UnstableBackend`]. This must be polled in order for the
+/// Driver for the [`ChainHeadBackend`]. This must be polled in order for the
 /// backend to make progress.
 #[derive(Debug)]
 pub struct ChainHeadBackendDriver<T: Config> {
@@ -169,7 +169,7 @@ pub struct ChainHeadBackend<T: Config> {
 }
 
 impl<T: Config> ChainHeadBackend<T> {
-    /// Configure and construct an [`UnstableBackend`] and the associated [`UnstableBackendDriver`].
+    /// Configure and construct an [`ChainHeadBackend`] and the associated [`ChainHeadBackendDriver`].
     pub fn builder() -> ChainHeadBackendBuilder<T> {
         ChainHeadBackendBuilder::new()
     }

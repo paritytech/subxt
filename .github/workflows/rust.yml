@@ -301,7 +301,7 @@ jobs:
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   unstable_backend_tests:
-    name: "Test (Unstable Backend)"
+    name: "Test chainhead backend"
     runs-on: ubuntu-latest-16-cores
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 30
@@ -329,7 +329,7 @@ jobs:
         uses: actions-rs/cargo@v1.0.3
         with:
           command: nextest
-          args: run --workspace --features unstable-backend-client
+          args: run --workspace --features chainhead-backend
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
