@@ -22,9 +22,13 @@ extern crate alloc;
 mod from_into;
 mod utils;
 
+use alloc::borrow::Cow;
 use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
+use frame_decode::extrinsics::{
+    ExtrinsicInfo, ExtrinsicInfoArg, ExtrinsicInfoError, ExtrinsicSignatureInfo,
+};
 use hashbrown::HashMap;
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
 use utils::variant_index::VariantIndex;
@@ -59,6 +63,63 @@ pub struct Metadata {
     apis: OrderedMap<ArcStr, RuntimeApiMetadataInner>,
     /// Allows users to add custom types to the metadata. A map that associates a string key to a `CustomValueMetadata`.
     custom: frame_metadata::v15::CustomMetadata<PortableForm>,
+}
+
+// Since we've abstracted away from frame-metadatas, we impl this on our custom Metadata
+// so that it can be used by `frame-decode` to obtain the relevant extrinsic info.
+impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn get_extrinsic_info(
+        &self,
+        pallet_index: u8,
+        call_index: u8,
+    ) -> Result<ExtrinsicInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
+        let pallet = self.pallet_by_index(pallet_index).ok_or({
+            ExtrinsicInfoError::PalletNotFound {
+                index: pallet_index,
+            }
+        })?;
+
+        let call = pallet.call_variant_by_index(call_index).ok_or_else(|| {
+            ExtrinsicInfoError::CallNotFound {
+                index: call_index,
+                pallet_index,
+                pallet_name: Cow::Borrowed(pallet.name()),
+            }
+        })?;
+
+        Ok(ExtrinsicInfo {
+            pallet_name: Cow::Borrowed(pallet.name()),
+            call_name: Cow::Borrowed(&call.name),
+            args: call
+                .fields
+                .iter()
+                .map(|f| ExtrinsicInfoArg {
+                    name: Cow::Borrowed(f.name.as_deref().unwrap_or("")),
+                    id: f.ty.id,
+                })
+                .collect(),
+        })
+    }
+
+    fn get_signature_info(
+        &self,
+    ) -> Result<ExtrinsicSignatureInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
+        Ok(ExtrinsicSignatureInfo {
+            address_id: self.extrinsic().address_ty(),
+            signature_id: self.extrinsic().signature_ty(),
+            transaction_extension_ids: self
+                .extrinsic()
+                .signed_extensions()
+                .iter()
+                .map(|f| ExtrinsicInfoArg {
+                    name: Cow::Borrowed(f.identifier()),
+                    id: f.extra_ty(),
+                })
+                .collect(),
+        })
+    }
 }
 
 impl Metadata {

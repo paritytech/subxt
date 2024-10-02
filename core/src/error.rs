@@ -56,29 +56,32 @@ impl_from!(StorageAddressError => Error::StorageAddress);
 impl_from!(codec::Error => Error::Codec);
 
 /// Block error
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Debug)]
 pub enum BlockError {
-    /// Extrinsic type ID cannot be resolved with the provided metadata.
-    MissingType,
-    /// Unsupported signature.
-    /// The extrinsic has an unsupported version.
-    UnsupportedVersion(u8),
-    /// Decoding error.
-    DecodingError(codec::Error),
+    /// Leftover bytes found after decoding the extrinsic.
+    LeftoverBytes(usize),
+    /// Something went wrong decoding the extrinsic.
+    ExtrinsicDecodeError(ExtrinsicDecodeError),
 }
-
 impl Display for BlockError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            BlockError::MissingType => write!(f, "Extrinsic type ID cannot be resolved with the provided metadata. Make sure this is a valid metadata"),
-            BlockError::UnsupportedVersion(_) => write!(f, "Unsupported extrinsic version, only version 4 is supported currently"),
-            BlockError::DecodingError(e) => write!(f, "Cannot decode extrinsic: {e}"),
+            BlockError::LeftoverBytes(n) => {
+                write!(
+                    f,
+                    "After decoding, {n} bytes were left, suggesting that decoding may have failed"
+                )
+            }
+            BlockError::ExtrinsicDecodeError(e) => {
+                write!(f, "{e}")
+            }
         }
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for BlockError {}
+/// An alias for [`frame_decode::extrinsics::ExtrinsicDecodeError`].
+///
+pub type ExtrinsicDecodeError = frame_decode::extrinsics::ExtrinsicDecodeError;
 
 /// Something went wrong trying to access details in the metadata.
 #[derive(Clone, Debug, PartialEq)]
