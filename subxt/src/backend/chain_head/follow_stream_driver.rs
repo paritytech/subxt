@@ -432,10 +432,6 @@ where
                     self.sub_id = Some(sub_id);
                     continue;
                 }
-                FollowStreamMsg::Event(FollowEvent::Stop) => {
-                    self.is_done = true;
-                    return Poll::Ready(None);
-                }
                 FollowStreamMsg::Event(FollowEvent::Finalized(finalized)) => {
                     self.last_seen_block = finalized.finalized_block_hashes.last().cloned();
 
