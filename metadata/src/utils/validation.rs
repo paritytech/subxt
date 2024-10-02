@@ -122,15 +122,10 @@ fn get_type_def_variant_hash(
     let variant_field_bytes = variant.variants.iter().fold([0u8; HASH_LEN], |bytes, var| {
         // With EncodeAsType and DecodeAsType we no longer care which order the variants are in,
         // as long as all of the names+types are there. XOR to not care about ordering.
-        let should_hash = true;
-        if should_hash {
-            xor(
-                bytes,
-                get_variant_hash(registry, var, cache, outer_enum_hashes),
-            )
-        } else {
-            bytes
-        }
+        xor(
+            bytes,
+            get_variant_hash(registry, var, cache, outer_enum_hashes),
+        )
     });
     concat_and_hash2(&variant_id_bytes, &variant_field_bytes)
 }

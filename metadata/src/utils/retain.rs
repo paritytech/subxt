@@ -4,13 +4,11 @@
 
 //! Utility functions to generate a subset of the metadata.
 
-use alloc::collections::BTreeSet;
-
 use crate::{
     ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
     StorageEntryType,
 };
-use alloc::collections::{BTreeMap, VecDeque};
+use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use alloc::vec::Vec;
 use scale_info::{
     PortableType, TypeDef, TypeDefArray, TypeDefBitSequence, TypeDefCompact, TypeDefComposite,
@@ -91,7 +89,7 @@ impl TypeSet {
         }
     }
 
-    fn collect_extrinsic_types(&mut self, extrinsic: &ExtrinsicMetadata) {
+    fn collect_extrinsic_types(&mut self, metadata: &Metadata, extrinsic: &ExtrinsicMetadata) {
         let mut ids = Vec::from([
             extrinsic.address_ty,
             extrinsic.call_ty,
@@ -104,17 +102,26 @@ impl TypeSet {
             ids.push(signed.additional_ty);
         }
         for id in ids {
-            self.seen_ids.insert(id);
+            if self.seen_ids.insert(id) {
+                let typ = resolve_typ(metadata, id);
+                self.insert_and_collect_types(metadata, typ);
+            }
         }
     }
 
     /// Collect all type IDs needed to represent the runtime APIs.
-    fn collect_runtime_api_types(&mut self, api: &RuntimeApiMetadataInner) {
+    fn collect_runtime_api_types(&mut self, metadata: &Metadata, api: &RuntimeApiMetadataInner) {
         for method in api.methods.values() {
             for input in &method.inputs {
-                self.seen_ids.insert(input.ty);
+                if self.seen_ids.insert(input.ty) {
+                    let ty = resolve_typ(metadata, input.ty);
+                    self.insert_and_collect_types(metadata, ty);
+                }
             }
-            self.seen_ids.insert(method.output_ty);
+            if self.seen_ids.insert(method.output_ty) {
+                let ty = resolve_typ(metadata, method.output_ty);
+                self.insert_and_collect_types(metadata, ty);
+            }
         }
     }
 
@@ -392,7 +399,7 @@ pub fn retain_metadata<F, G>(
     for api in metadata.apis.values() {
         let should_retain = runtime_apis_filter(&api.name);
         if should_retain {
-            type_set.collect_runtime_api_types(api);
+            type_set.collect_runtime_api_types(&metadata, api);
         }
     }
 
@@ -406,7 +413,7 @@ pub fn retain_metadata<F, G>(
         .expect("Metadata must contain sp_runtime::DispatchError");
     type_set.seen_ids.insert(dispatch_error_ty.id);
     type_set.seen_ids.insert(metadata.runtime_ty);
-    type_set.collect_extrinsic_types(&metadata.extrinsic);
+    type_set.collect_extrinsic_types(&metadata, &metadata.extrinsic);
 
     // Collect the outer enums type IDs.
     for typ in [
