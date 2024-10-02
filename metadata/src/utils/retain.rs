@@ -399,7 +399,7 @@ pub fn retain_metadata<F, G>(
     for api in metadata.apis.values() {
         let should_retain = runtime_apis_filter(&api.name);
         if should_retain {
-            type_set.collect_runtime_api_types(&metadata, api);
+            type_set.collect_runtime_api_types(metadata, api);
         }
     }
 
@@ -413,7 +413,7 @@ pub fn retain_metadata<F, G>(
         .expect("Metadata must contain sp_runtime::DispatchError");
     type_set.seen_ids.insert(dispatch_error_ty.id);
     type_set.seen_ids.insert(metadata.runtime_ty);
-    type_set.collect_extrinsic_types(&metadata, &metadata.extrinsic);
+    type_set.collect_extrinsic_types(metadata, &metadata.extrinsic);
 
     // Collect the outer enums type IDs.
     for typ in [
