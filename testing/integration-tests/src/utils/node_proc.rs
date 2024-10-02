@@ -207,7 +207,7 @@ impl TestNodeProcessBuilder {
             client
         };
 
-        #[cfg(legacy_backend)]
+        #[cfg(all(not(lightclient), legacy_backend))]
         let client = {
             let client = build_legacy_backend(rpc_client.clone()).await?;
             legacy_backend = Some(client.clone());
