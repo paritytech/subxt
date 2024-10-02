@@ -1749,6 +1749,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "frame-decode"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed90459016b06a2855321469cb01fbc74208c80c06b085d1ed13162cf8bd7e1b"
+dependencies = [
+ "frame-metadata 16.0.0",
+ "hex",
+ "parity-scale-codec",
+ "scale-decode",
+ "scale-info",
+ "scale-type-resolver",
+ "sp-crypto-hashing",
+]
+
+[[package]]
 name = "frame-metadata"
 version = "15.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5313,6 +5328,7 @@ dependencies = [
  "bitvec",
  "blake2",
  "derive-where",
+ "frame-decode",
  "frame-metadata 16.0.0",
  "hashbrown 0.14.5",
  "hex",
@@ -5387,6 +5403,7 @@ dependencies = [
  "assert_matches",
  "bitvec",
  "criterion",
+ "frame-decode",
  "frame-metadata 16.0.0",
  "hashbrown 0.14.5",
  "parity-scale-codec",

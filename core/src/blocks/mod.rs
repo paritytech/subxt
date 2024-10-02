@@ -45,14 +45,12 @@
 //!
 //! // We can iterate over them and decode various details out of them.
 //! for ext in exts.iter() {
-//!     let ext = ext.unwrap();
 //!     println!("Pallet: {}", ext.pallet_name().unwrap());
 //!     println!("Call:   {}", ext.variant_name().unwrap());
 //! }
 //!
 //! # let ext_details: Vec<_> = exts.iter()
 //! #     .map(|ext| {
-//! #         let ext = ext.unwrap();
 //! #         let pallet = ext.pallet_name().unwrap().to_string();
 //! #         let call = ext.variant_name().unwrap().to_string();
 //! #         (pallet, call)
@@ -71,14 +69,13 @@ mod extrinsics;
 mod static_extrinsic;
 
 use crate::config::Config;
-use crate::error::BlockError;
+use crate::error::Error;
 use crate::Metadata;
 use alloc::vec::Vec;
 
+pub use crate::error::BlockError;
 pub use extrinsic_signed_extensions::{ExtrinsicSignedExtension, ExtrinsicSignedExtensions};
-pub use extrinsics::{
-    ExtrinsicDetails, ExtrinsicMetadataDetails, Extrinsics, FoundExtrinsic, SignedExtrinsicDetails,
-};
+pub use extrinsics::{ExtrinsicDetails, ExtrinsicMetadataDetails, Extrinsics, FoundExtrinsic};
 pub use static_extrinsic::StaticExtrinsic;
 
 /// Instantiate a new [`Extrinsics`] object, given a vector containing each extrinsic hash (in the
@@ -88,6 +85,6 @@ pub use static_extrinsic::StaticExtrinsic;
 pub fn decode_from<T: Config>(
     extrinsics: Vec<Vec<u8>>,
     metadata: Metadata,
-) -> Result<Extrinsics<T>, BlockError> {
+) -> Result<Extrinsics<T>, Error> {
     Extrinsics::decode_from(extrinsics, metadata)
 }
