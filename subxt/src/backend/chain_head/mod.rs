@@ -111,9 +111,10 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
     /// An API to build the backend and driver which will run in the background until completion
     /// on the default runtime.
     ///
-    /// - On non-wasm targets, this will spawn a tokio task to poll the driver.
-    /// - On wasm targets, this will spawn a wasm-bindgen task to poll the driver.
+    /// - On non-wasm targets, this will spawn a tokio task to run driver in the background until completion.
+    /// - On wasm targets, this will spawn a wasm-bindgen task to run driver in the background until completion.
     #[cfg(feature = "runtime")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "runtime")))]
     pub fn build_with_background_driver(self, client: impl Into<RpcClient>) -> ChainHeadBackend<T> {
         fn spawn<F: std::future::Future + Send + 'static>(future: F) {
             #[cfg(not(target_family = "wasm"))]
