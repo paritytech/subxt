@@ -111,7 +111,7 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
     /// An API to build the backend and driver which will run in the background until completion
     /// on the default runtime.
     ///
-    /// - On non-wasm targets, this will spawn the driver on tokio.
+    /// - On non-wasm targets, this will spawn the driver on `tokio`.
     /// - On wasm targets, this will spawn the driver on `wasm-bindgen-futures`.
     #[cfg(feature = "runtime")]
     #[cfg_attr(docsrs, doc(cfg(feature = "runtime")))]
