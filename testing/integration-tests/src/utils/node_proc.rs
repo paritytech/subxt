@@ -16,7 +16,7 @@ use subxt::{
 // The URL that we'll connect to for our tests comes from SUBXT_TEXT_HOST env var,
 // defaulting to localhost if not provided. If the env var is set, we won't spawn
 // a binary. Note though that some tests expect and modify a fresh state, and so will
-// fail. Fo a similar reason wyou should also use `--test-threads 1` when running tests
+// fail. For a similar reason you should also use `--test-threads 1` when running tests
 // to reduce the number of conflicts between state altering tests.
 const URL_ENV_VAR: &str = "SUBXT_TEST_URL";
 fn is_url_provided() -> bool {
@@ -124,7 +124,7 @@ where
 /// Kind of rpc client to use in tests
 pub enum RpcClientKind {
     Legacy,
-    UnstableReconnecting,
+    Reconnecting,
 }
 
 /// Construct a test node process.
@@ -153,7 +153,7 @@ impl TestNodeProcessBuilder {
         }
     }
 
-    /// Set the testRunner to use a preferred RpcClient impl, ie Legacy or Unstable
+    /// Set the testRunner to use a preferred RpcClient impl, ie Legacy or Reconnecting.
     pub fn with_rpc_client_kind(&mut self, rpc_client_kind: RpcClientKind) -> &mut Self {
         self.rpc_client = rpc_client_kind;
         self
@@ -187,7 +187,7 @@ impl TestNodeProcessBuilder {
         let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
         let rpc_client = match self.rpc_client {
             RpcClientKind::Legacy => build_rpc_client(&ws_url).await,
-            RpcClientKind::UnstableReconnecting => build_reconnecting_rpc_client(&ws_url).await,
+            RpcClientKind::Reconnecting => build_reconnecting_rpc_client(&ws_url).await,
         }
         .map_err(|e| format!("Failed to connect to node at {ws_url}: {e}"))?;
 

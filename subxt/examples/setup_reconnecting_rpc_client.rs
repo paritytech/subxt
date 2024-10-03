@@ -1,5 +1,5 @@
 //! Example to utilize the `reconnecting rpc client` in subxt
-//! which hidden behind behind `--feature unstable-reconnecting-rpc-client`
+//! which hidden behind behind `--feature reconnecting-rpc-client`
 //!
 //! To utilize full logs from the RPC client use:
 //! `RUST_LOG="jsonrpsee=trace,subxt-reconnecting-rpc-client=trace"`
