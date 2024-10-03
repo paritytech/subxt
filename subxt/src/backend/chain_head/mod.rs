@@ -38,22 +38,22 @@ use std::task::Poll;
 use storage_items::StorageItems;
 
 // Expose the RPC methods.
-pub use rpc_methods::UnstableRpcMethods;
+pub use rpc_methods::ChainHeadRpcMethods;
 
-/// Configure and build an [`UnstableBackend`].
-pub struct UnstableBackendBuilder<T> {
+/// Configure and build an [`ChainHeadBackend`].
+pub struct ChainHeadBackendBuilder<T> {
     max_block_life: usize,
     _marker: std::marker::PhantomData<T>,
 }
 
-impl<T: Config> Default for UnstableBackendBuilder<T> {
+impl<T: Config> Default for ChainHeadBackendBuilder<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T: Config> UnstableBackendBuilder<T> {
-    /// Create a new [`UnstableBackendBuilder`].
+impl<T: Config> ChainHeadBackendBuilder<T> {
+    /// Create a new [`ChainHeadBackendBuilder`].
     pub fn new() -> Self {
         Self {
             max_block_life: usize::MAX,
@@ -73,15 +73,20 @@ impl<T: Config> UnstableBackendBuilder<T> {
         self
     }
 
-    /// Given an [`RpcClient`] to use to make requests, this returns a tuple of an [`UnstableBackend`],
-    /// which implements the [`Backend`] trait, and an [`UnstableBackendDriver`] which must be polled in
-    /// order for the backend to make progress.
+    /// A low-level API to build the backend and driver which requires polling the driver for the backend
+    /// to make progress.
+    ///
+    /// This is useful if you want to manage the driver yourself, for example if you want to run it in on
+    /// a specific runtime.
+    ///
+    /// If you just want to run the driver in the background until completion in on the default runtime,
+    /// use [`ChainHeadBackendBuilder::build_with_background_driver`] instead.
     pub fn build(
         self,
         client: impl Into<RpcClient>,
-    ) -> (UnstableBackend<T>, UnstableBackendDriver<T>) {
+    ) -> (ChainHeadBackend<T>, ChainHeadBackendDriver<T>) {
         // Construct the underlying follow_stream layers:
-        let rpc_methods = UnstableRpcMethods::new(client.into());
+        let rpc_methods = ChainHeadRpcMethods::new(client.into());
         let follow_stream =
             follow_stream::FollowStream::<T::Hash>::from_methods(rpc_methods.clone());
         let follow_stream_unpin = follow_stream_unpin::FollowStreamUnpin::<T::Hash>::from_methods(
@@ -92,26 +97,61 @@ impl<T: Config> UnstableBackendBuilder<T> {
         let follow_stream_driver = FollowStreamDriver::new(follow_stream_unpin);
 
         // Wrap these into the backend and driver that we'll expose.
-        let backend = UnstableBackend {
+        let backend = ChainHeadBackend {
             methods: rpc_methods,
             follow_handle: follow_stream_driver.handle(),
         };
-        let driver = UnstableBackendDriver {
+        let driver = ChainHeadBackendDriver {
             driver: follow_stream_driver,
         };
 
         (backend, driver)
     }
+
+    /// An API to build the backend and driver which will run in the background until completion
+    /// on the default runtime.
+    ///
+    /// - On non-wasm targets, this will spawn the driver on `tokio`.
+    /// - On wasm targets, this will spawn the driver on `wasm-bindgen-futures`.
+    #[cfg(feature = "runtime")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "runtime")))]
+    pub fn build_with_background_driver(self, client: impl Into<RpcClient>) -> ChainHeadBackend<T> {
+        fn spawn<F: std::future::Future + Send + 'static>(future: F) {
+            #[cfg(not(target_family = "wasm"))]
+            tokio::spawn(async move {
+                future.await;
+            });
+            #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+            wasm_bindgen_futures::spawn_local(async move {
+                future.await;
+            });
+        }
+
+        let (backend, mut driver) = self.build(client);
+
+        spawn(async move {
+            while let Some(res) = driver.next().await {
+                if let Err(e) = res {
+                    if !e.is_disconnected_will_reconnect() {
+                        tracing::debug!(target: "subxt", "chainHead driver was closed: {e}");
+                        break;
+                    }
+                }
+            }
+        });
+
+        backend
+    }
 }
 
-/// Driver for the [`UnstableBackend`]. This must be polled in order for the
+/// Driver for the [`ChainHeadBackend`]. This must be polled in order for the
 /// backend to make progress.
 #[derive(Debug)]
-pub struct UnstableBackendDriver<T: Config> {
+pub struct ChainHeadBackendDriver<T: Config> {
     driver: FollowStreamDriver<T::Hash>,
 }
 
-impl<T: Config> Stream for UnstableBackendDriver<T> {
+impl<T: Config> Stream for ChainHeadBackendDriver<T> {
     type Item = <FollowStreamDriver<T::Hash> as Stream>::Item;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
@@ -121,19 +161,19 @@ impl<T: Config> Stream for UnstableBackendDriver<T> {
     }
 }
 
-/// The unstable backend.
+/// The chainHead backend.
 #[derive(Debug, Clone)]
-pub struct UnstableBackend<T: Config> {
+pub struct ChainHeadBackend<T: Config> {
     // RPC methods we'll want to call:
-    methods: UnstableRpcMethods<T>,
+    methods: ChainHeadRpcMethods<T>,
     // A handle to the chainHead_follow subscription:
     follow_handle: FollowStreamDriverHandle<T::Hash>,
 }
 
-impl<T: Config> UnstableBackend<T> {
-    /// Configure and construct an [`UnstableBackend`] and the associated [`UnstableBackendDriver`].
-    pub fn builder() -> UnstableBackendBuilder<T> {
-        UnstableBackendBuilder::new()
+impl<T: Config> ChainHeadBackend<T> {
+    /// Configure and construct an [`ChainHeadBackend`] and the associated [`ChainHeadBackendDriver`].
+    pub fn builder() -> ChainHeadBackendBuilder<T> {
+        ChainHeadBackendBuilder::new()
     }
 
     /// Stream block headers based on the provided filter fn
@@ -193,10 +233,10 @@ impl<Hash: BlockHash + 'static> From<follow_stream_unpin::BlockRef<Hash>> for Bl
     }
 }
 
-impl<T: Config> super::sealed::Sealed for UnstableBackend<T> {}
+impl<T: Config> super::sealed::Sealed for ChainHeadBackend<T> {}
 
 #[async_trait]
-impl<T: Config + Send + Sync + 'static> Backend<T> for UnstableBackend<T> {
+impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
     async fn storage_fetch_values(
         &self,
         keys: Vec<Vec<u8>>,

@@ -19,15 +19,15 @@ use std::task::Poll;
 /// some `T: Config` trait which determines some of the types that the RPC methods will
 /// take or hand back.
 #[derive_where(Clone, Debug)]
-pub struct UnstableRpcMethods<T> {
+pub struct ChainHeadRpcMethods<T> {
     client: RpcClient,
     _marker: std::marker::PhantomData<T>,
 }
 
-impl<T: Config> UnstableRpcMethods<T> {
+impl<T: Config> ChainHeadRpcMethods<T> {
     /// Instantiate the legacy RPC method interface.
     pub fn new(client: RpcClient) -> Self {
-        UnstableRpcMethods {
+        ChainHeadRpcMethods {
             client,
             _marker: std::marker::PhantomData,
         }
@@ -36,15 +36,15 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// Subscribe to `chainHead_v1_follow` to obtain all reported blocks by the chain.
     ///
     /// The subscription ID can be used to make queries for the
-    /// block's body ([`chainHead_v1_body`](UnstableRpcMethods::chainhead_v1_follow)),
-    /// block's header ([`chainHead_v1_header`](UnstableRpcMethods::chainhead_v1_header)),
-    /// block's storage ([`chainHead_v1_storage`](UnstableRpcMethods::chainhead_v1_storage)) and submitting
-    /// runtime API calls at this block ([`chainHead_v1_call`](UnstableRpcMethods::chainhead_v1_call)).
+    /// block's body ([`chainHead_v1_body`](ChainHeadRpcMethods::chainhead_v1_follow)),
+    /// block's header ([`chainHead_v1_header`](ChainHeadRpcMethods::chainhead_v1_header)),
+    /// block's storage ([`chainHead_v1_storage`](ChainHeadRpcMethods::chainhead_v1_storage)) and submitting
+    /// runtime API calls at this block ([`chainHead_v1_call`](ChainHeadRpcMethods::chainhead_v1_call)).
     ///
     /// # Note
     ///
     /// When the user is no longer interested in a block, the user is responsible
-    /// for calling the [`chainHead_v1_unpin`](UnstableRpcMethods::chainhead_v1_unpin) method.
+    /// for calling the [`chainHead_v1_unpin`](ChainHeadRpcMethods::chainhead_v1_unpin) method.
     /// Failure to do so will result in the subscription being stopped by generating the `Stop` event.
     pub async fn chainhead_v1_follow(
         &self,
@@ -106,7 +106,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainHead_v1_follow`](UnstableRpcMethods::chainhead_v1_follow).
+    /// [`chainHead_v1_follow`](ChainHeadRpcMethods::chainhead_v1_follow).
     pub async fn chainhead_v1_body(
         &self,
         subscription_id: &str,
@@ -125,7 +125,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainHead_v1_follow`](UnstableRpcMethods::chainhead_v1_follow).
+    /// [`chainHead_v1_follow`](ChainHeadRpcMethods::chainhead_v1_follow).
     pub async fn chainhead_v1_header(
         &self,
         subscription_id: &str,
@@ -151,7 +151,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainHead_v1_follow`](UnstableRpcMethods::chainhead_v1_follow).
+    /// [`chainHead_v1_follow`](ChainHeadRpcMethods::chainhead_v1_follow).
     pub async fn chainhead_v1_storage(
         &self,
         subscription_id: &str,
@@ -186,7 +186,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainHead_v1_follow`](UnstableRpcMethods::chainhead_v1_follow).
+    /// [`chainHead_v1_follow`](ChainHeadRpcMethods::chainhead_v1_follow).
     pub async fn chainhead_v1_call(
         &self,
         subscription_id: &str,
@@ -210,7 +210,7 @@ impl<T: Config> UnstableRpcMethods<T> {
     /// # Note
     ///
     /// The subscription ID is obtained from an open subscription created by
-    /// [`chainHead_v1_follow`](UnstableRpcMethods::chainhead_v1_follow).
+    /// [`chainHead_v1_follow`](ChainHeadRpcMethods::chainhead_v1_follow).
     pub async fn chainhead_v1_unpin(
         &self,
         subscription_id: &str,

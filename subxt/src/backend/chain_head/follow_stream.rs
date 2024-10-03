@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::rpc_methods::{FollowEvent, UnstableRpcMethods};
+use super::rpc_methods::{ChainHeadRpcMethods, FollowEvent};
 use crate::config::Config;
 use crate::error::Error;
 use futures::{FutureExt, Stream, StreamExt};
@@ -99,7 +99,7 @@ impl<Hash> FollowStream<Hash> {
     }
 
     /// Create a new [`FollowStream`] given the RPC methods.
-    pub fn from_methods<T: Config>(methods: UnstableRpcMethods<T>) -> FollowStream<T::Hash> {
+    pub fn from_methods<T: Config>(methods: ChainHeadRpcMethods<T>) -> FollowStream<T::Hash> {
         FollowStream {
             stream_getter: Box::new(move || {
                 let methods = methods.clone();
@@ -215,7 +215,7 @@ impl<Hash> Stream for FollowStream<Hash> {
 #[cfg(test)]
 pub(super) mod test_utils {
     use super::*;
-    use crate::backend::unstable::rpc_methods::{
+    use crate::backend::chain_head::rpc_methods::{
         BestBlockChanged, Finalized, Initialized, NewBlock,
     };
     use crate::config::substrate::H256;
