@@ -47,7 +47,7 @@ web = [
     "finito?/wasm-bindgen",
 ]
 
-# Feature flags for enabling default future executor runtimes.
+# Feature flag to enable the default future executor.
 # Technically it's a hack enable to both but simplifies the conditional compilation
 # and subxt is selecting executor based on the used platform.
 #
