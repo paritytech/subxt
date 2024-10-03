@@ -111,15 +111,16 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
     /// An API to build the backend and driver which will run in the background until completion
     /// on the default runtime.
     ///
-    /// On native this is spawned on the tokio runtime.
-    /// On web this is spawned on the wasm_bindgen.
+    /// - On non-wasm targets, this will spawn a tokio task to poll the driver.
+    /// - On wasm targets, this will spawn a wasm-bindgen task to poll the driver.
+    #[cfg(feature = "runtime")]
     pub fn build_with_background_driver(self, client: impl Into<RpcClient>) -> ChainHeadBackend<T> {
         fn spawn<F: std::future::Future + Send + 'static>(future: F) {
-            #[cfg(feature = "native")]
+            #[cfg(not(target_family = "wasm"))]
             tokio::spawn(async move {
                 future.await;
             });
-            #[cfg(feature = "web")]
+            #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
             wasm_bindgen_futures::spawn_local(async move {
                 future.await;
             });
