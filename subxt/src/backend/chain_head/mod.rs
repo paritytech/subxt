@@ -112,7 +112,7 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
     /// on the default runtime.
     ///
     /// - On non-wasm targets, this will spawn the driver on tokio.
-    /// - On wasm targets, this will spawn a wasm-bindgen task to run driver in the background until completion.
+    /// - On wasm targets, this will spawn the driver on `wasm-bindgen-futures`.
     #[cfg(feature = "runtime")]
     #[cfg_attr(docsrs, doc(cfg(feature = "runtime")))]
     pub fn build_with_background_driver(self, client: impl Into<RpcClient>) -> ChainHeadBackend<T> {
