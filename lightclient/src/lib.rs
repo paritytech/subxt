@@ -43,7 +43,7 @@ pub enum LightClientError {
 #[derive(Debug, thiserror::Error)]
 pub enum LightClientRpcError {
     /// Error response from the JSON-RPC server.
-    #[error("{0}")]
+    #[error(transparent)]
     JsonRpcError(JsonRpcError),
     /// Smoldot could not handle the RPC call.
     #[error("Smoldot could not handle the RPC call: {0}.")]

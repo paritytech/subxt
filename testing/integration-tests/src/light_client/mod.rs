@@ -31,8 +31,8 @@ use crate::utils::node_runtime;
 use codec::Compact;
 use futures::StreamExt;
 use std::sync::Arc;
+use subxt::backend::chain_head::ChainHeadBackend;
 use subxt::backend::rpc::RpcClient;
-use subxt::backend::unstable::UnstableBackend;
 use subxt::{client::OnlineClient, config::PolkadotConfig, lightclient::LightClient};
 use subxt_metadata::Metadata;
 
@@ -184,7 +184,7 @@ async fn run_test(backend: BackendType) -> Result<(), subxt::Error> {
 
     let api = match backend {
         BackendType::Unstable => {
-            let (backend, mut driver) = UnstableBackend::builder().build(RpcClient::new(rpc));
+            let (backend, mut driver) = ChainHeadBackend::builder().build(RpcClient::new(rpc));
             tokio::spawn(async move {
                 while let Some(val) = driver.next().await {
                     if let Err(e) = val {

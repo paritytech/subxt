@@ -34,20 +34,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build("ws://localhost:9944".to_string())
         .await?;
 
-    // If you want to use the unstable backend with the reconnecting RPC client, you can do so like this:
+    // If you want to use the chainhead backend with the reconnecting RPC client, you can do so like this:
     //
     // ```
-    // use subxt::backend::unstable::UnstableBackend;
+    // use subxt::backend::chain_head:ChainHeadBackend;
     // use subxt::OnlineClient;
     //
-    // let (backend, mut driver) = UnstableBackend::builder().build(RpcClient::new(rpc.clone()));
-    // tokio::spawn(async move {
-    //     while let Some(val) = driver.next().await {
-    //         if let Err(e) = val {
-    //             eprintln!("Error driving unstable backend: {e}; terminating client");
-    //        }
-    //    }
-    // });
+    // let backend = ChainHeadBackend::builder().build_with_background_task(RpcClient::new(rpc.clone()));
     // let api: OnlineClient<PolkadotConfig> = OnlineClient::from_backend(Arc::new(backend)).await?;
     // ```
 

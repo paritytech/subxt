@@ -5,7 +5,7 @@
 //! # RPC calls
 //!
 //! Subxt exposes low level interfaces that can be used to make RPC requests; [`crate::backend::legacy::rpc_methods`]
-//! and [`crate::backend::unstable::rpc_methods`].
+//! and [`crate::backend::chain_head::rpc_methods`].
 //!
 //! These interfaces cannot be accessed directly through an [`crate::OnlineClient`]; this is so that the high level
 //! Subxt APIs can target either the "legacy" or the more modern "unstable" sets of RPC methods by selecting an appropriate
