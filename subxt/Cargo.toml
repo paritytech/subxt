@@ -47,12 +47,21 @@ web = [
     "finito?/wasm-bindgen",
 ]
 
+# Feature flag to enable the default future executor.
+# Technically it's a hack enable to both but simplifies the conditional compilation
+# and subxt is selecting executor based on the used platform.
+#
+# For instance `wasm-bindgen-futures` panics if the platform isn't wasm32 and
+# similar for tokio that requires a tokio runtime to be initialized.
+runtime = ["tokio/rt", "wasm-bindgen-futures"]
+
 # Enable this to use the reconnecting rpc client
-unstable-reconnecting-rpc-client = ["dep:finito", "dep:tokio", "jsonrpsee", "wasm-bindgen-futures"]
+reconnecting-rpc-client = ["dep:finito", "jsonrpsee"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = [
     "dep:jsonrpsee",
+    "runtime",
 ]
 
 # Enable this to pull in extra Substrate dependencies which make it possible to
@@ -154,7 +163,7 @@ required-features = ["unstable-light-client", "jsonrpsee", "native"]
 [[example]]
 name = "setup_reconnecting_rpc_client"
 path = "examples/setup_reconnecting_rpc_client.rs"
-required-features = ["unstable-reconnecting-rpc-client"]
+required-features = ["reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]
 features = ["default", "substrate-compat", "unstable-light-client"]

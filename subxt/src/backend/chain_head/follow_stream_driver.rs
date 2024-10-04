@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
-use crate::backend::unstable::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
+use crate::backend::chain_head::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
 use futures::stream::{Stream, StreamExt};

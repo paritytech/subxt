@@ -26,7 +26,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Log each of the extrinsic with it's associated events:
         let extrinsics = block.extrinsics().await?;
         for ext in extrinsics.iter() {
-            let ext = ext?;
             let idx = ext.index();
             let events = ext.events().await?;
             let bytes_hex = format!("0x{}", hex::encode(ext.bytes()));
@@ -52,7 +51,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("      Signed Extensions:");
             if let Some(signed_extensions) = ext.signed_extensions() {
                 for signed_extension in signed_extensions.iter() {
-                    let signed_extension = signed_extension?;
                     let name = signed_extension.name();
                     let value = signed_extension.value()?.to_string();
                     println!("        {name}: {value}");

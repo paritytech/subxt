@@ -84,12 +84,12 @@ where
             return Err(BlockError::not_found(block_hash).into());
         };
 
-        Ok(Extrinsics::new(
+        Extrinsics::new(
             self.client.clone(),
             extrinsics,
             self.cached_events.clone(),
             block_hash,
-        )?)
+        )
     }
 
     /// Work with storage.

@@ -13,7 +13,7 @@ use assert_matches::assert_matches;
 use codec::Encode;
 use futures::Stream;
 use subxt::{
-    backend::unstable::rpc_methods::{
+    backend::chain_head::rpc_methods::{
         FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
         StorageQueryType,
     },
@@ -27,7 +27,7 @@ use subxt_signer::sr25519::dev;
 #[subxt_test]
 async fn chainhead_v1_follow() {
     let ctx = test_context().await;
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
     let legacy_rpc = ctx.legacy_rpc_methods().await;
 
     // Check subscription with runtime updates set on false.
@@ -67,7 +67,7 @@ async fn chainhead_v1_follow() {
 #[subxt_test]
 async fn chainhead_v1_body() {
     let ctx = test_context().await;
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
 
     let mut blocks = rpc.chainhead_v1_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
@@ -95,7 +95,7 @@ async fn chainhead_v1_body() {
 #[subxt_test]
 async fn chainhead_v1_header() {
     let ctx = test_context().await;
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
     let legacy_rpc = ctx.legacy_rpc_methods().await;
 
     let mut blocks = rpc.chainhead_v1_follow(false).await.unwrap();
@@ -124,7 +124,7 @@ async fn chainhead_v1_header() {
 async fn chainhead_v1_storage() {
     let ctx = test_context().await;
     let api = ctx.client();
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
 
     let mut blocks = rpc.chainhead_v1_follow(false).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
@@ -169,7 +169,7 @@ async fn chainhead_v1_storage() {
 #[subxt_test]
 async fn chainhead_v1_call() {
     let ctx = test_context().await;
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
 
     let mut blocks = rpc.chainhead_v1_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
@@ -206,7 +206,7 @@ async fn chainhead_v1_call() {
 #[subxt_test]
 async fn chainhead_v1_unpin() {
     let ctx = test_context().await;
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
 
     let mut blocks = rpc.chainhead_v1_follow(true).await.unwrap();
     let event = blocks.next().await.unwrap().unwrap();
@@ -226,7 +226,7 @@ async fn chainhead_v1_unpin() {
 async fn chainspec_v1_genesishash() {
     let ctx = test_context().await;
     let old_rpc = ctx.legacy_rpc_methods().await;
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
 
     let a = old_rpc.genesis_hash().await.unwrap();
     let b = rpc.chainspec_v1_genesis_hash().await.unwrap();
@@ -239,7 +239,7 @@ async fn chainspec_v1_genesishash() {
 async fn chainspec_v1_chainname() {
     let ctx = test_context().await;
     let old_rpc = ctx.legacy_rpc_methods().await;
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
 
     let a = old_rpc.system_chain().await.unwrap();
     let b = rpc.chainspec_v1_chain_name().await.unwrap();
@@ -252,7 +252,7 @@ async fn chainspec_v1_chainname() {
 async fn chainspec_v1_properties() {
     let ctx = test_context().await;
     let old_rpc = ctx.legacy_rpc_methods().await;
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
 
     let a = old_rpc.system_properties().await.unwrap();
     let b = rpc.chainspec_v1_properties().await.unwrap();
@@ -264,7 +264,7 @@ async fn chainspec_v1_properties() {
 #[subxt_test]
 async fn transactionwatch_v1_submit_and_watch() {
     let ctx = test_context().await;
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
 
     // Build and sign some random tx, just to get some appropriate bytes:
     let payload = node_runtime::tx().system().remark(b"hello".to_vec());
@@ -327,7 +327,7 @@ async fn transaction_v1_broadcast() {
 
     let ctx = test_context().await;
     let api = ctx.client();
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
 
     let tx_payload = node_runtime::tx()
         .balances()
@@ -367,10 +367,7 @@ async fn transaction_v1_broadcast() {
         }
 
         let extrinsics = finalized.extrinsics().await.unwrap();
-        let block_extrinsics = extrinsics
-            .iter()
-            .map(|res| res.unwrap())
-            .collect::<Vec<_>>();
+        let block_extrinsics = extrinsics.iter().collect::<Vec<_>>();
 
         let Some(ext) = block_extrinsics
             .iter()
@@ -394,7 +391,7 @@ async fn transaction_v1_stop() {
     let bob_address: MultiAddress<AccountId32, u32> = bob.public_key().into();
 
     let ctx = test_context().await;
-    let rpc = ctx.unstable_rpc_methods().await;
+    let rpc = ctx.chainhead_rpc_methods().await;
 
     // Cannot stop an operation that was not started.
     let _err = rpc

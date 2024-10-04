@@ -36,6 +36,7 @@ substrate-compat = ["polkadot-sdk/sp-core", "polkadot-sdk/sp-runtime", "polkadot
 
 [dependencies]
 codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
+frame-decode = { workspace = true }
 scale-info = { workspace = true, default-features = false, features = ["bit-vec"] }
 scale-value = { workspace = true, default-features = false }
 scale-bits = { workspace = true, default-features = false }
