@@ -56,7 +56,7 @@ web = [
 runtime = ["tokio/rt", "wasm-bindgen-futures"]
 
 # Enable this to use the reconnecting rpc client
-reconnecting-rpc-client = ["dep:finito", "jsonrpsee"]
+reconnecting-rpc-client = []
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = [
