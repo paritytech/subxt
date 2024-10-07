@@ -96,7 +96,7 @@ pub mod api {
         "BeefyMmrApi",
         "GenesisBuilder",
     ];
-    #[doc = r" The error type returned when there is a runtime issue."]
+    #[doc = r" The error type that is returned when there is a runtime issue."]
     pub type DispatchError = runtime_types::sp_runtime::DispatchError;
     #[doc = r" The outer event enum."]
     pub type Event = runtime_types::rococo_runtime::RuntimeEvent;
