@@ -317,7 +317,7 @@ impl<Hash: BlockHash> Shared<Hash> {
             FollowStreamMsg::Event(ev @ FollowEvent::BestBlockChanged(_)) => {
                 shared.block_events_for_new_subscriptions.push_back(ev);
             }
-            FollowStreamMsg::Event(FollowEvent::Stop) => {
+            FollowStreamMsg::Event(FollowEvent::Stop { .. }) => {
                 // On a stop event, clear everything. Wait for resubscription and new ready/initialised events.
                 shared.block_events_for_new_subscriptions.clear();
                 shared.current_subscription_id = None;
@@ -460,7 +460,14 @@ where
 
                     (self.f)(FollowEvent::Initialized(init))
                 }
-                FollowStreamMsg::Event(ev) => (self.f)(ev),
+                FollowStreamMsg::Event(ev) => {
+                    if matches!(ev, FollowEvent::Stop { restart: false }) {
+                        self.is_done = true;
+                        return Poll::Ready(None);
+                    };
+
+                    (self.f)(ev)
+                }
             };
 
             if block_refs.is_empty() {
@@ -655,7 +662,7 @@ mod test {
                     Ok(ev_new_block(0, 1)),
                     Ok(ev_best_block(1)),
                     Ok(ev_finalized([1], [])),
-                    Ok(FollowEvent::Stop),
+                    Ok(FollowEvent::Stop { restart: true }),
                     Ok(ev_initialized(1)),
                     Ok(ev_finalized([2], [])),
                     Err(Error::Other("ended".to_owned())),
@@ -700,7 +707,7 @@ mod test {
             || {
                 [
                     Ok(ev_initialized(0)),
-                    Ok(FollowEvent::Stop),
+                    Ok(FollowEvent::Stop { restart: true }),
                     // Emulate that we missed some blocks.
                     Ok(ev_initialized(13)),
                     Ok(ev_finalized([14], [])),
@@ -739,6 +746,41 @@ mod test {
             &(
                 "sub_id_2".to_string(),
                 vec![BlockRef::new(H256::from_low_u64_le(14))]
+            )
+        );
+    }
+
+    #[tokio::test]
+    async fn subscribe_finalized_blocks_no_restart() {
+        let mut driver = test_follow_stream_driver_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(FollowEvent::Stop { restart: false }),
+                ]
+            },
+            10,
+        );
+
+        let handle = driver.handle();
+
+        tokio::spawn(async move { while driver.next().await.is_some() {} });
+
+        let f = |ev| match ev {
+            FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
+            FollowEvent::Initialized(ev) => ev.finalized_block_hashes,
+            _ => vec![],
+        };
+
+        let stream = FollowStreamFinalizedHeads::new(handle.subscribe(), f);
+        let evs: Vec<_> = stream.try_collect().await.unwrap();
+
+        assert_eq!(evs.len(), 1);
+        assert_eq!(
+            evs[0],
+            (
+                "sub_id_0".to_string(),
+                vec![BlockRef::new(H256::from_low_u64_le(0))]
             )
         );
     }

@@ -893,15 +893,7 @@ mod test {
         }
 
         fn build_backend_spawn_background(rpc_client: impl RpcClientT) -> ChainHeadBackend<Conf> {
-            let (backend, mut driver) = build_backend(rpc_client);
-            tokio::spawn(async move {
-                while let Some(val) = driver.next().await {
-                    if let Err(e) = val {
-                        eprintln!("Error driving unstable backend: {e}; terminating client");
-                    }
-                }
-            });
-            backend
+            ChainHeadBackend::builder().build_with_background_driver(rpc_client)
         }
 
         fn runtime_spec() -> RuntimeSpec {
@@ -1023,7 +1015,10 @@ mod test {
             )];
             let mock_subscription_data = vec![(
                 "chainHead_v1_storage",
-                Message::Many(Ok(vec![Ok(operation_error("Id1")), Ok(FollowEvent::Stop)])),
+                Message::Many(Ok(vec![
+                    Ok(operation_error("Id1")),
+                    Ok(FollowEvent::Stop { restart: true }),
+                ])),
             )];
             let rpc_client = setup_mock_rpc_client(false)
                 .add_method("chainHead_v1_storage", |data, sub, _| {
@@ -1187,7 +1182,10 @@ mod test {
                 ),
                 (
                     "chainHead_v1_storage",
-                    Message::Many(Ok(vec![Ok(operation_error("Id1")), Ok(FollowEvent::Stop)])),
+                    Message::Many(Ok(vec![
+                        Ok(operation_error("Id1")),
+                        Ok(FollowEvent::Stop { restart: true }),
+                    ])),
                 ),
                 (
                     "chainHead_v1_storage",
@@ -1350,7 +1348,10 @@ mod test {
             let mock_data = vec![
                 (
                     "chainHead_v1_storage",
-                    Message::Many(Ok(vec![Ok(operation_error("Id1")), Ok(FollowEvent::Stop)])),
+                    Message::Many(Ok(vec![
+                        Ok(operation_error("Id1")),
+                        Ok(FollowEvent::Stop { restart: true }),
+                    ])),
                 ),
                 (
                     "chainHead_v1_storage",

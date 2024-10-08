@@ -353,7 +353,10 @@ pub enum FollowEvent<Hash> {
     OperationError(OperationError),
     /// The subscription is dropped and no further events
     /// will be generated.
-    Stop,
+    Stop {
+        /// Whether the stopped subscription will be restarted.
+        restart: bool,
+    },
 }
 
 /// Contain information about the latest finalized block.
@@ -649,7 +652,7 @@ impl<Hash: BlockHash> Stream for FollowSubscription<Hash> {
 
         let res = self.sub.poll_next_unpin(cx);
 
-        if let Poll::Ready(Some(Ok(FollowEvent::Stop))) = &res {
+        if let Poll::Ready(Some(Ok(FollowEvent::Stop { .. }))) = &res {
             // No more events will occur after this one.
             self.done = true
         }
