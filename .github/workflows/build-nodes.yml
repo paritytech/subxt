@@ -6,7 +6,6 @@ on:
   # Run at 2am every day for nightly builds.
   schedule:
     - cron: "0 2 * * *"
-  pull_request:
 
 jobs:
   tests:
