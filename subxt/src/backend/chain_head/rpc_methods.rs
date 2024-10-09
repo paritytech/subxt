@@ -655,9 +655,13 @@ impl<Hash: BlockHash> Stream for FollowSubscription<Hash> {
 
         let res = self.sub.poll_next_unpin(cx);
 
-        if let Poll::Ready(Some(Ok(FollowEvent::Stop { .. }))) = &res {
+        match &res {
             // No more events will occur after this one.
-            self.done = true
+            Poll::Ready(Some(Ok(FollowEvent::Stop)))
+            | Poll::Ready(Some(Ok(FollowEvent::BackendClosed))) => {
+                self.done = true;
+            }
+            _ => {}
         }
 
         res
