@@ -36,8 +36,8 @@ runs:
         chmod u+x ./polkadot-prepare-worker
         ./substrate-node --version
         ./polkadot --version
-        mv ./substrate-node /usr/local/bin
-        mv ./polkadot /usr/local/bin
-        mv ./polkadot-execute-worker /usr/local/bin
-        mv ./polkadot-prepare-worker /usr/local/bin
+        sudo mv ./substrate-node /usr/local/bin
+        sudo mv ./polkadot /usr/local/bin
+        sudo mv ./polkadot-execute-worker /usr/local/bin
+        sudo mv ./polkadot-prepare-worker /usr/local/bin
         rm ./polkadot.tar.gz
