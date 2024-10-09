@@ -3,7 +3,7 @@ description: Downloads and configures the substrate and polkadot binaries built 
 runs:
   using: composite
   steps:
-    - name: Install curl
+    - name: Install dependencies
       shell: bash
       run: sudo apt-get update && sudo apt-get install -y curl gcc make clang cmake
 
