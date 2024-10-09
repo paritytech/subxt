@@ -15,8 +15,6 @@ use scale_info::{
     TypeDefSequence, TypeDefTuple, TypeDefVariant,
 };
 
-use super::variant_index::VariantIndex;
-
 #[derive(Clone)]
 struct TypeSet {
     seen_ids: BTreeSet<u32>,
@@ -83,13 +81,14 @@ impl TypeSet {
         }
     }
 
-    fn insert_and_collect_types(&mut self, metadata: &Metadata, ty: &PortableType) {
-        if self.seen_ids.insert(ty.id) {
-            self.collect_types(metadata, ty);
+    fn insert_and_collect(&mut self, metadata: &Metadata, id: u32) {
+        if self.seen_ids.insert(id) {
+            let t = resolve_typ(metadata, id);
+            self.collect_types(metadata, t);
         }
     }
 
-    fn collect_extrinsic_types(&mut self, metadata: &Metadata, extrinsic: &ExtrinsicMetadata) {
+    fn collect_extrinsic_types(&mut self, extrinsic: &ExtrinsicMetadata) {
         let mut ids = Vec::from([
             extrinsic.address_ty,
             extrinsic.call_ty,
@@ -102,10 +101,7 @@ impl TypeSet {
             ids.push(signed.additional_ty);
         }
         for id in ids {
-            if self.seen_ids.insert(id) {
-                let typ = resolve_typ(metadata, id);
-                self.insert_and_collect_types(metadata, typ);
-            }
+            self.seen_ids.insert(id);
         }
     }
 
@@ -113,15 +109,9 @@ impl TypeSet {
     fn collect_runtime_api_types(&mut self, metadata: &Metadata, api: &RuntimeApiMetadataInner) {
         for method in api.methods.values() {
             for input in &method.inputs {
-                if self.seen_ids.insert(input.ty) {
-                    let ty = resolve_typ(metadata, input.ty);
-                    self.insert_and_collect_types(metadata, ty);
-                }
+                self.insert_and_collect(metadata, input.ty);
             }
-            if self.seen_ids.insert(method.output_ty) {
-                let ty = resolve_typ(metadata, method.output_ty);
-                self.insert_and_collect_types(metadata, ty);
-            }
+            self.insert_and_collect(metadata, method.output_ty);
         }
     }
 
@@ -160,73 +150,8 @@ impl TypeSet {
             type_ids.push(ty);
         }
         for id in type_ids {
-            let typ = resolve_typ(metadata, id);
-            self.insert_and_collect_types(metadata, typ);
+            self.insert_and_collect(metadata, id);
         }
-    }
-    /// Strips pallets that we need to keep around for their types
-    fn update_filtered_pallet(
-        &mut self,
-        pallet: &mut PalletMetadataInner,
-        retained_set: &mut TypeSet,
-    ) {
-        let entry_fn = |entry: &crate::StorageEntryMetadata| match entry.entry_type {
-            StorageEntryType::Plain(ty) => {
-                self.seen_ids.contains(&ty) && retained_set.seen_ids.remove(&ty)
-            }
-            StorageEntryType::Map {
-                key_ty, value_ty, ..
-            } => {
-                if self.seen_ids.contains(&key_ty) && self.seen_ids.contains(&value_ty) {
-                    retained_set.seen_ids.remove(&key_ty) && retained_set.seen_ids.remove(&value_ty)
-                } else {
-                    false
-                }
-            }
-        };
-        let new_storage = match pallet.storage.as_mut() {
-            Some(storage) => {
-                // check if the both types in the seen_set and keep the entry if types were not retained already
-                storage.retain_entries(entry_fn);
-                // if the storage list is empty - drop it completetely
-                if storage.entries().is_empty() {
-                    None
-                } else {
-                    Some(storage)
-                }
-            }
-            None => None,
-        };
-
-        pallet.storage = new_storage.cloned();
-
-        // Helpers
-        let mut check_opt_and_retain = |option: Option<u32>| -> Option<u32> {
-            match option {
-                Some(ty) if self.seen_ids.contains(&ty) && retained_set.seen_ids.remove(&ty) => {
-                    Some(ty)
-                }
-                _ => None,
-            }
-        };
-        fn reset_variant_index(variant_index: &mut VariantIndex, opt: Option<u32>) {
-            if opt.is_none() {
-                *variant_index = VariantIndex::empty()
-            }
-        }
-
-        pallet.call_ty = check_opt_and_retain(pallet.call_ty);
-        reset_variant_index(&mut pallet.call_variant_index, pallet.call_ty);
-
-        pallet.event_ty = check_opt_and_retain(pallet.event_ty);
-        reset_variant_index(&mut pallet.event_variant_index, pallet.event_ty);
-
-        pallet.error_ty = check_opt_and_retain(pallet.error_ty);
-        reset_variant_index(&mut pallet.error_variant_index, pallet.error_ty);
-
-        pallet.constants.retain(|value| {
-            self.seen_ids.contains(&value.ty) && retained_set.seen_ids.remove(&value.ty)
-        });
     }
 
     // Collect types referenced inside outer enum
@@ -234,8 +159,6 @@ impl TypeSet {
     where
         F: FnMut(&str) -> bool,
     {
-        let m = metadata.clone();
-
         let ty = {
             metadata
                 .types
@@ -244,34 +167,15 @@ impl TypeSet {
                 .expect("Metadata should contain enum type in registry")
         };
 
-        let mut for_mut_ty = ty.clone();
-
-        let TypeDef::Variant(variant) = &mut for_mut_ty.ty.type_def else {
-            panic!("Metadata type is expected to be a variant type");
-        };
-
-        // Remove all variants from the cloned type that aren't the pallet(s) we want to keep.
-        variant.variants.retain(|v| name_filter(&v.name));
-
-        // traverse the enum and collect the types
-        self.collect_types(&m, &for_mut_ty);
-
         // Redo the thing above but keep filtered out variants if they reference types that we intend to keep
         let TypeDef::Variant(variant) = &mut ty.ty.type_def else {
             panic!("Metadata type is expected to be a variant type");
         };
 
-        variant.variants.retain(|v| {
-            name_filter(&v.name) || {
-                v.fields
-                    .iter()
-                    .all(|field| self.seen_ids.contains(&field.ty.id))
-            }
-        });
-
-        self.seen_ids.insert(id);
-
-        self.collect_types(&m, ty);
+        // If the type was not referenced earlier we can safely strip some of the variants
+        if self.seen_ids.insert(id) {
+            variant.variants.retain(|v| name_filter(&v.name));
+        }
     }
 }
 
@@ -395,7 +299,6 @@ pub fn retain_metadata<F, G>(
 
     // all types that we intend to keep
     let mut type_set = retained_set.clone();
-
     for api in metadata.apis.values() {
         let should_retain = runtime_apis_filter(&api.name);
         if should_retain {
@@ -413,7 +316,7 @@ pub fn retain_metadata<F, G>(
         .expect("Metadata must contain sp_runtime::DispatchError");
     type_set.seen_ids.insert(dispatch_error_ty.id);
     type_set.seen_ids.insert(metadata.runtime_ty);
-    type_set.collect_extrinsic_types(metadata, &metadata.extrinsic);
+    type_set.collect_extrinsic_types(&metadata.extrinsic);
 
     // Collect the outer enums type IDs.
     for typ in [
@@ -424,35 +327,10 @@ pub fn retain_metadata<F, G>(
         type_set.collect_variants_in_type(metadata, typ, &mut pallets_filter);
     }
 
-    let mut retained_set = TypeSet {
-        seen_ids: type_set
-            .seen_ids
-            .difference(&retained_set.seen_ids)
-            .copied()
-            .collect(),
-    };
-    // Strip down Pallets we dont need and only keep types that are not yet included in the retained set.
-    for pallet in metadata.pallets.values_mut() {
-        if !pallets_filter(&pallet.name) {
-            type_set.update_filtered_pallet(pallet, &mut retained_set);
-        }
-    }
-
     // Filter out unnecesary pallets that have no entries
-    metadata.pallets.retain(|pallet| {
-        pallets_filter(&pallet.name)
-            || !matches!(
-                pallet,
-                PalletMetadataInner {
-                    storage: None,
-                    call_ty: None,
-                    event_ty: None,
-                    error_ty: None,
-                    constants: map,
-                    ..
-                } if map.is_empty()
-            )
-    });
+    metadata
+        .pallets
+        .retain(|pallet| pallets_filter(&pallet.name));
 
     // Retain the apis
     metadata.apis.retain(|api| runtime_apis_filter(&api.name));
@@ -510,18 +388,17 @@ mod tests {
                 |pallet_name| pallet_name == pallet.name(),
                 |_| true,
             );
-
-            assert!(
-                metadata.pallets.len() < original_meta.pallets.len(),
-                "Stripped metadata must have less pallets than the non-stripped one: stripped amount {}, original amount {}",
-                metadata.pallets.len(), original_meta.pallets.len()
+            assert_eq!(metadata.pallets.len(), 1);
+            assert_eq!(
+                &*metadata.pallets.get_by_index(0).unwrap().name,
+                pallet.name()
             );
 
             assert!(
                 metadata.types.types.len() < original_meta.types.types.len(),
                 "Stripped metadata must have less retained types than the non-stripped one: stripped amount {}, original amount {}",
                 metadata.types.types.len(), original_meta.types.types.len()
-            )
+            );
         }
     }
 

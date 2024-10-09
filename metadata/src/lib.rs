@@ -214,7 +214,10 @@ impl Metadata {
         MetadataHasher::new(self)
     }
 
-    /// Filter out any pallets that we don't want to keep, retaining only those that we do.
+    /// Filter out any pallets and/or runtime_apis that we don't want to keep, retaining only those that we do.
+    /// Note:
+    /// without also filtering out irrelevant runtime_api's in addition to pallets one should not expect significant metadata size reduction.
+    /// This happens because we will keep the types returned by runtime_api methods to guarantee that we can safely decode them.
     pub fn retain<F, G>(&mut self, pallet_filter: F, api_filter: G)
     where
         F: FnMut(&str) -> bool,
