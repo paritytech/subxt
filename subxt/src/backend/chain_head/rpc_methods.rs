@@ -308,7 +308,7 @@ impl<T: Config> ChainHeadRpcMethods<T> {
 /// The following events are related to operations:
 /// - OperationBodyDone: The response of the `chainHead_body`
 /// - OperationCallDone: The response of the `chainHead_call`
-/// - OperationStorageItems: Items produced by the `chianHead_storage`
+/// - OperationStorageItems: Items produced by the `chainHead_storage`
 /// - OperationWaitingForContinue: Generated after OperationStorageItems and requires the user to
 ///   call `chainHead_continue`
 /// - OperationStorageDone: The `chainHead_storage` method has produced all the results
@@ -353,10 +353,13 @@ pub enum FollowEvent<Hash> {
     OperationError(OperationError),
     /// The subscription is dropped and no further events
     /// will be generated.
-    Stop {
-        /// Whether the stopped subscription will be restarted.
-        restart: bool,
-    },
+    Stop,
+    /// Internal state which should not be exposed to the user
+    /// and not part of the JSON-RPC spec for the `chainHead_v1_follow`.
+    ///
+    /// The backend was closed and tell everything to shutdown.
+    #[doc(hidden)]
+    BackendClosed,
 }
 
 /// Contain information about the latest finalized block.

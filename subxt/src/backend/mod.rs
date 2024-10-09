@@ -1015,10 +1015,7 @@ mod test {
             )];
             let mock_subscription_data = vec![(
                 "chainHead_v1_storage",
-                Message::Many(Ok(vec![
-                    Ok(operation_error("Id1")),
-                    Ok(FollowEvent::Stop { restart: true }),
-                ])),
+                Message::Many(Ok(vec![Ok(operation_error("Id1")), Ok(FollowEvent::Stop)])),
             )];
             let rpc_client = setup_mock_rpc_client(false)
                 .add_method("chainHead_v1_storage", |data, sub, _| {
@@ -1182,10 +1179,7 @@ mod test {
                 ),
                 (
                     "chainHead_v1_storage",
-                    Message::Many(Ok(vec![
-                        Ok(operation_error("Id1")),
-                        Ok(FollowEvent::Stop { restart: true }),
-                    ])),
+                    Message::Many(Ok(vec![Ok(operation_error("Id1")), Ok(FollowEvent::Stop)])),
                 ),
                 (
                     "chainHead_v1_storage",
@@ -1348,10 +1342,7 @@ mod test {
             let mock_data = vec![
                 (
                     "chainHead_v1_storage",
-                    Message::Many(Ok(vec![
-                        Ok(operation_error("Id1")),
-                        Ok(FollowEvent::Stop { restart: true }),
-                    ])),
+                    Message::Many(Ok(vec![Ok(operation_error("Id1")), Ok(FollowEvent::Stop)])),
                 ),
                 (
                     "chainHead_v1_storage",

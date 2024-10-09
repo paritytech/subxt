@@ -317,7 +317,8 @@ impl<Hash: BlockHash> Shared<Hash> {
             FollowStreamMsg::Event(ev @ FollowEvent::BestBlockChanged(_)) => {
                 shared.block_events_for_new_subscriptions.push_back(ev);
             }
-            FollowStreamMsg::Event(FollowEvent::Stop { .. }) => {
+            FollowStreamMsg::Event(FollowEvent::Stop)
+            | FollowStreamMsg::Event(FollowEvent::BackendClosed) => {
                 // On a stop event, clear everything. Wait for resubscription and new ready/initialised events.
                 shared.block_events_for_new_subscriptions.clear();
                 shared.current_subscription_id = None;
@@ -461,7 +462,7 @@ where
                     (self.f)(FollowEvent::Initialized(init))
                 }
                 FollowStreamMsg::Event(ev) => {
-                    if matches!(ev, FollowEvent::Stop { restart: false }) {
+                    if matches!(ev, FollowEvent::BackendClosed) {
                         self.is_done = true;
                         return Poll::Ready(None);
                     };
@@ -662,7 +663,7 @@ mod test {
                     Ok(ev_new_block(0, 1)),
                     Ok(ev_best_block(1)),
                     Ok(ev_finalized([1], [])),
-                    Ok(FollowEvent::Stop { restart: true }),
+                    Ok(FollowEvent::Stop),
                     Ok(ev_initialized(1)),
                     Ok(ev_finalized([2], [])),
                     Err(Error::Other("ended".to_owned())),
@@ -707,7 +708,7 @@ mod test {
             || {
                 [
                     Ok(ev_initialized(0)),
-                    Ok(FollowEvent::Stop { restart: true }),
+                    Ok(FollowEvent::Stop),
                     // Emulate that we missed some blocks.
                     Ok(ev_initialized(13)),
                     Ok(ev_finalized([14], [])),
@@ -753,12 +754,7 @@ mod test {
     #[tokio::test]
     async fn subscribe_finalized_blocks_no_restart() {
         let mut driver = test_follow_stream_driver_getter(
-            || {
-                [
-                    Ok(ev_initialized(0)),
-                    Ok(FollowEvent::Stop { restart: false }),
-                ]
-            },
+            || [Ok(ev_initialized(0)), Ok(FollowEvent::BackendClosed)],
             10,
         );
 

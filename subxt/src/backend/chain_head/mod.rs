@@ -614,7 +614,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                                 );
                             }
                         }
-                        FollowEvent::Stop { .. } => {
+                        FollowEvent::Stop | FollowEvent::BackendClosed => {
                             // If we get this event, we'll lose all of our existing pinned blocks and have a gap
                             // in which we may lose the finalized block that the TX is in. For now, just error if
                             // this happens, to prevent the case in which we never see a finalized block and wait

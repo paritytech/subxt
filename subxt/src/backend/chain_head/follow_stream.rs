@@ -71,7 +71,9 @@ enum InnerStreamState<Hash> {
     /// We are polling for, and receiving events from the stream.
     ReceivingEvents(FollowEventStream<Hash>),
     /// We received a stop event. We'll send one on and restart the stream.
-    Stopped { restart: bool },
+    Stopped,
+    /// The backend was closed and tell everything to shutdown.
+    BackendClosed,
     /// Report error.
     Error(Option<Error>),
     /// The stream is finished and will not restart (likely due to an error).
@@ -86,6 +88,7 @@ impl<Hash> std::fmt::Debug for InnerStreamState<Hash> {
             Self::Ready(_) => write!(f, "Ready(..)"),
             Self::ReceivingEvents(_) => write!(f, "ReceivingEvents(..)"),
             Self::Stopped { .. } => write!(f, "Stopped"),
+            Self::BackendClosed => write!(f, "BackendClosed"),
             Self::Finished => write!(f, "Finished"),
             Self::Error(_) => write!(f, "Error"),
         }
@@ -153,19 +156,19 @@ impl<Hash> Stream for FollowStream<Hash> {
                         Poll::Ready(Err(e)) => {
                             // Re-start if a reconnecting backend was enabled.
                             if e.is_disconnected_will_reconnect() {
-                                this.stream = InnerStreamState::Stopped { restart: true };
+                                this.stream = InnerStreamState::Stopped;
                                 continue;
                             }
 
                             // Finish forever if there's an error which is done as follows:
                             //
-                            // 1) Send the FollowEvent::Stop message which is propagated to the subscriber
-                            // 2) Send the error on the stream
-                            // 3) Finish the stream
+                            // 1) Send the FollowEvent::BackendClosed message which tells to subscriber that subscription is closed.
+                            // 2) Send the error on the backend driver stream.
+                            // 3) Finish the stream.
                             //
                             this.stream = InnerStreamState::Error(Some(e));
                             return Poll::Ready(Some(Ok(FollowStreamMsg::Event(
-                                FollowEvent::Stop { restart: false },
+                                FollowEvent::BackendClosed,
                             ))));
                         }
                     }
@@ -185,22 +188,30 @@ impl<Hash> Stream for FollowStream<Hash> {
                         Poll::Ready(None) => {
                             // No error happened but the stream ended; restart and
                             // pass on a Stop message anyway.
-                            this.stream = InnerStreamState::Stopped { restart: true };
+                            this.stream = InnerStreamState::Stopped;
                             continue;
                         }
                         Poll::Ready(Some(Ok(ev))) => {
-                            if let FollowEvent::Stop { restart } = ev {
-                                // A stop event means the stream has ended, so start
-                                // over after passing on the stop message.
-                                this.stream = InnerStreamState::Stopped { restart };
-                                continue;
+                            match ev {
+                                FollowEvent::Stop => {
+                                    // A stop event means the stream has ended, so start
+                                    // over after passing on the stop message.
+                                    this.stream = InnerStreamState::Stopped;
+                                    continue;
+                                }
+                                FollowEvent::BackendClosed => {
+                                    this.stream = InnerStreamState::BackendClosed;
+                                    continue;
+                                }
+                                _ => {
+                                    return Poll::Ready(Some(Ok(FollowStreamMsg::Event(ev))));
+                                }
                             }
-                            return Poll::Ready(Some(Ok(FollowStreamMsg::Event(ev))));
                         }
                         Poll::Ready(Some(Err(e))) => {
                             // Re-start if a reconnecting backend was enabled.
                             if e.is_disconnected_will_reconnect() {
-                                this.stream = InnerStreamState::Stopped { restart: true };
+                                this.stream = InnerStreamState::Stopped;
                                 continue;
                             }
 
@@ -210,16 +221,12 @@ impl<Hash> Stream for FollowStream<Hash> {
                         }
                     }
                 }
-                InnerStreamState::Stopped { restart } => {
-                    let restart = *restart;
-                    if restart {
-                        this.stream = InnerStreamState::New;
-                    } else {
-                        this.stream = InnerStreamState::Finished;
-                    }
-                    return Poll::Ready(Some(Ok(FollowStreamMsg::Event(FollowEvent::Stop {
-                        restart,
-                    }))));
+                InnerStreamState::Stopped => {
+                    this.stream = InnerStreamState::New;
+                    return Poll::Ready(Some(Ok(FollowStreamMsg::Event(FollowEvent::Stop))));
+                }
+                InnerStreamState::BackendClosed => {
+                    this.stream = InnerStreamState::Finished;
                 }
                 InnerStreamState::Error(e) => {
                     let e = e.take().expect("should always be Some");
@@ -325,8 +332,8 @@ pub mod test {
             [
                 Ok(ev_initialized(1)),
                 // Stop should lead to a drop and resubscribe:
-                Ok(FollowEvent::Stop { restart: true }),
-                Ok(FollowEvent::Stop { restart: true }),
+                Ok(FollowEvent::Stop),
+                Ok(FollowEvent::Stop),
                 Ok(ev_new_block(1, 2)),
                 // Nothing should be emitted after an error:
                 Err(Error::Other("ended".to_owned())),
@@ -343,9 +350,9 @@ pub mod test {
             vec![
                 FollowStreamMsg::Ready("sub_id_0".to_owned()),
                 FollowStreamMsg::Event(ev_initialized(1)),
-                FollowStreamMsg::Event(FollowEvent::Stop { restart: true }),
+                FollowStreamMsg::Event(FollowEvent::Stop),
                 FollowStreamMsg::Ready("sub_id_2".to_owned()),
-                FollowStreamMsg::Event(FollowEvent::Stop { restart: true }),
+                FollowStreamMsg::Event(FollowEvent::Stop),
                 FollowStreamMsg::Ready("sub_id_3".to_owned()),
                 FollowStreamMsg::Event(ev_new_block(1, 2)),
             ]
