@@ -5,7 +5,7 @@ runs:
   steps:
     - name: Install curl
       shell: bash
-      run: sudo apt-get update && sudo apt-get install -y curl
+      run: sudo apt-get update && sudo apt-get install -y curl gcc make clang
 
     - name: Download substrate-node binary
       id: download-substrate-binary
