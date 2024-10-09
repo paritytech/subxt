@@ -82,7 +82,7 @@ jobs:
 
   clippy:
     name: Cargo clippy
-    runs-on: ubuntu-latest
+    runs-on: parity-large
     needs: [fmt, machete]
     steps:
       - name: Checkout sources
@@ -145,7 +145,7 @@ jobs:
 
   check:
     name: Cargo check
-    runs-on: ubuntu-latest
+    runs-on: parity-large
     needs: [fmt, machete]
     steps:
       - name: Checkout sources
@@ -235,7 +235,7 @@ jobs:
 
   docs:
     name: Check documentation and run doc tests
-    runs-on: ubuntu-latest
+    runs-on: parity-large
     needs: [fmt, machete]
     steps:
       - name: Checkout sources

@@ -3,6 +3,10 @@ description: Downloads and configures the substrate and polkadot binaries built 
 runs:
   using: composite
   steps:
+    - name: Install curl
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y curl
+
     - name: Download substrate-node binary
       id: download-substrate-binary
       uses: dawidd6/action-download-artifact@bf251b5aa9c2f7eeb574a96ee720e24f801b7c11 # v6
