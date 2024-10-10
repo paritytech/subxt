@@ -196,6 +196,13 @@ impl<Hash: BlockHash> Shared<Hash> {
     pub fn done(&self) {
         let mut shared = self.0.lock().unwrap();
         shared.done = true;
+
+        // Wake up all subscribers so they can see that we're done.
+        for details in shared.subscribers.values_mut() {
+            if let Some(waker) = details.waker.take() {
+                waker.wake();
+            }
+        }
     }
 
     /// Cleanup a subscription.
@@ -317,8 +324,7 @@ impl<Hash: BlockHash> Shared<Hash> {
             FollowStreamMsg::Event(ev @ FollowEvent::BestBlockChanged(_)) => {
                 shared.block_events_for_new_subscriptions.push_back(ev);
             }
-            FollowStreamMsg::Event(FollowEvent::Stop)
-            | FollowStreamMsg::Event(FollowEvent::BackendClosed) => {
+            FollowStreamMsg::Event(FollowEvent::Stop) => {
                 // On a stop event, clear everything. Wait for resubscription and new ready/initialised events.
                 shared.block_events_for_new_subscriptions.clear();
                 shared.current_subscription_id = None;
@@ -461,14 +467,7 @@ where
 
                     (self.f)(FollowEvent::Initialized(init))
                 }
-                FollowStreamMsg::Event(ev) => {
-                    if matches!(ev, FollowEvent::BackendClosed) {
-                        self.is_done = true;
-                        return Poll::Ready(None);
-                    };
-
-                    (self.f)(ev)
-                }
+                FollowStreamMsg::Event(ev) => (self.f)(ev),
             };
 
             if block_refs.is_empty() {

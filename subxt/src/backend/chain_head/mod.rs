@@ -128,16 +128,16 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
         }
 
         let (backend, mut driver) = self.build(client);
-
         spawn(async move {
+            // NOTE: we need to poll the driver until it's done i.e returns None
+            // to ensure that the backend is shutdown properly.
             while let Some(res) = driver.next().await {
-                if let Err(e) = res {
-                    if !e.is_disconnected_will_reconnect() {
-                        tracing::debug!(target: "subxt", "chainHead driver was closed: {e}");
-                        break;
-                    }
+                if let Err(err) = res {
+                    tracing::debug!(target: "subxt", "ChainHeadBackendDriver got error={err}");
                 }
             }
+
+            tracing::debug!(target: "subxt", "ChainHeadBackendDriver closed");
         });
 
         backend
@@ -614,7 +614,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                                 );
                             }
                         }
-                        FollowEvent::Stop | FollowEvent::BackendClosed => {
+                        FollowEvent::Stop => {
                             // If we get this event, we'll lose all of our existing pinned blocks and have a gap
                             // in which we may lose the finalized block that the TX is in. For now, just error if
                             // this happens, to prevent the case in which we never see a finalized block and wait

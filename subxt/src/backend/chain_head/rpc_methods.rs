@@ -354,12 +354,6 @@ pub enum FollowEvent<Hash> {
     /// The subscription is dropped and no further events
     /// will be generated.
     Stop,
-    /// Internal state which should not be exposed to the user
-    /// and not part of the JSON-RPC spec for the `chainHead_v1_follow`.
-    ///
-    /// The backend was closed and tell everything to shutdown.
-    #[doc(hidden)]
-    BackendClosed,
 }
 
 /// Contain information about the latest finalized block.
@@ -655,13 +649,9 @@ impl<Hash: BlockHash> Stream for FollowSubscription<Hash> {
 
         let res = self.sub.poll_next_unpin(cx);
 
-        match &res {
+        if let Poll::Ready(Some(Ok(FollowEvent::Stop))) = &res {
             // No more events will occur after this one.
-            Poll::Ready(Some(Ok(FollowEvent::Stop)))
-            | Poll::Ready(Some(Ok(FollowEvent::BackendClosed))) => {
-                self.done = true;
-            }
-            _ => {}
+            self.done = true;
         }
 
         res

@@ -72,10 +72,6 @@ enum InnerStreamState<Hash> {
     ReceivingEvents(FollowEventStream<Hash>),
     /// We received a stop event. We'll send one on and restart the stream.
     Stopped,
-    /// The backend was closed and tell everything to shutdown.
-    BackendClosed,
-    /// Report error.
-    Error(Option<Error>),
     /// The stream is finished and will not restart (likely due to an error).
     Finished,
 }
@@ -88,9 +84,7 @@ impl<Hash> std::fmt::Debug for InnerStreamState<Hash> {
             Self::Ready(_) => write!(f, "Ready(..)"),
             Self::ReceivingEvents(_) => write!(f, "ReceivingEvents(..)"),
             Self::Stopped { .. } => write!(f, "Stopped"),
-            Self::BackendClosed => write!(f, "BackendClosed"),
             Self::Finished => write!(f, "Finished"),
-            Self::Error(_) => write!(f, "Error"),
         }
     }
 }
@@ -160,16 +154,9 @@ impl<Hash> Stream for FollowStream<Hash> {
                                 continue;
                             }
 
-                            // Finish forever if there's an error which is done as follows:
-                            //
-                            // 1) Send the FollowEvent::BackendClosed message which tells to subscriber that subscription is closed.
-                            // 2) Send the error on the backend driver stream.
-                            // 3) Finish the stream.
-                            //
-                            this.stream = InnerStreamState::Error(Some(e));
-                            return Poll::Ready(Some(Ok(FollowStreamMsg::Event(
-                                FollowEvent::BackendClosed,
-                            ))));
+                            // Finish forever if there's an error, passing it on.
+                            this.stream = InnerStreamState::Finished;
+                            return Poll::Ready(Some(Err(e)));
                         }
                     }
                 }
@@ -192,21 +179,13 @@ impl<Hash> Stream for FollowStream<Hash> {
                             continue;
                         }
                         Poll::Ready(Some(Ok(ev))) => {
-                            match ev {
-                                FollowEvent::Stop => {
-                                    // A stop event means the stream has ended, so start
-                                    // over after passing on the stop message.
-                                    this.stream = InnerStreamState::Stopped;
-                                    continue;
-                                }
-                                FollowEvent::BackendClosed => {
-                                    this.stream = InnerStreamState::BackendClosed;
-                                    continue;
-                                }
-                                _ => {
-                                    return Poll::Ready(Some(Ok(FollowStreamMsg::Event(ev))));
-                                }
+                            if let FollowEvent::Stop = ev {
+                                // A stop event means the stream has ended, so start
+                                // over after passing on the stop message.
+                                this.stream = InnerStreamState::Stopped;
+                                continue;
                             }
+                            return Poll::Ready(Some(Ok(FollowStreamMsg::Event(ev))));
                         }
                         Poll::Ready(Some(Err(e))) => {
                             // Re-start if a reconnecting backend was enabled.
@@ -224,14 +203,6 @@ impl<Hash> Stream for FollowStream<Hash> {
                 InnerStreamState::Stopped => {
                     this.stream = InnerStreamState::New;
                     return Poll::Ready(Some(Ok(FollowStreamMsg::Event(FollowEvent::Stop))));
-                }
-                InnerStreamState::BackendClosed => {
-                    this.stream = InnerStreamState::Finished;
-                }
-                InnerStreamState::Error(e) => {
-                    let e = e.take().expect("should always be Some");
-                    this.stream = InnerStreamState::Finished;
-                    return Poll::Ready(Some(Err(e)));
                 }
                 InnerStreamState::Finished => {
                     return Poll::Ready(None);

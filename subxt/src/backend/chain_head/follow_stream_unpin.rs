@@ -223,18 +223,6 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
 
                     FollowStreamMsg::Event(FollowEvent::Stop)
                 }
-                FollowStreamMsg::Event(FollowEvent::BackendClosed) => {
-                    // clear out "old" things that are no longer applicable since
-                    // the subscription has ended (a new one will be created under the hood, at
-                    // which point we'll get given a new subscription ID.
-                    this.subscription_id = None;
-                    this.pinned.clear();
-                    this.unpin_futs.clear();
-                    this.unpin_flags.lock().unwrap().clear();
-                    this.next_rel_block_age = 0;
-
-                    FollowStreamMsg::Event(FollowEvent::BackendClosed)
-                }
                 // These events aren't interesting; we just forward them on:
                 FollowStreamMsg::Event(FollowEvent::OperationBodyDone(details)) => {
                     FollowStreamMsg::Event(FollowEvent::OperationBodyDone(details))
