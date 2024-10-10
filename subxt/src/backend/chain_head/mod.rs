@@ -133,7 +133,7 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
             // to ensure that the backend is shutdown properly.
             while let Some(res) = driver.next().await {
                 if let Err(err) = res {
-                    tracing::debug!(target: "subxt", "ChainHeadBackendDriver got error={err}");
+                    tracing::debug!(target: "subxt", "chainHead backend error={err}");
                 }
             }
 
