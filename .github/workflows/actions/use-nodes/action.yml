@@ -3,6 +3,10 @@ description: Downloads and configures the substrate and polkadot binaries built 
 runs:
   using: composite
   steps:
+    - name: Install dependencies
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y curl gcc make clang cmake
+
     - name: Download substrate-node binary
       id: download-substrate-binary
       uses: dawidd6/action-download-artifact@bf251b5aa9c2f7eeb574a96ee720e24f801b7c11 # v6
@@ -32,9 +36,8 @@ runs:
         chmod u+x ./polkadot-prepare-worker
         ./substrate-node --version
         ./polkadot --version
-        mkdir -p ~/.local/bin
-        mv ./substrate-node ~/.local/bin
-        mv ./polkadot ~/.local/bin
-        mv ./polkadot-execute-worker ~/.local/bin
-        mv ./polkadot-prepare-worker ~/.local/bin
+        sudo mv ./substrate-node /usr/local/bin
+        sudo mv ./polkadot /usr/local/bin
+        sudo mv ./polkadot-execute-worker /usr/local/bin
+        sudo mv ./polkadot-prepare-worker /usr/local/bin
         rm ./polkadot.tar.gz

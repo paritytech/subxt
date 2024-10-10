@@ -82,7 +82,7 @@ jobs:
 
   clippy:
     name: Cargo clippy
-    runs-on: ubuntu-latest
+    runs-on: parity-large
     needs: [fmt, machete]
     steps:
       - name: Checkout sources
@@ -145,7 +145,7 @@ jobs:
 
   check:
     name: Cargo check
-    runs-on: ubuntu-latest
+    runs-on: parity-large
     needs: [fmt, machete]
     steps:
       - name: Checkout sources
@@ -235,7 +235,7 @@ jobs:
 
   docs:
     name: Check documentation and run doc tests
-    runs-on: ubuntu-latest
+    runs-on: parity-large
     needs: [fmt, machete]
     steps:
       - name: Checkout sources
@@ -268,7 +268,7 @@ jobs:
 
   tests:
     name: "Test (Native)"
-    runs-on: ubuntu-latest-16-cores
+    runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 30
     steps:
@@ -302,7 +302,7 @@ jobs:
 
   unstable_backend_tests:
     name: "Test chainhead backend"
-    runs-on: ubuntu-latest-16-cores
+    runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 30
     steps:
