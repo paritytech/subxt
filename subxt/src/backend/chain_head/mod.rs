@@ -137,7 +137,7 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
                 }
             }
 
-            tracing::debug!(target: "subxt", "ChainHeadBackendDriver closed");
+            tracing::debug!(target: "subxt", "chainHead backend was closed");
         });
 
         backend
