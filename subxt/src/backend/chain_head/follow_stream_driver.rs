@@ -749,34 +749,4 @@ mod test {
             )
         );
     }
-
-    #[tokio::test]
-    async fn subscribe_finalized_blocks_no_restart() {
-        let mut driver = test_follow_stream_driver_getter(
-            || [Ok(ev_initialized(0)), Ok(FollowEvent::BackendClosed)],
-            10,
-        );
-
-        let handle = driver.handle();
-
-        tokio::spawn(async move { while driver.next().await.is_some() {} });
-
-        let f = |ev| match ev {
-            FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
-            FollowEvent::Initialized(ev) => ev.finalized_block_hashes,
-            _ => vec![],
-        };
-
-        let stream = FollowStreamFinalizedHeads::new(handle.subscribe(), f);
-        let evs: Vec<_> = stream.try_collect().await.unwrap();
-
-        assert_eq!(evs.len(), 1);
-        assert_eq!(
-            evs[0],
-            (
-                "sub_id_0".to_string(),
-                vec![BlockRef::new(H256::from_low_u64_le(0))]
-            )
-        );
-    }
 }

@@ -83,7 +83,7 @@ impl<Hash> std::fmt::Debug for InnerStreamState<Hash> {
             Self::Initializing(_) => write!(f, "Initializing(..)"),
             Self::Ready(_) => write!(f, "Ready(..)"),
             Self::ReceivingEvents(_) => write!(f, "ReceivingEvents(..)"),
-            Self::Stopped { .. } => write!(f, "Stopped"),
+            Self::Stopped => write!(f, "Stopped"),
             Self::Finished => write!(f, "Finished"),
         }
     }
