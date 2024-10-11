@@ -13,8 +13,9 @@ description = "Generate an API for interacting with a substrate node from FRAME 
 
 [features]
 default = []
-fetch-metadata = ["dep:jsonrpsee", "dep:frame-metadata"]
-web = ["jsonrpsee?/async-wasm-client", "jsonrpsee?/client-web-transport", "getrandom/js"]
+fetch-metadata = ["dep:jsonrpsee", "dep:frame-metadata", "dep:url"]
+# NOTE: This is just hack that only enables `getrandom/js` and doesn't do anything else.
+web = ["getrandom/js"]
 
 [dependencies]
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
@@ -29,6 +30,7 @@ jsonrpsee = { workspace = true, features = ["ws-client", "http-client"], optiona
 hex = { workspace = true, features = ["std"] }
 thiserror = { workspace = true }
 scale-typegen = { workspace = true }
+url = { workspace = true, optional = true }
 
 # Included if "web" feature is enabled, to enable its js feature.
 getrandom = { workspace = true, optional = true }

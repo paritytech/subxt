@@ -11,7 +11,7 @@ use jsonrpsee::{
 };
 use std::time::Duration;
 
-pub use jsonrpsee::client_transport::ws::Url;
+pub use url::Url;
 
 /// The metadata version that is fetched from the node.
 #[derive(Default, Debug, Clone, Copy)]

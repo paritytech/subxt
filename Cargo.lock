@@ -10635,6 +10635,7 @@ dependencies = [
  "subxt-metadata",
  "syn 2.0.77",
  "thiserror",
+ "url",
 ]
 
 [[package]]
