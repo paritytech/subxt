@@ -10635,7 +10635,6 @@ dependencies = [
  "subxt-metadata",
  "syn 2.0.77",
  "thiserror",
- "tokio",
 ]
 
 [[package]]
@@ -10699,6 +10698,7 @@ name = "subxt-macro"
 version = "0.37.0"
 dependencies = [
  "darling 0.20.10",
+ "futures",
  "parity-scale-codec",
  "polkadot-sdk",
  "proc-macro-error2",

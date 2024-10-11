@@ -17,7 +17,7 @@ use scale_typegen::typegen::{
 };
 use subxt_codegen::{
     fetch_metadata::{
-        fetch_metadata_from_file_blocking, fetch_metadata_from_url_blocking, MetadataVersion, Url,
+        fetch_metadata_from_file_blocking, fetch_metadata_from_url, MetadataVersion, Url,
     },
     CodegenBuilder, CodegenError, Metadata,
 };
@@ -256,10 +256,13 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 false => MetadataVersion::Latest,
             };
 
-            fetch_metadata_from_url_blocking(url, version)
-                .map_err(CodegenError::from)
-                .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
-                .map_err(|e| e.into_compile_error())?
+            futures::executor::block_on(async {
+                fetch_metadata_from_url(url, version)
+                    .await
+                    .map_err(CodegenError::from)
+                    .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
+                    .map_err(|e| e.into_compile_error())
+            })?
         }
         #[cfg(feature = "runtime-path")]
         (None, None) => {

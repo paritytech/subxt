@@ -7,11 +7,7 @@
 use crate::error::FetchMetadataError;
 use codec::{Decode, Encode};
 use jsonrpsee::{
-    async_client::ClientBuilder,
-    client_transport::ws::WsTransportClientBuilder,
-    core::client::{ClientT, Error},
-    http_client::HttpClientBuilder,
-    rpc_params,
+    core::client::ClientT, http_client::HttpClientBuilder, rpc_params, ws_client::WsClientBuilder,
 };
 use std::time::Duration;
 
@@ -60,23 +56,6 @@ pub fn fetch_metadata_from_file_blocking(
     Ok(bytes)
 }
 
-/// Returns the metadata bytes from the provided URL, blocking the current thread.
-pub fn fetch_metadata_from_url_blocking(
-    url: Url,
-    version: MetadataVersion,
-) -> Result<Vec<u8>, FetchMetadataError> {
-    tokio_block_on(fetch_metadata_from_url(url, version))
-}
-
-// Block on some tokio runtime for sync contexts
-fn tokio_block_on<T, Fut: std::future::Future<Output = T>>(fut: Fut) -> T {
-    tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .build()
-        .unwrap()
-        .block_on(fut)
-}
-
 /// Returns the metadata bytes from the provided URL.
 pub async fn fetch_metadata_from_url(
     url: Url,
@@ -95,15 +74,11 @@ async fn fetch_metadata_ws(
     url: Url,
     version: MetadataVersion,
 ) -> Result<Vec<u8>, FetchMetadataError> {
-    let (sender, receiver) = WsTransportClientBuilder::default()
-        .build(url)
-        .await
-        .map_err(|e| Error::Transport(e.into()))?;
-
-    let client = ClientBuilder::default()
+    let client = WsClientBuilder::new()
         .request_timeout(Duration::from_secs(180))
         .max_buffer_capacity_per_subscription(4096)
-        .build_with_tokio(sender, receiver);
+        .build(url)
+        .await?;
 
     fetch_metadata(client, version).await
 }
