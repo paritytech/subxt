@@ -178,27 +178,14 @@ async fn run_test(backend: BackendType) -> Result<(), subxt::Error> {
     //     .unwrap();
     // let chain_config = chainspec.get();
 
-    tracing::trace!("Init light clinet");
+    tracing::trace!("Init light client");
     let now = std::time::Instant::now();
     let (_lc, rpc) = LightClient::relay_chain(POLKADOT_SPEC)?;
 
     let api = match backend {
         BackendType::Unstable => {
-            let (backend, mut driver) = ChainHeadBackend::builder().build(RpcClient::new(rpc));
-            tokio::spawn(async move {
-                while let Some(val) = driver.next().await {
-                    if let Err(e) = val {
-                        if e.is_disconnected_will_reconnect() {
-                            tracing::info!(
-                                "The RPC connection was lost and we may have missed a few blocks"
-                            );
-                            continue;
-                        }
-
-                        tracing::error!("Error driving unstable backend: {e}");
-                    }
-                }
-            });
+            let (backend, mut driver) =
+                ChainHeadBackend::builder().build_with_background_driver(RpcClient::new(rpc));
             let api: OnlineClient<PolkadotConfig> =
                 OnlineClient::from_backend(Arc::new(backend)).await?;
             api
