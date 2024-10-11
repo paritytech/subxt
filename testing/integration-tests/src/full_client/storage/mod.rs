@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, subxt_test, test_context, utils::wait_for_blocks};
+use polkadot_sdk::sp_core;
 
 #[cfg(fullclient)]
 use subxt::utils::AccountId32;

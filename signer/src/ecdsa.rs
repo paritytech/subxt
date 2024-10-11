@@ -4,6 +4,7 @@
 
 //! An ecdsa keypair implementation.
 use codec::Encode;
+use polkadot_sdk::sp_crypto_hashing;
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 use core::{fmt::Display, str::FromStr};
@@ -359,8 +360,7 @@ mod test {
 
     use super::*;
 
-    use sp_core::crypto::Pair as _;
-    use sp_core::ecdsa::Pair as SpPair;
+    use polkadot_sdk::sp_core::{self, crypto::Pair as _, ecdsa::Pair as SpPair};
 
     #[test]
     fn check_from_phrase_matches() {

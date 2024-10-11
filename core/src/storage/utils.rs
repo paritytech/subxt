@@ -11,6 +11,7 @@ use crate::error::{Error, MetadataError};
 use crate::metadata::Metadata;
 use alloc::borrow::ToOwned;
 use alloc::vec::Vec;
+use polkadot_sdk::sp_crypto_hashing;
 use subxt_metadata::{PalletMetadata, StorageEntryMetadata, StorageHasher};
 
 /// Return the root of a given [`Address`]: hash the pallet name and entry name

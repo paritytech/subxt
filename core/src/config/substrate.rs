@@ -8,6 +8,7 @@ use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, Hashe
 use alloc::format;
 use alloc::vec::Vec;
 use codec::{Decode, Encode};
+use polkadot_sdk::sp_crypto_hashing;
 use serde::{Deserialize, Serialize};
 
 pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};

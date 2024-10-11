@@ -81,9 +81,10 @@
 //! # {
 //! use subxt::config::PolkadotConfig;
 //! use std::str::FromStr;
+//! use polkadot_sdk::{sp_core, sp_keyring};
 //!
 //! //// 1. Use a `subxt_signer` impl:
-//! use subxt_signer::{ SecretUri, sr25519 };
+//! use subxt_signer::{SecretUri, sr25519};
 //!
 //! // Get hold of a `Signer` for a test account:
 //! let alice = sr25519::dev::alice();

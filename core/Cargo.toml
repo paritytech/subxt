@@ -32,7 +32,7 @@ std = [
     "impl-serde/std",
     "primitive-types/std",
 ]
-substrate-compat = ["sp-core", "sp-runtime"]
+substrate-compat = ["polkadot-sdk/sp-core", "polkadot-sdk/sp-runtime", "polkadot-sdk/std"]
 
 [dependencies]
 codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
@@ -50,7 +50,6 @@ serde = { workspace = true, default-features = false, features = ["derive"] }
 serde_json = { workspace = true, default-features = false, features = ["raw_value", "alloc"] }
 hashbrown = { workspace = true }
 
-
 # For ss58 encoding AccountId32 to serialize them properly:
 base58 = { workspace = true }
 blake2 = { workspace = true }
@@ -58,11 +57,9 @@ blake2 = { workspace = true }
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true, default-features = false }
 primitive-types = { workspace = true, default-features = false, features = ["codec", "serde_no_std", "scale-info"] }
-sp-crypto-hashing = { workspace = true }
+polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
 
 # Included if the "substrate-compat" feature is enabled.
-sp-core = { workspace = true, optional = true }
-sp-runtime = { workspace = true, optional = true }
 tracing = { workspace = true, default-features = false }
 
 # AccountId20
@@ -74,11 +71,8 @@ bitvec = { workspace = true }
 codec = { workspace = true, features = ["derive", "bit-vec"] }
 subxt-macro = { workspace = true }
 subxt-signer = { workspace = true, features = ["sr25519", "subxt"] }
-sp-core = { workspace = true }
-sp-keyring = { workspace = true }
-sp-runtime = { workspace = true }
+polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing", "sp-core", "sp-keyring"] }
 hex = { workspace = true }
-
 
 [package.metadata.docs.rs]
 defalt-features = true

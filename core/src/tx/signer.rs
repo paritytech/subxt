@@ -35,8 +35,8 @@ cfg_substrate_compat! {
 mod pair_signer {
     use super::Signer;
     use crate::Config;
-    use sp_core::Pair as PairT;
-    use sp_runtime::{
+    use polkadot_sdk::sp_core::Pair as PairT;
+    use polkadot_sdk::sp_runtime::{
         traits::{IdentifyAccount, Verify},
         AccountId32 as SpAccountId32, MultiSignature as SpMultiSignature,
     };

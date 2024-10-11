@@ -24,6 +24,7 @@ pub enum MultiSignature {
 #[cfg(feature = "substrate-compat")]
 mod substrate_impls {
     use super::*;
+    use polkadot_sdk::{sp_core, sp_runtime};
 
     impl From<sp_runtime::MultiSignature> for MultiSignature {
         fn from(value: sp_runtime::MultiSignature) -> Self {

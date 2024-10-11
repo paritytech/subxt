@@ -15,7 +15,7 @@ description = "Generate types and helpers for interacting with Substrate runtime
 
 [features]
 web = ["subxt-codegen/web"]
-runtime-path = ["sp-io", "sc-executor-common", "sp-state-machine", "sp-maybe-compressed-blob", "sc-executor"]
+runtime-path = ["polkadot-sdk"]
 
 [lib]
 proc-macro = true
@@ -28,11 +28,7 @@ syn = { workspace = true }
 quote = { workspace = true }
 subxt-codegen = { workspace = true, features = ["fetch-metadata"] }
 scale-typegen = { workspace = true }
-sc-executor = { workspace = true, optional = true }
-sp-maybe-compressed-blob = { workspace = true, optional = true }
-sp-state-machine = { workspace = true, optional = true }
-sp-io = { workspace = true, optional = true }
-sc-executor-common = { workspace = true, optional = true }
+polkadot-sdk = { workspace = true, optional = true, features = ["sp-io", "sc-executor-common", "sp-state-machine", "sp-maybe-compressed-blob", "sc-executor"] }
 
 [lints]
 workspace = true

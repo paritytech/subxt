@@ -132,6 +132,7 @@ cfg_substrate_compat! {
     /// implement subxt's Hasher and Header traits for some substrate structs
     mod substrate_impls {
         use super::*;
+        use polkadot_sdk::sp_runtime;
 
         impl<T: sp_runtime::traits::Header> Header for T
         where
