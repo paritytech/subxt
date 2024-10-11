@@ -893,15 +893,7 @@ mod test {
         }
 
         fn build_backend_spawn_background(rpc_client: impl RpcClientT) -> ChainHeadBackend<Conf> {
-            let (backend, mut driver) = build_backend(rpc_client);
-            tokio::spawn(async move {
-                while let Some(val) = driver.next().await {
-                    if let Err(e) = val {
-                        eprintln!("Error driving unstable backend: {e}; terminating client");
-                    }
-                }
-            });
-            backend
+            ChainHeadBackend::builder().build_with_background_driver(rpc_client)
         }
 
         fn runtime_spec() -> RuntimeSpec {

@@ -308,7 +308,7 @@ impl<T: Config> ChainHeadRpcMethods<T> {
 /// The following events are related to operations:
 /// - OperationBodyDone: The response of the `chainHead_body`
 /// - OperationCallDone: The response of the `chainHead_call`
-/// - OperationStorageItems: Items produced by the `chianHead_storage`
+/// - OperationStorageItems: Items produced by the `chainHead_storage`
 /// - OperationWaitingForContinue: Generated after OperationStorageItems and requires the user to
 ///   call `chainHead_continue`
 /// - OperationStorageDone: The `chainHead_storage` method has produced all the results
@@ -651,7 +651,7 @@ impl<Hash: BlockHash> Stream for FollowSubscription<Hash> {
 
         if let Poll::Ready(Some(Ok(FollowEvent::Stop))) = &res {
             // No more events will occur after this one.
-            self.done = true
+            self.done = true;
         }
 
         res

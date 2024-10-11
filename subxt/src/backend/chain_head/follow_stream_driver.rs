@@ -196,6 +196,13 @@ impl<Hash: BlockHash> Shared<Hash> {
     pub fn done(&self) {
         let mut shared = self.0.lock().unwrap();
         shared.done = true;
+
+        // Wake up all subscribers so they get notified that the backend was closed
+        for details in shared.subscribers.values_mut() {
+            if let Some(waker) = details.waker.take() {
+                waker.wake();
+            }
+        }
     }
 
     /// Cleanup a subscription.
