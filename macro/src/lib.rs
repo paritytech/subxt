@@ -16,10 +16,7 @@ use scale_typegen::typegen::{
     validation::{registry_contains_type_path, similar_type_paths_in_registry},
 };
 use subxt_codegen::{
-    fetch_metadata::{
-        fetch_metadata_from_file_blocking, fetch_metadata_from_url_blocking, MetadataVersion, Url,
-    },
-    CodegenBuilder, CodegenError, Metadata,
+    fetch_metadata::fetch_metadata_from_file_blocking, CodegenBuilder, CodegenError, Metadata,
 };
 use syn::{parse_macro_input, punctuated::Punctuated};
 
@@ -246,7 +243,10 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .map_err(|e| CodegenError::from(e).into_compile_error())?
         }
+        #[cfg(feature = "jsonrpsee")]
         (None, Some(url_string)) => {
+            use subxt_codegen::fetch_metadata::{fetch_metadata_from_url, MetadataVersion, Url};
+
             let url = Url::parse(url_string).unwrap_or_else(|_| {
                 abort_call_site!("Cannot download metadata; invalid url: {}", url_string)
             });
@@ -256,10 +256,19 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 false => MetadataVersion::Latest,
             };
 
-            fetch_metadata_from_url_blocking(url, version)
-                .map_err(CodegenError::from)
-                .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
-                .map_err(|e| e.into_compile_error())?
+            futures::executor::block_on(async {
+                fetch_metadata_from_url(url, version)
+                    .await
+                    .map_err(CodegenError::from)
+                    .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
+                    .map_err(|e| e.into_compile_error())
+            })?
+        }
+        #[cfg(not(feature = "jsonrpsee"))]
+        (None, Some(_)) => {
+            abort_call_site!(
+                    "The 'runtime_metadata_insecure_url' attribute is not supported without the 'jsonrpsee' feature"
+                )
         }
         #[cfg(feature = "runtime-path")]
         (None, None) => {

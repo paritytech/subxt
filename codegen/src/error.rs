@@ -85,6 +85,7 @@ impl CodegenError {
 /// Error attempting to load metadata.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
+
 pub enum FetchMetadataError {
     /// Error decoding from a hex value.
     #[error("Cannot decode hex value: {0}")]
@@ -95,6 +96,7 @@ pub enum FetchMetadataError {
     /// JSON-RPC error fetching metadata.
     #[cfg(feature = "fetch-metadata")]
     #[error("Request error: {0}")]
+    #[cfg(feature = "jsonrpsee")]
     RequestError(#[from] jsonrpsee::core::ClientError),
     /// Failed IO when fetching from a file.
     #[error("Failed IO for {0}, make sure that you are providing the correct file path for metadata: {1}")]

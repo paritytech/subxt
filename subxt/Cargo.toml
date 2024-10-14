@@ -62,6 +62,7 @@ reconnecting-rpc-client = ["dep:finito", "jsonrpsee"]
 jsonrpsee = [
     "dep:jsonrpsee",
     "runtime",
+    "subxt-macro/jsonrpsee"
 ]
 
 # Enable this to pull in extra Substrate dependencies which make it possible to
