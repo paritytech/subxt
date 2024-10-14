@@ -75,11 +75,11 @@ polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing", "sp-core", "
 hex = { workspace = true }
 
 [package.metadata.docs.rs]
-defalt-features = true
+default-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
-defalt-features = true
+default-features = true
 
 [lints]
 workspace = true

@@ -70,8 +70,8 @@ instant = { workspace = true, optional = true }
 getrandom = { workspace = true, optional = true }
 
 [package.metadata.docs.rs]
-defalt-features = true
+default-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
-defalt-features = true
+default-features = true
