@@ -1,4 +1,4 @@
-#[allow(dead_code, unused_imports, non_camel_case_types)]
+#[allow(dead_code, unused_imports, non_camel_case_types, unreachable_patterns)]
 #[allow(clippy::all)]
 #[allow(rustdoc::broken_intra_doc_links)]
 pub mod api {
@@ -5173,9 +5173,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                105u8, 200u8, 6u8, 121u8, 225u8, 107u8, 90u8, 181u8, 118u8, 128u8, 177u8, 54u8,
-                77u8, 44u8, 78u8, 160u8, 74u8, 228u8, 207u8, 15u8, 65u8, 219u8, 75u8, 68u8, 221u8,
-                147u8, 249u8, 199u8, 45u8, 153u8, 28u8, 69u8,
+                69u8, 73u8, 60u8, 67u8, 233u8, 216u8, 10u8, 38u8, 241u8, 132u8, 93u8, 146u8, 15u8,
+                5u8, 238u8, 129u8, 251u8, 189u8, 111u8, 218u8, 222u8, 102u8, 138u8, 181u8, 242u8,
+                179u8, 45u8, 239u8, 237u8, 108u8, 1u8, 26u8,
             ]
     }
     pub mod system {
@@ -37095,10 +37095,9 @@ pub mod api {
                         "AllowedRelayParents",
                         (),
                         [
-                            12u8, 170u8, 241u8, 120u8, 39u8, 216u8, 90u8, 37u8, 119u8, 212u8,
-                            161u8, 90u8, 233u8, 124u8, 92u8, 43u8, 212u8, 206u8, 153u8, 103u8,
-                            156u8, 79u8, 74u8, 7u8, 60u8, 35u8, 86u8, 16u8, 0u8, 224u8, 202u8,
-                            61u8,
+                            19u8, 136u8, 83u8, 71u8, 147u8, 131u8, 0u8, 128u8, 2u8, 78u8, 136u8,
+                            126u8, 42u8, 42u8, 76u8, 33u8, 22u8, 254u8, 25u8, 74u8, 140u8, 126u8,
+                            142u8, 229u8, 76u8, 163u8, 30u8, 192u8, 104u8, 50u8, 6u8, 121u8,
                         ],
                     )
                 }
@@ -67301,8 +67300,38 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct AllowedRelayParentsTracker<_0, _1> {
-                    pub buffer: ::subxt::ext::subxt_core::alloc::vec::Vec<(_0, _0)>,
+                    pub buffer: ::subxt::ext::subxt_core::alloc::vec::Vec<
+                        runtime_types::polkadot_runtime_parachains::shared::RelayParentInfo<_0>,
+                    >,
                     pub latest_number: _1,
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct RelayParentInfo<_0> {
+                    pub relay_parent: _0,
+                    pub state_root: _0,
+                    pub claim_queue: ::subxt::ext::subxt_core::utils::KeyedVec<
+                        runtime_types::polkadot_parachain_primitives::primitives::Id,
+                        ::subxt::ext::subxt_core::utils::KeyedVec<
+                            ::core::primitive::u8,
+                            ::subxt::ext::subxt_core::alloc::vec::Vec<
+                                runtime_types::polkadot_primitives::v8::CoreIndex,
+                            >,
+                        >,
+                    >,
                 }
             }
         }
