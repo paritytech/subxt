@@ -47,12 +47,21 @@ web = [
     "finito?/wasm-bindgen",
 ]
 
+# Feature flag to enable the default future executor.
+# Technically it's a hack enable to both but simplifies the conditional compilation
+# and subxt is selecting executor based on the used platform.
+#
+# For instance `wasm-bindgen-futures` panics if the platform isn't wasm32 and
+# similar for tokio that requires a tokio runtime to be initialized.
+runtime = ["tokio/rt", "wasm-bindgen-futures"]
+
 # Enable this to use the reconnecting rpc client
-unstable-reconnecting-rpc-client = ["dep:finito", "dep:tokio", "jsonrpsee", "wasm-bindgen-futures"]
+reconnecting-rpc-client = ["dep:finito", "jsonrpsee"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = [
     "dep:jsonrpsee",
+    "runtime",
 ]
 
 # Enable this to pull in extra Substrate dependencies which make it possible to
@@ -95,7 +104,7 @@ instant = { workspace = true }
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }
 primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"] }
-sp-crypto-hashing = { workspace = true }
+polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
 
 # Included if the "jsonrpsee" feature is enabled.
 jsonrpsee = { workspace = true, optional = true, features = ["jsonrpsee-types"] }
@@ -127,9 +136,7 @@ bitvec = { workspace = true }
 codec = { workspace = true, features = ["derive", "bit-vec"] }
 scale-info = { workspace = true, features = ["bit-vec"] }
 tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread", "sync"] }
-sp-core = { workspace = true }
-sp-keyring = { workspace = true }
-sp-runtime = { workspace = true }
+polkadot-sdk = { workspace = true, features = ["sp-core", "sp-keyring", "sp-runtime", "sp-crypto-hashing"] }
 assert_matches = { workspace = true }
 subxt-signer = { path = "../signer", features = ["unstable-eth"] }
 # Tracing subscriber is useful for light-client examples to ensure that
@@ -156,7 +163,7 @@ required-features = ["unstable-light-client", "jsonrpsee", "native"]
 [[example]]
 name = "setup_reconnecting_rpc_client"
 path = "examples/setup_reconnecting_rpc_client.rs"
-required-features = ["unstable-reconnecting-rpc-client"]
+required-features = ["reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]
 features = ["default", "substrate-compat", "unstable-light-client"]

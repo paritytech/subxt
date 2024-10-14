@@ -5,6 +5,7 @@
 use crate::backend::{Backend, BackendExt, BlockRef};
 use crate::{client::OnlineClientT, error::Error, events::Events, Config};
 use derive_where::derive_where;
+use polkadot_sdk::sp_crypto_hashing;
 use std::future::Future;
 
 /// A client for working with events.

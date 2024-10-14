@@ -217,7 +217,7 @@ pub mod ext {
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     substitute_type(
 ///         path = "sp_runtime::multiaddress::MultiAddress<A, B>",
-///         with = "::subxt::utils::Static<::sp_runtime::MultiAddress<A, B>>"
+///         with = "::subxt::utils::Static<polkadot_sdk::sp_runtime::MultiAddress<A, B>>"
 ///     )
 /// )]
 /// mod polkadot {}

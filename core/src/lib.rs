@@ -52,7 +52,7 @@ pub mod ext {
     pub use scale_value;
 
     cfg_substrate_compat! {
-        pub use sp_runtime;
-        pub use sp_core;
+        pub use polkadot_sdk::sp_runtime;
+        pub use polkadot_sdk::sp_core;
     }
 }

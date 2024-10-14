@@ -12,6 +12,7 @@ use crate::{
 use codec::Decode;
 use derive_where::derive_where;
 use futures::StreamExt;
+use polkadot_sdk::sp_crypto_hashing;
 use std::{future::Future, marker::PhantomData};
 use subxt_core::storage::address::{Address, StorageHashers, StorageKey};
 use subxt_core::utils::Yes;

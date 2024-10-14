@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
-use crate::backend::unstable::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
+use crate::backend::chain_head::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
 use futures::stream::{Stream, StreamExt};
@@ -196,6 +196,13 @@ impl<Hash: BlockHash> Shared<Hash> {
     pub fn done(&self) {
         let mut shared = self.0.lock().unwrap();
         shared.done = true;
+
+        // Wake up all subscribers so they get notified that the backend was closed
+        for details in shared.subscribers.values_mut() {
+            if let Some(waker) = details.waker.take() {
+                waker.wake();
+            }
+        }
     }
 
     /// Cleanup a subscription.
@@ -500,7 +507,7 @@ mod test_utils {
 #[cfg(test)]
 mod test {
     use futures::TryStreamExt;
-    use sp_core::H256;
+    use polkadot_sdk::sp_core::H256;
 
     use super::super::follow_stream::test_utils::{
         ev_best_block, ev_finalized, ev_initialized, ev_new_block,

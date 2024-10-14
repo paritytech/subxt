@@ -6,9 +6,9 @@
 //! the necessary information (probably from a JSON-RPC API, but that's up to the
 //! implementation).
 
+pub mod chain_head;
 pub mod legacy;
 pub mod rpc;
-pub mod unstable;
 pub mod utils;
 
 use subxt_core::client::RuntimeVersion;
@@ -325,7 +325,7 @@ pub enum TransactionStatus<Hash> {
 
 /// A response from calls like [`Backend::storage_fetch_values`] or
 /// [`Backend::storage_fetch_descendant_values`].
-#[cfg_attr(test, derive(serde::Serialize, Clone, PartialEq, Debug))]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, Debug)]
 pub struct StorageResponse {
     /// The key.
     pub key: Vec<u8>,
@@ -339,10 +339,10 @@ mod test {
     pub use crate::backend::rpc::{RawRpcFuture, RawRpcSubscription};
     pub use crate::{backend::StorageResponse, error::RpcError};
     pub use futures::StreamExt;
+    pub use polkadot_sdk::sp_core::{self, H256};
     pub use rpc::RpcClientT;
     pub use serde::Serialize;
     pub use serde_json::value::RawValue;
-    pub use sp_core::H256;
     pub use std::collections::{HashMap, VecDeque};
     pub use subxt_core::{config::DefaultExtrinsicParams, Config};
     pub use tokio::sync::{mpsc, Mutex};
@@ -881,27 +881,19 @@ mod test {
             OperationStorageItems, RuntimeSpec, RuntimeVersionEvent,
         };
 
-        use super::unstable::*;
+        use super::chain_head::*;
         use super::*;
 
         fn build_backend(
             rpc_client: impl RpcClientT,
-        ) -> (UnstableBackend<Conf>, UnstableBackendDriver<Conf>) {
-            let (backend, driver): (UnstableBackend<Conf>, _) =
-                UnstableBackend::builder().build(rpc_client);
+        ) -> (ChainHeadBackend<Conf>, ChainHeadBackendDriver<Conf>) {
+            let (backend, driver): (ChainHeadBackend<Conf>, _) =
+                ChainHeadBackend::builder().build(rpc_client);
             (backend, driver)
         }
 
-        fn build_backend_spawn_background(rpc_client: impl RpcClientT) -> UnstableBackend<Conf> {
-            let (backend, mut driver) = build_backend(rpc_client);
-            tokio::spawn(async move {
-                while let Some(val) = driver.next().await {
-                    if let Err(e) = val {
-                        eprintln!("Error driving unstable backend: {e}; terminating client");
-                    }
-                }
-            });
-            backend
+        fn build_backend_spawn_background(rpc_client: impl RpcClientT) -> ChainHeadBackend<Conf> {
+            ChainHeadBackend::builder().build_with_background_driver(rpc_client)
         }
 
         fn runtime_spec() -> RuntimeSpec {
@@ -931,7 +923,7 @@ mod test {
             serde_json::from_value(spec).unwrap()
         }
 
-        type FollowEvent = unstable::rpc_methods::FollowEvent<<Conf as Config>::Hash>;
+        type FollowEvent = chain_head::rpc_methods::FollowEvent<<Conf as Config>::Hash>;
 
         fn setup_mock_rpc_client(cycle_ids: bool) -> MockRpcBuilder {
             let hash = random_hash();
@@ -993,13 +985,16 @@ mod test {
                 operation_id: id.to_owned(),
             })
         }
-        fn storage_result(key: &str, value: &str) -> unstable::rpc_methods::StorageResult {
-            unstable::rpc_methods::StorageResult {
+        fn storage_result(key: &str, value: &str) -> chain_head::rpc_methods::StorageResult {
+            chain_head::rpc_methods::StorageResult {
                 key: Bytes(key.to_owned().into()),
                 result: rpc_methods::StorageResultType::Value(Bytes(value.to_owned().into())),
             }
         }
-        fn storage_items(id: &str, items: &[unstable::rpc_methods::StorageResult]) -> FollowEvent {
+        fn storage_items(
+            id: &str,
+            items: &[chain_head::rpc_methods::StorageResult],
+        ) -> FollowEvent {
             FollowEvent::OperationStorageItems(OperationStorageItems {
                 operation_id: id.to_owned(),
                 items: VecDeque::from(items.to_owned()),
@@ -1400,7 +1395,7 @@ mod test {
                 .add_mock_data(mock_data)
                 .add_mock_data(response_data)
                 .build();
-            let (backend, mut driver): (UnstableBackend<Conf>, _) = build_backend(rpc_client);
+            let (backend, mut driver): (ChainHeadBackend<Conf>, _) = build_backend(rpc_client);
 
             let _ = driver.next().await.unwrap();
             let _ = driver.next().await.unwrap();

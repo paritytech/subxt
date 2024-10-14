@@ -35,5 +35,5 @@ pub async fn test_context() -> TestContext {
 }
 
 pub async fn test_context_reconnecting_rpc_client() -> TestContext {
-    test_context_with("alice".to_string(), RpcClientKind::UnstableReconnecting).await
+    test_context_with("alice".to_string(), RpcClientKind::Reconnecting).await
 }

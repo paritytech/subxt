@@ -48,6 +48,7 @@ impl<AccountId, AccountIndex> From<AccountId> for MultiAddress<AccountId, Accoun
 #[cfg(feature = "substrate-compat")]
 mod substrate_impls {
     use super::{super::AccountId32, *};
+    use polkadot_sdk::sp_runtime;
 
     impl<N> From<sp_runtime::AccountId32> for MultiAddress<AccountId32, N> {
         fn from(value: sp_runtime::AccountId32) -> Self {

@@ -42,7 +42,7 @@ features = ["fetch-metadata"]
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
-defalt-features = true
+default-features = true
 
 [lints]
 workspace = true

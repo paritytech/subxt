@@ -175,6 +175,7 @@ impl core::str::FromStr for AccountId32 {
 #[cfg(feature = "substrate-compat")]
 mod substrate_impls {
     use super::*;
+    use polkadot_sdk::{sp_core, sp_runtime};
 
     impl From<sp_runtime::AccountId32> for AccountId32 {
         fn from(value: sp_runtime::AccountId32) -> Self {
@@ -199,8 +200,8 @@ mod substrate_impls {
 mod test {
     use super::*;
 
-    use sp_core::crypto::Ss58Codec;
-    use sp_keyring::AccountKeyring;
+    use polkadot_sdk::sp_core::{self, crypto::Ss58Codec};
+    use polkadot_sdk::sp_keyring::AccountKeyring;
 
     #[test]
     fn ss58_is_compatible_with_substrate_impl() {
