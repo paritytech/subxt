@@ -216,8 +216,8 @@ impl Metadata {
 
     /// Filter out any pallets and/or runtime_apis that we don't want to keep, retaining only those that we do.
     /// Note:
-    /// without also filtering out irrelevant runtime_api's in addition to pallets one should not expect significant metadata size reduction.
-    /// This happens because we will keep the types returned by runtime_api methods to guarantee that we can safely decode them.
+    /// only filter by `pallet`s will not lead to significant metadata size reduction because the return types are kept to ensure that those can be decoded.
+    ///
     pub fn retain<F, G>(&mut self, pallet_filter: F, api_filter: G)
     where
         F: FnMut(&str) -> bool,
@@ -404,7 +404,7 @@ impl StorageMetadata {
         self.entries.values()
     }
 
-    /// filter over the storage entries.
+    /// Filter out storage entries that are not of interest.
     pub fn retain_entries<F>(&mut self, f: F)
     where
         F: FnMut(&StorageEntryMetadata) -> bool,

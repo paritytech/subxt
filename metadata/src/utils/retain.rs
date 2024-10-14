@@ -27,6 +27,7 @@ impl TypeSet {
         }
     }
 
+    /// This function will deeply traverse the inital type and it's dependencies to collect the relevant type_ids
     fn collect_types(&mut self, metadata: &Metadata, t: &PortableType) {
         let mut work_set = VecDeque::from([t]);
         while let Some(typ) = work_set.pop_front() {
@@ -154,7 +155,8 @@ impl TypeSet {
         }
     }
 
-    // Collect types referenced inside outer enum
+    // Collect the types in outerEnums
+    // If the type wasn't previously collected we can safely strip some of the variants
     fn collect_variants_in_type<F>(&mut self, metadata: &mut Metadata, id: u32, mut name_filter: F)
     where
         F: FnMut(&str) -> bool,
@@ -167,7 +169,6 @@ impl TypeSet {
                 .expect("Metadata should contain enum type in registry")
         };
 
-        // Redo the thing above but keep filtered out variants if they reference types that we intend to keep
         let TypeDef::Variant(variant) = &mut ty.ty.type_def else {
             panic!("Metadata type is expected to be a variant type");
         };
@@ -287,18 +288,18 @@ pub fn retain_metadata<F, G>(
     F: FnMut(&str) -> bool,
     G: FnMut(&str) -> bool,
 {
-    // Types specifically referenced inside pallets that we keep
-    let mut retained_set = TypeSet::new();
+    // all types that we intend to keep
+    let mut type_set = TypeSet::new();
 
+    // Do a deep traversal over the pallet types first
     for pallet in metadata.pallets.values() {
         let should_retain = pallets_filter(&pallet.name);
         if should_retain {
-            retained_set.collect_pallet_types(pallet, metadata);
+            type_set.collect_pallet_types(pallet, metadata);
         }
     }
 
-    // all types that we intend to keep
-    let mut type_set = retained_set.clone();
+    // Do a deep traversal over the `Runtime apis` input/output types
     for api in metadata.apis.values() {
         let should_retain = runtime_apis_filter(&api.name);
         if should_retain {
@@ -327,14 +328,14 @@ pub fn retain_metadata<F, G>(
         type_set.collect_variants_in_type(metadata, typ, &mut pallets_filter);
     }
 
-    // Filter out unnecesary pallets that have no entries
-    metadata
-        .pallets
-        .retain(|pallet| pallets_filter(&pallet.name));
-
     // Retain the apis
     metadata.apis.retain(|api| runtime_apis_filter(&api.name));
 
+    // Filter out unnecesary pallets that have no entries
+    // and then re-index pallets after removing some of them above
+    metadata
+        .pallets
+        .retain(|pallet| pallets_filter(&pallet.name));
     metadata.pallets_by_index = metadata
         .pallets
         .values()
@@ -362,9 +363,12 @@ mod tests {
     use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
     use std::{fs, path::Path};
 
-    fn load_metadata() -> Metadata {
-        let bytes = fs::read(Path::new("../artifacts/polkadot_metadata_full.scale"))
-            .expect("Cannot read metadata blob");
+    fn load_metadata_polkadot() -> Metadata {
+        load_metadata("../artifacts/polkadot_metadata_full.scale")
+    }
+
+    fn load_metadata(path: impl AsRef<Path>) -> Metadata {
+        let bytes = fs::read(path).expect("Cannot read metadata blob");
         let meta: RuntimeMetadataPrefixed =
             Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
 
@@ -377,7 +381,7 @@ mod tests {
 
     #[test]
     fn retain_one_pallet() {
-        let metadata_cache = load_metadata();
+        let metadata_cache = load_metadata_polkadot();
 
         // Retain one pallet at a time ensuring the test does not panic.
         for pallet in metadata_cache.pallets() {
@@ -404,7 +408,7 @@ mod tests {
 
     #[test]
     fn retain_one_runtime_api() {
-        let metadata_cache = load_metadata();
+        let metadata_cache = load_metadata_polkadot();
 
         // Retain one runtime API at a time ensuring the test does not panic.
         for runtime_api in metadata_cache.runtime_api_traits() {
@@ -421,5 +425,35 @@ mod tests {
                 runtime_api.name()
             );
         }
+    }
+
+    #[test]
+    fn issue_1659() {
+        let metadata_cache = load_metadata("../artifacts/regressions/1659.scale");
+
+        // Strip metadata to the pallets as described in the issue.
+        let mut stripped_metadata = metadata_cache.clone();
+        retain_metadata(
+            &mut stripped_metadata,
+            {
+                let set = "Balances,Timestamp,Contracts,ContractsEvm,System"
+                    .split(",")
+                    .collect::<BTreeSet<&str>>();
+                move |s| set.contains(&s)
+            },
+            |_| true,
+        );
+
+        // check that call_enum did not change as it is referenced inside runtime_api
+        assert_eq!(
+            stripped_metadata.type_hash(stripped_metadata.outer_enums.call_enum_ty),
+            metadata_cache.type_hash(metadata_cache.outer_enums.call_enum_ty)
+        );
+
+        // check that event_num did not change as it is referenced inside runtime_api
+        assert_eq!(
+            stripped_metadata.type_hash(stripped_metadata.outer_enums.event_enum_ty),
+            metadata_cache.type_hash(metadata_cache.outer_enums.event_enum_ty)
+        );
     }
 }
