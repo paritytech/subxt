@@ -29,7 +29,6 @@
 
 use crate::utils::node_runtime;
 use codec::Compact;
-use futures::StreamExt;
 use std::sync::Arc;
 use subxt::backend::chain_head::ChainHeadBackend;
 use subxt::backend::rpc::RpcClient;
@@ -184,7 +183,7 @@ async fn run_test(backend: BackendType) -> Result<(), subxt::Error> {
 
     let api = match backend {
         BackendType::Unstable => {
-            let (backend, mut driver) =
+            let backend =
                 ChainHeadBackend::builder().build_with_background_driver(RpcClient::new(rpc));
             let api: OnlineClient<PolkadotConfig> =
                 OnlineClient::from_backend(Arc::new(backend)).await?;
