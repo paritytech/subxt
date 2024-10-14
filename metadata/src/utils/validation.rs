@@ -577,7 +577,7 @@ impl<'a> MetadataHasher<'a> {
     pub fn hash(&self) -> Hash {
         let metadata = self.metadata;
 
-        // Get the hashes of outer enums, considering only `specific_pallets` (if any are set).
+        // Get the hashes of outer enums.
         // If any of the typed that represent outer enums are encountered later, hashes from `top_level_enum_hashes` can be substituted.
         let outer_enum_hashes = OuterEnumHashes::new(metadata);
 

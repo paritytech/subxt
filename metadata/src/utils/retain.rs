@@ -9,7 +9,6 @@ use crate::{
     StorageEntryType,
 };
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
-use alloc::vec::Vec;
 use scale_info::{
     PortableType, TypeDef, TypeDefArray, TypeDefBitSequence, TypeDefCompact, TypeDefComposite,
     TypeDefSequence, TypeDefTuple, TypeDefVariant,
@@ -27,6 +26,14 @@ impl TypeSet {
         }
     }
 
+    fn insert(&mut self, id: u32) -> bool {
+        self.seen_ids.insert(id)
+    }
+
+    fn contains(&mut self, id: u32) -> bool {
+        self.seen_ids.contains(&id)
+    }
+
     /// This function will deeply traverse the inital type and it's dependencies to collect the relevant type_ids
     fn collect_types(&mut self, metadata: &Metadata, t: &PortableType) {
         let mut work_set = VecDeque::from([t]);
@@ -34,7 +41,7 @@ impl TypeSet {
             match &typ.ty.type_def {
                 TypeDef::Composite(TypeDefComposite { fields }) => {
                     for field in fields {
-                        if self.seen_ids.insert(field.ty.id) {
+                        if self.insert(field.ty.id) {
                             let ty = resolve_typ(metadata, field.ty.id);
                             work_set.push_back(ty);
                         }
@@ -43,7 +50,7 @@ impl TypeSet {
                 TypeDef::Variant(TypeDefVariant { variants }) => {
                     for variant in variants {
                         for field in &variant.fields {
-                            if self.seen_ids.insert(field.ty.id) {
+                            if self.insert(field.ty.id) {
                                 let ty = resolve_typ(metadata, field.ty.id);
                                 work_set.push_back(ty);
                             }
@@ -53,14 +60,14 @@ impl TypeSet {
                 TypeDef::Array(TypeDefArray { len: _, type_param })
                 | TypeDef::Sequence(TypeDefSequence { type_param })
                 | TypeDef::Compact(TypeDefCompact { type_param }) => {
-                    if self.seen_ids.insert(type_param.id) {
+                    if self.insert(type_param.id) {
                         let ty = resolve_typ(metadata, type_param.id);
                         work_set.push_back(ty);
                     }
                 }
                 TypeDef::Tuple(TypeDefTuple { fields }) => {
                     for field in fields {
-                        if self.seen_ids.insert(field.id) {
+                        if self.insert(field.id) {
                             let ty = resolve_typ(metadata, field.id);
                             work_set.push_back(ty);
                         }
@@ -72,7 +79,7 @@ impl TypeSet {
                     bit_order_type,
                 }) => {
                     for typ in [bit_order_type, bit_store_type] {
-                        if self.seen_ids.insert(typ.id) {
+                        if self.insert(typ.id) {
                             let ty = resolve_typ(metadata, typ.id);
                             work_set.push_back(ty);
                         }
@@ -83,26 +90,25 @@ impl TypeSet {
     }
 
     fn insert_and_collect(&mut self, metadata: &Metadata, id: u32) {
-        if self.seen_ids.insert(id) {
+        if self.insert(id) {
             let t = resolve_typ(metadata, id);
             self.collect_types(metadata, t);
         }
     }
 
     fn collect_extrinsic_types(&mut self, extrinsic: &ExtrinsicMetadata) {
-        let mut ids = Vec::from([
+        for ty in [
             extrinsic.address_ty,
             extrinsic.call_ty,
             extrinsic.signature_ty,
             extrinsic.extra_ty,
-        ]);
+        ] {
+            self.insert(ty);
+        }
 
         for signed in &extrinsic.signed_extensions {
-            ids.push(signed.extra_ty);
-            ids.push(signed.additional_ty);
-        }
-        for id in ids {
-            self.seen_ids.insert(id);
+            self.insert(signed.extra_ty);
+            self.insert(signed.additional_ty);
         }
     }
 
@@ -118,40 +124,36 @@ impl TypeSet {
 
     /// Collect all type IDs needed to represent the provided pallet.
     fn collect_pallet_types(&mut self, pallet: &PalletMetadataInner, metadata: &Metadata) {
-        let mut type_ids = Vec::new();
         if let Some(storage) = &pallet.storage {
             for entry in storage.entries() {
                 match entry.entry_type {
                     StorageEntryType::Plain(ty) => {
-                        type_ids.push(ty);
+                        self.insert_and_collect(metadata, ty);
                     }
                     StorageEntryType::Map {
                         key_ty, value_ty, ..
                     } => {
-                        type_ids.push(key_ty);
-                        type_ids.push(value_ty);
+                        self.insert_and_collect(metadata, key_ty);
+                        self.insert_and_collect(metadata, value_ty);
                     }
                 }
             }
         }
 
         if let Some(ty) = pallet.call_ty {
-            type_ids.push(ty);
+            self.insert_and_collect(metadata, ty);
         }
 
         if let Some(ty) = pallet.event_ty {
-            type_ids.push(ty);
+            self.insert_and_collect(metadata, ty);
         }
 
         for constant in pallet.constants.values() {
-            type_ids.push(constant.ty);
+            self.insert_and_collect(metadata, constant.ty);
         }
 
         if let Some(ty) = pallet.error_ty {
-            type_ids.push(ty);
-        }
-        for id in type_ids {
-            self.insert_and_collect(metadata, id);
+            self.insert_and_collect(metadata, ty);
         }
     }
 
@@ -174,7 +176,7 @@ impl TypeSet {
         };
 
         // If the type was not referenced earlier we can safely strip some of the variants
-        if self.seen_ids.insert(id) {
+        if self.insert(id) {
             variant.variants.retain(|v| name_filter(&v.name));
         }
     }
@@ -315,8 +317,8 @@ pub fn retain_metadata<F, G>(
         .iter()
         .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
         .expect("Metadata must contain sp_runtime::DispatchError");
-    type_set.seen_ids.insert(dispatch_error_ty.id);
-    type_set.seen_ids.insert(metadata.runtime_ty);
+    type_set.insert(dispatch_error_ty.id);
+    type_set.insert(metadata.runtime_ty);
     type_set.collect_extrinsic_types(&metadata.extrinsic);
 
     // Collect the outer enums type IDs.
@@ -344,7 +346,7 @@ pub fn retain_metadata<F, G>(
         .map(|(pos, p)| (p.index, pos))
         .collect();
 
-    let map_ids = metadata.types.retain(|id| type_set.seen_ids.contains(&id));
+    let map_ids = metadata.types.retain(|id| type_set.contains(id));
 
     update_outer_enums(&mut metadata.outer_enums, &map_ids);
     for pallets in metadata.pallets.values_mut() {
