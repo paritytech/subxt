@@ -404,14 +404,6 @@ impl StorageMetadata {
         self.entries.values()
     }
 
-    /// Filter out storage entries that are not of interest.
-    pub fn retain_entries<F>(&mut self, f: F)
-    where
-        F: FnMut(&StorageEntryMetadata) -> bool,
-    {
-        self.entries.retain(f)
-    }
-
     /// Return a specific storage entry given its name.
     pub fn entry_by_name(&self, name: &str) -> Option<&StorageEntryMetadata> {
         self.entries.get_by_key(name)
