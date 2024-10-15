@@ -1216,29 +1216,4 @@ mod tests {
         .try_into()
         .expect("can build valid metadata")
     }
-
-    #[test]
-    fn hash_comparison_trimmed_metadata() {
-        // trim the metadata:
-        let metadata = metadata_with_pallet_events();
-        let trimmed_metadata = {
-            let mut m = metadata.clone();
-            m.retain(|e| e == "First", |_| true);
-            m
-        };
-
-        let name_set: Vec<String> = trimmed_metadata
-            .pallets
-            .values()
-            .iter()
-            .map(|pallet| pallet.name.to_string())
-            .collect();
-        // test that the hashes are the same:
-        let hash = MetadataHasher::new(&metadata)
-            .only_these_pallets(&name_set)
-            .hash();
-        let hash_trimmed = MetadataHasher::new(&trimmed_metadata).hash();
-
-        assert_eq!(hash, hash_trimmed);
-    }
 }

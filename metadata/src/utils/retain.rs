@@ -35,42 +35,34 @@ impl TypeSet {
     }
 
     /// This function will deeply traverse the inital type and it's dependencies to collect the relevant type_ids
-    fn collect_types(&mut self, metadata: &Metadata, t: &PortableType) {
-        let mut work_set = VecDeque::from([t]);
+    fn collect_types(&mut self, metadata: &Metadata, id: u32) {
+        let mut work_set = VecDeque::from([id]);
         while let Some(typ) = work_set.pop_front() {
+            if !self.insert(typ) {
+                return;
+            }
+            let typ = resolve_typ(metadata, typ);
             match &typ.ty.type_def {
                 TypeDef::Composite(TypeDefComposite { fields }) => {
                     for field in fields {
-                        if self.insert(field.ty.id) {
-                            let ty = resolve_typ(metadata, field.ty.id);
-                            work_set.push_back(ty);
-                        }
+                        work_set.push_back(field.ty.id);
                     }
                 }
                 TypeDef::Variant(TypeDefVariant { variants }) => {
                     for variant in variants {
                         for field in &variant.fields {
-                            if self.insert(field.ty.id) {
-                                let ty = resolve_typ(metadata, field.ty.id);
-                                work_set.push_back(ty);
-                            }
+                            work_set.push_back(field.ty.id);
                         }
                     }
                 }
                 TypeDef::Array(TypeDefArray { len: _, type_param })
                 | TypeDef::Sequence(TypeDefSequence { type_param })
                 | TypeDef::Compact(TypeDefCompact { type_param }) => {
-                    if self.insert(type_param.id) {
-                        let ty = resolve_typ(metadata, type_param.id);
-                        work_set.push_back(ty);
-                    }
+                    work_set.push_back(type_param.id);
                 }
                 TypeDef::Tuple(TypeDefTuple { fields }) => {
                     for field in fields {
-                        if self.insert(field.id) {
-                            let ty = resolve_typ(metadata, field.id);
-                            work_set.push_back(ty);
-                        }
+                        work_set.push_back(field.id);
                     }
                 }
                 TypeDef::Primitive(_) => (),
@@ -79,20 +71,10 @@ impl TypeSet {
                     bit_order_type,
                 }) => {
                     for typ in [bit_order_type, bit_store_type] {
-                        if self.insert(typ.id) {
-                            let ty = resolve_typ(metadata, typ.id);
-                            work_set.push_back(ty);
-                        }
+                        work_set.push_back(typ.id);
                     }
                 }
             }
-        }
-    }
-
-    fn insert_and_collect(&mut self, metadata: &Metadata, id: u32) {
-        if self.insert(id) {
-            let t = resolve_typ(metadata, id);
-            self.collect_types(metadata, t);
         }
     }
 
@@ -116,9 +98,9 @@ impl TypeSet {
     fn collect_runtime_api_types(&mut self, metadata: &Metadata, api: &RuntimeApiMetadataInner) {
         for method in api.methods.values() {
             for input in &method.inputs {
-                self.insert_and_collect(metadata, input.ty);
+                self.collect_types(metadata, input.ty);
             }
-            self.insert_and_collect(metadata, method.output_ty);
+            self.collect_types(metadata, method.output_ty);
         }
     }
 
@@ -128,32 +110,32 @@ impl TypeSet {
             for entry in storage.entries() {
                 match entry.entry_type {
                     StorageEntryType::Plain(ty) => {
-                        self.insert_and_collect(metadata, ty);
+                        self.collect_types(metadata, ty);
                     }
                     StorageEntryType::Map {
                         key_ty, value_ty, ..
                     } => {
-                        self.insert_and_collect(metadata, key_ty);
-                        self.insert_and_collect(metadata, value_ty);
+                        self.collect_types(metadata, key_ty);
+                        self.collect_types(metadata, value_ty);
                     }
                 }
             }
         }
 
         if let Some(ty) = pallet.call_ty {
-            self.insert_and_collect(metadata, ty);
+            self.collect_types(metadata, ty);
         }
 
         if let Some(ty) = pallet.event_ty {
-            self.insert_and_collect(metadata, ty);
+            self.collect_types(metadata, ty);
         }
 
         for constant in pallet.constants.values() {
-            self.insert_and_collect(metadata, constant.ty);
+            self.collect_types(metadata, constant.ty);
         }
 
         if let Some(ty) = pallet.error_ty {
-            self.insert_and_collect(metadata, ty);
+            self.collect_types(metadata, ty);
         }
     }
 
@@ -365,11 +347,11 @@ mod tests {
     use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
     use std::{fs, path::Path};
 
-    fn load_metadata_polkadot() -> Metadata {
-        load_metadata("../artifacts/polkadot_metadata_full.scale")
+    fn load_metadata() -> Metadata {
+        load_metadata_custom("../artifacts/polkadot_metadata_full.scale")
     }
 
-    fn load_metadata(path: impl AsRef<Path>) -> Metadata {
+    fn load_metadata_custom(path: impl AsRef<Path>) -> Metadata {
         let bytes = fs::read(path).expect("Cannot read metadata blob");
         let meta: RuntimeMetadataPrefixed =
             Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
@@ -383,7 +365,7 @@ mod tests {
 
     #[test]
     fn retain_one_pallet() {
-        let metadata_cache = load_metadata_polkadot();
+        let metadata_cache = load_metadata();
 
         // Retain one pallet at a time ensuring the test does not panic.
         for pallet in metadata_cache.pallets() {
@@ -410,7 +392,7 @@ mod tests {
 
     #[test]
     fn retain_one_runtime_api() {
-        let metadata_cache = load_metadata_polkadot();
+        let metadata_cache = load_metadata();
 
         // Retain one runtime API at a time ensuring the test does not panic.
         for runtime_api in metadata_cache.runtime_api_traits() {
@@ -431,7 +413,7 @@ mod tests {
 
     #[test]
     fn issue_1659() {
-        let metadata_cache = load_metadata("../artifacts/regressions/1659.scale");
+        let metadata_cache = load_metadata_custom("../artifacts/regressions/1659.scale");
 
         // Strip metadata to the pallets as described in the issue.
         let mut stripped_metadata = metadata_cache.clone();
