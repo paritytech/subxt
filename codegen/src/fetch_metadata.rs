@@ -7,7 +7,10 @@
 use crate::error::FetchMetadataError;
 
 #[cfg(feature = "jsonrpsee")]
-pub use {jsonrpsee::fetch_metadata_from_url, url::Url};
+pub use {
+    jsonrpsee::{fetch_metadata_from_url, fetch_metadata_from_url_blocking},
+    url::Url,
+};
 
 /// The metadata version that is fetched from the node.
 #[derive(Default, Debug, Clone, Copy)]
@@ -53,6 +56,7 @@ pub fn fetch_metadata_from_file_blocking(
 }
 
 #[cfg(feature = "jsonrpsee")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
 mod jsonrpsee {
     use super::{FetchMetadataError, MetadataVersion};
     use codec::{Decode, Encode};
@@ -74,6 +78,23 @@ mod jsonrpsee {
         }?;
 
         Ok(bytes)
+    }
+
+    /// Returns the metadata bytes from the provided URL, blocking the current thread.
+    pub fn fetch_metadata_from_url_blocking(
+        url: Url,
+        version: MetadataVersion,
+    ) -> Result<Vec<u8>, FetchMetadataError> {
+        tokio_block_on(fetch_metadata_from_url(url, version))
+    }
+
+    // Block on some tokio runtime for sync contexts
+    fn tokio_block_on<T, Fut: std::future::Future<Output = T>>(fut: Fut) -> T {
+        tokio::runtime::Builder::new_multi_thread()
+            .enable_all()
+            .build()
+            .unwrap()
+            .block_on(fut)
     }
 
     async fn fetch_metadata_ws(

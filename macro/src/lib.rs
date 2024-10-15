@@ -245,7 +245,9 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
         }
         #[cfg(feature = "jsonrpsee")]
         (None, Some(url_string)) => {
-            use subxt_codegen::fetch_metadata::{fetch_metadata_from_url, MetadataVersion, Url};
+            use subxt_codegen::fetch_metadata::{
+                fetch_metadata_from_url_blocking, MetadataVersion, Url,
+            };
 
             let url = Url::parse(url_string).unwrap_or_else(|_| {
                 abort_call_site!("Cannot download metadata; invalid url: {}", url_string)
@@ -256,13 +258,10 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 false => MetadataVersion::Latest,
             };
 
-            futures::executor::block_on(async {
-                fetch_metadata_from_url(url, version)
-                    .await
-                    .map_err(CodegenError::from)
-                    .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
-                    .map_err(|e| e.into_compile_error())
-            })?
+            fetch_metadata_from_url_blocking(url, version)
+                .map_err(CodegenError::from)
+                .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
+                .map_err(|e| e.into_compile_error())?
         }
         #[cfg(not(feature = "jsonrpsee"))]
         (None, Some(_)) => {
