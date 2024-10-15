@@ -85,7 +85,6 @@ impl CodegenError {
 /// Error attempting to load metadata.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
-
 pub enum FetchMetadataError {
     /// Error decoding from a hex value.
     #[error("Cannot decode hex value: {0}")]
