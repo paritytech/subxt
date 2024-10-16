@@ -1,0 +1,38 @@
+[package]
+name = "subxt-fetchmetadata"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = true
+autotests = false
+
+license.workspace = true
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+description = "Fetch metadata via file or URL"
+
+[features]
+url = ["dep:jsonrpsee", "dep:tokio", "dep:url", "frame-metadata"]
+
+[dependencies]
+thiserror = { workspace = true }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "std"] }
+hex = { workspace = true, features = ["std"] }
+
+# Optional dependencies for the `url` feature.
+jsonrpsee = { workspace = true, features = ["ws-client", "http-client"], optional = true }
+tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
+url = { workspace = true, optional = true }
+frame-metadata = { workspace = true, optional = true, features = ["std"] }
+
+[package.metadata.docs.rs]
+features = ["url"]
+rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.playground]
+default-features = true
+
+[lints]
+workspace = true

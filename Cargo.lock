@@ -10612,6 +10612,7 @@ dependencies = [
  "strip-ansi-escapes",
  "subxt",
  "subxt-codegen",
+ "subxt-fetchmetadata",
  "subxt-metadata",
  "syn 2.0.77",
  "thiserror",
@@ -10626,7 +10627,6 @@ dependencies = [
  "getrandom",
  "heck 0.5.0",
  "hex",
- "jsonrpsee",
  "parity-scale-codec",
  "proc-macro2",
  "quote",
@@ -10635,8 +10635,6 @@ dependencies = [
  "subxt-metadata",
  "syn 2.0.77",
  "thiserror",
- "tokio",
- "url",
 ]
 
 [[package]]
@@ -10668,6 +10666,19 @@ dependencies = [
  "subxt-metadata",
  "subxt-signer",
  "tracing",
+]
+
+[[package]]
+name = "subxt-fetchmetadata"
+version = "0.37.0"
+dependencies = [
+ "frame-metadata 16.0.0",
+ "hex",
+ "jsonrpsee",
+ "parity-scale-codec",
+ "thiserror",
+ "tokio",
+ "url",
 ]
 
 [[package]]
@@ -10706,6 +10717,7 @@ dependencies = [
  "quote",
  "scale-typegen",
  "subxt-codegen",
+ "subxt-fetchmetadata",
  "syn 2.0.77",
 ]
 

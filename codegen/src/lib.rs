@@ -13,13 +13,6 @@ mod api;
 pub mod error;
 mod ir;
 
-// These should probably be in a separate crate; they are used by the
-// macro and CLI tool, so they only live here because this is a common
-// crate that both depend on.
-#[cfg(feature = "fetch-metadata")]
-#[cfg_attr(docsrs, doc(cfg(feature = "fetch-metadata")))]
-pub mod fetch_metadata;
-
 #[cfg(feature = "web")]
 use getrandom as _;
 

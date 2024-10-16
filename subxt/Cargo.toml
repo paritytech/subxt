@@ -61,8 +61,7 @@ reconnecting-rpc-client = ["dep:finito", "jsonrpsee"]
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = [
     "dep:jsonrpsee",
-    "runtime",
-    "subxt-macro/jsonrpsee"
+    "runtime"
 ]
 
 # Enable this to pull in extra Substrate dependencies which make it possible to
