@@ -10612,8 +10612,8 @@ dependencies = [
  "strip-ansi-escapes",
  "subxt",
  "subxt-codegen",
- "subxt-fetchmetadata",
  "subxt-metadata",
+ "subxt-utils",
  "syn 2.0.77",
  "thiserror",
  "tokio",
@@ -10669,19 +10669,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "subxt-fetchmetadata"
-version = "0.37.0"
-dependencies = [
- "frame-metadata 16.0.0",
- "hex",
- "jsonrpsee",
- "parity-scale-codec",
- "thiserror",
- "tokio",
- "url",
-]
-
-[[package]]
 name = "subxt-lightclient"
 version = "0.37.0"
 dependencies = [
@@ -10717,7 +10704,7 @@ dependencies = [
  "quote",
  "scale-typegen",
  "subxt-codegen",
- "subxt-fetchmetadata",
+ "subxt-utils",
  "syn 2.0.77",
 ]
 
@@ -10772,6 +10759,19 @@ version = "0.37.0"
 dependencies = [
  "quote",
  "syn 2.0.77",
+]
+
+[[package]]
+name = "subxt-utils"
+version = "0.37.0"
+dependencies = [
+ "frame-metadata 16.0.0",
+ "hex",
+ "jsonrpsee",
+ "parity-scale-codec",
+ "thiserror",
+ "tokio",
+ "url",
 ]
 
 [[package]]

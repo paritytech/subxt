@@ -9,7 +9,7 @@ use jsonrpsee::{
     http_client::HttpClientBuilder,
 };
 use std::time::Duration;
-use subxt_fetchmetadata::url::Url;
+use subxt_utils::fetch_metadata::Url;
 
 /// Returns the node's chainSpec from the provided URL.
 pub async fn fetch_chain_spec(url: Url) -> Result<serde_json::Value, FetchSpecError> {
