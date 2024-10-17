@@ -10626,7 +10626,6 @@ dependencies = [
  "frame-metadata 16.0.0",
  "getrandom",
  "heck 0.5.0",
- "hex",
  "parity-scale-codec",
  "proc-macro2",
  "quote",

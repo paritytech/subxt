@@ -24,7 +24,6 @@ quote = { workspace = true }
 syn = { workspace = true }
 scale-info = { workspace = true }
 subxt-metadata = { workspace = true }
-hex = { workspace = true, features = ["std"] }
 thiserror = { workspace = true }
 scale-typegen = { workspace = true }
 
