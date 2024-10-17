@@ -5,10 +5,9 @@
 //! Utility functions to generate a subset of the metadata.
 
 use crate::{
-    ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
-    StorageEntryType,
+    ExtrinsicMetadata, Metadata, PalletMetadataInner, RuntimeApiMetadataInner, StorageEntryType,
 };
-use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
+use alloc::collections::{BTreeSet, VecDeque};
 use scale_info::{
     PortableType, TypeDef, TypeDefArray, TypeDefBitSequence, TypeDefCompact, TypeDefComposite,
     TypeDefSequence, TypeDefTuple, TypeDefVariant,
@@ -17,12 +16,14 @@ use scale_info::{
 #[derive(Clone)]
 struct TypeSet {
     seen_ids: BTreeSet<u32>,
+    work_set: VecDeque<u32>,
 }
 
 impl TypeSet {
     fn new() -> Self {
         Self {
             seen_ids: BTreeSet::new(),
+            work_set: VecDeque::with_capacity(22),
         }
     }
 
@@ -36,42 +37,41 @@ impl TypeSet {
 
     /// This function will deeply traverse the inital type and it's dependencies to collect the relevant type_ids
     fn collect_types(&mut self, metadata: &Metadata, id: u32) {
-        let mut work_set = VecDeque::from([id]);
-        while let Some(typ) = work_set.pop_front() {
-            if !self.insert(typ) {
-                return;
-            }
-            let typ = resolve_typ(metadata, typ);
-            match &typ.ty.type_def {
-                TypeDef::Composite(TypeDefComposite { fields }) => {
-                    for field in fields {
-                        work_set.push_back(field.ty.id);
-                    }
-                }
-                TypeDef::Variant(TypeDefVariant { variants }) => {
-                    for variant in variants {
-                        for field in &variant.fields {
-                            work_set.push_back(field.ty.id);
+        self.work_set.push_back(id);
+        while let Some(typ) = self.work_set.pop_front() {
+            if self.insert(typ) {
+                let typ = resolve_typ(metadata, typ);
+                match &typ.ty.type_def {
+                    TypeDef::Composite(TypeDefComposite { fields }) => {
+                        for field in fields {
+                            self.work_set.push_back(field.ty.id);
                         }
                     }
-                }
-                TypeDef::Array(TypeDefArray { len: _, type_param })
-                | TypeDef::Sequence(TypeDefSequence { type_param })
-                | TypeDef::Compact(TypeDefCompact { type_param }) => {
-                    work_set.push_back(type_param.id);
-                }
-                TypeDef::Tuple(TypeDefTuple { fields }) => {
-                    for field in fields {
-                        work_set.push_back(field.id);
+                    TypeDef::Variant(TypeDefVariant { variants }) => {
+                        for variant in variants {
+                            for field in &variant.fields {
+                                self.work_set.push_back(field.ty.id);
+                            }
+                        }
                     }
-                }
-                TypeDef::Primitive(_) => (),
-                TypeDef::BitSequence(TypeDefBitSequence {
-                    bit_store_type,
-                    bit_order_type,
-                }) => {
-                    for typ in [bit_order_type, bit_store_type] {
-                        work_set.push_back(typ.id);
+                    TypeDef::Array(TypeDefArray { len: _, type_param })
+                    | TypeDef::Sequence(TypeDefSequence { type_param })
+                    | TypeDef::Compact(TypeDefCompact { type_param }) => {
+                        self.work_set.push_back(type_param.id);
+                    }
+                    TypeDef::Tuple(TypeDefTuple { fields }) => {
+                        for field in fields {
+                            self.work_set.push_back(field.id);
+                        }
+                    }
+                    TypeDef::Primitive(_) => (),
+                    TypeDef::BitSequence(TypeDefBitSequence {
+                        bit_store_type,
+                        bit_order_type,
+                    }) => {
+                        for typ in [bit_order_type, bit_store_type] {
+                            self.work_set.push_back(typ.id);
+                        }
                     }
                 }
             }
@@ -97,9 +97,6 @@ impl TypeSet {
     /// Collect all type IDs needed to represent the runtime APIs.
     fn collect_runtime_api_types(&mut self, metadata: &Metadata, api: &RuntimeApiMetadataInner) {
         for method in api.methods.values() {
-            for input in &method.inputs {
-                self.collect_types(metadata, input.ty);
-            }
             self.collect_types(metadata, method.output_ty);
         }
     }
@@ -122,44 +119,8 @@ impl TypeSet {
             }
         }
 
-        if let Some(ty) = pallet.call_ty {
-            self.collect_types(metadata, ty);
-        }
-
-        if let Some(ty) = pallet.event_ty {
-            self.collect_types(metadata, ty);
-        }
-
         for constant in pallet.constants.values() {
             self.collect_types(metadata, constant.ty);
-        }
-
-        if let Some(ty) = pallet.error_ty {
-            self.collect_types(metadata, ty);
-        }
-    }
-
-    // Collect the types in outerEnums
-    // If the type wasn't previously collected we can safely strip some of the variants
-    fn collect_variants_in_type<F>(&mut self, metadata: &mut Metadata, id: u32, mut name_filter: F)
-    where
-        F: FnMut(&str) -> bool,
-    {
-        let ty = {
-            metadata
-                .types
-                .types
-                .get_mut(id as usize)
-                .expect("Metadata should contain enum type in registry")
-        };
-
-        let TypeDef::Variant(variant) = &mut ty.ty.type_def else {
-            panic!("Metadata type is expected to be a variant type");
-        };
-
-        // If the type was not referenced earlier we can safely strip some of the variants
-        if self.insert(id) {
-            variant.variants.retain(|v| name_filter(&v.name));
         }
     }
 }
@@ -170,86 +131,6 @@ fn resolve_typ(metadata: &Metadata, typ: u32) -> &PortableType {
         .types
         .get(typ as usize)
         .expect("Metadata should contain enum type in registry")
-}
-
-/// Update all type IDs of the provided pallet using the new type IDs from the portable registry.
-fn update_pallet_types(pallet: &mut PalletMetadataInner, map_ids: &BTreeMap<u32, u32>) {
-    if let Some(storage) = &mut pallet.storage {
-        for entry in storage.entries.values_mut() {
-            match &mut entry.entry_type {
-                StorageEntryType::Plain(ty) => {
-                    update_type(ty, map_ids);
-                }
-                StorageEntryType::Map {
-                    key_ty, value_ty, ..
-                } => {
-                    update_type(key_ty, map_ids);
-                    update_type(value_ty, map_ids);
-                }
-            }
-        }
-    }
-    if let Some(ty) = &mut pallet.call_ty {
-        update_type(ty, map_ids);
-    }
-
-    if let Some(ty) = &mut pallet.event_ty {
-        update_type(ty, map_ids);
-    }
-
-    if let Some(ty) = &mut pallet.error_ty {
-        update_type(ty, map_ids);
-    }
-
-    for constant in pallet.constants.values_mut() {
-        update_type(&mut constant.ty, map_ids);
-    }
-}
-
-/// Update all type IDs of the provided extrinsic metadata using the new type IDs from the portable registry.
-fn update_extrinsic_types(extrinsic: &mut ExtrinsicMetadata, map_ids: &BTreeMap<u32, u32>) {
-    update_type(&mut extrinsic.address_ty, map_ids);
-    update_type(&mut extrinsic.call_ty, map_ids);
-    update_type(&mut extrinsic.signature_ty, map_ids);
-    update_type(&mut extrinsic.extra_ty, map_ids);
-
-    for signed in &mut extrinsic.signed_extensions {
-        update_type(&mut signed.extra_ty, map_ids);
-        update_type(&mut signed.additional_ty, map_ids);
-    }
-}
-
-/// Update all type IDs of the provided runtime APIs metadata using the new type IDs from the portable registry.
-fn update_runtime_api_types(apis: &mut [RuntimeApiMetadataInner], map_ids: &BTreeMap<u32, u32>) {
-    for api in apis {
-        for method in api.methods.values_mut() {
-            for input in &mut method.inputs {
-                update_type(&mut input.ty, map_ids);
-            }
-            update_type(&mut method.output_ty, map_ids);
-        }
-    }
-}
-
-/// Update all the type IDs for outer enums.
-fn update_outer_enums(enums: &mut OuterEnumsMetadata, map_ids: &BTreeMap<u32, u32>) {
-    update_type(&mut enums.call_enum_ty, map_ids);
-    update_type(&mut enums.event_enum_ty, map_ids);
-    update_type(&mut enums.error_enum_ty, map_ids);
-}
-
-/// Update the given type using the new type ID from the portable registry.
-///
-/// # Panics
-///
-/// Panics if the [`scale_info::PortableRegistry`] did not retain all needed types.
-fn update_type(ty: &mut u32, map_ids: &BTreeMap<u32, u32>) {
-    let old_id = *ty;
-    let new_id = map_ids
-        .get(&old_id)
-        .copied()
-        .unwrap_or_else(|| panic!("PortableRegistry did not retain type id {old_id}. This is a bug. Please open an issue."));
-    *ty = new_id;
 }
 
 /// Generate a subset of the metadata that contains only the
@@ -272,51 +153,7 @@ pub fn retain_metadata<F, G>(
     F: FnMut(&str) -> bool,
     G: FnMut(&str) -> bool,
 {
-    // all types that we intend to keep
-    let mut type_set = TypeSet::new();
-
-    // Do a deep traversal over the pallet types first
-    for pallet in metadata.pallets.values() {
-        let should_retain = pallets_filter(&pallet.name);
-        if should_retain {
-            type_set.collect_pallet_types(pallet, metadata);
-        }
-    }
-
-    // Do a deep traversal over the `Runtime apis` input/output types
-    for api in metadata.apis.values() {
-        let should_retain = runtime_apis_filter(&api.name);
-        if should_retain {
-            type_set.collect_runtime_api_types(metadata, api);
-        }
-    }
-
-    // Additionally, subxt depends on the `DispatchError` type existing; we use the same
-    // logic here that is used when building our `Metadata`.
-    let dispatch_error_ty = metadata
-        .types
-        .types
-        .iter()
-        .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
-        .expect("Metadata must contain sp_runtime::DispatchError");
-    type_set.insert(dispatch_error_ty.id);
-    type_set.insert(metadata.runtime_ty);
-    type_set.collect_extrinsic_types(&metadata.extrinsic);
-
-    // Collect the outer enums type IDs.
-    for typ in [
-        metadata.outer_enums.call_enum_ty,
-        metadata.outer_enums.event_enum_ty,
-        metadata.outer_enums.error_enum_ty,
-    ] {
-        type_set.collect_variants_in_type(metadata, typ, &mut pallets_filter);
-    }
-
-    // Retain the apis
-    metadata.apis.retain(|api| runtime_apis_filter(&api.name));
-
-    // Filter out unnecesary pallets that have no entries
-    // and then re-index pallets after removing some of them above
+    // 1. Delete pallets we don't want to keep.
     metadata
         .pallets
         .retain(|pallet| pallets_filter(&pallet.name));
@@ -328,21 +165,181 @@ pub fn retain_metadata<F, G>(
         .map(|(pos, p)| (p.index, pos))
         .collect();
 
-    let map_ids = metadata.types.retain(|id| type_set.contains(id));
+    // 2. Delete runtime APIs we don't want to keep.
+    metadata.apis.retain(|api| runtime_apis_filter(&api.name));
 
-    update_outer_enums(&mut metadata.outer_enums, &map_ids);
-    for pallets in metadata.pallets.values_mut() {
-        update_pallet_types(pallets, &map_ids);
+    // 3. For each outer enum type, strip it if possible, ie if it is not returned by any
+    // of the things we're keeping (because if it is, we need to keep all of it so that we
+    // can still decode values into it).
+    let outer_enums = metadata.outer_enums();
+    let mut find_type_id =
+        collect_return_types(metadata, &mut pallets_filter, &mut runtime_apis_filter);
+    for outer_enum_ty_id in [
+        outer_enums.call_enum_ty(),
+        outer_enums.error_enum_ty(),
+        outer_enums.event_enum_ty(),
+    ] {
+        if !find_type_id(outer_enum_ty_id) {
+            strip_variants_in_enum_type(metadata, &mut pallets_filter, outer_enum_ty_id);
+        }
     }
-    update_extrinsic_types(&mut metadata.extrinsic, &map_ids);
-    update_type(&mut metadata.runtime_ty, &map_ids);
-    update_runtime_api_types(metadata.apis.values_mut(), &map_ids);
+
+    // 4. Collect all of the type IDs we still want to keep after deleting.
+    let mut keep_these_type_ids: BTreeSet<u32> = iterate_metadata_types(metadata)
+        .iter()
+        .map(|x| **x)
+        .collect();
+
+    // 5. Additionally, subxt depends on the `DispatchError` type existing; we use the same
+    // logic here that is used when building our `Metadata` to ensure we keep it too.
+    let dispatch_error_ty = metadata
+        .types
+        .types
+        .iter()
+        .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
+        .expect("Metadata must contain sp_runtime::DispatchError");
+
+    keep_these_type_ids.insert(dispatch_error_ty.id);
+
+    // 5. Strip all of the type IDs we no longer need, based on the above set.
+    let map_ids = metadata
+        .types
+        .retain(|id| keep_these_type_ids.contains(&id));
+
+    // 6. Now, update the type IDs referenced in our metadata to reflect this.
+    for id in iterate_metadata_types(metadata) {
+        if let Some(new_id) = map_ids.get(id) {
+            *id = *new_id;
+        } else {
+            panic!("Type id {id} was not retained. This is a bug");
+        }
+    }
+}
+
+fn strip_variants_in_enum_type<F>(metadata: &mut Metadata, mut pallets_filter: F, id: u32)
+where
+    F: FnMut(&str) -> bool,
+{
+    let ty = {
+        metadata
+            .types
+            .types
+            .get_mut(id as usize)
+            .expect("Metadata should contain enum type in registry")
+    };
+
+    let TypeDef::Variant(variant) = &mut ty.ty.type_def else {
+        panic!("Metadata type is expected to be a variant type");
+    };
+
+    variant.variants.retain(|v| pallets_filter(&v.name));
+}
+
+/// return an Vec handing back a mutable reference to each type ID seen in the metadata (not recursively).
+/// This will iterate over every type referenced in the metadata outside of `metadata.types`.
+fn iterate_metadata_types(metadata: &mut Metadata) -> alloc::vec::Vec<&mut u32> {
+    let mut types = alloc::vec::Vec::new();
+
+    // collect outer_enum top-level types
+    let outer_enum = &mut metadata.outer_enums;
+    types.push(&mut outer_enum.call_enum_ty);
+    types.push(&mut outer_enum.event_enum_ty);
+    types.push(&mut outer_enum.error_enum_ty);
+
+    // collect pallet top-level type ids
+    for pallet in metadata.pallets.values_mut() {
+        if let Some(storage) = &mut pallet.storage {
+            for entry in storage.entries.values_mut() {
+                match &mut entry.entry_type {
+                    StorageEntryType::Plain(ty) => {
+                        types.push(ty);
+                    }
+                    StorageEntryType::Map {
+                        key_ty, value_ty, ..
+                    } => {
+                        types.push(key_ty);
+                        types.push(value_ty);
+                    }
+                }
+            }
+        };
+        if let Some(ty) = &mut pallet.call_ty {
+            types.push(ty);
+        }
+
+        if let Some(ty) = &mut pallet.event_ty {
+            types.push(ty);
+        }
+
+        if let Some(ty) = &mut pallet.error_ty {
+            types.push(ty);
+        }
+
+        for constant in pallet.constants.values_mut() {
+            types.push(&mut constant.ty);
+        }
+    }
+
+    // collect extrinsic type_ids
+    for ty in [
+        &mut metadata.extrinsic.extra_ty,
+        &mut metadata.extrinsic.address_ty,
+        &mut metadata.extrinsic.signature_ty,
+        &mut metadata.extrinsic.call_ty,
+    ] {
+        types.push(ty);
+    }
+
+    for signed in &mut metadata.extrinsic.signed_extensions {
+        types.push(&mut signed.extra_ty);
+        types.push(&mut signed.additional_ty);
+    }
+
+    types.push(&mut metadata.runtime_ty);
+
+    // collect runtime_api_types
+    for api in metadata.apis.values_mut() {
+        for method in api.methods.values_mut() {
+            for input in &mut method.inputs.iter_mut() {
+                types.push(&mut input.ty);
+            }
+            types.push(&mut method.output_ty);
+        }
+    }
+
+    types
+}
+
+/// Look for a type ID anywhere that we can be given back, ie in constants, storage, extrinsics or runtime API return types.
+/// This will recurse deeply into those type IDs to find them.
+pub fn collect_return_types<F, G>(
+    metadata: &Metadata,
+    pallets_filter: &mut F,
+    runtime_apis_filter: &mut G,
+) -> impl FnMut(u32) -> bool
+where
+    F: FnMut(&str) -> bool,
+    G: FnMut(&str) -> bool,
+{
+    let mut type_set = TypeSet::new();
+    for pallet in metadata.pallets.values() {
+        if pallets_filter(&pallet.name) {
+            type_set.collect_pallet_types(pallet, metadata);
+        }
+    }
+    for api in metadata.apis.values() {
+        if runtime_apis_filter(&api.name) {
+            type_set.collect_runtime_api_types(metadata, api);
+        }
+    }
+    type_set.collect_extrinsic_types(&metadata.extrinsic);
+    move |type_id| type_set.contains(type_id)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Metadata;
+    use crate::{Metadata, MetadataHasher};
     use codec::Decode;
     use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
     use std::{fs, path::Path};
@@ -413,10 +410,9 @@ mod tests {
 
     #[test]
     fn issue_1659() {
-        let metadata_cache = load_metadata_custom("../artifacts/regressions/1659.scale");
-
+        let full_metadata = load_metadata_custom("../artifacts/regressions/1659.scale");
         // Strip metadata to the pallets as described in the issue.
-        let mut stripped_metadata = metadata_cache.clone();
+        let mut stripped_metadata = full_metadata.clone();
         retain_metadata(
             &mut stripped_metadata,
             {
@@ -431,13 +427,13 @@ mod tests {
         // check that call_enum did not change as it is referenced inside runtime_api
         assert_eq!(
             stripped_metadata.type_hash(stripped_metadata.outer_enums.call_enum_ty),
-            metadata_cache.type_hash(metadata_cache.outer_enums.call_enum_ty)
+            full_metadata.type_hash(full_metadata.outer_enums.call_enum_ty)
         );
 
         // check that event_num did not change as it is referenced inside runtime_api
         assert_eq!(
             stripped_metadata.type_hash(stripped_metadata.outer_enums.event_enum_ty),
-            metadata_cache.type_hash(metadata_cache.outer_enums.event_enum_ty)
+            full_metadata.type_hash(full_metadata.outer_enums.event_enum_ty)
         );
     }
 }

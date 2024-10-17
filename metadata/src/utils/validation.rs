@@ -116,6 +116,7 @@ fn get_variant_hash(
 fn get_type_def_variant_hash(
     registry: &PortableRegistry,
     variant: &TypeDefVariant<PortableForm>,
+    only_these_variants: Option<&[&str]>,
     cache: &mut HashMap<u32, CachedHash>,
     outer_enum_hashes: &OuterEnumHashes,
 ) -> Hash {
@@ -123,10 +124,18 @@ fn get_type_def_variant_hash(
     let variant_field_bytes = variant.variants.iter().fold([0u8; HASH_LEN], |bytes, var| {
         // With EncodeAsType and DecodeAsType we no longer care which order the variants are in,
         // as long as all of the names+types are there. XOR to not care about ordering.
-        xor(
-            bytes,
-            get_variant_hash(registry, var, cache, outer_enum_hashes),
-        )
+        let should_hash = only_these_variants
+            .as_ref()
+            .map(|only_these_variants| only_these_variants.contains(&var.name.as_str()))
+            .unwrap_or(true);
+        if should_hash {
+            xor(
+                bytes,
+                get_variant_hash(registry, var, cache, outer_enum_hashes),
+            )
+        } else {
+            bytes
+        }
     });
     concat_and_hash2(&variant_id_bytes, &variant_field_bytes)
 }
@@ -156,7 +165,7 @@ fn get_type_def_hash(
             concat_and_hash2(&composite_id_bytes, &composite_field_bytes)
         }
         TypeDef::Variant(variant) => {
-            get_type_def_variant_hash(registry, variant, cache, outer_enum_hashes)
+            get_type_def_variant_hash(registry, variant, None, cache, outer_enum_hashes)
         }
         TypeDef::Sequence(sequence) => concat_and_hash2(
             &[TypeBeingHashed::Sequence as u8; HASH_LEN],
@@ -578,9 +587,13 @@ impl<'a> MetadataHasher<'a> {
     pub fn hash(&self) -> Hash {
         let metadata = self.metadata;
 
-        // Get the hashes of outer enums.
+        // Get the hashes of outer enums, considering only `specific_pallets` (if any are set).
         // If any of the typed that represent outer enums are encountered later, hashes from `top_level_enum_hashes` can be substituted.
-        let outer_enum_hashes = OuterEnumHashes::new(metadata);
+        let outer_enum_hashes = OuterEnumHashes::new(
+            metadata,
+            self.specific_pallets.as_deref(),
+            self.specific_runtime_apis.as_deref(),
+        );
 
         let pallet_hash = metadata.pallets().fold([0u8; HASH_LEN], |bytes, pallet| {
             // If specific pallets are given, only include this pallet if it is in the specific pallets.
@@ -1094,5 +1107,145 @@ mod tests {
             to_hash(meta_type::<StructE1>()),
             to_hash(meta_type::<StructE2>())
         );
+    }
+
+    use frame_metadata::v15::{
+        PalletEventMetadata, PalletStorageMetadata, StorageEntryMetadata, StorageEntryModifier,
+    };
+
+    fn metadata_with_pallet_events() -> Metadata {
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct FirstEvent {
+            s: String,
+        }
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct SecondEvent {
+            n: u8,
+        }
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum Events {
+            First(FirstEvent),
+            Second(SecondEvent),
+        }
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum Errors {
+            First(DispatchError),
+            Second(DispatchError),
+        }
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum Calls {
+            First(u8),
+            Second(u8),
+        }
+
+        #[allow(dead_code)]
+        enum DispatchError {
+            A,
+            B,
+            C,
+        }
+
+        impl scale_info::TypeInfo for DispatchError {
+            type Identity = DispatchError;
+
+            fn type_info() -> scale_info::Type {
+                scale_info::Type {
+                    path: scale_info::Path {
+                        segments: vec!["sp_runtime", "DispatchError"],
+                    },
+                    type_params: vec![],
+                    type_def: TypeDef::Variant(TypeDefVariant { variants: vec![] }),
+                    docs: vec![],
+                }
+            }
+        }
+
+        let pallets = vec![
+            v15::PalletMetadata {
+                name: "First",
+                index: 0,
+                calls: Some(v15::PalletCallMetadata {
+                    ty: meta_type::<u8>(),
+                }),
+                storage: Some(PalletStorageMetadata {
+                    prefix: "___",
+                    entries: vec![StorageEntryMetadata {
+                        name: "Hello",
+                        modifier: StorageEntryModifier::Optional,
+                        // Note: This is the important part here:
+                        // The Events type will be trimmed down and this trimming needs to be reflected
+                        // when the hash of this storage item is computed.
+                        ty: frame_metadata::v14::StorageEntryType::Plain(meta_type::<Vec<Events>>()),
+                        default: vec![],
+                        docs: vec![],
+                    }],
+                }),
+                event: Some(PalletEventMetadata {
+                    ty: meta_type::<FirstEvent>(),
+                }),
+                constants: vec![],
+                error: None,
+                docs: vec![],
+            },
+            v15::PalletMetadata {
+                name: "Second",
+                index: 1,
+                calls: Some(v15::PalletCallMetadata {
+                    ty: meta_type::<u64>(),
+                }),
+                storage: None,
+                event: Some(PalletEventMetadata {
+                    ty: meta_type::<SecondEvent>(),
+                }),
+                constants: vec![],
+                error: None,
+                docs: vec![],
+            },
+        ];
+
+        v15::RuntimeMetadataV15::new(
+            pallets,
+            build_default_extrinsic(),
+            meta_type::<()>(),
+            vec![],
+            v15::OuterEnums {
+                call_enum_ty: meta_type::<Calls>(),
+                event_enum_ty: meta_type::<Events>(),
+                error_enum_ty: meta_type::<Errors>(),
+            },
+            v15::CustomMetadata {
+                map: Default::default(),
+            },
+        )
+        .try_into()
+        .expect("can build valid metadata")
+    }
+
+    #[test]
+    fn hash_comparison_trimmed_metadata() {
+        // trim the metadata:
+        let metadata = metadata_with_pallet_events();
+        let trimmed_metadata = {
+            let mut m = metadata.clone();
+            m.retain(|e| e == "First", |_| true);
+            m
+        };
+
+        // test that the hashes are the same:
+        let hash = MetadataHasher::new(&metadata)
+            .only_these_pallets(&["First"])
+            .hash();
+        let hash_trimmed = MetadataHasher::new(&trimmed_metadata).hash();
+
+        assert_eq!(hash, hash_trimmed);
     }
 }
