@@ -1,0 +1,32 @@
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
+
+macro_rules! cfg_feature {
+	($feature:literal, $($item:item)*) => {
+		$(
+			#[cfg(feature = $feature)]
+			#[cfg_attr(docsrs, doc(cfg(feature = $feature)))]
+			$item
+		)*
+	}
+}
+
+macro_rules! cfg_fetch_metadata_url {
+    ($($item:item)*) => {
+        crate::macros::cfg_feature!("fetch-metadata-url", $($item)*);
+    };
+}
+
+macro_rules! cfg_fetch_metadata {
+    ($($item:item)*) => {
+        $(
+			#[cfg(any(feature = "fetch-metadata-url", feature = "fetch-metadata"))]
+			#[cfg_attr(docsrs, doc(cfg(any(feature = "fetch-metadata-url", feature = "fetch-metadata"))))]
+			$item
+		)*
+    };
+}
+
+#[allow(unused)]
+pub(crate) use {cfg_feature, cfg_fetch_metadata, cfg_fetch_metadata_url};
