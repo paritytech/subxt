@@ -32,6 +32,7 @@ getrandom = { workspace = true, optional = true }
 
 [dev-dependencies]
 scale-info = { workspace = true, features = ["bit-vec"] }
+frame-metadata = { workspace = true }
 
 [package.metadata.docs.rs]
 features = ["fetch-metadata"]
