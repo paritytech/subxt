@@ -3928,18 +3928,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "instant"
-version = "0.1.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0242819d153cba4b4b05a5a8f2a7e9bbf97b6055b2a002b395c96b5ff3c0222"
-dependencies = [
- "cfg-if",
- "js-sys",
- "wasm-bindgen",
- "web-sys",
-]
-
-[[package]]
 name = "integer-sqrt"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10562,7 +10550,6 @@ dependencies = [
  "http-body",
  "hyper",
  "impl-serde",
- "instant",
  "jsonrpsee",
  "parity-scale-codec",
  "polkadot-sdk",
@@ -10587,6 +10574,7 @@ dependencies = [
  "tracing-subscriber",
  "url",
  "wasm-bindgen-futures",
+ "web-time",
 ]
 
 [[package]]
@@ -10677,7 +10665,6 @@ dependencies = [
  "futures-timer",
  "futures-util",
  "getrandom",
- "instant",
  "js-sys",
  "pin-project",
  "send_wrapper 0.6.0",
@@ -10692,6 +10679,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+ "web-time",
 ]
 
 [[package]]
@@ -11872,6 +11860,16 @@ name = "web-sys"
 version = "0.3.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26fdeaafd9bd129f65e7c031593c24d62186301e0c72c8978fa1678be7d532c0"
+dependencies = [
+ "js-sys",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "web-time"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a6580f308b1fad9207618087a65c04e7a10bc77e02c8e84e9b00dd4b12fa0bb"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
