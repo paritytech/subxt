@@ -339,7 +339,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Metadata, MetadataHasher};
+    use crate::Metadata;
     use codec::Decode;
     use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
     use std::{fs, path::Path};
