@@ -21,7 +21,7 @@ pub fn now_from_unix_epoch() -> Duration {
 pub type Instant = instant::Instant;
 
 pub fn now() -> Instant {
-    instant::Instant::now()
+    web_time::Instant::now()
 }
 
 pub type Delay = future::BoxFuture<'static, ()>;
