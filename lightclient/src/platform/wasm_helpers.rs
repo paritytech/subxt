@@ -34,7 +34,7 @@ pub fn sleep(duration: Duration) -> Delay {
 #[pin_project::pin_project]
 pub struct Stream(
     #[pin]
-    pub smoldot::libp2p::with_buffers::WithBuffers<
+    pub  smoldot::libp2p::with_buffers::WithBuffers<
         future::BoxFuture<'static, Result<WasmSocket, std::io::Error>>,
         WasmSocket,
         Instant,
