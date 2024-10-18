@@ -42,7 +42,6 @@ web = [
     "getrandom/js",
     "subxt-lightclient?/web",
     "subxt-macro/web",
-    "instant/wasm-bindgen",
     "tokio?/sync",
     "finito?/wasm-bindgen",
 ]
@@ -99,7 +98,7 @@ thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
 either = { workspace = true }
-instant = { workspace = true }
+web-time = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }
