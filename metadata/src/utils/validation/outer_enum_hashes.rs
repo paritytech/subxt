@@ -32,7 +32,7 @@ impl OuterEnumHashes {
             Some(names) => names.contains(&name),
             None => true,
         };
-        let mut check_enum_type_id = retain::collect_return_types(
+        let mut check_enum_type_id = retain::keep_outer_enum(
             metadata,
             &mut |name| filter(specific_pallets, name),
             &mut |name| filter(specific_runtimes, name),

@@ -7,7 +7,8 @@
 use crate::{
     ExtrinsicMetadata, Metadata, PalletMetadataInner, RuntimeApiMetadataInner, StorageEntryType,
 };
-use alloc::collections::{BTreeSet, VecDeque};
+use alloc::collections::BTreeSet;
+use alloc::vec::Vec;
 use scale_info::{
     PortableType, TypeDef, TypeDefArray, TypeDefBitSequence, TypeDefCompact, TypeDefComposite,
     TypeDefSequence, TypeDefTuple, TypeDefVariant,
@@ -16,14 +17,15 @@ use scale_info::{
 #[derive(Clone)]
 struct TypeSet {
     seen_ids: BTreeSet<u32>,
-    work_set: VecDeque<u32>,
+    pub work_set: Vec<u32>,
 }
 
 impl TypeSet {
     fn new() -> Self {
         Self {
             seen_ids: BTreeSet::new(),
-            work_set: VecDeque::with_capacity(22),
+            // Average work set size is around 30-50 elements, depending on the metadata size
+            work_set: Vec::with_capacity(32),
         }
     }
 
@@ -35,36 +37,39 @@ impl TypeSet {
         self.seen_ids.contains(&id)
     }
 
+    fn push_to_workset(&mut self, id: u32) {
+        // Check if wee hit a type we've already inserted; avoid infinite loops and stop.
+        if self.insert(id) {
+            self.work_set.push(id);
+        }
+    }
+
     /// This function will deeply traverse the inital type and it's dependencies to collect the relevant type_ids
     fn collect_types(&mut self, metadata: &Metadata, id: u32) {
-        self.work_set.push_back(id);
-        while let Some(typ) = self.work_set.pop_front() {
-            if !self.insert(typ) {
-                // We hit a type we've already inserted; avoid infinite loops and stop.
-                continue;
-            }
+        self.push_to_workset(id);
+        while let Some(typ) = self.work_set.pop() {
             let typ = resolve_typ(metadata, typ);
             match &typ.ty.type_def {
                 TypeDef::Composite(TypeDefComposite { fields }) => {
                     for field in fields {
-                        self.work_set.push_back(field.ty.id);
+                        self.push_to_workset(field.ty.id);
                     }
                 }
                 TypeDef::Variant(TypeDefVariant { variants }) => {
                     for variant in variants {
                         for field in &variant.fields {
-                            self.work_set.push_back(field.ty.id);
+                            self.push_to_workset(field.ty.id);
                         }
                     }
                 }
                 TypeDef::Array(TypeDefArray { len: _, type_param })
                 | TypeDef::Sequence(TypeDefSequence { type_param })
                 | TypeDef::Compact(TypeDefCompact { type_param }) => {
-                    self.work_set.push_back(type_param.id);
+                    self.push_to_workset(type_param.id);
                 }
                 TypeDef::Tuple(TypeDefTuple { fields }) => {
                     for field in fields {
-                        self.work_set.push_back(field.id);
+                        self.push_to_workset(field.id);
                     }
                 }
                 TypeDef::Primitive(_) => (),
@@ -73,7 +78,7 @@ impl TypeSet {
                     bit_order_type,
                 }) => {
                     for typ in [bit_order_type, bit_store_type] {
-                        self.work_set.push_back(typ.id);
+                        self.push_to_workset(typ.id);
                     }
                 }
             }
@@ -174,8 +179,7 @@ pub fn retain_metadata<F, G>(
     // of the things we're keeping (because if it is, we need to keep all of it so that we
     // can still decode values into it).
     let outer_enums = metadata.outer_enums();
-    let mut find_type_id =
-        collect_return_types(metadata, &mut pallets_filter, &mut runtime_apis_filter);
+    let mut find_type_id = keep_outer_enum(metadata, &mut pallets_filter, &mut runtime_apis_filter);
     for outer_enum_ty_id in [
         outer_enums.call_enum_ty(),
         outer_enums.error_enum_ty(),
@@ -312,7 +316,7 @@ fn iterate_metadata_types(metadata: &mut Metadata) -> impl Iterator<Item = &mut 
 
 /// Look for a type ID anywhere that we can be given back, ie in constants, storage, extrinsics or runtime API return types.
 /// This will recurse deeply into those type IDs to find them.
-pub fn collect_return_types<F, G>(
+pub fn keep_outer_enum<F, G>(
     metadata: &Metadata,
     pallets_filter: &mut F,
     runtime_apis_filter: &mut G,
@@ -373,6 +377,7 @@ mod tests {
                 |pallet_name| pallet_name == pallet.name(),
                 |_| true,
             );
+
             assert_eq!(metadata.pallets.len(), 1);
             assert_eq!(
                 &*metadata.pallets.get_by_index(0).unwrap().name,
