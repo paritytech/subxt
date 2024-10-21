@@ -235,7 +235,7 @@ where
     variant.variants.retain(|v| pallets_filter(&v.name));
 }
 
-/// return an Vec handing back a mutable reference to each type ID seen in the metadata (not recursively).
+/// Returns an iterator that allows modifying each type ID seen in the metadata (not recursively).
 /// This will iterate over every type referenced in the metadata outside of `metadata.types`.
 fn iterate_metadata_types(metadata: &mut Metadata) -> impl Iterator<Item = &mut u32> {
     let mut types = alloc::vec::Vec::new();
