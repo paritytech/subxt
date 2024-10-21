@@ -39,39 +39,41 @@ impl TypeSet {
     fn collect_types(&mut self, metadata: &Metadata, id: u32) {
         self.work_set.push_back(id);
         while let Some(typ) = self.work_set.pop_front() {
-            if self.insert(typ) {
-                let typ = resolve_typ(metadata, typ);
-                match &typ.ty.type_def {
-                    TypeDef::Composite(TypeDefComposite { fields }) => {
-                        for field in fields {
+            if !self.insert(typ) {
+                // We hit a type we've already inserted; avoid infinite loops and stop.
+                continue;
+            }
+            let typ = resolve_typ(metadata, typ);
+            match &typ.ty.type_def {
+                TypeDef::Composite(TypeDefComposite { fields }) => {
+                    for field in fields {
+                        self.work_set.push_back(field.ty.id);
+                    }
+                }
+                TypeDef::Variant(TypeDefVariant { variants }) => {
+                    for variant in variants {
+                        for field in &variant.fields {
                             self.work_set.push_back(field.ty.id);
                         }
                     }
-                    TypeDef::Variant(TypeDefVariant { variants }) => {
-                        for variant in variants {
-                            for field in &variant.fields {
-                                self.work_set.push_back(field.ty.id);
-                            }
-                        }
+                }
+                TypeDef::Array(TypeDefArray { len: _, type_param })
+                | TypeDef::Sequence(TypeDefSequence { type_param })
+                | TypeDef::Compact(TypeDefCompact { type_param }) => {
+                    self.work_set.push_back(type_param.id);
+                }
+                TypeDef::Tuple(TypeDefTuple { fields }) => {
+                    for field in fields {
+                        self.work_set.push_back(field.id);
                     }
-                    TypeDef::Array(TypeDefArray { len: _, type_param })
-                    | TypeDef::Sequence(TypeDefSequence { type_param })
-                    | TypeDef::Compact(TypeDefCompact { type_param }) => {
-                        self.work_set.push_back(type_param.id);
-                    }
-                    TypeDef::Tuple(TypeDefTuple { fields }) => {
-                        for field in fields {
-                            self.work_set.push_back(field.id);
-                        }
-                    }
-                    TypeDef::Primitive(_) => (),
-                    TypeDef::BitSequence(TypeDefBitSequence {
-                        bit_store_type,
-                        bit_order_type,
-                    }) => {
-                        for typ in [bit_order_type, bit_store_type] {
-                            self.work_set.push_back(typ.id);
-                        }
+                }
+                TypeDef::Primitive(_) => (),
+                TypeDef::BitSequence(TypeDefBitSequence {
+                    bit_store_type,
+                    bit_order_type,
+                }) => {
+                    for typ in [bit_order_type, bit_store_type] {
+                        self.work_set.push_back(typ.id);
                     }
                 }
             }
@@ -185,10 +187,8 @@ pub fn retain_metadata<F, G>(
     }
 
     // 4. Collect all of the type IDs we still want to keep after deleting.
-    let mut keep_these_type_ids: BTreeSet<u32> = iterate_metadata_types(metadata)
-        .iter()
-        .map(|x| **x)
-        .collect();
+    let mut keep_these_type_ids: BTreeSet<u32> =
+        iterate_metadata_types(metadata).map(|x| *x).collect();
 
     // 5. Additionally, subxt depends on the `DispatchError` type existing; we use the same
     // logic here that is used when building our `Metadata` to ensure we keep it too.
@@ -237,7 +237,7 @@ where
 
 /// return an Vec handing back a mutable reference to each type ID seen in the metadata (not recursively).
 /// This will iterate over every type referenced in the metadata outside of `metadata.types`.
-fn iterate_metadata_types(metadata: &mut Metadata) -> alloc::vec::Vec<&mut u32> {
+fn iterate_metadata_types(metadata: &mut Metadata) -> impl Iterator<Item = &mut u32> {
     let mut types = alloc::vec::Vec::new();
 
     // collect outer_enum top-level types
@@ -307,7 +307,7 @@ fn iterate_metadata_types(metadata: &mut Metadata) -> alloc::vec::Vec<&mut u32> 
         }
     }
 
-    types
+    types.into_iter()
 }
 
 /// Look for a type ID anywhere that we can be given back, ie in constants, storage, extrinsics or runtime API return types.
