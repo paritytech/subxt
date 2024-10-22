@@ -2996,7 +2996,7 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "055387e30382aec12f626c6d9086b7a7a08844f2a2074c14b415eef48237cff4"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 16.0.0",
  "hex",
  "parity-scale-codec",
  "scale-decode 0.13.1",
@@ -3066,6 +3066,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "frame-metadata"
+version = "17.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "701bac17e9b55e0f95067c428ebcb46496587f08e8cf4ccc0fe5903bea10dbb8"
+dependencies = [
+ "cfg-if",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+]
+
+[[package]]
 name = "frame-metadata-hash-extension"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3092,7 +3104,7 @@ dependencies = [
  "bitflags 1.3.2",
  "docify",
  "environmental",
- "frame-metadata",
+ "frame-metadata 16.0.0",
  "frame-support-procedural",
  "impl-trait-for-tuples",
  "k256",
@@ -3368,7 +3380,7 @@ dependencies = [
 name = "generate-custom-metadata"
 version = "0.37.0"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 17.0.0",
  "parity-scale-codec",
  "scale-info",
 ]
@@ -3935,7 +3947,7 @@ version = "0.37.0"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
- "frame-metadata",
+ "frame-metadata 17.0.0",
  "futures",
  "hex",
  "parity-scale-codec",
@@ -9898,7 +9910,7 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a616fa51350b35326682a472ee8e6ba742fdacb18babac38ecd46b3e05ead869"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 16.0.0",
  "parity-scale-codec",
  "scale-info",
 ]
@@ -10535,7 +10547,7 @@ dependencies = [
  "derive-where",
  "either",
  "finito",
- "frame-metadata",
+ "frame-metadata 17.0.0",
  "futures",
  "getrandom",
  "hex",
@@ -10575,7 +10587,7 @@ version = "0.37.0"
 dependencies = [
  "clap",
  "color-eyre",
- "frame-metadata",
+ "frame-metadata 17.0.0",
  "heck 0.5.0",
  "hex",
  "indoc",
@@ -10602,7 +10614,7 @@ dependencies = [
 name = "subxt-codegen"
 version = "0.37.0"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 17.0.0",
  "getrandom",
  "heck 0.5.0",
  "hex",
@@ -10628,7 +10640,7 @@ dependencies = [
  "blake2",
  "derive-where",
  "frame-decode",
- "frame-metadata",
+ "frame-metadata 17.0.0",
  "hashbrown 0.14.5",
  "hex",
  "impl-serde 0.5.0",
@@ -10695,7 +10707,7 @@ dependencies = [
  "bitvec",
  "criterion",
  "frame-decode",
- "frame-metadata",
+ "frame-metadata 17.0.0",
  "hashbrown 0.14.5",
  "parity-scale-codec",
  "polkadot-sdk",
@@ -11246,7 +11258,7 @@ checksum = "2896d95c02a80c6d6a5d6e953d479f5ddf2dfdb6a244441010e373ac0fb88971"
 name = "ui-tests"
 version = "0.37.0"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 17.0.0",
  "generate-custom-metadata",
  "hex",
  "parity-scale-codec",
