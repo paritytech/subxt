@@ -195,7 +195,7 @@ where
             .then(|| -> Result<SignedExtrinsicDetails, Error> {
                 let address_start_idx = bytes.len() - cursor.len();
                 // Skip over the address, signature and extra fields. If V5 general
-                // extrinsic then there is no address and signature so skip nothing,
+                // extrinsic then there is no address and signature so skip nothing.
                 if !is_general {
                     scale_decode::visitor::decode_with_visitor(
                         cursor,
