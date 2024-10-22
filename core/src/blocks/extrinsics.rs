@@ -149,7 +149,9 @@ pub struct SignedExtrinsicDetails {
     address_end_idx: usize,
     /// end index of the range in `bytes` of `ExtrinsicDetails` that encodes the signature. Equivalent to extra_start_idx.
     signature_end_idx: usize,
-    /// end index of the range in `bytes` of `ExtrinsicDetails` that encodes the signature.
+    /// start index of the range in `bytes` of `ExtrinsicDetails` that encodes the extensions.
+    extra_start_idx: usize,
+    /// end index of the range in `bytes` of `ExtrinsicDetails` that encodes the extensions.
     extra_end_idx: usize,
 }
 
@@ -165,9 +167,8 @@ where
         metadata: Metadata,
         ids: ExtrinsicPartTypeIds,
     ) -> Result<ExtrinsicDetails<T>, Error> {
-        const SIGNATURE_MASK: u8 = 0b1000_0000;
-        const VERSION_MASK: u8 = 0b0111_1111;
-        const LATEST_EXTRINSIC_VERSION: u8 = 4;
+        const SIGNATURE_MASK: u8 = 0b1100_0000;
+        const VERSION_MASK: u8 = 0b0011_1111;
 
         // removing the compact encoded prefix:
         let bytes: Arc<[u8]> = strip_compact_prefix(extrinsic_bytes)?.1.into();
@@ -179,11 +180,13 @@ where
         let first_byte: u8 = Decode::decode(&mut &bytes[..])?;
 
         let version = first_byte & VERSION_MASK;
-        if version != LATEST_EXTRINSIC_VERSION {
+        if version != 4 && version != 5 {
             return Err(BlockError::UnsupportedVersion(version).into());
         }
 
-        let is_signed = first_byte & SIGNATURE_MASK != 0;
+        // Hack in rudimentory support for V5 extrinsics..
+        let is_signed = first_byte & SIGNATURE_MASK == 0b1000_0000;
+        let is_general = first_byte & SIGNATURE_MASK == 0b0100_0000;
 
         // Skip over the first byte which denotes the version and signing.
         let cursor = &mut &bytes[1..];
@@ -191,25 +194,37 @@ where
         let signed_details = is_signed
             .then(|| -> Result<SignedExtrinsicDetails, Error> {
                 let address_start_idx = bytes.len() - cursor.len();
-                // Skip over the address, signature and extra fields.
-                scale_decode::visitor::decode_with_visitor(
-                    cursor,
-                    ids.address,
-                    metadata.types(),
-                    scale_decode::visitor::IgnoreVisitor::new(),
-                )
-                .map_err(scale_decode::Error::from)?;
+                // Skip over the address, signature and extra fields. If V5 general
+                // extrinsic then there is no address and signature so skip nothing,
+                if !is_general {
+                    scale_decode::visitor::decode_with_visitor(
+                        cursor,
+                        ids.address,
+                        metadata.types(),
+                        scale_decode::visitor::IgnoreVisitor::new(),
+                    )
+                    .map_err(scale_decode::Error::from)?;
+                }
                 let address_end_idx = bytes.len() - cursor.len();
 
-                scale_decode::visitor::decode_with_visitor(
-                    cursor,
-                    ids.signature,
-                    metadata.types(),
-                    scale_decode::visitor::IgnoreVisitor::new(),
-                )
-                .map_err(scale_decode::Error::from)?;
+                if !is_general {
+                    scale_decode::visitor::decode_with_visitor(
+                        cursor,
+                        ids.signature,
+                        metadata.types(),
+                        scale_decode::visitor::IgnoreVisitor::new(),
+                    )
+                    .map_err(scale_decode::Error::from)?;
+                }
                 let signature_end_idx = bytes.len() - cursor.len();
 
+                if is_general {
+                    // V5 general extrinsics have an extension version byte.
+                    // For now we just ignore it as a hack to decode V5 exts.
+                    let _extension_version = u8::decode(cursor)?;
+                }
+
+                let extra_start_idx = bytes.len() - cursor.len();
                 scale_decode::visitor::decode_with_visitor(
                     cursor,
                     ids.extra,
@@ -223,6 +238,7 @@ where
                     address_start_idx,
                     address_end_idx,
                     signature_end_idx,
+                    extra_start_idx,
                     extra_end_idx,
                 })
             })
@@ -320,7 +336,7 @@ where
     pub fn signed_extensions_bytes(&self) -> Option<&[u8]> {
         self.signed_details
             .as_ref()
-            .map(|e| &self.bytes[e.signature_end_idx..e.extra_end_idx])
+            .map(|e| &self.bytes[e.extra_start_idx..e.extra_end_idx])
     }
 
     /// Returns `None` if the extrinsic is not signed.
