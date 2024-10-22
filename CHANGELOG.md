@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.37.1] - 2024-10-22
+
+This patch release adds basic support for V5 extrinsics into `subxt-core`. We only bump `subxt-core` in this release; other crates should then take this patch automatically but you may need to `cargo update` to get the change.
+
 ## [0.37.0] - 2024-05-28
 
 This release mainly adds support for the sign extension `CheckMetadataHash` and fixes a regression introduced in v0.36.0

@@ -174,7 +174,7 @@ where
         let bytes: Arc<[u8]> = strip_compact_prefix(extrinsic_bytes)?.1.into();
 
         // Extrinsic are encoded in memory in the following way:
-        //   - first byte: abbbbbbb (a = 0 for unsigned, 1 for signed, b = version)
+        //   - first byte: aabbbbbb (a = 00 for unsigned, 10 for signed, 01 for general, b = version)
         //   - signature: [unknown TBD with metadata].
         //   - extrinsic data
         let first_byte: u8 = Decode::decode(&mut &bytes[..])?;
