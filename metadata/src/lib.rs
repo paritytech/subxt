@@ -27,7 +27,8 @@ use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use frame_decode::extrinsics::{
-    ExtrinsicInfo, ExtrinsicInfoArg, ExtrinsicInfoError, ExtrinsicSignatureInfo,
+    ExtrinsicCallInfo, ExtrinsicExtensionInfo, ExtrinsicInfoArg, ExtrinsicInfoError,
+    ExtrinsicSignatureInfo,
 };
 use hashbrown::HashMap;
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
@@ -70,11 +71,11 @@ pub struct Metadata {
 impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
     type TypeId = u32;
 
-    fn get_extrinsic_info(
+    fn get_call_info(
         &self,
         pallet_index: u8,
         call_index: u8,
-    ) -> Result<ExtrinsicInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
+    ) -> Result<ExtrinsicCallInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
         let pallet = self.pallet_by_index(pallet_index).ok_or({
             ExtrinsicInfoError::PalletNotFound {
                 index: pallet_index,
@@ -89,7 +90,7 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
             }
         })?;
 
-        Ok(ExtrinsicInfo {
+        Ok(ExtrinsicCallInfo {
             pallet_name: Cow::Borrowed(pallet.name()),
             call_name: Cow::Borrowed(&call.name),
             args: call
@@ -105,11 +106,30 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
 
     fn get_signature_info(
         &self,
-    ) -> Result<ExtrinsicSignatureInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
+    ) -> Result<ExtrinsicSignatureInfo<Self::TypeId>, ExtrinsicInfoError<'_>> {
         Ok(ExtrinsicSignatureInfo {
             address_id: self.extrinsic().address_ty(),
             signature_id: self.extrinsic().signature_ty(),
-            transaction_extension_ids: self
+        })
+    }
+
+    fn get_extension_info(
+        &self,
+        extension_version: Option<u8>,
+    ) -> Result<ExtrinsicExtensionInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
+        // For now, if there exists an extension version that's non-zero, we say we don't know
+        // how to decode it. When multiple extension versions exist, we may have to tighten up
+        // on this and require V16 metadata to decode.
+        if let Some(extension_version) = extension_version {
+            if extension_version != 0 {
+                return Err(ExtrinsicInfoError::ExtrinsicExtensionVersionNotSupported {
+                    extension_version,
+                });
+            }
+        }
+
+        Ok(ExtrinsicExtensionInfo {
+            extension_ids: self
                 .extrinsic()
                 .signed_extensions()
                 .iter()
@@ -214,7 +234,10 @@ impl Metadata {
         MetadataHasher::new(self)
     }
 
-    /// Filter out any pallets that we don't want to keep, retaining only those that we do.
+    /// Filter out any pallets and/or runtime_apis that we don't want to keep, retaining only those that we do.
+    /// Note:
+    /// only filter by `pallet`s will not lead to significant metadata size reduction because the return types are kept to ensure that those can be decoded.
+    ///
     pub fn retain<F, G>(&mut self, pallet_filter: F, api_filter: G)
     where
         F: FnMut(&str) -> bool,

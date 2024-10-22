@@ -11,17 +11,17 @@ use core::time::Duration;
 use futures_util::{future, FutureExt};
 
 pub fn now_from_unix_epoch() -> Duration {
-    instant::SystemTime::now()
-        .duration_since(instant::SystemTime::UNIX_EPOCH)
+    web_time::SystemTime::now()
+        .duration_since(web_time::SystemTime::UNIX_EPOCH)
         .unwrap_or_else(|_| {
             panic!("Invalid systime cannot be configured earlier than `UNIX_EPOCH`")
         })
 }
 
-pub type Instant = instant::Instant;
+pub type Instant = web_time::Instant;
 
 pub fn now() -> Instant {
-    instant::Instant::now()
+    web_time::Instant::now()
 }
 
 pub type Delay = future::BoxFuture<'static, ()>;
