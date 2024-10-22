@@ -2999,7 +2999,7 @@ dependencies = [
  "frame-metadata 16.0.0",
  "hex",
  "parity-scale-codec",
- "scale-decode",
+ "scale-decode 0.13.2",
  "scale-info",
  "scale-type-resolver",
  "sp-crypto-hashing",
@@ -8490,6 +8490,19 @@ checksum = "d157a4753b652a9d34bafd05b5d9e71cda401d030ed151a58cc3af77997553ba"
 dependencies = [
  "derive_more 1.0.0",
  "parity-scale-codec",
+ "scale-bits",
+ "scale-type-resolver",
+ "smallvec",
+]
+
+[[package]]
+name = "scale-decode"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8ae9cc099ae85ff28820210732b00f019546f36f33225f509fe25d5816864a0"
+dependencies = [
+ "derive_more 1.0.0",
+ "parity-scale-codec",
  "primitive-types 0.13.1",
  "scale-bits",
  "scale-decode-derive",
@@ -8499,9 +8512,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode-derive"
-version = "0.13.2"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0386b0bcba1c217c97da321f064c33337c3bfe1decd33d8caa9a93fb82d1aa6"
+checksum = "5ed9401effa946b493f9f84dc03714cca98119b230497df6f3df6b84a2b03648"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -8517,7 +8530,20 @@ checksum = "528464e6ae6c8f98e2b79633bf79ef939552e795e316579dab09c61670d56602"
 dependencies = [
  "derive_more 0.99.18",
  "parity-scale-codec",
- "primitive-types 0.12.2",
+ "scale-bits",
+ "scale-type-resolver",
+ "smallvec",
+]
+
+[[package]]
+name = "scale-encode"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f9271284d05d0749c40771c46180ce89905fd95aa72a2a2fddb4b7c0aa424db"
+dependencies = [
+ "derive_more 1.0.0",
+ "parity-scale-codec",
+ "primitive-types 0.13.1",
  "scale-bits",
  "scale-encode-derive",
  "scale-type-resolver",
@@ -8526,9 +8552,9 @@ dependencies = [
 
 [[package]]
 name = "scale-encode-derive"
-version = "0.7.2"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bef2618f123c88da9cd8853b69d766068f1eddc7692146d7dfe9b89e25ce2efd"
+checksum = "102fbc6236de6c53906c0b262f12c7aa69c2bdc604862c12728f5f4d370bc137"
 dependencies = [
  "darling",
  "proc-macro-crate",
@@ -8600,7 +8626,7 @@ dependencies = [
  "rand_chacha",
  "scale-info",
  "scale-typegen",
- "scale-value",
+ "scale-value 0.16.3",
  "smallvec",
 ]
 
@@ -8617,8 +8643,28 @@ dependencies = [
  "frame-metadata 15.1.0",
  "parity-scale-codec",
  "scale-bits",
- "scale-decode",
- "scale-encode",
+ "scale-decode 0.13.2",
+ "scale-encode 0.7.2",
+ "scale-info",
+ "scale-type-resolver",
+ "serde",
+ "yap",
+]
+
+[[package]]
+name = "scale-value"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f5e0ef2a0ee1e02a69ada37feb87ea1616ce9808aca072befe2d3131bf28576e"
+dependencies = [
+ "base58",
+ "blake2",
+ "derive_more 1.0.0",
+ "either",
+ "parity-scale-codec",
+ "scale-bits",
+ "scale-decode 0.14.0",
+ "scale-encode 0.8.0",
  "scale-info",
  "scale-type-resolver",
  "serde",
@@ -10559,10 +10605,10 @@ dependencies = [
  "polkadot-sdk",
  "primitive-types 0.13.1",
  "scale-bits",
- "scale-decode",
- "scale-encode",
+ "scale-decode 0.14.0",
+ "scale-encode 0.8.0",
  "scale-info",
- "scale-value",
+ "scale-value 0.17.0",
  "serde",
  "serde_json",
  "subxt-core",
@@ -10596,7 +10642,7 @@ dependencies = [
  "quote",
  "scale-info",
  "scale-typegen-description",
- "scale-value",
+ "scale-value 0.17.0",
  "serde",
  "serde_json",
  "smoldot",
@@ -10648,10 +10694,10 @@ dependencies = [
  "polkadot-sdk",
  "primitive-types 0.13.1",
  "scale-bits",
- "scale-decode",
- "scale-encode",
+ "scale-decode 0.14.0",
+ "scale-encode 0.8.0",
  "scale-info",
- "scale-value",
+ "scale-value 0.17.0",
  "serde",
  "serde_json",
  "subxt-macro",
