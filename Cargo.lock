@@ -10541,7 +10541,7 @@ dependencies = [
  "hex",
  "http-body",
  "hyper",
- "impl-serde 0.4.0",
+ "impl-serde 0.5.0",
  "jsonrpsee",
  "parity-scale-codec",
  "polkadot-sdk",
@@ -10631,7 +10631,7 @@ dependencies = [
  "frame-metadata",
  "hashbrown 0.14.5",
  "hex",
- "impl-serde 0.4.0",
+ "impl-serde 0.5.0",
  "keccak-hash",
  "parity-scale-codec",
  "polkadot-sdk",
@@ -10824,7 +10824,7 @@ name = "test-runtime"
 version = "0.37.0"
 dependencies = [
  "hex",
- "impl-serde 0.4.0",
+ "impl-serde 0.5.0",
  "jsonrpsee",
  "parity-scale-codec",
  "serde",

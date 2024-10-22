@@ -59,8 +59,6 @@ unused_extern_crates = "deny"
 type_complexity = "allow"
 # Priority -1 means that it can overwritten by other lints, https://rust-lang.github.io/rust-clippy/master/index.html#/lint_groups_priority
 all = { level = "deny", priority = -1 }
-# https://github.com/rust-lang/rust-clippy/issues/12643
-manual-unwrap-or-default = "allow"
 
 [workspace.dependencies]
 async-trait = "0.1.83"
@@ -85,7 +83,7 @@ getrandom = { version = "0.2", default-features = false }
 hashbrown = "0.14.5"
 hex = { version = "0.4.3", default-features = false }
 heck = "0.5.0"
-impl-serde = { version = "0.4.0", default-features = false }
+impl-serde = { version = "0.5.0", default-features = false }
 indoc = "2"
 jsonrpsee = { version = "0.24.5" }
 pretty_assertions = "1.4.1"
