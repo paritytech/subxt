@@ -59,8 +59,6 @@ unused_extern_crates = "deny"
 type_complexity = "allow"
 # Priority -1 means that it can overwritten by other lints, https://rust-lang.github.io/rust-clippy/master/index.html#/lint_groups_priority
 all = { level = "deny", priority = -1 }
-# https://github.com/rust-lang/rust-clippy/issues/12643
-manual-unwrap-or-default = "allow"
 
 [workspace.dependencies]
 async-trait = "0.1.83"
@@ -80,27 +78,27 @@ either = { version = "1.13.0", default-features = false }
 finito = { version = "0.1.0", default-features = false }
 frame-decode = { version = "0.4.0", default-features = false }
 frame-metadata = { version = "16.0.0", default-features = false }
-futures = { version = "0.3.30", default-features = false, features = ["std"] }
+futures = { version = "0.3.31", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
 hashbrown = "0.14.5"
 hex = { version = "0.4.3", default-features = false }
 heck = "0.5.0"
-impl-serde = { version = "0.4.0", default-features = false }
+impl-serde = { version = "0.5.0", default-features = false }
 indoc = "2"
 jsonrpsee = { version = "0.24.5" }
 pretty_assertions = "1.4.1"
-primitive-types = { version = "0.12.2", default-features = false }
+primitive-types = { version = "0.13.1", default-features = false }
 proc-macro-error2 = "2.0.0"
 proc-macro2 = "1.0.86"
 quote = "1.0.37"
 regex = { version = "1.11.0", default-features = false }
-scale-info = { version = "2.11.3", default-features = false }
-scale-value = { version = "0.16.3", default-features = false }
+scale-info = { version = "2.11.4", default-features = false }
+scale-value = { version = "0.17.0", default-features = false }
 scale-bits = { version = "0.6.0", default-features = false }
-scale-decode = { version = "0.13.1", default-features = false }
-scale-encode = { version = "0.7.1", default-features = false }
-scale-typegen = "0.8.0"
-scale-typegen-description = "0.8.0"
+scale-decode = { version = "0.14.0", default-features = false }
+scale-encode = { version = "0.8.0", default-features = false }
+scale-typegen = "0.9.0"
+scale-typegen-description = "0.9.0"
 serde = { version = "1.0.210", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.128", default-features = false }
 syn = { version = "2.0.77", features = ["full", "extra-traits"] }
@@ -122,7 +120,7 @@ hex-literal = "0.4.1"
 smoldot = { version = "0.18.0", default-features = false }
 smoldot-light = { version = "0.16.2", default-features = false }
 tokio-stream = "0.1.16"
-futures-util = "0.3.30"
+futures-util = "0.3.31"
 rand = "0.8.5"
 pin-project = "1.1.5"
 
