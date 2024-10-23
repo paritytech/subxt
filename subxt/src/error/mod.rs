@@ -172,18 +172,40 @@ pub enum BlockError {
     #[error("Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)")]
     NotFound(String),
     /// Leftover bytes found after decoding the extrinsic.
-    #[error("After decoding, {0} bytes were left, suggesting that decoding may have failed")]
-    LeftoverBytes(usize),
+    #[error("After decoding the exntrinsic at index {extrinsic_index}, {num_leftover_bytes} bytes were left, suggesting that decoding may have failed")]
+    LeftoverBytes {
+        /// Index of the extrinsic that failed to decode.
+        extrinsic_index: usize,
+        /// Number of bytes leftover after decoding the extrinsic.
+        num_leftover_bytes: usize,
+    },
     /// Decoding error.
-    #[error("Cannot decode extrinsic: {0}")]
-    ExtrinsicDecodeError(subxt_core::error::ExtrinsicDecodeError),
+    #[error("Cannot decode extrinsic at index {extrinsic_index}: {error}")]
+    ExtrinsicDecodeError {
+        /// Index of the extrinsic that failed to decode.
+        extrinsic_index: usize,
+        /// The decode error.
+        error: subxt_core::error::ExtrinsicDecodeError,
+    },
 }
 
 impl From<CoreBlockError> for BlockError {
     fn from(value: CoreBlockError) -> Self {
         match value {
-            CoreBlockError::LeftoverBytes(n) => BlockError::LeftoverBytes(n),
-            CoreBlockError::ExtrinsicDecodeError(e) => BlockError::ExtrinsicDecodeError(e),
+            CoreBlockError::LeftoverBytes {
+                extrinsic_index,
+                num_leftover_bytes,
+            } => BlockError::LeftoverBytes {
+                extrinsic_index,
+                num_leftover_bytes,
+            },
+            CoreBlockError::ExtrinsicDecodeError {
+                extrinsic_index,
+                error,
+            } => BlockError::ExtrinsicDecodeError {
+                extrinsic_index,
+                error,
+            },
         }
     }
 }
