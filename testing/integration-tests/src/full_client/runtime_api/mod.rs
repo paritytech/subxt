@@ -93,10 +93,15 @@ async fn unchecked_extrinsic_encoding() -> Result<(), subxt::Error> {
         )
         .await?;
 
+    let uxt =
+        test_runtime::node_runtime::runtime_types::pallet_revive::evm::runtime::UncheckedExtrinsic(
+            tx_bytes.into(),
+        );
+
     // Use the generated API to confirm the result with the raw call.
     let runtime_api_call = node_runtime::apis()
         .transaction_payment_api()
-        .query_fee_details(tx_bytes.into(), len);
+        .query_fee_details(uxt, len);
 
     let result = api
         .runtime_api()
