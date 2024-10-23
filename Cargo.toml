@@ -78,7 +78,7 @@ either = { version = "1.13.0", default-features = false }
 finito = { version = "0.1.0", default-features = false }
 frame-decode = { version = "0.4.0", default-features = false }
 frame-metadata = { version = "16.0.0", default-features = false }
-futures = { version = "0.3.30", default-features = false, features = ["std"] }
+futures = { version = "0.3.31", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
 hashbrown = "0.14.5"
 hex = { version = "0.4.3", default-features = false }
@@ -120,7 +120,7 @@ hex-literal = "0.4.1"
 smoldot = { version = "0.18.0", default-features = false }
 smoldot-light = { version = "0.16.2", default-features = false }
 tokio-stream = "0.1.16"
-futures-util = "0.3.30"
+futures-util = "0.3.31"
 rand = "0.8.5"
 pin-project = "1.1.5"
 
