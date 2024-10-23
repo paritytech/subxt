@@ -2992,14 +2992,13 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "055387e30382aec12f626c6d9086b7a7a08844f2a2074c14b415eef48237cff4"
+checksum = "02d3379df61ff3dd871e2dde7d1bcdc0263e613c21c7579b149fd4f0ad9b1dc2"
 dependencies = [
- "frame-metadata 16.0.0",
- "hex",
+ "frame-metadata 17.0.0",
  "parity-scale-codec",
- "scale-decode 0.13.1",
+ "scale-decode",
  "scale-info",
  "scale-type-resolver",
  "sp-crypto-hashing",
@@ -8473,19 +8472,6 @@ dependencies = [
 
 [[package]]
 name = "scale-decode"
-version = "0.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e98f3262c250d90e700bb802eb704e1f841e03331c2eb815e46516c4edbf5b27"
-dependencies = [
- "derive_more 0.99.17",
- "parity-scale-codec",
- "scale-bits",
- "scale-type-resolver",
- "smallvec",
-]
-
-[[package]]
-name = "scale-decode"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8ae9cc099ae85ff28820210732b00f019546f36f33225f509fe25d5816864a0"
@@ -8618,7 +8604,7 @@ dependencies = [
  "either",
  "parity-scale-codec",
  "scale-bits",
- "scale-decode 0.14.0",
+ "scale-decode",
  "scale-encode",
  "scale-info",
  "scale-type-resolver",
@@ -10559,7 +10545,7 @@ dependencies = [
  "polkadot-sdk",
  "primitive-types 0.13.1",
  "scale-bits",
- "scale-decode 0.14.0",
+ "scale-decode",
  "scale-encode",
  "scale-info",
  "scale-value",
@@ -10649,7 +10635,7 @@ dependencies = [
  "polkadot-sdk",
  "primitive-types 0.13.1",
  "scale-bits",
- "scale-decode 0.14.0",
+ "scale-decode",
  "scale-encode",
  "scale-info",
  "scale-value",
