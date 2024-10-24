@@ -10591,7 +10591,7 @@ dependencies = [
  "subxt",
  "subxt-codegen",
  "subxt-metadata",
- "subxt-utils",
+ "subxt-utils-fetchmetadata",
  "syn 2.0.77",
  "thiserror",
  "tokio",
@@ -10681,7 +10681,7 @@ dependencies = [
  "quote",
  "scale-typegen",
  "subxt-codegen",
- "subxt-utils",
+ "subxt-utils-fetchmetadata",
  "syn 2.0.77",
 ]
 
@@ -10738,10 +10738,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "subxt-utils"
+name = "subxt-utils-fetchmetadata"
 version = "0.37.0"
 dependencies = [
- "frame-metadata 16.0.0",
+ "frame-metadata 17.0.0",
  "hex",
  "jsonrpsee",
  "parity-scale-codec",

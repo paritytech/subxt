@@ -19,7 +19,7 @@ pub type WasmMetadataResult<A> = Result<A, CodegenError>;
 
 /// Uses wasm artifact produced by compiling the runtime to generate metadata
 pub fn from_wasm_file(wasm_file_path: &Path) -> WasmMetadataResult<Metadata> {
-    let wasm_file = subxt_utils::fetch_metadata::from_file_blocking(wasm_file_path)
+    let wasm_file = subxt_utils_fetchmetadata::from_file_blocking(wasm_file_path)
         .map_err(|e| CodegenError::Other(e.to_string()))
         .and_then(maybe_decompress)?;
     call_and_decode(wasm_file)

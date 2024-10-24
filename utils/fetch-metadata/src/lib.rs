@@ -2,11 +2,15 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Fetch metadata from a file or URL.
+//! Subxt utils fetch metadata.
+
+// Internal helper macros
+#[macro_use]
+mod macros;
 
 mod error;
 
-cfg_fetch_metadata_url! {
+cfg_fetch_from_url! {
     mod url;
     pub use url::{from_url, from_url_blocking, MetadataVersion, Url};
 }

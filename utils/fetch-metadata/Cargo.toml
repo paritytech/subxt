@@ -1,5 +1,5 @@
 [package]
-name = "subxt-utils"
+name = "subxt-utils-fetchmetadata"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -11,11 +11,10 @@ license.workspace = true
 repository.workspace = true
 documentation.workspace = true
 homepage.workspace = true
-description = "subxt utils"
+description = "subxt utils fetch metadata"
 
 [features]
-fetch-metadata = []
-fetch-metadata-url = ["dep:jsonrpsee", "dep:tokio", "dep:url", "frame-metadata"]
+url = ["dep:jsonrpsee", "dep:tokio", "dep:url", "frame-metadata"]
 
 [dependencies]
 thiserror = { workspace = true }

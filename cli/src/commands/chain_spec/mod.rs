@@ -6,7 +6,7 @@ use clap::Parser as ClapParser;
 #[cfg(feature = "chain-spec-pruning")]
 use serde_json::Value;
 use std::{io::Write, path::PathBuf};
-use subxt_utils::fetch_metadata::Url;
+use subxt_utils_fetchmetadata::Url;
 
 mod fetch;
 

@@ -9,7 +9,7 @@ use jsonrpsee::client_transport::ws::Url;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use subxt_metadata::Metadata;
-use subxt_utils::fetch_metadata::MetadataVersion;
+use subxt_utils_fetchmetadata::MetadataVersion;
 
 use crate::utils::validate_url_security;
 
@@ -137,7 +137,7 @@ async fn fetch_runtime_metadata(
     url: Url,
     version: MetadataVersion,
 ) -> color_eyre::Result<Metadata> {
-    let bytes = subxt_utils::fetch_metadata::from_url(url, version).await?;
+    let bytes = subxt_utils_fetchmetadata::from_url(url, version).await?;
     let metadata = Metadata::decode(&mut &bytes[..])?;
     Ok(metadata)
 }

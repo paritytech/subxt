@@ -15,7 +15,7 @@ members = [
     "signer",
     "subxt",
     "scripts/artifacts",
-    "utils",
+    "utils/fetch-metadata",
 ]
 
 # We exclude any crates that would depend on non mutually
@@ -141,7 +141,7 @@ polkadot-sdk = { version = "0.7", default-features = false }
 # Subxt workspace crates:
 subxt = { version = "0.37.0", path = "subxt", default-features = false }
 subxt-core = { version = "0.37.0", path = "core", default-features = false }
-subxt-utils = { version = "0.37.0", path = "utils", default-features = false }
+subxt-utils-fetchmetadata = { version = "0.37.0", path = "utils/fetch-metadata", default-features = false }
 subxt-macro = { version = "0.37.0", path = "macro" }
 subxt-metadata = { version = "0.37.0", path = "metadata", default-features = false }
 subxt-codegen = { version = "0.37.0", path = "codegen" }

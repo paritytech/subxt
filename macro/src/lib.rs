@@ -235,13 +235,13 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
             let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
             let root_path = std::path::Path::new(&root);
             let path = root_path.join(rest_of_path);
-            subxt_utils::fetch_metadata::from_file_blocking(&path)
+            subxt_utils_fetchmetadata::from_file_blocking(&path)
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .map_err(|e| CodegenError::Other(e.to_string()).into_compile_error())?
         }
         #[cfg(feature = "runtime-metadata-insecure-url")]
         (None, Some(url_string)) => {
-            use subxt_utils::fetch_metadata::{from_url_blocking, MetadataVersion, Url};
+            use subxt_utils_fetchmetadata::{from_url_blocking, MetadataVersion, Url};
 
             let url = Url::parse(url_string).unwrap_or_else(|_| {
                 abort_call_site!("Cannot download metadata; invalid url: {}", url_string)

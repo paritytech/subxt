@@ -35,7 +35,7 @@ scale-info = { workspace = true, features = ["bit-vec"] }
 frame-metadata = { workspace = true }
 
 [package.metadata.docs.rs]
-features = ["fetch-metadata"]
+features = ["default"]
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]

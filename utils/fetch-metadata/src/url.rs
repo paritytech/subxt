@@ -4,7 +4,7 @@
 
 //! Fetch metadata from a URL.
 
-use crate::fetch_metadata::Error;
+use crate::Error;
 use codec::{Decode, Encode};
 use jsonrpsee::{
     core::client::ClientT, http_client::HttpClientBuilder, rpc_params, ws_client::WsClientBuilder,

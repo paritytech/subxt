@@ -13,7 +13,7 @@ pub enum Error {
     #[error("Cannot scale encode/decode value: {0}")]
     CodecError(#[from] codec::Error),
     /// JSON-RPC error fetching metadata.
-    #[cfg(feature = "fetch-metadata-url")]
+    #[cfg(feature = "url")]
     #[error("Request error: {0}")]
     RequestError(#[from] jsonrpsee::core::ClientError),
     /// Failed IO when fetching from a file.
