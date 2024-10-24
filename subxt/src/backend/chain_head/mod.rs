@@ -560,7 +560,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         let mut finalized_hash: Option<T::Hash> = None;
 
         // Record the start time so that we can time out if things appear to take too long.
-        let start_instant = instant::Instant::now();
+        let start_instant = web_time::Instant::now();
 
         // A quick helper to return a generic error.
         let err_other = |s: &str| Some(Err(Error::Other(s.into())));

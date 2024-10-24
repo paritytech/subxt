@@ -59,21 +59,40 @@ impl_from!(codec::Error => Error::Codec);
 #[derive(Debug)]
 pub enum BlockError {
     /// Leftover bytes found after decoding the extrinsic.
-    LeftoverBytes(usize),
+    LeftoverBytes {
+        /// Index of the extrinsic that failed to decode.
+        extrinsic_index: usize,
+        /// Number of bytes leftover after decoding the extrinsic.
+        num_leftover_bytes: usize,
+    },
     /// Something went wrong decoding the extrinsic.
-    ExtrinsicDecodeError(ExtrinsicDecodeError),
+    ExtrinsicDecodeError {
+        /// Index of the extrinsic that failed to decode.
+        extrinsic_index: usize,
+        /// The decode error.
+        error: ExtrinsicDecodeError,
+    },
 }
 impl Display for BlockError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            BlockError::LeftoverBytes(n) => {
+            BlockError::LeftoverBytes {
+                extrinsic_index,
+                num_leftover_bytes,
+            } => {
                 write!(
                     f,
-                    "After decoding, {n} bytes were left, suggesting that decoding may have failed"
+                    "After decoding the extrinsic at index {extrinsic_index}, {num_leftover_bytes} bytes were left, suggesting that decoding may have failed"
                 )
             }
-            BlockError::ExtrinsicDecodeError(e) => {
-                write!(f, "{e}")
+            BlockError::ExtrinsicDecodeError {
+                extrinsic_index,
+                error,
+            } => {
+                write!(
+                    f,
+                    "Failed to decode extrinsic at index {extrinsic_index}: {error}"
+                )
             }
         }
     }

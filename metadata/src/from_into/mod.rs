@@ -108,6 +108,9 @@ impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for crate::Metadata {
             }
             frame_metadata::RuntimeMetadata::V14(m) => m.try_into(),
             frame_metadata::RuntimeMetadata::V15(m) => m.try_into(),
+            frame_metadata::RuntimeMetadata::V16(_opaque) => {
+                Err(TryFromError::UnsupportedMetadataVersion(16))
+            }
         }
     }
 }

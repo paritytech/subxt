@@ -36,7 +36,7 @@ web = [
     # For the light-client platform.
     "wasm-bindgen-futures",
 	"futures-timer/wasm-bindgen",
-    "instant/wasm-bindgen",
+    "web-time",
     "pin-project",
 
     # For websocket.
@@ -66,7 +66,7 @@ wasm-bindgen-futures = { workspace = true, optional = true }
 smoldot = { workspace = true, optional = true }
 pin-project = { workspace = true, optional = true }
 futures-timer = { workspace = true, optional = true }
-instant = { workspace = true, optional = true }
+web-time = { workspace = true, optional = true }
 getrandom = { workspace = true, optional = true }
 
 [package.metadata.docs.rs]
