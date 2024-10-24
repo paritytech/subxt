@@ -32,7 +32,8 @@ impl<T: Config> Extrinsics<T> {
     pub fn decode_from(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, Error> {
         let extrinsics = extrinsics
             .into_iter()
-            .map(|bytes| {
+            .enumerate()
+            .map(|(extrinsic_index, bytes)| {
                 let cursor = &mut &*bytes;
 
                 // Try to decode the extrinsic.
@@ -41,12 +42,19 @@ impl<T: Config> Extrinsics<T> {
                     metadata.deref(),
                     metadata.types(),
                 )
-                .map_err(BlockError::ExtrinsicDecodeError)?
+                .map_err(|error| BlockError::ExtrinsicDecodeError {
+                    extrinsic_index,
+                    error,
+                })?
                 .into_owned();
 
                 // We didn't consume all bytes, so decoding probably failed.
                 if !cursor.is_empty() {
-                    return Err(BlockError::LeftoverBytes(cursor.len()).into());
+                    return Err(BlockError::LeftoverBytes {
+                        extrinsic_index,
+                        num_leftover_bytes: cursor.len(),
+                    }
+                    .into());
                 }
 
                 Ok(Arc::new((decoded_info, bytes)))
@@ -493,7 +501,10 @@ mod tests {
         assert_matches!(
             result.err(),
             Some(crate::Error::Block(
-                crate::error::BlockError::ExtrinsicDecodeError(_)
+                crate::error::BlockError::ExtrinsicDecodeError {
+                    extrinsic_index: 0,
+                    error: _
+                }
             ))
         );
     }
@@ -510,9 +521,10 @@ mod tests {
         assert_matches!(
             result.err(),
             Some(crate::Error::Block(
-                crate::error::BlockError::ExtrinsicDecodeError(
-                    ExtrinsicDecodeError::VersionNotSupported(3)
-                )
+                crate::error::BlockError::ExtrinsicDecodeError {
+                    extrinsic_index: 0,
+                    error: ExtrinsicDecodeError::VersionNotSupported(3),
+                }
             ))
         );
     }

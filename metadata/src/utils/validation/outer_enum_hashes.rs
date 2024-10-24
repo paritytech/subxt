@@ -5,7 +5,10 @@ use hashbrown::HashMap;
 use scale_info::{PortableRegistry, TypeDef};
 
 use crate::{
-    utils::validation::{get_type_def_variant_hash, get_type_hash},
+    utils::{
+        retain,
+        validation::{get_type_def_variant_hash, get_type_hash},
+    },
     Metadata,
 };
 
@@ -20,7 +23,28 @@ pub struct OuterEnumHashes {
 
 impl OuterEnumHashes {
     /// Constructs new `OuterEnumHashes` from metadata. If `only_these_variants` is set, the enums are stripped down to only these variants, before their hashes are calculated.
-    pub fn new(metadata: &Metadata, only_these_variants: Option<&[&str]>) -> Self {
+    pub fn new(
+        metadata: &Metadata,
+        specific_pallets: Option<&[&str]>,
+        specific_runtimes: Option<&[&str]>,
+    ) -> Self {
+        let filter = |names: Option<&[&str]>, name: &str| match names {
+            Some(names) => names.contains(&name),
+            None => true,
+        };
+        let mut check_enum_type_id = retain::keep_outer_enum(
+            metadata,
+            &mut |name| filter(specific_pallets, name),
+            &mut |name| filter(specific_runtimes, name),
+        );
+
+        let variants = |filter: bool| {
+            if !filter {
+                specific_pallets
+            } else {
+                None
+            }
+        };
         fn get_enum_hash(
             registry: &PortableRegistry,
             id: u32,
@@ -46,9 +70,12 @@ impl OuterEnumHashes {
         }
         let enums = &metadata.outer_enums;
 
-        let call_hash = get_enum_hash(metadata.types(), enums.call_enum_ty, only_these_variants);
-        let event_hash = get_enum_hash(metadata.types(), enums.event_enum_ty, only_these_variants);
-        let error_hash = get_enum_hash(metadata.types(), enums.error_enum_ty, only_these_variants);
+        let call_variants = variants(check_enum_type_id(enums.call_enum_ty));
+        let call_hash = get_enum_hash(metadata.types(), enums.call_enum_ty, call_variants);
+        let event_variants = variants(check_enum_type_id(enums.event_enum_ty));
+        let event_hash = get_enum_hash(metadata.types(), enums.event_enum_ty, event_variants);
+        let error_variants = variants(check_enum_type_id(enums.error_enum_ty));
+        let error_hash = get_enum_hash(metadata.types(), enums.error_enum_ty, error_variants);
 
         Self {
             call_hash: (enums.call_enum_ty, call_hash),
