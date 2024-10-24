@@ -4,6 +4,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.38.0] - 2024-10-24
+
+This release doesn't introduce any substantial breaking changes and focuses primarily on incremental improvements, testing and bug fixes. A few of the highlights include:
+
+- [#1785](https://github.com/paritytech/subxt/pull/1785): Support decoding V5 extrinsics in blocks (currently Subxt will still submit V4 extrinsics). This also unifies our extrinsic decoding logic into one place.
+- [#1802](https://github.com/paritytech/subxt/pull/1802): Stabilizing the `subxt::backend::unstable::UnstableBackend` (it's now called `subxt::backend::chain_head::ChainHeadBackend`). This backend can be used to interact with the modern `chainHead` RPC methods exposed by Smoldot and compliant RPC nodes. See [this example](https://github.com/paritytech/subxt/blob/master/subxt/examples/setup_rpc_chainhead_backend.rs).
+- [#1803](https://github.com/paritytech/subxt/pull/1803): Stabilizing the `reconnecting-rpc-client`. See [this example](https://github.com/paritytech/subxt/blob/master/subxt/examples/setup_reconnecting_rpc_client.rs).
+- [#1720](https://github.com/paritytech/subxt/pull/1720): A nice little QoL improvement if you have the raw runtime WASM and would like to generate an interface directly from that (ie with `#[subx(runtime_path = "path/to/runtime.wasm")]`).
+- [#1661](https://github.com/paritytech/subxt/pull/1661): Support loading keys directly from the PolkadotJS JSON to be used in Subxt.
+- [#1638](https://github.com/paritytech/subxt/pull/1638): Improve support for Eth style chains by defining a 20-byte account ID type directly in `subxt-core`. See [this example](https://github.com/paritytech/subxt/blob/master/subxt/examples/tx_basic_frontier.rs).
+
+The notable changes in this release are as follows:
+
+### Added
+- add reconnecting tests for unstable_backend ([#1765](https://github.com/paritytech/subxt/pull/1765))
+- add support for generating metadata from runtime wasm files ([#1720](https://github.com/paritytech/subxt/pull/1720))
+- support loading keys from Polkadot-JS accounts ([#1661](https://github.com/paritytech/subxt/pull/1661))
+- allow tx payloads to be boxed ([#1690](https://github.com/paritytech/subxt/pull/1690))
+- add hash method to ExtrinsicDetails ([#1676](https://github.com/paritytech/subxt/pull/1676))
+- expose `secret_key` method for `ecdsa::Keypair` and `eth::Keypair` ([#1628](https://github.com/paritytech/subxt/pull/1628))
+- add 20-byte account id to subxt_core ([#1638](https://github.com/paritytech/subxt/pull/1638))
+
+### Changed
+- make it clearer which extrinsic failed to decode ([#1835](https://github.com/paritytech/subxt/pull/1835))
+- chore(deps): bump frame-metadata from 16 to 17 ([#1836](https://github.com/paritytech/subxt/pull/1836))
+- chore(deps): bump `scale family crates`, `primitive-types` and `impl-serde` ([#1832](https://github.com/paritytech/subxt/pull/1832))
+- chore(deps): replace `instant` with `web-time` ([#1830](https://github.com/paritytech/subxt/pull/1830))
+- deps: use polkadot-sdk umbrella crate ([#1786](https://github.com/paritytech/subxt/pull/1786))
+- stabilize reconnecting-rpc-client ([#1803](https://github.com/paritytech/subxt/pull/1803))
+- stabilize chainhead backend ([#1802](https://github.com/paritytech/subxt/pull/1802))
+- derive serialize on more types ([#1797](https://github.com/paritytech/subxt/pull/1797))
+- use frame-decode for core extrinsic decode logic (including v5 support) ([#1785](https://github.com/paritytech/subxt/pull/1785))
+- reconn-rpc-client: parse URL before connecting ([#1789](https://github.com/paritytech/subxt/pull/1789))
+- update proc_macro_error to proc_macro_error2 ([#1767](https://github.com/paritytech/subxt/pull/1767))
+- chore(deps): update Smoldot to the latest version ([#1400](https://github.com/paritytech/subxt/pull/1400))
+- remove unneeded `?Sized` bound and replace never type with `()` ([#1758](https://github.com/paritytech/subxt/pull/1758))
+- improve test coverage for legacy `Backend` impl ([#1751](https://github.com/paritytech/subxt/pull/1751))
+- add integration tests for `unstable-reconnecting-rpc-client` ([#1711](https://github.com/paritytech/subxt/pull/1711))
+- replace `reconnecting-jsonrpsee-ws-client` with `subxt-reconnecting-rpc-client` ([#1705](https://github.com/paritytech/subxt/pull/1705))
+- allow PartialExtrinsic to be held across await points ([#1658](https://github.com/paritytech/subxt/pull/1658))
+- chore(deps): bump jsonrpsee from 0.22.5 to 0.23.1 ([#1656](https://github.com/paritytech/subxt/pull/1656))
+
+### Fixed
+- fix stripping metadata in the case where enums like RuntimeCall are handed back ([#1774](https://github.com/paritytech/subxt/pull/1774))
+- fix: `defalt-feature` -> `default-features` Cargo.toml ([#1828](https://github.com/paritytech/subxt/pull/1828))
+- avoid hang by notifying subscribers when the backend is closed ([#1817](https://github.com/paritytech/subxt/pull/1817))
+- fix: error message on rpc errors ([#1804](https://github.com/paritytech/subxt/pull/1804))
+- docs: fix typos ([#1776](https://github.com/paritytech/subxt/pull/1776))
+- examples: fix reconnecting logging target ([#1733](https://github.com/paritytech/subxt/pull/1733))
+- docs: fix spelling issues ([#1699](https://github.com/paritytech/subxt/pull/1699))
+- chore: fix some comments ([#1697](https://github.com/paritytech/subxt/pull/1697))
+- codegen: Fix decode error by adding `#[codec(dumb_trait_bound)]` ([#1630](https://github.com/paritytech/subxt/pull/1630))
+
 ## [0.37.0] - 2024-05-28
 
 This release mainly adds support for the sign extension `CheckMetadataHash` and fixes a regression introduced in v0.36.0
