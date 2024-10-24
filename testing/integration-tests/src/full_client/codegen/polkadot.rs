@@ -934,10 +934,9 @@ pub mod api {
                         "apply_extrinsic",
                         types::ApplyExtrinsic { extrinsic },
                         [
-                            75u8, 52u8, 249u8, 160u8, 171u8, 84u8, 31u8, 114u8, 106u8, 150u8,
-                            171u8, 246u8, 53u8, 135u8, 139u8, 203u8, 104u8, 228u8, 217u8, 42u8,
-                            13u8, 3u8, 223u8, 240u8, 47u8, 35u8, 192u8, 232u8, 92u8, 177u8, 114u8,
-                            203u8,
+                            192u8, 184u8, 199u8, 4u8, 85u8, 136u8, 214u8, 205u8, 29u8, 29u8, 98u8,
+                            145u8, 172u8, 92u8, 168u8, 161u8, 150u8, 133u8, 100u8, 243u8, 100u8,
+                            100u8, 118u8, 28u8, 104u8, 82u8, 93u8, 63u8, 79u8, 36u8, 149u8, 144u8,
                         ],
                     )
                 }
@@ -1143,9 +1142,10 @@ pub mod api {
                             block_hash,
                         },
                         [
-                            196u8, 50u8, 90u8, 49u8, 109u8, 251u8, 200u8, 35u8, 23u8, 150u8, 140u8,
-                            143u8, 232u8, 164u8, 133u8, 89u8, 32u8, 240u8, 115u8, 39u8, 95u8, 70u8,
-                            162u8, 76u8, 122u8, 73u8, 151u8, 144u8, 234u8, 120u8, 100u8, 29u8,
+                            19u8, 53u8, 170u8, 115u8, 75u8, 121u8, 231u8, 50u8, 199u8, 181u8,
+                            243u8, 170u8, 163u8, 224u8, 213u8, 134u8, 206u8, 207u8, 88u8, 242u8,
+                            80u8, 139u8, 233u8, 87u8, 175u8, 249u8, 178u8, 169u8, 255u8, 171u8,
+                            4u8, 125u8,
                         ],
                     )
                 }
@@ -5173,9 +5173,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                69u8, 73u8, 60u8, 67u8, 233u8, 216u8, 10u8, 38u8, 241u8, 132u8, 93u8, 146u8, 15u8,
-                5u8, 238u8, 129u8, 251u8, 189u8, 111u8, 218u8, 222u8, 102u8, 138u8, 181u8, 242u8,
-                179u8, 45u8, 239u8, 237u8, 108u8, 1u8, 26u8,
+                76u8, 217u8, 4u8, 129u8, 221u8, 172u8, 36u8, 174u8, 192u8, 47u8, 59u8, 172u8,
+                245u8, 78u8, 76u8, 217u8, 51u8, 196u8, 164u8, 199u8, 109u8, 133u8, 96u8, 184u8,
+                67u8, 162u8, 177u8, 147u8, 80u8, 214u8, 27u8, 55u8,
             ]
     }
     pub mod system {
@@ -5777,7 +5777,7 @@ pub mod api {
             }
             pub mod extrinsic_success {
                 use super::runtime_types;
-                pub type DispatchInfo = runtime_types::frame_support::dispatch::DispatchInfo;
+                pub type DispatchInfo = runtime_types::frame_system::DispatchEventInfo;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for ExtrinsicSuccess {
                 const PALLET: &'static str = "System";
@@ -5802,7 +5802,7 @@ pub mod api {
             pub mod extrinsic_failed {
                 use super::runtime_types;
                 pub type DispatchError = runtime_types::sp_runtime::DispatchError;
-                pub type DispatchInfo = runtime_types::frame_support::dispatch::DispatchInfo;
+                pub type DispatchInfo = runtime_types::frame_system::DispatchEventInfo;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for ExtrinsicFailed {
                 const PALLET: &'static str = "System";
@@ -17878,7 +17878,7 @@ pub mod api {
                 #[doc = "Attest to a statement, needed to finalize the claims process."]
                 #[doc = ""]
                 #[doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a"]
-                #[doc = "`SignedExtension`."]
+                #[doc = "`TransactionExtension`."]
                 #[doc = ""]
                 #[doc = "Unsigned Validation:"]
                 #[doc = "A call to attest is deemed valid if the sender has a `Preclaim` registered"]
@@ -18076,7 +18076,7 @@ pub mod api {
                 #[doc = "Attest to a statement, needed to finalize the claims process."]
                 #[doc = ""]
                 #[doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a"]
-                #[doc = "`SignedExtension`."]
+                #[doc = "`TransactionExtension`."]
                 #[doc = ""]
                 #[doc = "Unsigned Validation:"]
                 #[doc = "A call to attest is deemed valid if the sender has a `Preclaim` registered"]
@@ -53171,26 +53171,6 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct DispatchInfo {
-                    pub weight: runtime_types::sp_weights::weight_v2::Weight,
-                    pub class: runtime_types::frame_support::dispatch::DispatchClass,
-                    pub pays_fee: runtime_types::frame_support::dispatch::Pays,
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
                 pub enum Pays {
                     #[codec(index = 0)]
                     Yes,
@@ -53816,13 +53796,13 @@ pub mod api {
                     #[codec(index = 0)]
                     #[doc = "An extrinsic completed successfully."]
                     ExtrinsicSuccess {
-                        dispatch_info: runtime_types::frame_support::dispatch::DispatchInfo,
+                        dispatch_info: runtime_types::frame_system::DispatchEventInfo,
                     },
                     #[codec(index = 1)]
                     #[doc = "An extrinsic failed."]
                     ExtrinsicFailed {
                         dispatch_error: runtime_types::sp_runtime::DispatchError,
-                        dispatch_info: runtime_types::frame_support::dispatch::DispatchInfo,
+                        dispatch_info: runtime_types::frame_system::DispatchEventInfo,
                     },
                     #[codec(index = 2)]
                     #[doc = "`:code` was updated."]
@@ -53883,6 +53863,22 @@ pub mod api {
             pub struct CodeUpgradeAuthorization {
                 pub code_hash: ::subxt::ext::subxt_core::utils::H256,
                 pub check_version: ::core::primitive::bool,
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub struct DispatchEventInfo {
+                pub weight: runtime_types::sp_weights::weight_v2::Weight,
+                pub class: runtime_types::frame_support::dispatch::DispatchClass,
+                pub pays_fee: runtime_types::frame_support::dispatch::Pays,
             }
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -64656,7 +64652,7 @@ pub mod api {
                         #[doc = "Attest to a statement, needed to finalize the claims process."]
                         #[doc = ""]
                         #[doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a"]
-                        #[doc = "`SignedExtension`."]
+                        #[doc = "`TransactionExtension`."]
                         #[doc = ""]
                         #[doc = "Unsigned Validation:"]
                         #[doc = "A call to attest is deemed valid if the sender has a `Preclaim` registered"]
@@ -69828,6 +69824,10 @@ pub mod api {
                     MandatoryValidation,
                     #[codec(index = 10)]
                     BadSigner,
+                    #[codec(index = 11)]
+                    IndeterminateImplicit,
+                    #[codec(index = 12)]
+                    UnknownOrigin,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
