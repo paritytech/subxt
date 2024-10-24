@@ -15,7 +15,7 @@ description = "Generate types and helpers for interacting with Substrate runtime
 
 [features]
 web = ["subxt-codegen/web"]
-runtime-path = ["polkadot-sdk"]
+runtime-metadata-path = ["polkadot-sdk"]
 runtime-metadata-insecure-url = ["subxt-utils-fetchmetadata/url"]
 
 [lib]
