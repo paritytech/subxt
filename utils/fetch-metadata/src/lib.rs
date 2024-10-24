@@ -7,7 +7,6 @@
 // Internal helper macros
 #[macro_use]
 mod macros;
-
 mod error;
 
 cfg_fetch_from_url! {
