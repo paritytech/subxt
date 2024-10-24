@@ -1,21 +1,16 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2024 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Helper methods for fetching metadata from a file or URL.
+//! Fetch metadata from a URL.
 
-use crate::error::FetchMetadataError;
+use crate::Error;
 use codec::{Decode, Encode};
 use jsonrpsee::{
-    async_client::ClientBuilder,
-    client_transport::ws::WsTransportClientBuilder,
-    core::client::{ClientT, Error},
-    http_client::HttpClientBuilder,
-    rpc_params,
+    core::client::ClientT, http_client::HttpClientBuilder, rpc_params, ws_client::WsClientBuilder,
 };
-use std::time::Duration;
 
-pub use jsonrpsee::client_transport::ws::Url;
+pub use url::Url;
 
 /// The metadata version that is fetched from the node.
 #[derive(Default, Debug, Clone, Copy)]
@@ -48,24 +43,20 @@ impl std::str::FromStr for MetadataVersion {
     }
 }
 
-/// Fetch metadata from a file.
-pub fn fetch_metadata_from_file_blocking(
-    path: &std::path::Path,
-) -> Result<Vec<u8>, FetchMetadataError> {
-    use std::io::Read;
-    let to_err = |err| FetchMetadataError::Io(path.to_string_lossy().into(), err);
-    let mut file = std::fs::File::open(path).map_err(to_err)?;
-    let mut bytes = Vec::new();
-    file.read_to_end(&mut bytes).map_err(to_err)?;
+/// Returns the metadata bytes from the provided URL.
+pub async fn from_url(url: Url, version: MetadataVersion) -> Result<Vec<u8>, Error> {
+    let bytes = match url.scheme() {
+        "http" | "https" => fetch_metadata_http(url, version).await,
+        "ws" | "wss" => fetch_metadata_ws(url, version).await,
+        invalid_scheme => Err(Error::InvalidScheme(invalid_scheme.to_owned())),
+    }?;
+
     Ok(bytes)
 }
 
 /// Returns the metadata bytes from the provided URL, blocking the current thread.
-pub fn fetch_metadata_from_url_blocking(
-    url: Url,
-    version: MetadataVersion,
-) -> Result<Vec<u8>, FetchMetadataError> {
-    tokio_block_on(fetch_metadata_from_url(url, version))
+pub fn from_url_blocking(url: Url, version: MetadataVersion) -> Result<Vec<u8>, Error> {
+    tokio_block_on(from_url(url, version))
 }
 
 // Block on some tokio runtime for sync contexts
@@ -77,60 +68,33 @@ fn tokio_block_on<T, Fut: std::future::Future<Output = T>>(fut: Fut) -> T {
         .block_on(fut)
 }
 
-/// Returns the metadata bytes from the provided URL.
-pub async fn fetch_metadata_from_url(
-    url: Url,
-    version: MetadataVersion,
-) -> Result<Vec<u8>, FetchMetadataError> {
-    let bytes = match url.scheme() {
-        "http" | "https" => fetch_metadata_http(url, version).await,
-        "ws" | "wss" => fetch_metadata_ws(url, version).await,
-        invalid_scheme => Err(FetchMetadataError::InvalidScheme(invalid_scheme.to_owned())),
-    }?;
-
-    Ok(bytes)
-}
-
-async fn fetch_metadata_ws(
-    url: Url,
-    version: MetadataVersion,
-) -> Result<Vec<u8>, FetchMetadataError> {
-    let (sender, receiver) = WsTransportClientBuilder::default()
-        .build(url)
-        .await
-        .map_err(|e| Error::Transport(e.into()))?;
-
-    let client = ClientBuilder::default()
-        .request_timeout(Duration::from_secs(180))
+async fn fetch_metadata_ws(url: Url, version: MetadataVersion) -> Result<Vec<u8>, Error> {
+    let client = WsClientBuilder::default()
+        .request_timeout(std::time::Duration::from_secs(180))
         .max_buffer_capacity_per_subscription(4096)
-        .build_with_tokio(sender, receiver);
+        .build(url)
+        .await?;
 
     fetch_metadata(client, version).await
 }
 
-async fn fetch_metadata_http(
-    url: Url,
-    version: MetadataVersion,
-) -> Result<Vec<u8>, FetchMetadataError> {
+async fn fetch_metadata_http(url: Url, version: MetadataVersion) -> Result<Vec<u8>, Error> {
     let client = HttpClientBuilder::default()
-        .request_timeout(Duration::from_secs(180))
+        .request_timeout(std::time::Duration::from_secs(180))
         .build(url)?;
 
     fetch_metadata(client, version).await
 }
 
 /// The innermost call to fetch metadata:
-async fn fetch_metadata(
-    client: impl ClientT,
-    version: MetadataVersion,
-) -> Result<Vec<u8>, FetchMetadataError> {
+async fn fetch_metadata(client: impl ClientT, version: MetadataVersion) -> Result<Vec<u8>, Error> {
     const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
 
     // Fetch metadata using the "new" state_call interface
     async fn fetch_inner(
         client: &impl ClientT,
         version: MetadataVersion,
-    ) -> Result<Vec<u8>, FetchMetadataError> {
+    ) -> Result<Vec<u8>, Error> {
         // Look up supported versions:
         let supported_versions: Vec<u32> = {
             let res: String = client
@@ -149,14 +113,12 @@ async fn fetch_metadata(
                 .iter()
                 .filter(|&&v| v != UNSTABLE_METADATA_VERSION)
                 .max()
-                .ok_or_else(|| {
-                    FetchMetadataError::Other("No valid metadata versions returned".to_string())
-                })?,
+                .ok_or_else(|| Error::Other("No valid metadata versions returned".to_string()))?,
             MetadataVersion::Unstable => {
                 if supported_versions.contains(&UNSTABLE_METADATA_VERSION) {
                     UNSTABLE_METADATA_VERSION
                 } else {
-                    return Err(FetchMetadataError::Other(
+                    return Err(Error::Other(
                         "The node does not have an unstable metadata version available".to_string(),
                     ));
                 }
@@ -165,7 +127,7 @@ async fn fetch_metadata(
                 if supported_versions.contains(&version) {
                     version
                 } else {
-                    return Err(FetchMetadataError::Other(format!(
+                    return Err(Error::Other(format!(
                         "The node does not have version {version} available"
                     )));
                 }
@@ -187,7 +149,7 @@ async fn fetch_metadata(
         let metadata: Option<frame_metadata::OpaqueMetadata> =
             Decode::decode(&mut &metadata_bytes[..])?;
         let Some(metadata) = metadata else {
-            return Err(FetchMetadataError::Other(format!(
+            return Err(Error::Other(format!(
                 "The node does not have version {version} available"
             )));
         };
@@ -198,13 +160,13 @@ async fn fetch_metadata(
     async fn fetch_inner_legacy(
         client: &impl ClientT,
         version: MetadataVersion,
-    ) -> Result<Vec<u8>, FetchMetadataError> {
+    ) -> Result<Vec<u8>, Error> {
         // If the user specifically asks for anything other than version 14 or "latest", error.
         if !matches!(
             version,
             MetadataVersion::Latest | MetadataVersion::Version(14)
         ) {
-            return Err(FetchMetadataError::Other(
+            return Err(Error::Other(
                 "The node can only return version 14 metadata using the legacy API but you've asked for something else"
                     .to_string(),
             ));

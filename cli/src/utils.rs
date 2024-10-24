@@ -14,7 +14,7 @@ use std::{fs, io::Read, path::PathBuf};
 use subxt::{OnlineClient, PolkadotConfig};
 
 use scale_value::Value;
-use subxt_codegen::fetch_metadata::{fetch_metadata_from_url, MetadataVersion, Url};
+use subxt_utils_fetchmetadata::{self as fetch_metadata, MetadataVersion, Url};
 
 /// The source of the metadata.
 #[derive(Debug, Args, Clone)]
@@ -117,12 +117,12 @@ impl FileOrUrl {
             }
             // Fetch from --url
             (None, Some(uri), version) => {
-                Ok(fetch_metadata_from_url(uri.clone(), version.unwrap_or_default()).await?)
+                Ok(fetch_metadata::from_url(uri.clone(), version.unwrap_or_default()).await?)
             }
             // Default if neither is provided; fetch from local url
             (None, None, version) => {
                 let url = Url::parse("ws://localhost:9944").expect("Valid URL; qed");
-                Ok(fetch_metadata_from_url(url, version.unwrap_or_default()).await?)
+                Ok(fetch_metadata::from_url(url, version.unwrap_or_default()).await?)
             }
         }
     }

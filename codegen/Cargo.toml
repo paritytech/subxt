@@ -13,8 +13,7 @@ description = "Generate an API for interacting with a substrate node from FRAME 
 
 [features]
 default = []
-fetch-metadata = ["dep:jsonrpsee", "dep:tokio", "dep:frame-metadata"]
-web = ["jsonrpsee?/async-wasm-client", "jsonrpsee?/client-web-transport", "getrandom/js"]
+web = ["getrandom/js"]
 
 [dependencies]
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
@@ -25,9 +24,6 @@ quote = { workspace = true }
 syn = { workspace = true }
 scale-info = { workspace = true }
 subxt-metadata = { workspace = true }
-jsonrpsee = { workspace = true, features = ["async-client", "client-ws-transport-tls", "http-client"], optional = true }
-hex = { workspace = true, features = ["std"] }
-tokio = { workspace = true, features = ["rt-multi-thread"], optional = true }
 thiserror = { workspace = true }
 scale-typegen = { workspace = true }
 
@@ -36,9 +32,10 @@ getrandom = { workspace = true, optional = true }
 
 [dev-dependencies]
 scale-info = { workspace = true, features = ["bit-vec"] }
+frame-metadata = { workspace = true }
 
 [package.metadata.docs.rs]
-features = ["fetch-metadata"]
+features = ["default"]
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]

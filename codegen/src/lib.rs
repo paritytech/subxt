@@ -6,19 +6,12 @@
 //! This is used by the `#[subxt]` macro and `subxt codegen` CLI command, but can also
 //! be used directly if preferable.
 
-#![deny(unused_crate_dependencies, missing_docs)]
+#![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod api;
 pub mod error;
 mod ir;
-
-// These should probably be in a separate crate; they are used by the
-// macro and CLI tool, so they only live here because this is a common
-// crate that both depend on.
-#[cfg(feature = "fetch-metadata")]
-#[cfg_attr(docsrs, doc(cfg(feature = "fetch-metadata")))]
-pub mod fetch_metadata;
 
 #[cfg(feature = "web")]
 use getrandom as _;

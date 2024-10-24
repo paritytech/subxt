@@ -26,9 +26,10 @@ workspace = true
 chain-spec-pruning = ["smoldot"]
 
 [dependencies]
-subxt-codegen = { workspace = true, features = ["fetch-metadata"] }
+subxt-codegen = { workspace = true }
+subxt-utils-fetchmetadata = { workspace = true, features = ["url"] }
 subxt-metadata = { workspace = true }
-subxt = { workspace = true, features = ["native", "jsonrpsee"] }
+subxt = { workspace = true, features = ["default"] }
 clap = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 color-eyre = { workspace = true }
