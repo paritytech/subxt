@@ -21,7 +21,6 @@ The notable changes in this release are as follows:
 - add reconnecting tests for unstable_backend ([#1765](https://github.com/paritytech/subxt/pull/1765))
 - add support for generating metadata from runtime wasm files ([#1720](https://github.com/paritytech/subxt/pull/1720))
 - support loading keys from Polkadot-JS accounts ([#1661](https://github.com/paritytech/subxt/pull/1661))
-- add Hyperbridge as a subxt user to README ([#1721](https://github.com/paritytech/subxt/pull/1721))
 - allow tx payloads to be boxed ([#1690](https://github.com/paritytech/subxt/pull/1690))
 - add hash method to ExtrinsicDetails ([#1676](https://github.com/paritytech/subxt/pull/1676))
 - expose `secret_key` method for `ecdsa::Keypair` and `eth::Keypair` ([#1628](https://github.com/paritytech/subxt/pull/1628))
