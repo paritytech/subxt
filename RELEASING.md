@@ -76,13 +76,22 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
         ```
         (cd metadata && cargo publish) && \
-            (cd lightclient && cargo publish) && \
-            (cd codegen && cargo publish) && \
-            (cd macro && cargo publish) && \
-            (cd subxt && cargo publish) && \
-            (cd signer && cargo publish) && \
-            (cd cli && cargo publish);
+        (cd lightclient && cargo publish) && \
+        (cd utils/fetch-metadata && cargo publish) && \
+        (cd codegen && cargo publish) && \
+        (cd macro && cargo publish);
         ```
+
+        Now, remove the dev dependencies from `subxt-core` (to avoid circular deps), and then run:
+
+        ```
+        (cd core && cargo publish) && \
+        (cd subxt && cargo publish) && \
+        (cd signer && cargo publish) && \
+        (cd cli && cargo publish);
+        ```
+
+        Finally, put back the dev dependencies in `subxt-core`.
 
 11. If the release was successful, tag the commit that we released in the `master` branch with the
     version that we just released, for example:
