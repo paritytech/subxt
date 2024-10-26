@@ -112,6 +112,10 @@ pub mod ext {
     pub use scale_value;
     pub use subxt_core;
 
+    cfg_jsonrpsee! {
+        pub use jsonrpsee;
+    }
+
     cfg_substrate_compat! {
         pub use subxt_core::ext::{sp_runtime, sp_core};
     }
