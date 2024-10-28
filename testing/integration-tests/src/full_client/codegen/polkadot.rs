@@ -604,9 +604,9 @@ pub mod api {
                         "dry_run_call",
                         types::DryRunCall { origin, call },
                         [
-                            52u8, 250u8, 189u8, 192u8, 244u8, 58u8, 169u8, 209u8, 187u8, 96u8,
-                            184u8, 201u8, 241u8, 45u8, 186u8, 40u8, 229u8, 66u8, 33u8, 26u8, 80u8,
-                            27u8, 170u8, 232u8, 172u8, 71u8, 201u8, 70u8, 148u8, 44u8, 254u8, 31u8,
+                            98u8, 74u8, 157u8, 191u8, 38u8, 149u8, 9u8, 50u8, 218u8, 70u8, 242u8,
+                            153u8, 28u8, 222u8, 163u8, 67u8, 167u8, 160u8, 186u8, 177u8, 199u8,
+                            62u8, 129u8, 129u8, 126u8, 41u8, 196u8, 117u8, 37u8, 171u8, 45u8, 87u8,
                         ],
                     )
                 }
@@ -934,10 +934,9 @@ pub mod api {
                         "apply_extrinsic",
                         types::ApplyExtrinsic { extrinsic },
                         [
-                            75u8, 52u8, 249u8, 160u8, 171u8, 84u8, 31u8, 114u8, 106u8, 150u8,
-                            171u8, 246u8, 53u8, 135u8, 139u8, 203u8, 104u8, 228u8, 217u8, 42u8,
-                            13u8, 3u8, 223u8, 240u8, 47u8, 35u8, 192u8, 232u8, 92u8, 177u8, 114u8,
-                            203u8,
+                            192u8, 184u8, 199u8, 4u8, 85u8, 136u8, 214u8, 205u8, 29u8, 29u8, 98u8,
+                            145u8, 172u8, 92u8, 168u8, 161u8, 150u8, 133u8, 100u8, 243u8, 100u8,
+                            100u8, 118u8, 28u8, 104u8, 82u8, 93u8, 63u8, 79u8, 36u8, 149u8, 144u8,
                         ],
                     )
                 }
@@ -1143,9 +1142,10 @@ pub mod api {
                             block_hash,
                         },
                         [
-                            196u8, 50u8, 90u8, 49u8, 109u8, 251u8, 200u8, 35u8, 23u8, 150u8, 140u8,
-                            143u8, 232u8, 164u8, 133u8, 89u8, 32u8, 240u8, 115u8, 39u8, 95u8, 70u8,
-                            162u8, 76u8, 122u8, 73u8, 151u8, 144u8, 234u8, 120u8, 100u8, 29u8,
+                            19u8, 53u8, 170u8, 115u8, 75u8, 121u8, 231u8, 50u8, 199u8, 181u8,
+                            243u8, 170u8, 163u8, 224u8, 213u8, 134u8, 206u8, 207u8, 88u8, 242u8,
+                            80u8, 139u8, 233u8, 87u8, 175u8, 249u8, 178u8, 169u8, 255u8, 171u8,
+                            4u8, 125u8,
                         ],
                     )
                 }
@@ -5173,9 +5173,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                69u8, 73u8, 60u8, 67u8, 233u8, 216u8, 10u8, 38u8, 241u8, 132u8, 93u8, 146u8, 15u8,
-                5u8, 238u8, 129u8, 251u8, 189u8, 111u8, 218u8, 222u8, 102u8, 138u8, 181u8, 242u8,
-                179u8, 45u8, 239u8, 237u8, 108u8, 1u8, 26u8,
+                111u8, 207u8, 238u8, 81u8, 154u8, 136u8, 66u8, 31u8, 240u8, 85u8, 233u8, 121u8,
+                56u8, 61u8, 106u8, 230u8, 66u8, 85u8, 119u8, 202u8, 201u8, 196u8, 6u8, 175u8,
+                201u8, 87u8, 152u8, 252u8, 119u8, 240u8, 180u8, 188u8,
             ]
     }
     pub mod system {
@@ -5777,7 +5777,7 @@ pub mod api {
             }
             pub mod extrinsic_success {
                 use super::runtime_types;
-                pub type DispatchInfo = runtime_types::frame_support::dispatch::DispatchInfo;
+                pub type DispatchInfo = runtime_types::frame_system::DispatchEventInfo;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for ExtrinsicSuccess {
                 const PALLET: &'static str = "System";
@@ -5802,7 +5802,7 @@ pub mod api {
             pub mod extrinsic_failed {
                 use super::runtime_types;
                 pub type DispatchError = runtime_types::sp_runtime::DispatchError;
-                pub type DispatchInfo = runtime_types::frame_support::dispatch::DispatchInfo;
+                pub type DispatchInfo = runtime_types::frame_system::DispatchEventInfo;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for ExtrinsicFailed {
                 const PALLET: &'static str = "System";
@@ -17535,10 +17535,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            197u8, 55u8, 250u8, 192u8, 213u8, 206u8, 85u8, 122u8, 93u8, 193u8,
-                            109u8, 160u8, 142u8, 35u8, 21u8, 177u8, 121u8, 235u8, 220u8, 180u8,
-                            190u8, 129u8, 142u8, 94u8, 130u8, 65u8, 132u8, 188u8, 34u8, 169u8,
-                            44u8, 135u8,
+                            4u8, 117u8, 242u8, 164u8, 193u8, 238u8, 20u8, 110u8, 119u8, 140u8, 3u8,
+                            65u8, 4u8, 52u8, 202u8, 73u8, 177u8, 47u8, 16u8, 150u8, 116u8, 122u8,
+                            2u8, 49u8, 92u8, 103u8, 151u8, 64u8, 179u8, 223u8, 197u8, 2u8,
                         ],
                     )
                 }
@@ -17878,7 +17877,7 @@ pub mod api {
                 #[doc = "Attest to a statement, needed to finalize the claims process."]
                 #[doc = ""]
                 #[doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a"]
-                #[doc = "`SignedExtension`."]
+                #[doc = "`TransactionExtension`."]
                 #[doc = ""]
                 #[doc = "Unsigned Validation:"]
                 #[doc = "A call to attest is deemed valid if the sender has a `Preclaim` registered"]
@@ -18076,7 +18075,7 @@ pub mod api {
                 #[doc = "Attest to a statement, needed to finalize the claims process."]
                 #[doc = ""]
                 #[doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a"]
-                #[doc = "`SignedExtension`."]
+                #[doc = "`TransactionExtension`."]
                 #[doc = ""]
                 #[doc = "Unsigned Validation:"]
                 #[doc = "A call to attest is deemed valid if the sender has a `Preclaim` registered"]
@@ -18733,10 +18732,9 @@ pub mod api {
                         "batch",
                         types::Batch { calls },
                         [
-                            166u8, 231u8, 88u8, 173u8, 166u8, 95u8, 31u8, 101u8, 164u8, 19u8, 59u8,
-                            91u8, 127u8, 220u8, 116u8, 24u8, 138u8, 228u8, 237u8, 220u8, 122u8,
-                            4u8, 207u8, 106u8, 254u8, 154u8, 242u8, 76u8, 211u8, 164u8, 211u8,
-                            110u8,
+                            182u8, 91u8, 84u8, 165u8, 125u8, 198u8, 242u8, 251u8, 57u8, 147u8,
+                            70u8, 167u8, 237u8, 37u8, 229u8, 38u8, 193u8, 18u8, 61u8, 243u8, 61u8,
+                            114u8, 16u8, 203u8, 23u8, 237u8, 73u8, 193u8, 152u8, 98u8, 61u8, 92u8,
                         ],
                     )
                 }
@@ -18767,10 +18765,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            181u8, 183u8, 181u8, 121u8, 131u8, 148u8, 33u8, 245u8, 101u8, 19u8,
-                            101u8, 225u8, 129u8, 37u8, 244u8, 238u8, 242u8, 160u8, 167u8, 114u8,
-                            192u8, 220u8, 33u8, 173u8, 240u8, 230u8, 45u8, 244u8, 255u8, 11u8,
-                            154u8, 42u8,
+                            89u8, 44u8, 224u8, 216u8, 101u8, 33u8, 232u8, 99u8, 233u8, 195u8, 66u8,
+                            144u8, 84u8, 112u8, 93u8, 101u8, 199u8, 115u8, 42u8, 150u8, 86u8,
+                            136u8, 36u8, 238u8, 215u8, 247u8, 152u8, 228u8, 217u8, 17u8, 177u8,
+                            243u8,
                         ],
                     )
                 }
@@ -18797,10 +18795,10 @@ pub mod api {
                         "batch_all",
                         types::BatchAll { calls },
                         [
-                            132u8, 171u8, 156u8, 145u8, 41u8, 61u8, 132u8, 200u8, 112u8, 147u8,
-                            232u8, 85u8, 105u8, 65u8, 179u8, 136u8, 235u8, 120u8, 21u8, 16u8, 98u8,
-                            47u8, 175u8, 49u8, 219u8, 193u8, 112u8, 180u8, 12u8, 196u8, 109u8,
-                            112u8,
+                            150u8, 241u8, 187u8, 20u8, 140u8, 197u8, 30u8, 239u8, 41u8, 233u8,
+                            116u8, 14u8, 241u8, 75u8, 73u8, 52u8, 243u8, 8u8, 165u8, 47u8, 111u8,
+                            79u8, 16u8, 121u8, 208u8, 174u8, 215u8, 23u8, 249u8, 208u8, 89u8,
+                            245u8,
                         ],
                     )
                 }
@@ -18824,9 +18822,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            239u8, 113u8, 72u8, 190u8, 213u8, 81u8, 20u8, 102u8, 88u8, 28u8, 35u8,
-                            173u8, 79u8, 44u8, 241u8, 199u8, 123u8, 249u8, 145u8, 43u8, 80u8, 68u8,
-                            115u8, 110u8, 168u8, 82u8, 102u8, 180u8, 59u8, 145u8, 217u8, 197u8,
+                            34u8, 79u8, 101u8, 11u8, 74u8, 76u8, 110u8, 143u8, 67u8, 38u8, 141u8,
+                            91u8, 69u8, 104u8, 32u8, 174u8, 14u8, 159u8, 94u8, 155u8, 214u8, 77u8,
+                            220u8, 192u8, 3u8, 180u8, 90u8, 168u8, 161u8, 156u8, 78u8, 106u8,
                         ],
                     )
                 }
@@ -18853,10 +18851,10 @@ pub mod api {
                         "force_batch",
                         types::ForceBatch { calls },
                         [
-                            124u8, 139u8, 141u8, 42u8, 121u8, 216u8, 213u8, 150u8, 239u8, 135u8,
-                            240u8, 174u8, 5u8, 43u8, 29u8, 167u8, 152u8, 41u8, 128u8, 21u8, 60u8,
-                            143u8, 48u8, 233u8, 188u8, 94u8, 184u8, 159u8, 144u8, 125u8, 28u8,
-                            225u8,
+                            45u8, 96u8, 234u8, 51u8, 178u8, 234u8, 225u8, 144u8, 79u8, 109u8,
+                            147u8, 14u8, 165u8, 220u8, 158u8, 225u8, 253u8, 71u8, 126u8, 122u8,
+                            0u8, 220u8, 153u8, 181u8, 8u8, 193u8, 34u8, 156u8, 141u8, 90u8, 125u8,
+                            150u8,
                         ],
                     )
                 }
@@ -18880,10 +18878,9 @@ pub mod api {
                             weight,
                         },
                         [
-                            98u8, 243u8, 191u8, 25u8, 154u8, 18u8, 74u8, 149u8, 49u8, 222u8, 15u8,
-                            4u8, 177u8, 154u8, 231u8, 255u8, 20u8, 32u8, 220u8, 120u8, 228u8,
-                            176u8, 157u8, 222u8, 54u8, 150u8, 109u8, 35u8, 65u8, 164u8, 195u8,
-                            101u8,
+                            252u8, 204u8, 151u8, 233u8, 57u8, 239u8, 6u8, 186u8, 29u8, 87u8, 85u8,
+                            3u8, 211u8, 214u8, 133u8, 85u8, 98u8, 61u8, 178u8, 225u8, 131u8, 147u8,
+                            152u8, 52u8, 190u8, 149u8, 45u8, 243u8, 247u8, 143u8, 132u8, 27u8,
                         ],
                     )
                 }
@@ -24412,9 +24409,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            87u8, 25u8, 195u8, 106u8, 176u8, 148u8, 253u8, 151u8, 72u8, 195u8,
-                            248u8, 230u8, 137u8, 202u8, 53u8, 35u8, 8u8, 119u8, 145u8, 28u8, 145u8,
-                            95u8, 205u8, 145u8, 42u8, 199u8, 55u8, 243u8, 11u8, 58u8, 91u8, 44u8,
+                            101u8, 215u8, 92u8, 230u8, 248u8, 151u8, 142u8, 97u8, 37u8, 7u8, 19u8,
+                            7u8, 245u8, 187u8, 134u8, 116u8, 58u8, 127u8, 69u8, 179u8, 93u8, 188u8,
+                            107u8, 108u8, 114u8, 142u8, 215u8, 109u8, 0u8, 179u8, 60u8, 4u8,
                         ],
                     )
                 }
@@ -26136,9 +26133,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            231u8, 217u8, 33u8, 221u8, 170u8, 127u8, 235u8, 215u8, 0u8, 72u8, 13u8,
-                            224u8, 176u8, 249u8, 80u8, 47u8, 124u8, 223u8, 228u8, 84u8, 36u8,
-                            206u8, 198u8, 124u8, 209u8, 114u8, 84u8, 17u8, 0u8, 202u8, 116u8, 41u8,
+                            2u8, 187u8, 156u8, 127u8, 77u8, 79u8, 156u8, 43u8, 165u8, 39u8, 220u8,
+                            16u8, 19u8, 108u8, 31u8, 6u8, 15u8, 154u8, 190u8, 126u8, 152u8, 91u8,
+                            187u8, 143u8, 28u8, 240u8, 243u8, 215u8, 83u8, 236u8, 45u8, 197u8,
                         ],
                     )
                 }
@@ -26182,9 +26179,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            154u8, 76u8, 74u8, 122u8, 137u8, 73u8, 63u8, 101u8, 36u8, 109u8, 156u8,
-                            51u8, 156u8, 87u8, 64u8, 128u8, 177u8, 241u8, 239u8, 178u8, 117u8,
-                            84u8, 22u8, 20u8, 81u8, 131u8, 228u8, 90u8, 124u8, 52u8, 184u8, 98u8,
+                            62u8, 211u8, 116u8, 28u8, 29u8, 66u8, 246u8, 196u8, 21u8, 149u8, 132u8,
+                            9u8, 99u8, 126u8, 47u8, 195u8, 44u8, 182u8, 22u8, 146u8, 81u8, 119u8,
+                            26u8, 166u8, 224u8, 185u8, 7u8, 234u8, 224u8, 11u8, 89u8, 62u8,
                         ],
                     )
                 }
@@ -26224,9 +26221,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            20u8, 138u8, 164u8, 47u8, 71u8, 62u8, 152u8, 57u8, 61u8, 183u8, 227u8,
-                            48u8, 70u8, 194u8, 214u8, 93u8, 76u8, 221u8, 51u8, 50u8, 180u8, 102u8,
-                            214u8, 135u8, 137u8, 129u8, 194u8, 237u8, 246u8, 89u8, 121u8, 67u8,
+                            244u8, 201u8, 32u8, 227u8, 144u8, 180u8, 49u8, 204u8, 224u8, 28u8,
+                            234u8, 218u8, 145u8, 132u8, 139u8, 156u8, 151u8, 113u8, 173u8, 179u8,
+                            86u8, 222u8, 179u8, 212u8, 117u8, 132u8, 153u8, 216u8, 59u8, 25u8,
+                            67u8, 8u8,
                         ],
                     )
                 }
@@ -26251,10 +26249,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            239u8, 228u8, 93u8, 237u8, 67u8, 79u8, 193u8, 62u8, 113u8, 163u8,
-                            110u8, 71u8, 187u8, 180u8, 132u8, 114u8, 141u8, 140u8, 163u8, 204u8,
-                            64u8, 173u8, 223u8, 73u8, 204u8, 53u8, 113u8, 26u8, 204u8, 112u8,
-                            231u8, 81u8,
+                            116u8, 210u8, 59u8, 27u8, 51u8, 46u8, 127u8, 95u8, 92u8, 228u8, 127u8,
+                            4u8, 186u8, 112u8, 76u8, 188u8, 108u8, 221u8, 222u8, 232u8, 45u8,
+                            190u8, 131u8, 92u8, 61u8, 240u8, 35u8, 169u8, 118u8, 11u8, 7u8, 111u8,
                         ],
                     )
                 }
@@ -27370,10 +27367,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            31u8, 150u8, 185u8, 206u8, 126u8, 164u8, 89u8, 154u8, 13u8, 83u8,
-                            195u8, 97u8, 43u8, 110u8, 90u8, 126u8, 116u8, 23u8, 60u8, 158u8, 238u8,
-                            118u8, 157u8, 101u8, 179u8, 45u8, 67u8, 62u8, 222u8, 206u8, 22u8,
-                            191u8,
+                            195u8, 211u8, 108u8, 136u8, 187u8, 144u8, 127u8, 95u8, 159u8, 86u8,
+                            107u8, 15u8, 222u8, 95u8, 156u8, 185u8, 36u8, 34u8, 108u8, 51u8, 34u8,
+                            99u8, 149u8, 73u8, 80u8, 212u8, 122u8, 134u8, 161u8, 55u8, 33u8, 242u8,
                         ],
                     )
                 }
@@ -27661,9 +27657,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            115u8, 131u8, 7u8, 126u8, 194u8, 2u8, 175u8, 151u8, 175u8, 152u8,
-                            247u8, 65u8, 237u8, 230u8, 99u8, 184u8, 229u8, 214u8, 38u8, 35u8, 5u8,
-                            173u8, 214u8, 30u8, 219u8, 108u8, 96u8, 50u8, 60u8, 12u8, 168u8, 60u8,
+                            199u8, 73u8, 204u8, 76u8, 46u8, 23u8, 190u8, 62u8, 229u8, 20u8, 116u8,
+                            195u8, 19u8, 80u8, 204u8, 184u8, 166u8, 77u8, 245u8, 204u8, 190u8,
+                            211u8, 122u8, 252u8, 119u8, 190u8, 72u8, 162u8, 58u8, 123u8, 186u8,
+                            182u8,
                         ],
                     )
                 }
@@ -28352,10 +28349,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            175u8, 69u8, 240u8, 255u8, 89u8, 99u8, 198u8, 193u8, 159u8, 204u8,
-                            90u8, 139u8, 38u8, 128u8, 111u8, 122u8, 228u8, 164u8, 125u8, 226u8,
-                            252u8, 215u8, 172u8, 227u8, 189u8, 231u8, 90u8, 213u8, 108u8, 31u8,
-                            51u8, 150u8,
+                            31u8, 146u8, 94u8, 42u8, 198u8, 72u8, 52u8, 104u8, 24u8, 69u8, 179u8,
+                            187u8, 234u8, 194u8, 42u8, 138u8, 200u8, 235u8, 66u8, 137u8, 78u8,
+                            155u8, 207u8, 94u8, 76u8, 158u8, 53u8, 107u8, 149u8, 238u8, 238u8,
+                            61u8,
                         ],
                     )
                 }
@@ -28418,9 +28415,10 @@ pub mod api {
                             max_weight,
                         },
                         [
-                            108u8, 236u8, 59u8, 220u8, 62u8, 0u8, 104u8, 179u8, 120u8, 99u8, 139u8,
-                            59u8, 137u8, 95u8, 249u8, 76u8, 204u8, 39u8, 24u8, 225u8, 74u8, 243u8,
-                            47u8, 162u8, 238u8, 122u8, 31u8, 166u8, 110u8, 207u8, 55u8, 146u8,
+                            240u8, 179u8, 75u8, 163u8, 38u8, 147u8, 147u8, 142u8, 252u8, 73u8,
+                            195u8, 6u8, 15u8, 69u8, 42u8, 133u8, 96u8, 206u8, 13u8, 33u8, 8u8,
+                            143u8, 155u8, 85u8, 169u8, 43u8, 132u8, 118u8, 127u8, 135u8, 67u8,
+                            90u8,
                         ],
                     )
                 }
@@ -34883,33 +34881,6 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                #[doc = "Set the max number of times a claim may timeout on a core before it is abandoned"]
-                pub struct SetMaxAvailabilityTimeouts {
-                    pub new: set_max_availability_timeouts::New,
-                }
-                pub mod set_max_availability_timeouts {
-                    use super::runtime_types;
-                    pub type New = ::core::primitive::u32;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetMaxAvailabilityTimeouts {
-                    const PALLET: &'static str = "Configuration";
-                    const CALL: &'static str = "set_max_availability_timeouts";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
                 #[doc = "Set the parachain validator-group rotation frequency"]
                 pub struct SetGroupRotationFrequency {
                     pub new: set_group_rotation_frequency::New,
@@ -35866,33 +35837,6 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                #[doc = "Set the on demand (parathreads) ttl in the claimqueue."]
-                pub struct SetOnDemandTtl {
-                    pub new: set_on_demand_ttl::New,
-                }
-                pub mod set_on_demand_ttl {
-                    use super::runtime_types;
-                    pub type New = ::core::primitive::u32;
-                }
-                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for SetOnDemandTtl {
-                    const PALLET: &'static str = "Configuration";
-                    const CALL: &'static str = "set_on_demand_ttl";
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
                 #[doc = "Set the minimum backing votes threshold."]
                 pub struct SetMinimumBackingVotes {
                     pub new: set_minimum_backing_votes::New,
@@ -36119,24 +36063,6 @@ pub mod api {
                             179u8, 131u8, 211u8, 152u8, 167u8, 6u8, 108u8, 94u8, 179u8, 97u8, 87u8,
                             227u8, 57u8, 120u8, 133u8, 130u8, 59u8, 243u8, 224u8, 2u8, 11u8, 86u8,
                             251u8, 77u8, 159u8, 177u8, 145u8, 34u8, 117u8, 93u8, 28u8, 52u8,
-                        ],
-                    )
-                }
-                #[doc = "Set the max number of times a claim may timeout on a core before it is abandoned"]
-                pub fn set_max_availability_timeouts(
-                    &self,
-                    new: types::set_max_availability_timeouts::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
-                    types::SetMaxAvailabilityTimeouts,
-                > {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Configuration",
-                        "set_max_availability_timeouts",
-                        types::SetMaxAvailabilityTimeouts { new },
-                        [
-                            53u8, 141u8, 53u8, 9u8, 149u8, 145u8, 48u8, 165u8, 157u8, 2u8, 45u8,
-                            23u8, 128u8, 233u8, 27u8, 132u8, 189u8, 212u8, 45u8, 187u8, 2u8, 112u8,
-                            26u8, 88u8, 233u8, 84u8, 148u8, 73u8, 222u8, 208u8, 195u8, 153u8,
                         ],
                     )
                 }
@@ -36784,24 +36710,6 @@ pub mod api {
                             218u8, 142u8, 156u8, 247u8, 70u8, 214u8, 144u8, 159u8, 71u8, 241u8,
                             178u8, 102u8, 251u8, 153u8, 208u8, 222u8, 121u8, 139u8, 66u8, 146u8,
                             94u8, 147u8,
-                        ],
-                    )
-                }
-                #[doc = "Set the on demand (parathreads) ttl in the claimqueue."]
-                pub fn set_on_demand_ttl(
-                    &self,
-                    new: types::set_on_demand_ttl::New,
-                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::SetOnDemandTtl>
-                {
-                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
-                        "Configuration",
-                        "set_on_demand_ttl",
-                        types::SetOnDemandTtl { new },
-                        [
-                            248u8, 250u8, 204u8, 180u8, 134u8, 226u8, 77u8, 206u8, 21u8, 247u8,
-                            184u8, 68u8, 164u8, 54u8, 230u8, 135u8, 237u8, 226u8, 62u8, 253u8,
-                            116u8, 47u8, 31u8, 202u8, 110u8, 225u8, 211u8, 105u8, 72u8, 175u8,
-                            171u8, 169u8,
                         ],
                     )
                 }
@@ -37463,21 +37371,13 @@ pub mod api {
                         >,
                     >;
                 }
-                pub mod availability_cores {
-                    use super::runtime_types;
-                    pub type AvailabilityCores = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_runtime_parachains::scheduler::pallet::CoreOccupied<
-                            ::core::primitive::u32,
-                        >,
-                    >;
-                }
                 pub mod session_start_block {
                     use super::runtime_types;
                     pub type SessionStartBlock = ::core::primitive::u32;
                 }
                 pub mod claim_queue {
                     use super::runtime_types;
-                    pub type ClaimQueue = :: subxt :: ext :: subxt_core :: utils :: KeyedVec < runtime_types :: polkadot_primitives :: v8 :: CoreIndex , :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: scheduler :: pallet :: ParasEntry < :: core :: primitive :: u32 > > > ;
+                    pub type ClaimQueue = :: subxt :: ext :: subxt_core :: utils :: KeyedVec < runtime_types :: polkadot_primitives :: v8 :: CoreIndex , :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: scheduler :: common :: Assignment > > ;
                 }
             }
             pub struct StorageApi;
@@ -37509,33 +37409,6 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " One entry for each availability core. The i'th parachain belongs to the i'th core, with the"]
-                #[doc = " remaining cores all being on demand parachain multiplexers."]
-                #[doc = ""]
-                #[doc = " Bounded by the maximum of either of these two values:"]
-                #[doc = "   * The number of parachains and parathread multiplexers"]
-                #[doc = "   * The number of validators divided by `configuration.max_validators_per_core`."]
-                pub fn availability_cores(
-                    &self,
-                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (),
-                    types::availability_cores::AvailabilityCores,
-                    ::subxt::ext::subxt_core::utils::Yes,
-                    ::subxt::ext::subxt_core::utils::Yes,
-                    (),
-                > {
-                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
-                        "ParaScheduler",
-                        "AvailabilityCores",
-                        (),
-                        [
-                            250u8, 177u8, 44u8, 237u8, 5u8, 116u8, 135u8, 99u8, 136u8, 209u8,
-                            181u8, 145u8, 254u8, 57u8, 42u8, 92u8, 236u8, 67u8, 128u8, 171u8,
-                            200u8, 88u8, 40u8, 31u8, 163u8, 128u8, 15u8, 96u8, 181u8, 224u8, 162u8,
-                            188u8,
-                        ],
-                    )
-                }
                 #[doc = " The block number where the session start occurred. Used to track how many group rotations"]
                 #[doc = " have occurred."]
                 #[doc = ""]
@@ -37564,8 +37437,7 @@ pub mod api {
                     )
                 }
                 #[doc = " One entry for each availability core. The `VecDeque` represents the assignments to be"]
-                #[doc = " scheduled on that core. The value contained here will not be valid after the end of"]
-                #[doc = " a block. Runtime APIs should be used to determine scheduled cores for the upcoming block."]
+                #[doc = " scheduled on that core."]
                 pub fn claim_queue(
                     &self,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
@@ -37580,10 +37452,10 @@ pub mod api {
                         "ClaimQueue",
                         (),
                         [
-                            192u8, 65u8, 227u8, 114u8, 125u8, 169u8, 134u8, 70u8, 201u8, 99u8,
-                            246u8, 23u8, 0u8, 143u8, 163u8, 87u8, 216u8, 1u8, 184u8, 124u8, 23u8,
-                            180u8, 132u8, 143u8, 202u8, 81u8, 144u8, 242u8, 15u8, 141u8, 124u8,
-                            126u8,
+                            240u8, 46u8, 91u8, 20u8, 166u8, 224u8, 110u8, 71u8, 239u8, 139u8, 55u8,
+                            228u8, 184u8, 34u8, 165u8, 115u8, 192u8, 243u8, 244u8, 44u8, 107u8,
+                            14u8, 67u8, 146u8, 186u8, 179u8, 9u8, 134u8, 181u8, 240u8, 254u8,
+                            112u8,
                         ],
                     )
                 }
@@ -39531,7 +39403,7 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Buffered session changes along with the block number at which they should be applied."]
+                #[doc = " Buffered session changes."]
                 #[doc = ""]
                 #[doc = " Typically this will be empty or one element long. Apart from that this item never hits"]
                 #[doc = " the storage."]
@@ -52776,9 +52648,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            158u8, 24u8, 178u8, 18u8, 112u8, 106u8, 203u8, 2u8, 180u8, 20u8, 22u8,
-                            136u8, 171u8, 20u8, 141u8, 159u8, 113u8, 151u8, 151u8, 19u8, 248u8,
-                            152u8, 52u8, 60u8, 210u8, 130u8, 30u8, 205u8, 123u8, 27u8, 252u8, 88u8,
+                            105u8, 167u8, 53u8, 102u8, 86u8, 46u8, 134u8, 230u8, 60u8, 3u8, 89u8,
+                            234u8, 198u8, 138u8, 12u8, 170u8, 222u8, 167u8, 217u8, 186u8, 233u8,
+                            112u8, 229u8, 133u8, 8u8, 91u8, 226u8, 150u8, 220u8, 71u8, 125u8, 80u8,
                         ],
                     )
                 }
@@ -52801,10 +52673,10 @@ pub mod api {
                             weight,
                         },
                         [
-                            154u8, 195u8, 254u8, 7u8, 128u8, 250u8, 244u8, 107u8, 100u8, 87u8,
-                            151u8, 89u8, 179u8, 115u8, 182u8, 103u8, 242u8, 190u8, 144u8, 206u8,
-                            52u8, 97u8, 230u8, 151u8, 119u8, 115u8, 250u8, 227u8, 3u8, 55u8, 6u8,
-                            51u8,
+                            45u8, 194u8, 207u8, 87u8, 233u8, 20u8, 220u8, 60u8, 203u8, 102u8,
+                            113u8, 11u8, 160u8, 56u8, 173u8, 31u8, 119u8, 230u8, 181u8, 136u8,
+                            30u8, 183u8, 14u8, 56u8, 121u8, 17u8, 6u8, 234u8, 222u8, 34u8, 210u8,
+                            35u8,
                         ],
                     )
                 }
@@ -52844,10 +52716,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            199u8, 210u8, 41u8, 179u8, 64u8, 179u8, 23u8, 125u8, 176u8, 174u8,
-                            164u8, 152u8, 148u8, 30u8, 223u8, 93u8, 122u8, 123u8, 199u8, 43u8,
-                            62u8, 22u8, 199u8, 251u8, 252u8, 84u8, 229u8, 131u8, 113u8, 144u8,
-                            38u8, 234u8,
+                            55u8, 113u8, 135u8, 136u8, 254u8, 189u8, 67u8, 128u8, 27u8, 159u8,
+                            211u8, 119u8, 140u8, 60u8, 192u8, 26u8, 5u8, 166u8, 5u8, 81u8, 56u8,
+                            159u8, 231u8, 186u8, 63u8, 137u8, 178u8, 144u8, 148u8, 188u8, 130u8,
+                            213u8,
                         ],
                     )
                 }
@@ -53155,26 +53027,6 @@ pub mod api {
                     Operational,
                     #[codec(index = 2)]
                     Mandatory,
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct DispatchInfo {
-                    pub weight: runtime_types::sp_weights::weight_v2::Weight,
-                    pub class: runtime_types::frame_support::dispatch::DispatchClass,
-                    pub pays_fee: runtime_types::frame_support::dispatch::Pays,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -53816,13 +53668,13 @@ pub mod api {
                     #[codec(index = 0)]
                     #[doc = "An extrinsic completed successfully."]
                     ExtrinsicSuccess {
-                        dispatch_info: runtime_types::frame_support::dispatch::DispatchInfo,
+                        dispatch_info: runtime_types::frame_system::DispatchEventInfo,
                     },
                     #[codec(index = 1)]
                     #[doc = "An extrinsic failed."]
                     ExtrinsicFailed {
                         dispatch_error: runtime_types::sp_runtime::DispatchError,
-                        dispatch_info: runtime_types::frame_support::dispatch::DispatchInfo,
+                        dispatch_info: runtime_types::frame_system::DispatchEventInfo,
                     },
                     #[codec(index = 2)]
                     #[doc = "`:code` was updated."]
@@ -53883,6 +53735,22 @@ pub mod api {
             pub struct CodeUpgradeAuthorization {
                 pub code_hash: ::subxt::ext::subxt_core::utils::H256,
                 pub check_version: ::core::primitive::bool,
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub struct DispatchEventInfo {
+                pub weight: runtime_types::sp_weights::weight_v2::Weight,
+                pub class: runtime_types::frame_support::dispatch::DispatchClass,
+                pub pays_fee: runtime_types::frame_support::dispatch::Pays,
             }
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -64656,7 +64524,7 @@ pub mod api {
                         #[doc = "Attest to a statement, needed to finalize the claims process."]
                         #[doc = ""]
                         #[doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a"]
-                        #[doc = "`SignedExtension`."]
+                        #[doc = "`TransactionExtension`."]
                         #[doc = ""]
                         #[doc = "Unsigned Validation:"]
                         #[doc = "A call to attest is deemed valid if the sender has a `Preclaim` registered"]
@@ -65809,7 +65677,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
-                        # [codec (index = 0)] # [doc = "Set the validation upgrade cooldown."] set_validation_upgrade_cooldown { new : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Set the validation upgrade delay."] set_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [codec (index = 2)] # [doc = "Set the acceptance period for an included candidate."] set_code_retention_period { new : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Set the max validation code size for incoming upgrades."] set_max_code_size { new : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "Set the max POV block size for incoming upgrades."] set_max_pov_size { new : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Set the max head data size for paras."] set_max_head_data_size { new : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "Set the number of coretime execution cores."] # [doc = ""] # [doc = "NOTE: that this configuration is managed by the coretime chain. Only manually change"] # [doc = "this, if you really know what you are doing!"] set_coretime_cores { new : :: core :: primitive :: u32 , } , # [codec (index = 7)] # [doc = "Set the max number of times a claim may timeout on a core before it is abandoned"] set_max_availability_timeouts { new : :: core :: primitive :: u32 , } , # [codec (index = 8)] # [doc = "Set the parachain validator-group rotation frequency"] set_group_rotation_frequency { new : :: core :: primitive :: u32 , } , # [codec (index = 9)] # [doc = "Set the availability period for paras."] set_paras_availability_period { new : :: core :: primitive :: u32 , } , # [codec (index = 11)] # [doc = "Set the scheduling lookahead, in expected number of blocks at peak throughput."] set_scheduling_lookahead { new : :: core :: primitive :: u32 , } , # [codec (index = 12)] # [doc = "Set the maximum number of validators to assign to any core."] set_max_validators_per_core { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 13)] # [doc = "Set the maximum number of validators to use in parachain consensus."] set_max_validators { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 14)] # [doc = "Set the dispute period, in number of sessions to keep for disputes."] set_dispute_period { new : :: core :: primitive :: u32 , } , # [codec (index = 15)] # [doc = "Set the dispute post conclusion acceptance period."] set_dispute_post_conclusion_acceptance_period { new : :: core :: primitive :: u32 , } , # [codec (index = 18)] # [doc = "Set the no show slots, in number of number of consensus slots."] # [doc = "Must be at least 1."] set_no_show_slots { new : :: core :: primitive :: u32 , } , # [codec (index = 19)] # [doc = "Set the total number of delay tranches."] set_n_delay_tranches { new : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Set the zeroth delay tranche width."] set_zeroth_delay_tranche_width { new : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "Set the number of validators needed to approve a block."] set_needed_approvals { new : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "Set the number of samples to do of the `RelayVRFModulo` approval assignment criterion."] set_relay_vrf_modulo_samples { new : :: core :: primitive :: u32 , } , # [codec (index = 23)] # [doc = "Sets the maximum items that can present in a upward dispatch queue at once."] set_max_upward_queue_count { new : :: core :: primitive :: u32 , } , # [codec (index = 24)] # [doc = "Sets the maximum total size of items that can present in a upward dispatch queue at"] # [doc = "once."] set_max_upward_queue_size { new : :: core :: primitive :: u32 , } , # [codec (index = 25)] # [doc = "Set the critical downward message size."] set_max_downward_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 27)] # [doc = "Sets the maximum size of an upward message that can be sent by a candidate."] set_max_upward_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 28)] # [doc = "Sets the maximum number of messages that a candidate can contain."] set_max_upward_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [codec (index = 29)] # [doc = "Sets the number of sessions after which an HRMP open channel request expires."] set_hrmp_open_request_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 30)] # [doc = "Sets the amount of funds that the sender should provide for opening an HRMP channel."] set_hrmp_sender_deposit { new : :: core :: primitive :: u128 , } , # [codec (index = 31)] # [doc = "Sets the amount of funds that the recipient should provide for accepting opening an HRMP"] # [doc = "channel."] set_hrmp_recipient_deposit { new : :: core :: primitive :: u128 , } , # [codec (index = 32)] # [doc = "Sets the maximum number of messages allowed in an HRMP channel at once."] set_hrmp_channel_max_capacity { new : :: core :: primitive :: u32 , } , # [codec (index = 33)] # [doc = "Sets the maximum total size of messages in bytes allowed in an HRMP channel at once."] set_hrmp_channel_max_total_size { new : :: core :: primitive :: u32 , } , # [codec (index = 34)] # [doc = "Sets the maximum number of inbound HRMP channels a parachain is allowed to accept."] set_hrmp_max_parachain_inbound_channels { new : :: core :: primitive :: u32 , } , # [codec (index = 36)] # [doc = "Sets the maximum size of a message that could ever be put into an HRMP channel."] set_hrmp_channel_max_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 37)] # [doc = "Sets the maximum number of outbound HRMP channels a parachain is allowed to open."] set_hrmp_max_parachain_outbound_channels { new : :: core :: primitive :: u32 , } , # [codec (index = 39)] # [doc = "Sets the maximum number of outbound HRMP messages can be sent by a candidate."] set_hrmp_max_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [codec (index = 42)] # [doc = "Set the number of session changes after which a PVF pre-checking voting is rejected."] set_pvf_voting_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 43)] # [doc = "Sets the minimum delay between announcing the upgrade block for a parachain until the"] # [doc = "upgrade taking place."] # [doc = ""] # [doc = "See the field documentation for information and constraints for the new value."] set_minimum_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [codec (index = 44)] # [doc = "Setting this to true will disable consistency checks for the configuration setters."] # [doc = "Use with caution."] set_bypass_consistency_check { new : :: core :: primitive :: bool , } , # [codec (index = 45)] # [doc = "Set the asynchronous backing parameters."] set_async_backing_params { new : runtime_types :: polkadot_primitives :: v8 :: async_backing :: AsyncBackingParams , } , # [codec (index = 46)] # [doc = "Set PVF executor parameters."] set_executor_params { new : runtime_types :: polkadot_primitives :: v8 :: executor_params :: ExecutorParams , } , # [codec (index = 47)] # [doc = "Set the on demand (parathreads) base fee."] set_on_demand_base_fee { new : :: core :: primitive :: u128 , } , # [codec (index = 48)] # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_fee_variability { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 49)] # [doc = "Set the on demand (parathreads) queue max size."] set_on_demand_queue_max_size { new : :: core :: primitive :: u32 , } , # [codec (index = 50)] # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_target_queue_utilization { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 51)] # [doc = "Set the on demand (parathreads) ttl in the claimqueue."] set_on_demand_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 52)] # [doc = "Set the minimum backing votes threshold."] set_minimum_backing_votes { new : :: core :: primitive :: u32 , } , # [codec (index = 53)] # [doc = "Set/Unset a node feature."] set_node_feature { index : :: core :: primitive :: u8 , value : :: core :: primitive :: bool , } , # [codec (index = 54)] # [doc = "Set approval-voting-params."] set_approval_voting_params { new : runtime_types :: polkadot_primitives :: v8 :: ApprovalVotingParams , } , # [codec (index = 55)] # [doc = "Set scheduler-params."] set_scheduler_params { new : runtime_types :: polkadot_primitives :: v8 :: SchedulerParams < :: core :: primitive :: u32 > , } , }
+                        # [codec (index = 0)] # [doc = "Set the validation upgrade cooldown."] set_validation_upgrade_cooldown { new : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Set the validation upgrade delay."] set_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [codec (index = 2)] # [doc = "Set the acceptance period for an included candidate."] set_code_retention_period { new : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Set the max validation code size for incoming upgrades."] set_max_code_size { new : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "Set the max POV block size for incoming upgrades."] set_max_pov_size { new : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Set the max head data size for paras."] set_max_head_data_size { new : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "Set the number of coretime execution cores."] # [doc = ""] # [doc = "NOTE: that this configuration is managed by the coretime chain. Only manually change"] # [doc = "this, if you really know what you are doing!"] set_coretime_cores { new : :: core :: primitive :: u32 , } , # [codec (index = 8)] # [doc = "Set the parachain validator-group rotation frequency"] set_group_rotation_frequency { new : :: core :: primitive :: u32 , } , # [codec (index = 9)] # [doc = "Set the availability period for paras."] set_paras_availability_period { new : :: core :: primitive :: u32 , } , # [codec (index = 11)] # [doc = "Set the scheduling lookahead, in expected number of blocks at peak throughput."] set_scheduling_lookahead { new : :: core :: primitive :: u32 , } , # [codec (index = 12)] # [doc = "Set the maximum number of validators to assign to any core."] set_max_validators_per_core { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 13)] # [doc = "Set the maximum number of validators to use in parachain consensus."] set_max_validators { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 14)] # [doc = "Set the dispute period, in number of sessions to keep for disputes."] set_dispute_period { new : :: core :: primitive :: u32 , } , # [codec (index = 15)] # [doc = "Set the dispute post conclusion acceptance period."] set_dispute_post_conclusion_acceptance_period { new : :: core :: primitive :: u32 , } , # [codec (index = 18)] # [doc = "Set the no show slots, in number of number of consensus slots."] # [doc = "Must be at least 1."] set_no_show_slots { new : :: core :: primitive :: u32 , } , # [codec (index = 19)] # [doc = "Set the total number of delay tranches."] set_n_delay_tranches { new : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Set the zeroth delay tranche width."] set_zeroth_delay_tranche_width { new : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "Set the number of validators needed to approve a block."] set_needed_approvals { new : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "Set the number of samples to do of the `RelayVRFModulo` approval assignment criterion."] set_relay_vrf_modulo_samples { new : :: core :: primitive :: u32 , } , # [codec (index = 23)] # [doc = "Sets the maximum items that can present in a upward dispatch queue at once."] set_max_upward_queue_count { new : :: core :: primitive :: u32 , } , # [codec (index = 24)] # [doc = "Sets the maximum total size of items that can present in a upward dispatch queue at"] # [doc = "once."] set_max_upward_queue_size { new : :: core :: primitive :: u32 , } , # [codec (index = 25)] # [doc = "Set the critical downward message size."] set_max_downward_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 27)] # [doc = "Sets the maximum size of an upward message that can be sent by a candidate."] set_max_upward_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 28)] # [doc = "Sets the maximum number of messages that a candidate can contain."] set_max_upward_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [codec (index = 29)] # [doc = "Sets the number of sessions after which an HRMP open channel request expires."] set_hrmp_open_request_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 30)] # [doc = "Sets the amount of funds that the sender should provide for opening an HRMP channel."] set_hrmp_sender_deposit { new : :: core :: primitive :: u128 , } , # [codec (index = 31)] # [doc = "Sets the amount of funds that the recipient should provide for accepting opening an HRMP"] # [doc = "channel."] set_hrmp_recipient_deposit { new : :: core :: primitive :: u128 , } , # [codec (index = 32)] # [doc = "Sets the maximum number of messages allowed in an HRMP channel at once."] set_hrmp_channel_max_capacity { new : :: core :: primitive :: u32 , } , # [codec (index = 33)] # [doc = "Sets the maximum total size of messages in bytes allowed in an HRMP channel at once."] set_hrmp_channel_max_total_size { new : :: core :: primitive :: u32 , } , # [codec (index = 34)] # [doc = "Sets the maximum number of inbound HRMP channels a parachain is allowed to accept."] set_hrmp_max_parachain_inbound_channels { new : :: core :: primitive :: u32 , } , # [codec (index = 36)] # [doc = "Sets the maximum size of a message that could ever be put into an HRMP channel."] set_hrmp_channel_max_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 37)] # [doc = "Sets the maximum number of outbound HRMP channels a parachain is allowed to open."] set_hrmp_max_parachain_outbound_channels { new : :: core :: primitive :: u32 , } , # [codec (index = 39)] # [doc = "Sets the maximum number of outbound HRMP messages can be sent by a candidate."] set_hrmp_max_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [codec (index = 42)] # [doc = "Set the number of session changes after which a PVF pre-checking voting is rejected."] set_pvf_voting_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 43)] # [doc = "Sets the minimum delay between announcing the upgrade block for a parachain until the"] # [doc = "upgrade taking place."] # [doc = ""] # [doc = "See the field documentation for information and constraints for the new value."] set_minimum_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [codec (index = 44)] # [doc = "Setting this to true will disable consistency checks for the configuration setters."] # [doc = "Use with caution."] set_bypass_consistency_check { new : :: core :: primitive :: bool , } , # [codec (index = 45)] # [doc = "Set the asynchronous backing parameters."] set_async_backing_params { new : runtime_types :: polkadot_primitives :: v8 :: async_backing :: AsyncBackingParams , } , # [codec (index = 46)] # [doc = "Set PVF executor parameters."] set_executor_params { new : runtime_types :: polkadot_primitives :: v8 :: executor_params :: ExecutorParams , } , # [codec (index = 47)] # [doc = "Set the on demand (parathreads) base fee."] set_on_demand_base_fee { new : :: core :: primitive :: u128 , } , # [codec (index = 48)] # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_fee_variability { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 49)] # [doc = "Set the on demand (parathreads) queue max size."] set_on_demand_queue_max_size { new : :: core :: primitive :: u32 , } , # [codec (index = 50)] # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_target_queue_utilization { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 52)] # [doc = "Set the minimum backing votes threshold."] set_minimum_backing_votes { new : :: core :: primitive :: u32 , } , # [codec (index = 53)] # [doc = "Set/Unset a node feature."] set_node_feature { index : :: core :: primitive :: u8 , value : :: core :: primitive :: bool , } , # [codec (index = 54)] # [doc = "Set approval-voting-params."] set_approval_voting_params { new : runtime_types :: polkadot_primitives :: v8 :: ApprovalVotingParams , } , # [codec (index = 55)] # [doc = "Set scheduler-params."] set_scheduler_params { new : runtime_types :: polkadot_primitives :: v8 :: SchedulerParams < :: core :: primitive :: u32 > , } , }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
                         :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
@@ -67184,13 +67052,10 @@ pub mod api {
                         #[doc = "the parent."]
                         InvalidParentHeader,
                         #[codec(index = 2)]
-                        #[doc = "The data given to the inherent will result in an overweight block."]
-                        InherentOverweight,
-                        #[codec(index = 3)]
-                        #[doc = "A candidate was filtered during inherent execution. This should have only been done"]
+                        #[doc = "Inherent data was filtered during execution. This should have only been done"]
                         #[doc = "during creation."]
-                        CandidatesFilteredDuringExecution,
-                        #[codec(index = 4)]
+                        InherentDataFilteredDuringExecution,
+                        #[codec(index = 3)]
                         #[doc = "Too many candidates supplied."]
                         UnscheduledCandidate,
                     }
@@ -67224,42 +67089,6 @@ pub mod api {
                         #[codec(index = 1)]
                         Bulk(runtime_types::polkadot_parachain_primitives::primitives::Id),
                     }
-                }
-                pub mod pallet {
-                    use super::runtime_types;
-                    #[derive(
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                    #[codec(dumb_trait_bound)]
-                    #[decode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                    )]
-                    #[encode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                    )]
-                    pub enum CoreOccupied<_0> {
-                        # [codec (index = 0)] Free , # [codec (index = 1)] Paras (runtime_types :: polkadot_runtime_parachains :: scheduler :: pallet :: ParasEntry < _0 > ,) , }
-                    #[derive(
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                    #[codec(dumb_trait_bound)]
-                    #[decode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                    )]
-                    #[encode_as_type(
-                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                    )]
-                    pub struct ParasEntry < _0 > { pub assignment : runtime_types :: polkadot_runtime_parachains :: scheduler :: common :: Assignment , pub availability_timeouts : :: core :: primitive :: u32 , pub ttl : _0 , }
                 }
             }
             pub mod shared {
@@ -69828,6 +69657,10 @@ pub mod api {
                     MandatoryValidation,
                     #[codec(index = 10)]
                     BadSigner,
+                    #[codec(index = 11)]
+                    IndeterminateImplicit,
+                    #[codec(index = 12)]
+                    UnknownOrigin,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
