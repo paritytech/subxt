@@ -300,10 +300,10 @@ impl ExtrinsicPartTypeIds {
         let extra = find_param(EXTRA);
 
         Ok(ExtrinsicPartTypeIds {
-            address: address,
-            signature: signature,
-            call: call,
-            extra: extra,
+            address,
+            signature,
+            call,
+            extra,
         })
     }
 }
