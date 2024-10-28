@@ -595,16 +595,21 @@ impl ConstantMetadata {
 pub struct ExtrinsicMetadata {
     /// The type of the address that signs the extrinsic
     address_ty: u32,
-    /// The type of the outermost Call enum.
-    call_ty: u32,
     /// The type of the extrinsic's signature.
     signature_ty: u32,
-    /// The type of the outermost Extra enum.
-    extra_ty: u32,
     /// Extrinsic version.
     version: u8,
     /// The signed extensions in the order they appear in the extrinsic.
     signed_extensions: Vec<SignedExtensionMetadata>,
+
+    /// The type of the outermost Call enum.
+    /// Note: This isn't used in Subxt, and may be a naff value, but is preserved
+    /// where possible to allow converting back into V15 metadata losslessly.
+    call_ty: u32,
+    /// The type of the outermost Extra enum.
+    /// Note: This isn't used in Subxt, and may be a naff value, but is preserved
+    /// where possible to allow converting back into V15 metadata losslessly.
+    extra_ty: u32,
 }
 
 impl ExtrinsicMetadata {
@@ -613,17 +618,9 @@ impl ExtrinsicMetadata {
         self.address_ty
     }
 
-    /// The type of the outermost Call enum.
-    pub fn call_ty(&self) -> u32 {
-        self.call_ty
-    }
     /// The type of the extrinsic's signature.
     pub fn signature_ty(&self) -> u32 {
         self.signature_ty
-    }
-    /// The type of the outermost Extra enum.
-    pub fn extra_ty(&self) -> u32 {
-        self.extra_ty
     }
 
     /// Extrinsic version.

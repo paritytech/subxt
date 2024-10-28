@@ -86,12 +86,7 @@ impl TypeSet {
     }
 
     fn collect_extrinsic_types(&mut self, extrinsic: &ExtrinsicMetadata) {
-        for ty in [
-            extrinsic.address_ty,
-            extrinsic.call_ty,
-            extrinsic.signature_ty,
-            extrinsic.extra_ty,
-        ] {
+        for ty in [extrinsic.address_ty, extrinsic.signature_ty] {
             self.insert(ty);
         }
 
@@ -286,10 +281,8 @@ fn iterate_metadata_types(metadata: &mut Metadata) -> impl Iterator<Item = &mut 
 
     // collect extrinsic type_ids
     for ty in [
-        &mut metadata.extrinsic.extra_ty,
         &mut metadata.extrinsic.address_ty,
         &mut metadata.extrinsic.signature_ty,
-        &mut metadata.extrinsic.call_ty,
     ] {
         types.push(ty);
     }

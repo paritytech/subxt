@@ -291,14 +291,8 @@ fn get_extrinsic_hash(
     let address_hash = get_type_hash(registry, extrinsic.address_ty, outer_enum_hashes);
     // The `RuntimeCall` type is intentionally omitted and hashed by the outer enums instead.
     let signature_hash = get_type_hash(registry, extrinsic.signature_ty, outer_enum_hashes);
-    let extra_hash = get_type_hash(registry, extrinsic.extra_ty, outer_enum_hashes);
 
-    let mut bytes = concat_and_hash4(
-        &address_hash,
-        &signature_hash,
-        &extra_hash,
-        &[extrinsic.version; 32],
-    );
+    let mut bytes = concat_and_hash3(&address_hash, &signature_hash, &[extrinsic.version; 32]);
 
     for signed_extension in extrinsic.signed_extensions.iter() {
         bytes = concat_and_hash4(

@@ -351,7 +351,7 @@ fn default_derives(crate_path: &syn::Path) -> DerivesRegistry {
 fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
     let mut type_substitutes = TypeSubstitutes::new();
 
-    let defaults: [(syn::Path, syn::Path); 13] = [
+    let defaults: [(syn::Path, syn::Path); 14] = [
         (
             parse_quote!(bitvec::order::Lsb0),
             parse_quote!(#crate_path::utils::bits::Lsb0),
@@ -409,10 +409,17 @@ fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
         // `EncodeAsType` the bytes would be re-encoded. This leads to the bytes
         // being altered by adding the length prefix in front of them.
 
-        // Note: Not sure if this is appropriate or not. The most recent polkadot.rs file does not have these.
+        // This allows things calls that require an `UncheckedExtrinsic` type to be given our
+        // util one, which was be converted from a Vec<u8>:
         (
             parse_quote!(sp_runtime::generic::unchecked_extrinsic::UncheckedExtrinsic),
             parse_quote!(#crate_path::utils::UncheckedExtrinsic),
+        ),
+        // This extends the above to also work with runtimes that set the UncheckedExtrinsic
+        // type to the one from pallet_revive (used for handling EVM transactions):
+        (
+            parse_quote!(pallet_revive::evm::runtime::UncheckedExtrinsic<Address, Call>),
+            parse_quote!(#crate_path::utils::UncheckedExtrinsic<Address, Call, u8, u8>),
         ),
     ];
 
