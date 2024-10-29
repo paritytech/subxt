@@ -10,7 +10,6 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::fmt::Write;
 use frame_metadata::{v14, v15};
-use hashbrown::HashMap;
 use scale_info::TypeDef;
 
 impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
@@ -277,36 +276,33 @@ impl ExtrinsicPartTypeIds {
             return Err(TryFromError::TypeNotFound(extrinsic_id));
         };
 
-        let params: HashMap<_, _> = extrinsic_ty
-            .type_params
-            .iter()
-            .map(|ty_param| {
-                let Some(ty) = ty_param.ty else {
-                    return Err(TryFromError::TypeNameNotFound(ty_param.name.clone()));
-                };
+        let find_param = |name: &'static str| -> Option<u32> {
+            extrinsic_ty
+                .type_params
+                .iter()
+                .find(|param| param.name.as_str() == name)
+                .and_then(|param| param.ty.as_ref())
+                .map(|ty| ty.id)
+        };
 
-                Ok((ty_param.name.as_str(), ty.id))
-            })
-            .collect::<Result<_, _>>()?;
-
-        let Some(address) = params.get(ADDRESS) else {
+        let Some(address) = find_param(ADDRESS) else {
             return Err(TryFromError::TypeNameNotFound(ADDRESS.into()));
         };
-        let Some(call) = params.get(CALL) else {
+        let Some(call) = find_param(CALL) else {
             return Err(TryFromError::TypeNameNotFound(CALL.into()));
         };
-        let Some(signature) = params.get(SIGNATURE) else {
+        let Some(signature) = find_param(SIGNATURE) else {
             return Err(TryFromError::TypeNameNotFound(SIGNATURE.into()));
         };
-        let Some(extra) = params.get(EXTRA) else {
+        let Some(extra) = find_param(EXTRA) else {
             return Err(TryFromError::TypeNameNotFound(EXTRA.into()));
         };
 
         Ok(ExtrinsicPartTypeIds {
-            address: *address,
-            call: *call,
-            signature: *signature,
-            extra: *extra,
+            address,
+            call,
+            signature,
+            extra,
         })
     }
 }
