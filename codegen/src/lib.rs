@@ -351,7 +351,7 @@ fn default_derives(crate_path: &syn::Path) -> DerivesRegistry {
 fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
     let mut type_substitutes = TypeSubstitutes::new();
 
-    let defaults: [(syn::Path, syn::Path); 14] = [
+    let defaults: [(syn::Path, syn::Path); 13] = [
         (
             parse_quote!(bitvec::order::Lsb0),
             parse_quote!(#crate_path::utils::bits::Lsb0),
@@ -414,12 +414,6 @@ fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
         (
             parse_quote!(sp_runtime::generic::unchecked_extrinsic::UncheckedExtrinsic),
             parse_quote!(#crate_path::utils::UncheckedExtrinsic),
-        ),
-        // This extends the above to also work with runtimes that set the UncheckedExtrinsic
-        // type to the one from pallet_revive (used for handling EVM transactions):
-        (
-            parse_quote!(pallet_revive::evm::runtime::UncheckedExtrinsic<Address, Call>),
-            parse_quote!(#crate_path::utils::UncheckedExtrinsic<Address, Call, u8, u8>),
         ),
     ];
 
