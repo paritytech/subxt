@@ -4,13 +4,13 @@
 
 //! An ecdsa keypair implementation.
 use codec::Encode;
-use polkadot_sdk::sp_crypto_hashing;
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 use core::{fmt::Display, str::FromStr};
 use hex::FromHex;
 use secp256k1::{ecdsa::RecoverableSignature, Message, Secp256k1, SecretKey};
 use secrecy::ExposeSecret;
+use polkadot_sdk::sp_crypto_hashing;
 
 const SECRET_KEY_LENGTH: usize = 32;
 

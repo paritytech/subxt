@@ -50,9 +50,4 @@ pub mod ext {
     pub use scale_decode;
     pub use scale_encode;
     pub use scale_value;
-
-    cfg_substrate_compat! {
-        pub use polkadot_sdk::sp_runtime;
-        pub use polkadot_sdk::sp_core;
-    }
 }

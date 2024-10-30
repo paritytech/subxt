@@ -31,7 +31,7 @@ criterion = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 
 [lib]
-# Without this, libtest cli opts interfere with criteron benches:
+# Without this, libtest cli opts interfere with criterion benches:
 bench = false
 
 [[bench]]
