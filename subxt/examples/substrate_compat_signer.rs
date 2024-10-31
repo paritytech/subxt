@@ -25,7 +25,7 @@ mod pair_signer {
         tx::Signer,
     };
 
-    /// A [`Signer`] implementation for `polkadot_sdk::sp_core::sr25519::Pair`.
+    /// A [`Signer`] implementation for [`polkadot_sdk::sp_core::sr25519::Pair`].
     #[derive(Clone)]
     pub struct PairSigner {
         account_id: <PolkadotConfig as Config>::AccountId,
@@ -33,12 +33,20 @@ mod pair_signer {
     }
 
     impl PairSigner {
-        /// Creates a new [`Signer`] from an [`sp_core::Pair`].
+        /// Creates a new [`Signer`] from an [`sp_core::sr25519::Pair`].
         pub fn new(signer: sr25519::Pair) -> Self {
             let account_id =
                 <SpMultiSignature as Verify>::Signer::from(signer.public()).into_account();
             Self {
                 // Convert `sp_core::AccountId32` to `subxt::config::substrate::AccountId32`.
+                //
+                // This is necessary because we use `subxt::config::substrate::AccountId32` and no
+                // From/Into impls are provided between `sp_core::AccountId32` because `polkadot-sdk` isn't a direct
+                // dependency in subxt.
+                //
+                // This can also be done by provided a wrapper type around `subxt::config::substrate::AccountId32` to implement
+                // such conversions but that also most likely requires a custom `Config` with a separate `AccountId` type to work
+                // properly without additional hacks.
                 account_id: AccountId32(account_id.into()),
                 signer,
             }
@@ -73,20 +81,22 @@ mod pair_signer {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt::init();
+
     // Create a new API client, configured to talk to Polkadot nodes.
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     let signer = {
-        let acc = sr25519::Pair::from_string("//Alice", None).unwrap();
+        let acc = sr25519::Pair::from_string("//Alice", None)?;
         pair_signer::PairSigner::new(acc)
     };
 
-    let alice = signer.account_id().clone().into();
+    let dest = subxt_signer::sr25519::dev::bob().public_key().into();
 
     // Build a balance transfer extrinsic.
     let balance_transfer_tx = polkadot::tx()
         .balances()
-        .transfer_allow_death(alice, 10_000);
+        .transfer_allow_death(dest, 100_000);
 
     // Submit the balance transfer extrinsic from Alice, and wait for it to be successful
     // and in a finalized block. We get back the extrinsic events if all is well.
