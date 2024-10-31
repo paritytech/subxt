@@ -15,6 +15,17 @@ pub mod polkadot {}
 
 pub enum PolkadotConfig {}
 
+impl subxt::Config for PolkadotConfig {
+    type Hash = <subxt::PolkadotConfig as Config>::Hash;
+    type AccountId = AccountId32;
+    type Address = MultiAddress<Self::AccountId, ()>;
+    type Signature = MultiSignature;
+    type Hasher = <subxt::PolkadotConfig as Config>::Hasher;
+    type Header = <subxt::PolkadotConfig as Config>::Header;
+    type ExtrinsicParams = PolkadotExtrinsicParams<Self>;
+    type AssetId = u32;
+}
+
 /// AccountId32 for substrate compatibility.
 #[derive(
     Clone,
@@ -101,17 +112,6 @@ impl From<sp_core::ecdsa::Signature> for MultiSignature {
         let sig: sp_runtime::MultiSignature = value.into();
         sig.into()
     }
-}
-
-impl subxt::Config for PolkadotConfig {
-    type Hash = <subxt::PolkadotConfig as Config>::Hash;
-    type AccountId = AccountId32;
-    type Address = MultiAddress<Self::AccountId, ()>;
-    type Signature = MultiSignature;
-    type Hasher = <subxt::PolkadotConfig as Config>::Hasher;
-    type Header = <subxt::PolkadotConfig as Config>::Header;
-    type ExtrinsicParams = PolkadotExtrinsicParams<Self>;
-    type AssetId = u32;
 }
 
 /// A [`Signer`] implementation that can be constructed from an [`sp_core::Pair`].
