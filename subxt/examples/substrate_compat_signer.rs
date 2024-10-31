@@ -1,9 +1,10 @@
-//! This example demonstrates how to use to add a layer for full functionality for types in substrate.
+//! This example demonstrates how to use to add a custom signer implementation to `subxt`
+//! by using the signer implementation from polkadot-sdk.
 //!
 //! Similar functionality was provided by the `substrate-compat` feature in the original `subxt` crate.
 //! which is now removed.
 
-#![allow(missing_docs)]
+#![allow(missing_docs, unused)]
 
 use polkadot_sdk::sp_core::{sr25519, Pair as _};
 use subxt::{Config, OnlineClient, PolkadotConfig};
