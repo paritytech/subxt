@@ -287,8 +287,7 @@ where
             .iter()
             .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
         let decoded =
-            scale_value::scale::decode_as_fields(bytes, &mut fields, self.metadata.types())
-                .map_err(Into::<scale_decode::Error>::into)?;
+            scale_value::scale::decode_as_fields(bytes, &mut fields, self.metadata.types())?;
 
         Ok(decoded)
     }

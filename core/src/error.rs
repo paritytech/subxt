@@ -35,6 +35,12 @@ pub enum Error {
     Block(#[from] BlockError),
 }
 
+impl From<scale_decode::visitor::DecodeError> for Error {
+    fn from(err: scale_decode::visitor::DecodeError) -> Error {
+        Error::Decode(err.into())
+    }
+}
+
 /// Block error
 #[derive(Debug, DeriveError)]
 pub enum BlockError {
