@@ -13,13 +13,13 @@ use thiserror::Error as DeriveError;
 #[derive(Debug, DeriveError)]
 pub enum Error {
     /// Codec error.
-    #[error("Scale codec error: {0}")]
+    #[error(transparent)]
     Codec(#[from] codec::Error),
     /// Metadata error.
-    #[error("Metadata Error: {0}")]
+    #[error(transparent)]
     Metadata(#[from] MetadataError),
     /// Storage address error.
-    #[error("Storage Error: {0}")]
+    #[error(transparent)]
     StorageAddress(#[from] StorageAddressError),
     /// Error decoding to a [`crate::dynamic::Value`].
     #[error("Error decoding into dynamic value: {0}")]
@@ -28,7 +28,7 @@ pub enum Error {
     #[error("Error encoding from dynamic value: {0}")]
     Encode(#[from] scale_encode::Error),
     /// Error constructing the appropriate extrinsic params.
-    #[error("Extrinsic params error: {0}")]
+    #[error(transparent)]
     ExtrinsicParams(#[from] ExtrinsicParamsError),
     /// Block body error.
     #[error("Error working with block_body: {0}")]
