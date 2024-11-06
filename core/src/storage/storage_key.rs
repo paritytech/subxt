@@ -264,7 +264,9 @@ impl StorageKey for Vec<scale_value::Value> {
             match consume_hash_returning_key_bytes(bytes, hasher, ty_id, types)? {
                 Some(value_bytes) => {
                     let value =
-                        scale_value::scale::decode_as_type(&mut &*value_bytes, ty_id, types)?;
+                        scale_value::scale::decode_as_type(&mut &*value_bytes, ty_id, types)
+                            .map_err(Into::<scale_decode::Error>::into)?;
+
                     result.push(value.remove_context());
                 }
                 None => {

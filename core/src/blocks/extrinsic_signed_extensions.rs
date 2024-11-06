@@ -120,7 +120,8 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
             &mut &self.bytes[..],
             self.ty_id,
             self.metadata.types(),
-        )?;
+        )
+        .map_err(Into::<scale_decode::Error>::into)?;
         Ok(value)
     }
 

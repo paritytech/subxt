@@ -6,10 +6,12 @@
 
 use crate::ecdsa;
 use alloc::format;
-use core::fmt::{Display, Formatter};
+use core::fmt::Formatter;
 use core::str::FromStr;
 use keccak_hash::keccak;
 use secp256k1::Message;
+
+use thiserror::Error as DeriveError;
 
 const SECRET_KEY_LENGTH: usize = 32;
 
@@ -201,28 +203,15 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, DeriveError)]
 pub enum Error {
     /// Invalid seed.
+    #[error("Invalid seed (was it the wrong length?)")]
     InvalidSeed,
     /// Invalid derivation path.
+    #[error("Could not derive from path; some values in the path may have been >= 2^31?")]
     DeriveFromPath,
 }
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Error::InvalidSeed => write!(f, "Invalid seed (was it the wrong length?)"),
-            Error::DeriveFromPath => write!(
-                f,
-                "Could not derive from path; some values in the path may have been >= 2^31?"
-            ),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for Error {}
 
 /// Dev accounts, helpful for testing but not to be used in production,
 /// since the secret keys are known.

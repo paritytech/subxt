@@ -65,6 +65,9 @@ tracing = { workspace = true, default-features = false }
 # AccountId20
 keccak-hash = { workspace = true}
 
+# Error handling 
+thiserror = { workspace = true, default-features = false }
+
 [dev-dependencies]
 assert_matches = { workspace = true }
 bitvec = { workspace = true }

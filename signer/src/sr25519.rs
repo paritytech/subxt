@@ -4,7 +4,7 @@
 
 //! An sr25519 keypair implementation.
 
-use core::{fmt::Display, str::FromStr};
+use core::str::FromStr;
 
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 
@@ -14,6 +14,8 @@ use schnorrkel::{
     ExpansionMode, MiniSecretKey,
 };
 use secrecy::ExposeSecret;
+
+use thiserror::Error as DeriveError;
 
 const SECRET_KEY_LENGTH: usize = schnorrkel::keys::MINI_SECRET_KEY_LENGTH;
 const SIGNING_CTX: &[u8] = b"substrate";
@@ -203,35 +205,27 @@ pub fn verify<M: AsRef<[u8]>>(sig: &Signature, message: M, pubkey: &PublicKey) -
 }
 
 /// An error handed back if creating a keypair fails.
-#[derive(Debug)]
+#[derive(Debug, DeriveError)]
 pub enum Error {
     /// Invalid seed.
+    #[error("Invalid seed (was it the wrong length?)")]
     InvalidSeed,
     /// Invalid phrase.
-    Phrase(bip39::Error),
+    #[error("Cannot parse phrase: {0}")]
+    Phrase(#[from] bip39::Error),
     /// Invalid hex.
-    Hex(hex::FromHexError),
+    #[error("Cannot parse hex string: {0}")]
+    Hex(#[from] hex::FromHexError),
     /// Signature error.
+    #[error("Signature error: {0}")]
     Signature(schnorrkel::SignatureError),
 }
 
-impl_from!(bip39::Error => Error::Phrase);
-impl_from!(hex::FromHexError => Error::Hex);
-impl_from!(schnorrkel::SignatureError => Error::Signature);
-
-impl Display for Error {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Error::InvalidSeed => write!(f, "Invalid seed (was it the wrong length?)"),
-            Error::Phrase(e) => write!(f, "Cannot parse phrase: {e}"),
-            Error::Hex(e) => write!(f, "Cannot parse hex string: {e}"),
-            Error::Signature(e) => write!(f, "Signature error: {e}"),
-        }
+impl From<schnorrkel::SignatureError> for Error {
+    fn from(value: schnorrkel::SignatureError) -> Self {
+        Error::Signature(value)
     }
 }
-
-#[cfg(feature = "std")]
-impl std::error::Error for Error {}
 
 /// Dev accounts, helpful for testing but not to be used in production,
 /// since the secret keys are known.

@@ -4,13 +4,12 @@
 
 //! `AccountId20` is a representation of Ethereum address derived from hashing the public key.
 
-use core::fmt::Display;
-
 use alloc::format;
 use alloc::string::String;
 use codec::{Decode, Encode};
 use keccak_hash::keccak;
 use serde::{Deserialize, Serialize};
+use thiserror::Error as DeriveError;
 
 #[derive(
     Copy,
@@ -72,26 +71,16 @@ impl AccountId20 {
 }
 
 /// An error obtained from trying to interpret a hex encoded string into an AccountId20
-#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug, DeriveError)]
 #[allow(missing_docs)]
 pub enum FromChecksumError {
+    #[error("Length is bad")]
     BadLength,
+    #[error("Invalid checksum")]
     InvalidChecksum,
+    #[error("Invalid checksum prefix byte.")]
     InvalidPrefix,
 }
-
-impl Display for FromChecksumError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            FromChecksumError::BadLength => write!(f, "Length is bad"),
-            FromChecksumError::InvalidChecksum => write!(f, "Invalid checksum"),
-            FromChecksumError::InvalidPrefix => write!(f, "Invalid checksum prefix byte."),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for FromChecksumError {}
 
 impl Serialize for AccountId20 {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

@@ -5,13 +5,14 @@
 //! A Polkadot-JS account loader.
 
 use base64::Engine;
-use core::fmt::Display;
 use crypto_secretbox::{
     aead::{Aead, KeyInit},
     Key, Nonce, XSalsa20Poly1305,
 };
 use serde::Deserialize;
 use subxt_core::utils::AccountId32;
+
+use thiserror::Error as DeriveError;
 
 use crate::sr25519;
 
@@ -22,15 +23,19 @@ pub fn decrypt_json(json: &str, password: &str) -> Result<sr25519::Keypair, Erro
 }
 
 /// Error
-#[derive(Debug)]
+#[derive(Debug, DeriveError)]
 pub enum Error {
     /// Error decoding JSON.
-    Json(serde_json::Error),
+    #[error("Invalid JSON: {0}")]
+    Json(#[from] serde_json::Error),
     /// The keypair has an unsupported encoding.
+    #[error("Unsupported encoding.")]
     UnsupportedEncoding,
     /// Base64 decoding error.
-    Base64(base64::DecodeError),
+    #[error("Base64 decoding error: {0}")]
+    Base64(#[from] base64::DecodeError),
     /// Wrong Scrypt parameters
+    #[error("Unsupported Scrypt parameters: N: {n}, p: {p}, r: {r}")]
     UnsupportedScryptParameters {
         /// N
         n: u32,
@@ -40,36 +45,15 @@ pub enum Error {
         r: u32,
     },
     /// Decryption error.
-    Secretbox(crypto_secretbox::Error),
+    #[error("Decryption error: {0}")]
+    Secretbox(#[from] crypto_secretbox::Error),
     /// sr25519 keypair error.
-    Sr25519(sr25519::Error),
+    #[error(transparent)]
+    Sr25519(#[from] sr25519::Error),
     /// The decrypted keys are not valid.
+    #[error("The decrypted keys are not valid.")]
     InvalidKeys,
 }
-
-impl_from!(serde_json::Error => Error::Json);
-impl_from!(base64::DecodeError => Error::Base64);
-impl_from!(crypto_secretbox::Error => Error::Secretbox);
-impl_from!(sr25519::Error => Error::Sr25519);
-
-impl Display for Error {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Error::Json(e) => write!(f, "Invalid JSON: {e}"),
-            Error::UnsupportedEncoding => write!(f, "Unsupported encoding."),
-            Error::Base64(e) => write!(f, "Base64 decoding error: {e}"),
-            Error::UnsupportedScryptParameters { n, p, r } => {
-                write!(f, "Unsupported Scrypt parameters: N: {n}, p: {p}, r: {r}")
-            }
-            Error::Secretbox(e) => write!(f, "Decryption error: {e}"),
-            Error::Sr25519(e) => write!(f, "{e}"),
-            Error::InvalidKeys => write!(f, "The decrypted keys are not valid."),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for Error {}
 
 #[derive(Deserialize)]
 struct EncryptionMetadata {
