@@ -6,7 +6,6 @@
 
 use crate::ecdsa;
 use alloc::format;
-use core::fmt::Formatter;
 use core::str::FromStr;
 use keccak_hash::keccak;
 use secp256k1::Message;
