@@ -4,7 +4,7 @@
 
 use std::{borrow::Cow, path::Path};
 
-use codec::Decode;
+use codec::{Decode, Encode};
 use polkadot_sdk::{
     sc_executor::{self, WasmExecutionMethod, WasmExecutor},
     sc_executor_common::runtime_blob::RuntimeBlob,
@@ -39,17 +39,50 @@ fn call_and_decode(wasm_file: Vec<u8>) -> WasmMetadataResult<Metadata> {
 
     let runtime_blob =
         RuntimeBlob::new(&wasm_file).map_err(|e| CodegenError::Wasm(e.to_string()))?;
-    let metadata_encoded = executor
-        .uncached_call(runtime_blob, &mut ext, true, "Metadata_metadata", &[])
-        .map_err(|_| CodegenError::Wasm("method \"Metadata_metadata\" doesnt exist".to_owned()))?;
 
-    let metadata = <Vec<u8>>::decode(&mut &metadata_encoded[..]).map_err(CodegenError::Decode)?;
+    let version = executor
+        .uncached_call(
+            runtime_blob.clone(),
+            &mut ext,
+            true,
+            "Metadata_metadata_versions",
+            &[],
+        )
+        .map_err(|_| {
+            CodegenError::Wasm("method \"Metadata_metadata_versions\" doesnt exist".to_owned())
+        })?;
+    let mut versions = <Vec<u32>>::decode(&mut &version[..]).map_err(CodegenError::Decode)?;
 
-    decode(metadata)
+    // Highest version will always be the last one in the vec
+    versions.sort();
+
+    let version = versions
+        .last()
+        .ok_or(CodegenError::Other(
+            "No metadata versions were returned".to_owned(),
+        ))
+        .map(|v| v.encode())?;
+
+    let encoded_metadata = executor
+        .uncached_call(
+            runtime_blob,
+            &mut ext,
+            false,
+            "Metadata_metadata_at_version",
+            &version,
+        )
+        .map_err(|e| {
+            dbg!(e);
+            CodegenError::Wasm("method \"Metadata_metadata_at_version\" doesnt exist".to_owned())
+        })?;
+
+    decode(encoded_metadata)
 }
 
 fn decode(encoded_metadata: Vec<u8>) -> WasmMetadataResult<Metadata> {
-    Metadata::decode(&mut encoded_metadata.as_ref()).map_err(Into::into)
+    // We slice the first byte from the metadata because it's wrapped inside an option and we know that its always `Some`
+    let metadata = <Vec<u8>>::decode(&mut &encoded_metadata[1..]).map_err(CodegenError::Decode)?;
+    Metadata::decode(&mut metadata.as_ref()).map_err(Into::into)
 }
 
 fn maybe_decompress(file_contents: Vec<u8>) -> WasmMetadataResult<Vec<u8>> {
