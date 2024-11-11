@@ -412,6 +412,7 @@ jobs:
           pkill substrate-node
         working-directory: testing/wasm-lightclient-tests
 
+      # TODO: WASM tests for the subxt-signer is currently broken https://github.com/paritytech/subxt/issues/1861.
       #- name: Run subxt-signer WASM tests
       #  run: |
       #    wasm-pack test --headless --firefox
