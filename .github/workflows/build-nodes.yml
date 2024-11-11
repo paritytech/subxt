@@ -16,8 +16,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: paritytech/polkadot-sdk
-          # TODO: Temporary to pin a specific polkadot commit because of that substrate master doesn't work
-          ref: 356386b56881a7a2cb1b0be5628ad2a97678b34d
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y protobuf-compiler curl gcc make clang cmake

@@ -1,5 +1,15 @@
-error: Type Generation failed: Type substitution error: `substitute_type(with = <path>)` must be a path prefixed with 'crate::' or '::'
- --> src/incorrect/substitute_path_not_absolute.rs:5:16
+error: Type `DispatchInfo` does not exist at path `frame_support::dispatch::DispatchInfo`
+
+       There is no Type with name `DispatchInfo` in the provided metadata.
+ --> src/incorrect/substitute_path_not_absolute.rs:1:1
   |
-5 |         with = "my_mod::DispatchInfo"
-  |                ^^^^^^^^^^^^^^^^^^^^^^
+1 | / #[subxt::subxt(
+2 | |     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
+3 | |     substitute_type(
+4 | |         path = "frame_support::dispatch::DispatchInfo",
+5 | |         with = "my_mod::DispatchInfo"
+6 | |     )
+7 | | )]
+  | |__^
+  |
+  = note: this error originates in the attribute macro `subxt::subxt` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -2,8 +2,53 @@ error: Type `Event` does not exist at path `sp_runtime::multiaddress::Event`
 
        A type with the same name is present at:
        frame_system::pallet::Event
+       pallet_indices::pallet::Event
        pallet_balances::pallet::Event
+       pallet_parameters::pallet::Event
+       pallet_transaction_payment::pallet::Event
+       pallet_offences::pallet::Event
+       pallet_session::pallet::Event
+       pallet_grandpa::pallet::Event
+       pallet_treasury::pallet::Event
+       pallet_conviction_voting::pallet::Event
+       pallet_referenda::pallet::Event
+       pallet_ranked_collective::pallet::Event
+       pallet_referenda::pallet::Event
+       pallet_whitelist::pallet::Event
+       polkadot_runtime_common::claims::pallet::Event
+       pallet_utility::pallet::Event
+       pallet_identity::pallet::Event
+       pallet_society::pallet::Event
+       pallet_recovery::pallet::Event
+       pallet_vesting::pallet::Event
+       pallet_scheduler::pallet::Event
+       pallet_proxy::pallet::Event
        pallet_multisig::pallet::Event
+       pallet_preimage::pallet::Event
+       pallet_asset_rate::pallet::Event
+       pallet_bounties::pallet::Event
+       pallet_child_bounties::pallet::Event
+       pallet_nis::pallet::Event
+       pallet_balances::pallet::Event
+       polkadot_runtime_parachains::inclusion::pallet::Event
+       polkadot_runtime_parachains::paras::pallet::Event
+       polkadot_runtime_parachains::hrmp::pallet::Event
+       polkadot_runtime_parachains::disputes::pallet::Event
+       pallet_message_queue::pallet::Event
+       polkadot_runtime_parachains::on_demand::pallet::Event
+       polkadot_runtime_common::paras_registrar::pallet::Event
+       polkadot_runtime_common::slots::pallet::Event
+       polkadot_runtime_common::auctions::pallet::Event
+       polkadot_runtime_common::crowdloan::pallet::Event
+       polkadot_runtime_parachains::coretime::pallet::Event
+       pallet_migrations::pallet::Event
+       pallet_xcm::pallet::Event
+       polkadot_runtime_common::identity_migrator::pallet::Event
+       polkadot_runtime_common::assigned_slots::pallet::Event
+       rococo_runtime::validator_manager::pallet::Event
+       pallet_state_trie_migration::pallet::Event
+       pallet_root_testing::pallet::Event
+       pallet_sudo::pallet::Event
  --> src/incorrect/substitute_at_wrong_path.rs:1:1
   |
 1 | / #[subxt::subxt(
