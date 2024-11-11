@@ -13,8 +13,8 @@ use subxt_signer::sr25519::dev;
     )
 )]
 pub mod runtime {}
-use runtime::runtime_types::xcm::v3::junctions::Junctions;
 use runtime::runtime_types::staging_xcm::v3::multilocation::MultiLocation;
+use runtime::runtime_types::xcm::v3::junctions::Junctions;
 
 // We don't need to construct this at runtime, so an empty enum is appropriate.
 pub enum AssetHubConfig {}
