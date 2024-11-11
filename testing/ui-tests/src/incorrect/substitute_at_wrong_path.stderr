@@ -41,6 +41,7 @@ error: Type `Event` does not exist at path `sp_runtime::multiaddress::Event`
        polkadot_runtime_common::auctions::pallet::Event
        polkadot_runtime_common::crowdloan::pallet::Event
        polkadot_runtime_parachains::coretime::pallet::Event
+       pallet_migrations::pallet::Event
        pallet_xcm::pallet::Event
        polkadot_runtime_common::identity_migrator::pallet::Event
        polkadot_runtime_common::assigned_slots::pallet::Event
