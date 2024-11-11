@@ -338,6 +338,7 @@ pub mod tests {
                 SessionKeys
                 TaggedTransactionQueue
                 TransactionPaymentApi
+                TrustedQueryApi
                 XcmPaymentApi
         "};
         assert_eq!(output, expected_output);
