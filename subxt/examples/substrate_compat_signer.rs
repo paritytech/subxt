@@ -91,7 +91,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         pair_signer::PairSigner::new(acc)
     };
 
-    let dest = subxt_signer::sr25519::dev::bob().public_key().into();
+    let dest = {
+        let acc = sr25519::Pair::from_string("//Bob", None)?;
+        MultiAddress::Address32(acc.public().0)
+    };
 
     // Build a balance transfer extrinsic.
     let balance_transfer_tx = polkadot::tx()
