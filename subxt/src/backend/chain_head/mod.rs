@@ -682,8 +682,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                     rpc_methods::TransactionStatus::BestChainBlockIncluded { block: None } => {
                         TransactionStatus::NoLongerInBestBlock
                     }
-                    rpc_methods::TransactionStatus::Broadcasted { num_peers } => {
-                        TransactionStatus::Broadcasted { num_peers }
+                    rpc_methods::TransactionStatus::Broadcasted => {
+                        TransactionStatus::Broadcasted
                     }
                     rpc_methods::TransactionStatus::Dropped { error, .. } => {
                         TransactionStatus::Dropped { message: error }
