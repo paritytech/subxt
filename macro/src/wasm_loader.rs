@@ -31,9 +31,14 @@ fn call_and_decode(wasm_file: Vec<u8>) -> WasmMetadataResult<Metadata> {
     let mut executor = Executor::new(&wasm_file)?;
 
     if let Ok(versions) = executor.versions() {
-        executor.load_metadata_at_latest_version(versions)
+        let version = versions
+            .into_iter()
+            .max()
+            .expect("This is checked earlier and can't fail.");
+
+        executor.load_metadata_at_version(version)
     } else {
-        executor.metadata()
+        executor.load_legacy_metadata()
     }
 }
 
@@ -106,7 +111,7 @@ impl Executor {
         Ok(versions)
     }
 
-    fn metadata(&mut self) -> WasmMetadataResult<Metadata> {
+    fn load_legacy_metadata(&mut self) -> WasmMetadataResult<Metadata> {
         let encoded_metadata = self
             .executor
             .uncached_call(
@@ -124,15 +129,7 @@ impl Executor {
         decode(encoded_metadata)
     }
 
-    fn load_metadata_at_latest_version(
-        &mut self,
-        versions: Vec<u32>,
-    ) -> WasmMetadataResult<Metadata> {
-        let version = versions
-            .into_iter()
-            .max()
-            .expect("This is checked earlier and can't fail.");
-
+    fn load_metadata_at_version(&mut self, version: u32) -> WasmMetadataResult<Metadata> {
         let encoded_metadata = self
             .executor
             .uncached_call(
@@ -142,8 +139,7 @@ impl Executor {
                 "Metadata_metadata_at_version",
                 &version.encode(),
             )
-            .map_err(|e| {
-                dbg!(e);
+            .map_err(|_| {
                 CodegenError::Wasm(
                     "method \"Metadata_metadata_at_version\" doesnt exist".to_owned(),
                 )
