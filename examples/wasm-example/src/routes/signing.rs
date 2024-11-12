@@ -8,10 +8,14 @@ use subxt::ext::codec::{Decode, Encode};
 use subxt::tx::Payload as _;
 use subxt::tx::SubmittableExtrinsic;
 use subxt::utils::{AccountId32, MultiSignature};
+use subxt::backend::chain_head::{ChainHeadBackend, ChainHeadBackendBuilder};
+use subxt::lightclient::LightClient;
 
 use crate::services::{extension_signature_for_extrinsic, get_accounts, polkadot, Account};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
+
+pub const PASEO_SPEC: &str = include_str!("../../../../artifacts/demo_chain_specs/paseo.json");
 
 pub struct SigningExamplesComponent {
     message: String,
@@ -85,7 +89,14 @@ impl Component for SigningExamplesComponent {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-        ctx.link().send_future(OnlineClient::<PolkadotConfig>::new().map(|res| {
+        // Initiate light client (smoldot)
+        let (_, rpc) = LightClient::relay_chain(PASEO_SPEC)
+            .expect("expect valid smoldot connection");
+
+        let backend: ChainHeadBackend<PolkadotConfig> =
+            ChainHeadBackendBuilder::default().build_with_background_driver(rpc.clone());
+
+        ctx.link().send_future(OnlineClient::from_backend(backend.into()).map(|res| {
             match res {
                 Ok(online_client) => Message::OnlineClientCreated(online_client),
                 Err(err) => Message::Error(anyhow!("Online Client could not be created. Make sure you have a local node running:\n{err}")),
