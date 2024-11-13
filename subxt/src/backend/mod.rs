@@ -290,10 +290,7 @@ pub enum TransactionStatus<Hash> {
     /// Transaction is part of the future queue.
     Validated,
     /// The transaction has been broadcast to other nodes.
-    Broadcasted {
-        /// Number of peers it's been broadcast to.
-        num_peers: u32,
-    },
+    Broadcasted,
     /// Transaction is no longer in a best block.
     NoLongerInBestBlock,
     /// Transaction has been included in block with given hash.

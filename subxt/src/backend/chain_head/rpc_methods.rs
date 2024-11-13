@@ -709,10 +709,11 @@ pub enum TransactionStatus<Hash> {
     /// Transaction is part of the future queue.
     Validated,
     /// The transaction has been broadcast to other nodes.
-    Broadcasted {
-        /// Number of peers it's been broadcast to.
-        num_peers: u32,
-    },
+    ///
+    /// Note: This event is no longer expected to be returned as of
+    /// the chainHead_v1 spec, but we do so for compatibility with
+    /// older versions of Smoldot, which do return it.
+    Broadcasted,
     /// Transaction has been included in block with given details.
     /// Null is returned if the transaction is no longer in any block
     /// of the best chain.
@@ -737,8 +738,6 @@ pub enum TransactionStatus<Hash> {
     },
     /// The transaction was dropped.
     Dropped {
-        /// Was the transaction broadcasted to other nodes before being dropped?
-        broadcasted: bool,
         /// Human readable message; why was it dropped.
         error: String,
     },
