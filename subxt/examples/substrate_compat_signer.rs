@@ -7,6 +7,7 @@
 #![allow(missing_docs, unused)]
 
 use polkadot_sdk::sp_core::{sr25519, Pair as _};
+use subxt::config::substrate::MultiAddress;
 use subxt::{Config, OnlineClient, PolkadotConfig};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
