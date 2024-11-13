@@ -7,13 +7,14 @@ use subxt_signer::sr25519::dev;
 #[subxt::subxt(
     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
     derive_for_type(
-        path = "xcm::v2::multilocation::MultiLocation",
+        path = "staging_xcm::v3::multilocation::MultiLocation",
         derive = "Clone",
         recursive
     )
 )]
 pub mod runtime {}
-use runtime::runtime_types::xcm::v2::multilocation::{Junctions, MultiLocation};
+use runtime::runtime_types::staging_xcm::v3::multilocation::MultiLocation;
+use runtime::runtime_types::xcm::v3::junctions::Junctions;
 
 // We don't need to construct this at runtime, so an empty enum is appropriate.
 pub enum AssetHubConfig {}
