@@ -354,10 +354,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                         RpcTransactionStatus::Retracted(_) => None,
                         // These roughly map across:
                         RpcTransactionStatus::Ready => Some(TransactionStatus::Validated),
-                        RpcTransactionStatus::Broadcast(peers) => {
-                            Some(TransactionStatus::Broadcasted {
-                                num_peers: peers.len() as u32,
-                            })
+                        RpcTransactionStatus::Broadcast(_peers) => {
+                            Some(TransactionStatus::Broadcasted)
                         }
                         RpcTransactionStatus::InBlock(hash) => {
                             Some(TransactionStatus::InBestBlock {

@@ -135,7 +135,7 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
         sub.poll_next_unpin(cx).map_ok(|status| {
             match status {
                 BackendTxStatus::Validated => TxStatus::Validated,
-                BackendTxStatus::Broadcasted { num_peers } => TxStatus::Broadcasted { num_peers },
+                BackendTxStatus::Broadcasted => TxStatus::Broadcasted,
                 BackendTxStatus::NoLongerInBestBlock => TxStatus::NoLongerInBestBlock,
                 BackendTxStatus::InBestBlock { hash } => {
                     TxStatus::InBestBlock(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
@@ -172,10 +172,7 @@ pub enum TxStatus<T: Config, C> {
     /// Transaction is part of the future queue.
     Validated,
     /// The transaction has been broadcast to other nodes.
-    Broadcasted {
-        /// Number of peers it's been broadcast to.
-        num_peers: u32,
-    },
+    Broadcasted,
     /// Transaction is no longer in a best block.
     NoLongerInBestBlock,
     /// Transaction has been included in block with given hash.
@@ -363,7 +360,7 @@ mod test {
     #[tokio::test]
     async fn wait_for_finalized_returns_err_when_error() {
         let tx_progress = mock_tx_progress(vec![
-            MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
+            MockSubstrateTxStatus::Broadcasted,
             MockSubstrateTxStatus::Error {
                 message: "err".into(),
             },
@@ -378,7 +375,7 @@ mod test {
     #[tokio::test]
     async fn wait_for_finalized_returns_err_when_invalid() {
         let tx_progress = mock_tx_progress(vec![
-            MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
+            MockSubstrateTxStatus::Broadcasted,
             MockSubstrateTxStatus::Invalid {
                 message: "err".into(),
             },
@@ -393,7 +390,7 @@ mod test {
     #[tokio::test]
     async fn wait_for_finalized_returns_err_when_dropped() {
         let tx_progress = mock_tx_progress(vec![
-            MockSubstrateTxStatus::Broadcasted { num_peers: 2 },
+            MockSubstrateTxStatus::Broadcasted,
             MockSubstrateTxStatus::Dropped {
                 message: "err".into(),
             },
