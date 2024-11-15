@@ -413,7 +413,7 @@ async fn partial_fee_estimate_correct() {
 }
 
 #[subxt_test(timeout = 120)]
-async fn legacy_and_unstable_block_subscription_reconnect() {
+async fn chainhead_block_subscription_reconnect() {
     let ctx = test_context_reconnecting_rpc_client().await;
     let api = ctx.chainhead_backend().await;
     let chainhead_client_blocks = move |num: usize| {
