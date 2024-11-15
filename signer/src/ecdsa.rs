@@ -234,10 +234,22 @@ pub enum Error {
     SoftJunction,
     /// Invalid phrase.
     #[error("Cannot parse phrase: {0}")]
-    Phrase(#[from] bip39::Error),
+    Phrase(bip39::Error),
     /// Invalid hex.
     #[error("Cannot parse hex string: {0}")]
-    Hex(#[from] hex::FromHexError),
+    Hex(hex::FromHexError),
+}
+
+impl From<hex::FromHexError> for Error {
+    fn from(err: hex::FromHexError) -> Self {
+        Error::Hex(err)
+    }
+}
+
+impl From<bip39::Error> for Error {
+    fn from(err: bip39::Error) -> Self {
+        Error::Phrase(err)
+    }
 }
 
 /// Dev accounts, helpful for testing but not to be used in production,

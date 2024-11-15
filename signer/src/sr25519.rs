@@ -212,10 +212,10 @@ pub enum Error {
     InvalidSeed,
     /// Invalid phrase.
     #[error("Cannot parse phrase: {0}")]
-    Phrase(#[from] bip39::Error),
+    Phrase(bip39::Error),
     /// Invalid hex.
     #[error("Cannot parse hex string: {0}")]
-    Hex(#[from] hex::FromHexError),
+    Hex(hex::FromHexError),
     /// Signature error.
     #[error("Signature error: {0}")]
     Signature(schnorrkel::SignatureError),
@@ -224,6 +224,18 @@ pub enum Error {
 impl From<schnorrkel::SignatureError> for Error {
     fn from(value: schnorrkel::SignatureError) -> Self {
         Error::Signature(value)
+    }
+}
+
+impl From<hex::FromHexError> for Error {
+    fn from(err: hex::FromHexError) -> Self {
+        Error::Hex(err)
+    }
+}
+
+impl From<bip39::Error> for Error {
+    fn from(err: bip39::Error) -> Self {
+        Error::Phrase(err)
     }
 }
 
