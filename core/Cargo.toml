@@ -19,10 +19,6 @@ default = ["std"]
 std = [
     "codec/std",
     "scale-info/std",
-    "scale-value/std",
-    "scale-bits/std",
-    "scale-decode/std",
-    "scale-encode/std",
     "frame-metadata/std",
     "subxt-metadata/std",
     "hex/std",
@@ -66,7 +62,6 @@ tracing = { workspace = true, default-features = false }
 
 # AccountId20
 keccak-hash = { workspace = true}
-
 
 [dev-dependencies]
 assert_matches = { workspace = true }

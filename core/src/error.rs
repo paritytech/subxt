@@ -13,8 +13,8 @@ use thiserror::Error as DeriveError;
 #[derive(Debug, DeriveError)]
 pub enum Error {
     /// Codec error.
-    #[error(transparent)]
-    Codec(#[from] codec::Error),
+    #[error("Codec error: {0}")]
+    Codec(codec::Error),
     /// Metadata error.
     #[error(transparent)]
     Metadata(#[from] MetadataError),
@@ -38,6 +38,14 @@ pub enum Error {
 impl From<scale_decode::visitor::DecodeError> for Error {
     fn from(err: scale_decode::visitor::DecodeError) -> Error {
         Error::Decode(err.into())
+    }
+}
+
+// TODO: when `codec::Error` implements `core::Error`
+// remove this impl and replace it by thiserror #[from]
+impl From<codec::Error> for Error {
+    fn from(err: codec::Error) -> Error {
+        Error::Codec(err)
     }
 }
 
