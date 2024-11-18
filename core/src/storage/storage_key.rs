@@ -265,6 +265,7 @@ impl StorageKey for Vec<scale_value::Value> {
                 Some(value_bytes) => {
                     let value =
                         scale_value::scale::decode_as_type(&mut &*value_bytes, ty_id, types)?;
+
                     result.push(value.remove_context());
                 }
                 None => {
