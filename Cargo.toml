@@ -155,7 +155,7 @@ bip39 = { version = "2.1.0", default-features = false }
 bip32 = { version = "0.5.2", default-features = false }
 hmac = { version = "0.12.1", default-features = false }
 pbkdf2 = { version = "0.12.2", default-features = false }
-schnorrkel = { version = "0.11.4", default-features = false }
+schnorrkel = { version = "0.11.4", default-features = false, features = ["getrandom"] }
 secp256k1 = { version = "0.30.0", default-features = false }
 keccak-hash = { version = "0.11.0", default-features = false }
 secrecy = "0.10.3"
