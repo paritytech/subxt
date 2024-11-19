@@ -1,0 +1,24 @@
+[package]
+name = "nostd-tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.24"
+tracing-wasm = "0.2.1"
+console_error_panic_hook = "0.1.7"
+
+# This crate is not a part of the workspace, because we want to
+# enable the "web" feature here but don't want it enabled as part
+# of workspace builds. Also disable the "subxt" feature here because
+# we want to ensure it works in isolation of that.
+subxt-signer = { path = "../../", default-features = false, features = [
+    "sr25519",
+    "ecdsa",
+    "unstable-eth",
+] }
+
+# this shouldn't be needed, it's in workspace.exclude, but still
+# I get the complaint unless I add it...
+[workspace]
