@@ -6,14 +6,13 @@
 //! This doesn't contain much functionality itself, but is easy to convert to/from an `sp_core::AccountId32`
 //! for instance, to gain functionality without forcing a dependency on Substrate crates here.
 
-use core::fmt::Display;
-
 use alloc::format;
 use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
 use codec::{Decode, Encode};
 use serde::{Deserialize, Serialize};
+use thiserror::Error as DeriveError;
 
 /// A 32-byte cryptographic identifier. This is a simplified version of Substrate's
 /// `sp_core::crypto::AccountId32`. To obtain more functionality, convert this into
@@ -106,28 +105,18 @@ impl AccountId32 {
 }
 
 /// An error obtained from trying to interpret an SS58 encoded string into an AccountId32
-#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug, DeriveError)]
 #[allow(missing_docs)]
 pub enum FromSs58Error {
+    #[error("Base 58 requirement is violated")]
     BadBase58,
+    #[error("Length is bad")]
     BadLength,
+    #[error("Invalid checksum")]
     InvalidChecksum,
+    #[error("Invalid SS58 prefix byte.")]
     InvalidPrefix,
 }
-
-impl Display for FromSs58Error {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            FromSs58Error::BadBase58 => write!(f, "Base 58 requirement is violated"),
-            FromSs58Error::BadLength => write!(f, "Length is bad"),
-            FromSs58Error::InvalidChecksum => write!(f, "Invalid checksum"),
-            FromSs58Error::InvalidPrefix => write!(f, "Invalid SS58 prefix byte."),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for FromSs58Error {}
 
 // We do this just to get a checksum to help verify the validity of the address in to_ss58check
 fn ss58hash(data: &[u8]) -> Vec<u8> {

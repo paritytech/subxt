@@ -24,6 +24,7 @@ frame-metadata = { workspace = true, default-features = false, features = ["curr
 codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
 polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
 hashbrown = { workspace = true }
+thiserror = { workspace = true, default-features = false }
 
 [dev-dependencies]
 bitvec = { workspace = true, features = ["alloc"] }

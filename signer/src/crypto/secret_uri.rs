@@ -2,12 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use core::fmt::Display;
-
 use super::DeriveJunction;
 use alloc::{string::ToString, vec::Vec};
 use regex::Regex;
 use secrecy::SecretString;
+
+use thiserror::Error as DeriveError;
 
 // This code is taken from sp_core::crypto::DeriveJunction. The logic should be identical,
 // though the code is tweaked a touch!
@@ -116,22 +116,12 @@ impl core::str::FromStr for SecretUri {
 }
 
 /// This is returned if `FromStr` cannot parse a string into a `SecretUri`.
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, DeriveError)]
 pub enum SecretUriError {
     /// Parsing the secret URI from a string failed; wrong format.
+    #[error("Invalid secret phrase format")]
     InvalidFormat,
 }
-
-impl Display for SecretUriError {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            SecretUriError::InvalidFormat => write!(f, "Invalid secret phrase format"),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for SecretUriError {}
 
 once_static_cloned! {
     /// Interpret a phrase like:

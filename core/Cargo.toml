@@ -19,10 +19,6 @@ default = ["std"]
 std = [
     "codec/std",
     "scale-info/std",
-    "scale-value/std",
-    "scale-bits/std",
-    "scale-decode/std",
-    "scale-encode/std",
     "frame-metadata/std",
     "subxt-metadata/std",
     "hex/std",
@@ -50,6 +46,8 @@ serde_json = { workspace = true, default-features = false, features = ["raw_valu
 tracing = { workspace = true, default-features = false }
 polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
 hashbrown = { workspace = true }
+thiserror = { workspace = true, default-features = false }
+
 
 # For ss58 encoding AccountId32 to serialize them properly:
 base58 = { workspace = true }
