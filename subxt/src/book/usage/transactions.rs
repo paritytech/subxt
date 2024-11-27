@@ -73,15 +73,17 @@
 //! need additional signing algorithms that `subxt_signer` doesn't support, and don't care about WASM
 //! compatibility.
 //!
-//! Let's see how to use each of these approaches:
+//! Because 2 is more complex and require more code, we'll focus on 1 here.
+//! For 2, see the example in `subxt/examples/substrate_compat_signer.rs` how
+//! you can integrate things like sp_core's signer in subxt.
+//!
+//! Let's go through how to create a signer using the `subxt_signer` crate:
 //!
 //! ```rust
 //! # {
 //! use subxt::config::PolkadotConfig;
 //! use std::str::FromStr;
-//! use polkadot_sdk::{sp_core, sp_keyring};
 //!
-//! //// 1. Use a `subxt_signer` impl:
 //! use subxt_signer::{SecretUri, sr25519};
 //!
 //! // Get hold of a `Signer` for a test account:
@@ -92,8 +94,9 @@
 //!     .expect("valid URI");
 //! let keypair = sr25519::Keypair::from_uri(&uri)
 //!     .expect("valid keypair");
+//!```
 //!
-//! //// 2.  See `subxt/examples/substrate_compat_signer.rs` how to use the polkadot-sdk signer with Subxt.
+//! After initializing the signer, let's also go through how to create a transaction and sign it:
 //!
 //! ```rust,no_run
 //! # #[tokio::main]
