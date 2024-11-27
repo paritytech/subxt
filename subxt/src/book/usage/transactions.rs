@@ -66,8 +66,7 @@
 //! There are two main ways to create a compatible signer instance:
 //! 1. The `subxt_signer` crate provides a WASM compatible implementation of [`crate::tx::Signer`]
 //! for chains which require sr25519 or ecdsa signatures (requires the `subxt` feature to be enabled).
-//! 2. Alternately, Subxt can use instances of Substrate's `sp_core::Pair` to sign things by wrapping
-//! them in a new type pattern and implement `crate::tx::Signer`.
+//! 2. Alternately, implement your own [`crate::tx::Signer`] instance using the `polkadot-sdk` signer.
 //!
 //! Going for 1 leads to fewer dependencies being imported and WASM compatibility out of the box via
 //! the `web` feature flag. Going for 2 is useful if you're already using the Substrate dependencies or
@@ -94,76 +93,7 @@
 //! let keypair = sr25519::Keypair::from_uri(&uri)
 //!     .expect("valid keypair");
 //!
-//! //// 2. Use the corresponding `sp_core::Pair` impl:
-//!
-//! use polkadot_sdk::sp_runtime::{
-//!     traits::{IdentifyAccount, Verify},
-//!     MultiSignature as SpMultiSignature,
-//! };
-//! use sp_core::Pair;
-//! use subxt::config::substrate::{AccountId32, MultiSignature};
-//! use subxt::Config;
-//!
-//! #[derive(Clone)]
-//! pub struct PairSigner {
-//!     account_id: <PolkadotConfig as Config>::AccountId,
-//!     signer: sp_core::sr25519::Pair,
-//! }
-//!
-//! impl PairSigner {
-//!     pub fn new(signer: sp_core::sr25519::Pair) -> Self {
-//!          let account_id =
-//!                 <SpMultiSignature as Verify>::Signer::from(signer.public()).into_account();
-//!          Self {
-//!                 account_id: AccountId32(account_id.into()),
-//!                 signer,
-//!          }
-//!     }
-//!
-//!     /// Return the account ID.
-//!     pub fn account_id(&self) -> &AccountId32 {
-//!          &self.account_id
-//!      }
-//! }
-//!
-//! impl subxt::tx::Signer<PolkadotConfig> for PairSigner {
-//!     fn account_id(&self) -> <PolkadotConfig as Config>::AccountId {
-//!          self.account_id.clone()
-//!     }
-//!
-//!     fn address(&self) -> <PolkadotConfig as Config>::Address {
-//!          self.account_id.clone().into()
-//!     }
-//!
-//!     fn sign(&self, signer_payload: &[u8]) -> <PolkadotConfig as Config>::Signature {
-//!          let signature = self.signer.sign(signer_payload);
-//!          MultiSignature::Sr25519(signature.0)
-//!     }
-//! }
-//!
-//! // Get hold of a `Signer` for a test account:
-//! let alice = sp_keyring::AccountKeyring::Alice.pair();
-//! let alice = PairSigner::new(alice);
-//!
-//! // Or generate a keypair, here from an SURI:
-//! let keypair = sp_core::sr25519::Pair::from_string("vessel ladder alter error federal sibling chat ability sun glass valve picture/0/1///Password", None)
-//!     .expect("valid URI");
-//! let keypair = PairSigner::new(keypair);
-//! #
-//! # // Test that these all impl Signer trait while we're here:
-//! #
-//! # fn is_subxt_signer(_signer: impl subxt::tx::Signer<PolkadotConfig>) {}
-//! # is_subxt_signer(subxt_signer::sr25519::dev::alice());
-//! # is_subxt_signer(subxt_signer::ecdsa::dev::alice());
-//! # is_subxt_signer(PairSigner::new(sp_keyring::AccountKeyring::Alice.pair()));
-//! # }
-//! ```
-//!
-//! See the `subxt_signer` crate or the `sp_core::Pair` docs for more ways to construct
-//! and work with key pairs.
-//!
-//! If this isn't suitable/available, you can either implement [`crate::tx::Signer`] yourself to use
-//! custom signing logic, or you can use some external signing logic, like so:
+//! //// 2.  See `subxt/examples/substrate_compat_signer.rs` how to use the polkadot-sdk signer with Subxt.
 //!
 //! ```rust,no_run
 //! # #[tokio::main]
