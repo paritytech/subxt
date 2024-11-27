@@ -80,7 +80,6 @@
 //! Let's go through how to create a signer using the `subxt_signer` crate:
 //!
 //! ```rust
-//! # {
 //! use subxt::config::PolkadotConfig;
 //! use std::str::FromStr;
 //!
