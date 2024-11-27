@@ -3002,6 +3002,8 @@ dependencies = [
 [[package]]
 name = "frame-decode"
 version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8a784e501ed2cec99eb00a1e78e42740fcb05f1aea7bbea90bf46f0a9f255bb"
 dependencies = [
  "frame-metadata 18.0.0",
  "parity-scale-codec",

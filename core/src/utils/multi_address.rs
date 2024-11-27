@@ -10,8 +10,7 @@ use alloc::vec::Vec;
 use codec::{Decode, Encode};
 
 /// A multi-format address wrapper for on-chain accounts. This is a simplified version of Substrate's
-/// `sp_runtime::MultiAddress`. To obtain more functionality, convert this into that type (this conversion
-/// functionality is provided via `From` impls if the `substrate-compat` feature is enabled).
+/// `sp_runtime::MultiAddress`.
 #[derive(
     Clone,
     Eq,
@@ -41,34 +40,5 @@ pub enum MultiAddress<AccountId, AccountIndex> {
 impl<AccountId, AccountIndex> From<AccountId> for MultiAddress<AccountId, AccountIndex> {
     fn from(a: AccountId) -> Self {
         Self::Id(a)
-    }
-}
-
-// Improve compat with the substrate version if we're using those crates:
-#[cfg(feature = "substrate-compat")]
-mod substrate_impls {
-    use super::{super::AccountId32, *};
-    use polkadot_sdk::sp_runtime;
-
-    impl<N> From<sp_runtime::AccountId32> for MultiAddress<AccountId32, N> {
-        fn from(value: sp_runtime::AccountId32) -> Self {
-            let val: AccountId32 = value.into();
-            val.into()
-        }
-    }
-
-    impl<Id, N> From<sp_runtime::MultiAddress<Id, N>> for MultiAddress<AccountId32, N>
-    where
-        Id: Into<AccountId32>,
-    {
-        fn from(value: sp_runtime::MultiAddress<Id, N>) -> Self {
-            match value {
-                sp_runtime::MultiAddress::Id(v) => Self::Id(v.into()),
-                sp_runtime::MultiAddress::Index(v) => Self::Index(v),
-                sp_runtime::MultiAddress::Raw(v) => Self::Raw(v),
-                sp_runtime::MultiAddress::Address32(v) => Self::Address32(v),
-                sp_runtime::MultiAddress::Address20(v) => Self::Address20(v),
-            }
-        }
     }
 }

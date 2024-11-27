@@ -160,35 +160,9 @@ impl core::str::FromStr for AccountId32 {
     }
 }
 
-// Improve compat with the substrate version if we're using those crates:
-#[cfg(feature = "substrate-compat")]
-mod substrate_impls {
-    use super::*;
-    use polkadot_sdk::{sp_core, sp_runtime};
-
-    impl From<sp_runtime::AccountId32> for AccountId32 {
-        fn from(value: sp_runtime::AccountId32) -> Self {
-            Self(value.into())
-        }
-    }
-    impl From<sp_core::sr25519::Public> for AccountId32 {
-        fn from(value: sp_core::sr25519::Public) -> Self {
-            let acc: sp_runtime::AccountId32 = value.into();
-            acc.into()
-        }
-    }
-    impl From<sp_core::ed25519::Public> for AccountId32 {
-        fn from(value: sp_core::ed25519::Public) -> Self {
-            let acc: sp_runtime::AccountId32 = value.into();
-            acc.into()
-        }
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
-
     use polkadot_sdk::sp_core::{self, crypto::Ss58Codec};
     use polkadot_sdk::sp_keyring::AccountKeyring;
 
@@ -202,8 +176,6 @@ mod test {
 
         for keyring in keyrings {
             let substrate_account = keyring.to_account_id();
-            // Avoid "From" impl hidden behind "substrate-compat" feature so that this test
-            // can work either way:
             let local_account = AccountId32(substrate_account.clone().into());
 
             // Both should encode to ss58 the same way:
