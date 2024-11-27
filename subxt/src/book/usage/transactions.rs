@@ -66,7 +66,8 @@
 //! There are two main ways to create a compatible signer instance:
 //! 1. The `subxt_signer` crate provides a WASM compatible implementation of [`crate::tx::Signer`]
 //! for chains which require sr25519 or ecdsa signatures (requires the `subxt` feature to be enabled).
-//! 2. Alternately, implement your own [`crate::tx::Signer`] instance using the `polkadot-sdk` signer.
+//! 2. Alternately, implement your own [`crate::tx::Signer`] instance by wrapping it in a new type pattern.
+     This can be used to use the polkadot-sdk signer instead of subxt signer.
 //!
 //! Going for 1 leads to fewer dependencies being imported and WASM compatibility out of the box via
 //! the `web` feature flag. Going for 2 is useful if you're already using the Substrate dependencies or
