@@ -8,7 +8,7 @@
 use crate::metadata::{DecodeWithMetadata, Metadata};
 use alloc::vec::Vec;
 use scale_decode::DecodeAsType;
-pub use scale_value::{At, Value};
+pub use scale_value::{scale, serde, stringify, At, Value};
 
 /// A [`scale_value::Value`] type endowed with contextual information
 /// regarding what type was used to decode each part of it. This implements
