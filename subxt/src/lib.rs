@@ -168,46 +168,29 @@ pub mod ext {
 ///
 /// ## `substitute_type(path = "...", with = "...")`
 ///
-/// This attribute replaces any reference to the generated type at the path given by `path` with a
-/// reference to the path given by `with`.
+/// Replaces references to a specific type in the generated code with a custom type.
+///
+/// ### Important Notes
+/// - The path to replace must be an absolute path (fully qualified)
+/// - The replacement type must implement the necessary traits for encoding and decoding
+///
+/// ### Basic Usage
+/// Replace a specific type with a custom type:
 ///
 /// ```rust
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     substitute_type(path = "sp_arithmetic::per_things::Perbill", with = "crate::Foo")
 /// )]
-/// mod polkadot {}
-///
-/// # #[derive(
-/// #     scale_encode::EncodeAsType,
-/// #     scale_decode::DecodeAsType,
-/// #     codec::Encode,
-/// #     codec::Decode,
-/// #     Clone,
-/// #     Debug,
-/// # )]
-/// // In reality this needs some traits implementing on
-/// // it to allow it to be used in place of Perbill:
-/// pub struct Foo(u32);
-/// # impl codec::CompactAs for Foo {
-/// #     type As = u32;
-/// #     fn encode_as(&self) -> &Self::As {
-/// #         &self.0
-/// #     }
-/// #     fn decode_from(x: Self::As) -> Result<Self, codec::Error> {
-/// #         Ok(Foo(x))
-/// #     }
-/// # }
-/// # impl From<codec::Compact<Foo>> for Foo {
-/// #     fn from(v: codec::Compact<Foo>) -> Foo {
-/// #         v.0
-/// #     }
-/// # }
-/// # fn main() {}
+/// mod polkadot {
+///     // Custom type to replace Perbill
+///     pub struct Foo(u32);
+///     // Note: Foo must implement required traits
+/// }
 /// ```
 ///
-/// If the type you're substituting contains generic parameters, you can "pattern match" on those, and
-/// make use of them in the substituted type, like so:
+/// ### Generic Type Substitution
+/// When the original type contains generic parameters, you can preserve them:
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
@@ -220,9 +203,33 @@ pub mod ext {
 /// mod polkadot {}
 /// ```
 ///
-/// The above is also an example of using the [`crate::utils::Static`] type to wrap some type which doesn't
-/// on it's own implement [`scale_encode::EncodeAsType`] or [`scale_decode::DecodeAsType`], which are required traits
-/// for any substitute type to implement by default.
+/// ### Recommended Alternative: Type Conversion
+/// In many cases, it's preferable to implement conversion traits instead of substitution:
+///
+/// ```rust
+/// // Instead of substitute_type, create a custom type and implement conversion
+/// pub struct MyCustomType(u32);
+///
+/// impl From<runtime::OriginalType> for MyCustomType {
+///     fn from(original: runtime::OriginalType) -> Self {
+///         // Custom conversion logic
+///         MyCustomType(original.0)
+///     }
+/// }
+///
+/// impl From<MyCustomType> for runtime::OriginalType {
+///     fn from(custom: MyCustomType) -> Self {
+///         // Conversion back to original type
+///         runtime::OriginalType(custom.0)
+///     }
+/// }
+/// ```
+///
+/// ### Cautions
+/// - Substitution can be error-prone if not done carefully
+/// - Ensure the substitute type matches the original type's encoding and semantics
+/// - Implement necessary traits (`scale_encode::EncodeAsType`, `scale_decode::DecodeAsType`)
+/// - Prefer type conversion methods when possible
 ///
 /// ## `derive_for_all_types = "..."`
 ///
