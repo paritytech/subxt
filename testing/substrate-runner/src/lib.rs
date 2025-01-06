@@ -291,7 +291,10 @@ fn try_find_substrate_port_from_output(r: impl Read + Send + 'static) -> Substra
 
         // Parse the p2p port line (present in debug logs)
         let p2p_port_line = line
+            // oldest message:
             .rsplit_once("New listen address: /ip4/127.0.0.1/tcp/")
+            // slightly newer message:
+            .or_else(|| line.rsplit_once("New listen address address=/ip4/127.0.0.1/tcp/"))
             .map(|(_, address_str)| address_str);
 
         if let Some(line_port) = p2p_port_line {
