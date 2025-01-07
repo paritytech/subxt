@@ -341,6 +341,7 @@ async fn decode_signed_extensions_from_blocks() {
         "CheckWeight",
         "ChargeAssetTxPayment",
         "CheckMetadataHash",
+        "WeightReclaim",
     ];
 
     assert_eq!(extensions1.iter().count(), expected_signed_extensions.len());
