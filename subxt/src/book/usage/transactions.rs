@@ -66,24 +66,23 @@
 //! There are two main ways to create a compatible signer instance:
 //! 1. The `subxt_signer` crate provides a WASM compatible implementation of [`crate::tx::Signer`]
 //! for chains which require sr25519 or ecdsa signatures (requires the `subxt` feature to be enabled).
-//! 2. Alternately, Subxt can use instances of Substrate's `sp_core::Pair` to sign things by wrapping
-//! them in a `crate::tx::PairSigner` (requires the `substrate-compat` feature to be enabled).
+//! 2. Alternately, implement your own [`crate::tx::Signer`] instance by wrapping it in a new type pattern.
 //!
 //! Going for 1 leads to fewer dependencies being imported and WASM compatibility out of the box via
 //! the `web` feature flag. Going for 2 is useful if you're already using the Substrate dependencies or
 //! need additional signing algorithms that `subxt_signer` doesn't support, and don't care about WASM
 //! compatibility.
 //!
-//! Let's see how to use each of these approaches:
+//! Because 2 is more complex and require more code, we'll focus on 1 here.
+//! For 2, see the example in `subxt/examples/substrate_compat_signer.rs` how
+//! you can integrate things like sp_core's signer in subxt.
+//!
+//! Let's go through how to create a signer using the `subxt_signer` crate:
 //!
 //! ```rust
-//! # #[cfg(feature = "substrate-compat")]
-//! # {
 //! use subxt::config::PolkadotConfig;
 //! use std::str::FromStr;
-//! use polkadot_sdk::{sp_core, sp_keyring};
 //!
-//! //// 1. Use a `subxt_signer` impl:
 //! use subxt_signer::{SecretUri, sr25519};
 //!
 //! // Get hold of a `Signer` for a test account:
@@ -94,34 +93,9 @@
 //!     .expect("valid URI");
 //! let keypair = sr25519::Keypair::from_uri(&uri)
 //!     .expect("valid keypair");
+//!```
 //!
-//! //// 2. Use the corresponding `sp_core::Pair` impl:
-//! use subxt::tx::PairSigner;
-//! use sp_core::Pair;
-//!
-//! // Get hold of a `Signer` for a test account:
-//! let alice = sp_keyring::AccountKeyring::Alice.pair();
-//! let alice = PairSigner::<PolkadotConfig,_>::new(alice);
-//!
-//! // Or generate a keypair, here from an SURI:
-//! let keypair = sp_core::sr25519::Pair::from_string("vessel ladder alter error federal sibling chat ability sun glass valve picture/0/1///Password", None)
-//!     .expect("valid URI");
-//! let keypair = PairSigner::<PolkadotConfig,_>::new(keypair);
-//! #
-//! # // Test that these all impl Signer trait while we're here:
-//! #
-//! # fn is_subxt_signer(_signer: impl subxt::tx::Signer<PolkadotConfig>) {}
-//! # is_subxt_signer(subxt_signer::sr25519::dev::alice());
-//! # is_subxt_signer(subxt_signer::ecdsa::dev::alice());
-//! # is_subxt_signer(PairSigner::<PolkadotConfig,_>::new(sp_keyring::AccountKeyring::Alice.pair()));
-//! # }
-//! ```
-//!
-//! See the `subxt_signer` crate or the `sp_core::Pair` docs for more ways to construct
-//! and work with key pairs.
-//!
-//! If this isn't suitable/available, you can either implement [`crate::tx::Signer`] yourself to use
-//! custom signing logic, or you can use some external signing logic, like so:
+//! After initializing the signer, let's also go through how to create a transaction and sign it:
 //!
 //! ```rust,no_run
 //! # #[tokio::main]

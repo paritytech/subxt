@@ -16,7 +16,6 @@ pub mod polkadot;
 pub mod signed_extensions;
 pub mod substrate;
 
-use crate::macros::cfg_substrate_compat;
 use codec::{Decode, Encode};
 use core::fmt::Debug;
 use scale_decode::DecodeAsType;
@@ -125,33 +124,5 @@ pub trait Header: Sized + Encode + Decode {
     /// Hash this header.
     fn hash(&self) -> <Self::Hasher as Hasher>::Output {
         Self::Hasher::hash_of(self)
-    }
-}
-
-cfg_substrate_compat! {
-    /// implement subxt's Hasher and Header traits for some substrate structs
-    mod substrate_impls {
-        use super::*;
-        use polkadot_sdk::sp_runtime;
-
-        impl<T: sp_runtime::traits::Header> Header for T
-        where
-            <T as sp_runtime::traits::Header>::Number: Into<u64>,
-        {
-            type Number = T::Number;
-            type Hasher = T::Hashing;
-
-            fn number(&self) -> Self::Number {
-                *self.number()
-            }
-        }
-
-        impl<T: sp_runtime::traits::Hash> Hasher for T {
-            type Output = T::Output;
-
-            fn hash(s: &[u8]) -> Self::Output {
-                <T as sp_runtime::traits::Hash>::hash(s)
-            }
-        }
     }
 }

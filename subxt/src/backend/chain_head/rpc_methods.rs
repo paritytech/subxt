@@ -788,7 +788,7 @@ pub(crate) mod unsigned_number_as_string {
 
     struct NumberVisitor<N>(std::marker::PhantomData<N>);
 
-    impl<'de, N: From<u64>> Visitor<'de> for NumberVisitor<N> {
+    impl<N: From<u64>> Visitor<'_> for NumberVisitor<N> {
         type Value = N;
 
         fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

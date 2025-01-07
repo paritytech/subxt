@@ -64,11 +64,6 @@ jsonrpsee = [
     "runtime"
 ]
 
-# Enable this to pull in extra Substrate dependencies which make it possible to
-# use the `sp_core::crypto::Pair` Signer implementation, as well as adding some
-# `From` impls for types like `AccountId32`. Cannot be used with "web".
-substrate-compat = ["subxt-core/substrate-compat"]
-
 # Enable this to fetch and utilize the latest unstable metadata from a node.
 # The unstable metadata is subject to breaking changes and the subxt might
 # fail to decode the metadata properly. Use this to experiment with the
@@ -95,6 +90,7 @@ futures = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, features = ["default", "raw_value"] }
+polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
@@ -104,7 +100,6 @@ web-time = { workspace = true }
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
 impl-serde = { workspace = true }
 primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"] }
-polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
 
 # Included if the "jsonrpsee" feature is enabled.
 jsonrpsee = { workspace = true, optional = true, features = ["jsonrpsee-types"] }
@@ -136,7 +131,7 @@ bitvec = { workspace = true }
 codec = { workspace = true, features = ["derive", "bit-vec"] }
 scale-info = { workspace = true, features = ["bit-vec"] }
 tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread", "sync"] }
-polkadot-sdk = { workspace = true, features = ["sp-core", "sp-keyring", "sp-runtime", "sp-crypto-hashing"] }
+polkadot-sdk = { workspace = true, features = ["sp-core", "sp-keyring", "sp-runtime", "std"] }
 assert_matches = { workspace = true }
 subxt-signer = { path = "../signer", features = ["unstable-eth"] }
 # Tracing subscriber is useful for light-client examples to ensure that
@@ -166,8 +161,8 @@ path = "examples/setup_reconnecting_rpc_client.rs"
 required-features = ["reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]
-features = ["default", "substrate-compat", "unstable-light-client"]
+features = ["default", "unstable-light-client"]
 rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
-features = ["default", "substrate-compat", "unstable-light-client"]
+features = ["default", "unstable-light-client"]

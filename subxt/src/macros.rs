@@ -12,12 +12,6 @@ macro_rules! cfg_feature {
 	}
 }
 
-macro_rules! cfg_substrate_compat {
-	($($item:item)*) => {
-		crate::macros::cfg_feature!("substrate-compat", $($item)*);
-	};
-}
-
 macro_rules! cfg_unstable_light_client {
 	($($item:item)*) => {
 		crate::macros::cfg_feature!("unstable-light-client", $($item)*);
@@ -64,8 +58,7 @@ macro_rules! cfg_reconnecting_rpc_client {
 }
 
 pub(crate) use {
-    cfg_feature, cfg_jsonrpsee, cfg_reconnecting_rpc_client, cfg_substrate_compat,
-    cfg_unstable_light_client,
+    cfg_feature, cfg_jsonrpsee, cfg_reconnecting_rpc_client, cfg_unstable_light_client,
 };
 
 // Only used by light-client.

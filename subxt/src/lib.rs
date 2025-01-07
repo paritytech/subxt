@@ -18,9 +18,6 @@
 ))]
 compile_error!("subxt: exactly one of the 'web' and 'native' features should be used.");
 
-#[cfg(all(feature = "web", feature = "substrate-compat"))]
-compile_error!("subxt: the 'substrate-compat' feature is not compatible with the 'web' feature.");
-
 // The guide is here.
 pub mod book;
 
@@ -114,10 +111,6 @@ pub mod ext {
 
     cfg_jsonrpsee! {
         pub use jsonrpsee;
-    }
-
-    cfg_substrate_compat! {
-        pub use subxt_core::ext::{sp_runtime, sp_core};
     }
 }
 

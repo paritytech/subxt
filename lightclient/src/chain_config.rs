@@ -26,7 +26,7 @@ impl<'a> From<&'a str> for ChainConfig<'a> {
     }
 }
 
-impl<'a> From<String> for ChainConfig<'a> {
+impl From<String> for ChainConfig<'_> {
     fn from(chain_spec: String) -> Self {
         ChainConfig::chain_spec(chain_spec)
     }

@@ -10,7 +10,7 @@ use scale_info::{
 /// See the `ModuleErrorType` in `subxt_codegen` for more info on the different DispatchError
 /// types that we've encountered. We need the path to match `sp_runtime::DispatchError`, otherwise
 /// we could just implement roughly the correct types and derive TypeInfo on them.
-
+///
 /// This type has TypeInfo compatible with the `NamedField` version of the DispatchError.
 /// This is the oldest version that subxt supports:
 /// `DispatchError::Module { index: u8, error: u8 }`
