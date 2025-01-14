@@ -86,7 +86,7 @@ pub struct StorageHashersIter<'a> {
     idx: usize,
 }
 
-impl<'a> StorageHashersIter<'a> {
+impl StorageHashersIter<'_> {
     fn next_or_err(&mut self) -> Result<(StorageHasher, u32), Error> {
         self.next().ok_or_else(|| {
             StorageAddressError::TooManyKeys {
@@ -97,7 +97,7 @@ impl<'a> StorageHashersIter<'a> {
     }
 }
 
-impl<'a> Iterator for StorageHashersIter<'a> {
+impl Iterator for StorageHashersIter<'_> {
     type Item = (StorageHasher, u32);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -107,7 +107,7 @@ impl<'a> Iterator for StorageHashersIter<'a> {
     }
 }
 
-impl<'a> ExactSizeIterator for StorageHashersIter<'a> {
+impl ExactSizeIterator for StorageHashersIter<'_> {
     fn len(&self) -> usize {
         self.hashers.hashers_and_ty_ids.len() - self.idx
     }

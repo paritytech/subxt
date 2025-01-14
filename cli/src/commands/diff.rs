@@ -324,7 +324,7 @@ fn calls_differences<'a>(
     pallet_metadata_1: &'a PalletMetadata<'a>,
     pallet_metadata_2: &'a PalletMetadata<'a>,
 ) -> Vec<Diff<&'a Variant<PortableForm>>> {
-    return diff(
+    diff(
         pallet_metadata_1.call_variants().unwrap_or_default(),
         pallet_metadata_2.call_variants().unwrap_or_default(),
         |e| {
@@ -338,7 +338,7 @@ fn calls_differences<'a>(
                 .expect("call is in metadata; qed")
         },
         |e| &e.name,
-    );
+    )
 }
 
 fn constants_differences<'a>(
