@@ -1,4 +1,4 @@
-#[no_std]
+#![no_std]
 
 use subxt_signer::{ecdsa, eth, sr25519};
 
