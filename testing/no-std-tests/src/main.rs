@@ -42,6 +42,7 @@ fn compile_test() {
     subxt_metadata::Metadata::decode(&mut &METADATA[..]).expect("should be valid metadata");
 
     // Subxt signer compiles (though nothing much works on this particular nostd target...):
+    // Supported targets: <https://docs.rs/getrandom/latest/getrandom/#supported-targets>
     use core::str::FromStr;
     let _ = subxt_signer::SecretUri::from_str("//Alice/bar");
 
