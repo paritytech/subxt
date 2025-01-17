@@ -6,10 +6,8 @@ publish = false
 
 [dev-dependencies]
 
-# This crate is not a part of the workspace, because we want to
-# enable the "web" feature here but don't want it enabled as part
-# of workspace builds. Also disable the "subxt" feature here because
-# we want to ensure it works in isolation of that.
+# This crate is not a part of the workspace, to ensure that no features
+# are enabled for it at the workspace level; which conflict with this test.
 subxt-signer = { path = "../../", default-features = false, features = [
     "sr25519",
     "ecdsa",
