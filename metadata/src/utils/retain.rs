@@ -44,7 +44,7 @@ impl TypeSet {
         }
     }
 
-    /// This function will deeply traverse the inital type and it's dependencies to collect the relevant type_ids
+    /// This function will deeply traverse the initial type and it's dependencies to collect the relevant type_ids
     fn collect_types(&mut self, metadata: &Metadata, id: u32) {
         self.push_to_workset(id);
         while let Some(typ) = self.work_set.pop() {
