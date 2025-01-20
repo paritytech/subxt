@@ -306,23 +306,19 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
         .find_first::<system::events::ExtrinsicSuccess>()?
         .expect("No ExtrinsicSuccess Event found");
 
-    let locks_addr = node_runtime::storage().balances().locks(bob);
+    let holds_addr = node_runtime::storage().balances().holds(bob);
 
-    let locks = api
+    let holds = api
         .storage()
         .at_latest()
         .await?
-        .fetch_or_default(&locks_addr)
-        .await?;
+        .fetch_or_default(&holds_addr)
+        .await?
+        .0;
 
-    assert_eq!(
-        locks.0,
-        vec![runtime_types::pallet_balances::types::BalanceLock {
-            id: *b"staking ",
-            amount: 100_000_000_000_000,
-            reasons: runtime_types::pallet_balances::types::Reasons::All,
-        }]
-    );
+    // There is now a hold on the balance being staked
+    assert_eq!(holds.len(), 1);
+    assert_eq!(holds[0].amount, 100_000_000_000_000);
 
     Ok(())
 }
