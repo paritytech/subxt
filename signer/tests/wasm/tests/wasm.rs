@@ -8,7 +8,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 // Run the tests by calling:
 //
 // ```text
-// wasm-pack test --firefox --headless`
+// wasm-pack test --firefox --headless
 // ```
 //
 // These are independent of any other package to ensure that nothing
