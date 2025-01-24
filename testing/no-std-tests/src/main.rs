@@ -5,9 +5,9 @@
 #![allow(internal_features)]
 #![feature(lang_items, alloc_error_handler)]
 #![no_std]
+#![no_main]
 
-#[start]
-fn start(_argc: isize, _argv: *const *const u8) -> isize {
+pub extern "C" fn _start(_argc: isize, _argv: *const *const u8) -> isize {
     compile_test();
     0
 }
