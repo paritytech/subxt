@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.38.1] - 2025-01-24
+
+This is a bug-fix release that fixes a bug in the `reconnecting-rpc-client` where the error was wrapped in the wrong error variant
+which kept retry logic to keep retrying the same error indefinitely.
+
+### Fixed
+- don't wrap rpc error in DisconnectedWillReconnect in reconnecting rpc client ([#1904](https://github.com/paritytech/subxt/pull/1904))
+
 ## [0.38.0] - 2024-10-24
 
 This release doesn't introduce any substantial breaking changes and focuses primarily on incremental improvements, testing and bug fixes. A few of the highlights include:
