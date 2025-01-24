@@ -3,12 +3,11 @@
 // see LICENSE for license details.
 
 #![allow(internal_features)]
-#![feature(lang_items, start)]
-#![feature(alloc_error_handler)]
+#![feature(lang_items, alloc_error_handler)]
 #![no_std]
+#![no_main]
 
-#[start]
-fn start(_argc: isize, _argv: *const *const u8) -> isize {
+pub extern "C" fn _start(_argc: isize, _argv: *const *const u8) -> isize {
     compile_test();
     0
 }
@@ -60,11 +59,10 @@ fn compile_test() {
 
     // Subxt Core compiles:
     let _era = subxt_core::utils::Era::Immortal;
-    
 }
 
 #[subxt_macro::subxt(
     runtime_metadata_path = "../../artifacts/polkadot_metadata_full.scale",
-    crate="::subxt_core"
+    crate = "::subxt_core"
 )]
-pub mod polkadot{}
+pub mod polkadot {}
