@@ -455,7 +455,11 @@ impl RpcClientT for RpcClient {
                 SubscriptionId::Str(s) => s.to_string(),
             };
             let stream = sub
-                .map_err(|e| SubxtRpcError::DisconnectedWillReconnect(e.to_string()))
+                // NOTE: The stream emits only one error `DisconnectWillReconnect if the connection was lost
+                // and safe to wrap it in a `SubxtRpcError::DisconnectWillReconnect` here
+                .map_err(|e: DisconnectedWillReconnect| {
+                    SubxtRpcError::DisconnectedWillReconnect(e.to_string())
+                })
                 .boxed();
 
             Ok(RawRpcSubscription {
