@@ -427,7 +427,13 @@ impl RpcClientT for RpcClient {
         async {
             self.request(method.to_string(), params)
                 .await
-                .map_err(|e| SubxtRpcError::DisconnectedWillReconnect(e.to_string()))
+                .map_err(|e| match e {
+                    Error::DisconnectedWillReconnect(e) => {
+                        SubxtRpcError::DisconnectedWillReconnect(e.to_string())
+                    }
+                    Error::Dropped => SubxtRpcError::ClientError(Box::new(e)),
+                    Error::RpcError(e) => SubxtRpcError::ClientError(Box::new(e)),
+                })
         }
         .boxed()
     }
@@ -449,7 +455,11 @@ impl RpcClientT for RpcClient {
                 SubscriptionId::Str(s) => s.to_string(),
             };
             let stream = sub
-                .map_err(|e| SubxtRpcError::DisconnectedWillReconnect(e.to_string()))
+                // NOTE: The stream emits only one error `DisconnectWillReconnect if the connection was lost
+                // and safe to wrap it in a `SubxtRpcError::DisconnectWillReconnect` here
+                .map_err(|e: DisconnectedWillReconnect| {
+                    SubxtRpcError::DisconnectedWillReconnect(e.to_string())
+                })
                 .boxed();
 
             Ok(RawRpcSubscription {
