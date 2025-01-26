@@ -202,7 +202,7 @@ struct BackgroundTaskChannels<TPlatform: PlatformRef> {
 struct BackgroundTaskData<TPlatform: PlatformRef, TChain> {
     /// A smoldot light client that can be shared.
     client: SharedClient<TPlatform, TChain>,
-    /// Knowing the chain ID helps with debugging, but isn't overwise necessary.
+    /// Knowing the chain ID helps with debugging, but isn't otherwise necessary.
     chain_id: smoldot_light::ChainId,
     /// Know which Id to use next for new requests/subscriptions.
     last_request_id: usize,

@@ -29,7 +29,7 @@ use subxt_metadata::RuntimeApiMetadata;
 ///                         true  => validate (trailing args + build node connection)
 ///                           validation is:
 ///                             Err => Show Error
-///                             Ok  => Make a runtime api call witht the provided args.
+///                             Ok  => Make a runtime api call with the provided args.
 ///                               response is:
 ///                                 Err => Show Error
 ///                                 Ok  => Show the result
