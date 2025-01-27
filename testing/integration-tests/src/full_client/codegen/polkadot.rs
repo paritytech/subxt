@@ -1890,6 +1890,26 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = " Returns the constraints on the actions that can be taken by a new parachain"]
+                #[doc = " block."]
+                pub fn backing_constraints(
+                    &self,
+                    para_id: types::backing_constraints::ParaId,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::BackingConstraints,
+                    types::backing_constraints::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "ParachainHost",
+                        "backing_constraints",
+                        types::BackingConstraints { para_id },
+                        [
+                            235u8, 42u8, 54u8, 27u8, 171u8, 123u8, 224u8, 238u8, 189u8, 84u8, 82u8,
+                            173u8, 140u8, 129u8, 211u8, 21u8, 134u8, 19u8, 95u8, 222u8, 97u8,
+                            130u8, 70u8, 237u8, 83u8, 57u8, 20u8, 98u8, 130u8, 152u8, 103u8, 217u8,
+                        ],
+                    )
+                }
             }
             pub mod types {
                 use super::runtime_types;
@@ -2747,6 +2767,32 @@ pub mod api {
                 )]
                 pub struct CandidatesPendingAvailability {
                     pub para_id: candidates_pending_availability::ParaId,
+                }
+                pub mod backing_constraints {
+                    use super::runtime_types;
+                    pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = :: core :: option :: Option < runtime_types :: polkadot_primitives :: vstaging :: async_backing :: Constraints < :: core :: primitive :: u32 > > ;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct BackingConstraints {
+                    pub para_id: backing_constraints::ParaId,
                 }
             }
         }
@@ -5309,9 +5355,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                242u8, 250u8, 91u8, 47u8, 116u8, 27u8, 188u8, 95u8, 51u8, 87u8, 202u8, 241u8,
-                177u8, 83u8, 8u8, 188u8, 75u8, 205u8, 99u8, 40u8, 150u8, 222u8, 141u8, 216u8, 90u8,
-                114u8, 187u8, 69u8, 224u8, 91u8, 63u8, 70u8,
+                51u8, 150u8, 162u8, 57u8, 229u8, 127u8, 170u8, 213u8, 240u8, 50u8, 119u8, 88u8,
+                47u8, 86u8, 141u8, 181u8, 175u8, 77u8, 26u8, 156u8, 110u8, 137u8, 0u8, 94u8, 14u8,
+                148u8, 209u8, 224u8, 182u8, 21u8, 103u8, 219u8,
             ]
     }
     pub mod system {
@@ -65638,6 +65684,22 @@ pub mod api {
                         pub relay_parent_number: _1,
                         pub max_pov_size: ::core::primitive::u32,
                     }
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                    #[codec(dumb_trait_bound)]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    pub struct Constraints < _0 > { pub min_relay_parent_number : _0 , pub max_pov_size : :: core :: primitive :: u32 , pub max_code_size : :: core :: primitive :: u32 , pub max_head_data_size : :: core :: primitive :: u32 , pub ump_remaining : :: core :: primitive :: u32 , pub ump_remaining_bytes : :: core :: primitive :: u32 , pub max_ump_num_per_candidate : :: core :: primitive :: u32 , pub dmp_remaining_messages : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < _0 > , pub hrmp_inbound : runtime_types :: polkadot_primitives :: v8 :: async_backing :: InboundHrmpLimitations < _0 > , pub hrmp_channels_out : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < (runtime_types :: polkadot_parachain_primitives :: primitives :: Id , runtime_types :: polkadot_primitives :: v8 :: async_backing :: OutboundHrmpChannelLimitations ,) > , pub max_hrmp_num_per_candidate : :: core :: primitive :: u32 , pub required_parent : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , pub validation_code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , pub upgrade_restriction : :: core :: option :: Option < runtime_types :: polkadot_primitives :: v8 :: UpgradeRestriction > , pub future_validation_code : :: core :: option :: Option < (_0 , runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ,) > , }
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
