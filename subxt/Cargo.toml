@@ -29,6 +29,7 @@ native = [
     "jsonrpsee?/client-ws-transport-tls",
     "jsonrpsee?/ws-client",
     "subxt-lightclient?/native",
+    "subxt-rpcs/native",
     "tokio-util",
     "tokio?/sync",
     "polkadot-sdk/std",
@@ -43,6 +44,7 @@ web = [
     "getrandom/js",
     "subxt-lightclient?/web",
     "subxt-macro/web",
+    "subxt-rpcs/web",
     "tokio?/sync",
     "finito?/wasm-bindgen",
 ]
@@ -56,11 +58,12 @@ web = [
 runtime = ["tokio/rt", "wasm-bindgen-futures"]
 
 # Enable this to use the reconnecting rpc client
-reconnecting-rpc-client = ["dep:finito", "jsonrpsee"]
+reconnecting-rpc-client = ["subxt-rpcs/reconnecting-rpc-client"]
 
 # Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
 jsonrpsee = [
     "dep:jsonrpsee",
+    "subxt-rpcs/jsonrpsee",
     "runtime"
 ]
 
@@ -109,6 +112,7 @@ subxt-macro = { workspace = true }
 subxt-core = { workspace = true, features = ["std"] }
 subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
+subxt-rpcs = { workspace = true, default-features = false, features = ["subxt-core"] }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
@@ -141,9 +145,9 @@ subxt-signer = { path = "../signer", features = ["unstable-eth"] }
 tracing-subscriber = { workspace = true }
 # These deps are needed to test the reconnecting rpc client
 jsonrpsee = { workspace = true, features = ["server"] }
-tower = "0.4"
-hyper = "1"
-http-body = "1"
+tower = { workspace = true }
+hyper = { workspace = true }
+http-body = { workspace = true }
 
 [[example]]
 name = "light_client_basic"

@@ -428,7 +428,7 @@ async fn chainhead_block_subscription_reconnect() {
                 let disconnected = match item {
                     Ok(_) => false,
                     Err(e) => {
-                        if matches!(e, Error::Rpc(subxt::error::RpcError::DisconnectedWillReconnect(e)) if e.contains("Missed at least one block when the connection was lost")) {
+                        if e.is_disconnected_will_reconnect() && e.to_string().contains("Missed at least one block when the connection was lost") {
                             missed_blocks = true;
                         }
                         e.is_disconnected_will_reconnect()

@@ -8,7 +8,6 @@
 
 pub mod chain_head;
 pub mod legacy;
-pub mod rpc;
 pub mod utils;
 
 use subxt_core::client::RuntimeVersion;
@@ -21,6 +20,12 @@ use codec::{Decode, Encode};
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use std::sync::Arc;
+
+/// Some re-exports from the [`subxt_rpcs`] crate, also accessible in full via [`crate::ext::subxt_rpcs`].
+pub mod rpc {
+    pub use subxt_rpcs::{ RpcClient, RpcClientT };
+    pub use subxt_rpcs::client::{ RawRpcFuture, RawRpcSubscription, RawValue, reconnecting_rpc_client };
+}
 
 /// Prevent the backend trait being implemented externally.
 #[doc(hidden)]
@@ -334,7 +339,7 @@ pub struct StorageResponse {
 mod test {
     use super::*;
     pub use crate::backend::rpc::{RawRpcFuture, RawRpcSubscription};
-    pub use crate::{backend::StorageResponse, error::RpcError};
+    pub use crate::backend::StorageResponse;
     pub use futures::StreamExt;
     pub use polkadot_sdk::sp_core;
     pub use primitive_types::H256;
@@ -345,7 +350,7 @@ mod test {
     pub use subxt_core::{config::DefaultExtrinsicParams, Config};
     pub use tokio::sync::{mpsc, Mutex};
 
-    pub type RpcResult<T> = Result<T, RpcError>;
+    pub type RpcResult<T> = Result<T, subxt_rpcs::Error>;
     pub type Item = RpcResult<String>;
 
     fn random_hash() -> H256 {
@@ -361,6 +366,7 @@ mod test {
             value: value.into(),
         }
     }
+
     pub mod rpc_client {
         use super::*;
         use std::time::Duration;
@@ -617,9 +623,7 @@ mod test {
 
     mod legacy {
         use super::*;
-        use crate::backend::{
-            legacy::rpc_methods::Bytes, legacy::rpc_methods::RuntimeVersion, legacy::LegacyBackend,
-        };
+        use crate::{backend::legacy::{rpc_methods::{Bytes, RuntimeVersion}, LegacyBackend}, error::RpcError};
         use rpc_client::*;
 
         pub fn setup_mock_rpc() -> MockRpcBuilder {
@@ -668,14 +672,14 @@ mod test {
                 ("ID1", Message::Single(bytes("Data1"))),
                 (
                     "ID2",
-                    Message::Single(Err(RpcError::DisconnectedWillReconnect(
+                    Message::Single(Err(subxt_rpcs::Error::DisconnectedWillReconnect(
                         "Reconnecting".to_string(),
                     ))),
                 ),
                 ("ID2", Message::Single(bytes("Data2"))),
                 (
                     "ID3",
-                    Message::Single(Err(RpcError::DisconnectedWillReconnect(
+                    Message::Single(Err(subxt_rpcs::Error::DisconnectedWillReconnect(
                         "Reconnecting".to_string(),
                     ))),
                 ),
@@ -713,7 +717,7 @@ mod test {
             let mock_data = [
                 (
                     "ID1",
-                    Message::Single(Err(RpcError::DisconnectedWillReconnect(
+                    Message::Single(Err(subxt_rpcs::Error::DisconnectedWillReconnect(
                         "Reconnecting".to_string(),
                     ))),
                 ),
@@ -752,7 +756,7 @@ mod test {
             let mock_data = vec![
                 (
                     "chain_getBlockHash",
-                    Message::Single(Err(RpcError::DisconnectedWillReconnect(
+                    Message::Single(Err(subxt_rpcs::Error::DisconnectedWillReconnect(
                         "Reconnecting".to_string(),
                     ))),
                 ),
@@ -796,7 +800,7 @@ mod test {
                     "state_subscribeRuntimeVersion",
                     Message::Many(Ok(vec![
                         Ok(runtime_version(0)),
-                        Err(RpcError::DisconnectedWillReconnect(
+                        Err(subxt_rpcs::Error::DisconnectedWillReconnect(
                             "Reconnecting".to_string(),
                         )),
                         Ok(runtime_version(1)),
@@ -805,7 +809,7 @@ mod test {
                 (
                     "state_subscribeRuntimeVersion",
                     Message::Many(Ok(vec![
-                        Err(RpcError::DisconnectedWillReconnect(
+                        Err(subxt_rpcs::Error::DisconnectedWillReconnect(
                             "Reconnecting".to_string(),
                         )),
                         Ok(runtime_version(2)),
@@ -817,7 +821,7 @@ mod test {
                     Message::Many(Ok(vec![
                         Ok(runtime_version(4)),
                         Ok(runtime_version(5)),
-                        Err(RpcError::RequestRejected("Reconnecting".to_string())),
+                        Err(subxt_rpcs::Error::Client("Reconnecting".into())),
                     ])),
                 ),
             ];
@@ -859,7 +863,7 @@ mod test {
                 } else {
                     assert!(matches!(
                         res,
-                        Err(crate::Error::Rpc(RpcError::RequestRejected(_)))
+                        Err(Error::Rpc(RpcError::ClientError(subxt_rpcs::Error::Client(_))))
                     ))
                 }
             }
@@ -874,7 +878,8 @@ mod test {
 
         use futures::task::Poll;
         use rpc_client::{Message, MockRpcBuilder, Subscription};
-        use rpc_methods::{
+        use subxt_rpcs::methods::chain_head::{
+            self,
             Bytes, Initialized, MethodResponse, MethodResponseStarted, OperationError, OperationId,
             OperationStorageItems, RuntimeSpec, RuntimeVersionEvent,
         };
@@ -921,7 +926,7 @@ mod test {
             serde_json::from_value(spec).unwrap()
         }
 
-        type FollowEvent = chain_head::rpc_methods::FollowEvent<<Conf as Config>::Hash>;
+        type FollowEvent = chain_head::FollowEvent<<Conf as Config>::Hash>;
 
         fn setup_mock_rpc_client(cycle_ids: bool) -> MockRpcBuilder {
             let hash = random_hash();
@@ -936,7 +941,7 @@ mod test {
                         let follow_event =
                             FollowEvent::Initialized(Initialized::<<Conf as Config>::Hash> {
                                 finalized_block_hashes: vec![hash],
-                                finalized_block_runtime: Some(rpc_methods::RuntimeEvent::Valid(
+                                finalized_block_runtime: Some(chain_head::RuntimeEvent::Valid(
                                     RuntimeVersionEvent {
                                         spec: runtime_spec(),
                                     },
@@ -983,15 +988,15 @@ mod test {
                 operation_id: id.to_owned(),
             })
         }
-        fn storage_result(key: &str, value: &str) -> chain_head::rpc_methods::StorageResult {
-            chain_head::rpc_methods::StorageResult {
+        fn storage_result(key: &str, value: &str) -> chain_head::StorageResult {
+            chain_head::StorageResult {
                 key: Bytes(key.to_owned().into()),
-                result: rpc_methods::StorageResultType::Value(Bytes(value.to_owned().into())),
+                result: chain_head::StorageResultType::Value(Bytes(value.to_owned().into())),
             }
         }
         fn storage_items(
             id: &str,
-            items: &[chain_head::rpc_methods::StorageResult],
+            items: &[chain_head::StorageResult],
         ) -> FollowEvent {
             FollowEvent::OperationStorageItems(OperationStorageItems {
                 operation_id: id.to_owned(),
@@ -1062,7 +1067,7 @@ mod test {
             let response_data = vec![
                 (
                     "method_response",
-                    Message::Single(Err(RpcError::DisconnectedWillReconnect("Error".into()))),
+                    Message::Single(Err(subxt_rpcs::Error::DisconnectedWillReconnect("Error".into()))),
                 ),
                 (
                     "method_response",
@@ -1137,8 +1142,8 @@ mod test {
             let response_data = vec![
                 (
                     "method_response",
-                    Message::Single(Err::<MethodResponse, RpcError>(
-                        RpcError::DisconnectedWillReconnect("Error".into()),
+                    Message::Single(Err::<MethodResponse, _>(
+                        subxt_rpcs::Error::DisconnectedWillReconnect("Error".into()),
                     )),
                 ),
                 (
@@ -1155,7 +1160,7 @@ mod test {
                 ("continue_response", Message::Single(Ok(()))),
                 (
                     "continue_response",
-                    Message::Single(Err(RpcError::DisconnectedWillReconnect("Error".into()))),
+                    Message::Single(Err(subxt_rpcs::Error::DisconnectedWillReconnect("Error".into()))),
                 ),
                 ("continue_response", Message::Single(Ok(()))),
                 ("continue_response", Message::Single(Ok(()))),
@@ -1289,13 +1294,11 @@ mod test {
             let mock_data = vec![
                 (
                     "chainSpec_v1_genesisHash",
-                    Message::Single(Err::<H256, RpcError>(RpcError::RequestRejected(
-                        "Error".to_owned(),
-                    ))),
+                    Message::Single(Err::<H256, _>(subxt_rpcs::Error::Client("Error".into()))),
                 ),
                 (
                     "chainSpec_v1_genesisHash",
-                    Message::Single(Err(RpcError::DisconnectedWillReconnect("Error".to_owned()))),
+                    Message::Single(Err(subxt_rpcs::Error::DisconnectedWillReconnect("Error".to_owned()))),
                 ),
                 ("chainSpec_v1_genesisHash", Message::Single(Ok(hash))),
             ];
@@ -1329,7 +1332,7 @@ mod test {
                 ),
                 (
                     "method_response",
-                    Message::Single(Err(RpcError::RequestRejected("stale id".into()))),
+                    Message::Single(Err(subxt_rpcs::Error::Client("stale id".into()))), 
                 ),
                 (
                     "method_response",
@@ -1369,7 +1372,7 @@ mod test {
                                 let rpc_params = jsonrpsee::types::Params::new(params.as_deref());
                                 let key: String = rpc_params.sequence().next().unwrap();
                                 if key == *"ID1" {
-                                    return Err(RpcError::RequestRejected("stale id".into()));
+                                    return Err(subxt_rpcs::Error::Client("stale id".into()));
                                 } else {
                                     subscription_expired
                                         .swap(false, std::sync::atomic::Ordering::SeqCst);
@@ -1429,7 +1432,7 @@ mod test {
 
             assert!(matches!(
                 response,
-                Err(Error::Rpc(RpcError::RequestRejected(reason))) if reason == "stale id"
+                Err(e) if e.to_string() == "stale id"
             ))
         }
     }

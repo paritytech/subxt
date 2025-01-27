@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -46,8 +46,19 @@ macro_rules! cfg_jsonrpsee_web {
 	}
 }
 
+#[allow(unused)]
+macro_rules! cfg_reconnecting_rpc_client {
+	($($item:item)*) => {
+		$(
+			#[cfg(all(feature = "reconnecting-rpc-client", any(feature = "native", feature = "web")))]
+			#[cfg_attr(docsrs, doc(cfg(feature = "reconnecting-rpc-client")))]
+			$item
+		)*
+	}
+}
+
 pub(crate) use {
-    cfg_feature, cfg_jsonrpsee, cfg_unstable_light_client,
+    cfg_feature, cfg_jsonrpsee, cfg_reconnecting_rpc_client, cfg_unstable_light_client,
 };
 
 // Only used by light-client.

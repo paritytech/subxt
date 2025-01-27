@@ -1,13 +1,13 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 //! An interface to call the raw legacy RPC methods.
 
-use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
-use crate::metadata::Metadata;
-use crate::{Config, Error};
+use crate::client::{rpc_params, RpcClient, RpcSubscription};
+use crate::{RpcConfig, Error};
 use codec::Decode;
+use frame_metadata::RuntimeMetadataPrefixed;
 use derive_where::derive_where;
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
@@ -21,7 +21,7 @@ pub struct LegacyRpcMethods<T> {
     _marker: std::marker::PhantomData<T>,
 }
 
-impl<T: Config> LegacyRpcMethods<T> {
+impl<T: RpcConfig> LegacyRpcMethods<T> {
     /// Instantiate the legacy RPC method interface.
     pub fn new(client: RpcClient) -> Self {
         LegacyRpcMethods {
@@ -97,17 +97,16 @@ impl<T: Config> LegacyRpcMethods<T> {
         let params = rpc_params![block_zero];
         let genesis_hash: Option<T::Hash> =
             self.client.request("chain_getBlockHash", params).await?;
-        genesis_hash.ok_or_else(|| "Genesis hash not found".into())
+        genesis_hash.ok_or_else(|| Error::Client("Genesis hash not found".into()))
     }
 
     /// Fetch the metadata via the legacy `state_getMetadata` RPC method.
-    pub async fn state_get_metadata(&self, at: Option<T::Hash>) -> Result<Metadata, Error> {
+    pub async fn state_get_metadata(&self, at: Option<T::Hash>) -> Result<StateGetMetadataResponse, Error> {
         let bytes: Bytes = self
             .client
             .request("state_getMetadata", rpc_params![at])
             .await?;
-        let metadata = Metadata::decode(&mut &bytes[..])?;
-        Ok(metadata)
+        Ok(StateGetMetadataResponse(bytes.0))
     }
 
     /// Fetch system health
@@ -140,10 +139,7 @@ impl<T: Config> LegacyRpcMethods<T> {
     /// Fetch next nonce for an Account
     ///
     /// Return account nonce adjusted for extrinsics currently in transaction pool
-    pub async fn system_account_next_index(&self, account_id: &T::AccountId) -> Result<u64, Error>
-    where
-        T::AccountId: Serialize,
-    {
+    pub async fn system_account_next_index(&self, account_id: &T::AccountId) -> Result<u64, Error> {
         self.client
             .request("system_accountNextIndex", rpc_params![&account_id])
             .await
@@ -391,10 +387,24 @@ impl<T: Config> LegacyRpcMethods<T> {
         &self,
         encoded_signed: &[u8],
         at: Option<T::Hash>,
-    ) -> Result<DryRunResultBytes, Error> {
+    ) -> Result<Vec<u8>, Error> {
         let params = rpc_params![to_hex(encoded_signed), at];
         let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
-        Ok(DryRunResultBytes(result_bytes.0))
+        Ok(result_bytes.0)
+    }
+}
+
+/// Response from the legacy `state_get_metadata` RPC call.
+pub struct StateGetMetadataResponse(Vec<u8>);
+
+impl StateGetMetadataResponse {
+    /// Return the raw SCALE encoded metadata bytes 
+    pub fn into_raw(self) -> Vec<u8> {
+        self.0
+    }
+    /// Decode and return [`frame_metadata::RuntimeMetadataPrefixed`].
+    pub fn to_frame_metadata(&self) -> Result<frame_metadata::RuntimeMetadataPrefixed, codec::Error> {
+        RuntimeMetadataPrefixed::decode(&mut &*self.0)
     }
 }
 
@@ -426,8 +436,8 @@ pub type BlockNumber = NumberOrHex;
 
 /// The response from `chain_getBlock`
 #[derive(Debug, Deserialize)]
-#[serde(bound = "T: Config")]
-pub struct BlockDetails<T: Config> {
+#[serde(bound = "T: RpcConfig")]
+pub struct BlockDetails<T: RpcConfig> {
     /// The block itself.
     pub block: Block<T>,
     /// Block justification.
@@ -436,7 +446,7 @@ pub struct BlockDetails<T: Config> {
 
 /// Block details in the [`BlockDetails`].
 #[derive(Debug, Deserialize)]
-pub struct Block<T: Config> {
+pub struct Block<T: RpcConfig> {
     /// The block header.
     pub header: T::Header,
     /// The accompanying extrinsics.
@@ -507,55 +517,6 @@ pub enum TransactionStatus<Hash> {
     Dropped,
     /// Transaction is no longer valid in the current state.
     Invalid,
-}
-
-/// The decoded result returned from calling `system_dryRun` on some extrinsic.
-#[derive(Debug, PartialEq, Eq)]
-pub enum DryRunResult {
-    /// The transaction could be included in the block and executed.
-    Success,
-    /// The transaction could be included in the block, but the call failed to dispatch.
-    DispatchError(crate::error::DispatchError),
-    /// The transaction could not be included in the block.
-    TransactionValidityError,
-}
-
-/// The bytes representing an error dry running an extrinsic. call [`DryRunResultBytes::into_dry_run_result`]
-/// to attempt to decode this into something more meaningful.
-pub struct DryRunResultBytes(pub Vec<u8>);
-
-impl DryRunResultBytes {
-    /// Attempt to decode the error bytes into a [`DryRunResult`] using the provided [`Metadata`].
-    pub fn into_dry_run_result(
-        self,
-        metadata: &crate::metadata::Metadata,
-    ) -> Result<DryRunResult, crate::Error> {
-        // dryRun returns an ApplyExtrinsicResult, which is basically a
-        // `Result<Result<(), DispatchError>, TransactionValidityError>`.
-        let bytes = self.0;
-
-        // We expect at least 2 bytes. In case we got a naff response back (or
-        // manually constructed this struct), just error to avoid a panic:
-        if bytes.len() < 2 {
-            return Err(crate::Error::Unknown(bytes));
-        }
-
-        if bytes[0] == 0 && bytes[1] == 0 {
-            // Ok(Ok(())); transaction is valid and executed ok
-            Ok(DryRunResult::Success)
-        } else if bytes[0] == 0 && bytes[1] == 1 {
-            // Ok(Err(dispatch_error)); transaction is valid but execution failed
-            let dispatch_error =
-                crate::error::DispatchError::decode_from(&bytes[2..], metadata.clone())?;
-            Ok(DryRunResult::DispatchError(dispatch_error))
-        } else if bytes[0] == 1 {
-            // Err(transaction_error); some transaction validity error (we ignore the details at the moment)
-            Ok(DryRunResult::TransactionValidityError)
-        } else {
-            // unable to decode the bytes; they aren't what we expect.
-            Err(crate::Error::Unknown(bytes))
-        }
-    }
 }
 
 /// Storage change set

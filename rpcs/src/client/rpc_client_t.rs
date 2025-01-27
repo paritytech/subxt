@@ -1,10 +1,10 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::error::RpcError;
 use futures::Stream;
 use std::{future::Future, pin::Pin};
+use crate::Error;
 
 // Re-exporting for simplicity since it's used a bunch in the trait definition.
 pub use serde_json::value::RawValue;
@@ -54,12 +54,12 @@ pub trait RpcClientT: Send + Sync + 'static {
 }
 
 /// A boxed future that is returned from the [`RpcClientT`] methods.
-pub type RawRpcFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T, RpcError>> + Send + 'a>>;
+pub type RawRpcFuture<'a, T, E = Error> = Pin<Box<dyn Future<Output = Result<T, E>> + Send + 'a>>;
 
 /// The RPC subscription returned from [`RpcClientT`]'s `subscription` method.
 pub struct RawRpcSubscription {
     /// The subscription stream.
-    pub stream: Pin<Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>>,
+    pub stream: Pin<Box<dyn Stream<Item = Result<Box<RawValue>, Error>> + Send + 'static>>,
     /// The ID associated with the subscription.
     pub id: Option<String>,
 }

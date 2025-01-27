@@ -3,9 +3,9 @@
 // see LICENSE for license details.
 
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
-use crate::backend::chain_head::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
+use subxt_rpcs::methods::chain_head::{FollowEvent, Initialized, RuntimeEvent};
 use futures::stream::{Stream, StreamExt};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::ops::DerefMut;
@@ -454,9 +454,9 @@ where
                             .iter()
                             .position(|b| b.hash() == p.hash())
                         else {
-                            return Poll::Ready(Some(Err(RpcError::DisconnectedWillReconnect(
+                            return Poll::Ready(Some(Err(RpcError::ClientError(subxt_rpcs::Error::DisconnectedWillReconnect(
                                 "Missed at least one block when the connection was lost".to_owned(),
-                            )
+                            ))
                             .into())));
                         };
 
@@ -739,7 +739,7 @@ mod test {
             )
         );
         assert!(
-            matches!(&evs[1], Err(Error::Rpc(RpcError::DisconnectedWillReconnect(e))) if e.contains("Missed at least one block when the connection was lost"))
+            matches!(&evs[1], Err(Error::Rpc(RpcError::ClientError(subxt_rpcs::Error::DisconnectedWillReconnect(e)))) if e.contains("Missed at least one block when the connection was lost"))
         );
         assert_eq!(
             evs[2].as_ref().unwrap(),

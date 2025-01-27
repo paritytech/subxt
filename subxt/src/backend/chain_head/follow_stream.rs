@@ -2,10 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::rpc_methods::{ChainHeadRpcMethods, FollowEvent};
 use crate::config::Config;
 use crate::error::Error;
-use futures::{FutureExt, Stream, StreamExt};
+use subxt_rpcs::methods::chain_head::{ChainHeadRpcMethods, FollowEvent};
+use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -113,8 +113,10 @@ impl<Hash> FollowStream<Hash> {
                                 .to_owned(),
                         ));
                     };
-                    // Return both:
+                    // Map stream errors into the higher level subxt one:
+                    let stream = stream.map_err(|e| e.into());
                     let stream: FollowEventStream<T::Hash> = Box::pin(stream);
+                    // Return both:
                     Ok((stream, sub_id))
                 })
             }),
@@ -215,7 +217,7 @@ impl<Hash> Stream for FollowStream<Hash> {
 #[cfg(test)]
 pub(super) mod test_utils {
     use super::*;
-    use crate::backend::chain_head::rpc_methods::{
+    use subxt_rpcs::methods::chain_head::{
         BestBlockChanged, Finalized, Initialized, NewBlock,
     };
     use crate::config::substrate::H256;

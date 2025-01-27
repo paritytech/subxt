@@ -64,7 +64,7 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
-        crate::utils::validate_url_is_secure(url.as_ref())?;
+        subxt_rpcs::utils::validate_url_is_secure(url.as_ref())?;
         OnlineClient::from_insecure_url(url).await
     }
 

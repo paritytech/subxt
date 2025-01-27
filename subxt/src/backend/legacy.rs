@@ -5,21 +5,25 @@
 //! This module exposes a legacy backend implementation, which relies
 //! on the legacy RPC API methods.
 
-pub mod rpc_methods;
-
 use self::rpc_methods::TransactionStatus as RpcTransactionStatus;
 use crate::backend::utils::{retry, retry_stream};
 use crate::backend::{
-    rpc::RpcClient, Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
+    Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
     TransactionStatus,
 };
-use crate::error::RpcError;
 use crate::{config::Header, Config, Error};
 use async_trait::async_trait;
+use futures::TryStreamExt;
 use futures::{future, future::Either, stream, Future, FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use subxt_rpcs::RpcClient;
+
+/// Re-export legacy RPC types from [`subxt_rpcs::methods::legacy`].
+pub mod rpc_methods {
+    pub use subxt_rpcs::methods::legacy::*;
+}
 
 // Expose the RPC methods.
 pub use rpc_methods::LegacyRpcMethods;
@@ -181,11 +185,17 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        retry(|| self.methods.genesis_hash()).await
+        retry(|| async {
+            let hash = self.methods.genesis_hash().await?;
+            Ok(hash)
+        }).await
     }
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
-        retry(|| self.methods.chain_get_header(Some(at))).await
+        retry(|| async {
+            let header = self.methods.chain_get_header(Some(at)).await?;
+            Ok(header)
+        }).await
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
@@ -227,12 +237,14 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
             Box::pin(async move {
                 let sub = methods.state_subscribe_runtime_version().await?;
-                let sub = sub.map(|r| {
-                    r.map(|v| RuntimeVersion {
-                        spec_version: v.spec_version,
-                        transaction_version: v.transaction_version,
-                    })
-                });
+                let sub = sub
+                    .map_err(|e| e.into())
+                    .map(|r| {
+                        r.map(|v| RuntimeVersion {
+                            spec_version: v.spec_version,
+                            transaction_version: v.transaction_version,
+                        })
+                    });
                 Ok(StreamOf(Box::pin(sub)))
             })
         })
@@ -244,8 +256,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         // Thus, it's technically possible that a runtime version can be missed if
         // two runtime upgrades happen in quick succession, but this is very unlikely.
         let stream = retry_sub.filter(|r| {
-            let forward = !matches!(r, Err(Error::Rpc(RpcError::DisconnectedWillReconnect(_))));
-            async move { forward }
+            let mut keep = true;
+            if let Err(e) = r {
+                if e.is_disconnected_will_reconnect() {
+                    keep = false;
+                }
+            }
+            async move { keep }
         });
 
         Ok(StreamOf(Box::pin(stream)))
@@ -260,12 +277,14 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             let methods = methods.clone();
             Box::pin(async move {
                 let sub = methods.chain_subscribe_all_heads().await?;
-                let sub = sub.map(|r| {
-                    r.map(|h| {
-                        let hash = h.hash();
-                        (h, BlockRef::from_hash(hash))
-                    })
-                });
+                let sub = sub
+                    .map_err(|e| e.into())
+                    .map(|r| {
+                        r.map(|h| {
+                            let hash = h.hash();
+                            (h, BlockRef::from_hash(hash))
+                        })
+                    });
                 Ok(StreamOf(Box::pin(sub)))
             })
         })
@@ -283,12 +302,14 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             let methods = methods.clone();
             Box::pin(async move {
                 let sub = methods.chain_subscribe_new_heads().await?;
-                let sub = sub.map(|r| {
-                    r.map(|h| {
-                        let hash = h.hash();
-                        (h, BlockRef::from_hash(hash))
-                    })
-                });
+                let sub = sub
+                    .map_err(|e| e.into())
+                    .map(|r| {
+                        r.map(|h| {
+                            let hash = h.hash();
+                            (h, BlockRef::from_hash(hash))
+                        })
+                    });
                 Ok(StreamOf(Box::pin(sub)))
             })
         })
@@ -347,6 +368,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
         let sub = sub.filter_map(|r| {
             let mapped = r
+                .map_err(|e| e.into())
                 .map(|tx| {
                     match tx {
                         // We ignore these because they don't map nicely to the new API. They don't signal "end states" so this should be fine.
@@ -401,7 +423,10 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         call_parameters: Option<&[u8]>,
         at: T::Hash,
     ) -> Result<Vec<u8>, Error> {
-        retry(|| self.methods.state_call(method, call_parameters, Some(at))).await
+        retry(|| async {
+            let res = self.methods.state_call(method, call_parameters, Some(at)).await?;
+            Ok(res)
+        }).await
     }
 }
 
@@ -530,14 +555,15 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
             let storage_page_size = this.storage_page_size;
             let pagination_start_key = this.pagination_start_key.clone();
             let keys_fut = async move {
-                methods
+                let keys = methods
                     .state_get_keys_paged(
                         &key,
                         storage_page_size,
                         pagination_start_key.as_deref(),
                         Some(at),
                     )
-                    .await
+                    .await?;
+                Ok(keys)
             };
             this.keys_fut = Some(Box::pin(keys_fut));
         }
@@ -600,8 +626,10 @@ impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
                     let results_fut = async move {
                         let keys = keys.iter().map(|k| &**k);
                         let values =
-                            retry(|| methods.state_query_storage_at(keys.clone(), Some(at)))
-                                .await?;
+                            retry(|| async {
+                                let res = methods.state_query_storage_at(keys.clone(), Some(at)).await?;
+                                Ok(res)
+                            }).await?;
                         let values: VecDeque<_> = values
                             .into_iter()
                             .flat_map(|v| {

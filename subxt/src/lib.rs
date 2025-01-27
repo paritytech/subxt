@@ -108,6 +108,7 @@ pub mod ext {
     pub use scale_encode;
     pub use scale_value;
     pub use subxt_core;
+    pub use subxt_rpcs;
 
     cfg_jsonrpsee! {
         pub use jsonrpsee;

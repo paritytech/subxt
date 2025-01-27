@@ -168,10 +168,10 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
         .await?;
 
     // get metadata via `state_getMetadata`.
-    let meta2 = rpc.state_get_metadata(Some(block.hash())).await?;
+    let meta2_bytes = rpc.state_get_metadata(Some(block.hash())).await?.into_raw();
 
     // They should be the same.
-    assert_eq!(meta1.encode(), meta2.encode());
+    assert_eq!(meta1.encode(), meta2_bytes);
 
     Ok(())
 }

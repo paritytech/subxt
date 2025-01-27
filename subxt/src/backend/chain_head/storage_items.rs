@@ -4,11 +4,11 @@
 
 use super::follow_stream_driver::FollowStreamDriverHandle;
 use super::follow_stream_unpin::BlockRef;
-use super::rpc_methods::{
-    ChainHeadRpcMethods, FollowEvent, MethodResponse, StorageQuery, StorageResult,
-};
 use crate::config::Config;
 use crate::error::{Error, RpcError};
+use subxt_rpcs::methods::chain_head::{
+    ChainHeadRpcMethods, FollowEvent, MethodResponse, StorageQuery, StorageResult,
+};
 use futures::{FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;
 use std::future::Future;
@@ -59,7 +59,10 @@ impl<T: Config> StorageItems<T> {
                 let operation_id = operation_id.clone();
                 let methods = methods.clone();
 
-                Box::pin(async move { methods.chainhead_v1_continue(&sub_id, &operation_id).await })
+                Box::pin(async move { 
+                    let cont = methods.chainhead_v1_continue(&sub_id, &operation_id).await?;
+                    Ok(cont)
+                })
             })
         };
 

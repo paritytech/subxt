@@ -1,9 +1,9 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use super::{RawRpcFuture, RawRpcSubscription, RpcClientT};
-use crate::error::RpcError;
+use crate::Error;
 use futures::stream::{StreamExt, TryStreamExt};
 use jsonrpsee::{
     core::{
@@ -31,7 +31,7 @@ impl RpcClientT for Client {
         Box::pin(async move {
             let res = ClientT::request(self, method, Params(params))
                 .await
-                .map_err(|e| RpcError::ClientError(Box::new(e)))?;
+                .map_err(|e| Error::Client(Box::new(e)))?;
             Ok(res)
         })
     }
@@ -50,7 +50,7 @@ impl RpcClientT for Client {
                 unsub,
             )
             .await
-            .map_err(|e| RpcError::ClientError(Box::new(e)))?;
+            .map_err(|e| Error::Client(Box::new(e)))?;
 
             let id = match stream.kind() {
                 SubscriptionKind::Subscription(SubscriptionId::Str(id)) => {
@@ -60,7 +60,7 @@ impl RpcClientT for Client {
             };
 
             let stream = stream
-                .map_err(|e| RpcError::ClientError(Box::new(e)))
+                .map_err(|e| Error::Client(Box::new(e)))
                 .boxed();
             Ok(RawRpcSubscription { stream, id })
         })

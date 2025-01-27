@@ -120,10 +120,16 @@ impl From<scale_decode::visitor::DecodeError> for Error {
     }
 }
 
+impl From<subxt_rpcs::Error> for Error {
+    fn from(value: subxt_rpcs::Error) -> Self {
+        Error::Rpc(value.into())
+    }
+}
+
 impl Error {
     /// Checks whether the error was caused by a RPC re-connection.
     pub fn is_disconnected_will_reconnect(&self) -> bool {
-        matches!(self, Error::Rpc(RpcError::DisconnectedWillReconnect(_)))
+        matches!(self, Error::Rpc(RpcError::ClientError(subxt_rpcs::Error::DisconnectedWillReconnect(_))))
     }
 
     /// Checks whether the error was caused by a RPC request being rejected.
@@ -141,7 +147,7 @@ pub enum RpcError {
     // for `subscribe_to_block_headers_filling_in_gaps` and friends.
     /// Error related to the RPC client.
     #[error("RPC error: {0}")]
-    ClientError(Box<dyn std::error::Error + Send + Sync + 'static>),
+    ClientError(#[from] subxt_rpcs::Error),
     /// This error signals that the request was rejected for some reason.
     /// The specific reason is provided.
     #[error("RPC error: request rejected: {0}")]
@@ -149,12 +155,6 @@ pub enum RpcError {
     /// The RPC subscription dropped.
     #[error("RPC error: subscription dropped.")]
     SubscriptionDropped,
-    /// The requested URL is insecure.
-    #[error("RPC error: insecure URL: {0}")]
-    InsecureUrl(String),
-    /// The connection was lost and automatically reconnected.
-    #[error("RPC error: the connection was lost `{0}`; reconnect automatically initiated")]
-    DisconnectedWillReconnect(String),
 }
 
 impl RpcError {

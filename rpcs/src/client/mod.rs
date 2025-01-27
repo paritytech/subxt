@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -58,15 +58,17 @@
 
 crate::macros::cfg_jsonrpsee! {
     mod jsonrpsee_impl;
+    pub use jsonrpsee::core::client::Client as JsonrpseeRpcClient; 
 }
 
 crate::macros::cfg_unstable_light_client! {
     mod lightclient_impl;
+    pub use lightclient_impl::LightClientRpc as LightClientRpcClient; 
 }
 
 crate::macros::cfg_reconnecting_rpc_client! {
-   /// reconnecting rpc client.
    pub mod reconnecting_rpc_client;
+   pub use reconnecting_rpc_client::RpcClient as ReconnectingRpcClient;
 }
 
 mod rpc_client;

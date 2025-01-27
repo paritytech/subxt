@@ -4,11 +4,11 @@
 
 use super::follow_stream::FollowStream;
 use super::ChainHeadRpcMethods;
-use crate::backend::chain_head::rpc_methods::{
-    BestBlockChanged, Finalized, FollowEvent, Initialized, NewBlock,
-};
 use crate::config::{BlockHash, Config};
 use crate::error::Error;
+use subxt_rpcs::methods::chain_head::{
+    BestBlockChanged, Finalized, FollowEvent, Initialized, NewBlock,
+};
 use futures::stream::{FuturesUnordered, Stream, StreamExt};
 
 use std::collections::{HashMap, HashSet};
