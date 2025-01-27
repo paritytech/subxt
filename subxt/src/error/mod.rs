@@ -129,7 +129,12 @@ impl From<subxt_rpcs::Error> for Error {
 impl Error {
     /// Checks whether the error was caused by a RPC re-connection.
     pub fn is_disconnected_will_reconnect(&self) -> bool {
-        matches!(self, Error::Rpc(RpcError::ClientError(subxt_rpcs::Error::DisconnectedWillReconnect(_))))
+        matches!(
+            self,
+            Error::Rpc(RpcError::ClientError(
+                subxt_rpcs::Error::DisconnectedWillReconnect(_)
+            ))
+        )
     }
 
     /// Checks whether the error was caused by a RPC request being rejected.

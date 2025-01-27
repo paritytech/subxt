@@ -46,9 +46,7 @@ macro_rules! cfg_jsonrpsee_web {
 	}
 }
 
-pub(crate) use {
-    cfg_feature, cfg_jsonrpsee, cfg_unstable_light_client,
-};
+pub(crate) use {cfg_feature, cfg_jsonrpsee, cfg_unstable_light_client};
 
 // Only used by light-client.
 #[allow(unused)]

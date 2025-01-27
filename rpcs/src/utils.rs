@@ -4,8 +4,8 @@
 
 //! A couple of utility methods that we make use of.
 
-use url::Url;
 use crate::Error;
+use url::Url;
 
 /// A URL is considered secure if it uses a secure scheme ("https" or "wss") or is referring to localhost.
 ///

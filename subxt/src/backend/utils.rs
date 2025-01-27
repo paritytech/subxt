@@ -182,9 +182,7 @@ mod tests {
     use crate::backend::StreamOf;
 
     fn disconnect_err() -> Error {
-        Error::Rpc(subxt_rpcs::Error::DisconnectedWillReconnect(
-            String::new(),
-        ).into())
+        Error::Rpc(subxt_rpcs::Error::DisconnectedWillReconnect(String::new()).into())
     }
 
     fn custom_err() -> Error {

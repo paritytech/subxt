@@ -5,13 +5,13 @@
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
-use subxt_rpcs::methods::chain_head::{FollowEvent, Initialized, RuntimeEvent};
 use futures::stream::{Stream, StreamExt};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::ops::DerefMut;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll, Waker};
+use subxt_rpcs::methods::chain_head::{FollowEvent, Initialized, RuntimeEvent};
 
 /// A `Stream` which builds on `FollowStreamDriver`, and allows multiple subscribers to obtain events
 /// from the single underlying subscription (each being provided an `Initialized` message and all new
@@ -454,9 +454,12 @@ where
                             .iter()
                             .position(|b| b.hash() == p.hash())
                         else {
-                            return Poll::Ready(Some(Err(RpcError::ClientError(subxt_rpcs::Error::DisconnectedWillReconnect(
-                                "Missed at least one block when the connection was lost".to_owned(),
-                            ))
+                            return Poll::Ready(Some(Err(RpcError::ClientError(
+                                subxt_rpcs::Error::DisconnectedWillReconnect(
+                                    "Missed at least one block when the connection was lost"
+                                        .to_owned(),
+                                ),
+                            )
                             .into())));
                         };
 

@@ -8,7 +8,7 @@
 
 use crate::client::{rpc_params, RpcClient, RpcSubscription};
 use crate::BlockHash;
-use crate::{RpcConfig, Error};
+use crate::{Error, RpcConfig};
 use derive_where::derive_where;
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Deserializer, Serialize};

@@ -58,12 +58,12 @@
 
 crate::macros::cfg_jsonrpsee! {
     mod jsonrpsee_impl;
-    pub use jsonrpsee::core::client::Client as JsonrpseeRpcClient; 
+    pub use jsonrpsee::core::client::Client as JsonrpseeRpcClient;
 }
 
 crate::macros::cfg_unstable_light_client! {
     mod lightclient_impl;
-    pub use lightclient_impl::LightClientRpc as LightClientRpcClient; 
+    pub use lightclient_impl::LightClientRpc as LightClientRpcClient;
 }
 
 crate::macros::cfg_reconnecting_rpc_client! {

@@ -6,10 +6,10 @@ use super::follow_stream::FollowStream;
 use super::ChainHeadRpcMethods;
 use crate::config::{BlockHash, Config};
 use crate::error::Error;
+use futures::stream::{FuturesUnordered, Stream, StreamExt};
 use subxt_rpcs::methods::chain_head::{
     BestBlockChanged, Finalized, FollowEvent, Initialized, NewBlock,
 };
-use futures::stream::{FuturesUnordered, Stream, StreamExt};
 
 use std::collections::{HashMap, HashSet};
 use std::future::Future;

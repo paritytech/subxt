@@ -4,11 +4,11 @@
 
 use crate::config::Config;
 use crate::error::Error;
-use subxt_rpcs::methods::chain_head::{ChainHeadRpcMethods, FollowEvent};
 use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use subxt_rpcs::methods::chain_head::{ChainHeadRpcMethods, FollowEvent};
 
 /// A `Stream` whose goal is to remain subscribed to `chainHead_follow`. It will re-subscribe if the subscription
 /// is ended for any reason, and it will return the current `subscription_id` as an event, along with the other
@@ -217,12 +217,10 @@ impl<Hash> Stream for FollowStream<Hash> {
 #[cfg(test)]
 pub(super) mod test_utils {
     use super::*;
-    use subxt_rpcs::methods::chain_head::{
-        BestBlockChanged, Finalized, Initialized, NewBlock,
-    };
     use crate::config::substrate::H256;
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::Arc;
+    use subxt_rpcs::methods::chain_head::{BestBlockChanged, Finalized, Initialized, NewBlock};
 
     /// Given some events, returns a follow stream getter that we can use in
     /// place of the usual RPC method.

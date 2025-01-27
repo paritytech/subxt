@@ -16,14 +16,10 @@ mod follow_stream_driver;
 mod follow_stream_unpin;
 mod storage_items;
 
-use subxt_rpcs::RpcClient;
-use subxt_rpcs::methods::chain_head::{
-    FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
-};
 use self::follow_stream_driver::FollowStreamFinalizedHeads;
 use crate::backend::{
-    utils::retry, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse,
-    StreamOf, StreamOfResults, TransactionStatus,
+    utils::retry, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf,
+    StreamOfResults, TransactionStatus,
 };
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
@@ -35,6 +31,10 @@ use futures::{Stream, StreamExt};
 use std::collections::HashMap;
 use std::task::Poll;
 use storage_items::StorageItems;
+use subxt_rpcs::methods::chain_head::{
+    FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
+};
+use subxt_rpcs::RpcClient;
 
 // Expose the RPC methods.
 pub use subxt_rpcs::methods::chain_head::ChainHeadRpcMethods;
@@ -340,7 +340,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         retry(|| async {
             let genesis_hash = self.methods.chainspec_v1_genesis_hash().await?;
             Ok(genesis_hash)
-        }).await
+        })
+        .await
     }
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
@@ -670,9 +671,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                         finalized_hash = Some(block.hash);
                         continue;
                     }
-                    RpcTransactionStatus::BestChainBlockIncluded {
-                        block: Some(block),
-                    } => {
+                    RpcTransactionStatus::BestChainBlockIncluded { block: Some(block) } => {
                         // Look up a pinned block ref if we can, else return a non-pinned
                         // block that likely isn't accessible. We have no guarantee that a best
                         // block on the node a tx was sent to will ever be known about on the

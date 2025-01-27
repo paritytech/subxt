@@ -188,14 +188,16 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         retry(|| async {
             let hash = self.methods.genesis_hash().await?;
             Ok(hash)
-        }).await
+        })
+        .await
     }
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
         retry(|| async {
             let header = self.methods.chain_get_header(Some(at)).await?;
             Ok(header)
-        }).await
+        })
+        .await
     }
 
     async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
@@ -237,14 +239,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
             Box::pin(async move {
                 let sub = methods.state_subscribe_runtime_version().await?;
-                let sub = sub
-                    .map_err(|e| e.into())
-                    .map(|r| {
-                        r.map(|v| RuntimeVersion {
-                            spec_version: v.spec_version,
-                            transaction_version: v.transaction_version,
-                        })
-                    });
+                let sub = sub.map_err(|e| e.into()).map(|r| {
+                    r.map(|v| RuntimeVersion {
+                        spec_version: v.spec_version,
+                        transaction_version: v.transaction_version,
+                    })
+                });
                 Ok(StreamOf(Box::pin(sub)))
             })
         })
@@ -277,14 +277,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             let methods = methods.clone();
             Box::pin(async move {
                 let sub = methods.chain_subscribe_all_heads().await?;
-                let sub = sub
-                    .map_err(|e| e.into())
-                    .map(|r| {
-                        r.map(|h| {
-                            let hash = h.hash();
-                            (h, BlockRef::from_hash(hash))
-                        })
-                    });
+                let sub = sub.map_err(|e| e.into()).map(|r| {
+                    r.map(|h| {
+                        let hash = h.hash();
+                        (h, BlockRef::from_hash(hash))
+                    })
+                });
                 Ok(StreamOf(Box::pin(sub)))
             })
         })
@@ -302,14 +300,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             let methods = methods.clone();
             Box::pin(async move {
                 let sub = methods.chain_subscribe_new_heads().await?;
-                let sub = sub
-                    .map_err(|e| e.into())
-                    .map(|r| {
-                        r.map(|h| {
-                            let hash = h.hash();
-                            (h, BlockRef::from_hash(hash))
-                        })
-                    });
+                let sub = sub.map_err(|e| e.into()).map(|r| {
+                    r.map(|h| {
+                        let hash = h.hash();
+                        (h, BlockRef::from_hash(hash))
+                    })
+                });
                 Ok(StreamOf(Box::pin(sub)))
             })
         })
@@ -424,9 +420,13 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         at: T::Hash,
     ) -> Result<Vec<u8>, Error> {
         retry(|| async {
-            let res = self.methods.state_call(method, call_parameters, Some(at)).await?;
+            let res = self
+                .methods
+                .state_call(method, call_parameters, Some(at))
+                .await?;
             Ok(res)
-        }).await
+        })
+        .await
     }
 }
 
@@ -625,11 +625,13 @@ impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
                     let at = this.keys.at;
                     let results_fut = async move {
                         let keys = keys.iter().map(|k| &**k);
-                        let values =
-                            retry(|| async {
-                                let res = methods.state_query_storage_at(keys.clone(), Some(at)).await?;
-                                Ok(res)
-                            }).await?;
+                        let values = retry(|| async {
+                            let res = methods
+                                .state_query_storage_at(keys.clone(), Some(at))
+                                .await?;
+                            Ok(res)
+                        })
+                        .await?;
                         let values: VecDeque<_> = values
                             .into_iter()
                             .flat_map(|v| {

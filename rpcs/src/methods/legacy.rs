@@ -5,10 +5,10 @@
 //! An interface to call the raw legacy RPC methods.
 
 use crate::client::{rpc_params, RpcClient, RpcSubscription};
-use crate::{RpcConfig, Error};
+use crate::{Error, RpcConfig};
 use codec::Decode;
-use frame_metadata::RuntimeMetadataPrefixed;
 use derive_where::derive_where;
+use frame_metadata::RuntimeMetadataPrefixed;
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
@@ -101,7 +101,10 @@ impl<T: RpcConfig> LegacyRpcMethods<T> {
     }
 
     /// Fetch the metadata via the legacy `state_getMetadata` RPC method.
-    pub async fn state_get_metadata(&self, at: Option<T::Hash>) -> Result<StateGetMetadataResponse, Error> {
+    pub async fn state_get_metadata(
+        &self,
+        at: Option<T::Hash>,
+    ) -> Result<StateGetMetadataResponse, Error> {
         let bytes: Bytes = self
             .client
             .request("state_getMetadata", rpc_params![at])
@@ -398,12 +401,14 @@ impl<T: RpcConfig> LegacyRpcMethods<T> {
 pub struct StateGetMetadataResponse(Vec<u8>);
 
 impl StateGetMetadataResponse {
-    /// Return the raw SCALE encoded metadata bytes 
+    /// Return the raw SCALE encoded metadata bytes
     pub fn into_raw(self) -> Vec<u8> {
         self.0
     }
     /// Decode and return [`frame_metadata::RuntimeMetadataPrefixed`].
-    pub fn to_frame_metadata(&self) -> Result<frame_metadata::RuntimeMetadataPrefixed, codec::Error> {
+    pub fn to_frame_metadata(
+        &self,
+    ) -> Result<frame_metadata::RuntimeMetadataPrefixed, codec::Error> {
         RuntimeMetadataPrefixed::decode(&mut &*self.0)
     }
 }
