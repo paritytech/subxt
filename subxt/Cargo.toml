@@ -46,7 +46,6 @@ web = [
     "subxt-macro/web",
     "subxt-rpcs/web",
     "tokio?/sync",
-    "finito?/wasm-bindgen",
 ]
 
 # Feature flag to enable the default future executor.
@@ -101,7 +100,6 @@ either = { workspace = true }
 web-time = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
-impl-serde = { workspace = true }
 primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"] }
 
 # Included if the "jsonrpsee" feature is enabled.
@@ -127,7 +125,6 @@ tokio-util = { workspace = true, features = ["compat"], optional = true }
 # Only the `tokio/sync` is used in the reconnecting rpc client
 # and that compiles both for native and web.
 tokio = { workspace = true, optional = true }
-finito = { workspace = true, optional = true }
 wasm-bindgen-futures = { workspace = true, optional = true }
 
 [dev-dependencies]
