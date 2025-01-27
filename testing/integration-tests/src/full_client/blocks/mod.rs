@@ -21,8 +21,6 @@ use subxt::{
 #[cfg(fullclient)]
 use subxt_signer::sr25519::dev;
 
-use subxt_metadata::Metadata;
-
 #[cfg(fullclient)]
 #[subxt_test]
 async fn block_subscriptions_are_consistent_with_eachother() -> Result<(), subxt::Error> {
@@ -164,7 +162,10 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
 
     // get metadata via state_call.
     let (_, meta1) = rt
-        .call_raw::<(Compact<u32>, Metadata)>("Metadata_metadata", None)
+        .call_raw::<(Compact<u32>, frame_metadata::RuntimeMetadataPrefixed)>(
+            "Metadata_metadata",
+            None,
+        )
         .await?;
 
     // get metadata via `state_getMetadata`.

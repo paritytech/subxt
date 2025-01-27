@@ -431,8 +431,8 @@ impl RpcClientT for RpcClient {
                     Error::DisconnectedWillReconnect(e) => {
                         SubxtRpcError::DisconnectedWillReconnect(e.to_string())
                     }
-                    Error::Dropped => SubxtRpcError::ClientError(Box::new(e)),
-                    Error::RpcError(e) => SubxtRpcError::ClientError(Box::new(e)),
+                    Error::Dropped => SubxtRpcError::Client(Box::new(e)),
+                    Error::RpcError(e) => SubxtRpcError::Client(Box::new(e)),
                 })
         }
         .boxed()
