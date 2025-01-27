@@ -39,7 +39,7 @@ pub trait Config: Sized + Send + Sync + 'static {
     type Hash: BlockHash;
 
     /// The account ID type.
-    type AccountId: Debug + Clone + Encode;
+    type AccountId: Debug + Clone + Encode + Serialize;
 
     /// The address type.
     type Address: Debug + Encode + From<Self::AccountId>;

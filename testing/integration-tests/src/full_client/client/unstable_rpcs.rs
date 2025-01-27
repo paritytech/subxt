@@ -13,13 +13,13 @@ use assert_matches::assert_matches;
 use codec::Encode;
 use futures::Stream;
 use subxt::{
-    backend::chain_head::rpc_methods::{
-        FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
-        StorageQueryType,
-    },
     config::Hasher,
     utils::{AccountId32, MultiAddress},
     SubstrateConfig,
+};
+use subxt_rpcs::methods::chain_head::{
+    FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
+    StorageQueryType,
 };
 
 use subxt_signer::sr25519::dev;
@@ -293,7 +293,8 @@ async fn transactionwatch_v1_submit_and_watch() {
 /// Ignore block related events and obtain the next event related to an operation.
 async fn next_operation_event<
     T: serde::de::DeserializeOwned,
-    S: Unpin + Stream<Item = Result<FollowEvent<T>, subxt::Error>>,
+    S: Unpin + Stream<Item = Result<FollowEvent<T>, E>>,
+    E: core::fmt::Debug,
 >(
     sub: &mut S,
 ) -> FollowEvent<T> {

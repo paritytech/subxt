@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -47,7 +47,7 @@ impl RpcClientT for LightClientRpc {
 fn lc_err_to_rpc_err(err: LightClientRpcError) -> RpcError {
     match err {
         LightClientRpcError::JsonRpcError(e) => RpcError::ClientError(Box::new(e)),
-        LightClientRpcError::SmoldotError(e) => RpcError::RequestRejected(e),
-        LightClientRpcError::BackgroundTaskDropped => RpcError::SubscriptionDropped,
+        LightClientRpcError::SmoldotError(e) => RpcError::ClientError(Box::new(e)),
+        LightClientRpcError::BackgroundTaskDropped => RpcError::ClientError(Box::new("Smoldot background task was dropped")),
     }
 }

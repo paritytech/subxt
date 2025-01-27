@@ -1,4 +1,4 @@
-// Copyright 2019-2024 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -60,7 +60,7 @@ use std::{
 };
 
 use super::{RawRpcFuture, RawRpcSubscription, RpcClientT};
-use crate::error::RpcError as SubxtRpcError;
+use crate::Error as SubxtRpcError;
 
 use finito::Retry;
 use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
@@ -431,8 +431,8 @@ impl RpcClientT for RpcClient {
                     Error::DisconnectedWillReconnect(e) => {
                         SubxtRpcError::DisconnectedWillReconnect(e.to_string())
                     }
-                    Error::Dropped => SubxtRpcError::ClientError(Box::new(e)),
-                    Error::RpcError(e) => SubxtRpcError::ClientError(Box::new(e)),
+                    Error::Dropped => SubxtRpcError::Client(Box::new(e)),
+                    Error::RpcError(e) => SubxtRpcError::Client(Box::new(e)),
                 })
         }
         .boxed()
@@ -448,7 +448,7 @@ impl RpcClientT for RpcClient {
             let sub = self
                 .subscribe(sub.to_string(), params, unsub.to_string())
                 .await
-                .map_err(|e| SubxtRpcError::ClientError(Box::new(e)))?;
+                .map_err(|e| SubxtRpcError::Client(Box::new(e)))?;
 
             let id = match sub.id() {
                 SubscriptionId::Num(n) => n.to_string(),

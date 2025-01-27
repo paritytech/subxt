@@ -1,0 +1,83 @@
+[package]
+name = "subxt-rpcs"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = true
+
+license.workspace = true
+readme = "README.md"
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+description = "Make RPC calls to Substrate based nodes"
+keywords = ["parity", "subxt", "rpcs"]
+
+[features]
+default = ["jsonrpsee", "native"]
+
+subxt-core = ["dep:subxt-core"]
+jsonrpsee = ["dep:jsonrpsee", "dep:tokio-util"]
+unstable-light-client = ["dep:subxt-lightclient"]
+reconnecting-rpc-client = [
+    "jsonrpsee",
+    "dep:finito",
+    "dep:tokio", 
+    "tokio/sync",
+]
+
+# Enable this for native (ie non web/wasm builds).
+# Exactly 1 of "web" and "native" is expected.
+native = [
+    "jsonrpsee?/async-client",
+    "jsonrpsee?/client-ws-transport-tls",
+    "jsonrpsee?/ws-client",
+    "subxt-lightclient?/native",
+]
+
+# Enable this for web/wasm builds.
+# Exactly 1 of "web" and "native" is expected.
+web = [
+    "jsonrpsee?/async-wasm-client",
+    "jsonrpsee?/client-web-transport",
+    "jsonrpsee?/wasm-client",
+    "subxt-lightclient?/web",
+    "finito?/wasm-bindgen",
+]
+
+[dependencies]
+codec = { workspace = true }
+derive-where = { workspace = true }
+futures = { workspace = true }
+hex = { workspace = true }
+impl-serde = { workspace = true }
+primitive-types = { workspace = true, features = ["serde"] }
+serde = { workspace = true }
+serde_json = { workspace = true, features = ["default", "raw_value"] }
+thiserror = { workspace = true }
+frame-metadata = { workspace = true, features = ["decode"] }
+url = { workspace = true }
+tracing = { workspace = true }
+
+# Included with the jsonrpsee feature
+jsonrpsee = { workspace = true, optional = true }
+tokio-util = { workspace = true, features = ["compat"], optional = true }
+
+# Included with the reconnecting-rpc-client feature
+finito = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
+
+# Included with the lightclient feature
+subxt-lightclient = { workspace = true, optional = true, default-features = false }
+
+# Included with the subxt-core feature to impl Config for RpcConfig
+subxt-core = { workspace = true, optional = true }
+
+[dev-dependencies]
+tower = { workspace = true }
+hyper = { workspace = true }
+http-body = { workspace = true }
+
+[lints]
+workspace = true

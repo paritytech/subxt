@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -6,9 +6,9 @@
 //! <https://github.com/paritytech/json-rpc-interface-spec/> for details of the API
 //! methods exposed here.
 
-use crate::backend::rpc::{rpc_params, RpcClient, RpcSubscription};
-use crate::config::BlockHash;
-use crate::{Config, Error};
+use crate::client::{rpc_params, RpcClient, RpcSubscription};
+use crate::BlockHash;
+use crate::{Error, RpcConfig};
 use derive_where::derive_where;
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Deserializer, Serialize};
@@ -24,7 +24,7 @@ pub struct ChainHeadRpcMethods<T> {
     _marker: std::marker::PhantomData<T>,
 }
 
-impl<T: Config> ChainHeadRpcMethods<T> {
+impl<T: RpcConfig> ChainHeadRpcMethods<T> {
     /// Instantiate the legacy RPC method interface.
     pub fn new(client: RpcClient) -> Self {
         ChainHeadRpcMethods {
@@ -139,7 +139,8 @@ impl<T: Config> ChainHeadRpcMethods<T> {
 
         let header = header
             .map(|h| codec::Decode::decode(&mut &*h.0))
-            .transpose()?;
+            .transpose()
+            .map_err(Error::Decode)?;
         Ok(header)
     }
 

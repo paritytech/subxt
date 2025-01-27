@@ -40,6 +40,7 @@ subxt = { workspace = true, features = ["unstable-metadata", "native", "jsonrpse
 subxt-signer = { workspace = true, features = ["default"] }
 subxt-codegen = { workspace = true }
 subxt-metadata = { workspace = true }
+subxt-rpcs = { workspace = true }
 test-runtime = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
