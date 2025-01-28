@@ -18,6 +18,12 @@ macro_rules! cfg_unstable_light_client {
 	};
 }
 
+macro_rules! cfg_reconnecting_rpc_client {
+	($($item:item)*) => {
+		crate::macros::cfg_feature!("reconnecting-rpc-client", $($item)*);
+	};
+}
+
 macro_rules! cfg_jsonrpsee {
 	($($item:item)*) => {
 		crate::macros::cfg_feature!("jsonrpsee", $($item)*);
@@ -50,4 +56,4 @@ pub(crate) use {cfg_feature, cfg_jsonrpsee, cfg_unstable_light_client};
 
 // Only used by light-client.
 #[allow(unused)]
-pub(crate) use {cfg_jsonrpsee_native, cfg_jsonrpsee_web};
+pub(crate) use {cfg_jsonrpsee_native, cfg_jsonrpsee_web, cfg_reconnecting_rpc_client};

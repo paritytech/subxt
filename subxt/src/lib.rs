@@ -18,6 +18,10 @@
 ))]
 compile_error!("subxt: exactly one of the 'web' and 'native' features should be used.");
 
+// Internal helper macros
+#[macro_use]
+mod macros;
+
 // The guide is here.
 pub mod book;
 
@@ -79,10 +83,6 @@ pub mod dynamic {
         constant, runtime_api_call, storage, tx, At, DecodedValue, DecodedValueThunk, Value,
     };
 }
-
-// Internal helper macros
-#[macro_use]
-mod macros;
 
 // Expose light client bits
 cfg_unstable_light_client! {

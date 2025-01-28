@@ -10,8 +10,6 @@ pub mod chain_head;
 pub mod legacy;
 pub mod utils;
 
-use subxt_core::client::RuntimeVersion;
-
 use crate::error::Error;
 use crate::metadata::Metadata;
 use crate::Config;
@@ -20,12 +18,14 @@ use codec::{Decode, Encode};
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use std::sync::Arc;
+use subxt_core::client::RuntimeVersion;
 
 /// Some re-exports from the [`subxt_rpcs`] crate, also accessible in full via [`crate::ext::subxt_rpcs`].
 pub mod rpc {
-    pub use subxt_rpcs::client::{
-        reconnecting_rpc_client, RawRpcFuture, RawRpcSubscription, RawValue,
-    };
+    pub use subxt_rpcs::client::{RawRpcFuture, RawRpcSubscription, RawValue};
+    crate::macros::cfg_reconnecting_rpc_client! {
+        pub use subxt_rpcs::client::reconnecting_rpc_client;
+    }
     pub use subxt_rpcs::{RpcClient, RpcClientT};
 }
 
