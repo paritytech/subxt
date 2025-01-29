@@ -4,10 +4,9 @@
 
 //! RPC types and client for interacting with a substrate node.
 //!
-//! These are used behind the scenes by Subxt backend implementations, for
-//! example [`crate::backend::legacy::LegacyBackend`]. If you need an RPC client,
-//! then you can manually instantiate one, and then hand it to Subxt if you'd like
-//! to re-use it for the Subxt connection.
+//! An RPC client is instantiated and then used to create some methods, for instance 
+//! [`crate::methods::ChainHeadRpcMethods`], which defines the calls that can be made with it.
+//! The core RPC client bits are:
 //!
 //! - [`RpcClientT`] is the underlying dynamic RPC implementation. This provides
 //!   the low level [`RpcClientT::request_raw`] and [`RpcClientT::subscribe_raw`]
@@ -15,46 +14,8 @@
 //! - [`RpcClient`] is the higher level wrapper around this, offering
 //!   the [`RpcClient::request`] and [`RpcClient::subscribe`] methods.
 //!
-//! # Example
-//!
-//! Fetching the genesis hash.
-//!
-//! ```no_run
-//! # #[tokio::main]
-//! # async fn main() {
-//! use subxt::{
-//!     client::OnlineClient,
-//!     config::SubstrateConfig,
-//!     backend::rpc::RpcClient,
-//!     backend::legacy::LegacyRpcMethods,
-//! };
-//!
-//! // Instantiate a default RPC client pointing at some URL.
-//! let rpc_client = RpcClient::from_url("ws://localhost:9944")
-//!     .await
-//!     .unwrap();
-//!
-//! // Instantiate the legacy RPC interface, providing an appropriate
-//! // config so that it uses the correct types for your chain.
-//! let rpc_methods = LegacyRpcMethods::<SubstrateConfig>::new(rpc_client.clone());
-//!
-//! // Use it to make RPC calls, here using the legacy genesis_hash method.
-//! let genesis_hash = rpc_methods
-//!     .genesis_hash()
-//!     .await
-//!     .unwrap();
-//!
-//! println!("{genesis_hash}");
-//!
-//! // Instantiate the Subxt interface using the same client and config if you
-//! // want to reuse the same connection:
-//! let client = OnlineClient::<SubstrateConfig>::from_rpc_client(rpc_client);
-//! # }
-//! ```
-
-// Allow an `rpc.rs` file in the `rpc` folder to align better
-// with other file names for their types.
-#![allow(clippy::module_inception)]
+//! We then expose implementations here (depending on which features are enabled)
+//! which implement [`RpcClientT`] and can therefore be used to construct [`RpcClient`]s.
 
 crate::macros::cfg_jsonrpsee! {
     mod jsonrpsee_impl;
@@ -71,9 +32,7 @@ crate::macros::cfg_reconnecting_rpc_client! {
    pub use reconnecting_rpc_client::RpcClient as ReconnectingRpcClient;
 }
 
-#[cfg(test)]
 pub mod mock_rpc_client;
-#[cfg(test)]
 pub use mock_rpc_client::MockRpcClient;
 
 mod rpc_client;

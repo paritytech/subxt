@@ -15,7 +15,7 @@ description = "Make RPC calls to Substrate based nodes"
 keywords = ["parity", "subxt", "rpcs"]
 
 [features]
-default = ["jsonrpsee", "native", "unstable-light-client"]
+default = ["jsonrpsee", "native"]
 
 subxt-core = ["dep:subxt-core"]
 jsonrpsee = ["dep:jsonrpsee", "dep:tokio-util"]
