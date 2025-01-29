@@ -138,8 +138,8 @@ impl Error {
     }
 
     /// Checks whether the error was caused by a RPC request being rejected.
-    pub fn is_rejected(&self) -> bool {
-        matches!(self, Error::Rpc(RpcError::RequestRejected(_)))
+    pub fn is_rpc_limit_reached(&self) -> bool {
+        matches!(self, Error::Rpc(RpcError::LimitReached))
     }
 }
 
@@ -153,20 +153,13 @@ pub enum RpcError {
     /// Error related to the RPC client.
     #[error("RPC error: {0}")]
     ClientError(#[from] subxt_rpcs::Error),
-    /// This error signals that the request was rejected for some reason.
-    /// The specific reason is provided.
-    #[error("RPC error: request rejected: {0}")]
-    RequestRejected(String),
+    /// This error signals that we got back a [`subxt_rpcs::methods::chain_head::MethodResponse::LimitReached`],
+    /// which is not technically an RPC error but is treated as an error in our own APIs.
+    #[error("RPC error: limit reached")]
+    LimitReached,
     /// The RPC subscription dropped.
     #[error("RPC error: subscription dropped.")]
     SubscriptionDropped,
-}
-
-impl RpcError {
-    /// Create a `RequestRejected` error from anything that can be turned into a string.
-    pub fn request_rejected<S: Into<String>>(s: S) -> RpcError {
-        RpcError::RequestRejected(s.into())
-    }
 }
 
 /// Block error

@@ -118,14 +118,20 @@ where
                 }
 
                 // TODO: https://github.com/paritytech/subxt/issues/1567
-                // This is a hack because if a reconnection occurs
-                // the order of pending calls is not guaranteed.
+                // This is a hack because, in the event of a disconnection,
+                // we may not get the correct subscription ID back on reconnecting.
                 //
-                // Such that it's possible the a pending future completes
-                // before `chainHead_follow` is established with fresh
-                // subscription id.
+                // This is because we have a race between this future and the
+                // separate chainHead subscription, which runs in a different task.
+                // if this future is too quick, it'll be given back an old
+                // subscription ID from the chainHead subscription which has yet
+                // to reconnect and establish a new subscription ID.
                 //
-                if e.is_rejected() && rejected_retries < REJECTED_MAX_RETRIES {
+                // In the event of a wrong subscription Id being used, we happen to
+                // hand back an `RpcError::LimitReached`, and so can retry when we
+                // specifically hit that error to see if we get a new subscription ID
+                // eventually.
+                if e.is_rpc_limit_reached() && rejected_retries < REJECTED_MAX_RETRIES {
                     rejected_retries += 1;
                     continue;
                 }

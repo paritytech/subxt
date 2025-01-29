@@ -60,6 +60,9 @@ mod impl_config {
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum Error {
+    /// An error which indicates a user fault.
+    #[error("User error: {0}")]
+    User(UserError),
     // Dev note: We need the error to be safely sent between threads
     // for `subscribe_to_block_headers_filling_in_gaps` and friends.
     /// An error coming from the underlying RPC Client.
@@ -80,4 +83,41 @@ pub enum Error {
     /// The requested URL is insecure.
     #[error("RPC error: insecure URL: {0}")]
     InsecureUrl(String),
+}
+
+impl Error {
+    /// Is the error the `DisconnectedWillReconnect` variant? This should be true
+    /// only if the underlying `RpcClient` implementation was disconnected and is
+    /// automatically reconnecting behind the scenes.
+    pub fn is_disconnected_will_reconnect(&self) -> bool {
+        matches!(self, Error::DisconnectedWillReconnect(_))
+    }
+}
+
+/// This error tends to be returned when the user made an RPC call with
+/// invalid parameters. Implementations of [`RpcClientT`] should turn any such
+/// errors into this, so that they can be handled appropriately. By contrast,
+/// [`Error::Client`] is emitted when the underlying RPC Client implementation
+/// has some problem that isn't user specific (eg network issue or similar).
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct UserError {
+	/// Code
+	pub code: i32,
+	/// Message
+	pub message: String,
+	/// Optional data
+	pub data: Option<Box<serde_json::value::RawValue>>,
+}
+
+impl core::fmt::Display for UserError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} ({})", &self.message, &self.code)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    
+
 }

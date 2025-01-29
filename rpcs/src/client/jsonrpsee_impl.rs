@@ -7,7 +7,7 @@ use crate::Error;
 use futures::stream::{StreamExt, TryStreamExt};
 use jsonrpsee::{
     core::{
-        client::{Client, ClientT, SubscriptionClientT, SubscriptionKind},
+        client::{Error as JsonrpseeError, Client, ClientT, SubscriptionClientT, SubscriptionKind},
         traits::ToRpcParams,
     },
     types::SubscriptionId,
@@ -31,7 +31,7 @@ impl RpcClientT for Client {
         Box::pin(async move {
             let res = ClientT::request(self, method, Params(params))
                 .await
-                .map_err(|e| Error::Client(Box::new(e)))?;
+                .map_err(error_to_rpc_error)?;
             Ok(res)
         })
     }
@@ -50,7 +50,7 @@ impl RpcClientT for Client {
                 unsub,
             )
             .await
-            .map_err(|e| Error::Client(Box::new(e)))?;
+            .map_err(error_to_rpc_error)?;
 
             let id = match stream.kind() {
                 SubscriptionKind::Subscription(SubscriptionId::Str(id)) => {
@@ -64,5 +64,23 @@ impl RpcClientT for Client {
                 .boxed();
             Ok(RawRpcSubscription { stream, id })
         })
+    }
+}
+
+/// Convert a JsonrpseeError into the RPC error in this crate.
+/// The main reason for this is to capture user errors so that
+/// they can be represented/handled without casting. 
+fn error_to_rpc_error(error: JsonrpseeError) -> Error {
+    match error {
+        JsonrpseeError::Call(e) => {
+            Error::User(crate::UserError {
+                code: e.code(),
+                message: e.message().to_owned(),
+                data: e.data().map(|d| d.to_owned())
+            })
+        },
+        e => {
+            Error::Client(Box::new(e))
+        }
     }
 }

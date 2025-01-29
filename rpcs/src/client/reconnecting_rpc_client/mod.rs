@@ -427,13 +427,7 @@ impl RpcClientT for RpcClient {
         async {
             self.request(method.to_string(), params)
                 .await
-                .map_err(|e| match e {
-                    Error::DisconnectedWillReconnect(e) => {
-                        SubxtRpcError::DisconnectedWillReconnect(e.to_string())
-                    }
-                    Error::Dropped => SubxtRpcError::Client(Box::new(e)),
-                    Error::RpcError(e) => SubxtRpcError::Client(Box::new(e)),
-                })
+                .map_err(error_to_rpc_error)
         }
         .boxed()
     }
@@ -448,7 +442,7 @@ impl RpcClientT for RpcClient {
             let sub = self
                 .subscribe(sub.to_string(), params, unsub.to_string())
                 .await
-                .map_err(|e| SubxtRpcError::Client(Box::new(e)))?;
+                .map_err(error_to_rpc_error)?;
 
             let id = match sub.id() {
                 SubscriptionId::Num(n) => n.to_string(),
@@ -468,6 +462,27 @@ impl RpcClientT for RpcClient {
             })
         }
         .boxed()
+    }
+}
+
+/// Convert a reconnecting client Error into the RPC error in this crate.
+/// The main reason for this is to capture user errors so that
+/// they can be represented/handled without casting. 
+fn error_to_rpc_error(error: Error) -> SubxtRpcError {
+    match error {
+        Error::DisconnectedWillReconnect(reason) => {
+            SubxtRpcError::DisconnectedWillReconnect(reason.to_string())
+        },
+        Error::RpcError(RpcError::Call(e)) => {
+            SubxtRpcError::User(crate::UserError {
+                code: e.code(),
+                message: e.message().to_owned(),
+                data: e.data().map(|d| d.to_owned())
+            })
+        },
+        e => {
+            SubxtRpcError::Client(Box::new(e))
+        }
     }
 }
 

@@ -992,6 +992,10 @@ mod test {
             })
         }
 
+        fn limit_reached() -> MethodResponse {
+            MethodResponse::LimitReached
+        }
+
         fn storage_done(id: &str) -> FollowEvent {
             FollowEvent::OperationStorageDone(OperationId {
                 operation_id: id.to_owned(),
@@ -1304,10 +1308,6 @@ mod test {
             let mock_data = vec![
                 (
                     "chainSpec_v1_genesisHash",
-                    Message::Single(Err::<H256, _>(subxt_rpcs::Error::Client("Error".into()))),
-                ),
-                (
-                    "chainSpec_v1_genesisHash",
                     Message::Single(Err(subxt_rpcs::Error::DisconnectedWillReconnect(
                         "Error".to_owned(),
                     ))),
@@ -1344,7 +1344,7 @@ mod test {
                 ),
                 (
                     "method_response",
-                    Message::Single(Err(subxt_rpcs::Error::Client("stale id".into()))),
+                    Message::Single(Ok(limit_reached())),
                 ),
                 (
                     "method_response",
@@ -1384,7 +1384,7 @@ mod test {
                                 let rpc_params = jsonrpsee::types::Params::new(params.as_deref());
                                 let key: String = rpc_params.sequence().next().unwrap();
                                 if key == *"ID1" {
-                                    return Err(subxt_rpcs::Error::Client("stale id".into()));
+                                    return Message::Single(Ok(limit_reached()));
                                 } else {
                                     subscription_expired
                                         .swap(false, std::sync::atomic::Ordering::SeqCst);

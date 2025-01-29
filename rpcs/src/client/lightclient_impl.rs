@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::{RawRpcFuture, RawRpcSubscription, RpcClientT};
-use crate::error::RpcError;
+use crate::Error;
 use futures::stream::{StreamExt, TryStreamExt};
 use serde_json::value::RawValue;
 use subxt_lightclient::{LightClientRpc, LightClientRpcError};
@@ -36,7 +36,7 @@ impl RpcClientT for LightClientRpc {
 
             let id = Some(sub.id().to_owned());
             let stream = sub
-                .map_err(|e| RpcError::ClientError(Box::new(e)))
+                .map_err(|e| Error::Client(Box::new(e)))
                 .boxed();
 
             Ok(RawRpcSubscription { id, stream })
@@ -44,10 +44,19 @@ impl RpcClientT for LightClientRpc {
     }
 }
 
-fn lc_err_to_rpc_err(err: LightClientRpcError) -> RpcError {
+fn lc_err_to_rpc_err(err: LightClientRpcError) -> Error {
     match err {
-        LightClientRpcError::JsonRpcError(e) => RpcError::ClientError(Box::new(e)),
-        LightClientRpcError::SmoldotError(e) => RpcError::ClientError(Box::new(e)),
-        LightClientRpcError::BackgroundTaskDropped => RpcError::ClientError(Box::new("Smoldot background task was dropped")),
+        LightClientRpcError::JsonRpcError(e) => {
+            // If the error is a typical user error, report it as such, else
+            // just wrap the error into a ClientError.
+            let Ok(user_error) = e.try_deserialize() else {
+                return Error::Client(Box::<CoreError>::from(e))
+            };
+            Error::User(user_error)
+        },
+        LightClientRpcError::SmoldotError(e) => Error::Client(Box::<CoreError>::from(e)),
+        LightClientRpcError::BackgroundTaskDropped => Error::Client(Box::<CoreError>::from("Smoldot background task was dropped")),
     }
 }
+
+type CoreError = dyn core::error::Error + Send + Sync + 'static;

@@ -54,7 +54,7 @@ pub trait RpcClientT: Send + Sync + 'static {
 }
 
 /// A boxed future that is returned from the [`RpcClientT`] methods.
-pub type RawRpcFuture<'a, T, E = Error> = Pin<Box<dyn Future<Output = Result<T, E>> + Send + 'a>>;
+pub type RawRpcFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T, Error>> + Send + 'a>>;
 
 /// The RPC subscription returned from [`RpcClientT`]'s `subscription` method.
 pub struct RawRpcSubscription {

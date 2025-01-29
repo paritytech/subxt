@@ -46,7 +46,7 @@ impl<T: Config> StorageItems<T> {
             .await?;
         let operation_id: Arc<str> = match status {
             MethodResponse::LimitReached => {
-                return Err(RpcError::request_rejected("limit reached").into())
+                return Err(RpcError::LimitReached.into())
             }
             MethodResponse::Started(s) => s.operation_id.into(),
         };
