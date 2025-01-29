@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 //! An sr25519 keypair implementation.
-//! 
+//!
 //! **Note:** This implementation requires the `getrandom` dependency to obtain randomness,
 //! and will not compile on targets that it does not support. See the supported `getrandom`
 //! targets here: <https://docs.rs/getrandom/latest/getrandom/#supported-targets>.
