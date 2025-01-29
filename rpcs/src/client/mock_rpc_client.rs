@@ -18,14 +18,19 @@
 //! 
 //! // Define a mock client by providing some state (can be optional)
 //! // and functions which intercept method and subscription calls and
-//! // return something back.
+//! // returns something back.
 //! let mock_client = MockRpcClient::new(
 //!     state,
-//!     |state: &mut Vec<Json<_>>, method, params| {
-//!         state.pop().unwrap()
+//!     |state, method, params| {
+//!         // We'll panic if an RPC method is called more than 3 times:
+//!         let val = state.pop().unwrap();
+//!         async move { val }
 //!     },
-//!     |state: &mut _, sub, params, unsub| {
-//!         vec![Json(1), Json(2), Json(3)]
+//!     |state, sub, params, unsub| {
+//!         // Arrays, vecs or an RpcSubscription can be returned here to
+//!         // signal the set of values to be handed back on a subscription.
+//!         let vals = vec![Json(1), Json(2), Json(3)];
+//!         async move { vals }
 //!     }
 //! );
 //! 
@@ -52,21 +57,32 @@ pub struct MockRpcClient<State> {
 }
 
 impl <State: Send + 'static> MockRpcClient<State> {
-    /// Create a [`MockRpcClient`] by providing a function to handle method calls
-    /// and a function to handle subscription calls.
-    pub fn new<MethodHandler, SubscriptionHandler, MA, SA>(
+    /// Create a [`MockRpcClient`] by providing some state (which will be mutably available 
+    /// to each function), a function to handle method calls, and a function to handle 
+    /// subscription calls.
+    pub fn new<MethodHandler, MFut, MRes, SubscriptionHandler, SFut, SRes>(
         state: State, 
         method_handler: MethodHandler, 
         subscription_handler: SubscriptionHandler
     ) -> MockRpcClient<State>
     where
-        MethodHandler: IntoMethodHandler<State, MA>,
-        SubscriptionHandler: IntoSubscriptionHandler<State, SA>,
+        MethodHandler: Fn(&mut State, String, Option<Box<serde_json::value::RawValue>>) -> MFut + Send + Sync + 'static,
+        MFut: Future<Output = MRes> + Send + 'static,
+        MRes: IntoHandlerResponse,
+        SubscriptionHandler: Fn(&mut State, String, Option<Box<serde_json::value::RawValue>>, String) -> SFut + Send + Sync + 'static,
+        SFut: Future<Output = SRes> + Send + 'static,
+        SRes: IntoSubscriptionResponse,
     {
         MockRpcClient {
             state: Arc::new(Mutex::new(state)),
-            method_handler: method_handler.into_method_handler(),
-            subscription_handler: subscription_handler.into_subscription_handler()
+            method_handler: Box::new(move |state: &mut State, method: String, params: Option<Box<serde_json::value::RawValue>>| {
+                let fut = method_handler(state, method, params);
+                Box::pin(async move { fut.await.into_handler_response() })
+            }),
+            subscription_handler: Box::new(move |state: &mut State, sub: String, params: Option<Box<serde_json::value::RawValue>>, unsub: String| {
+                let fut = subscription_handler(state, sub, params, unsub);
+                Box::pin(async move { fut.await.into_subscription_response() })
+            })
         }
     }
 }
@@ -90,10 +106,6 @@ impl <State: Send + 'static> RpcClientT for MockRpcClient<State> {
         (self.subscription_handler)(&mut *s, sub.to_owned(), params, unsub.to_owned())
     }
 }
-
-// The below is all boilerplate to allow various types of functions, sync and async,
-// and returning different types of arguments, are all able to be used as method and
-// subscription handler functions.
 
 /// Return responses wrapped in this to have them serialized to JSON. 
 pub struct Json<T>(pub T);
@@ -165,74 +177,3 @@ impl <T: IntoHandlerResponse + Send + 'static, const N: usize> IntoSubscriptionR
         })
     }
 }
-
-/// Anything that is a valid method handler implements this trait.
-pub trait IntoMethodHandler<State, A> {
-    /// Convert self into a method handler function.
-    fn into_method_handler(self) -> MethodHandlerFn<State>;
-}
-
-impl <State, F, R> IntoMethodHandler<State, SyncMarker> for F 
-where
-    F: Fn(&mut State, String, Option<Box<serde_json::value::RawValue>>) -> R + Send + Sync + 'static,
-    R: IntoHandlerResponse + Send + 'static,
-{
-    fn into_method_handler(self) -> MethodHandlerFn<State> {
-        Box::new(move |state: &mut State, method: String, params: Option<Box<serde_json::value::RawValue>>| {
-            let res = self(state, method, params);
-            Box::pin(async move { res.into_handler_response() })
-        })
-    }
-}
-
-impl <State, F, Fut, R> IntoMethodHandler<State, AsyncMarker> for F 
-where
-    F: Fn(&mut State, String, Option<Box<serde_json::value::RawValue>>) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = R> + Send + 'static,
-    R: IntoHandlerResponse + Send + 'static,
-{
-    fn into_method_handler(self) -> MethodHandlerFn<State> {
-        Box::new(move |state: &mut State, method: String, params: Option<Box<serde_json::value::RawValue>>| {
-            let fut = self(state, method, params);
-            Box::pin(async move { fut.await.into_handler_response() })
-        })
-    }
-}
-
-/// Anything that is a valid subscription handler implements this trait.
-pub trait IntoSubscriptionHandler<State, A> {
-    /// Convert self into a subscription handler function.
-    fn into_subscription_handler(self) -> SubscriptionHandlerFn<State>;
-}
-
-impl <State, F, R> IntoSubscriptionHandler<State, SyncMarker> for F 
-where
-    F: Fn(&mut State, String, Option<Box<serde_json::value::RawValue>>, String) -> R + Send + Sync + 'static,
-    R: IntoSubscriptionResponse + Send + 'static,
-{
-    fn into_subscription_handler(self) -> SubscriptionHandlerFn<State> {
-        Box::new(move |state: &mut State, sub: String, params: Option<Box<serde_json::value::RawValue>>, unsub: String| {
-            let res = self(state, sub, params, unsub);
-            Box::pin(async move { res.into_subscription_response() })
-        })
-    }
-}
-
-impl <State, F, Fut, R> IntoSubscriptionHandler<State, AsyncMarker> for F 
-where
-    F: Fn(&mut State, String, Option<Box<serde_json::value::RawValue>>, String) -> Fut + Send + Sync + 'static,
-    Fut: Future<Output = R> + Send + 'static,
-    R: IntoSubscriptionResponse + Send + 'static,
-{
-    fn into_subscription_handler(self) -> SubscriptionHandlerFn<State> {
-        Box::new(move |state: &mut State, sub: String, params: Option<Box<serde_json::value::RawValue>>, unsub: String| {
-            let fut = self(state, sub, params, unsub);
-            Box::pin(async move { fut.await.into_subscription_response() })
-        })
-    }
-}
-
-#[doc(hidden)]
-pub enum SyncMarker {}
-#[doc(hidden)]
-pub enum AsyncMarker {}
