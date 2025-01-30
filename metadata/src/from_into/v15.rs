@@ -284,9 +284,7 @@ mod into_v15 {
                     event_enum_ty: m.outer_enums.event_enum_ty.into(),
                     error_enum_ty: m.outer_enums.error_enum_ty.into(),
                 },
-                custom: v15::CustomMetadata {
-                    map: Default::default(),
-                },
+                custom: m.custom,
             }
         }
     }
