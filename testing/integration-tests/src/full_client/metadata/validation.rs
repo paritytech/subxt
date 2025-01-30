@@ -98,6 +98,25 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> Metadata {
 }
 
 #[subxt_test]
+async fn metadata_converting_works_ok() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    assert!(
+        node_runtime::is_codegen_valid_for(&api.metadata()),
+        "Should be valid initially"
+    );
+
+    let metadata = RuntimeMetadataV15::from((*api.metadata()).clone());
+    let metadata = v15_to_metadata(metadata);
+
+    assert!(
+        node_runtime::is_codegen_valid_for(&metadata),
+        "Should still be valid after conversion back and forth"
+    );
+}
+
+#[subxt_test]
 async fn full_metadata_check() {
     let ctx = test_context().await;
     let api = ctx.client();
