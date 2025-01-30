@@ -291,6 +291,12 @@ jobs:
       - name: Install cargo-nextest
         run: cargo install cargo-nextest
 
+      - name: Run subxt-signer no-std tests
+        uses: actions-rs/cargo@v1.0.3
+        with:
+          command: test
+          working-directory: signer/tests/no-std
+
       - name: Run tests
         uses: actions-rs/cargo@v1.0.3
         with:
@@ -416,7 +422,7 @@ jobs:
         run: |
           wasm-pack test --headless --firefox
           wasm-pack test --headless --chrome
-        working-directory: signer/wasm-tests
+        working-directory: signer/tests/wasm
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5

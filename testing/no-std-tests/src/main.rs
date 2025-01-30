@@ -41,21 +41,28 @@ fn compile_test() {
     const METADATA: &[u8] = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
     subxt_metadata::Metadata::decode(&mut &METADATA[..]).expect("should be valid metadata");
 
-    // Subxt Signer compiles:
-    use subxt_signer::sr25519;
-    let keypair = sr25519::dev::alice();
-    let message = b"Hello!";
-    let _signature = keypair.sign(message);
-    let _public_key = keypair.public_key();
+    // Subxt signer compiles (though nothing much works on this particular nostd target...):
+    // Supported targets: <https://docs.rs/getrandom/latest/getrandom/#supported-targets>
+    use core::str::FromStr;
+    let _ = subxt_signer::SecretUri::from_str("//Alice/bar");
 
-    // Note: `ecdsa` is not compiling for the `thumbv7em-none-eabi` target.
+    // Note: sr25519 needs randomness, but `thumbv7em-none-eabi` isn't supported by
+    // `getrandom`, so we can't sign in nostd on this target.
+    //
+    // use subxt_signer::sr25519;
+    // let keypair = sr25519::dev::alice();
+    // let message = b"Hello!";
+    // let _signature = keypair.sign(message);
+    // let _public_key = keypair.public_key();
+
+    // Note: `ecdsa` is also not compiling for the `thumbv7em-none-eabi` target owing to
+    // an issue compiling `secp256k1-sys`.
     //
     // use subxt_signer::ecdsa;
     // let keypair = ecdsa::dev::alice();
     // let message = b"Hello!";
     // let _signature = keypair.sign(message);
     // let _public_key = keypair.public_key();
-    //
 
     // Subxt Core compiles:
     let _era = subxt_core::utils::Era::Immortal;

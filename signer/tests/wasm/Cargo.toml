@@ -13,7 +13,7 @@ console_error_panic_hook = "0.1.7"
 # enable the "web" feature here but don't want it enabled as part
 # of workspace builds. Also disable the "subxt" feature here because
 # we want to ensure it works in isolation of that.
-subxt-signer = { path = "..", default-features = false, features = [
+subxt-signer = { path = "../../", default-features = false, features = [
     "web",
     "sr25519",
     "ecdsa",
