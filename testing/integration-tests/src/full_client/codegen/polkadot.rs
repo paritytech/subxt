@@ -4870,7 +4870,23 @@ pub mod api {
         CustomValuesApi
     }
     pub struct CustomValuesApi;
-    impl CustomValuesApi {}
+    impl CustomValuesApi {
+        pub fn view_functions_experimental(
+            &self,
+        ) -> ::subxt::ext::subxt_core::custom_values::address::StaticAddress<
+            runtime_types::rococo_runtime::RuntimeViewFunction,
+            ::subxt::ext::subxt_core::utils::Yes,
+        > {
+            ::subxt::ext::subxt_core::custom_values::address::StaticAddress::new_static(
+                "view_functions_experimental",
+                [
+                    128u8, 150u8, 108u8, 4u8, 190u8, 241u8, 12u8, 170u8, 111u8, 105u8, 220u8,
+                    108u8, 186u8, 254u8, 115u8, 208u8, 38u8, 84u8, 39u8, 168u8, 231u8, 177u8,
+                    204u8, 189u8, 149u8, 220u8, 144u8, 21u8, 220u8, 36u8, 235u8, 150u8,
+                ],
+            )
+        }
+    }
     pub struct ConstantsApi;
     impl ConstantsApi {
         pub fn system(&self) -> system::constants::ConstantsApi {
@@ -5355,9 +5371,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                51u8, 150u8, 162u8, 57u8, 229u8, 127u8, 170u8, 213u8, 240u8, 50u8, 119u8, 88u8,
-                47u8, 86u8, 141u8, 181u8, 175u8, 77u8, 26u8, 156u8, 110u8, 137u8, 0u8, 94u8, 14u8,
-                148u8, 209u8, 224u8, 182u8, 21u8, 103u8, 219u8,
+                245u8, 38u8, 177u8, 91u8, 230u8, 128u8, 143u8, 175u8, 239u8, 115u8, 40u8, 160u8,
+                166u8, 18u8, 102u8, 159u8, 101u8, 10u8, 213u8, 240u8, 132u8, 162u8, 129u8, 231u8,
+                75u8, 105u8, 26u8, 22u8, 123u8, 51u8, 9u8, 162u8,
             ]
     }
     pub mod system {
@@ -69912,6 +69928,18 @@ pub mod api {
                 #[codec(index = 1)]
                 Preimage(runtime_types::rococo_runtime::dynamic_params::preimage::ParametersValue),
             }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub enum RuntimeViewFunction {}
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
                 :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
