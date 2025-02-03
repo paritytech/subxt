@@ -5,7 +5,7 @@
 use crate::{
     blocks::block_types::{get_events, CachedEvents},
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, Hasher},
+    config::Config,
     error::Error,
     events,
 };
