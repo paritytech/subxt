@@ -19,20 +19,17 @@
 //! // Define a mock client by providing some state (can be optional)
 //! // and functions which intercept method and subscription calls and
 //! // returns something back.
-//! let mock_client = MockRpcClient::new(
-//!     state,
-//!     |state, method, params| {
+//! let mock_client = MockRpcClient::<Vec<_>>::builder()
+//!     .method_handler("foo", |state, params| async move {
 //!         // We'll panic if an RPC method is called more than 3 times:
-//!         let val = state.pop().unwrap();
-//!         async move { val }
-//!     },
-//!     |state, sub, params, unsub| {
+//!         state.get().await.pop().unwrap()
+//!     })
+//!     .subscription_handler("bar", |state, params, unsub| async move {
 //!         // Arrays, vecs or an RpcSubscription can be returned here to
 //!         // signal the set of values to be handed back on a subscription.
-//!         let vals = vec![Json(1), Json(2), Json(3)];
-//!         async move { vals }
-//!     }
-//! );
+//!         vec![Json(1), Json(2), Json(3)]
+//!     })
+//!     .build(state);
 //! 
 //! // Build an RPC Client that can be used in Subxt or in conjunction with
 //! // the RPC methods provided in this crate. 
@@ -40,50 +37,124 @@
 //! ```
 
 use super::{RpcClientT, RawRpcFuture, RawRpcSubscription};
-use crate::Error;
+use crate::{Error, UserError};
 use core::future::Future;
+use futures::StreamExt;
 use serde_json::value::RawValue;
-use std::sync::{Arc,Mutex};
+use std::sync::{Arc, Mutex};
+use std::collections::HashMap;
 
-type MethodHandlerFn<State> = Box<dyn Fn(&mut State, String, Option<Box<serde_json::value::RawValue>>) -> RawRpcFuture<'static, Box<RawValue>> + Send + Sync + 'static>;
-type SubscriptionHandlerFn<State> = Box<dyn Fn(&mut State, String, Option<Box<serde_json::value::RawValue>>, String) -> RawRpcFuture<'static, RawRpcSubscription> + Send + Sync + 'static>;
+type MethodHandlerFn<State> = Box<dyn FnMut(StateHolder<State>, &str, Option<Box<serde_json::value::RawValue>>) -> RawRpcFuture<'static, Box<RawValue>> + Send + Sync + 'static>;
+type SubscriptionHandlerFn<State> = Box<dyn FnMut(StateHolder<State>, &str, Option<Box<serde_json::value::RawValue>>, &str) -> RawRpcFuture<'static, RawRpcSubscription> + Send + Sync + 'static>;
+
+/// A builder to configure and build a new [`MockRpcClient`].
+pub struct MockRpcClientBuilder<State> {
+    method_handlers: HashMap<String, MethodHandlerFn<State>>,
+    subscription_handlers: HashMap<String, SubscriptionHandlerFn<State>>,
+    method_fallback: Option<MethodHandlerFn<State>>,
+    subscription_fallback: Option<SubscriptionHandlerFn<State>>
+}
+
+impl <State> MockRpcClientBuilder<State> {
+    fn new() -> Self {
+        MockRpcClientBuilder {
+            method_handlers: HashMap::new(),
+            subscription_handlers: HashMap::new(),
+            method_fallback: None,
+            subscription_fallback: None
+        }
+    }
+
+    /// Add a handler for a specific RPC method.
+    pub fn method_handler<MethodHandler, MFut, MRes>(mut self, name: impl Into<String>, mut f: MethodHandler) -> Self 
+    where
+        MethodHandler: FnMut(StateHolder<State>, Option<Box<serde_json::value::RawValue>>) -> MFut + Send + Sync + 'static,
+        MFut: Future<Output = MRes> + Send + 'static,
+        MRes: IntoHandlerResponse,
+    {
+        let handler: MethodHandlerFn<State> = Box::new(move |state: StateHolder<State>, _method: &str, params: Option<Box<serde_json::value::RawValue>>| {
+            let fut = f(state, params);
+            Box::pin(async move { fut.await.into_handler_response() })
+        });
+        self.method_handlers.insert(name.into(), handler);
+        self
+    }
+
+    /// Add a fallback handler to handle any methods not handled by a specific handler.
+    pub fn method_fallback<MethodHandler, MFut, MRes>(mut self, mut f: MethodHandler) -> Self 
+    where
+        MethodHandler: FnMut(StateHolder<State>, String, Option<Box<serde_json::value::RawValue>>) -> MFut + Send + Sync + 'static,
+        MFut: Future<Output = MRes> + Send + 'static,
+        MRes: IntoHandlerResponse,
+    {
+        let handler: MethodHandlerFn<State> = Box::new(move |state: StateHolder<State>, method: &str, params: Option<Box<serde_json::value::RawValue>>| {
+            let fut = f(state, method.to_owned(), params);
+            Box::pin(async move { fut.await.into_handler_response() })
+        });
+        self.method_fallback = Some(handler);
+        self
+    }
+
+    /// Add a handler for a specific RPC subscription.
+    pub fn subscription_handler<SubscriptionHandler, SFut, SRes>(mut self, name: impl Into<String>, mut f: SubscriptionHandler) -> Self 
+    where
+        SubscriptionHandler: FnMut(StateHolder<State>, Option<Box<serde_json::value::RawValue>>, String) -> SFut + Send + Sync + 'static,
+        SFut: Future<Output = SRes> + Send + 'static,
+        SRes: IntoSubscriptionResponse,
+    {
+        let handler: SubscriptionHandlerFn<State> = Box::new(move |state: StateHolder<State>, _sub: &str, params: Option<Box<serde_json::value::RawValue>>, unsub: &str| {
+            let fut = f(state, params, unsub.to_owned());
+            Box::pin(async move { fut.await.into_subscription_response() })
+        });
+        self.subscription_handlers.insert(name.into(), handler);
+        self
+    }
+
+    /// Add a fallback handler to handle any subscriptions not handled by a specific handler.
+    pub fn subscription_fallback<SubscriptionHandler, SFut, SRes>(mut self, mut f: SubscriptionHandler) -> Self 
+    where
+        SubscriptionHandler: FnMut(StateHolder<State>, String, Option<Box<serde_json::value::RawValue>>, String) -> SFut + Send + Sync + 'static,
+        SFut: Future<Output = SRes> + Send + 'static,
+        SRes: IntoSubscriptionResponse,
+    {
+        let handler: SubscriptionHandlerFn<State> = Box::new(move |state: StateHolder<State>, sub: &str, params: Option<Box<serde_json::value::RawValue>>, unsub: &str| {
+            let fut = f(state, sub.to_owned(), params, unsub.to_owned());
+            Box::pin(async move { fut.await.into_subscription_response() })
+        });
+        self.subscription_fallback = Some(handler);
+        self
+    }
+
+    /// Construct a [`MockRpcClient`] given some state which will be mutably available to each of the handlers.
+    pub fn build(self, state: State) -> MockRpcClient<State> {
+        MockRpcClient { 
+            state: Arc::new(tokio::sync::Mutex::new(state)), 
+            method_handlers: Arc::new(Mutex::new(self.method_handlers)), 
+            subscription_handlers: Arc::new(Mutex::new(self.subscription_handlers)), 
+            method_fallback: self.method_fallback.map(|f| Arc::new(Mutex::new(f))),
+            subscription_fallback: self.subscription_fallback.map(|f| Arc::new(Mutex::new(f))),
+        }
+    }
+}
 
 /// A mock RPC client that responds programmatically to requests.
 /// Useful for testing.
 pub struct MockRpcClient<State> {
-    state: Arc<Mutex<State>>,
-    method_handler: MethodHandlerFn<State>,
-    subscription_handler: SubscriptionHandlerFn<State>
+    // State is accessed inside async functions and may be held across await points,
+    // so we use a tokio Mutex for it.
+    state: Arc<tokio::sync::Mutex<State>>,
+    // These are all accessed for just long enough to call the method. The method
+    // returns a future, but the method call itself isn't held for long.
+    method_handlers: Arc<Mutex<HashMap<String, MethodHandlerFn<State>>>>,
+    subscription_handlers: Arc<Mutex<HashMap<String, SubscriptionHandlerFn<State>>>>,
+    method_fallback: Option<Arc<Mutex<MethodHandlerFn<State>>>>,
+    subscription_fallback: Option<Arc<Mutex<SubscriptionHandlerFn<State>>>>,
 }
 
 impl <State: Send + 'static> MockRpcClient<State> {
-    /// Create a [`MockRpcClient`] by providing some state (which will be mutably available 
-    /// to each function), a function to handle method calls, and a function to handle 
-    /// subscription calls.
-    pub fn new<MethodHandler, MFut, MRes, SubscriptionHandler, SFut, SRes>(
-        state: State, 
-        method_handler: MethodHandler, 
-        subscription_handler: SubscriptionHandler
-    ) -> MockRpcClient<State>
-    where
-        MethodHandler: Fn(&mut State, String, Option<Box<serde_json::value::RawValue>>) -> MFut + Send + Sync + 'static,
-        MFut: Future<Output = MRes> + Send + 'static,
-        MRes: IntoHandlerResponse,
-        SubscriptionHandler: Fn(&mut State, String, Option<Box<serde_json::value::RawValue>>, String) -> SFut + Send + Sync + 'static,
-        SFut: Future<Output = SRes> + Send + 'static,
-        SRes: IntoSubscriptionResponse,
-    {
-        MockRpcClient {
-            state: Arc::new(Mutex::new(state)),
-            method_handler: Box::new(move |state: &mut State, method: String, params: Option<Box<serde_json::value::RawValue>>| {
-                let fut = method_handler(state, method, params);
-                Box::pin(async move { fut.await.into_handler_response() })
-            }),
-            subscription_handler: Box::new(move |state: &mut State, sub: String, params: Option<Box<serde_json::value::RawValue>>, unsub: String| {
-                let fut = subscription_handler(state, sub, params, unsub);
-                Box::pin(async move { fut.await.into_subscription_response() })
-            })
-        }
+    /// Construct a new [`MockRpcClient`]
+    pub fn builder() -> MockRpcClientBuilder<State> {
+        MockRpcClientBuilder::new()
     }
 }
 
@@ -93,8 +164,18 @@ impl <State: Send + 'static> RpcClientT for MockRpcClient<State> {
         method: &'a str,
         params: Option<Box<serde_json::value::RawValue>>,
     ) -> RawRpcFuture<'a, Box<serde_json::value::RawValue>> {
-        let mut s = self.state.lock().unwrap();
-        (self.method_handler)(&mut *s, method.to_owned(), params)
+        let mut handlers = self.method_handlers.lock().unwrap();
+        if let Some(handler) = handlers.get_mut(method) {
+            // Call a specific handler for the method if one is found.
+            handler(StateHolder(self.state.clone()), method, params)
+        } else if let Some(handler) = &self.method_fallback {
+            // Else, call the fallback handler if that exists.
+            let mut handler = handler.lock().unwrap();
+            handler(StateHolder(self.state.clone()), method, params)
+        } else {
+            // Else, method not found.
+            Box::pin(async move { Err(UserError::method_not_found().into()) })
+        }
     }
     fn subscribe_raw<'a>(
         &'a self,
@@ -102,13 +183,69 @@ impl <State: Send + 'static> RpcClientT for MockRpcClient<State> {
         params: Option<Box<serde_json::value::RawValue>>,
         unsub: &'a str,
     ) -> RawRpcFuture<'a, RawRpcSubscription> {
-        let mut s = self.state.lock().unwrap();
-        (self.subscription_handler)(&mut *s, sub.to_owned(), params, unsub.to_owned())
+        let mut handlers = self.subscription_handlers.lock().unwrap();
+        if let Some(handler) = handlers.get_mut(sub) {
+            // Call a specific handler for the method if one is found.
+            handler(StateHolder(self.state.clone()), sub, params, unsub)
+        } else if let Some(handler) = &self.subscription_fallback {
+            // Else, call the fallback handler if that exists.
+            let mut handler = handler.lock().unwrap();
+            handler(StateHolder(self.state.clone()), sub, params, unsub)
+        } else {
+            // Else, method not found.
+            Box::pin(async move { Err(UserError::method_not_found().into()) })
+        }
+    }
+}
+
+/// State passed to each handler.
+pub struct StateHolder<T>(Arc<tokio::sync::Mutex<T>>);
+
+/// A guard for state that is being accessed.
+pub struct StateHolderGuard<'a, T>(tokio::sync::MutexGuard<'a, T>);
+
+impl <T> StateHolder<T> {
+    /// Get the inner state
+    pub async fn get(&self) -> StateHolderGuard<T> {
+        StateHolderGuard(self.0.lock().await)
+    }
+
+    /// Set the inner state to a new value, returning the old state.
+    pub async fn set(&self, new: T) -> T {
+        let mut guard = self.0.lock().await;
+        std::mem::replace(&mut *guard, new)
+    }
+
+    /// Update the inner state, returning the old state.
+    pub async fn update<F: FnOnce(&T) -> T>(&self, f: F) -> T {
+        let mut guard = self.0.lock().await;
+        let new = f(&guard);
+        std::mem::replace(&mut *guard, new)
+    }
+}
+
+impl <'a, T> core::ops::Deref for StateHolderGuard<'a, T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &*self.0
+    }
+}
+impl <'a, T> core::ops::DerefMut for StateHolderGuard<'a, T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut *self.0
     }
 }
 
 /// Return responses wrapped in this to have them serialized to JSON. 
 pub struct Json<T>(pub T);
+
+impl Json<serde_json::Value> {
+    /// Create a [`Json<serde_json::Value>`] from some serializable value.
+    /// Useful when value types are heterogenous.
+    pub fn value_of<T: serde::Serialize>(item: T) -> Self {
+        Json(serde_json::to_value(item).expect("item cannot be converted to a serde_json::Value"))
+    }
+}
 
 /// Anything that can be converted into a valid handler response implements this.
 pub trait IntoHandlerResponse {
@@ -116,9 +253,16 @@ pub trait IntoHandlerResponse {
     fn into_handler_response(self) -> Result<Box<RawValue>, Error>;
 }
 
-impl <T: serde::Serialize> IntoHandlerResponse for Result<T, Error> {
+impl <T: IntoHandlerResponse> IntoHandlerResponse for Result<T, Error> {
     fn into_handler_response(self) -> Result<Box<RawValue>, Error> {
-        self.and_then(|val| serialize_to_raw_value(&val))
+        self.and_then(|val| val.into_handler_response())
+    }
+}
+
+impl <T: IntoHandlerResponse> IntoHandlerResponse for Option<T> {
+    fn into_handler_response(self) -> Result<Box<RawValue>, Error> {
+        self.ok_or_else(|| UserError::method_not_found().into())
+            .and_then(|val| val.into_handler_response())
     }
 }
 
@@ -152,6 +296,51 @@ pub trait IntoSubscriptionResponse {
     fn into_subscription_response(self) -> Result<RawRpcSubscription, Error>;
 }
 
+// A tuple of a subscription plus some string is treated as a subscription with that string ID.
+impl <T: IntoSubscriptionResponse, S: Into<String>> IntoSubscriptionResponse for (T, S) {
+    fn into_subscription_response(self) -> Result<RawRpcSubscription, Error> {
+        self.0
+            .into_subscription_response()
+            .map(|mut r| {
+                r.id = Some(self.1.into());
+                r
+            })
+    }
+}
+
+impl <T: IntoHandlerResponse + Send + 'static> IntoSubscriptionResponse for tokio::sync::mpsc::Receiver<T> {
+    fn into_subscription_response(self) -> Result<RawRpcSubscription, Error> {
+        struct IntoStream<T>(tokio::sync::mpsc::Receiver<T>);
+        impl <T> futures::Stream for IntoStream<T> {
+            type Item = T;
+            fn poll_next(mut self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Option<Self::Item>> {
+                self.0.poll_recv(cx)
+            }
+        }
+
+        Ok(RawRpcSubscription {
+            stream: Box::pin(IntoStream(self).map(|item| item.into_handler_response())),
+            id: None,
+        })
+    }
+}
+impl <T: IntoHandlerResponse + Send + 'static> IntoSubscriptionResponse for tokio::sync::mpsc::UnboundedReceiver<T> {
+    fn into_subscription_response(self) -> Result<RawRpcSubscription, Error> {
+        struct IntoStream<T>(tokio::sync::mpsc::UnboundedReceiver<T>);
+        impl <T> futures::Stream for IntoStream<T> {
+            type Item = T;
+            fn poll_next(mut self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Option<Self::Item>> {
+                self.0.poll_recv(cx)
+            }
+        }
+
+        Ok(RawRpcSubscription {
+            stream: Box::pin(IntoStream(self).map(|item| item.into_handler_response())),
+            id: None,
+        })
+    }
+}
+
 impl IntoSubscriptionResponse for Result<RawRpcSubscription, Error> {
     fn into_subscription_response(self) -> Result<RawRpcSubscription, Error> {
         self
@@ -168,6 +357,22 @@ impl <T: IntoHandlerResponse + Send + 'static> IntoSubscriptionResponse for Vec<
     }
 }
 
+impl <T: IntoSubscriptionResponse + Send + 'static> IntoSubscriptionResponse for Option<T> {
+    fn into_subscription_response(self) -> Result<RawRpcSubscription, Error> {
+        match self {
+            Some(sub) => {
+                sub.into_subscription_response()
+            },
+            None => {
+                Ok(RawRpcSubscription {
+                    stream: Box::pin(futures::stream::empty()),
+                    id: None,
+                }) 
+            }
+        }
+    }
+}
+
 impl <T: IntoHandlerResponse + Send + 'static, const N: usize> IntoSubscriptionResponse for [T; N] {
     fn into_subscription_response(self) -> Result<RawRpcSubscription, Error> {
         let iter = self.into_iter().map(|item| item.into_handler_response());
@@ -175,5 +380,31 @@ impl <T: IntoHandlerResponse + Send + 'static, const N: usize> IntoSubscriptionR
             stream: Box::pin(futures::stream::iter(iter)),
             id: None,
         })
+    }
+}
+
+/// Send the first items and then the second items back on a subscription;
+/// If any one of the responses is an error, we'll return the error.
+/// If one response has an ID and the other doesn't, we'll use that ID.
+pub struct AndThen<A, B>(pub A, pub B);
+
+impl <A: IntoSubscriptionResponse, B: IntoSubscriptionResponse> IntoSubscriptionResponse for AndThen<A, B> {
+    fn into_subscription_response(self) -> Result<RawRpcSubscription, Error> {
+        let a_responses = self.0.into_subscription_response();
+        let b_responses = self.1.into_subscription_response();
+
+        match (a_responses, b_responses) {
+            (Err(a), _) => {
+                Err(a)
+            },
+            (_, Err(b)) => {
+                Err(b)
+            },
+            (Ok(mut a), Ok(b)) => {
+                a.stream = Box::pin(a.stream.chain(b.stream));
+                a.id = a.id.or(b.id);
+                Ok(a)
+            }
+        }
     }
 }

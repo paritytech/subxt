@@ -24,29 +24,6 @@ macro_rules! cfg_jsonrpsee {
 	};
 }
 
-#[allow(unused)]
-macro_rules! cfg_jsonrpsee_native {
-	($($item:item)*) => {
-		$(
-			#[cfg(all(feature = "jsonrpsee", feature = "native"))]
-			#[cfg_attr(docsrs, doc(cfg(all(feature = "jsonrpsee", feature = "native"))))]
-			$item
-		)*
-	}
-}
-
-#[allow(unused)]
-macro_rules! cfg_jsonrpsee_web {
-	($($item:item)*) => {
-		$(
-			#[cfg(all(feature = "jsonrpsee", feature = "web"))]
-			#[cfg_attr(docsrs, doc(cfg(all(feature = "jsonrpsee", feature = "web"))))]
-			$item
-		)*
-	}
-}
-
-#[allow(unused)]
 macro_rules! cfg_reconnecting_rpc_client {
 	($($item:item)*) => {
 		$(
@@ -57,10 +34,13 @@ macro_rules! cfg_reconnecting_rpc_client {
 	}
 }
 
+macro_rules! cfg_mock_rpc_client {
+	($($item:item)*) => {
+		crate::macros::cfg_feature!("mock-rpc-client", $($item)*);
+	};
+}
+
 pub(crate) use {
-    cfg_feature, cfg_jsonrpsee, cfg_reconnecting_rpc_client, cfg_unstable_light_client,
+    cfg_feature, cfg_jsonrpsee, cfg_mock_rpc_client, cfg_reconnecting_rpc_client, cfg_unstable_light_client,
 };
 
-// Only used by light-client.
-#[allow(unused)]
-pub(crate) use {cfg_jsonrpsee_native, cfg_jsonrpsee_web};

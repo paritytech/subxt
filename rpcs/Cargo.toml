@@ -15,15 +15,24 @@ description = "Make RPC calls to Substrate based nodes"
 keywords = ["parity", "subxt", "rpcs"]
 
 [features]
-default = ["jsonrpsee", "native"]
+default = ["jsonrpsee", "native", "mock-rpc-client"]
 
 subxt-core = ["dep:subxt-core"]
 jsonrpsee = ["dep:jsonrpsee", "dep:tokio-util"]
-unstable-light-client = ["dep:subxt-lightclient"]
+
+unstable-light-client = [
+    "dep:subxt-lightclient"
+]
+
 reconnecting-rpc-client = [
     "jsonrpsee",
     "dep:finito",
     "dep:tokio", 
+    "tokio/sync",
+]
+
+mock-rpc-client = [
+    "dep:tokio",
     "tokio/sync",
 ]
 

@@ -62,7 +62,7 @@ mod impl_config {
 pub enum Error {
     /// An error which indicates a user fault.
     #[error("User error: {0}")]
-    User(UserError),
+    User(#[from] UserError),
     // Dev note: We need the error to be safely sent between threads
     // for `subscribe_to_block_headers_filling_in_gaps` and friends.
     /// An error coming from the underlying RPC Client.
@@ -99,7 +99,7 @@ impl Error {
 /// errors into this, so that they can be handled appropriately. By contrast,
 /// [`Error::Client`] is emitted when the underlying RPC Client implementation
 /// has some problem that isn't user specific (eg network issue or similar).
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, thiserror::Error)]
 #[serde(deny_unknown_fields)]
 pub struct UserError {
 	/// Code
@@ -108,6 +108,17 @@ pub struct UserError {
 	pub message: String,
 	/// Optional data
 	pub data: Option<Box<serde_json::value::RawValue>>,
+}
+
+impl UserError {
+    /// Returns a standard JSON-RPC "method not found" error.
+    pub fn method_not_found() -> UserError {
+        UserError {
+            code: -32601,
+            message: "Method not found".to_owned(),
+            data: None
+        }
+    }
 }
 
 impl core::fmt::Display for UserError {

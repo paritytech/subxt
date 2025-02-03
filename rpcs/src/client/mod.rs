@@ -32,8 +32,10 @@ crate::macros::cfg_reconnecting_rpc_client! {
    pub use reconnecting_rpc_client::RpcClient as ReconnectingRpcClient;
 }
 
-pub mod mock_rpc_client;
-pub use mock_rpc_client::MockRpcClient;
+crate::macros::cfg_mock_rpc_client! {
+    pub mod mock_rpc_client;
+    pub use mock_rpc_client::MockRpcClient;
+}
 
 mod rpc_client;
 mod rpc_client_t;
