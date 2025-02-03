@@ -250,7 +250,7 @@ where
     /// The events associated with the extrinsic.
     pub async fn events(&self) -> Result<ExtrinsicEvents<T>, Error> {
         let events = get_events(&self.client, self.block_hash, &self.cached_events).await?;
-        let ext_hash = T::Hasher::hash_of(&self.bytes());
+        let ext_hash = self.inner.hash();
         Ok(ExtrinsicEvents::new(ext_hash, self.index(), events))
     }
 }
