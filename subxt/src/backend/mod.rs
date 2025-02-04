@@ -859,6 +859,7 @@ mod test {
         use subxt_rpcs::methods::chain_head::{
             self, Bytes, Initialized, MethodResponse, MethodResponseStarted, OperationError, OperationId, OperationStorageItems, RuntimeSpec, RuntimeVersionEvent
         };
+        use tokio::select;
         use super::chain_head::*;
         use super::*;
 
@@ -876,51 +877,65 @@ mod test {
 
         fn runtime_spec() -> RuntimeSpec {
             let spec = serde_json::json!({
-                        "specName": "westend",
-                        "implName": "parity-westend",
-                        "specVersion": 9122,
-                        "implVersion": 0,
-                        "transactionVersion": 7,
-                        "apis": {
-                            "0xdf6acb689907609b": 3,
-                            "0x37e397fc7c91f5e4": 1,
-                            "0x40fe3ad401f8959a": 5,
-                            "0xd2bc9897eed08f15": 3,
-                            "0xf78b278be53f454c": 2,
-                            "0xaf2c0297a23e6d3d": 1,
-                            "0x49eaaf1b548a0cb0": 1,
-                            "0x91d5df18b0d2cf58": 1,
-                            "0xed99c5acb25eedf5": 3,
-                            "0xcbca25e39f142387": 2,
-                            "0x687ad44ad37f03c2": 1,
-                            "0xab3c0572291feb8b": 1,
-                            "0xbc9d89904f5b923f": 1,
-                            "0x37c8bb1350a9a2a8": 1
-                    }
+                "specName": "westend",
+                "implName": "parity-westend",
+                "specVersion": 9122,
+                "implVersion": 0,
+                "transactionVersion": 7,
+                "apis": {
+                    "0xdf6acb689907609b": 3,
+                    "0x37e397fc7c91f5e4": 1,
+                    "0x40fe3ad401f8959a": 5,
+                    "0xd2bc9897eed08f15": 3,
+                    "0xf78b278be53f454c": 2,
+                    "0xaf2c0297a23e6d3d": 1,
+                    "0x49eaaf1b548a0cb0": 1,
+                    "0x91d5df18b0d2cf58": 1,
+                    "0xed99c5acb25eedf5": 3,
+                    "0xcbca25e39f142387": 2,
+                    "0x687ad44ad37f03c2": 1,
+                    "0xab3c0572291feb8b": 1,
+                    "0xbc9d89904f5b923f": 1,
+                    "0x37c8bb1350a9a2a8": 1
+                }
             });
-            serde_json::from_value(spec).unwrap()
+            serde_json::from_value(spec).expect("Mock runtime spec should be the right shape")
         }
 
         type FollowEvent = chain_head::FollowEvent<<Conf as Config>::Hash>;
 
-        /// Build a mock client which can handle `chainHead_v1_follow` calls, and accepts 
-        /// a receiver whose messages will be sent onto the first such subscription.
-        fn mock_client_builder(recv: tokio::sync::mpsc::Receiver<subxt_rpcs::client::mock_rpc_client::Json<FollowEvent>>) -> subxt_rpcs::client::mock_rpc_client::MockRpcClientBuilder {
+        /// Build a mock client which can handle `chainHead_v1_follow` subscriptions.
+        /// Messages from the provided receiver are sent to the latest active subscription.
+        fn mock_client_builder(recv: tokio::sync::mpsc::UnboundedReceiver<FollowEvent>) -> subxt_rpcs::client::mock_rpc_client::MockRpcClientBuilder {
             use subxt_rpcs::client::{ MockRpcClient, mock_rpc_client::{Json, AndThen} };
 
-            let hash = random_hash();
-            let mut id = 0;
-            let mut recv = Some(recv);
+            let recv = Arc::new(tokio::sync::Mutex::new(recv));
 
             MockRpcClient::builder()
                 .subscription_handler("chainHead_v1_follow", move |_params, _unsub| {
-                    let recv = recv.take();
+                    let recv = recv.clone();
+                    let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+                    tokio::spawn(async move {
+                        let mut recv_guard = recv.lock().await;
+                        loop {
+                            select! {
+                                _ = tx.closed() => {
+                                    println!("CLOSED!");
+                                    break
+                                },
+                                Some(msg) = recv_guard.recv() => {
+                                    if tx.send(Json(msg)).is_err() {
+                                        break
+                                    }
+                                }                             
+                            }
+                        }
+                    });
+
                     async move {
-                        id += 1;
-                    
                         let follow_event =
                             FollowEvent::Initialized(Initialized::<<Conf as Config>::Hash> {
-                                finalized_block_hashes: vec![hash],
+                                finalized_block_hashes: vec![random_hash()],
                                 finalized_block_runtime: Some(chain_head::RuntimeEvent::Valid(
                                     RuntimeVersionEvent {
                                         spec: runtime_spec(),
@@ -930,54 +945,13 @@ mod test {
                         
                         AndThen(
                             // First send an initialized event
-                            (vec![Json(follow_event)], format!("ID{id}")),
+                            (vec![Json(follow_event)], "chainHeadFollowSubscriptionId"),
                             // Next, send any events provided via the recv channel
-                            recv
+                            rx
                         )
                     }
                 })
         }
-
-        // fn setup_mock_rpc_client(cycle_ids: bool) -> MockRpcBuilder {
-        //     let hash = random_hash();
-        //     let mut id = 0;
-        //     rpc_client::MockRpcBuilder::default().add_subscription(
-        //         "chainHead_v1_follow",
-        //         move |_, sub, _| {
-        //             Box::pin(async move {
-        //                 if cycle_ids {
-        //                     id += 1;
-        //                 }
-        //                 let follow_event =
-        //                     FollowEvent::Initialized(Initialized::<<Conf as Config>::Hash> {
-        //                         finalized_block_hashes: vec![hash],
-        //                         finalized_block_runtime: Some(chain_head::RuntimeEvent::Valid(
-        //                             RuntimeVersionEvent {
-        //                                 spec: runtime_spec(),
-        //                             },
-        //                         )),
-        //                     });
-        //                 let (subscription, mut receiver) = Subscription::new();
-        //                 subscription
-        //                     .write(Message::Single(Ok(
-        //                         serde_json::to_string(&follow_event).unwrap()
-        //                     )))
-        //                     .await;
-        //                 sub.replace(subscription);
-        //                 let read_stream =
-        //                     futures::stream::poll_fn(move |cx| -> Poll<Option<Item>> {
-        //                         receiver.poll_recv(cx)
-        //                     })
-        //                     .map(|item| item.map(|x| RawValue::from_string(x).unwrap()));
-        //                 let stream = RawRpcSubscription {
-        //                     stream: read_stream.boxed(),
-        //                     id: Some(format!("ID{}", id)),
-        //                 };
-        //                 Ok(stream)
-        //             })
-        //         },
-        //     )
-        // }
 
         fn response_started(id: &str) -> MethodResponse {
             MethodResponse::Started(MethodResponseStarted {
@@ -1025,7 +999,7 @@ mod test {
         async fn storage_fetch_values_returns_stream_with_single_error() {
             use subxt_rpcs::client::mock_rpc_client::Json;
 
-            let (tx, rx) = tokio::sync::mpsc::channel(10);
+            let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
 
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainHead_v1_storage", move |params| {
@@ -1033,7 +1007,7 @@ mod test {
                         // Wait a little and then send an error response on the
                         // chainHead_follow subscription:
                         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-                        tx.send(Json(operation_error("Id1"))).await.unwrap();
+                        tx.send(operation_error("Id1"));
                     });
 
                     async move {
@@ -1063,7 +1037,7 @@ mod test {
         async fn storage_fetch_values_retry_query() {
             use subxt_rpcs::client::mock_rpc_client::Json;
 
-            let (tx, rx) = tokio::sync::mpsc::channel(10);
+            let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
 
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
@@ -1074,18 +1048,16 @@ mod test {
                     // Otherwise, return that we'll start sending a response, and spawn
                     // task to send the relevant response via chainHead_follow.
                     tokio::spawn(async move {
-                        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-
-                        tx.send(Json(storage_items(
+                        tx.send(storage_items(
                             "Id1",
                             &[
                                 storage_result("ID1", "Data1"),
                                 storage_result("ID2", "Data2"),
                                 storage_result("ID3", "Data3"),
                             ],
-                        ))).await.unwrap();
+                        )).unwrap();
 
-                        tx.send(Json(storage_done("Id1"))).await.unwrap();
+                        tx.send(storage_done("Id1")).unwrap();
                     });
 
                     Ok(Json(response_started("Id1")))
@@ -1102,7 +1074,7 @@ mod test {
                 )
                 .await
                 .unwrap();
-
+            
             let response = response
                 .map(|x| x.unwrap())
                 .collect::<Vec<StorageResponse>>()
@@ -1123,7 +1095,7 @@ mod test {
 
             let mut storage_call_num = 0;
             let mut continue_call_num = 0;
-            let (tx, rx) = tokio::sync::mpsc::channel(10);
+            let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
             let tx2 = tx.clone();
 
             let rpc_client = mock_client_builder(rx)
@@ -1135,9 +1107,9 @@ mod test {
                     // Next call, return a storage item and then a "waiting for continue".
                     tokio::spawn(async move {
                         tx.send(
-                            Json(storage_items("Id1", &[storage_result("ID1", "Data1")]))
-                        ).await.unwrap();
-                        tx.send(Json(operation_continue("Id1"))).await.unwrap();
+                            storage_items("Id1", &[storage_result("ID1", "Data1")])
+                        ).unwrap();
+                        tx.send(operation_continue("Id1")).unwrap();
                     });
                     Ok(Json(response_started("Id1")))
                 })
@@ -1149,12 +1121,12 @@ mod test {
                     // Next call; acknowledge the "continue" and return reamining storage items.
                     tokio::spawn(async move {
                         tx2.send(
-                            Json(storage_items("Id1", &[storage_result("ID2", "Data2")]))
-                        ).await.unwrap();
+                            storage_items("Id1", &[storage_result("ID2", "Data2")])
+                        ).unwrap();
                         tx2.send(
-                            Json(storage_items("Id1", &[storage_result("ID3", "Data3")]))
-                        ).await.unwrap();
-                        tx2.send(Json(storage_done("Id1"))).await.unwrap();
+                            storage_items("Id1", &[storage_result("ID3", "Data3")])
+                        ).unwrap();
+                        tx2.send(storage_done("Id1")).unwrap();
                     });
                     Ok(Json(()))
                 })
@@ -1191,7 +1163,7 @@ mod test {
             use subxt_rpcs::client::mock_rpc_client::Json;
 
             let hash = random_hash();
-            let (tx, rx) = tokio::sync::mpsc::channel(10);
+            let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
 
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainSpec_v1_genesisHash", move |_params| async move {

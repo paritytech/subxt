@@ -10,7 +10,7 @@
 //! use subxt_rpcs::client::{ RpcClient, MockRpcClient };
 //! use subxt_rpcs::client::mock_rpc_client::Json;
 //! 
-//! let state = vec![
+//! let mut state = vec![
 //!     Json(1u8),
 //!     Json(2u8),
 //!     Json(3u8),
@@ -19,17 +19,18 @@
 //! // Define a mock client by providing some state (can be optional)
 //! // and functions which intercept method and subscription calls and
 //! // returns something back.
-//! let mock_client = MockRpcClient::<Vec<_>>::builder()
-//!     .method_handler("foo", |state, params| async move {
-//!         // We'll panic if an RPC method is called more than 3 times:
-//!         state.get().await.pop().unwrap()
+//! let mock_client = MockRpcClient::builder()
+//!     .method_handler_once("foo", move |params| {
+//!         // Return each item from our state, and then null afterwards.
+//!         let val = state.pop()
+//!         async move { Json(val) }
 //!     })
-//!     .subscription_handler("bar", |state, params, unsub| async move {
+//!     .subscription_handler("bar", |params, unsub| async move {
 //!         // Arrays, vecs or an RpcSubscription can be returned here to
 //!         // signal the set of values to be handed back on a subscription.
 //!         vec![Json(1), Json(2), Json(3)]
 //!     })
-//!     .build(state);
+//!     .build();
 //! 
 //! // Build an RPC Client that can be used in Subxt or in conjunction with
 //! // the RPC methods provided in this crate. 
@@ -352,6 +353,12 @@ impl <T: serde::Serialize> IntoHandlerResponse for Json<T> {
     }
 }
 
+impl IntoHandlerResponse for core::convert::Infallible {
+    fn into_handler_response(self) -> Result<Box<RawValue>, Error> {
+        match self {}
+    }
+}
+
 fn serialize_to_raw_value<T: serde::Serialize>(val: &T) -> Result<Box<RawValue>, Error> {
     let res = serde_json::to_string(val).map_err(Error::Deserialization)?;
     let raw_value = RawValue::from_string(res).map_err(Error::Deserialization)?;
@@ -451,6 +458,12 @@ impl <T: IntoHandlerResponse + Send + 'static, const N: usize> IntoSubscriptionR
     }
 }
 
+impl IntoSubscriptionResponse for core::convert::Infallible {
+    fn into_subscription_response(self) -> Result<RawRpcSubscription, Error> {
+        match self {}
+    }
+}
+
 /// Send the first items and then the second items back on a subscription;
 /// If any one of the responses is an error, we'll return the error.
 /// If one response has an ID and the other doesn't, we'll use that ID.
@@ -474,5 +487,168 @@ impl <A: IntoSubscriptionResponse, B: IntoSubscriptionResponse> IntoSubscription
                 Ok(a)
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{RpcClient, rpc_params};
+    use super::*;
+
+    #[tokio::test]
+    async fn test_method_params() {
+        let rpc_client = MockRpcClient::builder()
+            .method_handler("foo", |params| async {
+                Json(params)
+            })
+            .build();
+
+        let rpc_client = RpcClient::new(rpc_client);
+
+        // We get back whatever params we give
+        let res: (i32,i32,i32) = rpc_client.request("foo", rpc_params![1, 2, 3]).await.unwrap();
+        assert_eq!(res, (1,2,3));
+
+        let res: (String,) = rpc_client.request("foo", rpc_params!["hello"]).await.unwrap();
+        assert_eq!(res, ("hello".to_owned(),));
+    }
+
+    #[tokio::test]
+    async fn test_method_handler_then_fallback() {
+        let rpc_client = MockRpcClient::builder()
+            .method_handler("foo", |_params| async {
+                Json(1)
+            })
+            .method_fallback(|name, _params| async {
+                Json(name)
+            })
+            .build();
+
+        let rpc_client = RpcClient::new(rpc_client);
+
+        // Whenever we call "foo", we get 1 back.
+        for i in [1,1,1,1] {
+            let res: i32 = rpc_client.request("foo", rpc_params![]).await.unwrap();
+            assert_eq!(res, i);
+        }
+
+        // Whenever we call anything else, we get the name of the method back
+        for name in ["bar", "wibble", "steve"] {
+            let res: String = rpc_client.request(name, rpc_params![]).await.unwrap();
+            assert_eq!(res, name);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_method_once_then_handler() {
+        let rpc_client = MockRpcClient::builder()
+            .method_handler_once("foo", |_params| async {
+                Json(1)
+            })
+            .method_handler("foo", |_params| async {
+                Json(2)
+            })
+            .build();
+
+        let rpc_client = RpcClient::new(rpc_client);
+
+        // Check that we call the "once" one time and then the second after that.
+        for i in [1,2,2,2,2] {
+            let res: i32 = rpc_client.request("foo", rpc_params![]).await.unwrap();
+            assert_eq!(res, i);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_method_once() {
+        let rpc_client = MockRpcClient::builder()
+            .method_handler_once("foo", |_params| async {
+                Json(1)
+            })
+            .method_handler_once("foo", |_params| async {
+                Json(2)
+            })
+            .method_handler_once("foo", |_params| async {
+                Json(3)
+            })
+            .build();
+
+        let rpc_client = RpcClient::new(rpc_client);
+
+        // Check that each method is only called once, in the right order.
+        for i in [1,2,3] {
+            let res: i32 = rpc_client.request("foo", rpc_params![]).await.unwrap();
+            assert_eq!(res, i);
+        }
+
+        // Check that we get a "method not found" error afterwards.
+        let err = rpc_client.request::<i32>("foo", rpc_params![]).await.unwrap_err();
+        let not_found_code = UserError::method_not_found().code;
+        assert!(matches!(err, Error::User(u) if u.code == not_found_code));
+    }
+
+    #[tokio::test]
+    async fn test_subscription_once_then_handler_then_fallback() {
+        let rpc_client = MockRpcClient::builder()
+            .subscription_handler_once("foo", |_params, _unsub| async {
+                vec![Json(0), Json(0)]
+            })
+            .subscription_handler("foo", |_params, _unsub| async {
+                vec![Json(1), Json(2), Json(3)]
+            })
+            .subscription_fallback(|_name, _params, _unsub| async {
+                vec![Json(4)]
+            })
+            .build();
+
+        let rpc_client = RpcClient::new(rpc_client);
+
+        // "foo" returns 0,0 the first time it's subscribed to
+        let sub = rpc_client.subscribe::<i32>("foo", rpc_params![], "unsub").await.unwrap();
+        let res: Vec<i32> = sub.map(|i| i.unwrap()).collect().await;
+        assert_eq!(res, vec![0,0]);
+
+        // then, "foo" returns 1,2,3 in subscription every other time
+        for _ in 1..5 {
+            let sub = rpc_client.subscribe::<i32>("foo", rpc_params![], "unsub").await.unwrap();
+            let res: Vec<i32> = sub.map(|i| i.unwrap()).collect().await;
+            assert_eq!(res, vec![1,2,3]);
+        }
+
+        // anything else returns 4
+        let sub = rpc_client.subscribe::<i32>("bar", rpc_params![], "unsub").await.unwrap();
+        let res: Vec<i32> = sub.map(|i| i.unwrap()).collect().await;
+        assert_eq!(res, vec![4]);
+    }
+
+    #[tokio::test]
+    async fn test_subscription_and_then_with_channel() {
+        let (tx, rx) = tokio::sync::mpsc::channel(10);
+
+        let rpc_client = MockRpcClient::builder()
+            .subscription_handler_once("foo", move |_params, _unsub| async move {
+                AndThen(
+                    // These should be sent first..
+                    vec![Json(1), Json(2), Json(3)],
+                    // .. and then anything the channel is handing back.
+                    rx
+                )
+            })
+            .build();
+
+        let rpc_client = RpcClient::new(rpc_client);
+
+        // Send a few values down the channel to be handed back in "foo" subscription:
+        tokio::spawn(async move {
+            for i in 4..=6 {
+                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                tx.send(Json(i)).await.unwrap();
+            }
+        });
+
+        // Expect all values back:
+        let sub = rpc_client.subscribe::<i32>("foo", rpc_params![], "unsub").await.unwrap();
+        let res: Vec<i32> = sub.map(|i| i.unwrap()).collect().await;
+        assert_eq!(res, vec![1,2,3,4,5,6]);
     }
 }
