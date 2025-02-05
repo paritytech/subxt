@@ -26,6 +26,7 @@ As a result, we've taken the decision to remove this compatibility layer from Su
 3. Following the "here" links above to see what impls were removed. Impls can generally be recreated as needed using wrapper types which allow converting between Substrate and Subxt types/traits, for instance:
 
 ```rust
+// Wrap a substrate header type in this to impl the subxt Header trait:
 struct SubxtHeader<T>(pub T);
 
 // This basically copies the code removed from Subxt, but on a wrapper type:
@@ -43,7 +44,7 @@ where
 }
 ```
 
-The hope is that this pattern is applicable to any such types that you find useful to share between Substrate and Subxt code.
+The hope is that this pattern is applicable to any such types that you find useful to share between Substrate and Subxt code. Please raise an issue if you can't find a solution in your case, and we'll endeavour to help!
 
 The result of this is that your code will work against whichever Substrate crate versions you are using, at the cost of this code no longer being included behind the `substrate-compat` feature flag.
 
