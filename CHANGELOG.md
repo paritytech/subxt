@@ -4,6 +4,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.39.0] - 2025-02-04
+
+This release is mostly bug fixes and changes. The only change that should be a breaking change is removing the `substrate-compat` feature flag (see [#1850](https://github.com/paritytech/subxt/pull/1850)), which we'll go into more detail about.
+
+### The `substrate-compat` feature flag has been removed.
+
+The `substrate-compat` feature flag essentially provided:
+1. An implementation of the `subxt::config::Header` trait for anything implementing `sp_runtime::traits::Header` ([here](https://github.com/paritytech/subxt/pull/1850/files#diff-26ab583bc154fdb10c63d7cc90045a6026ad6497efe790fe257b60ceb1a15ea7L137)).
+2. Same for `subxt::config::Hasher` and anything implementing `sp_runtime::traits::Hasher` ([here](https://github.com/paritytech/subxt/pull/1850/files#diff-26ab583bc154fdb10c63d7cc90045a6026ad6497efe790fe257b60ceb1a15ea7L149)).
+3. A `subxt_core::tx::PairSigner` type which could be given something implementing `sp_core::Pair` and then be used to sign transactions ([here](https://github.com/paritytech/subxt/pull/1850/files#diff-fe5469ea5a4788ffac7607c8d25f9d17c232c703f2d38ffe593cb6e87662a0afL46)).
+4. From impls for `sp_runtime::AccountId32` and related for `subxt::utils::AccountId32` ([here](https://github.com/paritytech/subxt/pull/1850/files#diff-61f12204f1b6828f829ea82da72826674e8f6c35943795258860b25ce59fc692L169)).
+5. Likewise for `sp_runtime::MultiAddress` and `subxt::utils::MultiAddress` ([here](https://github.com/paritytech/subxt/pull/1850/files#diff-956118f361c3e5fbdd6974d6f23f40fd0050714cd6bfdfe0f6624d883a2d0c7cL53)).
+6. Likewise for `sp_runtime::MultiSignature` and `subxt::utils::MultiSignature` ([here](https://github.com/paritytech/subxt/pull/1850/files#diff-590233f1bae2f8031dfb010e9c35ba04bb700539d8b067daa7477a0a3f14e38dL29)).
+
+While useful, providing these features in Subxt is almost impossible to maintain: we can only support a single version of `sp_runtime`/`sp_core` at a time, but many versions are in use in the wild. This led to various issues regarding the mismatch between `sp_*` crates in use and a given version of Subxt. More generally, the goal of Subxt is to be independent from any specific version of Substrate, and communicate via the exposed RPC APIs in order to work across any compatible Substrate version (or indeed, alternative implementations that follow things like [the RPC spec](https://github.com/paritytech/json-rpc-interface-spec)).  
+
+As a result, we've taken the decision to remove this compatibility layer from Subxt itself. To migrate away from this feature, we suggest:
+1. Using the example [here](https://github.com/paritytech/subxt/blob/d924ece39a5cb369ba5ccde3dc160b5ee006271b/subxt/examples/substrate_compat_signer.rs) to see how to use a Substrate signer to sign Subxt transactions.
+2. Looking at `subxt_signer` instead, if it's a viable alternative in your case.
+3. Following the "here" links above to see what impls were removed. Impls can generally be recreated as needed using wrapper types which allow converting between Substrate and Subxt types/traits, for instance:
+
+```rust
+// Wrap a substrate header type in this to impl the subxt Header trait:
+struct SubxtHeader<T>(pub T);
+
+// This basically copies the code removed from Subxt, but on a wrapper type:
+impl <T> subxt::config::Header for SubxtHeader<T>
+where
+    T: sp_runtime::traits::Header,
+    <T as sp_runtime::traits::Header>::Number: Into<u64>,
+{
+    type Number = T::Number;
+    type Hasher = T::Hashing;
+
+    fn number(&self) -> Self::Number {
+        *self.0.number()
+    }
+}
+```
+
+The hope is that this pattern is applicable to any such types that you find useful to share between Substrate and Subxt code. Please raise an issue if you can't find a solution in your case, and we'll endeavour to help!
+
+The result of this is that your code will work against whichever Substrate crate versions you are using, at the cost of this code no longer being included behind the `substrate-compat` feature flag.
+
+A full list of relevant changes and fixes (nothing was added in this release) is as follows:
+
+### Changed
+
+- remove substrate compat ([#1850](https://github.com/paritytech/subxt/pull/1850))
+- migrate custom error trait impls to `thiserror` ([#1856](https://github.com/paritytech/subxt/pull/1856))
+- re-export `jsonrpsee` in `subxt::ext` ([#1843](https://github.com/paritytech/subxt/pull/1843))
+
+### Fixed
+
+- don't double hash: use the same hash in ExtrinsicDetails and ExtrinsicDetails ([#1917](https://github.com/paritytech/subxt/pull/1917))
+- fix and test sr25519 signing in nostd ([#1872](https://github.com/paritytech/subxt/pull/1872))
+- preserve custom metadata when converting between Subxt metadata and frame_metadata ([#1914](https://github.com/paritytech/subxt/pull/1914))
+- fix: don't wrap rpc error in DisconnectedWillReconnect in reconnecting rpc client ([#1904](https://github.com/paritytech/subxt/pull/1904))
+- fix: substrate runner, support new libp2p addr log ([#1892](https://github.com/paritytech/subxt/pull/1892))
+- update Artifacts (auto-generated) ([#1874](https://github.com/paritytech/subxt/pull/1874))
+- bump frame-decode and frame-metadata to latest ([#1870](https://github.com/paritytech/subxt/pull/1870))
+- fix unstable-light-client + ChainHeadBackend tx events ([#1865](https://github.com/paritytech/subxt/pull/1865))
+- when native feature is enabled, we need polkadot-sdk/std for eg examples to work ([#1864](https://github.com/paritytech/subxt/pull/1864))
+- load latest metadata version from Wasm blobs. ([#1859](https://github.com/paritytech/subxt/pull/1859))
+- minor fix - Yew example ([#1852](https://github.com/paritytech/subxt/pull/1852))
+- update the release notes to work for current releases ([#1842](https://github.com/paritytech/subxt/pull/1842))
+
 ## [0.38.0] - 2024-10-24
 
 This release doesn't introduce any substantial breaking changes and focuses primarily on incremental improvements, testing and bug fixes. A few of the highlights include:
