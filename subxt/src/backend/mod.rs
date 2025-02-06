@@ -352,6 +352,7 @@ mod test {
     pub use std::collections::{HashMap, VecDeque};
     pub use subxt_core::{config::DefaultExtrinsicParams, Config};
     pub use tokio::sync::{mpsc, Mutex};
+    pub use core::convert::Infallible;
 
     pub type RpcResult<T> = Result<T, subxt_rpcs::Error>;
     pub type Item = RpcResult<String>;
@@ -730,7 +731,7 @@ mod test {
             let rpc_client = MockRpcClient::builder()
                 .method_handler_once("state_getStorage", move |_params| async move {
                     // Return "disconnected" error on first call
-                    Err::<(),_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_string()))
+                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_string()))
                 })
                 .method_handler_once("state_getStorage", move |_param| async move {
                     // Return some hex encoded storage value on the next one
@@ -772,7 +773,7 @@ mod test {
             let rpc_client = MockRpcClient::builder()
                 .method_handler_once("chain_getBlockHash", move |_params| async move {
                     // Return "disconnected" error on first call
-                    Err::<(),_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_string()))
+                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_string()))
                 })
                 .method_handler_once("chain_getBlockHash", move |_params| async move {
                     // Return the blockhash on next call
@@ -859,6 +860,7 @@ mod test {
         use subxt_rpcs::methods::chain_head::{
             self, Bytes, Initialized, MethodResponse, MethodResponseStarted, OperationError, OperationId, OperationStorageItems, RuntimeSpec, RuntimeVersionEvent
         };
+        use subxt_rpcs::UserError;
         use tokio::select;
         use super::chain_head::*;
         use super::*;
@@ -907,22 +909,38 @@ mod test {
         /// Build a mock client which can handle `chainHead_v1_follow` subscriptions.
         /// Messages from the provided receiver are sent to the latest active subscription.
         fn mock_client_builder(recv: tokio::sync::mpsc::UnboundedReceiver<FollowEvent>) -> subxt_rpcs::client::mock_rpc_client::MockRpcClientBuilder {
-            use subxt_rpcs::client::{ MockRpcClient, mock_rpc_client::{Json, AndThen} };
+            mock_client_builder_with_ids(recv, 0..)
+        }
+            
+        fn mock_client_builder_with_ids<I>(recv: tokio::sync::mpsc::UnboundedReceiver<FollowEvent>, ids: I) -> subxt_rpcs::client::mock_rpc_client::MockRpcClientBuilder 
+        where
+            I: IntoIterator<Item=usize> + Send,
+            I::IntoIter: Send + Sync + 'static,
+        {
+            use subxt_rpcs::client::{ MockRpcClient, mock_rpc_client::{Json, AndThen, Either} };
+            use subxt_rpcs::{Error, UserError};
 
             let recv = Arc::new(tokio::sync::Mutex::new(recv));
+            let mut ids = ids.into_iter();
 
             MockRpcClient::builder()
                 .subscription_handler("chainHead_v1_follow", move |_params, _unsub| {
                     let recv = recv.clone();
+                    let id = ids.next();
+
+                    // For each new follow subscription, we take messages from `recv` and pipe them to the output
+                    // for the subscription (after an Initialized event). if the output is dropped/closed, we stop pulling
+                    // messages from `recv`.
                     let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
                     tokio::spawn(async move {
                         let mut recv_guard = recv.lock().await;
                         loop {
                             select! {
+                                // Channel closed, so stop pulling from `recv`.
                                 _ = tx.closed() => {
-                                    println!("CLOSED!");
                                     break
                                 },
+                                // Relay messages from `recv` unless some error sending.
                                 Some(msg) = recv_guard.recv() => {
                                     if tx.send(Json(msg)).is_err() {
                                         break
@@ -942,13 +960,33 @@ mod test {
                                     },
                                 )),
                             });
-                        
-                        AndThen(
-                            // First send an initialized event
-                            (vec![Json(follow_event)], "chainHeadFollowSubscriptionId"),
-                            // Next, send any events provided via the recv channel
-                            rx
-                        )
+
+                        match id {
+                            Some(id) => {
+                                let follow_event =
+                                    FollowEvent::Initialized(Initialized::<<Conf as Config>::Hash> {
+                                        finalized_block_hashes: vec![random_hash()],
+                                        finalized_block_runtime: Some(chain_head::RuntimeEvent::Valid(
+                                            RuntimeVersionEvent {
+                                                spec: runtime_spec(),
+                                            },
+                                        )),
+                                    });
+
+                                let res = AndThen(
+                                    // First send an initialized event with new ID
+                                    (vec![Json(follow_event)], format!("chainHeadFollowSubscriptionId{id}")),
+                                    // Next, send any events provided via the recv channel
+                                    rx
+                                );
+
+                                Ok(res)
+                            },
+                            None => {
+                                // Ran out of subscription IDs; return an error.
+                                Err(Error::User(UserError::method_not_found()))
+                            }
+                        }
                     }
                 })
         }
@@ -1042,7 +1080,7 @@ mod test {
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // First call; return DisconnectedWillReconnect
-                    Err::<(),_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()));
+                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
                 })
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // Otherwise, return that we'll start sending a response, and spawn
@@ -1101,7 +1139,7 @@ mod test {
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // First call; return DisconnectedWillReconnect
-                    Err::<(),_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
+                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
                 })
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // Next call, return a storage item and then a "waiting for continue".
@@ -1115,7 +1153,7 @@ mod test {
                 })
                 .method_handler_once("chainHead_v1_continue", move |_params| async move {
                     // First call; return DisconnectedWillReconnect
-                    Err::<(),_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
+                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
                 })
                 .method_handler_once("chainHead_v1_continue", move |_params| async move {
                     // Next call; acknowledge the "continue" and return reamining storage items.
@@ -1168,7 +1206,7 @@ mod test {
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainSpec_v1_genesisHash", move |_params| async move {
                     // First call, return disconnected error.
-                    Err::<(),_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_owned()))
+                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_owned()))
                 })
                 .method_handler_once("chainSpec_v1_genesisHash", move |_params| async move {
                     // Next call, return the hash.
@@ -1184,7 +1222,29 @@ mod test {
             assert_eq!(hash, response_hash)
         }
 
-       /* #[tokio::test]
+        // TODO: WIP
+        // Failure as we do not wait for subscription id to be updated.
+        // see https://github.com/paritytech/subxt/issues/1567
+        #[tokio::test]
+        async fn stale_subscription_id_failure() {
+            use subxt_rpcs::client::mock_rpc_client::Json;
+
+            //let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+
+            // let rpc_client = mock_client_builder_with_ids(rx, [1,2])
+            //     .method_handler("chainHead_v1_storage", |_params| {
+
+            //     })
+            //     .build();
+
+            // 1. chainHead_v1_follow called. returns initialized event. then DisconnectedWillReconnect
+            // 2. chainHead_v1_storage called. If ID is wrong, we see limitReached error . We retry internally
+            //    10 times until rejecting the call.
+            // 3. calling next on driver should lead to chainHead_v1_follow being called again. Returns new subscription ID.
+        }
+
+        /*
+        #[tokio::test]
         // Failure as we do not wait for subscription id to be updated.
         // see https://github.com/paritytech/subxt/issues/1567
         async fn stale_subscription_id_failure() {

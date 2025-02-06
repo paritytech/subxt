@@ -316,12 +316,6 @@ pub trait IntoHandlerResponse {
     fn into_handler_response(self) -> Result<Box<RawValue>, Error>;
 }
 
-impl IntoHandlerResponse for () {
-    fn into_handler_response(self) -> Result<Box<RawValue>, Error> {
-        serialize_to_raw_value(&())
-    }
-}
-
 impl <T: IntoHandlerResponse> IntoHandlerResponse for Result<T, Error> {
     fn into_handler_response(self) -> Result<Box<RawValue>, Error> {
         self.and_then(|val| val.into_handler_response())
@@ -416,9 +410,15 @@ impl <T: IntoHandlerResponse + Send + 'static> IntoSubscriptionResponse for toki
     }
 }
 
-impl IntoSubscriptionResponse for Result<RawRpcSubscription, Error> {
+impl IntoSubscriptionResponse for RawRpcSubscription {
     fn into_subscription_response(self) -> Result<RawRpcSubscription, Error> {
-        self
+        Ok(self)
+    }
+}
+
+impl <T: IntoSubscriptionResponse> IntoSubscriptionResponse for Result<T, Error> {
+    fn into_subscription_response(self) -> Result<RawRpcSubscription, Error> {
+        self.and_then(|res| res.into_subscription_response())
     }
 }
 
@@ -489,6 +489,33 @@ impl <A: IntoSubscriptionResponse, B: IntoSubscriptionResponse> IntoSubscription
         }
     }
 }
+
+/// Send back either one response or the other.
+pub enum Either<A, B> {
+    /// The first possibility.
+    A(A),
+    /// The second possibility.
+    B(B)
+}
+
+impl <A: IntoHandlerResponse, B: IntoHandlerResponse> IntoHandlerResponse for Either<A, B> {
+    fn into_handler_response(self) -> Result<Box<RawValue>, Error> {
+        match self {
+            Either::A(a) => a.into_handler_response(),
+            Either::B(b) => b.into_handler_response(),
+        }
+    }
+}
+
+impl <A: IntoSubscriptionResponse, B: IntoSubscriptionResponse> IntoSubscriptionResponse for Either<A, B> {
+    fn into_subscription_response(self) -> Result<RawRpcSubscription, Error> {
+        match self {
+            Either::A(a) => a.into_subscription_response(),
+            Either::B(b) => b.into_subscription_response(),
+        }
+    }
+}
+
 
 #[cfg(test)]
 mod test {
