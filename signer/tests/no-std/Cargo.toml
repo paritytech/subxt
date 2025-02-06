@@ -1,0 +1,19 @@
+[package]
+name = "nostd-tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dev-dependencies]
+
+# This crate is not a part of the workspace, to ensure that no features
+# are enabled for it at the workspace level; which conflict with this test.
+subxt-signer = { path = "../../", default-features = false, features = [
+    "sr25519",
+    "ecdsa",
+    "unstable-eth",
+] }
+
+# this shouldn't be needed, it's in workspace.exclude, but still
+# I get the complaint unless I add it...
+[workspace]
