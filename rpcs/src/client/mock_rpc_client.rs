@@ -21,8 +21,8 @@
 //! let mock_client = MockRpcClient::builder()
 //!     .method_handler_once("foo", move |params| {
 //!         // Return each item from our state, and then null afterwards.
-//!         let val = state.pop()
-//!         async move { Json(val) }
+//!         let val = state.pop();
+//!         async move { val }
 //!     })
 //!     .subscription_handler("bar", |params, unsub| async move {
 //!         // Arrays, vecs or an RpcSubscription can be returned here to

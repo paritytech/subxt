@@ -197,6 +197,7 @@ jobs:
           cargo check -p subxt-rpcs
           cargo check -p subxt-rpcs --no-default-features --features web
           cargo check -p subxt-rpcs --no-default-features --features native
+          cargo check -p subxt-rpcs --no-default-features --features native,subxt
           cargo check -p subxt-rpcs --no-default-features --features native,jsonrpsee
           cargo check -p subxt-rpcs --no-default-features --features native,reconnecting-rpc-client
           cargo check -p subxt-rpcs --no-default-features --features native,mock-rpc-client
