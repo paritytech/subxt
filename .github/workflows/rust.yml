@@ -191,13 +191,24 @@ jobs:
           cargo check -p subxt-signer --no-default-features --features ecdsa
           cargo check -p subxt-signer --no-default-features --features unstable-eth
 
+      # Subxt-rpcs has a bunch of clients that can be exposed. Check that they all stand on their own.
+      - name: Cargo check subxt-rpcs
+        run: |
+          cargo check -p subxt-rpcs
+          cargo check -p subxt-rpcs --no-default-features --features web
+          cargo check -p subxt-rpcs --no-default-features --features native
+          cargo check -p subxt-rpcs --no-default-features --features native,jsonrpsee
+          cargo check -p subxt-rpcs --no-default-features --features native,reconnecting-rpc-client
+          cargo check -p subxt-rpcs --no-default-features --features native,mock-rpc-client
+          cargo check -p subxt-rpcs --no-default-features --features native,unstable-light-client
+
       # We can't enable web features here, so no cargo hack.
       - name: Cargo check subxt-lightclient
         run: cargo check -p subxt-lightclient
 
       # Next, check each other package in isolation.
       - name: Cargo hack; check each feature/crate on its own
-        run: cargo hack --exclude subxt --exclude subxt-signer --exclude subxt-lightclient --exclude-all-features --each-feature check --workspace
+        run: cargo hack --exclude subxt --exclude subxt-signer --exclude subxt-lightclient --exclude subxt-rpcs --exclude-all-features --each-feature check --workspace
 
       # Check the parachain-example code, which isn't a part of the workspace so is otherwise ignored.
       - name: Cargo check parachain-example
