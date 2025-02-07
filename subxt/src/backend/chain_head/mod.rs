@@ -36,6 +36,11 @@ use subxt_rpcs::methods::chain_head::{
 };
 use subxt_rpcs::RpcClient;
 
+/// Re-export RPC types and methods from [`subxt_rpcs::methods::chain_head`].
+pub mod rpc_methods {
+    pub use subxt_rpcs::methods::legacy::*;
+}
+
 // Expose the RPC methods.
 pub use subxt_rpcs::methods::chain_head::ChainHeadRpcMethods;
 

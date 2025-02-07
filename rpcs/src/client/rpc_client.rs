@@ -9,9 +9,8 @@ use serde::{de::DeserializeOwned, Serialize};
 use serde_json::value::RawValue;
 use std::{pin::Pin, sync::Arc, task::Poll};
 
-/// A concrete wrapper around an [`RpcClientT`] which provides some higher level helper methods,
-/// is cheaply cloneable, and can be handed to things like [`crate::client::OnlineClient`] to
-/// instantiate it.
+/// A concrete wrapper around an [`RpcClientT`] which provides some higher level helper methods
+/// and is cheaply cloneable.
 #[derive(Clone)]
 pub struct RpcClient {
     client: Arc<dyn RpcClientT>,

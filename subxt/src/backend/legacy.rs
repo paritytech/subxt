@@ -20,7 +20,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use subxt_rpcs::RpcClient;
 
-/// Re-export legacy RPC types from [`subxt_rpcs::methods::legacy`].
+/// Re-export legacy RPC types and methods from [`subxt_rpcs::methods::legacy`].
 pub mod rpc_methods {
     pub use subxt_rpcs::methods::legacy::*;
 }

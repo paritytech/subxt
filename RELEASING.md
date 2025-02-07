@@ -86,6 +86,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
         ```
         (cd core && cargo publish) && \
+        (cd rpcs && cargo publish) && \
         (cd subxt && cargo publish) && \
         (cd signer && cargo publish) && \
         (cd cli && cargo publish);
