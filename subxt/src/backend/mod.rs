@@ -341,14 +341,17 @@ pub struct StorageResponse {
 mod test {
     use super::*;
     use crate::backend::StorageResponse;
+    use core::convert::Infallible;
     use futures::StreamExt;
     use polkadot_sdk::sp_core;
     use primitive_types::H256;
     use rpc::RpcClientT;
     use std::collections::{HashMap, VecDeque};
     use subxt_core::{config::DefaultExtrinsicParams, Config};
-    use subxt_rpcs::client::{ MockRpcClient, mock_rpc_client::{Json, MockRpcClientBuilder} };
-    use core::convert::Infallible;
+    use subxt_rpcs::client::{
+        mock_rpc_client::{Json, MockRpcClientBuilder},
+        MockRpcClient,
+    };
 
     fn random_hash() -> H256 {
         H256::random()
@@ -380,10 +383,7 @@ mod test {
     mod legacy {
         use super::*;
         use crate::{
-            backend::legacy::{
-                rpc_methods::RuntimeVersion,
-                LegacyBackend,
-            },
+            backend::legacy::{rpc_methods::RuntimeVersion, LegacyBackend},
             error::RpcError,
         };
 
@@ -411,23 +411,22 @@ mod test {
                 (
                     "ID1",
                     VecDeque::from_iter([
-                        Err(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_string())),
+                        Err(subxt_rpcs::Error::DisconnectedWillReconnect(
+                            "..".to_string(),
+                        )),
                         Ok(Json(hex::encode("Data1"))),
-                    ])
+                    ]),
                 ),
                 (
                     "ID2",
                     VecDeque::from_iter([
-                        Err(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_string())),
+                        Err(subxt_rpcs::Error::DisconnectedWillReconnect(
+                            "..".to_string(),
+                        )),
                         Ok(Json(hex::encode("Data2"))),
-                    ])
+                    ]),
                 ),
-                (
-                    "ID3",
-                    VecDeque::from_iter([
-                        Ok(Json(hex::encode("Data3"))),
-                    ])
-                ),
+                ("ID3", VecDeque::from_iter([Ok(Json(hex::encode("Data3")))])),
             ]);
 
             let rpc_client = MockRpcClient::builder()
@@ -474,14 +473,16 @@ mod test {
             let rpc_client = MockRpcClient::builder()
                 .method_handler_once("state_getStorage", move |_params| async move {
                     // Return "disconnected" error on first call
-                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_string()))
+                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect(
+                        "..".to_string(),
+                    ))
                 })
                 .method_handler_once("state_getStorage", move |_param| async move {
                     // Return some hex encoded storage value on the next one
                     Json(hex::encode("Data1"))
                 })
                 .build();
-            
+
             // Test
             let backend: LegacyBackend<Conf> = LegacyBackend::builder().build(rpc_client);
             let response = backend
@@ -513,7 +514,9 @@ mod test {
             let rpc_client = MockRpcClient::builder()
                 .method_handler_once("chain_getBlockHash", move |_params| async move {
                     // Return "disconnected" error on first call
-                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_string()))
+                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect(
+                        "..".to_string(),
+                    ))
                 })
                 .method_handler_once("chain_getBlockHash", move |_params| async move {
                     // Return the blockhash on next call
@@ -557,11 +560,15 @@ mod test {
             let mut data = VecDeque::from_iter([
                 vec![
                     Ok(Json(runtime_version(0))),
-                    Err(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_string())),
+                    Err(subxt_rpcs::Error::DisconnectedWillReconnect(
+                        "..".to_string(),
+                    )),
                     Ok(Json(runtime_version(1))),
                 ],
                 vec![
-                    Err(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_string())),
+                    Err(subxt_rpcs::Error::DisconnectedWillReconnect(
+                        "..".to_string(),
+                    )),
                     Ok(Json(runtime_version(2))),
                     Ok(Json(runtime_version(3))),
                 ],
@@ -569,7 +576,7 @@ mod test {
                     Ok(Json(runtime_version(4))),
                     Ok(Json(runtime_version(5))),
                     Err(subxt_rpcs::Error::Client("..".into())),
-                ]
+                ],
             ]);
 
             let rpc_client = MockRpcClient::builder()
@@ -583,20 +590,35 @@ mod test {
             let backend: LegacyBackend<Conf> = LegacyBackend::builder().build(rpc_client);
             let mut results = backend.stream_runtime_version().await.unwrap();
 
-            assert_eq!(results.next().await.unwrap().unwrap(), client_runtime_version(0));
-            assert_eq!(results.next().await.unwrap().unwrap(), client_runtime_version(4));
-            assert_eq!(results.next().await.unwrap().unwrap(), client_runtime_version(5));
-            assert!(matches!(results.next().await.unwrap(), Err(Error::Rpc(RpcError::ClientError(subxt_rpcs::Error::Client(_))))));
+            assert_eq!(
+                results.next().await.unwrap().unwrap(),
+                client_runtime_version(0)
+            );
+            assert_eq!(
+                results.next().await.unwrap().unwrap(),
+                client_runtime_version(4)
+            );
+            assert_eq!(
+                results.next().await.unwrap().unwrap(),
+                client_runtime_version(5)
+            );
+            assert!(matches!(
+                results.next().await.unwrap(),
+                Err(Error::Rpc(RpcError::ClientError(
+                    subxt_rpcs::Error::Client(_)
+                )))
+            ));
             assert!(results.next().await.is_none());
         }
     }
 
     mod unstable_backend {
+        use crate::error::RpcError;
         use subxt_rpcs::methods::chain_head::{
-            self, Bytes, Initialized, MethodResponse, MethodResponseStarted, OperationError, OperationId, OperationStorageItems, RuntimeSpec, RuntimeVersionEvent
+            self, Bytes, Initialized, MethodResponse, MethodResponseStarted, OperationError,
+            OperationId, OperationStorageItems, RuntimeSpec, RuntimeVersionEvent,
         };
         use tokio::select;
-        use crate::error::RpcError;
 
         use super::chain_head::*;
         use super::*;
@@ -644,13 +666,18 @@ mod test {
 
         /// Build a mock client which can handle `chainHead_v1_follow` subscriptions.
         /// Messages from the provided receiver are sent to the latest active subscription.
-        fn mock_client_builder(recv: tokio::sync::mpsc::UnboundedReceiver<FollowEvent>) -> MockRpcClientBuilder {
+        fn mock_client_builder(
+            recv: tokio::sync::mpsc::UnboundedReceiver<FollowEvent>,
+        ) -> MockRpcClientBuilder {
             mock_client_builder_with_ids(recv, 0..)
         }
-            
-        fn mock_client_builder_with_ids<I>(recv: tokio::sync::mpsc::UnboundedReceiver<FollowEvent>, ids: I) -> MockRpcClientBuilder 
+
+        fn mock_client_builder_with_ids<I>(
+            recv: tokio::sync::mpsc::UnboundedReceiver<FollowEvent>,
+            ids: I,
+        ) -> MockRpcClientBuilder
         where
-            I: IntoIterator<Item=usize> + Send,
+            I: IntoIterator<Item = usize> + Send,
             I::IntoIter: Send + Sync + 'static,
         {
             use subxt_rpcs::client::mock_rpc_client::AndThen;
@@ -659,8 +686,9 @@ mod test {
             let recv = Arc::new(tokio::sync::Mutex::new(recv));
             let mut ids = ids.into_iter();
 
-            MockRpcClient::builder()
-                .subscription_handler("chainHead_v1_follow", move |_params, _unsub| {
+            MockRpcClient::builder().subscription_handler(
+                "chainHead_v1_follow",
+                move |_params, _unsub| {
                     let recv = recv.clone();
                     let id = ids.next();
 
@@ -681,7 +709,7 @@ mod test {
                                     if tx.send(Json(msg)).is_err() {
                                         break
                                     }
-                                }                             
+                                }
                             }
                         }
                     });
@@ -702,7 +730,7 @@ mod test {
                                 // First send an initialized event with new ID
                                 (vec![Json(follow_event)], subscription_id(id)),
                                 // Next, send any events provided via the recv channel
-                                rx
+                                rx,
                             );
 
                             Ok(res)
@@ -711,7 +739,8 @@ mod test {
                             Err(Error::User(UserError::method_not_found()))
                         }
                     }
-                })
+                },
+            )
         }
 
         fn subscription_id(id: usize) -> String {
@@ -777,9 +806,7 @@ mod test {
                         tx.send(operation_error("Id1")).unwrap();
                     });
 
-                    async move {
-                        Json(response_started("Id1"))
-                    }
+                    async move { Json(response_started("Id1")) }
                 })
                 .build();
 
@@ -795,7 +822,11 @@ mod test {
                 .await
                 .unwrap();
 
-            assert!(response.next().await.unwrap().is_err_and(|e| matches!(e, Error::Other(e) if e == "error")));
+            assert!(response
+                .next()
+                .await
+                .unwrap()
+                .is_err_and(|e| matches!(e, Error::Other(e) if e == "error")));
             assert!(response.next().await.is_none());
         }
 
@@ -807,7 +838,7 @@ mod test {
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // First call; return DisconnectedWillReconnect
-                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
+                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
                 })
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // Otherwise, return that we'll start sending a response, and spawn
@@ -820,7 +851,8 @@ mod test {
                                 storage_result("ID2", "Data2"),
                                 storage_result("ID3", "Data3"),
                             ],
-                        )).unwrap();
+                        ))
+                        .unwrap();
 
                         tx.send(storage_done("Id1")).unwrap();
                     });
@@ -829,7 +861,7 @@ mod test {
                 })
                 .build();
 
-            // Despite DisconnectedWillReconnect we try again transparently 
+            // Despite DisconnectedWillReconnect we try again transparently
             // and get the data we asked for.
             let backend = build_backend_spawn_background(rpc_client);
             let response = backend
@@ -839,7 +871,7 @@ mod test {
                 )
                 .await
                 .unwrap();
-            
+
             let response = response
                 .map(|x| x.unwrap())
                 .collect::<Vec<StorageResponse>>()
@@ -863,31 +895,28 @@ mod test {
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // First call; return DisconnectedWillReconnect
-                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
+                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
                 })
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // Next call, return a storage item and then a "waiting for continue".
                     tokio::spawn(async move {
-                        tx.send(
-                            storage_items("Id1", &[storage_result("ID1", "Data1")])
-                        ).unwrap();
+                        tx.send(storage_items("Id1", &[storage_result("ID1", "Data1")]))
+                            .unwrap();
                         tx.send(operation_continue("Id1")).unwrap();
                     });
                     Ok(Json(response_started("Id1")))
                 })
                 .method_handler_once("chainHead_v1_continue", move |_params| async move {
                     // First call; return DisconnectedWillReconnect
-                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
+                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
                 })
                 .method_handler_once("chainHead_v1_continue", move |_params| async move {
                     // Next call; acknowledge the "continue" and return reamining storage items.
                     tokio::spawn(async move {
-                        tx2.send(
-                            storage_items("Id1", &[storage_result("ID2", "Data2")])
-                        ).unwrap();
-                        tx2.send(
-                            storage_items("Id1", &[storage_result("ID3", "Data3")])
-                        ).unwrap();
+                        tx2.send(storage_items("Id1", &[storage_result("ID2", "Data2")]))
+                            .unwrap();
+                        tx2.send(storage_items("Id1", &[storage_result("ID3", "Data3")]))
+                            .unwrap();
                         tx2.send(storage_done("Id1")).unwrap();
                     });
                     Ok(Json(()))
@@ -927,7 +956,9 @@ mod test {
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainSpec_v1_genesisHash", move |_params| async move {
                     // First call, return disconnected error.
-                    Err::<Infallible,_>(subxt_rpcs::Error::DisconnectedWillReconnect("..".to_owned()))
+                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect(
+                        "..".to_owned(),
+                    ))
                 })
                 .method_handler_once("chainSpec_v1_genesisHash", move |_params| async move {
                     // Next call, return the hash.
@@ -948,7 +979,7 @@ mod test {
         #[tokio::test]
         async fn stale_subscription_id_failure() {
             let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
-            let rpc_client = mock_client_builder_with_ids(rx, [1,2])
+            let rpc_client = mock_client_builder_with_ids(rx, [1, 2])
                 .method_handler("chainHead_v1_storage", move |params| {
                     // Decode the follow subscription ID which is the first param.
                     let this_sub_id = {
@@ -963,7 +994,7 @@ mod test {
 
                     async move {
                         if is_wrong_sub_id {
-                            Json(limit_reached()) 
+                            Json(limit_reached())
                         } else {
                             Json(response_started("some_id"))
                         }

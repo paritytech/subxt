@@ -45,9 +45,7 @@ impl<T: Config> StorageItems<T> {
             .chainhead_v1_storage(&sub_id, at, queries, None)
             .await?;
         let operation_id: Arc<str> = match status {
-            MethodResponse::LimitReached => {
-                return Err(RpcError::LimitReached.into())
-            }
+            MethodResponse::LimitReached => return Err(RpcError::LimitReached.into()),
             MethodResponse::Started(s) => s.operation_id.into(),
         };
 

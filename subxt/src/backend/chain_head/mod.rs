@@ -361,9 +361,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
             let follow_events = self.follow_handle.subscribe().events();
             let status = self.methods.chainhead_v1_body(&sub_id, at).await?;
             let operation_id = match status {
-                MethodResponse::LimitReached => {
-                    return Err(RpcError::LimitReached.into())
-                }
+                MethodResponse::LimitReached => return Err(RpcError::LimitReached.into()),
                 MethodResponse::Started(s) => s.operation_id,
             };
 
@@ -721,9 +719,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                 .chainhead_v1_call(&sub_id, at, method, call_parameters)
                 .await?;
             let operation_id = match status {
-                MethodResponse::LimitReached => {
-                    return Err(RpcError::LimitReached.into())
-                }
+                MethodResponse::LimitReached => return Err(RpcError::LimitReached.into()),
                 MethodResponse::Started(s) => s.operation_id,
             };
 
