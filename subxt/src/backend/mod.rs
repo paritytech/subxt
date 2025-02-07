@@ -26,9 +26,9 @@ pub mod rpc {
 
     crate::macros::cfg_reconnecting_rpc_client! {
         /// An RPC client that automatically reconnects.
-        /// 
+        ///
         /// # Example
-        /// 
+        ///
         /// ```rust,no_run
         /// use std::time::Duration;
         /// use futures::StreamExt;
@@ -45,7 +45,7 @@ pub mod rpc {
         ///
         ///     let subxt_client: OnlineClient<PolkadotConfig> = OnlineClient::from_rpc_client(rpc.clone()).await.unwrap();
         ///     let mut blocks_sub = subxt_client.blocks().subscribe_finalized().await.unwrap();
-        ///   
+        ///
         ///     while let Some(block) = blocks_sub.next().await {
         ///         let block = match block {
         ///             Ok(b) => b,
