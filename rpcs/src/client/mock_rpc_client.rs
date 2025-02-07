@@ -16,9 +16,8 @@
 //!     Json(3u8),
 //! ];
 //! 
-//! // Define a mock client by providing some state (can be optional)
-//! // and functions which intercept method and subscription calls and
-//! // returns something back.
+//! // Define a mock client by providing some functions which intercept 
+//! // method and subscription calls and return some response.
 //! let mock_client = MockRpcClient::builder()
 //!     .method_handler_once("foo", move |params| {
 //!         // Return each item from our state, and then null afterwards.

@@ -235,7 +235,7 @@ impl<Res: DeserializeOwned> Stream for RpcSubscription<Res> {
         // Decode the inner RawValue to the type we're expecting and map
         // any errors to the right shape:
         let res = res.map(|r| {
-            r.map_err(|e| e.into()).and_then(|raw_val| {
+            r.and_then(|raw_val| {
                 serde_json::from_str(raw_val.get()).map_err(Error::Deserialization)
             })
         });
