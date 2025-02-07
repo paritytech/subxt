@@ -287,15 +287,15 @@ impl <T> StateHolder<T> {
     }
 }
 
-impl <'a, T> core::ops::Deref for StateHolderGuard<'a, T> {
+impl <T> core::ops::Deref for StateHolderGuard<'_, T> {
     type Target = T;
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &self.0
     }
 }
-impl <'a, T> core::ops::DerefMut for StateHolderGuard<'a, T> {
+impl <T> core::ops::DerefMut for StateHolderGuard<'_, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut *self.0
+        &mut self.0
     }
 }
 

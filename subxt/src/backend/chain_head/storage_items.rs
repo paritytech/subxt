@@ -58,10 +58,10 @@ impl<T: Config> StorageItems<T> {
                 let methods = methods.clone();
 
                 Box::pin(async move {
-                    let cont = methods
+                    methods
                         .chainhead_v1_continue(&sub_id, &operation_id)
                         .await?;
-                    Ok(cont)
+                    Ok(())
                 })
             })
         };
