@@ -16,7 +16,7 @@ members = [
     "signer",
     "subxt",
     "scripts/artifacts",
-    "utils/fetch-metadata", "rpcs",
+    "utils/fetch-metadata",
 ]
 
 # We exclude any crates that would depend on non mutually

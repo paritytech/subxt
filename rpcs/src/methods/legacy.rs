@@ -390,10 +390,10 @@ impl<T: RpcConfig> LegacyRpcMethods<T> {
         &self,
         encoded_signed: &[u8],
         at: Option<T::Hash>,
-    ) -> Result<Vec<u8>, Error> {
+    ) -> Result<DryRunResultBytes, Error> {
         let params = rpc_params![to_hex(encoded_signed), at];
         let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
-        Ok(result_bytes.0)
+        Ok(DryRunResultBytes(result_bytes.0))
     }
 }
 
@@ -522,6 +522,66 @@ pub enum TransactionStatus<Hash> {
     Dropped,
     /// Transaction is no longer valid in the current state.
     Invalid,
+}
+
+/// The decoded result returned from calling `system_dryRun` on some extrinsic.
+#[derive(Debug, PartialEq, Eq)]
+pub enum DryRunResult<'a> {
+    /// The transaction could be included in the block and executed.
+    Success,
+    /// The transaction could be included in the block, but the call failed to dispatch.
+    /// If Subxt is available, the bytes here can be further decoded by calling:
+    ///
+    /// ```rust,ignore
+    /// subxt::error::DispatchError::decode_from(bytes, metadata)?;
+    /// ```
+    ///
+    /// Where metadata is an instance of `subxt::Metadata` that is valid for the runtime
+    /// version which returned this error.
+    DispatchError(&'a [u8]),
+    /// The transaction could not be included in the block.
+    TransactionValidityError,
+}
+
+/// The bytes representing an error dry running an extrinsic. call [`DryRunResultBytes::into_dry_run_result`]
+/// to attempt to decode this into something more meaningful.
+pub struct DryRunResultBytes(pub Vec<u8>);
+
+impl DryRunResultBytes {
+    /// Attempt to decode the error bytes into a [`DryRunResult`].
+    pub fn into_dry_run_result(&self) -> Result<DryRunResult<'_>, DryRunDecodeError> {
+        // dryRun returns an ApplyExtrinsicResult, which is basically a
+        // `Result<Result<(), DispatchError>, TransactionValidityError>`.
+        let bytes = &*self.0;
+
+        // We expect at least 2 bytes. In case we got a naff response back (or
+        // manually constructed this struct), just error to avoid a panic:
+        if bytes.len() < 2 {
+            return Err(DryRunDecodeError::WrongNumberOfBytes);
+        }
+
+        if bytes[0] == 0 && bytes[1] == 0 {
+            // Ok(Ok(())); transaction is valid and executed ok
+            Ok(DryRunResult::Success)
+        } else if bytes[0] == 0 && bytes[1] == 1 {
+            // Ok(Err(dispatch_error)); transaction is valid but execution failed
+            Ok(DryRunResult::DispatchError(&bytes[2..]))
+        } else if bytes[0] == 1 {
+            // Err(transaction_error); some transaction validity error (we ignore the details at the moment)
+            Ok(DryRunResult::TransactionValidityError)
+        } else {
+            // unable to decode the bytes; they aren't what we expect.
+            Err(DryRunDecodeError::InvalidBytes)
+        }
+    }
+}
+
+/// An error which can be emitted when calling [`DryRunResultBytes::into_dry_run_result`].
+pub enum DryRunDecodeError {
+    /// The dry run result was less than 2 bytes, which is invalid.
+    WrongNumberOfBytes,
+    /// The dry run bytes are not valid.
+    InvalidBytes,
 }
 
 /// Storage change set

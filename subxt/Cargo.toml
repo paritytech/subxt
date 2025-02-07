@@ -74,7 +74,7 @@ unstable-metadata = []
 
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
-unstable-light-client = ["subxt-lightclient"]
+unstable-light-client = ["subxt-lightclient", "subxt-rpcs/unstable-light-client"]
 
 # Activate this to expose the ability to generate metadata from Wasm runtime files.
 runtime-metadata-path = ["subxt-macro/runtime-metadata-path"]
@@ -110,7 +110,7 @@ subxt-macro = { workspace = true }
 subxt-core = { workspace = true, features = ["std"] }
 subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
-subxt-rpcs = { workspace = true, features = ["subxt-core"] }
+subxt-rpcs = { workspace = true, features = ["subxt"] }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }

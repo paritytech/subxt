@@ -43,7 +43,9 @@ impl<T> BlockHash for T where T: serde::de::DeserializeOwned + serde::Serialize 
 pub trait AccountId: serde::Serialize {}
 impl<T> AccountId for T where T: serde::Serialize {}
 
-#[cfg(feature = "subxt-core")]
+// When the subxt feature is enabled, ensure that any valid `subxt::Config`
+// is also a valid `RpcConfig`.
+#[cfg(feature = "subxt")]
 mod impl_config {
     use super::*;
     impl<T> RpcConfig for T
@@ -68,10 +70,9 @@ pub enum Error {
     /// An error coming from the underlying RPC Client.
     #[error("RPC error: client error: {0}")]
     Client(Box<dyn std::error::Error + Send + Sync + 'static>),
-    /// The connection was lost and automatically reconnected. Reconnecting clients
-    /// should only emit this when they plan to try reconnecting internally, in which
-    /// case they should buffer anycalls made to them until they have reconnected and
-    /// then send them off in the order given.
+    /// The connection was lost and the client will automatically reconnect. Clients
+    /// should only emit this if they are internally reconnecting, and will buffer any
+    /// calls made to them in the meantime until the connection is re-established.
     #[error("RPC error: the connection was lost ({0}); reconnect automatically initiated")]
     DisconnectedWillReconnect(String),
     /// Cannot deserialize the response.
@@ -94,11 +95,12 @@ impl Error {
     }
 }
 
-/// This error tends to be returned when the user made an RPC call with
-/// invalid parameters. Implementations of [`RpcClientT`] should turn any such
+/// This error should be returned when the user is at fault making a call,
+/// for instance because the method name was wrong, parameters invalid or some
+/// invariant not upheld. Implementations of [`RpcClientT`] should turn any such
 /// errors into this, so that they can be handled appropriately. By contrast,
 /// [`Error::Client`] is emitted when the underlying RPC Client implementation
-/// has some problem that isn't user specific (eg network issue or similar).
+/// has some problem that isn't user specific (eg network issues or similar).
 #[derive(Debug, Clone, serde::Deserialize, thiserror::Error)]
 #[serde(deny_unknown_fields)]
 pub struct UserError {

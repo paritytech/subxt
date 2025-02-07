@@ -261,44 +261,6 @@ impl RpcClientT for MockRpcClient {
     }
 }
 
-/// State passed to each handler.
-pub struct StateHolder<T>(Arc<tokio::sync::Mutex<T>>);
-
-/// A guard for state that is being accessed.
-pub struct StateHolderGuard<'a, T>(tokio::sync::MutexGuard<'a, T>);
-
-impl <T> StateHolder<T> {
-    /// Get the inner state
-    pub async fn get(&self) -> StateHolderGuard<T> {
-        StateHolderGuard(self.0.lock().await)
-    }
-
-    /// Set the inner state to a new value, returning the old state.
-    pub async fn set(&self, new: T) -> T {
-        let mut guard = self.0.lock().await;
-        std::mem::replace(&mut *guard, new)
-    }
-
-    /// Update the inner state, returning the old state.
-    pub async fn update<F: FnOnce(&T) -> T>(&self, f: F) -> T {
-        let mut guard = self.0.lock().await;
-        let new = f(&guard);
-        std::mem::replace(&mut *guard, new)
-    }
-}
-
-impl <T> core::ops::Deref for StateHolderGuard<'_, T> {
-    type Target = T;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl <T> core::ops::DerefMut for StateHolderGuard<'_, T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
 /// Return responses wrapped in this to have them serialized to JSON. 
 pub struct Json<T>(pub T);
 
