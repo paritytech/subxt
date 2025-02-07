@@ -102,12 +102,12 @@ impl Error {
 #[derive(Debug, Clone, serde::Deserialize, thiserror::Error)]
 #[serde(deny_unknown_fields)]
 pub struct UserError {
-	/// Code
-	pub code: i32,
-	/// Message
-	pub message: String,
-	/// Optional data
-	pub data: Option<Box<serde_json::value::RawValue>>,
+    /// Code
+    pub code: i32,
+    /// Message
+    pub message: String,
+    /// Optional data
+    pub data: Option<Box<serde_json::value::RawValue>>,
 }
 
 impl UserError {
@@ -116,7 +116,7 @@ impl UserError {
         UserError {
             code: -32601,
             message: "Method not found".to_owned(),
-            data: None
+            data: None,
         }
     }
 }
@@ -125,10 +125,4 @@ impl core::fmt::Display for UserError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} ({})", &self.message, &self.code)
     }
-}
-
-#[cfg(test)]
-mod test {
-    
-
 }

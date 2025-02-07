@@ -41,6 +41,6 @@ macro_rules! cfg_mock_rpc_client {
 }
 
 pub(crate) use {
-    cfg_feature, cfg_jsonrpsee, cfg_mock_rpc_client, cfg_reconnecting_rpc_client, cfg_unstable_light_client,
+    cfg_feature, cfg_jsonrpsee, cfg_mock_rpc_client, cfg_reconnecting_rpc_client,
+    cfg_unstable_light_client,
 };
-

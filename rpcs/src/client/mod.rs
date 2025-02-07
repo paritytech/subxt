@@ -4,7 +4,7 @@
 
 //! RPC types and client for interacting with a substrate node.
 //!
-//! An RPC client is instantiated and then used to create some methods, for instance 
+//! An RPC client is instantiated and then used to create some methods, for instance
 //! [`crate::methods::ChainHeadRpcMethods`], which defines the calls that can be made with it.
 //! The core RPC client bits are:
 //!

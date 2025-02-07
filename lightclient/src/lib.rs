@@ -61,7 +61,9 @@ pub struct JsonRpcError(Box<RawValue>);
 
 impl JsonRpcError {
     /// Attempt to deserialize this error into some type.
-    pub fn try_deserialize<'a, T: serde::de::Deserialize<'a>>(&'a self) -> Result<T, serde_json::Error> {
+    pub fn try_deserialize<'a, T: serde::de::Deserialize<'a>>(
+        &'a self,
+    ) -> Result<T, serde_json::Error> {
         serde_json::from_str(self.0.get())
     }
 }
