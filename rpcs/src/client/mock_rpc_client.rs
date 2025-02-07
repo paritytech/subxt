@@ -179,6 +179,7 @@ impl  MockRpcClientBuilder {
 
 /// A mock RPC client that responds programmatically to requests.
 /// Useful for testing.
+#[derive(Clone)]
 pub struct MockRpcClient {
     // These are all accessed for just long enough to call the method. The method
     // returns a future, but the method call itself isn't held for long.
