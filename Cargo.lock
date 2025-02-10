@@ -10554,7 +10554,6 @@ dependencies = [
  "either",
  "frame-metadata 18.0.0",
  "futures",
- "getrandom",
  "hex",
  "http-body",
  "hyper",
@@ -10728,6 +10727,7 @@ dependencies = [
  "finito",
  "frame-metadata 18.0.0",
  "futures",
+ "getrandom",
  "hex",
  "http-body",
  "hyper",
@@ -10745,6 +10745,7 @@ dependencies = [
  "tower",
  "tracing",
  "url",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]

@@ -38,11 +38,6 @@ mod only_used_in_docs_or_tests {
 #[cfg(test)]
 use tracing_subscriber as _;
 
-// Used to enable the js feature for wasm.
-#[cfg(feature = "web")]
-#[allow(unused_imports)]
-pub use getrandom as _;
-
 pub mod backend;
 pub mod blocks;
 pub mod client;

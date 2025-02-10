@@ -53,6 +53,8 @@ web = [
     "jsonrpsee?/wasm-client",
     "subxt-lightclient?/web",
     "finito?/wasm-bindgen",
+    "dep:wasm-bindgen-futures",
+    "getrandom/js",
 ]
 
 [dependencies]
@@ -68,6 +70,7 @@ thiserror = { workspace = true }
 frame-metadata = { workspace = true, features = ["decode"] }
 url = { workspace = true }
 tracing = { workspace = true }
+getrandom = { workspace = true, optional = true }
 
 # Included with the jsonrpsee feature
 jsonrpsee = { workspace = true, optional = true }
@@ -82,6 +85,9 @@ subxt-lightclient = { workspace = true, optional = true, default-features = fals
 
 # Included with the subxt-core feature to impl Config for RpcConfig
 subxt-core = { workspace = true, optional = true }
+
+# Included with WASM feature
+wasm-bindgen-futures = { workspace = true, optional = true }
 
 [dev-dependencies]
 tower = { workspace = true }

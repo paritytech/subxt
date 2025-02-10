@@ -25,9 +25,6 @@ default = ["jsonrpsee", "native"]
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
 native = [
-    "jsonrpsee?/async-client",
-    "jsonrpsee?/client-ws-transport-tls",
-    "jsonrpsee?/ws-client",
     "subxt-lightclient?/native",
     "subxt-rpcs/native",
     "tokio-util",
@@ -38,10 +35,6 @@ native = [
 # Enable this for web/wasm builds.
 # Exactly 1 of "web" and "native" is expected.
 web = [
-    "jsonrpsee?/async-wasm-client",
-    "jsonrpsee?/client-web-transport",
-    "jsonrpsee?/wasm-client",
-    "getrandom/js",
     "subxt-lightclient?/web",
     "subxt-macro/web",
     "subxt-rpcs/web",
@@ -59,7 +52,8 @@ runtime = ["tokio/rt", "wasm-bindgen-futures"]
 # Enable this to use the reconnecting rpc client
 reconnecting-rpc-client = ["subxt-rpcs/reconnecting-rpc-client"]
 
-# Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
+# Enable this to use jsonrpsee, which enables the jsonrpsee RPC client, and
+# a couple of util functions which rely on jsonrpsee.
 jsonrpsee = [
     "dep:jsonrpsee",
     "subxt-rpcs/jsonrpsee",
@@ -114,9 +108,6 @@ subxt-rpcs = { workspace = true, features = ["subxt"] }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
-
-# Included if "web" feature is enabled, to enable its js feature.
-getrandom = { workspace = true, optional = true }
 
 # Included if "native" feature is enabled
 tokio-util = { workspace = true, features = ["compat"], optional = true }
