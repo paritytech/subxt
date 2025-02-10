@@ -238,8 +238,8 @@ jobs:
 
       - name: Cargo check web features which require wasm32 target.
         run: |
-          cargo check -p subxt-rpcs --no-default-features --features web
-          cargo check -p subxt-rpcs --no-default-features --features web,reconnecting-rpc-client
+          cargo check -p subxt-rpcs --target wasm32-unknown-unknown --no-default-features --features web
+          cargo check -p subxt-rpcs --target wasm32-unknown-unknown --no-default-features --features web,reconnecting-rpc-client
 
       # Check WASM examples, which aren't a part of the workspace and so are otherwise missed:
       - name: Cargo check WASM examples
