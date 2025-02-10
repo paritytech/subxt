@@ -16,6 +16,11 @@ pub mod client;
 pub mod methods;
 pub mod utils;
 
+// Used to enable the js feature for wasm.
+#[cfg(feature = "web")]
+#[allow(unused_imports)]
+pub use getrandom as _;
+
 // Expose the most common things at the top level:
 pub use client::{RpcClient, RpcClientT};
 pub use methods::{ChainHeadRpcMethods, LegacyRpcMethods};
