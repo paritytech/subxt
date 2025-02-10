@@ -3,6 +3,18 @@
 // see LICENSE for license details.
 
 //! This crate provides a low level RPC interface to Substrate based nodes.
+//! 
+//! See the [`client`] module for a [`client::RpcClient`] which is driven by implementations
+//! of [`client::RpcClientT`] (several of which are provided behind feature flags).
+//! 
+//! See the [`methods`] module for structs which implement sets of concrete RPC calls for
+//! communicating with Substrate based nodes. These structs are all driven by a [`client::RpcClient`].
+//! 
+//! The RPC clients/methods here are made use of in `subxt`. Enabling the `subxt` feature flag ensures
+//! that all Subxt configurations are also valid RPC configurations.
+//! 
+//! The provided RPC client implementations can be used natively (with the default `native` feature 
+//! flag) or in WASM based web apps (with the `web` feature flag). 
 
 #[cfg(any(
     all(feature = "web", feature = "native"),
