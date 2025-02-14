@@ -51,6 +51,7 @@ type MethodHandlerFn = Box<dyn FnMut(&str, Option<Box<serde_json::value::RawValu
 type SubscriptionHandlerFn = Box<dyn FnMut(&str, Option<Box<serde_json::value::RawValue>>, &str) -> RawRpcFuture<'static, RawRpcSubscription> + Send + Sync + 'static>;
 
 /// A builder to configure and build a new [`MockRpcClient`].
+#[derive(Default)]
 pub struct MockRpcClientBuilder {
     method_handlers_once: HashMap<String, VecDeque<MethodHandlerFnOnce>>,
     method_handlers: HashMap<String, MethodHandlerFn>,
@@ -60,18 +61,7 @@ pub struct MockRpcClientBuilder {
     subscription_fallback: Option<SubscriptionHandlerFn>
 }
 
-impl  MockRpcClientBuilder {
-    fn new() -> Self {
-        MockRpcClientBuilder {
-            method_handlers_once: HashMap::new(),
-            method_handlers: HashMap::new(),
-            method_fallback: None,
-            subscription_handlers_once: HashMap::new(),
-            subscription_handlers: HashMap::new(),
-            subscription_fallback: None
-        }
-    }
-
+impl MockRpcClientBuilder {
     /// Add a handler for a specific RPC method. This is called exactly once, and multiple such calls for the same method can be
     /// added. Only when any calls registered with this have been used up is the method set by [`Self::method_handler`] called.
     pub fn method_handler_once<MethodHandler, MFut, MRes>(mut self, name: impl Into<String>, f: MethodHandler) -> Self 
@@ -193,7 +183,7 @@ pub struct MockRpcClient {
 impl MockRpcClient {
     /// Construct a new [`MockRpcClient`]
     pub fn builder() -> MockRpcClientBuilder {
-        MockRpcClientBuilder::new()
+        MockRpcClientBuilder::default()
     }
 }
 

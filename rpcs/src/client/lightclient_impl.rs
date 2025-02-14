@@ -16,8 +16,7 @@ impl RpcClientT for LightClientRpc {
     ) -> RawRpcFuture<'a, Box<RawValue>> {
         Box::pin(async move {
             let res = self.request(method.to_owned(), params)
-                .await
-                .map_err(lc_err_to_rpc_err)?;
+                .await?;
 
             Ok(res)
         })
@@ -31,8 +30,7 @@ impl RpcClientT for LightClientRpc {
     ) -> RawRpcFuture<'a, RawRpcSubscription> {
         Box::pin(async move {
             let sub = self.subscribe(sub.to_owned(), params, unsub.to_owned())
-                .await
-                .map_err(lc_err_to_rpc_err)?;
+                .await?;
 
             let id = Some(sub.id().to_owned());
             let stream = sub
@@ -44,18 +42,20 @@ impl RpcClientT for LightClientRpc {
     }
 }
 
-fn lc_err_to_rpc_err(err: LightClientRpcError) -> Error {
-    match err {
-        LightClientRpcError::JsonRpcError(e) => {
-            // If the error is a typical user error, report it as such, else
-            // just wrap the error into a ClientError.
-            let Ok(user_error) = e.try_deserialize() else {
-                return Error::Client(Box::<CoreError>::from(e))
-            };
-            Error::User(user_error)
-        },
-        LightClientRpcError::SmoldotError(e) => Error::Client(Box::<CoreError>::from(e)),
-        LightClientRpcError::BackgroundTaskDropped => Error::Client(Box::<CoreError>::from("Smoldot background task was dropped")),
+impl From<LightClientRpcError> for Error {
+    fn from(err: LightClientRpcError) -> Error {
+        match err {
+            LightClientRpcError::JsonRpcError(e) => {
+                // If the error is a typical user error, report it as such, else
+                // just wrap the error into a ClientError.
+                let Ok(user_error) = e.try_deserialize() else {
+                    return Error::Client(Box::<CoreError>::from(e))
+                };
+                Error::User(user_error)
+            },
+            LightClientRpcError::SmoldotError(e) => Error::Client(Box::<CoreError>::from(e)),
+            LightClientRpcError::BackgroundTaskDropped => Error::Client(Box::<CoreError>::from("Smoldot background task was dropped")),
+        }
     }
 }
 

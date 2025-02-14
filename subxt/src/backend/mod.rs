@@ -396,6 +396,10 @@ mod test {
         H256::random()
     }
 
+    fn disconnected_will_reconnect() -> subxt_rpcs::Error {
+        subxt_rpcs::Error::DisconnectedWillReconnect("..".into())
+    }
+
     fn storage_response<K: Into<Vec<u8>>, V: Into<Vec<u8>>>(key: K, value: V) -> StorageResponse
     where
         Vec<u8>: From<K>,
@@ -450,18 +454,14 @@ mod test {
                 (
                     "ID1",
                     VecDeque::from_iter([
-                        Err(subxt_rpcs::Error::DisconnectedWillReconnect(
-                            "..".to_string(),
-                        )),
+                        Err(disconnected_will_reconnect()),
                         Ok(Json(hex::encode("Data1"))),
                     ]),
                 ),
                 (
                     "ID2",
                     VecDeque::from_iter([
-                        Err(subxt_rpcs::Error::DisconnectedWillReconnect(
-                            "..".to_string(),
-                        )),
+                        Err(disconnected_will_reconnect()),
                         Ok(Json(hex::encode("Data2"))),
                     ]),
                 ),
@@ -512,9 +512,7 @@ mod test {
             let rpc_client = MockRpcClient::builder()
                 .method_handler_once("state_getStorage", move |_params| async move {
                     // Return "disconnected" error on first call
-                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect(
-                        "..".to_string(),
-                    ))
+                    Err::<Infallible, _>(disconnected_will_reconnect())
                 })
                 .method_handler_once("state_getStorage", move |_param| async move {
                     // Return some hex encoded storage value on the next one
@@ -553,9 +551,7 @@ mod test {
             let rpc_client = MockRpcClient::builder()
                 .method_handler_once("chain_getBlockHash", move |_params| async move {
                     // Return "disconnected" error on first call
-                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect(
-                        "..".to_string(),
-                    ))
+                    Err::<Infallible, _>(disconnected_will_reconnect())
                 })
                 .method_handler_once("chain_getBlockHash", move |_params| async move {
                     // Return the blockhash on next call
@@ -599,15 +595,11 @@ mod test {
             let mut data = VecDeque::from_iter([
                 vec![
                     Ok(Json(runtime_version(0))),
-                    Err(subxt_rpcs::Error::DisconnectedWillReconnect(
-                        "..".to_string(),
-                    )),
+                    Err(disconnected_will_reconnect()),
                     Ok(Json(runtime_version(1))),
                 ],
                 vec![
-                    Err(subxt_rpcs::Error::DisconnectedWillReconnect(
-                        "..".to_string(),
-                    )),
+                    Err(disconnected_will_reconnect()),
                     Ok(Json(runtime_version(2))),
                     Ok(Json(runtime_version(3))),
                 ],
@@ -877,7 +869,7 @@ mod test {
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // First call; return DisconnectedWillReconnect
-                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
+                    Err::<Infallible, _>(disconnected_will_reconnect())
                 })
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // Otherwise, return that we'll start sending a response, and spawn
@@ -934,7 +926,7 @@ mod test {
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // First call; return DisconnectedWillReconnect
-                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
+                    Err::<Infallible, _>(disconnected_will_reconnect())
                 })
                 .method_handler_once("chainHead_v1_storage", move |_params| async move {
                     // Next call, return a storage item and then a "waiting for continue".
@@ -947,7 +939,7 @@ mod test {
                 })
                 .method_handler_once("chainHead_v1_continue", move |_params| async move {
                     // First call; return DisconnectedWillReconnect
-                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect("..".into()))
+                    Err::<Infallible, _>(disconnected_will_reconnect())
                 })
                 .method_handler_once("chainHead_v1_continue", move |_params| async move {
                     // Next call; acknowledge the "continue" and return reamining storage items.
@@ -995,9 +987,7 @@ mod test {
             let rpc_client = mock_client_builder(rx)
                 .method_handler_once("chainSpec_v1_genesisHash", move |_params| async move {
                     // First call, return disconnected error.
-                    Err::<Infallible, _>(subxt_rpcs::Error::DisconnectedWillReconnect(
-                        "..".to_owned(),
-                    ))
+                    Err::<Infallible, _>(disconnected_will_reconnect())
                 })
                 .method_handler_once("chainSpec_v1_genesisHash", move |_params| async move {
                     // Next call, return the hash.

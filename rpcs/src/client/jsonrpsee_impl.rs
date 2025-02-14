@@ -29,9 +29,7 @@ impl RpcClientT for Client {
         params: Option<Box<RawValue>>,
     ) -> RawRpcFuture<'a, Box<RawValue>> {
         Box::pin(async move {
-            let res = ClientT::request(self, method, Params(params))
-                .await
-                .map_err(error_to_rpc_error)?;
+            let res = ClientT::request(self, method, Params(params)).await?;
             Ok(res)
         })
     }
@@ -48,9 +46,7 @@ impl RpcClientT for Client {
                 sub,
                 Params(params),
                 unsub,
-            )
-            .await
-            .map_err(error_to_rpc_error)?;
+            ).await?;
 
             let id = match stream.kind() {
                 SubscriptionKind::Subscription(SubscriptionId::Str(id)) => {
@@ -67,20 +63,22 @@ impl RpcClientT for Client {
     }
 }
 
-/// Convert a JsonrpseeError into the RPC error in this crate.
-/// The main reason for this is to capture user errors so that
-/// they can be represented/handled without casting. 
-fn error_to_rpc_error(error: JsonrpseeError) -> Error {
-    match error {
-        JsonrpseeError::Call(e) => {
-            Error::User(crate::UserError {
-                code: e.code(),
-                message: e.message().to_owned(),
-                data: e.data().map(|d| d.to_owned())
-            })
-        },
-        e => {
-            Error::Client(Box::new(e))
+// Convert a JsonrpseeError into the RPC error in this crate.
+// The main reason for this is to capture user errors so that
+// they can be represented/handled without casting. 
+impl From<JsonrpseeError> for Error {
+    fn from(error: JsonrpseeError) -> Self {
+        match error {
+            JsonrpseeError::Call(e) => {
+                Error::User(crate::UserError {
+                    code: e.code(),
+                    message: e.message().to_owned(),
+                    data: e.data().map(|d| d.to_owned())
+                })
+            },
+            e => {
+                Error::Client(Box::new(e))
+            }
         }
     }
 }
