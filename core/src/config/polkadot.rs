@@ -19,12 +19,18 @@ pub enum PolkadotConfig {}
 impl Config for PolkadotConfig {
     type Hash = <SubstrateConfig as Config>::Hash;
     type AccountId = <SubstrateConfig as Config>::AccountId;
-    type Address = MultiAddress<Self::AccountId, ()>;
     type Signature = <SubstrateConfig as Config>::Signature;
     type Hasher = <SubstrateConfig as Config>::Hasher;
     type Header = <SubstrateConfig as Config>::Header;
+    type AssetId = <SubstrateConfig as Config>::AssetId;
+
+    // Address on Polkadot has no account index, whereas it's u32 on
+    // the default substrate dev node.
+    type Address = MultiAddress<Self::AccountId, ()>;
+
+    // These are the same as the default substrate node, but redefined
+    // because we need to pass the PolkadotConfig trait as a param.
     type ExtrinsicParams = PolkadotExtrinsicParams<Self>;
-    type AssetId = u32;
 }
 
 /// A struct representing the signed extra and additional parameters required
