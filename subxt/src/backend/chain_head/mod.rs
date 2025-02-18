@@ -16,15 +16,10 @@ mod follow_stream_driver;
 mod follow_stream_unpin;
 mod storage_items;
 
-pub mod rpc_methods;
-
 use self::follow_stream_driver::FollowStreamFinalizedHeads;
-use self::rpc_methods::{
-    FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
-};
 use crate::backend::{
-    rpc::RpcClient, utils::retry, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse,
-    StreamOf, StreamOfResults, TransactionStatus,
+    utils::retry, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf,
+    StreamOfResults, TransactionStatus,
 };
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
@@ -36,9 +31,18 @@ use futures::{Stream, StreamExt};
 use std::collections::HashMap;
 use std::task::Poll;
 use storage_items::StorageItems;
+use subxt_rpcs::methods::chain_head::{
+    FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
+};
+use subxt_rpcs::RpcClient;
+
+/// Re-export RPC types and methods from [`subxt_rpcs::methods::chain_head`].
+pub mod rpc_methods {
+    pub use subxt_rpcs::methods::legacy::*;
+}
 
 // Expose the RPC methods.
-pub use rpc_methods::ChainHeadRpcMethods;
+pub use subxt_rpcs::methods::chain_head::ChainHeadRpcMethods;
 
 /// Configure and build an [`ChainHeadBackend`].
 pub struct ChainHeadBackendBuilder<T> {
@@ -213,7 +217,7 @@ impl<T: Config> ChainHeadBackend<T> {
 
                             let header = match res {
                                 Ok(header) => header,
-                                Err(e) => return Some(Err(e)),
+                                Err(e) => return Some(Err(e.into())),
                             };
 
                             Some(Ok((header, block_ref.into())))
@@ -338,13 +342,18 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
     }
 
     async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        retry(|| self.methods.chainspec_v1_genesis_hash()).await
+        retry(|| async {
+            let genesis_hash = self.methods.chainspec_v1_genesis_hash().await?;
+            Ok(genesis_hash)
+        })
+        .await
     }
 
     async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
         retry(|| async {
             let sub_id = get_subscription_id(&self.follow_handle).await?;
-            self.methods.chainhead_v1_header(&sub_id, at).await
+            let header = self.methods.chainhead_v1_header(&sub_id, at).await?;
+            Ok(header)
         })
         .await
     }
@@ -357,9 +366,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
             let follow_events = self.follow_handle.subscribe().events();
             let status = self.methods.chainhead_v1_body(&sub_id, at).await?;
             let operation_id = match status {
-                MethodResponse::LimitReached => {
-                    return Err(RpcError::request_rejected("limit reached").into())
-                }
+                MethodResponse::LimitReached => return Err(RpcError::LimitReached.into()),
                 MethodResponse::Started(s) => s.operation_id,
             };
 
@@ -653,22 +660,21 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                 let tx_progress_ev = match tx_progress.poll_next_unpin(cx) {
                     Poll::Pending => return Poll::Pending,
                     Poll::Ready(None) => return Poll::Ready(err_other("No more transaction progress events, but we haven't seen a Finalized one yet")),
-                    Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
+                    Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e.into()))),
                     Poll::Ready(Some(Ok(ev))) => ev,
                 };
 
                 // When we get one, map it to the correct format (or for finalized ev, wait for the pinned block):
+                use subxt_rpcs::methods::chain_head::TransactionStatus as RpcTransactionStatus;
                 let tx_progress_ev = match tx_progress_ev {
-                    rpc_methods::TransactionStatus::Finalized { block } => {
+                    RpcTransactionStatus::Finalized { block } => {
                         // We'll wait until we have seen this hash, to try to guarantee
                         // that when we return this event, the corresponding block is
                         // pinned and accessible.
                         finalized_hash = Some(block.hash);
                         continue;
                     }
-                    rpc_methods::TransactionStatus::BestChainBlockIncluded {
-                        block: Some(block),
-                    } => {
+                    RpcTransactionStatus::BestChainBlockIncluded { block: Some(block) } => {
                         // Look up a pinned block ref if we can, else return a non-pinned
                         // block that likely isn't accessible. We have no guarantee that a best
                         // block on the node a tx was sent to will ever be known about on the
@@ -679,20 +685,20 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                         };
                         TransactionStatus::InBestBlock { hash: block_ref }
                     }
-                    rpc_methods::TransactionStatus::BestChainBlockIncluded { block: None } => {
+                    RpcTransactionStatus::BestChainBlockIncluded { block: None } => {
                         TransactionStatus::NoLongerInBestBlock
                     }
-                    rpc_methods::TransactionStatus::Broadcasted => TransactionStatus::Broadcasted,
-                    rpc_methods::TransactionStatus::Dropped { error, .. } => {
+                    RpcTransactionStatus::Broadcasted => TransactionStatus::Broadcasted,
+                    RpcTransactionStatus::Dropped { error, .. } => {
                         TransactionStatus::Dropped { message: error }
                     }
-                    rpc_methods::TransactionStatus::Error { error } => {
+                    RpcTransactionStatus::Error { error } => {
                         TransactionStatus::Error { message: error }
                     }
-                    rpc_methods::TransactionStatus::Invalid { error } => {
+                    RpcTransactionStatus::Invalid { error } => {
                         TransactionStatus::Invalid { message: error }
                     }
-                    rpc_methods::TransactionStatus::Validated => TransactionStatus::Validated,
+                    RpcTransactionStatus::Validated => TransactionStatus::Validated,
                 };
                 return Poll::Ready(Some(Ok(tx_progress_ev)));
             }
@@ -718,9 +724,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                 .chainhead_v1_call(&sub_id, at, method, call_parameters)
                 .await?;
             let operation_id = match status {
-                MethodResponse::LimitReached => {
-                    return Err(RpcError::request_rejected("limit reached").into())
-                }
+                MethodResponse::LimitReached => return Err(RpcError::LimitReached.into()),
                 MethodResponse::Started(s) => s.operation_id,
             };
 

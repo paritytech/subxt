@@ -1,17 +1,16 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use super::{RawRpcSubscription, RpcClientT};
-use crate::error::Error;
+use crate::Error;
 use futures::{Stream, StreamExt};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json::value::RawValue;
 use std::{pin::Pin, sync::Arc, task::Poll};
 
-/// A concrete wrapper around an [`RpcClientT`] which provides some higher level helper methods,
-/// is cheaply cloneable, and can be handed to things like [`crate::client::OnlineClient`] to
-/// instantiate it.
+/// A concrete wrapper around an [`RpcClientT`] which provides some higher level helper methods
+/// and is cheaply cloneable.
 #[derive(Clone)]
 pub struct RpcClient {
     client: Arc<dyn RpcClientT>,
@@ -35,7 +34,7 @@ impl RpcClient {
     pub async fn from_insecure_url<U: AsRef<str>>(url: U) -> Result<Self, Error> {
         let client = jsonrpsee_helpers::client(url.as_ref())
             .await
-            .map_err(|e| crate::error::RpcError::ClientError(Box::new(e)))?;
+            .map_err(|e| Error::Client(Box::new(e)))?;
         Ok(Self::new(client))
     }
 
@@ -56,7 +55,7 @@ impl RpcClient {
         params: RpcParams,
     ) -> Result<Res, Error> {
         let res = self.client.request_raw(method, params.build()).await?;
-        let val = serde_json::from_str(res.get())?;
+        let val = serde_json::from_str(res.get()).map_err(Error::Deserialization)?;
         Ok(val)
     }
 
@@ -108,7 +107,7 @@ impl std::ops::Deref for RpcClient {
 /// # Example
 ///
 /// ```rust
-/// use subxt::backend::rpc::{ rpc_params, RpcParams };
+/// use subxt_rpcs::client::{ rpc_params, RpcParams };
 ///
 /// // If you provide no params you get `None` back
 /// let params: RpcParams = rpc_params![];
@@ -123,7 +122,7 @@ macro_rules! rpc_params {
     ($($p:expr), *) => {{
         // May be unused if empty; no params.
         #[allow(unused_mut)]
-        let mut params = $crate::backend::rpc::RpcParams::new();
+        let mut params = $crate::client::RpcParams::new();
         $(
             params.push($p).expect("values passed to rpc_params! must be serializable to JSON");
         )*
@@ -140,7 +139,7 @@ pub use rpc_params;
 /// # Example
 ///
 /// ```rust
-/// use subxt::backend::rpc::RpcParams;
+/// use subxt_rpcs::client::RpcParams;
 ///
 /// let mut params = RpcParams::new();
 /// params.push(1).unwrap();
@@ -165,7 +164,7 @@ impl RpcParams {
         } else {
             self.0.push(b',')
         }
-        serde_json::to_writer(&mut self.0, &param)?;
+        serde_json::to_writer(&mut self.0, &param).map_err(Error::Deserialization)?;
         Ok(())
     }
     /// Build a [`RawValue`] from our params, returning `None` if no parameters
@@ -235,8 +234,9 @@ impl<Res: DeserializeOwned> Stream for RpcSubscription<Res> {
         // Decode the inner RawValue to the type we're expecting and map
         // any errors to the right shape:
         let res = res.map(|r| {
-            r.map_err(|e| e.into())
-                .and_then(|raw_val| serde_json::from_str(raw_val.get()).map_err(|e| e.into()))
+            r.and_then(|raw_val| {
+                serde_json::from_str(raw_val.get()).map_err(Error::Deserialization)
+            })
         });
 
         Poll::Ready(res)

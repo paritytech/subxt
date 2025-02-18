@@ -1,8 +1,8 @@
-// Copyright 2019-2024 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::backend::rpc::reconnecting_rpc_client::{RpcClientBuilder, RpcError};
+use super::{RpcClientBuilder, RpcError};
 use jsonrpsee::core::client::Client;
 use std::sync::Arc;
 use url::Url;

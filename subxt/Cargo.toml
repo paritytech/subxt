@@ -25,10 +25,8 @@ default = ["jsonrpsee", "native"]
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
 native = [
-    "jsonrpsee?/async-client",
-    "jsonrpsee?/client-ws-transport-tls",
-    "jsonrpsee?/ws-client",
     "subxt-lightclient?/native",
+    "subxt-rpcs/native",
     "tokio-util",
     "tokio?/sync",
     "polkadot-sdk/std",
@@ -37,14 +35,10 @@ native = [
 # Enable this for web/wasm builds.
 # Exactly 1 of "web" and "native" is expected.
 web = [
-    "jsonrpsee?/async-wasm-client",
-    "jsonrpsee?/client-web-transport",
-    "jsonrpsee?/wasm-client",
-    "getrandom/js",
     "subxt-lightclient?/web",
     "subxt-macro/web",
+    "subxt-rpcs/web",
     "tokio?/sync",
-    "finito?/wasm-bindgen",
 ]
 
 # Feature flag to enable the default future executor.
@@ -56,11 +50,13 @@ web = [
 runtime = ["tokio/rt", "wasm-bindgen-futures"]
 
 # Enable this to use the reconnecting rpc client
-reconnecting-rpc-client = ["dep:finito", "jsonrpsee"]
+reconnecting-rpc-client = ["subxt-rpcs/reconnecting-rpc-client"]
 
-# Enable this to use jsonrpsee (allowing for example `OnlineClient::from_url`).
+# Enable this to use jsonrpsee, which enables the jsonrpsee RPC client, and
+# a couple of util functions which rely on jsonrpsee.
 jsonrpsee = [
     "dep:jsonrpsee",
+    "subxt-rpcs/jsonrpsee",
     "runtime"
 ]
 
@@ -72,7 +68,7 @@ unstable-metadata = []
 
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
-unstable-light-client = ["subxt-lightclient"]
+unstable-light-client = ["subxt-lightclient", "subxt-rpcs/unstable-light-client"]
 
 # Activate this to expose the ability to generate metadata from Wasm runtime files.
 runtime-metadata-path = ["subxt-macro/runtime-metadata-path"]
@@ -98,7 +94,6 @@ either = { workspace = true }
 web-time = { workspace = true }
 
 # Provides some deserialization, types like U256/H256 and hashing impls like twox/blake256:
-impl-serde = { workspace = true }
 primitive-types = { workspace = true, features = ["codec", "scale-info", "serde"] }
 
 # Included if the "jsonrpsee" feature is enabled.
@@ -109,12 +104,10 @@ subxt-macro = { workspace = true }
 subxt-core = { workspace = true, features = ["std"] }
 subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
+subxt-rpcs = { workspace = true, features = ["subxt"] }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
-
-# Included if "web" feature is enabled, to enable its js feature.
-getrandom = { workspace = true, optional = true }
 
 # Included if "native" feature is enabled
 tokio-util = { workspace = true, features = ["compat"], optional = true }
@@ -123,7 +116,6 @@ tokio-util = { workspace = true, features = ["compat"], optional = true }
 # Only the `tokio/sync` is used in the reconnecting rpc client
 # and that compiles both for native and web.
 tokio = { workspace = true, optional = true }
-finito = { workspace = true, optional = true }
 wasm-bindgen-futures = { workspace = true, optional = true }
 
 [dev-dependencies]
@@ -134,6 +126,7 @@ tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread", "sy
 polkadot-sdk = { workspace = true, features = ["sp-core", "sp-keyring", "sp-runtime", "std"] }
 assert_matches = { workspace = true }
 subxt-signer = { path = "../signer", features = ["unstable-eth"] }
+subxt-rpcs = { workspace = true, features = ["subxt", "mock-rpc-client"] }
 # Tracing subscriber is useful for light-client examples to ensure that
 # the `bootNodes` and chain spec are configured correctly. If all is fine, then
 # the light-client wlll emit INFO logs with
@@ -141,9 +134,9 @@ subxt-signer = { path = "../signer", features = ["unstable-eth"] }
 tracing-subscriber = { workspace = true }
 # These deps are needed to test the reconnecting rpc client
 jsonrpsee = { workspace = true, features = ["server"] }
-tower = "0.4"
-hyper = "1"
-http-body = "1"
+tower = { workspace = true }
+hyper = { workspace = true }
+http-body = { workspace = true }
 
 [[example]]
 name = "light_client_basic"

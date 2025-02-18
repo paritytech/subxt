@@ -3,7 +3,6 @@
 // see LICENSE for license details.
 
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
-use crate::backend::chain_head::rpc_methods::{FollowEvent, Initialized, RuntimeEvent};
 use crate::config::BlockHash;
 use crate::error::{Error, RpcError};
 use futures::stream::{Stream, StreamExt};
@@ -12,6 +11,7 @@ use std::ops::DerefMut;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll, Waker};
+use subxt_rpcs::methods::chain_head::{FollowEvent, Initialized, RuntimeEvent};
 
 /// A `Stream` which builds on `FollowStreamDriver`, and allows multiple subscribers to obtain events
 /// from the single underlying subscription (each being provided an `Initialized` message and all new
@@ -454,8 +454,11 @@ where
                             .iter()
                             .position(|b| b.hash() == p.hash())
                         else {
-                            return Poll::Ready(Some(Err(RpcError::DisconnectedWillReconnect(
-                                "Missed at least one block when the connection was lost".to_owned(),
+                            return Poll::Ready(Some(Err(RpcError::ClientError(
+                                subxt_rpcs::Error::DisconnectedWillReconnect(
+                                    "Missed at least one block when the connection was lost"
+                                        .to_owned(),
+                                ),
                             )
                             .into())));
                         };
@@ -739,7 +742,7 @@ mod test {
             )
         );
         assert!(
-            matches!(&evs[1], Err(Error::Rpc(RpcError::DisconnectedWillReconnect(e))) if e.contains("Missed at least one block when the connection was lost"))
+            matches!(&evs[1], Err(Error::Rpc(RpcError::ClientError(subxt_rpcs::Error::DisconnectedWillReconnect(e)))) if e.contains("Missed at least one block when the connection was lost"))
         );
         assert_eq!(
             evs[2].as_ref().unwrap(),

@@ -120,15 +120,26 @@ impl From<scale_decode::visitor::DecodeError> for Error {
     }
 }
 
+impl From<subxt_rpcs::Error> for Error {
+    fn from(value: subxt_rpcs::Error) -> Self {
+        Error::Rpc(value.into())
+    }
+}
+
 impl Error {
     /// Checks whether the error was caused by a RPC re-connection.
     pub fn is_disconnected_will_reconnect(&self) -> bool {
-        matches!(self, Error::Rpc(RpcError::DisconnectedWillReconnect(_)))
+        matches!(
+            self,
+            Error::Rpc(RpcError::ClientError(
+                subxt_rpcs::Error::DisconnectedWillReconnect(_)
+            ))
+        )
     }
 
     /// Checks whether the error was caused by a RPC request being rejected.
-    pub fn is_rejected(&self) -> bool {
-        matches!(self, Error::Rpc(RpcError::RequestRejected(_)))
+    pub fn is_rpc_limit_reached(&self) -> bool {
+        matches!(self, Error::Rpc(RpcError::LimitReached))
     }
 }
 
@@ -141,27 +152,14 @@ pub enum RpcError {
     // for `subscribe_to_block_headers_filling_in_gaps` and friends.
     /// Error related to the RPC client.
     #[error("RPC error: {0}")]
-    ClientError(Box<dyn std::error::Error + Send + Sync + 'static>),
-    /// This error signals that the request was rejected for some reason.
-    /// The specific reason is provided.
-    #[error("RPC error: request rejected: {0}")]
-    RequestRejected(String),
+    ClientError(#[from] subxt_rpcs::Error),
+    /// This error signals that we got back a [`subxt_rpcs::methods::chain_head::MethodResponse::LimitReached`],
+    /// which is not technically an RPC error but is treated as an error in our own APIs.
+    #[error("RPC error: limit reached")]
+    LimitReached,
     /// The RPC subscription dropped.
     #[error("RPC error: subscription dropped.")]
     SubscriptionDropped,
-    /// The requested URL is insecure.
-    #[error("RPC error: insecure URL: {0}")]
-    InsecureUrl(String),
-    /// The connection was lost and automatically reconnected.
-    #[error("RPC error: the connection was lost `{0}`; reconnect automatically initiated")]
-    DisconnectedWillReconnect(String),
-}
-
-impl RpcError {
-    /// Create a `RequestRejected` error from anything that can be turned into a string.
-    pub fn request_rejected<S: Into<String>>(s: S) -> RpcError {
-        RpcError::RequestRejected(s.into())
-    }
 }
 
 /// Block error

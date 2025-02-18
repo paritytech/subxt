@@ -1,4 +1,4 @@
-// Copyright 2019-2024 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -10,42 +10,7 @@
 //!
 //! The logic which action to take for individual calls and subscriptions are
 //! handled by the subxt backend implementations.
-//!
-//! # Example
-//!
-//! ```no_run
-//! use std::time::Duration;
-//! use futures::StreamExt;
-//! use subxt::backend::rpc::reconnecting_rpc_client::{RpcClient, ExponentialBackoff};
-//! use subxt::{OnlineClient, PolkadotConfig};
-//!
-//! #[tokio::main]
-//! async fn main() {
-//!     let rpc = RpcClient::builder()
-//!         .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10)))
-//!         .build("ws://localhost:9944".to_string())
-//!         .await
-//!         .unwrap();
-//!
-//!     let subxt_client: OnlineClient<PolkadotConfig> = OnlineClient::from_rpc_client(rpc.clone()).await.unwrap();
-//!     let mut blocks_sub = subxt_client.blocks().subscribe_finalized().await.unwrap();
-//!   
-//!     while let Some(block) = blocks_sub.next().await {
-//!         let block = match block {
-//!             Ok(b) => b,
-//!             Err(e) => {
-//!                 if e.is_disconnected_will_reconnect() {
-//!                     println!("The RPC connection was lost and we may have missed a few blocks");
-//!                     continue;
-//!                 } else {
-//!                   panic!("Error: {}", e);
-//!                 }
-//!             }
-//!         };
-//!         println!("Block #{} ({})", block.number(), block.hash());
-//!    }
-//! }
-//! ```
+//! 
 
 mod platform;
 #[cfg(test)]
@@ -60,7 +25,7 @@ use std::{
 };
 
 use super::{RawRpcFuture, RawRpcSubscription, RpcClientT};
-use crate::error::RpcError as SubxtRpcError;
+use crate::Error as SubxtRpcError;
 
 use finito::Retry;
 use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
@@ -427,13 +392,7 @@ impl RpcClientT for RpcClient {
         async {
             self.request(method.to_string(), params)
                 .await
-                .map_err(|e| match e {
-                    Error::DisconnectedWillReconnect(e) => {
-                        SubxtRpcError::DisconnectedWillReconnect(e.to_string())
-                    }
-                    Error::Dropped => SubxtRpcError::ClientError(Box::new(e)),
-                    Error::RpcError(e) => SubxtRpcError::ClientError(Box::new(e)),
-                })
+                .map_err(error_to_rpc_error)
         }
         .boxed()
     }
@@ -448,7 +407,7 @@ impl RpcClientT for RpcClient {
             let sub = self
                 .subscribe(sub.to_string(), params, unsub.to_string())
                 .await
-                .map_err(|e| SubxtRpcError::ClientError(Box::new(e)))?;
+                .map_err(error_to_rpc_error)?;
 
             let id = match sub.id() {
                 SubscriptionId::Num(n) => n.to_string(),
@@ -468,6 +427,27 @@ impl RpcClientT for RpcClient {
             })
         }
         .boxed()
+    }
+}
+
+/// Convert a reconnecting client Error into the RPC error in this crate.
+/// The main reason for this is to capture user errors so that
+/// they can be represented/handled without casting. 
+fn error_to_rpc_error(error: Error) -> SubxtRpcError {
+    match error {
+        Error::DisconnectedWillReconnect(reason) => {
+            SubxtRpcError::DisconnectedWillReconnect(reason.to_string())
+        },
+        Error::RpcError(RpcError::Call(e)) => {
+            SubxtRpcError::User(crate::UserError {
+                code: e.code(),
+                message: e.message().to_owned(),
+                data: e.data().map(|d| d.to_owned())
+            })
+        },
+        e => {
+            SubxtRpcError::Client(Box::new(e))
+        }
     }
 }
 

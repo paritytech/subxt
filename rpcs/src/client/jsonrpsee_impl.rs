@@ -1,13 +1,13 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use super::{RawRpcFuture, RawRpcSubscription, RpcClientT};
-use crate::error::RpcError;
+use crate::Error;
 use futures::stream::{StreamExt, TryStreamExt};
 use jsonrpsee::{
     core::{
-        client::{Client, ClientT, SubscriptionClientT, SubscriptionKind},
+        client::{Error as JsonrpseeError, Client, ClientT, SubscriptionClientT, SubscriptionKind},
         traits::ToRpcParams,
     },
     types::SubscriptionId,
@@ -29,9 +29,7 @@ impl RpcClientT for Client {
         params: Option<Box<RawValue>>,
     ) -> RawRpcFuture<'a, Box<RawValue>> {
         Box::pin(async move {
-            let res = ClientT::request(self, method, Params(params))
-                .await
-                .map_err(|e| RpcError::ClientError(Box::new(e)))?;
+            let res = ClientT::request(self, method, Params(params)).await?;
             Ok(res)
         })
     }
@@ -48,9 +46,7 @@ impl RpcClientT for Client {
                 sub,
                 Params(params),
                 unsub,
-            )
-            .await
-            .map_err(|e| RpcError::ClientError(Box::new(e)))?;
+            ).await?;
 
             let id = match stream.kind() {
                 SubscriptionKind::Subscription(SubscriptionId::Str(id)) => {
@@ -60,9 +56,29 @@ impl RpcClientT for Client {
             };
 
             let stream = stream
-                .map_err(|e| RpcError::ClientError(Box::new(e)))
+                .map_err(|e| Error::Client(Box::new(e)))
                 .boxed();
             Ok(RawRpcSubscription { stream, id })
         })
+    }
+}
+
+// Convert a JsonrpseeError into the RPC error in this crate.
+// The main reason for this is to capture user errors so that
+// they can be represented/handled without casting. 
+impl From<JsonrpseeError> for Error {
+    fn from(error: JsonrpseeError) -> Self {
+        match error {
+            JsonrpseeError::Call(e) => {
+                Error::User(crate::UserError {
+                    code: e.code(),
+                    message: e.message().to_owned(),
+                    data: e.data().map(|d| d.to_owned())
+                })
+            },
+            e => {
+                Error::Client(Box::new(e))
+            }
+        }
     }
 }

@@ -3976,6 +3976,7 @@ dependencies = [
  "subxt",
  "subxt-codegen",
  "subxt-metadata",
+ "subxt-rpcs",
  "subxt-signer",
  "subxt-test-macro",
  "syn 2.0.87",
@@ -10551,14 +10552,11 @@ dependencies = [
  "bitvec",
  "derive-where",
  "either",
- "finito",
  "frame-metadata 18.0.0",
  "futures",
- "getrandom",
  "hex",
  "http-body",
  "hyper",
- "impl-serde 0.5.0",
  "jsonrpsee",
  "parity-scale-codec",
  "polkadot-sdk",
@@ -10574,6 +10572,7 @@ dependencies = [
  "subxt-lightclient",
  "subxt-macro",
  "subxt-metadata",
+ "subxt-rpcs",
  "subxt-signer",
  "thiserror 2.0.0",
  "tokio",
@@ -10718,6 +10717,35 @@ dependencies = [
  "polkadot-sdk",
  "scale-info",
  "thiserror 2.0.0",
+]
+
+[[package]]
+name = "subxt-rpcs"
+version = "0.39.0"
+dependencies = [
+ "derive-where",
+ "finito",
+ "frame-metadata 18.0.0",
+ "futures",
+ "getrandom",
+ "hex",
+ "http-body",
+ "hyper",
+ "impl-serde 0.5.0",
+ "jsonrpsee",
+ "parity-scale-codec",
+ "primitive-types 0.13.1",
+ "serde",
+ "serde_json",
+ "subxt-core",
+ "subxt-lightclient",
+ "thiserror 2.0.0",
+ "tokio",
+ "tokio-util",
+ "tower",
+ "tracing",
+ "url",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]

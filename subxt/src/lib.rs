@@ -18,6 +18,10 @@
 ))]
 compile_error!("subxt: exactly one of the 'web' and 'native' features should be used.");
 
+// Internal helper macros
+#[macro_use]
+mod macros;
+
 // The guide is here.
 pub mod book;
 
@@ -33,11 +37,6 @@ mod only_used_in_docs_or_tests {
 // only used in example code snippets at the time of writing.
 #[cfg(test)]
 use tracing_subscriber as _;
-
-// Used to enable the js feature for wasm.
-#[cfg(feature = "web")]
-#[allow(unused_imports)]
-pub use getrandom as _;
 
 pub mod backend;
 pub mod blocks;
@@ -80,10 +79,6 @@ pub mod dynamic {
     };
 }
 
-// Internal helper macros
-#[macro_use]
-mod macros;
-
 // Expose light client bits
 cfg_unstable_light_client! {
     pub use subxt_lightclient as lightclient;
@@ -108,6 +103,7 @@ pub mod ext {
     pub use scale_encode;
     pub use scale_value;
     pub use subxt_core;
+    pub use subxt_rpcs;
 
     cfg_jsonrpsee! {
         pub use jsonrpsee;

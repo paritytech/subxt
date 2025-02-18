@@ -1,8 +1,8 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::error::RpcError;
+use crate::Error;
 use futures::Stream;
 use std::{future::Future, pin::Pin};
 
@@ -10,8 +10,8 @@ use std::{future::Future, pin::Pin};
 pub use serde_json::value::RawValue;
 
 /// A trait describing low level JSON-RPC interactions. Implementations of this can be
-/// used to instantiate a [`super::RpcClient`], which can be passed to [`crate::OnlineClient`]
-/// or used for lower level RPC calls via eg [`crate::backend::legacy::LegacyRpcMethods`].
+/// used to instantiate a [`super::RpcClient`], used for lower level RPC calls via eg
+/// [`crate::methods::LegacyRpcMethods`] and [`crate::methods::ChainHeadRpcMethods`].
 ///
 /// This is a low level interface whose methods expect an already-serialized set of params,
 /// and return an owned but still-serialized [`RawValue`], deferring deserialization to
@@ -54,12 +54,12 @@ pub trait RpcClientT: Send + Sync + 'static {
 }
 
 /// A boxed future that is returned from the [`RpcClientT`] methods.
-pub type RawRpcFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T, RpcError>> + Send + 'a>>;
+pub type RawRpcFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T, Error>> + Send + 'a>>;
 
 /// The RPC subscription returned from [`RpcClientT`]'s `subscription` method.
 pub struct RawRpcSubscription {
     /// The subscription stream.
-    pub stream: Pin<Box<dyn Stream<Item = Result<Box<RawValue>, RpcError>> + Send + 'static>>,
+    pub stream: Pin<Box<dyn Stream<Item = Result<Box<RawValue>, Error>> + Send + 'static>>,
     /// The ID associated with the subscription.
     pub id: Option<String>,
 }

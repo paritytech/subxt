@@ -4,12 +4,14 @@
 
 //! # RPC calls
 //!
-//! Subxt exposes low level interfaces that can be used to make RPC requests; [`crate::backend::legacy::rpc_methods`]
-//! and [`crate::backend::chain_head::rpc_methods`].
+//! The RPC interface is provided by the [`subxt_rpcs`] crate but re-exposed here. We have:
 //!
-//! These interfaces cannot be accessed directly through an [`crate::OnlineClient`]; this is so that the high level
-//! Subxt APIs can target either the "legacy" or the more modern "unstable" sets of RPC methods by selecting an appropriate
-//! [`crate::backend::Backend`]. It also means that there could exist a backend in the future that doesn't use JSON-RPC at all.
+//! - [`crate::backend::rpc::RpcClient`] and [`crate::backend::rpc::RpcClientT`]: the underlying type and trait
+//!   which provides a basic RPC client.
+//! - [`crate::backend::legacy::rpc_methods`] and [`crate::backend::chain_head::rpc_methods`]: RPc methods that
+//!   can be instantiated with an RPC client.
+//!
+//! See [`subxt_rpcs`] or [`crate::ext::subxt_rpcs`] for more.
 //!
 //! # Example
 //!
