@@ -2,10 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use std::collections::HashSet;
-
 use crate::{
-    subxt_test, test_context, test_context_reconnecting_rpc_client,
+    subxt_test, test_context,
     utils::{node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};
@@ -421,6 +419,9 @@ async fn partial_fee_estimate_correct() {
 /*
 #[subxt_test(timeout = 300)]
 async fn chainhead_block_subscription_reconnect() {
+    use std::collections::HashSet;
+    use crate::test_context_reconnecting_rpc_client;
+
     let ctx = test_context_reconnecting_rpc_client().await;
     let api = ctx.chainhead_backend().await;ccc
     let chainhead_client_blocks = move |num: usize| {
