@@ -384,7 +384,6 @@ mod test {
     use futures::StreamExt;
     use primitive_types::H256;
     use rpc::RpcClientT;
-    use sp_core;
     use std::collections::{HashMap, VecDeque};
     use subxt_core::{config::DefaultExtrinsicParams, Config};
     use subxt_rpcs::client::{
