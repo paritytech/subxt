@@ -601,8 +601,8 @@ pub struct ExtrinsicMetadata {
     signature_ty: u32,
     /// The type of the outermost Extra enum.
     extra_ty: u32,
-    /// Extrinsic version.
-    version: u8,
+    /// Which extrinsic versions are supported by this chain.
+    supported_versions: Vec<u8>,
     /// The signed extensions in the order they appear in the extrinsic.
     signed_extensions: Vec<SignedExtensionMetadata>,
 }
@@ -626,9 +626,9 @@ impl ExtrinsicMetadata {
         self.extra_ty
     }
 
-    /// Extrinsic version.
-    pub fn version(&self) -> u8 {
-        self.version
+    /// Which extrinsic versions are supported.
+    pub fn supported_versions(&self) -> &[u8] {
+        &self.supported_versions
     }
 
     /// The extra/additional information associated with the extrinsic.

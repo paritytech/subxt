@@ -178,7 +178,7 @@ pub enum ExtrinsicParamsError {
     },
     /// A signed extension in use on some chain was not provided.
     #[error("The chain expects a signed extension with the name {0}, but we did not provide one")]
-    UnknownSignedExtension(String),
+    UnknownTransactionExtension(String),
     /// Some custom error.
     #[error("Error constructing extrinsic parameters: {0}")]
     Custom(Box<dyn CustomError>),

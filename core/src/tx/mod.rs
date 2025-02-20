@@ -199,9 +199,8 @@ impl<T: Config> PartialTransaction<T> {
         F: for<'a> FnOnce(Cow<'a, [u8]>) -> R,
     {
         let mut bytes = self.call_data.clone();
-        self.additional_and_extra_params.encode_extra_to(&mut bytes);
-        self.additional_and_extra_params
-            .encode_additional_to(&mut bytes);
+        self.additional_and_extra_params.encode_signer_payload_to(&mut bytes); 
+        self.additional_and_extra_params.encode_implicit_to(&mut bytes);
         if bytes.len() > 256 {
             f(Cow::Borrowed(blake2_256(&bytes).as_ref()))
         } else {
@@ -253,8 +252,7 @@ impl<T: Config> PartialTransaction<T> {
             // the signature
             signature.encode_to(&mut encoded_inner);
             // attach custom extra params
-            self.additional_and_extra_params
-                .encode_extra_to(&mut encoded_inner);
+            self.additional_and_extra_params.encode_value_to(&mut encoded_inner);
             // and now, call data (remembering that it's been encoded already and just needs appending)
             encoded_inner.extend(&self.call_data);
             // now, prefix byte length:

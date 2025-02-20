@@ -64,7 +64,7 @@
 //! # ]);
 //! ```
 
-mod extrinsic_signed_extensions;
+mod extrinsic_transaction_extensions;
 mod extrinsics;
 mod static_extrinsic;
 
@@ -74,7 +74,7 @@ use crate::Metadata;
 use alloc::vec::Vec;
 
 pub use crate::error::BlockError;
-pub use extrinsic_signed_extensions::{ExtrinsicSignedExtension, ExtrinsicSignedExtensions};
+pub use extrinsic_transaction_extensions::{ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions};
 pub use extrinsics::{ExtrinsicDetails, ExtrinsicMetadataDetails, Extrinsics, FoundExtrinsic};
 pub use static_extrinsic::StaticExtrinsic;
 

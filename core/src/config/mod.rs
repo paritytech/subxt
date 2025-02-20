@@ -10,10 +10,9 @@
 
 mod default_extrinsic_params;
 mod extrinsic_params;
-mod refine_params;
 
 pub mod polkadot;
-pub mod signed_extensions;
+pub mod transaction_extensions;
 pub mod substrate;
 
 use codec::{Decode, Encode};
@@ -25,8 +24,7 @@ use serde::{de::DeserializeOwned, Serialize};
 pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
 pub use extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder};
 pub use polkadot::{PolkadotConfig, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder};
-pub use refine_params::{RefineParams, RefineParamsData};
-pub use signed_extensions::SignedExtension;
+pub use transaction_extensions::TransactionExtension;
 pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder};
 
 /// Runtime types.
@@ -39,13 +37,13 @@ pub trait Config: Sized + Send + Sync + 'static {
     type Hash: BlockHash;
 
     /// The account ID type.
-    type AccountId: Debug + Clone + Encode + Serialize;
+    type AccountId: Debug + Clone + Encode + Decode + Serialize + Send;
 
     /// The address type.
     type Address: Debug + Encode + From<Self::AccountId>;
 
     /// The signature type.
-    type Signature: Debug + Encode;
+    type Signature: Debug + Encode + Decode + Send;
 
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
     type Hasher: Debug + Hasher<Output = Self::Hash>;

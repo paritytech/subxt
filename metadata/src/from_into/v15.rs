@@ -12,6 +12,7 @@ use crate::{
     StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
 };
 use alloc::borrow::ToOwned;
+use alloc::vec;
 use frame_metadata::v15;
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;
@@ -112,7 +113,7 @@ mod from_v15 {
 
     fn from_extrinsic_metadata(value: v15::ExtrinsicMetadata<PortableForm>) -> ExtrinsicMetadata {
         ExtrinsicMetadata {
-            version: value.version,
+            supported_versions: vec![value.version],
             signed_extensions: value
                 .signed_extensions
                 .into_iter()
@@ -330,7 +331,17 @@ mod into_v15 {
 
     fn from_extrinsic_metadata(e: ExtrinsicMetadata) -> v15::ExtrinsicMetadata<PortableForm> {
         v15::ExtrinsicMetadata {
-            version: e.version,
+            // V16 and above metadata can have multiple supported extrinsic versions. We have to
+            // pick just one of these if converting back to V14/V15 metadata. 
+            //
+            // - Picking the largest may mean that older tooling won't be compatible (it may only 
+            //   check/support older version).
+            // - Picking the smallest may mean that newer tooling won't work, or newer methods won't 
+            //   work.
+            //
+            // Either could make sense, but we keep the oldest to prioritize backward compat with 
+            // older tooling.
+            version: *e.supported_versions.iter().min().expect("at least one extrinsic version expected"),
             signed_extensions: e
                 .signed_extensions
                 .into_iter()
