@@ -86,7 +86,7 @@ futures = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, features = ["default", "raw_value"] }
-sp-crypto-hashing = { workspace = true, default-features = false }
+sp-crypto-hashing = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }

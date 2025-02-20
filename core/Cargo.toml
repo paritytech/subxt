@@ -27,6 +27,7 @@ std = [
     "tracing/std",
     "impl-serde/std",
     "primitive-types/std",
+    "sp-crypto-hashing/std",
 ]
 
 [dependencies]
