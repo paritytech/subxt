@@ -544,7 +544,7 @@ mod tests {
         );
 
         // Encoded TX ready to submit.
-        let tx_encoded = crate::tx::create_unsigned::<SubstrateConfig, _>(&tx, &metadata)
+        let tx_encoded = crate::tx::create_bare::<SubstrateConfig, _>(&tx, &metadata)
             .expect("Valid dynamic parameters are provided");
 
         // Extrinsic details ready to decode.
@@ -575,7 +575,7 @@ mod tests {
                 Value::string("SomeValue"),
             ],
         );
-        let tx_encoded = crate::tx::create_unsigned::<SubstrateConfig, _>(&tx, &metadata)
+        let tx_encoded = crate::tx::create_bare::<SubstrateConfig, _>(&tx, &metadata)
             .expect("Valid dynamic parameters are provided");
 
         // Note: `create_unsigned` produces the extrinsic bytes by prefixing the extrinsic length.

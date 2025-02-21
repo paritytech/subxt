@@ -43,7 +43,7 @@ pub trait Config: Sized + Send + Sync + 'static {
     type Address: Debug + Encode + From<Self::AccountId>;
 
     /// The signature type.
-    type Signature: Debug + Encode + Decode + Send;
+    type Signature: Debug + Clone + Encode + Decode + Send;
 
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
     type Hasher: Debug + Hasher<Output = Self::Hash>;

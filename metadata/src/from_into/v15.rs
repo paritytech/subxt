@@ -8,7 +8,7 @@ use crate::utils::variant_index::VariantIndex;
 use crate::{
     utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, ExtrinsicMetadata, Metadata,
     OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner, RuntimeApiMethodMetadata,
-    RuntimeApiMethodParamMetadata, SignedExtensionMetadata, StorageEntryMetadata,
+    RuntimeApiMethodParamMetadata, TransactionExtensionMetadata, StorageEntryMetadata,
     StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
 };
 use alloc::borrow::ToOwned;
@@ -103,8 +103,8 @@ mod from_v15 {
 
     fn from_signed_extension_metadata(
         value: v15::SignedExtensionMetadata<PortableForm>,
-    ) -> SignedExtensionMetadata {
-        SignedExtensionMetadata {
+    ) -> TransactionExtensionMetadata {
+        TransactionExtensionMetadata {
             identifier: value.identifier,
             extra_ty: value.ty.id,
             additional_ty: value.additional_signed.id,
@@ -114,7 +114,7 @@ mod from_v15 {
     fn from_extrinsic_metadata(value: v15::ExtrinsicMetadata<PortableForm>) -> ExtrinsicMetadata {
         ExtrinsicMetadata {
             supported_versions: vec![value.version],
-            signed_extensions: value
+            transaction_extensions: value
                 .signed_extensions
                 .into_iter()
                 .map(from_signed_extension_metadata)
@@ -123,6 +123,7 @@ mod from_v15 {
             call_ty: value.call_ty.id,
             signature_ty: value.signature_ty.id,
             extra_ty: value.extra_ty.id,
+            transaction_extensions_version: 0
         }
     }
 
@@ -343,7 +344,7 @@ mod into_v15 {
             // older tooling.
             version: *e.supported_versions.iter().min().expect("at least one extrinsic version expected"),
             signed_extensions: e
-                .signed_extensions
+                .transaction_extensions
                 .into_iter()
                 .map(from_signed_extension_metadata)
                 .collect(),
@@ -355,7 +356,7 @@ mod into_v15 {
     }
 
     fn from_signed_extension_metadata(
-        s: SignedExtensionMetadata,
+        s: TransactionExtensionMetadata,
     ) -> v15::SignedExtensionMetadata<PortableForm> {
         v15::SignedExtensionMetadata {
             identifier: s.identifier,

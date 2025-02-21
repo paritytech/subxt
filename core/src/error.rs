@@ -27,9 +27,9 @@ pub enum Error {
     /// Error encoding from a [`crate::dynamic::Value`].
     #[error("Error encoding from dynamic value: {0}")]
     Encode(#[from] scale_encode::Error),
-    /// Error constructing the appropriate extrinsic params.
-    #[error(transparent)]
-    ExtrinsicParams(#[from] ExtrinsicParamsError),
+    /// Error constructing an extrinsic.
+    #[error("Error constructing transaction: {0}")]
+    Extrinsic(#[from] ExtrinsicError),
     /// Block body error.
     #[error("Error working with block_body: {0}")]
     Block(#[from] BlockError),
@@ -160,6 +160,24 @@ pub enum StorageAddressError {
         /// The invalid hasher that caused this error.
         hasher: StorageHasher,
     },
+}
+
+/// An error that can be encountered when constructing a transaction.
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+pub enum ExtrinsicError {
+    /// Transaction version not supported by Subxt.
+    #[error("Subxt does not support the extrinsic versions expected by the chain")]
+    UnsupportedVersion,
+    /// Issue encoding transaction extensions.
+    #[error("Cannot construct the required transaction extensions: {0}")]
+    Params(#[from] ExtrinsicParamsError)
+}
+
+impl From<ExtrinsicParamsError> for Error {
+    fn from(value: ExtrinsicParamsError) -> Self {
+        Error::Extrinsic(value.into())
+    }
 }
 
 /// An error that can be emitted when trying to construct an instance of [`crate::config::ExtrinsicParams`],

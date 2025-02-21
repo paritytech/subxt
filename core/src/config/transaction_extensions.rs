@@ -13,6 +13,7 @@ use crate::config::{Header, ExtrinsicParamsEncoder};
 use crate::error::ExtrinsicParamsError;
 use crate::utils::{ Static, Era };
 use crate::Config;
+use core::any::Any;
 use alloc::borrow::ToOwned;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
@@ -50,11 +51,6 @@ impl <T: Config> ExtrinsicParams<T> for VerifySignature<T> {
     fn new(_client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(VerifySignature(VerifySignatureDetails::Disabled))
     }
-
-    fn inject_signature(&mut self, account: <T as Config>::AccountId, signature: <T as Config>::Signature) {
-        // The signature is not set through params, only here, once given by a user:
-        self.0 = VerifySignatureDetails::Signed { signature, account }
-    }
 }
 
 impl <T: Config> ExtrinsicParamsEncoder for VerifySignature<T> {
@@ -73,6 +69,15 @@ impl <T: Config> ExtrinsicParamsEncoder for VerifySignature<T> {
         // in the pipeline to form the signer payload. Thus, clear anything
         // we've seen so far.
         v.clear();
+    }
+
+    fn inject_signature(&mut self, account: &dyn Any, signature: &dyn Any) {
+        // Downcast refs back to concrete types (we use `&dyn Any`` so that the trait remains object safe)
+        let account = account.downcast_ref::<T::AccountId>().unwrap().clone();
+        let signature = signature.downcast_ref::<T::Signature>().unwrap().clone();
+
+        // The signature is not set through params, only here, once given by a user:
+        self.0 = VerifySignatureDetails::Signed { signature, account }
     }
 }
 
@@ -186,16 +191,17 @@ impl<T: Config> ExtrinsicParams<T> for CheckNonce {
     fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(params)
     }
-    fn inject_account_nonce(&mut self, nonce: u64) {
-        if self.0.is_none() {
-            self.0 = Some(nonce)
-        }
-    }
 }
 
 impl ExtrinsicParamsEncoder for CheckNonce {
     fn encode_value_to(&self, v: &mut Vec<u8>) {
         Compact(self.0.unwrap_or(0)).encode_to(v);
+    }
+
+    fn inject_account_nonce(&mut self, nonce: u64) {
+        if self.0.is_none() {
+            self.0 = Some(nonce)
+        }
     }
 }
 
@@ -277,17 +283,6 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
             genesis_hash: client.genesis_hash
         })
     }
-
-    fn inject_block(&mut self, block_number: u64, block_hash: <T as Config>::Hash) {
-        // If the current block number/hash are provided, and we haven't explicitly set
-        // them already in our mortal transaction, then set them now.
-        if let CheckMortalityInner::MortalForBlocks(for_blocks) = &self.params {
-            self.params = CheckMortalityInner::MortalFromBlock { 
-                for_blocks: *for_blocks, 
-                from_block: (block_number, block_hash)
-            }
-        }
-    }
 }
 
 impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
@@ -313,6 +308,20 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
                 self.genesis_hash.encode_to(v);
             }
         }   
+    }
+
+    fn inject_block(&mut self, block_number: u64, block_hash: &dyn Any) {
+        // Downcast back to concrete block hash (we use `&dyn Any` to keep the trait object safe).
+        let block_hash = *block_hash.downcast_ref::<T::Hash>().unwrap();
+
+        // If the current block number/hash are provided, and we haven't explicitly set
+        // them already in our mortal transaction, then set them now.
+        if let CheckMortalityInner::MortalForBlocks(for_blocks) = &self.params {
+            self.params = CheckMortalityInner::MortalFromBlock { 
+                for_blocks: *for_blocks, 
+                from_block: (block_number, block_hash)
+            }
+        }
     }
 }
 
@@ -529,7 +538,7 @@ macro_rules! impl_tuples {
                 // there is one, and add it to a map with that index as the key.
                 let mut exts_by_index = HashMap::new();
                 $({
-                    for (idx, e) in metadata.extrinsic().signed_extensions().iter().enumerate() {
+                    for (idx, e) in metadata.extrinsic().transaction_extensions().iter().enumerate() {
                         // Skip over any exts that have a match already:
                         if exts_by_index.contains_key(&idx) {
                             continue
@@ -546,7 +555,7 @@ macro_rules! impl_tuples {
 
                 // Next, turn these into an ordered vec, erroring if we haven't matched on any exts yet.
                 let mut params = Vec::new();
-                for (idx, e) in metadata.extrinsic().signed_extensions().iter().enumerate() {
+                for (idx, e) in metadata.extrinsic().transaction_extensions().iter().enumerate() {
                     let Some(ext) = exts_by_index.remove(&idx) else {
                         if is_type_empty(e.extra_ty(), types) {
                             continue
@@ -582,6 +591,21 @@ macro_rules! impl_tuples {
             fn encode_implicit_to(&self, v: &mut Vec<u8>) {
                 for ext in &self.params {
                     ext.encode_implicit_to(v);
+                }
+            }
+            fn inject_account_nonce(&mut self, nonce: u64) {
+                for ext in &mut self.params {
+                    ext.inject_account_nonce(nonce);
+                }
+            }
+            fn inject_block(&mut self, number: u64, hash: &dyn Any) {
+                for ext in &mut self.params {
+                    ext.inject_block(number, hash);
+                }
+            }
+            fn inject_signature(&mut self, account_id: &dyn Any, signature: &dyn Any) {
+                for ext in &mut self.params {
+                    ext.inject_signature(account_id, signature);
                 }
             }
         }

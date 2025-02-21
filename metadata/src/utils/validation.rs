@@ -311,7 +311,7 @@ fn get_extrinsic_hash(
         &supported_extrinsic_versions,
     );
 
-    for signed_extension in extrinsic.signed_extensions.iter() {
+    for signed_extension in extrinsic.transaction_extensions.iter() {
         bytes = concat_and_hash4(
             &bytes,
             &hash(signed_extension.identifier.as_bytes()),

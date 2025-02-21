@@ -9,6 +9,7 @@
 
 use crate::{client::ClientState, error::ExtrinsicParamsError, Config};
 use alloc::vec::Vec;
+use core::any::Any;
 
 /// This trait allows you to configure the "signed extra" and
 /// "additional" parameters that are a part of the transaction payload
@@ -21,16 +22,6 @@ pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + Send + 's
 
     /// Construct a new instance of our [`ExtrinsicParams`].
     fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError>;
-
-    // The following methods allow our parameters to be updated with details from
-    // the chain or user that are captured at a later stage:
-
-    /// Set the account nonce.
-    fn inject_account_nonce(&mut self, _nonce: u64) {}
-    /// Set the current block.
-    fn inject_block(&mut self, _number: u64, _hash: T::Hash) {}
-    /// Set the signature.
-    fn inject_signature(&mut self, _account_id: T::AccountId, _signature: T::Signature) {}
 }
 
 /// This trait is expected to be implemented for any [`ExtrinsicParams`], and
@@ -59,4 +50,15 @@ pub trait ExtrinsicParamsEncoder: 'static {
     /// _not_ sent along with the transaction, but are taken into account when
     /// signing it, meaning the client and node must agree on their values.
     fn encode_implicit_to(&self, _v: &mut Vec<u8>) {}
+
+    // The following methods allow our parameters to be updated with details from
+    // the chain or user that are captured at a later stage. We can't have generics
+    // here because the trait needs to be object safe, so we pre-encode things where needed.
+
+    /// Set the account nonce.
+    fn inject_account_nonce(&mut self, _nonce: u64) {}
+    /// Set the current block.
+    fn inject_block(&mut self, _number: u64, _hash: &dyn Any) {}
+    /// Set the signature.
+    fn inject_signature(&mut self, _account_id: &dyn Any, _signature: &dyn Any) {} 
 }

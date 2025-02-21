@@ -58,7 +58,7 @@ pub mod payload;
 pub mod signer;
 
 use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher};
-use crate::error::{Error, MetadataError};
+use crate::error::{Error, MetadataError, ExtrinsicError};
 use crate::metadata::Metadata;
 use crate::utils::Encoded;
 use alloc::borrow::{Cow, ToOwned};
@@ -96,8 +96,8 @@ pub fn call_data<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<Vec<
     Ok(bytes)
 }
 
-/// Creates an unsigned extrinsic without submitting it.
-pub fn create_unsigned<T: Config, Call: Payload>(
+/// Creates an unsigned transaction without submitting it.
+pub fn create_bare<T: Config, Call: Payload>(
     call: &Call,
     metadata: &Metadata,
 ) -> Result<Transaction<T>, Error> {
@@ -105,11 +105,14 @@ pub fn create_unsigned<T: Config, Call: Payload>(
     // with a hash allowing us to do so.
     validate(call, metadata)?;
 
-    // 2. Encode extrinsic
+    // 2. Get the first supported TX version from the metadata.
+    let tx_version = TransactionVersion::from_metadata(metadata)?;
+
+    // 3. Encode extrinsic
     let extrinsic = {
         let mut encoded_inner = Vec::new();
-        // transaction protocol version (4) (is not signed, so no 1 bit at the front).
-        4u8.encode_to(&mut encoded_inner);
+        // encode the transaction version first.
+        tx_version.to_u8().encode_to(&mut encoded_inner);
         // encode call data after this byte.
         call.encode_call_data_to(metadata, &mut encoded_inner)?;
         // now, prefix byte length:
@@ -139,10 +142,14 @@ pub fn create_partial_signed<T: Config, Call: Payload>(
     // with a hash allowing us to do so.
     validate(call, &client_state.metadata)?;
 
-    // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
+    // 2. Work out which TX and tTX extension version we should encode target based on metadata.
+    let tx_version = TransactionVersion::from_metadata(&client_state.metadata)?;
+    let tx_extensions_version = client_state.metadata.extrinsic().transaction_extensions_version();
+
+    // 3. SCALE encode call data to bytes (pallet u8, call u8, call params).
     let call_data = call_data(call, &client_state.metadata)?;
 
-    // 3. Construct our custom additional/extra params.
+    // 4. Construct our custom additional/extra params.
     let additional_and_extra_params =
         <T::ExtrinsicParams as ExtrinsicParams<T>>::new(client_state, params)?;
 
@@ -150,6 +157,8 @@ pub fn create_partial_signed<T: Config, Call: Payload>(
     Ok(PartialTransaction {
         call_data,
         additional_and_extra_params,
+        tx_version,
+        tx_extensions_version,
     })
 }
 
@@ -174,7 +183,7 @@ where
 
     // 2. Gather the "additional" and "extra" params along with the encoded call data,
     //    ready to be signed.
-    let partial_signed = create_partial_signed(call, client_state, params)?;
+    let mut partial_signed = create_partial_signed(call, client_state, params)?;
 
     // 3. Sign and construct an extrinsic from these details.
     Ok(partial_signed.sign(signer))
@@ -188,6 +197,10 @@ where
 pub struct PartialTransaction<T: Config> {
     call_data: Vec<u8>,
     additional_and_extra_params: T::ExtrinsicParams,
+    // Are we building a V4 or V5 transaction?
+    tx_version: TransactionVersion,
+    // What version of transaction extensions are we encoding?
+    tx_extensions_version: u8,
 }
 
 impl<T: Config> PartialTransaction<T> {
@@ -201,7 +214,10 @@ impl<T: Config> PartialTransaction<T> {
         let mut bytes = self.call_data.clone();
         self.additional_and_extra_params.encode_signer_payload_to(&mut bytes); 
         self.additional_and_extra_params.encode_implicit_to(&mut bytes);
-        if bytes.len() > 256 {
+
+        // For V4 transactions we only hash if >256 bytes.
+        // For V5 transactions we _always_ hash.
+        if self.tx_version == TransactionVersion::V5 || bytes.len() > 256 {
             f(Cow::Borrowed(blake2_256(&bytes).as_ref()))
         } else {
             f(Cow::Owned(bytes))
@@ -223,14 +239,14 @@ impl<T: Config> PartialTransaction<T> {
     /// Convert this [`PartialTransaction`] into a [`Transaction`], ready to submit.
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
-    pub fn sign<Signer>(&self, signer: &Signer) -> Transaction<T>
+    pub fn sign<Signer>(&mut self, signer: &Signer) -> Transaction<T>
     where
         Signer: SignerT<T>,
     {
         // Given our signer, we can sign the payload representing this extrinsic.
         let signature = self.with_signer_payload(|bytes| signer.sign(&bytes));
         // Now, use the signature and "from" address to build the extrinsic.
-        self.sign_with_address_and_signature(&signer.address(), &signature)
+        self.sign_with_address_and_signature(&signer.account_id(), &signature)
     }
 
     /// Convert this [`PartialTransaction`] into a [`Transaction`], ready to submit.
@@ -238,31 +254,56 @@ impl<T: Config> PartialTransaction<T> {
     /// needed in order to construct it. If you have a `Signer` to hand, you can use
     /// [`PartialTransaction::sign()`] instead.
     pub fn sign_with_address_and_signature(
-        &self,
-        address: &T::Address,
+        &mut self,
+        account_id: &T::AccountId,
         signature: &T::Signature,
     ) -> Transaction<T> {
-        // Encode the extrinsic (into the format expected by protocol version 4)
-        let extrinsic = {
-            let mut encoded_inner = Vec::new();
-            // "is signed" + transaction protocol version (4)
-            (0b10000000 + 4u8).encode_to(&mut encoded_inner);
-            // from address for signature
-            address.encode_to(&mut encoded_inner);
-            // the signature
-            signature.encode_to(&mut encoded_inner);
-            // attach custom extra params
-            self.additional_and_extra_params.encode_value_to(&mut encoded_inner);
-            // and now, call data (remembering that it's been encoded already and just needs appending)
-            encoded_inner.extend(&self.call_data);
-            // now, prefix byte length:
-            let len = Compact(
-                u32::try_from(encoded_inner.len()).expect("extrinsic size expected to be <4GB"),
-            );
-            let mut encoded = Vec::new();
-            len.encode_to(&mut encoded);
-            encoded.extend(encoded_inner);
-            encoded
+        let extrinsic = match self.tx_version {
+            TransactionVersion::V4 => {
+                let mut encoded_inner = Vec::new();
+                // "is signed" + transaction protocol version (4)
+                (0b10000000 + 4u8).encode_to(&mut encoded_inner);
+                // from address for signature
+                let address: T::Address = account_id.clone().into();
+                address.encode_to(&mut encoded_inner);
+                // the signature
+                signature.encode_to(&mut encoded_inner);
+                // attach custom extra params
+                self.additional_and_extra_params.encode_value_to(&mut encoded_inner);
+                // and now, call data (remembering that it's been encoded already and just needs appending)
+                encoded_inner.extend(&self.call_data);
+                // now, prefix byte length:
+                let len = Compact(
+                    u32::try_from(encoded_inner.len()).expect("extrinsic size expected to be <4GB"),
+                );
+                let mut encoded = Vec::new();
+                len.encode_to(&mut encoded);
+                encoded.extend(encoded_inner);
+                encoded
+            },
+            TransactionVersion::V5 => {
+                // For V5 transactions, we need to inject the signature into
+                // the transaction extensions before constructing it below.
+                self.additional_and_extra_params.inject_signature(account_id, signature);
+
+                let mut encoded_inner = Vec::new();
+                // "is general" + transaction protocol version (5)
+                (0b0100000 + 5u8).encode_to(&mut encoded_inner);
+                // Encode versions for the transaction extensions
+                self.tx_extensions_version.encode_to(&mut encoded_inner);
+                // Encode the actual transaction extensions values
+                self.additional_and_extra_params.encode_value_to(&mut encoded_inner);
+                // and now, call data (remembering that it's been encoded already and just needs appending)
+                encoded_inner.extend(&self.call_data);
+                // now, prefix byte length:
+                let len = Compact(
+                    u32::try_from(encoded_inner.len()).expect("extrinsic size expected to be <4GB"),
+                );
+                let mut encoded = Vec::new();
+                len.encode_to(&mut encoded);
+                encoded.extend(encoded_inner);
+                encoded
+            }
         };
 
         // Return an extrinsic ready to be submitted.
@@ -302,5 +343,38 @@ impl<T: Config> Transaction<T> {
     /// extrinsic bytes.
     pub fn into_encoded(self) -> Vec<u8> {
         self.encoded.0
+    }
+}
+
+/// This represents the transaction versions supported by Subxt.
+#[derive(PartialEq,Copy,Clone,Debug)]
+enum TransactionVersion { V4, V5 }
+
+impl TransactionVersion {
+    fn from_metadata(metadata: &Metadata) -> Result<Self, Error> {
+        metadata
+            .extrinsic()
+            .supported_versions()
+            .iter()
+            .filter_map(|n| TransactionVersion::from_u8(*n).ok())
+            .next()
+            .ok_or(Error::Extrinsic(ExtrinsicError::UnsupportedVersion))
+    }
+
+    fn from_u8(n: u8) -> Result<Self, Error> {
+        if n == 4 {
+            Ok(TransactionVersion::V4)
+        } else if n == 5 {
+            Ok(TransactionVersion::V5)
+        } else {
+            Err(Error::Extrinsic(ExtrinsicError::UnsupportedVersion))
+        }
+    }
+
+    fn to_u8(self) -> u8 {
+        match self {
+            TransactionVersion::V4 => 4,
+            TransactionVersion::V5 => 5,
+        }
     }
 }
