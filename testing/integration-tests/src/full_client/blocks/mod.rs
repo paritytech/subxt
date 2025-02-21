@@ -12,7 +12,7 @@ use crate::utils::node_runtime;
 #[cfg(fullclient)]
 use subxt::{
     config::{
-        signed_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce},
+        transaction_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce},
         DefaultExtrinsicParamsBuilder, SubstrateConfig,
     },
     utils::Era,
@@ -262,7 +262,7 @@ async fn fetch_block_and_decode_extrinsic_details() {
 
 #[cfg(fullclient)]
 #[subxt_test]
-async fn decode_signed_extensions_from_blocks() {
+async fn decode_transaction_extensions_from_blocks() {
     let ctx = test_context().await;
     let api = ctx.client();
     let alice = dev::alice();
@@ -301,7 +301,7 @@ async fn decode_signed_extensions_from_blocks() {
     }
 
     let transaction1 = submit_transfer_extrinsic_and_get_it_back!(1234);
-    let extensions1 = transaction1.signed_extensions().unwrap();
+    let extensions1 = transaction1.transaction_extensions().unwrap();
 
     let nonce1 = extensions1.nonce().unwrap();
     let nonce1_static = extensions1.find::<CheckNonce>().unwrap().unwrap();
@@ -313,7 +313,7 @@ async fn decode_signed_extensions_from_blocks() {
         .tip();
 
     let transaction2 = submit_transfer_extrinsic_and_get_it_back!(5678);
-    let extensions2 = transaction2.signed_extensions().unwrap();
+    let extensions2 = transaction2.transaction_extensions().unwrap();
     let nonce2 = extensions2.nonce().unwrap();
     let nonce2_static = extensions2.find::<CheckNonce>().unwrap().unwrap();
     let tip2 = extensions2.tip().unwrap();
@@ -332,7 +332,7 @@ async fn decode_signed_extensions_from_blocks() {
     assert_eq!(tip2, 5678);
     assert_eq!(tip2, tip2_static);
 
-    let expected_signed_extensions = [
+    let expected_transaction_extensions = [
         "CheckNonZeroSender",
         "CheckSpecVersion",
         "CheckTxVersion",
@@ -345,13 +345,13 @@ async fn decode_signed_extensions_from_blocks() {
         "WeightReclaim",
     ];
 
-    assert_eq!(extensions1.iter().count(), expected_signed_extensions.len());
-    for (e, expected_name) in extensions1.iter().zip(expected_signed_extensions.iter()) {
+    assert_eq!(extensions1.iter().count(), expected_transaction_extensions.len());
+    for (e, expected_name) in extensions1.iter().zip(expected_transaction_extensions.iter()) {
         assert_eq!(e.name(), *expected_name);
     }
 
-    assert_eq!(extensions2.iter().count(), expected_signed_extensions.len());
-    for (e, expected_name) in extensions2.iter().zip(expected_signed_extensions.iter()) {
+    assert_eq!(extensions2.iter().count(), expected_transaction_extensions.len());
+    for (e, expected_name) in extensions2.iter().zip(expected_transaction_extensions.iter()) {
         assert_eq!(e.name(), *expected_name);
     }
 

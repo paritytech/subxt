@@ -232,14 +232,14 @@ where
     /// They do *not* include the `additional` signed bytes that are used as part of the payload that is signed.
     ///
     /// Note: Returns `None` if the extrinsic is not signed.
-    pub fn signed_extensions_bytes(&self) -> Option<&[u8]> {
+    pub fn transaction_extensions_bytes(&self) -> Option<&[u8]> {
         self.decoded_info()
             .transaction_extension_payload()
             .map(|t| &self.bytes()[t.range()])
     }
 
     /// Returns `None` if the extrinsic is not signed.
-    pub fn signed_extensions(&self) -> Option<ExtrinsicTransactionExtensions<'_, T>> {
+    pub fn transaction_extensions(&self) -> Option<ExtrinsicTransactionExtensions<'_, T>> {
         self.decoded_info()
             .transaction_extension_payload()
             .map(|t| ExtrinsicTransactionExtensions::new(self.bytes(), &self.metadata, t))

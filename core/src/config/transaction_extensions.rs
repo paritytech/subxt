@@ -60,12 +60,11 @@ impl <T: Config> ExtrinsicParamsEncoder for VerifySignature<T> {
     fn encode_value_to(&self, v: &mut Vec<u8>) {
         self.0.encode_to(v);
     }
-    fn encode_signer_payload_to(&self, v: &mut Vec<u8>) {
+    fn encode_signer_payload_value_to(&self, v: &mut Vec<u8>) {
         // This extension is never encoded to the signer payload, and extensions
         // prior to this are ignored when creating said payload, so clear anything
         // we've seen so far.
         v.clear();
-
     }
     fn encode_implicit_to(&self, v: &mut Vec<u8>) {
         // We only use the "implicit" data for extensions _after_ this one
@@ -76,8 +75,8 @@ impl <T: Config> ExtrinsicParamsEncoder for VerifySignature<T> {
 
     fn inject_signature(&mut self, account: &dyn Any, signature: &dyn Any) {
         // Downcast refs back to concrete types (we use `&dyn Any`` so that the trait remains object safe)
-        let account = account.downcast_ref::<T::AccountId>().unwrap().clone();
-        let signature = signature.downcast_ref::<T::Signature>().unwrap().clone();
+        let account = account.downcast_ref::<T::AccountId>().expect("A T::AccoundId should have been provided").clone();
+        let signature = signature.downcast_ref::<T::Signature>().expect("A T::Signature should have been provided").clone();
 
         // The signature is not set through params, only here, once given by a user:
         self.0 = VerifySignatureDetails::Signed { signature, account }
@@ -613,9 +612,9 @@ macro_rules! impl_tuples {
                     ext.encode_value_to(v);
                 }
             }
-            fn encode_signer_payload_to(&self, v: &mut Vec<u8>) {
+            fn encode_signer_payload_value_to(&self, v: &mut Vec<u8>) {
                 for ext in &self.params {
-                    ext.encode_signer_payload_to(v);
+                    ext.encode_signer_payload_value_to(v);
                 }
             }
             fn encode_implicit_to(&self, v: &mut Vec<u8>) {

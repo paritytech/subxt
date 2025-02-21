@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Decode each signed extrinsic in the block dynamically
         let extrinsics = block.extrinsics().await?;
         for ext in extrinsics.iter() {
-            let Some(signed_extensions) = ext.signed_extensions() else {
+            let Some(transaction_extensions) = ext.transaction_extensions() else {
                 continue; // we do not look at inherents in this example
             };
 
@@ -25,8 +25,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let fields = ext.field_values()?;
 
             println!("  {}/{}", meta.pallet.name(), meta.variant.name);
-            println!("    Signed Extensions:");
-            for signed_ext in signed_extensions.iter() {
+            println!("    Transaction Extensions:");
+            for signed_ext in transaction_extensions.iter() {
                 // We only want to take a look at these 3 signed extensions, because the others all just have unit fields.
                 if ["CheckMortality", "CheckNonce", "ChargeTransactionPayment"]
                     .contains(&signed_ext.name())

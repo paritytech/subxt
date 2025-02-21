@@ -191,14 +191,14 @@ where
         self.inner.signature_bytes()
     }
 
-    /// See [`subxt_core::blocks::ExtrinsicDetails::signed_extensions_bytes()`].
-    pub fn signed_extensions_bytes(&self) -> Option<&[u8]> {
-        self.inner.signed_extensions_bytes()
+    /// See [`subxt_core::blocks::ExtrinsicDetails::transaction_extensions_bytes()`].
+    pub fn transaction_extensions_bytes(&self) -> Option<&[u8]> {
+        self.inner.transaction_extensions_bytes()
     }
 
-    /// See [`subxt_core::blocks::ExtrinsicDetails::signed_extensions()`].
-    pub fn signed_extensions(&self) -> Option<ExtrinsicTransactionExtensions<'_, T>> {
-        self.inner.signed_extensions()
+    /// See [`subxt_core::blocks::ExtrinsicDetails::transaction_extensions()`].
+    pub fn transaction_extensions(&self) -> Option<ExtrinsicTransactionExtensions<'_, T>> {
+        self.inner.transaction_extensions()
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::pallet_index()`].

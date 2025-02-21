@@ -188,7 +188,7 @@ async fn external_signing() {
     // Create a partial extrinsic. We can get the signer payload at this point, to be
     // signed externally.
     let tx = node_runtime::tx().preimage().note_preimage(vec![0u8]);
-    let partial_extrinsic = api
+    let mut partial_extrinsic = api
         .tx()
         .create_partial_signed(&tx, &alice.public_key().into(), Default::default())
         .await

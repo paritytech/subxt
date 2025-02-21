@@ -33,15 +33,15 @@ pub trait ExtrinsicParamsEncoder: 'static {
     /// and also (by default) attached to the signer payload which is signed to
     /// provide a signature for the transaction.
     /// 
-    /// If [`ExtrinsicParamsEncoder::encode_for_signer_payloed_to`] is implemented,
+    /// If [`ExtrinsicParamsEncoder::encode_signer_payload_value_to`] is implemented,
     /// then that will be used instead when generating a signer payload. Useful for
     /// eg the `VerifySignature` extension, which is send with the transaction but
     /// is not a part of the signer payload.
     fn encode_value_to(&self, _v: &mut Vec<u8>) {}
 
-    /// See [`ExtrinsicParamsEncoder::encode_to`]. This defaults to calling that
+    /// See [`ExtrinsicParamsEncoder::encode_value_to`]. This defaults to calling that
     /// method, but if implemented will dictate what is encoded to the signer payload.
-    fn encode_signer_payload_to(&self, v: &mut Vec<u8>) {
+    fn encode_signer_payload_value_to(&self, v: &mut Vec<u8>) {
         self.encode_value_to(v);
     }
 

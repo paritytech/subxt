@@ -49,7 +49,7 @@
 //!
 //! This example shows how to subscribe to blocks and decode the extrinsics in each block into the root extrinsic type.
 //! Once we get hold of the [ExtrinsicDetails](crate::blocks::ExtrinsicDetails), we can decode it statically or dynamically.
-//! We can also access details about the extrinsic, including the associated events and signed extensions.
+//! We can also access details about the extrinsic, including the associated events and transaction extensions.
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../examples/blocks_subscribing.rs")]
@@ -64,7 +64,8 @@
 //! get only [the first one](crate::blocks::Extrinsics::find_first), or [the last one](crate::blocks::Extrinsics::find_last).
 //!
 //! The following example monitors `TransferKeepAlive` extrinsics on the Polkadot network.
-//! We statically decode them and access the [tip](crate::blocks::ExtrinsicSignedExtensions::tip()) and [account nonce](crate::blocks::ExtrinsicSignedExtensions::nonce()) signed extensions.
+//! We statically decode them and access the [tip](crate::blocks::ExtrinsicTransactionExtensions::tip()) and [account nonce](crate::blocks::ExtrinsicTransactionExtensions::nonce()) 
+//! transaction extensions.
 //!
 //! ```rust,ignore  
 #![doc = include_str!("../../../examples/block_decoding_static.rs")]
@@ -75,7 +76,7 @@
 //! Sometimes you might use subxt with metadata that is not known at compile time. In this case, you do not have access to a statically generated
 //! interface module that contains the relevant Rust types. You can [decode ExtrinsicDetails dynamically](crate::blocks::ExtrinsicDetails::field_values()),
 //! which gives you access to it's fields as a [scale value composite](scale_value::Composite).
-//! The following example looks for signed extrinsics on the Polkadot network and retrieves their pallet name, variant name, data fields and signed extensions dynamically.
+//! The following example looks for signed extrinsics on the Polkadot network and retrieves their pallet name, variant name, data fields and transaction extensions dynamically.
 //! Notice how we do not need to use code generation via the subxt macro. The only fixed component we provide is the [PolkadotConfig](crate::config::PolkadotConfig).
 //! Other than that it works in a chain-agnostic way:
 //!
@@ -83,16 +84,16 @@
 #![doc = include_str!("../../../examples/block_decoding_dynamic.rs")]
 //! ```
 //!
-//! ##  Decoding signed extensions
+//! ##  Decoding transaction extensions
 //!
-//! Extrinsics can contain signed extensions. The signed extensions can be different across chains.
-//! The [Config](crate::Config) implementation for your chain defines which signed extensions you expect.
+//! Extrinsics can contain transaction extensions. The transaction extensions can be different across chains.
+//! The [Config](crate::Config) implementation for your chain defines which transaction extensions you expect.
 //! Once you get hold of the [ExtrinsicDetails](crate::blocks::ExtrinsicDetails) for an extrinsic you are interested in,
-//! you can try to [get its signed extensions](crate::blocks::ExtrinsicDetails::signed_extensions()).
-//! These are only available on signed extrinsics. You can try to [find a specific signed extension](crate::blocks::ExtrinsicSignedExtensions::find),
-//! in the returned [signed extensions](crate::blocks::ExtrinsicSignedExtensions).
+//! you can try to [get its transaction extensions](crate::blocks::ExtrinsicDetails::transaction_extensions()).
+//! These are only available on V4 signed extrinsics or V5 general extrinsics. You can try to [find a specific transaction extension](crate::blocks::ExtrinsicTransactionExtensions::find),
+//! in the returned [transaction extensions](crate::blocks::ExtrinsicTransactionExtensions).
 //!
-//! Subxt also provides utility functions to get the [tip](crate::blocks::ExtrinsicSignedExtensions::tip()) and the
-//! [account nonce](crate::blocks::ExtrinsicSignedExtensions::tip()) associated with an extrinsic, given its signed extensions.
-//! If you prefer to do things dynamically you can get the data of the signed extension as a [scale value](crate::blocks::ExtrinsicSignedExtension::value()).
+//! Subxt also provides utility functions to get the [tip](crate::blocks::ExtrinsicTransactionExtensions::tip()) and the
+//! [account nonce](crate::blocks::ExtrinsicTransactionExtensions::tip()) associated with an extrinsic, given its transaction extensions.
+//! If you prefer to do things dynamically you can get the data of the transaction extension as a [scale value](crate::blocks::ExtrinsicTransactionExtension::value()).
 //!
