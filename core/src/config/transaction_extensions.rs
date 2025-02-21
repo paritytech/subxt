@@ -24,6 +24,9 @@ use hashbrown::HashMap;
 use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
 
+// Re-export this here; it's a bit generically named to be re-exported from ::config.
+pub use super::extrinsic_params::Params;
+
 /// A single [`TransactionExtension`] has a unique name, but is otherwise the
 /// same as [`ExtrinsicParams`] in describing how to encode the extra and
 /// additional data.
@@ -183,25 +186,19 @@ impl<T: Config> TransactionExtension<T> for CheckSpecVersion {
 }
 
 /// The [`CheckNonce`] transaction extension.
-pub struct CheckNonce(pub Option<u64>);
+pub struct CheckNonce(u64);
 
 impl<T: Config> ExtrinsicParams<T> for CheckNonce {
-    type Params = Self;
+    type Params = CheckNonceParams;
 
     fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
-        Ok(params)
+        Ok(CheckNonce(params.0.unwrap_or(0)))
     }
 }
 
 impl ExtrinsicParamsEncoder for CheckNonce {
     fn encode_value_to(&self, v: &mut Vec<u8>) {
-        Compact(self.0.unwrap_or(0)).encode_to(v);
-    }
-
-    fn inject_account_nonce(&mut self, nonce: u64) {
-        if self.0.is_none() {
-            self.0 = Some(nonce)
-        }
+        Compact(self.0).encode_to(v);
     }
 }
 
@@ -209,6 +206,29 @@ impl<T: Config> TransactionExtension<T> for CheckNonce {
     type Decoded = u64;
     fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
         identifier == "CheckNonce"
+    }
+}
+
+/// Configure the nonce used.
+#[derive(Debug,Clone,Default)]
+pub struct CheckNonceParams(Option<u64>);
+
+impl CheckNonceParams {
+    /// Retrieve the nonce from the chain and use that.
+    pub fn from_chain() -> Self {
+        Self(None)
+    }
+    /// Manually set an account nonce to use.
+    pub fn with_nonce(nonce: u64) -> Self {
+        Self(Some(nonce))
+    }
+}
+
+impl <T: Config> Params<T> for CheckNonceParams {
+    fn inject_account_nonce(&mut self, nonce: u64) {
+        if self.0.is_none() {
+            self.0 = Some(nonce)
+        }
     }
 }
 
@@ -262,14 +282,8 @@ impl<T: Config> TransactionExtension<T> for CheckGenesis<T> {
 
 /// The [`CheckMortality`] transaction extension.
 pub struct CheckMortality<T: Config> {
-    params: CheckMortalityInner<T>,
+    params: CheckMortalityParamsInner<T>,
     genesis_hash: T::Hash,
-}
-
-enum CheckMortalityInner<T: Config> {
-    Immortal,
-    MortalForBlocks(u64),
-    MortalFromBlock { for_blocks: u64, from_block: (u64, T::Hash) }
 }
 
 impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
@@ -279,7 +293,7 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
         Ok(CheckMortality {
             // if nothing has been explicitly configured, we will have a mortal transaction 
             // valid for 32 blocks if block info is available.
-            params: params.0.unwrap_or(CheckMortalityInner::MortalForBlocks(32)),
+            params: params.0,
             genesis_hash: client.genesis_hash
         })
     }
@@ -288,8 +302,8 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
 impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
     fn encode_value_to(&self, v: &mut Vec<u8>) {
         match &self.params {
-            CheckMortalityInner::MortalFromBlock { for_blocks, from_block } => {
-                Era::mortal(*for_blocks, from_block.0);
+            CheckMortalityParamsInner::MortalFromBlock { for_n_blocks, from_block_n, .. } => {
+                Era::mortal(*for_n_blocks, *from_block_n);
             },
             _ => {
                 // Note: if we see `CheckMortalityInner::MortalForBlocks`, then it means the user has
@@ -301,27 +315,13 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
     }
     fn encode_implicit_to(&self, v: &mut Vec<u8>) {
         match &self.params {
-            CheckMortalityInner::MortalFromBlock { from_block, .. } => {
-                from_block.1.encode_to(v);
+            CheckMortalityParamsInner::MortalFromBlock { from_block_hash, .. } => {
+                from_block_hash.encode_to(v);
             }
             _ => {
                 self.genesis_hash.encode_to(v);
             }
         }   
-    }
-
-    fn inject_block(&mut self, block_number: u64, block_hash: &dyn Any) {
-        // Downcast back to concrete block hash (we use `&dyn Any` to keep the trait object safe).
-        let block_hash = *block_hash.downcast_ref::<T::Hash>().unwrap();
-
-        // If the current block number/hash are provided, and we haven't explicitly set
-        // them already in our mortal transaction, then set them now.
-        if let CheckMortalityInner::MortalForBlocks(for_blocks) = &self.params {
-            self.params = CheckMortalityInner::MortalFromBlock { 
-                for_blocks: *for_blocks, 
-                from_block: (block_number, block_hash)
-            }
-        }
     }
 }
 
@@ -333,40 +333,66 @@ impl<T: Config> TransactionExtension<T> for CheckMortality<T> {
 }
 
 /// Parameters to configure the [`CheckMortality`] transaction extension.
-pub struct CheckMortalityParams<T: Config>(Option<CheckMortalityInner<T>>);
+pub struct CheckMortalityParams<T: Config>(CheckMortalityParamsInner<T>);
+
+enum CheckMortalityParamsInner<T: Config> {
+    Immortal,
+    MortalForBlocks(u64),
+    MortalFromBlock { for_n_blocks: u64, from_block_n: u64, from_block_hash: T::Hash }
+}
 
 impl <T: Config> Default for CheckMortalityParams<T> {
     fn default() -> Self {
-        CheckMortalityParams(None)
+        // default to being mortal for 32 blocks if possible:
+        CheckMortalityParams(CheckMortalityParamsInner::MortalForBlocks(32))
     }
 }
 
 impl <T: Config> CheckMortalityParams<T> {
     /// Configure a transaction that will be mortal for the number of blocks given.
     pub fn mortal(for_n_blocks: u64) -> Self {
-        Self(Some(CheckMortalityInner::MortalForBlocks(for_n_blocks)))
+        Self(CheckMortalityParamsInner::MortalForBlocks(for_n_blocks))
     }
     /// Configure a transaction that will be mortal for the number of blocks given,
     /// and from the block header provided.
     pub fn mortal_from(for_n_blocks: u64, from_block: T::Header) -> Self {
-        Self(Some(CheckMortalityInner::MortalFromBlock {
-            for_blocks: for_n_blocks, 
-            from_block: (from_block.number().into(), from_block.hash())
-        }))
+        Self(CheckMortalityParamsInner::MortalFromBlock {
+            for_n_blocks, 
+            from_block_n: from_block.number().into(),
+            from_block_hash: from_block.hash()
+        })
     }
     /// Configure a transaction that will be mortal for the number of blocks given,
     /// and from the block details provided. Prefer to use [`CheckMortalityParams::mortal()`]
     /// or [`CheckMortalityParams::mortal_from()`] which both avoid the block number and hash
     /// from being misaligned.
     pub fn mortal_from_unchecked(for_n_blocks: u64, from_block_n: u64, from_block_hash: T::Hash) -> Self {
-        Self(Some(CheckMortalityInner::MortalFromBlock {
-            for_blocks: for_n_blocks, 
-            from_block: (from_block_n, from_block_hash)
-        }))
+        Self(CheckMortalityParamsInner::MortalFromBlock {
+            for_n_blocks,
+            from_block_n,
+            from_block_hash,
+        })
     }
     /// An immortal transaction.
     pub fn immortal() -> Self {
-        Self(Some(CheckMortalityInner::Immortal))
+        Self(CheckMortalityParamsInner::Immortal)
+    }
+}
+
+impl <T: Config> Params<T> for CheckMortalityParams<T> {
+    fn inject_block(&mut self, from_block_n: u64, from_block_hash: <T as Config>::Hash) {
+        match &self.0 {
+            CheckMortalityParamsInner::MortalForBlocks(n) => {
+                self.0 = CheckMortalityParamsInner::MortalFromBlock { 
+                    for_n_blocks: *n, 
+                    from_block_n, 
+                    from_block_hash,
+                }
+            },
+            _ => {
+               // Don't change anything if explicit Immortal or explicit block set. 
+            }
+        }
     }
 }
 
@@ -388,6 +414,30 @@ impl<T: Config> ChargeAssetTxPayment<T> {
     /// Tip to the extrinsic author using the asset ID given.
     pub fn asset_id(&self) -> Option<&T::AssetId> {
         self.asset_id.as_ref()
+    }
+}
+
+impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
+    type Params = ChargeAssetTxPaymentParams<T>;
+
+    fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+        Ok(ChargeAssetTxPayment {
+            tip: Compact(params.tip),
+            asset_id: params.asset_id,
+        })
+    }
+}
+
+impl<T: Config> ExtrinsicParamsEncoder for ChargeAssetTxPayment<T> {
+    fn encode_value_to(&self, v: &mut Vec<u8>) {
+        (self.tip, &self.asset_id).encode_to(v);
+    }
+}
+
+impl<T: Config> TransactionExtension<T> for ChargeAssetTxPayment<T> {
+    type Decoded = Self;
+    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
+        identifier == "ChargeAssetTxPayment"
     }
 }
 
@@ -430,29 +480,7 @@ impl<T: Config> ChargeAssetTxPaymentParams<T> {
     }
 }
 
-impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
-    type Params = ChargeAssetTxPaymentParams<T>;
-
-    fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
-        Ok(ChargeAssetTxPayment {
-            tip: Compact(params.tip),
-            asset_id: params.asset_id,
-        })
-    }
-}
-
-impl<T: Config> ExtrinsicParamsEncoder for ChargeAssetTxPayment<T> {
-    fn encode_value_to(&self, v: &mut Vec<u8>) {
-        (self.tip, &self.asset_id).encode_to(v);
-    }
-}
-
-impl<T: Config> TransactionExtension<T> for ChargeAssetTxPayment<T> {
-    type Decoded = Self;
-    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
-        identifier == "ChargeAssetTxPayment"
-    }
-}
+impl <T: Config> Params<T> for ChargeAssetTxPaymentParams<T> {}
 
 /// The [`ChargeTransactionPayment`] transaction extension.
 #[derive(Clone, Debug, DecodeAsType)]
@@ -464,23 +492,6 @@ impl ChargeTransactionPayment {
     /// Tip to the extrinsic author in the native chain token.
     pub fn tip(&self) -> u128 {
         self.tip.0
-    }
-}
-
-/// Parameters to configure the [`ChargeTransactionPayment`] transaction extension.
-#[derive(Default)]
-pub struct ChargeTransactionPaymentParams {
-    tip: u128,
-}
-
-impl ChargeTransactionPaymentParams {
-    /// Don't provide a tip to the extrinsic author.
-    pub fn no_tip() -> Self {
-        ChargeTransactionPaymentParams { tip: 0 }
-    }
-    /// Tip the extrinsic author in the native chain token.
-    pub fn tip(tip: u128) -> Self {
-        ChargeTransactionPaymentParams { tip }
     }
 }
 
@@ -506,6 +517,25 @@ impl<T: Config> TransactionExtension<T> for ChargeTransactionPayment {
         identifier == "ChargeTransactionPayment"
     }
 }
+
+/// Parameters to configure the [`ChargeTransactionPayment`] transaction extension.
+#[derive(Default)]
+pub struct ChargeTransactionPaymentParams {
+    tip: u128,
+}
+
+impl ChargeTransactionPaymentParams {
+    /// Don't provide a tip to the extrinsic author.
+    pub fn no_tip() -> Self {
+        ChargeTransactionPaymentParams { tip: 0 }
+    }
+    /// Tip the extrinsic author in the native chain token.
+    pub fn tip(tip: u128) -> Self {
+        ChargeTransactionPaymentParams { tip }
+    }
+}
+
+impl <T: Config> Params<T> for ChargeTransactionPaymentParams {}
 
 /// This accepts a tuple of [`TransactionExtension`]s, and will dynamically make use of whichever
 /// ones are actually required for the chain in the correct order, ignoring the rest. This
@@ -591,16 +621,6 @@ macro_rules! impl_tuples {
             fn encode_implicit_to(&self, v: &mut Vec<u8>) {
                 for ext in &self.params {
                     ext.encode_implicit_to(v);
-                }
-            }
-            fn inject_account_nonce(&mut self, nonce: u64) {
-                for ext in &mut self.params {
-                    ext.inject_account_nonce(nonce);
-                }
-            }
-            fn inject_block(&mut self, number: u64, hash: &dyn Any) {
-                for ext in &mut self.params {
-                    ext.inject_block(number, hash);
                 }
             }
             fn inject_signature(&mut self, account_id: &dyn Any, signature: &dyn Any) {

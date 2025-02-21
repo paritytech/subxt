@@ -38,10 +38,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let current_nonce = rpc
             .system_account_next_index(&alice.public_key().into())
             .await?;
-        let current_header = rpc.chain_get_header(None).await?.unwrap();
 
         let ext_params = Params::new()
-            .mortal(&current_header, 8)
+            .mortal(8)
             .nonce(current_nonce)
             .build();
 

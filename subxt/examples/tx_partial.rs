@@ -25,7 +25,7 @@ async fn signing_example() -> Result<(), BoxedError> {
     let alice = dev::alice();
 
     // Create partial tx, ready to be signed.
-    let partial_tx = api
+    let mut partial_tx = api
         .tx()
         .create_partial_signed(
             &balance_transfer_tx,
@@ -41,7 +41,7 @@ async fn signing_example() -> Result<(), BoxedError> {
 
     // Sign the transaction.
     let tx = partial_tx
-        .sign_with_address_and_signature(&alice.public_key().to_address(), &signature.into());
+        .sign_with_address_and_signature(&alice.public_key().to_account_id(), &signature.into());
 
     // Submit it.
     tx.submit_and_watch()

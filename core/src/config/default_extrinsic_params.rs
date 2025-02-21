@@ -103,7 +103,11 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
         let charge_transaction_params =
             transaction_extensions::ChargeTransactionPaymentParams::tip(self.tip);
 
-        let check_nonce_params = transaction_extensions::CheckNonce(self.nonce);
+        let check_nonce_params = if let Some(nonce) = self.nonce {
+            transaction_extensions::CheckNonceParams::with_nonce(nonce)
+        } else {
+            transaction_extensions::CheckNonceParams::from_chain()
+        };
 
         (
             (),
@@ -116,5 +120,18 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
             charge_transaction_params,
             (),
         )
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    fn assert_default<T: Default>(_t: T) {}
+
+    #[test]
+    fn params_are_default() {
+        let params = DefaultExtrinsicParamsBuilder::<crate::config::PolkadotConfig>::new().build();
+        assert_default(params)
     }
 }

@@ -18,7 +18,7 @@ pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + Send + 's
     /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to
     /// help construct your [`ExtrinsicParams`] object.
-    type Params;
+    type Params: Params<T>;
 
     /// Construct a new instance of our [`ExtrinsicParams`].
     fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError>;
@@ -51,14 +51,59 @@ pub trait ExtrinsicParamsEncoder: 'static {
     /// signing it, meaning the client and node must agree on their values.
     fn encode_implicit_to(&self, _v: &mut Vec<u8>) {}
 
-    // The following methods allow our parameters to be updated with details from
-    // the chain or user that are captured at a later stage. We can't have generics
-    // here because the trait needs to be object safe, so we pre-encode things where needed.
+    /// Set the signature. This happens after we have constructed the extrinsic params, 
+    /// and so is defined here rather than on the params, below. We need to use `&dyn Any`
+    /// to keep this trait object safe, but can downcast in the impls.
+    fn inject_signature(&mut self, _account_id: &dyn Any, _signature: &dyn Any) {} 
+}
 
+/// The parameters (ie [`ExtrinsicParams::Params`]) can also have data injected into them,
+/// allowing Subxt to retrieve data from the chain and amend the parameters with it when
+/// online.
+pub trait Params<T: Config> {
     /// Set the account nonce.
     fn inject_account_nonce(&mut self, _nonce: u64) {}
     /// Set the current block.
-    fn inject_block(&mut self, _number: u64, _hash: &dyn Any) {}
-    /// Set the signature.
-    fn inject_signature(&mut self, _account_id: &dyn Any, _signature: &dyn Any) {} 
+    fn inject_block(&mut self, _number: u64, _hash: T::Hash) {}
 }
+
+impl<T: Config> Params<T> for () {}
+
+macro_rules! impl_tuples {
+    ($($ident:ident $index:tt),+) => {
+
+        impl <T: Config, $($ident : Params<T>),+> Params<T> for ($($ident,)+){
+            fn inject_account_nonce(&mut self, nonce: u64) {
+                $(self.$index.inject_account_nonce(nonce);)+
+            }
+            fn inject_block(&mut self, number: u64, hash: T::Hash) {
+                $(self.$index.inject_block(number, hash);)+
+            }
+        }
+    }
+}
+
+#[rustfmt::skip]
+const _: () = {
+    impl_tuples!(A 0);
+    impl_tuples!(A 0, B 1);
+    impl_tuples!(A 0, B 1, C 2);
+    impl_tuples!(A 0, B 1, C 2, D 3);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15, Q 16);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15, Q 16, R 17);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15, Q 16, R 17, S 18);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15, Q 16, R 17, S 18, U 19);
+    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15, Q 16, R 17, S 18, U 19, V 20);
+};

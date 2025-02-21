@@ -14,7 +14,7 @@ pub use crate::backend::BlockRef;
 pub use block_types::Block;
 pub use blocks_client::BlocksClient;
 pub use extrinsic_types::{
-    ExtrinsicDetails, ExtrinsicEvents, ExtrinsicSignedExtension, ExtrinsicSignedExtensions,
+    ExtrinsicDetails, ExtrinsicEvents, ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions,
     Extrinsics, FoundExtrinsic, StaticExtrinsic,
 };
 

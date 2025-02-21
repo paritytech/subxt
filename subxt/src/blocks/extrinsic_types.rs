@@ -16,7 +16,7 @@ use subxt_core::blocks::{ExtrinsicDetails as CoreExtrinsicDetails, Extrinsics as
 
 // Re-export anything that's directly returned/used in the APIs below.
 pub use subxt_core::blocks::{
-    ExtrinsicMetadataDetails, ExtrinsicSignedExtension, ExtrinsicSignedExtensions, StaticExtrinsic,
+    ExtrinsicMetadataDetails, ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions, StaticExtrinsic,
 };
 
 /// The body of a block.
@@ -197,7 +197,7 @@ where
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::signed_extensions()`].
-    pub fn signed_extensions(&self) -> Option<ExtrinsicSignedExtensions<'_, T>> {
+    pub fn signed_extensions(&self) -> Option<ExtrinsicTransactionExtensions<'_, T>> {
         self.inner.signed_extensions()
     }
 

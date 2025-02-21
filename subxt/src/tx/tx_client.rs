@@ -5,7 +5,7 @@
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, ExtrinsicParams, Header, RefineParams, RefineParamsData},
+    config::{Config, ExtrinsicParams, Header},
     error::{BlockError, Error},
     tx::{Payload, Signer as SignerT, TxProgress},
     utils::PhantomDataSendSync,
@@ -55,7 +55,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: Payload,
     {
-        subxt_core::tx::create_unsigned(call, &self.client.metadata())
+        subxt_core::tx::create_bare(call, &self.client.metadata())
             .map(|tx| SubmittableExtrinsic {
                 client: self.client.clone(),
                 inner: tx,
@@ -112,11 +112,13 @@ where
     C: OnlineClientT<T>,
 {
     /// Fetch the latest block header and account nonce from the backend and use them to refine [`ExtrinsicParams::Params`].
-    async fn refine_params(
+    async fn inject_account_nonce_and_block(
         &self,
         account_id: &T::AccountId,
         params: &mut <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
     ) -> Result<(), Error> {
+        use subxt_core::config::transaction_extensions::Params;
+
         let block_ref = self.client.backend().latest_finalized_block_ref().await?;
         let block_header = self
             .client
@@ -127,11 +129,9 @@ where
         let account_nonce =
             crate::blocks::get_account_nonce(&self.client, account_id, block_ref.hash()).await?;
 
-        params.refine(&RefineParamsData::new(
-            account_nonce,
-            block_header.number().into(),
-            block_header.hash(),
-        ));
+        params.inject_account_nonce(account_nonce);
+        params.inject_block(block_header.number().into(), block_header.hash());
+
         Ok(())
     }
 
@@ -151,15 +151,15 @@ where
     where
         Call: Payload,
     {
-        // Refine the params by adding account nonce and latest block information:
-        self.refine_params(account_id, &mut params).await?;
+        // Inject account nonce and latest block information into transaction extensions:
+        self.inject_account_nonce_and_block(account_id, &mut params).await?;
         // Create the partial extrinsic with the refined params:
         self.create_partial_signed_offline(call, params)
     }
 
     /// Creates a signed extrinsic, without submitting it.
     pub async fn create_signed<Call, Signer>(
-        &self,
+        &mut self,
         call: &Call,
         signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
@@ -174,7 +174,7 @@ where
 
         // 2. Gather the "additional" and "extra" params along with the encoded call data,
         //    ready to be signed.
-        let partial_signed = self
+        let mut partial_signed = self
             .create_partial_signed(call, &signer.account_id(), params)
             .await?;
 
@@ -188,7 +188,7 @@ where
     /// Returns a [`TxProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch_default<Call, Signer>(
-        &self,
+        &mut self,
         call: &Call,
         signer: &Signer,
     ) -> Result<TxProgress<T, C>, Error>
@@ -206,7 +206,7 @@ where
     /// Returns a [`TxProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch<Call, Signer>(
-        &self,
+        &mut self,
         call: &Call,
         signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
@@ -232,7 +232,7 @@ where
     /// Success does not mean the extrinsic has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
     pub async fn sign_and_submit_default<Call, Signer>(
-        &self,
+        &mut self,
         call: &Call,
         signer: &Signer,
     ) -> Result<T::Hash, Error>
@@ -253,7 +253,7 @@ where
     /// Success does not mean the extrinsic has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
     pub async fn sign_and_submit<Call, Signer>(
-        &self,
+        &mut self,
         call: &Call,
         signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
@@ -295,7 +295,7 @@ where
     /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
-    pub fn sign<Signer>(&self, signer: &Signer) -> SubmittableExtrinsic<T, C>
+    pub fn sign<Signer>(&mut self, signer: &Signer) -> SubmittableExtrinsic<T, C>
     where
         Signer: SignerT<T>,
     {
@@ -310,8 +310,8 @@ where
     /// needed in order to construct it. If you have a `Signer` to hand, you can use
     /// [`PartialExtrinsic::sign()`] instead.
     pub fn sign_with_address_and_signature(
-        &self,
-        address: &T::Address,
+        &mut self,
+        address: &T::AccountId,
         signature: &T::Signature,
     ) -> SubmittableExtrinsic<T, C> {
         SubmittableExtrinsic {

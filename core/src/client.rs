@@ -7,7 +7,7 @@
 use crate::{config::Config, metadata::Metadata};
 use derive_where::derive_where;
 
-/// This provides access to some relevant client state in signed extensions,
+/// This provides access to some relevant client state in transaction extensions,
 /// and is just a combination of some of the available properties.
 #[derive_where(Clone, Debug)]
 pub struct ClientState<C: Config> {
