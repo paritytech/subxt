@@ -29,7 +29,7 @@ native = [
     "subxt-rpcs/native",
     "tokio-util",
     "tokio?/sync",
-    "polkadot-sdk/std",
+    "sp-crypto-hashing/std",
 ]
 
 # Enable this for web/wasm builds.
@@ -86,7 +86,7 @@ futures = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, features = ["default", "raw_value"] }
-polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
+sp-crypto-hashing = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
@@ -123,7 +123,9 @@ bitvec = { workspace = true }
 codec = { workspace = true, features = ["derive", "bit-vec"] }
 scale-info = { workspace = true, features = ["bit-vec"] }
 tokio = { workspace = true, features = ["macros", "time", "rt-multi-thread", "sync"] }
-polkadot-sdk = { workspace = true, features = ["sp-core", "sp-keyring", "sp-runtime", "std"] }
+sp-core = { workspace = true, features = ["std"] }
+sp-keyring = { workspace = true, features = ["std"] }
+sp-runtime = { workspace = true, features = ["std"] }
 assert_matches = { workspace = true }
 subxt-signer = { path = "../signer", features = ["unstable-eth"] }
 subxt-rpcs = { workspace = true, features = ["subxt", "mock-rpc-client"] }

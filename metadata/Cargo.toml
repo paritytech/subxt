@@ -22,7 +22,7 @@ scale-info = { workspace = true, default-features = false }
 frame-decode = { workspace = true }
 frame-metadata = { workspace = true, default-features = false, features = ["current", "decode"] }
 codec = { package = "parity-scale-codec", workspace = true, default-features = false, features = ["derive"] }
-polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
+sp-crypto-hashing = { workspace = true }
 hashbrown = { workspace = true }
 thiserror = { workspace = true, default-features = false }
 

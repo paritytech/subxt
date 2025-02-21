@@ -59,7 +59,7 @@ cfg-if = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = [
     "derive",
 ] }
-polkadot-sdk = { workspace = true, features = ["sp-crypto-hashing"] }
+sp-crypto-hashing = { workspace = true }
 pbkdf2 = { workspace = true }
 sha2 = { workspace = true }
 hmac = { workspace = true }
@@ -87,7 +87,8 @@ getrandom = { workspace = true, optional = true }
 [dev-dependencies]
 proptest = { workspace = true }
 hex-literal = { workspace = true }
-polkadot-sdk = { workspace = true, features = ["sp-core", "sp-keyring"] }
+sp-core = { workspace = true }
+sp-keyring = { workspace = true }
 
 [package.metadata.cargo-machete]
 ignored = ["getrandom"]

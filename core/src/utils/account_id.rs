@@ -163,8 +163,8 @@ impl core::str::FromStr for AccountId32 {
 #[cfg(test)]
 mod test {
     use super::*;
-    use polkadot_sdk::sp_core::{self, crypto::Ss58Codec};
-    use polkadot_sdk::sp_keyring::AccountKeyring;
+    use sp_core::{self, crypto::Ss58Codec};
+    use sp_keyring::AccountKeyring;
 
     #[test]
     fn ss58_is_compatible_with_substrate_impl() {

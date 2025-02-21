@@ -5,13 +5,9 @@
 use std::{borrow::Cow, path::Path};
 
 use codec::{Decode, Encode};
-use polkadot_sdk::{
-    sc_executor::{self, WasmExecutionMethod, WasmExecutor},
-    sc_executor_common::runtime_blob::RuntimeBlob,
-    sp_io,
-    sp_maybe_compressed_blob::{self, CODE_BLOB_BOMB_LIMIT},
-    sp_state_machine,
-};
+use sc_executor::{WasmExecutionMethod, WasmExecutor};
+use sc_executor_common::runtime_blob::RuntimeBlob;
+use sp_maybe_compressed_blob::{self, CODE_BLOB_BOMB_LIMIT};
 use subxt_codegen::{CodegenError, Metadata};
 
 static SUPPORTED_METADATA_VERSIONS: [u32; 2] = [14, 15];

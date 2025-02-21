@@ -57,7 +57,7 @@ impl AccountId20 {
 
         for (i, ch) in hex_address.chars().enumerate() {
             // Get the corresponding nibble from the hash
-            let nibble = hash[i / 2] >> (if i % 2 == 0 { 4 } else { 0 }) & 0xf;
+            let nibble = (hash[i / 2] >> (if i % 2 == 0 { 4 } else { 0 })) & 0xf;
 
             if nibble >= 8 {
                 checksum_address.push(ch.to_ascii_uppercase());

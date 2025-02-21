@@ -6,7 +6,7 @@
 
 #![allow(missing_docs, unused)]
 
-use polkadot_sdk::sp_core::{sr25519, Pair as _};
+use sp_core::{sr25519, Pair as _};
 use subxt::config::substrate::MultiAddress;
 use subxt::{Config, OnlineClient, PolkadotConfig};
 
@@ -17,7 +17,7 @@ pub mod polkadot {}
 /// and that PolkadotConfig is the runtime configuration.
 mod pair_signer {
     use super::*;
-    use polkadot_sdk::sp_runtime::{
+    use sp_runtime::{
         traits::{IdentifyAccount, Verify},
         MultiSignature as SpMultiSignature,
     };
@@ -26,7 +26,7 @@ mod pair_signer {
         tx::Signer,
     };
 
-    /// A [`Signer`] implementation for [`polkadot_sdk::sp_core::sr25519::Pair`].
+    /// A [`Signer`] implementation for [`sp_core::sr25519::Pair`].
     #[derive(Clone)]
     pub struct PairSigner {
         account_id: <PolkadotConfig as Config>::AccountId,

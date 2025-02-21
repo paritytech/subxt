@@ -382,7 +382,6 @@ mod test {
     use crate::backend::StorageResponse;
     use core::convert::Infallible;
     use futures::StreamExt;
-    use polkadot_sdk::sp_core;
     use primitive_types::H256;
     use rpc::RpcClientT;
     use std::collections::{HashMap, VecDeque};

@@ -8,7 +8,6 @@ use codec::Encode;
 use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
 use core::str::FromStr;
 use hex::FromHex;
-use polkadot_sdk::sp_crypto_hashing;
 use secp256k1::{ecdsa::RecoverableSignature, Message, Secp256k1, SecretKey};
 use secrecy::ExposeSecret;
 
@@ -362,7 +361,7 @@ mod test {
 
     use super::*;
 
-    use polkadot_sdk::sp_core::{self, crypto::Pair as _, ecdsa::Pair as SpPair};
+    use sp_core::{self, crypto::Pair as _, ecdsa::Pair as SpPair};
 
     #[test]
     fn check_from_phrase_matches() {
