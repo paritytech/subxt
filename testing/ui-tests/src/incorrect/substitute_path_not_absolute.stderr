@@ -7,8 +7,7 @@ error: Type `DispatchInfo` does not exist at path `frame_support::dispatch::Disp
 2 | |     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
 3 | |     substitute_type(
 4 | |         path = "frame_support::dispatch::DispatchInfo",
-5 | |         with = "my_mod::DispatchInfo"
-6 | |     )
+... |
 7 | | )]
   | |__^
   |
