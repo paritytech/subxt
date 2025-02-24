@@ -136,7 +136,15 @@ web-time = { version = "1.1", default-features = false }
 tokio-util = "0.7.12"
 
 # Substrate crates:
-polkadot-sdk = { version = "0.7", default-features = false }
+sc-executor = { version = "0.41.0", default-features = false }
+sc-executor-common = { version = "0.36.0", default-features = false }
+sp-crypto-hashing = { version = "0.1.0", default-features = false }
+sp-core = { version = "35.0.0", default-features = false }
+sp-keyring = { version = "40.0.0", default-features = false }
+sp-maybe-compressed-blob = { version = "11.0.0", default-features = false }
+sp-io = { version = "39.0.0", default-features = false }
+sp-state-machine = { version = "0.44.0", default-features = false }
+sp-runtime = { version = "40.0.1", default-features = false }
 
 # Subxt workspace crates:
 subxt = { version = "0.39.0", path = "subxt", default-features = false }

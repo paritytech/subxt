@@ -69,10 +69,7 @@ impl<T: Config> LegacyRpcMethods<T> {
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, from, to];
-        self.client
-            .request("state_queryStorage", params)
-            .await
-            .map_err(Into::into)
+        self.client.request("state_queryStorage", params).await
     }
 
     /// Query storage entries at some block, using the best block if none is given.
@@ -85,10 +82,7 @@ impl<T: Config> LegacyRpcMethods<T> {
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, at];
-        self.client
-            .request("state_queryStorageAt", params)
-            .await
-            .map_err(Into::into)
+        self.client.request("state_queryStorageAt", params).await
     }
 
     /// Fetch the genesis hash

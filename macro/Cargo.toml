@@ -15,7 +15,7 @@ description = "Generate types and helpers for interacting with Substrate runtime
 
 [features]
 web = ["subxt-codegen/web"]
-runtime-metadata-path = ["polkadot-sdk"]
+runtime-metadata-path = ["sc-executor", "sc-executor-common", "sp-maybe-compressed-blob", "sp-io", "sp-state-machine"]
 runtime-metadata-insecure-url = ["subxt-utils-fetchmetadata/url"]
 
 [lib]
@@ -30,7 +30,11 @@ quote = { workspace = true }
 subxt-codegen = { workspace = true }
 subxt-utils-fetchmetadata = { workspace = true }
 scale-typegen = { workspace = true }
-polkadot-sdk = { workspace = true, optional = true, features = ["sp-io", "sc-executor-common", "sp-state-machine", "sp-maybe-compressed-blob", "sc-executor"] }
+sc-executor = { workspace = true, optional = true }
+sc-executor-common = { workspace = true, optional = true }
+sp-maybe-compressed-blob = { workspace = true, optional = true }
+sp-io = { workspace = true, optional = true }
+sp-state-machine = { workspace = true, optional = true }
 
 [lints]
 workspace = true
