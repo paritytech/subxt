@@ -5,14 +5,12 @@
 //! Substrate specific configuration
 
 use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, Hasher, Header};
+pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
 use alloc::format;
 use alloc::vec::Vec;
 use codec::{Decode, Encode};
-use polkadot_sdk::sp_crypto_hashing;
-use serde::{Deserialize, Serialize};
-
-pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
 pub use primitive_types::{H256, U256};
+use serde::{Deserialize, Serialize};
 
 /// Default set of commonly used types by Substrate runtimes.
 // Note: We only use this at the type level, so it should be impossible to

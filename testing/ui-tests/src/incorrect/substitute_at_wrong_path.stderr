@@ -55,8 +55,7 @@ error: Type `Event` does not exist at path `sp_runtime::multiaddress::Event`
 2 | |     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_small.scale",
 3 | |     substitute_type(
 4 | |         path = "sp_runtime::multiaddress::Event",
-5 | |         with = "crate::MyEvent"
-6 | |     )
+... |
 7 | | )]
   | |__^
   |
