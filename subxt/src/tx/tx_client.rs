@@ -310,16 +310,16 @@ where
     /// An address, and something representing a signature that can be SCALE encoded, are both
     /// needed in order to construct it. If you have a `Signer` to hand, you can use
     /// [`PartialExtrinsic::sign()`] instead.
-    pub fn sign_with_address_and_signature(
+    pub fn sign_with_account_and_signature(
         &mut self,
-        address: &T::AccountId,
+        account_id: &T::AccountId,
         signature: &T::Signature,
     ) -> SubmittableExtrinsic<T, C> {
         SubmittableExtrinsic {
             client: self.client.clone(),
             inner: self
                 .inner
-                .sign_with_address_and_signature(address, signature),
+                .sign_with_account_and_signature(account_id, signature),
         }
     }
 }

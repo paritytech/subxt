@@ -41,7 +41,7 @@ async fn signing_example() -> Result<(), BoxedError> {
 
     // Sign the transaction.
     let tx = partial_tx
-        .sign_with_address_and_signature(&alice.public_key().to_account_id(), &signature.into());
+        .sign_with_account_and_signature(&alice.public_key().to_account_id(), &signature.into());
 
     // Submit it.
     tx.submit_and_watch()

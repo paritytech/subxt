@@ -195,7 +195,7 @@ where
 /// This represents a partially constructed transaction that needs signing before it is ready
 /// to submit. Use [`PartialTransaction::signer_payload()`] to return the payload that needs signing,
 /// [`PartialTransaction::sign()`] to sign the transaction using a [`SignerT`] impl, or
-/// [`PartialTransaction::sign_with_address_and_signature()`] to apply an existing signature and address
+/// [`PartialTransaction::sign_with_account_and_signature()`] to apply an existing signature and account ID
 /// to the transaction.
 pub struct PartialTransaction<T: Config> {
     call_data: Vec<u8>,
@@ -251,14 +251,14 @@ impl<T: Config> PartialTransaction<T> {
         // Given our signer, we can sign the payload representing this extrinsic.
         let signature = self.with_signer_payload(|bytes| signer.sign(&bytes));
         // Now, use the signature and "from" address to build the extrinsic.
-        self.sign_with_address_and_signature(&signer.account_id(), &signature)
+        self.sign_with_account_and_signature(&signer.account_id(), &signature)
     }
 
     /// Convert this [`PartialTransaction`] into a [`Transaction`], ready to submit.
     /// An address, and something representing a signature that can be SCALE encoded, are both
     /// needed in order to construct it. If you have a `Signer` to hand, you can use
     /// [`PartialTransaction::sign()`] instead.
-    pub fn sign_with_address_and_signature(
+    pub fn sign_with_account_and_signature(
         &mut self,
         account_id: &T::AccountId,
         signature: &T::Signature,

@@ -200,7 +200,7 @@ async fn external_signing() {
     let signature = alice.sign(&signer_payload);
     // Use this to build a signed extrinsic.
     let extrinsic = partial_extrinsic
-        .sign_with_address_and_signature(&alice.public_key().into(), &signature.into());
+        .sign_with_account_and_signature(&alice.public_key().into(), &signature.into());
 
     // And now submit it.
     extrinsic

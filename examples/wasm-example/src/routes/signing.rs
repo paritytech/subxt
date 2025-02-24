@@ -174,7 +174,7 @@ impl Component for SigningExamplesComponent {
 
                         // Apply the signature
                         let signed_extrinsic = partial_signed
-                            .sign_with_address_and_signature(&account_id.into(), &multi_signature);
+                            .sign_with_account_and_signature(&account_id, &multi_signature);
 
                         // check the TX validity (to debug in the js console if the extrinsic would work)
                         let dry_res = signed_extrinsic.validate().await;
