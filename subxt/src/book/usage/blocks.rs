@@ -64,7 +64,7 @@
 //! get only [the first one](crate::blocks::Extrinsics::find_first), or [the last one](crate::blocks::Extrinsics::find_last).
 //!
 //! The following example monitors `TransferKeepAlive` extrinsics on the Polkadot network.
-//! We statically decode them and access the [tip](crate::blocks::ExtrinsicTransactionExtensions::tip()) and [account nonce](crate::blocks::ExtrinsicTransactionExtensions::nonce()) 
+//! We statically decode them and access the [tip](crate::blocks::ExtrinsicTransactionExtensions::tip()) and [account nonce](crate::blocks::ExtrinsicTransactionExtensions::nonce())
 //! transaction extensions.
 //!
 //! ```rust,ignore  

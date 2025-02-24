@@ -171,7 +171,7 @@ pub enum ExtrinsicError {
     UnsupportedVersion,
     /// Issue encoding transaction extensions.
     #[error("Cannot construct the required transaction extensions: {0}")]
-    Params(#[from] ExtrinsicParamsError)
+    Params(#[from] ExtrinsicParamsError),
 }
 
 impl From<ExtrinsicParamsError> for Error {

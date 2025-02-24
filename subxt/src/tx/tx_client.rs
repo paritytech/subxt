@@ -152,7 +152,8 @@ where
         Call: Payload,
     {
         // Inject account nonce and latest block information into transaction extensions:
-        self.inject_account_nonce_and_block(account_id, &mut params).await?;
+        self.inject_account_nonce_and_block(account_id, &mut params)
+            .await?;
         // Create the partial extrinsic with the refined params:
         self.create_partial_signed_offline(call, params)
     }

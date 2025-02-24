@@ -74,7 +74,9 @@ use crate::Metadata;
 use alloc::vec::Vec;
 
 pub use crate::error::BlockError;
-pub use extrinsic_transaction_extensions::{ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions};
+pub use extrinsic_transaction_extensions::{
+    ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions,
+};
 pub use extrinsics::{ExtrinsicDetails, ExtrinsicMetadataDetails, Extrinsics, FoundExtrinsic};
 pub use static_extrinsic::StaticExtrinsic;
 

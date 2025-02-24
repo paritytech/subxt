@@ -2,7 +2,8 @@
 use codec::Encode;
 use subxt::client::ClientState;
 use subxt::config::{
-    Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError, transaction_extensions::Params,
+    transaction_extensions::Params, Config, ExtrinsicParams, ExtrinsicParamsEncoder,
+    ExtrinsicParamsError,
 };
 use subxt_signer::sr25519::dev;
 

@@ -292,7 +292,7 @@ fn get_extrinsic_hash(
     // The `RuntimeCall` type is intentionally omitted and hashed by the outer enums instead.
     let signature_hash = get_type_hash(registry, extrinsic.signature_ty, outer_enum_hashes);
     let extra_hash = get_type_hash(registry, extrinsic.extra_ty, outer_enum_hashes);
-    
+
     // Supported versions are just u8s and we will likely never have more than 32 of these, so put them into
     // an array of u8s and panic if more than 32.
     if extrinsic.supported_versions.len() > 32 {

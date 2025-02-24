@@ -58,7 +58,7 @@ pub mod payload;
 pub mod signer;
 
 use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher};
-use crate::error::{Error, MetadataError, ExtrinsicError};
+use crate::error::{Error, ExtrinsicError, MetadataError};
 use crate::metadata::Metadata;
 use crate::utils::Encoded;
 use alloc::borrow::{Cow, ToOwned};
@@ -144,7 +144,10 @@ pub fn create_partial_signed<T: Config, Call: Payload>(
 
     // 2. Work out which TX and tTX extension version we should encode target based on metadata.
     let tx_version = TransactionVersion::from_metadata(&client_state.metadata)?;
-    let tx_extensions_version = client_state.metadata.extrinsic().transaction_extensions_version();
+    let tx_extensions_version = client_state
+        .metadata
+        .extrinsic()
+        .transaction_extensions_version();
 
     // 3. SCALE encode call data to bytes (pallet u8, call u8, call params).
     let call_data = call_data(call, &client_state.metadata)?;
@@ -212,8 +215,10 @@ impl<T: Config> PartialTransaction<T> {
         F: for<'a> FnOnce(Cow<'a, [u8]>) -> R,
     {
         let mut bytes = self.call_data.clone();
-        self.additional_and_extra_params.encode_signer_payload_value_to(&mut bytes); 
-        self.additional_and_extra_params.encode_implicit_to(&mut bytes);
+        self.additional_and_extra_params
+            .encode_signer_payload_value_to(&mut bytes);
+        self.additional_and_extra_params
+            .encode_implicit_to(&mut bytes);
 
         // For V4 transactions we only hash if >256 bytes.
         // For V5 transactions we _always_ hash.
@@ -269,7 +274,8 @@ impl<T: Config> PartialTransaction<T> {
                 // the signature
                 signature.encode_to(&mut encoded_inner);
                 // attach custom extra params
-                self.additional_and_extra_params.encode_value_to(&mut encoded_inner);
+                self.additional_and_extra_params
+                    .encode_value_to(&mut encoded_inner);
                 // and now, call data (remembering that it's been encoded already and just needs appending)
                 encoded_inner.extend(&self.call_data);
                 // now, prefix byte length:
@@ -280,11 +286,12 @@ impl<T: Config> PartialTransaction<T> {
                 len.encode_to(&mut encoded);
                 encoded.extend(encoded_inner);
                 encoded
-            },
+            }
             TransactionVersion::V5 => {
                 // For V5 transactions, we need to inject the signature into
                 // the transaction extensions before constructing it below.
-                self.additional_and_extra_params.inject_signature(account_id, signature);
+                self.additional_and_extra_params
+                    .inject_signature(account_id, signature);
 
                 let mut encoded_inner = Vec::new();
                 // "is general" + transaction protocol version (5)
@@ -292,7 +299,8 @@ impl<T: Config> PartialTransaction<T> {
                 // Encode versions for the transaction extensions
                 self.tx_extensions_version.encode_to(&mut encoded_inner);
                 // Encode the actual transaction extensions values
-                self.additional_and_extra_params.encode_value_to(&mut encoded_inner);
+                self.additional_and_extra_params
+                    .encode_value_to(&mut encoded_inner);
                 // and now, call data (remembering that it's been encoded already and just needs appending)
                 encoded_inner.extend(&self.call_data);
                 // now, prefix byte length:
@@ -347,8 +355,11 @@ impl<T: Config> Transaction<T> {
 }
 
 /// This represents the transaction versions supported by Subxt.
-#[derive(PartialEq,Copy,Clone,Debug)]
-enum TransactionVersion { V4, V5 }
+#[derive(PartialEq, Copy, Clone, Debug)]
+enum TransactionVersion {
+    V4,
+    V5,
+}
 
 impl TransactionVersion {
     fn from_metadata(metadata: &Metadata) -> Result<Self, Error> {

@@ -12,8 +12,8 @@ mod default_extrinsic_params;
 mod extrinsic_params;
 
 pub mod polkadot;
-pub mod transaction_extensions;
 pub mod substrate;
+pub mod transaction_extensions;
 
 use codec::{Decode, Encode};
 use core::fmt::Debug;
@@ -24,8 +24,8 @@ use serde::{de::DeserializeOwned, Serialize};
 pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
 pub use extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder};
 pub use polkadot::{PolkadotConfig, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder};
-pub use transaction_extensions::TransactionExtension;
 pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder};
+pub use transaction_extensions::TransactionExtension;
 
 /// Runtime types.
 // Note: the `Send + Sync + 'static` bound isn't strictly required, but currently deriving

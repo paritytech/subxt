@@ -36,13 +36,15 @@ impl<'a, T: Config> ExtrinsicTransactionExtensions<'a, T> {
 
     /// Returns an iterator over each of the signed extension details of the extrinsic.
     pub fn iter(&self) -> impl Iterator<Item = ExtrinsicTransactionExtension<T>> {
-        self.decoded_info.iter().map(|s| ExtrinsicTransactionExtension {
-            bytes: &self.bytes[s.range()],
-            ty_id: *s.ty(),
-            identifier: s.name(),
-            metadata: self.metadata,
-            _marker: core::marker::PhantomData,
-        })
+        self.decoded_info
+            .iter()
+            .map(|s| ExtrinsicTransactionExtension {
+                bytes: &self.bytes[s.range()],
+                ty_id: *s.ty(),
+                identifier: s.name(),
+                metadata: self.metadata,
+                _marker: core::marker::PhantomData,
+            })
     }
 
     /// Searches through all signed extensions to find a specific one.
@@ -127,7 +129,9 @@ impl<'a, T: Config> ExtrinsicTransactionExtension<'a, T> {
     /// Decodes the bytes of this Signed Extension into its associated `Decoded` type.
     /// Returns `Ok(None)` if the data we have doesn't match the Signed Extension we're asking to
     /// decode with.
-    pub fn as_signed_extension<S: TransactionExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
+    pub fn as_signed_extension<S: TransactionExtension<T>>(
+        &self,
+    ) -> Result<Option<S::Decoded>, Error> {
         if !S::matches(self.identifier, self.ty_id, self.metadata.types()) {
             return Ok(None);
         }

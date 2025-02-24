@@ -64,7 +64,7 @@
 //!
 //! ## ExtrinsicParams
 //!
-//! Chains each have a set of "transaction extensions" (formally called "signed extensions") configured. Transaction extensions provide 
+//! Chains each have a set of "transaction extensions" (formally called "signed extensions") configured. Transaction extensions provide
 //! a means to extend how transactions work. Each transaction extension can potentially encode some "extra" data which is sent along with a transaction, as well as some
 //! "additional" data which is included in the transaction signer payload, but not transmitted along with the transaction. On
 //! a node, transaction extensions can then perform additional checks on the submitted transactions to ensure their validity.

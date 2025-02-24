@@ -32,7 +32,7 @@ pub trait ExtrinsicParamsEncoder: 'static {
     /// buffer that has been provided. This data is attached to the transaction
     /// and also (by default) attached to the signer payload which is signed to
     /// provide a signature for the transaction.
-    /// 
+    ///
     /// If [`ExtrinsicParamsEncoder::encode_signer_payload_value_to`] is implemented,
     /// then that will be used instead when generating a signer payload. Useful for
     /// eg the `VerifySignature` extension, which is send with the transaction but
@@ -45,16 +45,16 @@ pub trait ExtrinsicParamsEncoder: 'static {
         self.encode_value_to(v);
     }
 
-    /// This is expected to SCALE encode the "implicit" (formally "additional") 
-    /// parameters to some buffer that has been provided. These parameters are 
+    /// This is expected to SCALE encode the "implicit" (formally "additional")
+    /// parameters to some buffer that has been provided. These parameters are
     /// _not_ sent along with the transaction, but are taken into account when
     /// signing it, meaning the client and node must agree on their values.
     fn encode_implicit_to(&self, _v: &mut Vec<u8>) {}
 
-    /// Set the signature. This happens after we have constructed the extrinsic params, 
+    /// Set the signature. This happens after we have constructed the extrinsic params,
     /// and so is defined here rather than on the params, below. We need to use `&dyn Any`
     /// to keep this trait object safe, but can downcast in the impls.
-    fn inject_signature(&mut self, _account_id: &dyn Any, _signature: &dyn Any) {} 
+    fn inject_signature(&mut self, _account_id: &dyn Any, _signature: &dyn Any) {}
 }
 
 /// The parameters (ie [`ExtrinsicParams::Params`]) can also have data injected into them,

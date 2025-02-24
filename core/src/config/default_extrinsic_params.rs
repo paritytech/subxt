@@ -2,8 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{transaction_extensions, ExtrinsicParams};
 use super::Config;
+use super::{transaction_extensions, ExtrinsicParams};
 
 /// The default [`super::ExtrinsicParams`] implementation understands common signed extensions
 /// and how to apply them to a given chain.

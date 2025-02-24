@@ -14,8 +14,8 @@ pub use crate::backend::BlockRef;
 pub use block_types::Block;
 pub use blocks_client::BlocksClient;
 pub use extrinsic_types::{
-    ExtrinsicDetails, ExtrinsicEvents, ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions,
-    Extrinsics, FoundExtrinsic, StaticExtrinsic,
+    ExtrinsicDetails, ExtrinsicEvents, ExtrinsicTransactionExtension,
+    ExtrinsicTransactionExtensions, Extrinsics, FoundExtrinsic, StaticExtrinsic,
 };
 
 // We get account nonce info in tx_client, too, so re-use the logic:

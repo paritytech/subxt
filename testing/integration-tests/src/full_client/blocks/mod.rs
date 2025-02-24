@@ -345,13 +345,25 @@ async fn decode_transaction_extensions_from_blocks() {
         "WeightReclaim",
     ];
 
-    assert_eq!(extensions1.iter().count(), expected_transaction_extensions.len());
-    for (e, expected_name) in extensions1.iter().zip(expected_transaction_extensions.iter()) {
+    assert_eq!(
+        extensions1.iter().count(),
+        expected_transaction_extensions.len()
+    );
+    for (e, expected_name) in extensions1
+        .iter()
+        .zip(expected_transaction_extensions.iter())
+    {
         assert_eq!(e.name(), *expected_name);
     }
 
-    assert_eq!(extensions2.iter().count(), expected_transaction_extensions.len());
-    for (e, expected_name) in extensions2.iter().zip(expected_transaction_extensions.iter()) {
+    assert_eq!(
+        extensions2.iter().count(),
+        expected_transaction_extensions.len()
+    );
+    for (e, expected_name) in extensions2
+        .iter()
+        .zip(expected_transaction_extensions.iter())
+    {
         assert_eq!(e.name(), *expected_name);
     }
 

@@ -9,15 +9,15 @@
 
 use super::extrinsic_params::ExtrinsicParams;
 use crate::client::ClientState;
-use crate::config::{Header, ExtrinsicParamsEncoder};
+use crate::config::{ExtrinsicParamsEncoder, Header};
 use crate::error::ExtrinsicParamsError;
-use crate::utils::{ Static, Era };
+use crate::utils::{Era, Static};
 use crate::Config;
-use core::any::Any;
 use alloc::borrow::ToOwned;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
 use codec::{Compact, Encode};
+use core::any::Any;
 use core::fmt::Debug;
 use derive_where::derive_where;
 use hashbrown::HashMap;
@@ -48,7 +48,7 @@ pub trait TransactionExtension<T: Config>: ExtrinsicParams<T> {
 /// this one in the list.
 pub struct VerifySignature<T: Config>(VerifySignatureDetails<T>);
 
-impl <T: Config> ExtrinsicParams<T> for VerifySignature<T> {
+impl<T: Config> ExtrinsicParams<T> for VerifySignature<T> {
     type Params = ();
 
     fn new(_client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
@@ -56,7 +56,7 @@ impl <T: Config> ExtrinsicParams<T> for VerifySignature<T> {
     }
 }
 
-impl <T: Config> ExtrinsicParamsEncoder for VerifySignature<T> {
+impl<T: Config> ExtrinsicParamsEncoder for VerifySignature<T> {
     fn encode_value_to(&self, v: &mut Vec<u8>) {
         self.0.encode_to(v);
     }
@@ -75,15 +75,21 @@ impl <T: Config> ExtrinsicParamsEncoder for VerifySignature<T> {
 
     fn inject_signature(&mut self, account: &dyn Any, signature: &dyn Any) {
         // Downcast refs back to concrete types (we use `&dyn Any`` so that the trait remains object safe)
-        let account = account.downcast_ref::<T::AccountId>().expect("A T::AccoundId should have been provided").clone();
-        let signature = signature.downcast_ref::<T::Signature>().expect("A T::Signature should have been provided").clone();
+        let account = account
+            .downcast_ref::<T::AccountId>()
+            .expect("A T::AccoundId should have been provided")
+            .clone();
+        let signature = signature
+            .downcast_ref::<T::Signature>()
+            .expect("A T::Signature should have been provided")
+            .clone();
 
         // The signature is not set through params, only here, once given by a user:
         self.0 = VerifySignatureDetails::Signed { signature, account }
     }
 }
 
-impl <T: Config> TransactionExtension<T> for VerifySignature<T> {
+impl<T: Config> TransactionExtension<T> for VerifySignature<T> {
     type Decoded = Static<VerifySignatureDetails<T>>;
     fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
         identifier == "VerifySignature"
@@ -102,7 +108,7 @@ pub enum VerifySignatureDetails<T: Config> {
         account: T::AccountId,
     },
     /// No signature was provided.
-    Disabled
+    Disabled,
 }
 
 /// The [`CheckMetadataHash`] transaction extension.
@@ -209,7 +215,7 @@ impl<T: Config> TransactionExtension<T> for CheckNonce {
 }
 
 /// Configure the nonce used.
-#[derive(Debug,Clone,Default)]
+#[derive(Debug, Clone, Default)]
 pub struct CheckNonceParams(Option<u64>);
 
 impl CheckNonceParams {
@@ -223,7 +229,7 @@ impl CheckNonceParams {
     }
 }
 
-impl <T: Config> Params<T> for CheckNonceParams {
+impl<T: Config> Params<T> for CheckNonceParams {
     fn inject_account_nonce(&mut self, nonce: u64) {
         if self.0.is_none() {
             self.0 = Some(nonce)
@@ -290,10 +296,10 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
 
     fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(CheckMortality {
-            // if nothing has been explicitly configured, we will have a mortal transaction 
+            // if nothing has been explicitly configured, we will have a mortal transaction
             // valid for 32 blocks if block info is available.
             params: params.0,
-            genesis_hash: client.genesis_hash
+            genesis_hash: client.genesis_hash,
         })
     }
 }
@@ -301,9 +307,13 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
 impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
     fn encode_value_to(&self, v: &mut Vec<u8>) {
         match &self.params {
-            CheckMortalityParamsInner::MortalFromBlock { for_n_blocks, from_block_n, .. } => {
+            CheckMortalityParamsInner::MortalFromBlock {
+                for_n_blocks,
+                from_block_n,
+                ..
+            } => {
                 Era::mortal(*for_n_blocks, *from_block_n).encode_to(v);
-            },
+            }
             _ => {
                 // Note: if we see `CheckMortalityInner::MortalForBlocks`, then it means the user has
                 // configured a block to be mortal for N blocks, but the current block was never injected,
@@ -314,13 +324,15 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
     }
     fn encode_implicit_to(&self, v: &mut Vec<u8>) {
         match &self.params {
-            CheckMortalityParamsInner::MortalFromBlock { from_block_hash, .. } => {
+            CheckMortalityParamsInner::MortalFromBlock {
+                from_block_hash, ..
+            } => {
                 from_block_hash.encode_to(v);
             }
             _ => {
                 self.genesis_hash.encode_to(v);
             }
-        }   
+        }
     }
 }
 
@@ -337,17 +349,21 @@ pub struct CheckMortalityParams<T: Config>(CheckMortalityParamsInner<T>);
 enum CheckMortalityParamsInner<T: Config> {
     Immortal,
     MortalForBlocks(u64),
-    MortalFromBlock { for_n_blocks: u64, from_block_n: u64, from_block_hash: T::Hash }
+    MortalFromBlock {
+        for_n_blocks: u64,
+        from_block_n: u64,
+        from_block_hash: T::Hash,
+    },
 }
 
-impl <T: Config> Default for CheckMortalityParams<T> {
+impl<T: Config> Default for CheckMortalityParams<T> {
     fn default() -> Self {
         // default to being mortal for 32 blocks if possible:
         CheckMortalityParams(CheckMortalityParamsInner::MortalForBlocks(32))
     }
 }
 
-impl <T: Config> CheckMortalityParams<T> {
+impl<T: Config> CheckMortalityParams<T> {
     /// Configure a transaction that will be mortal for the number of blocks given.
     pub fn mortal(for_n_blocks: u64) -> Self {
         Self(CheckMortalityParamsInner::MortalForBlocks(for_n_blocks))
@@ -356,16 +372,20 @@ impl <T: Config> CheckMortalityParams<T> {
     /// and from the block header provided.
     pub fn mortal_from(for_n_blocks: u64, from_block: T::Header) -> Self {
         Self(CheckMortalityParamsInner::MortalFromBlock {
-            for_n_blocks, 
+            for_n_blocks,
             from_block_n: from_block.number().into(),
-            from_block_hash: from_block.hash()
+            from_block_hash: from_block.hash(),
         })
     }
     /// Configure a transaction that will be mortal for the number of blocks given,
     /// and from the block details provided. Prefer to use [`CheckMortalityParams::mortal()`]
     /// or [`CheckMortalityParams::mortal_from()`] which both avoid the block number and hash
     /// from being misaligned.
-    pub fn mortal_from_unchecked(for_n_blocks: u64, from_block_n: u64, from_block_hash: T::Hash) -> Self {
+    pub fn mortal_from_unchecked(
+        for_n_blocks: u64,
+        from_block_n: u64,
+        from_block_hash: T::Hash,
+    ) -> Self {
         Self(CheckMortalityParamsInner::MortalFromBlock {
             for_n_blocks,
             from_block_n,
@@ -378,18 +398,18 @@ impl <T: Config> CheckMortalityParams<T> {
     }
 }
 
-impl <T: Config> Params<T> for CheckMortalityParams<T> {
+impl<T: Config> Params<T> for CheckMortalityParams<T> {
     fn inject_block(&mut self, from_block_n: u64, from_block_hash: <T as Config>::Hash) {
         match &self.0 {
             CheckMortalityParamsInner::MortalForBlocks(n) => {
-                self.0 = CheckMortalityParamsInner::MortalFromBlock { 
-                    for_n_blocks: *n, 
-                    from_block_n, 
+                self.0 = CheckMortalityParamsInner::MortalFromBlock {
+                    for_n_blocks: *n,
+                    from_block_n,
                     from_block_hash,
                 }
-            },
+            }
             _ => {
-               // Don't change anything if explicit Immortal or explicit block set. 
+                // Don't change anything if explicit Immortal or explicit block set.
             }
         }
     }
@@ -479,7 +499,7 @@ impl<T: Config> ChargeAssetTxPaymentParams<T> {
     }
 }
 
-impl <T: Config> Params<T> for ChargeAssetTxPaymentParams<T> {}
+impl<T: Config> Params<T> for ChargeAssetTxPaymentParams<T> {}
 
 /// The [`ChargeTransactionPayment`] transaction extension.
 #[derive(Clone, Debug, DecodeAsType)]
@@ -534,7 +554,7 @@ impl ChargeTransactionPaymentParams {
     }
 }
 
-impl <T: Config> Params<T> for ChargeTransactionPaymentParams {}
+impl<T: Config> Params<T> for ChargeTransactionPaymentParams {}
 
 /// This accepts a tuple of [`TransactionExtension`]s, and will dynamically make use of whichever
 /// ones are actually required for the chain in the correct order, ignoring the rest. This

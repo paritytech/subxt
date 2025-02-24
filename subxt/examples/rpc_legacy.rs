@@ -39,10 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .system_account_next_index(&alice.public_key().into())
             .await?;
 
-        let ext_params = Params::new()
-            .mortal(8)
-            .nonce(current_nonce)
-            .build();
+        let ext_params = Params::new().mortal(8).nonce(current_nonce).build();
 
         let balance_transfer = polkadot::tx()
             .balances()
