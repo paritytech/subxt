@@ -302,7 +302,7 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
     fn encode_value_to(&self, v: &mut Vec<u8>) {
         match &self.params {
             CheckMortalityParamsInner::MortalFromBlock { for_n_blocks, from_block_n, .. } => {
-                Era::mortal(*for_n_blocks, *from_block_n);
+                Era::mortal(*for_n_blocks, *from_block_n).encode_to(v);
             },
             _ => {
                 // Note: if we see `CheckMortalityInner::MortalForBlocks`, then it means the user has

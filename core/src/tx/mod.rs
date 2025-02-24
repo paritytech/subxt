@@ -258,15 +258,6 @@ impl<T: Config> PartialTransaction<T> {
         account_id: &T::AccountId,
         signature: &T::Signature,
     ) -> Transaction<T> {
-        println!("BUILDING {} {:?}", self.tx_extensions_version, self.tx_version);
-// TODO: Debug why this isn't working properly.
-//
-// BUILDING 0 V4
-// thread 'full_client::client::decode_a_module_error' panicked at testing/integration-tests/src/full_client/client/mod.rs:269:10:
-// called `Result::unwrap()` on an `Err` value: Rpc(ClientError(User(UserError { code: 1002, message: "Verification Error: Runtime error: Execution failed: Execution aborted due to trap: wasm trap: wasm `unreachable` instruction executed\nWASM backtrace:\nerror while executing at wasm backtrace:\n    0: 0x98ef49 - kitchensink_runtime.wasm!rust_begin_unwind\n    1: 0x124c8 - kitchensink_runtime.wasm!core::panicking::panic_fmt::h28c9f1abe9fc850b\n    2: 0x83aa28 - kitchensink_runtime.wasm!TaggedTransactionQueue_validate_transaction", data: Some(RawValue("RuntimeApi(\"Execution failed: Execution aborted due to trap: wasm trap: wasm `unreachable` instruction executed\\nWASM backtrace:\\nerror while executing at wasm backtrace:\\n    0: 0x98ef49 - kitchensink_runtime.wasm!rust_begin_unwind\\n    1: 0x124c8 - kitchensink_runtime.wasm!core::panicking::panic_fmt::h28c9f1abe9fc850b\\n    2: 0x83aa28 - kitchensink_runtime.wasm!TaggedTransactionQueue_validate_transaction\")")) })))
-// note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-// test full_client::client::decode_a_module_error ... FAILED
-
         let extrinsic = match self.tx_version {
             TransactionVersion::V4 => {
                 let mut encoded_inner = Vec::new();
