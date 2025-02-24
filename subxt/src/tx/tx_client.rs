@@ -339,7 +339,7 @@ where
     /// Convert this [`PartialExtrinsic`] into a V4 signed [`SubmittableExtrinsic`], ready to submit.
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
-    pub fn to_v4_signed<Signer>(&mut self, signer: &Signer) -> SubmittableExtrinsic<T, C>
+    pub fn to_v4_signed<Signer>(&self, signer: &Signer) -> SubmittableExtrinsic<T, C>
     where
         Signer: SignerT<T>,
     {
@@ -352,7 +352,7 @@ where
     ///
     /// The signature should be derived by signing [`Self::v4_signer_payload`].
     pub fn to_v4_signed_with_address_and_signature(
-        &mut self,
+        &self,
         address: &T::Address,
         signature: &T::Signature,
     ) -> SubmittableExtrinsic<T, C> {

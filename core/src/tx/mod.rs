@@ -331,7 +331,7 @@ impl<T: Config> PartialTransaction<T> {
     /// Convert this [`PartialTransaction`] into a V4 signed [`Transaction`], ready to submit.
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
-    pub fn to_v4_signed<Signer>(&mut self, signer: &Signer) -> Transaction<T>
+    pub fn to_v4_signed<Signer>(&self, signer: &Signer) -> Transaction<T>
     where
         Signer: SignerT<T>,
     {

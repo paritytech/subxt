@@ -166,7 +166,7 @@ impl Component for SigningExamplesComponent {
                         let params = DefaultExtrinsicParamsBuilder::new()
                             .nonce(account_nonce)
                             .build();
-                        let Ok(partial_signed) =
+                        let Ok(mut partial_signed) =
                             api.tx().create_partial_offline(&remark_call, params)
                         else {
                             return Message::Error(anyhow!("PartialExtrinsic creation failed"));
