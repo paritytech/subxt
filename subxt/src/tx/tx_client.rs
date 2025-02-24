@@ -402,7 +402,7 @@ where
     fn to_submittable(&self, inner: subxt_core::tx::Transaction<T>) -> SubmittableExtrinsic<T, C> {
         SubmittableExtrinsic {
             client: self.client.clone(),
-            inner: inner,
+            inner,
         }
     }
 }
