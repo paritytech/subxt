@@ -27,7 +27,7 @@ async fn signing_example() -> Result<(), BoxedError> {
     // Create partial tx, ready to be signed.
     let mut partial_tx = api
         .tx()
-        .create_partial_signed(
+        .create_partial(
             &balance_transfer_tx,
             &alice.public_key().to_account_id(),
             Default::default(),

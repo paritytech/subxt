@@ -55,7 +55,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: Payload,
     {
-        subxt_core::tx::create_bare(call, &self.client.metadata())
+        subxt_core::tx::create_unsigned(call, &self.client.metadata())
             .map(|tx| SubmittableExtrinsic {
                 client: self.client.clone(),
                 inner: tx,
@@ -67,7 +67,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     ///
     /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
     /// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
-    pub fn create_partial_signed_offline<Call>(
+    pub fn create_partial_offline<Call>(
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
@@ -75,7 +75,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     where
         Call: Payload,
     {
-        subxt_core::tx::create_partial_signed(call, &self.client.client_state(), params)
+        subxt_core::tx::create_partial(call, &self.client.client_state(), params)
             .map(|tx| PartialExtrinsic {
                 client: self.client.clone(),
                 inner: tx,
@@ -141,8 +141,8 @@ where
         crate::blocks::get_account_nonce(&self.client, account_id, block_ref.hash()).await
     }
 
-    /// Creates a partial signed extrinsic, without submitting it.
-    pub async fn create_partial_signed<Call>(
+    /// Creates a partial extrinsic, without submitting it. This can then be signed and submitted.
+    pub async fn create_partial<Call>(
         &self,
         call: &Call,
         account_id: &T::AccountId,
@@ -155,7 +155,7 @@ where
         self.inject_account_nonce_and_block(account_id, &mut params)
             .await?;
         // Create the partial extrinsic with the refined params:
-        self.create_partial_signed_offline(call, params)
+        self.create_partial_offline(call, params)
     }
 
     /// Creates a signed extrinsic, without submitting it.
@@ -175,12 +175,12 @@ where
 
         // 2. Gather the "additional" and "extra" params along with the encoded call data,
         //    ready to be signed.
-        let mut partial_signed = self
-            .create_partial_signed(call, &signer.account_id(), params)
+        let mut partial = self
+            .create_partial(call, &signer.account_id(), params)
             .await?;
 
         // 3. Sign and construct an extrinsic from these details.
-        Ok(partial_signed.sign(signer))
+        Ok(partial.sign(signer))
     }
 
     /// Creates and signs an extrinsic and submits it to the chain. Passes default parameters
@@ -283,8 +283,25 @@ where
 {
     /// Return the signer payload for this extrinsic. These are the bytes that must
     /// be signed in order to produce a valid signature for the extrinsic.
+    ///
+    /// This payload can be used with the non-versioned `sign*` methods (ie any method without
+    /// `v4` or `v5` in the name). If you wish to use the versioned `sign*` methods, use
+    /// [`Self::v4_signer_payload`] or [`Self::v5_signer_payload`] to construct the correct
+    /// payload for that version.
     pub fn signer_payload(&self) -> Vec<u8> {
         self.inner.signer_payload()
+    }
+
+    /// Return the V4 signer payload for this extrinsic. These are the bytes that must
+    /// be signed in order to produce a valid signature for a v4 extrinsic.
+    pub fn v4_signer_payload(&self) -> Vec<u8> {
+        self.inner.v4_signer_payload()
+    }
+
+    /// Return the V5 signer payload for this extrinsic. These are the bytes that must
+    /// be signed in order to produce a valid signature for a v5 extrinsic.
+    pub fn v5_signer_payload(&self) -> Vec<u8> {
+        self.inner.v5_signer_payload()
     }
 
     /// Return the bytes representing the call data for this partially constructed
@@ -300,10 +317,8 @@ where
     where
         Signer: SignerT<T>,
     {
-        SubmittableExtrinsic {
-            client: self.client.clone(),
-            inner: self.inner.sign(signer),
-        }
+        let tx = self.inner.sign(signer);
+        self.to_submittable(tx)
     }
 
     /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
@@ -315,11 +330,79 @@ where
         account_id: &T::AccountId,
         signature: &T::Signature,
     ) -> SubmittableExtrinsic<T, C> {
+        let tx = self
+            .inner
+            .sign_with_account_and_signature(account_id, signature);
+        self.to_submittable(tx)
+    }
+
+    /// Convert this [`PartialExtrinsic`] into a V4 signed [`SubmittableExtrinsic`], ready to submit.
+    /// The provided `signer` is responsible for providing the "from" address for the transaction,
+    /// as well as providing a signature to attach to it.
+    pub fn to_v4_signed<Signer>(&mut self, signer: &Signer) -> SubmittableExtrinsic<T, C>
+    where
+        Signer: SignerT<T>,
+    {
+        let tx = self.inner.to_v4_signed(signer);
+        self.to_submittable(tx)
+    }
+
+    /// Convert this [`PartialExtrinsic`] into a V4 signed [`SubmittableExtrinsic`], ready to submit.
+    /// The provided `address` and `signature` will be used.
+    ///
+    /// The signature should be derived by signing [`Self::v4_signer_payload`].
+    pub fn to_v4_signed_with_address_and_signature(
+        &mut self,
+        address: &T::Address,
+        signature: &T::Signature,
+    ) -> SubmittableExtrinsic<T, C> {
+        let tx = self
+            .inner
+            .to_v4_signed_with_address_and_signature(address, signature);
+        self.to_submittable(tx)
+    }
+
+    /// Convert this [`PartialExtrinsic`] into a V5 "general" [`SubmittableExtrinsic`].
+    ///
+    /// This transaction has not been explicitly signed. Use [`Self::to_v5_general_with_signer`]
+    /// or [`Self::to_v5_general_with_account_and_signature`] if you wish to provide a
+    /// signature (this is usually a necessary step).
+    pub fn to_v5_general(&self) -> SubmittableExtrinsic<T, C> {
+        let tx = self.inner.to_v5_general();
+        self.to_submittable(tx)
+    }
+
+    /// Convert this [`PartialExtrinsic`] into a V5 "general" [`SubmittableExtrinsic`] with a signature.
+    pub fn to_v5_general_with_signer<Signer>(
+        &mut self,
+        signer: &Signer,
+    ) -> SubmittableExtrinsic<T, C>
+    where
+        Signer: SignerT<T>,
+    {
+        let tx = self.inner.to_v5_general_with_signer(signer);
+        self.to_submittable(tx)
+    }
+
+    /// Convert this [`PartialExtrinsic`] into a V5 "general" [`SubmittableExtrinsic`] with a signature.
+    /// Prefer [`Self::to_v5_general_with_signer`] if you have a [`SignerT`] instance to use.
+    ///
+    /// The signature should be derived by signing [`Self::v5_signer_payload`].
+    pub fn to_v5_general_with_account_and_signature(
+        &mut self,
+        account_id: &T::AccountId,
+        signature: &T::Signature,
+    ) -> SubmittableExtrinsic<T, C> {
+        let tx = self
+            .inner
+            .to_v5_general_with_account_and_signature(account_id, signature);
+        self.to_submittable(tx)
+    }
+
+    fn to_submittable(&self, inner: subxt_core::tx::Transaction<T>) -> SubmittableExtrinsic<T, C> {
         SubmittableExtrinsic {
             client: self.client.clone(),
-            inner: self
-                .inner
-                .sign_with_account_and_signature(account_id, signature),
+            inner: inner,
         }
     }
 }

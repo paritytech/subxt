@@ -190,7 +190,7 @@ async fn external_signing() {
     let tx = node_runtime::tx().preimage().note_preimage(vec![0u8]);
     let mut partial_extrinsic = api
         .tx()
-        .create_partial_signed(&tx, &alice.public_key().into(), Default::default())
+        .create_partial(&tx, &alice.public_key().into(), Default::default())
         .await
         .unwrap();
 

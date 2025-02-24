@@ -167,7 +167,7 @@ impl Component for SigningExamplesComponent {
                             .nonce(account_nonce)
                             .build();
                         let Ok(partial_signed) =
-                            api.tx().create_partial_signed_offline(&remark_call, params)
+                            api.tx().create_partial_offline(&remark_call, params)
                         else {
                             return Message::Error(anyhow!("PartialExtrinsic creation failed"));
                         };
