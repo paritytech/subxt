@@ -278,7 +278,9 @@ pub struct ExtrinsicEvents<T: Config> {
 }
 
 impl<T: Config> ExtrinsicEvents<T> {
-    pub(crate) fn new(ext_hash: T::Hash, idx: u32, events: events::Events<T>) -> Self {
+    /// Creates a new instance of `ExtrinsicEvents`.
+    #[doc(hidden)]
+    pub fn new(ext_hash: T::Hash, idx: u32, events: events::Events<T>) -> Self {
         Self {
             ext_hash,
             idx,
