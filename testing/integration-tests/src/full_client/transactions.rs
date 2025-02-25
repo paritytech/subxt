@@ -1,8 +1,16 @@
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
+
 use crate::utils::node_runtime;
 use crate::{subxt_test, test_context};
 use core::ops::Deref;
 use frame_decode::extrinsics::ExtrinsicType;
 use subxt_signer::sr25519::dev;
+
+// TODO: When VerifySignature exists on the substrate kitchensink runtime,
+// let's try actuallty submitting v4 and v5 signed extrinsics to verify that
+// they are actually accepted by the node.
 
 #[subxt_test]
 async fn v4_unsigned_encode_decode() -> Result<(), subxt::Error> {
