@@ -63,6 +63,32 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             .map_err(Into::into)
     }
 
+    /// Creates a V4 "unsigned" transaction without submitting it.
+    pub fn create_v4_unsigned<Call>(&self, call: &Call) -> Result<SubmittableExtrinsic<T, C>, Error>
+    where
+        Call: Payload,
+    {
+        subxt_core::tx::create_v4_unsigned(call, &self.client.metadata())
+            .map(|tx| SubmittableExtrinsic {
+                client: self.client.clone(),
+                inner: tx,
+            })
+            .map_err(Into::into)
+    }
+
+    /// Creates a V5 "bare" transaction without submitting it.
+    pub fn create_v5_bare<Call>(&self, call: &Call) -> Result<SubmittableExtrinsic<T, C>, Error>
+    where
+        Call: Payload,
+    {
+        subxt_core::tx::create_v5_bare(call, &self.client.metadata())
+            .map(|tx| SubmittableExtrinsic {
+                client: self.client.clone(),
+                inner: tx,
+            })
+            .map_err(Into::into)
+    }
+
     /// Create a partial extrinsic.
     ///
     /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.

@@ -387,7 +387,7 @@ impl<T: Config> PartialTransaction<T> {
         let extrinsic = {
             let mut encoded_inner = Vec::new();
             // "is general" + transaction protocol version (5)
-            (0b0100000 + 5u8).encode_to(&mut encoded_inner);
+            (0b01000000 + 5u8).encode_to(&mut encoded_inner);
             // Encode versions for the transaction extensions
             self.tx_extensions_version.encode_to(&mut encoded_inner);
             // Encode the actual transaction extensions values

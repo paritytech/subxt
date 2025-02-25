@@ -28,6 +28,7 @@ chainhead-backend = []
 [dev-dependencies]
 assert_matches = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }
+frame-decode = { workspace = true }
 frame-metadata = { workspace = true }
 futures = { workspace = true }
 hex = { workspace = true }
