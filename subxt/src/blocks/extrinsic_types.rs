@@ -1,4 +1,4 @@
-// Copyright 2019-2023 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -279,7 +279,9 @@ pub struct ExtrinsicEvents<T: Config> {
 }
 
 impl<T: Config> ExtrinsicEvents<T> {
-    pub(crate) fn new(ext_hash: T::Hash, idx: u32, events: events::Events<T>) -> Self {
+    /// Creates a new instance of `ExtrinsicEvents`.
+    #[doc(hidden)]
+    pub fn new(ext_hash: T::Hash, idx: u32, events: events::Events<T>) -> Self {
         Self {
             ext_hash,
             idx,
