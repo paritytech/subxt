@@ -292,14 +292,25 @@ fn get_extrinsic_hash(
     let signature_hash = get_type_hash(registry, extrinsic.signature_ty, outer_enum_hashes);
     let extra_hash = get_type_hash(registry, extrinsic.extra_ty, outer_enum_hashes);
 
+    // Supported versions are just u8s and we will likely never have more than 32 of these, so put them into
+    // an array of u8s and panic if more than 32.
+    if extrinsic.supported_versions.len() > 32 {
+        panic!("The metadata validation logic does not support more than 32 extrinsic versions.");
+    }
+    let supported_extrinsic_versions = {
+        let mut a = [0u8; 32];
+        a[0..extrinsic.supported_versions.len()].copy_from_slice(&extrinsic.supported_versions);
+        a
+    };
+
     let mut bytes = concat_and_hash4(
         &address_hash,
         &signature_hash,
         &extra_hash,
-        &[extrinsic.version; 32],
+        &supported_extrinsic_versions,
     );
 
-    for signed_extension in extrinsic.signed_extensions.iter() {
+    for signed_extension in extrinsic.transaction_extensions.iter() {
         bytes = concat_and_hash4(
             &bytes,
             &hash(signed_extension.identifier.as_bytes()),

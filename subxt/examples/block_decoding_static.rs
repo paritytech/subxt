@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         for transfer in extrinsics.find::<TransferKeepAlive>() {
             let transfer = transfer?;
 
-            let Some(extensions) = transfer.details.signed_extensions() else {
+            let Some(extensions) = transfer.details.transaction_extensions() else {
                 panic!("TransferKeepAlive should be signed")
             };
 

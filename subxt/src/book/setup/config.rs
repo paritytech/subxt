@@ -64,10 +64,10 @@
 //!
 //! ## ExtrinsicParams
 //!
-//! Chains each have a set of "signed extensions" configured. Signed extensions provide a means to extend how transactions
-//! work. Each signed extension can potentially encode some "extra" data which is sent along with a transaction, as well as some
+//! Chains each have a set of "transaction extensions" (formally called "signed extensions") configured. Transaction extensions provide
+//! a means to extend how transactions work. Each transaction extension can potentially encode some "extra" data which is sent along with a transaction, as well as some
 //! "additional" data which is included in the transaction signer payload, but not transmitted along with the transaction. On
-//! a node, signed extensions can then perform additional checks on the submitted transactions to ensure their validity.
+//! a node, transaction extensions can then perform additional checks on the submitted transactions to ensure their validity.
 //!
 //! The `ExtrinsicParams` config type expects to be given an implementation of the [`crate::config::ExtrinsicParams`] trait.
 //! Implementations of the [`crate::config::ExtrinsicParams`] trait are handed some parameters from Subxt itself, and can
@@ -75,26 +75,26 @@
 //! via the required [`crate::config::ExtrinsicParamsEncoder`] impl.
 //!
 //! **In most cases, the default [crate::config::DefaultExtrinsicParams] type will work**: it understands the "standard"
-//! signed extensions that are in use, and allows the user to provide things like a tip, and set the extrinsic mortality via
-//! [`crate::config::DefaultExtrinsicParamsBuilder`]. It will use the chain metadata to decide which signed extensions to use
-//! and in which order. It will return an error if the chain uses a signed extension which it doesn't know how to handle.
+//! transaction extensions that are in use, and allows the user to provide things like a tip, and set the extrinsic mortality via
+//! [`crate::config::DefaultExtrinsicParamsBuilder`]. It will use the chain metadata to decide which transaction extensions to use
+//! and in which order. It will return an error if the chain uses a transaction extension which it doesn't know how to handle.
 //!
-//! If the chain uses novel signed extensions (or if you just wish to provide a different interface for users to configure
+//! If the chain uses novel transaction extensions (or if you just wish to provide a different interface for users to configure
 //! transactions), you can either:
 //!
-//! 1. Implement a new signed extension and add it to the list.
+//! 1. Implement a new transaction extension and add it to the list.
 //! 2. Implement [`crate::config::DefaultExtrinsicParams`] from scratch.
 //!
 //! See below for examples of each.
 //!
-//! ### Finding out which signed extensions a chain is using.
+//! ### Finding out which transaction extensions a chain is using.
 //!
-//! In either case, you'll want to find out which signed extensions a chain is using. This information can be obtained from
-//! the `SignedExtra` parameter of the `UncheckedExtrinsic` of your parachain, which will be a tuple of signed extensions.
+//! In either case, you'll want to find out which transaction extensions a chain is using. This information can be obtained from
+//! the `SignedExtra` parameter of the `UncheckedExtrinsic` of your parachain, which will be a tuple of transaction extensions.
 //! It can also be obtained from the metadata (see [`frame_metadata::v15::SignedExtensionMetadata`]).
 //!
-//! For statemint, the signed extensions look like
-//! [this](https://github.com/paritytech/cumulus/tree/master/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L779):
+//! For statemint, the transaction extensions look like
+//! [this](https://github.com/paritytech/cumulus/blob/d4bb2215bb28ee05159c4c7df1b3435177b5bf4e/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L786):
 //!
 //! ```rs
 //! pub type SignedExtra = (
@@ -126,20 +126,20 @@
 //!
 //! All types in the `struct type` column make up the "extra" data that we're expected to provide. All types in the
 //! `AdditionalSigned` column make up the "additional" data that we're expected to provide. This information will be useful
-//! whether we want to implement [`crate::config::SignedExtension`] for a signed extension, or implement
+//! whether we want to implement [`crate::config::TransactionExtension`] for a transaction extension, or implement
 //! [`crate::config::ExtrinsicParams`] from scratch.
 //!
-//! As it happens, all of the signed extensions in the table are either already exported in [`crate::config::signed_extensions`],
+//! As it happens, all of the transaction extensions in the table are either already exported in [`crate::config::transaction_extensions`],
 //! or they hand back no "additional" or "extra" data. In both of these cases, the default `ExtrinsicParams` configuration will
 //! work out of the box.
 //!
-//! ### Implementing and adding new signed extensions to the config
+//! ### Implementing and adding new transaction extensions to the config
 //!
-//! If you do need to implement a novel signed extension, then you can implement [`crate::config::signed_extensions::SignedExtension`]
-//! on a custom type and place it into a new set of signed extensions, like so:
+//! If you do need to implement a novel transaction extension, then you can implement [`crate::config::transaction_extensions::TransactionExtension`]
+//! on a custom type and place it into a new set of transaction extensions, like so:
 //!
 //! ```rust,ignore
-#![doc = include_str ! ("../../../examples/setup_config_signed_extension.rs")]
+#![doc = include_str ! ("../../../examples/setup_config_transaction_extension.rs")]
 //! ```
 //!
 //! ### Implementing [`crate::config::ExtrinsicParams`] from scratch

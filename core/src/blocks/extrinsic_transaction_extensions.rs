@@ -2,10 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::config::signed_extensions::{
+use crate::config::transaction_extensions::{
     ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
 };
-use crate::config::SignedExtension;
+use crate::config::TransactionExtension;
 use crate::dynamic::Value;
 use crate::{config::Config, error::Error, Metadata};
 use frame_decode::extrinsics::ExtrinsicExtensions;
@@ -13,14 +13,14 @@ use scale_decode::DecodeAsType;
 
 /// The signed extensions of an extrinsic.
 #[derive(Debug, Clone)]
-pub struct ExtrinsicSignedExtensions<'a, T: Config> {
+pub struct ExtrinsicTransactionExtensions<'a, T: Config> {
     bytes: &'a [u8],
     metadata: &'a Metadata,
     decoded_info: &'a ExtrinsicExtensions<'static, u32>,
     _marker: core::marker::PhantomData<T>,
 }
 
-impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
+impl<'a, T: Config> ExtrinsicTransactionExtensions<'a, T> {
     pub(crate) fn new(
         bytes: &'a [u8],
         metadata: &'a Metadata,
@@ -35,20 +35,22 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
     }
 
     /// Returns an iterator over each of the signed extension details of the extrinsic.
-    pub fn iter(&self) -> impl Iterator<Item = ExtrinsicSignedExtension<T>> {
-        self.decoded_info.iter().map(|s| ExtrinsicSignedExtension {
-            bytes: &self.bytes[s.range()],
-            ty_id: *s.ty(),
-            identifier: s.name(),
-            metadata: self.metadata,
-            _marker: core::marker::PhantomData,
-        })
+    pub fn iter(&self) -> impl Iterator<Item = ExtrinsicTransactionExtension<T>> {
+        self.decoded_info
+            .iter()
+            .map(|s| ExtrinsicTransactionExtension {
+                bytes: &self.bytes[s.range()],
+                ty_id: *s.ty(),
+                identifier: s.name(),
+                metadata: self.metadata,
+                _marker: core::marker::PhantomData,
+            })
     }
 
     /// Searches through all signed extensions to find a specific one.
     /// If the Signed Extension is not found `Ok(None)` is returned.
     /// If the Signed Extension is found but decoding failed `Err(_)` is returned.
-    pub fn find<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
+    pub fn find<S: TransactionExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
         for ext in self.iter() {
             match ext.as_signed_extension::<S>() {
                 // We found a match; return it:
@@ -90,7 +92,7 @@ impl<'a, T: Config> ExtrinsicSignedExtensions<'a, T> {
 
 /// A single signed extension
 #[derive(Debug, Clone)]
-pub struct ExtrinsicSignedExtension<'a, T: Config> {
+pub struct ExtrinsicTransactionExtension<'a, T: Config> {
     bytes: &'a [u8],
     ty_id: u32,
     identifier: &'a str,
@@ -98,7 +100,7 @@ pub struct ExtrinsicSignedExtension<'a, T: Config> {
     _marker: core::marker::PhantomData<T>,
 }
 
-impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
+impl<'a, T: Config> ExtrinsicTransactionExtension<'a, T> {
     /// The bytes representing this signed extension.
     pub fn bytes(&self) -> &'a [u8] {
         self.bytes
@@ -127,7 +129,9 @@ impl<'a, T: Config> ExtrinsicSignedExtension<'a, T> {
     /// Decodes the bytes of this Signed Extension into its associated `Decoded` type.
     /// Returns `Ok(None)` if the data we have doesn't match the Signed Extension we're asking to
     /// decode with.
-    pub fn as_signed_extension<S: SignedExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
+    pub fn as_signed_extension<S: TransactionExtension<T>>(
+        &self,
+    ) -> Result<Option<S::Decoded>, Error> {
         if !S::matches(self.identifier, self.ty_id, self.metadata.types()) {
             return Ok(None);
         }

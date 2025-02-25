@@ -166,15 +166,15 @@ impl Component for SigningExamplesComponent {
                         let params = DefaultExtrinsicParamsBuilder::new()
                             .nonce(account_nonce)
                             .build();
-                        let Ok(partial_signed) =
-                            api.tx().create_partial_signed_offline(&remark_call, params)
+                        let Ok(mut partial_signed) =
+                            api.tx().create_partial_offline(&remark_call, params)
                         else {
                             return Message::Error(anyhow!("PartialExtrinsic creation failed"));
                         };
 
                         // Apply the signature
                         let signed_extrinsic = partial_signed
-                            .sign_with_address_and_signature(&account_id.into(), &multi_signature);
+                            .sign_with_account_and_signature(&account_id, &multi_signature);
 
                         // check the TX validity (to debug in the js console if the extrinsic would work)
                         let dry_res = signed_extrinsic.validate().await;
