@@ -126,7 +126,7 @@
 //! // Ultimately we need to be given back a `signature` (or really, anything
 //! // that can be SCALE encoded) and an `address`:
 //! let signature;
-//! let address;
+//! let account_id;
 //! # use subxt::tx::Signer;
 //! # let signer = subxt_signer::sr25519::dev::alice();
 //! # signature = signer.sign(&signer_payload).into();
