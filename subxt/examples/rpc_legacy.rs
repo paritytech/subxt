@@ -47,7 +47,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let ext_hash = api
             .tx()
-            .create_signed_offline(&balance_transfer, &alice, ext_params)?
+            .create_partial_offline(&balance_transfer, ext_params)?
+            .sign(&alice)
             .submit()
             .await?;
 

@@ -71,6 +71,15 @@ use sp_crypto_hashing::blake2_256;
 // Expose these here since we expect them in some calls below.
 pub use crate::client::{ClientState, RuntimeVersion};
 
+// TODO:
+// `supported_versions(Metadata) -> impl iterator<u8>`
+// - only have methods for specific versions in Core
+// - only have "high level" methods in subxt itself
+// - have method to build `SubmittableExtrinsic` from core methods so there is a way
+//   to manually construct txs if preferred without polluting the high level APIs.
+// - check whether some extension uses signature/account and error if no such extension but
+//   we need to sign a v5 extrinsic? Or just ensure to prefer V4 always.
+
 /// Run the validation logic against some extrinsic you'd like to submit. Returns `Ok(())`
 /// if the call is valid (or if it's not possible to check since the call has no validation hash).
 /// Return an error if the call was not valid or something went wrong trying to validate it (ie
@@ -89,6 +98,32 @@ pub fn validate<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<(), E
     Ok(())
 }
 
+/// Returns the suggested transaction versions to build for a given chain, or an error
+/// if Subxt doesn't support any version expected by the chain.
+///
+/// If the result is [`TransactionVersion::V4`], use the `v4` methods in this module. If it's
+/// [`TransactionVersion::V5`], use the `v5` ones.
+pub fn suggested_version(metadata: &Metadata) -> Result<TransactionVersion, Error> {
+    let versions = metadata.extrinsic().supported_versions();
+
+    if versions.contains(&4) {
+        Ok(TransactionVersion::V4)
+    } else if versions.contains(&5) {
+        Ok(TransactionVersion::V5)
+    } else {
+        Err(ExtrinsicError::UnsupportedVersion.into())
+    }
+}
+
+/// The transaction versions supported by Subxt.
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum TransactionVersion {
+    /// v4 transactions (signed and unsigned transactions)
+    V4,
+    /// v5 transactions (bare and general transactions)
+    V5,
+}
+
 /// Return the SCALE encoded bytes representing the call data of the transaction.
 pub fn call_data<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<Vec<u8>, Error> {
     let mut bytes = Vec::new();
@@ -96,28 +131,12 @@ pub fn call_data<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<Vec<
     Ok(bytes)
 }
 
-/// Creates an unsigned transaction without submitting it. This will create a transaction
-/// at a version appropriate for the metadata provided. (either V4 or V5).
-///
-/// Use [`create_v4_unsigned`] or [`create_v5_bare`] if you'd prefer to explicitly create
-/// a V4 or V5 unsigned/bare transaction.
-pub fn create_unsigned<T: Config, Call: Payload>(
-    call: &Call,
-    metadata: &Metadata,
-) -> Result<Transaction<T>, Error> {
-    // 1. Get the first supported TX version from the metadata.
-    let tx_version = TransactionVersion::from_metadata(metadata)?;
-
-    // 2. Encode extrinsic at that version
-    create_unsigned_at_version(call, tx_version, metadata)
-}
-
 /// Creates a V4 "unsigned" transaction without submitting it.
 pub fn create_v4_unsigned<T: Config, Call: Payload>(
     call: &Call,
     metadata: &Metadata,
 ) -> Result<Transaction<T>, Error> {
-    create_unsigned_at_version(call, TransactionVersion::V4, metadata)
+    create_unsigned_at_version(call, 4, metadata)
 }
 
 /// Creates a V5 "bare" transaction without submitting it.
@@ -125,13 +144,13 @@ pub fn create_v5_bare<T: Config, Call: Payload>(
     call: &Call,
     metadata: &Metadata,
 ) -> Result<Transaction<T>, Error> {
-    create_unsigned_at_version(call, TransactionVersion::V5, metadata)
+    create_unsigned_at_version(call, 5, metadata)
 }
 
 // Create a V4 "unsigned" transaction or V5 "bare" transaction.
 fn create_unsigned_at_version<T: Config, Call: Payload>(
     call: &Call,
-    tx_version: TransactionVersion,
+    tx_version: u8,
     metadata: &Metadata,
 ) -> Result<Transaction<T>, Error> {
     // 1. Validate this call against the current node metadata if the call comes
@@ -142,7 +161,7 @@ fn create_unsigned_at_version<T: Config, Call: Payload>(
     let extrinsic = {
         let mut encoded_inner = Vec::new();
         // encode the transaction version first.
-        tx_version.to_u8().encode_to(&mut encoded_inner);
+        tx_version.encode_to(&mut encoded_inner);
         // encode call data after this byte.
         call.encode_call_data_to(metadata, &mut encoded_inner)?;
         // now, prefix byte length:
@@ -159,22 +178,42 @@ fn create_unsigned_at_version<T: Config, Call: Payload>(
     Ok(Transaction::from_bytes(extrinsic))
 }
 
-/// Create a partial extrinsic.
-///
-/// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
-/// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
-pub fn create_partial<T: Config, Call: Payload>(
+/// Construct a v4 extrinsic, ready to be signed.
+pub fn create_v4_signed<T: Config, Call: Payload>(
     call: &Call,
     client_state: &ClientState<T>,
     params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-) -> Result<PartialTransaction<T>, Error> {
+) -> Result<PartialTransactionV4<T>, Error> {
     // 1. Validate this call against the current node metadata if the call comes
     // with a hash allowing us to do so.
     validate(call, &client_state.metadata)?;
 
-    // 2. Work out which TX and TX extension version to target based on metadata (unless we
+    // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
+    let call_data = call_data(call, &client_state.metadata)?;
+
+    // 3. Construct our custom additional/extra params.
+    let additional_and_extra_params =
+        <T::ExtrinsicParams as ExtrinsicParams<T>>::new(client_state, params)?;
+
+    // Return these details, ready to construct a signed extrinsic from.
+    Ok(PartialTransactionV4 {
+        call_data,
+        additional_and_extra_params,
+    })
+}
+
+/// Construct a v5 "general" extrinsic, ready to be signed or emitted as is.
+pub fn create_v5_general<T: Config, Call: Payload>(
+    call: &Call,
+    client_state: &ClientState<T>,
+    params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
+) -> Result<PartialTransactionV5<T>, Error> {
+    // 1. Validate this call against the current node metadata if the call comes
+    // with a hash allowing us to do so.
+    validate(call, &client_state.metadata)?;
+
+    // 2. Work out which TX extension version to target based on metadata (unless we
     // explicitly ask for a specific transaction version at a later step).
-    let tx_version = TransactionVersion::from_metadata(&client_state.metadata)?;
     let tx_extensions_version = client_state
         .metadata
         .extrinsic()
@@ -188,61 +227,30 @@ pub fn create_partial<T: Config, Call: Payload>(
         <T::ExtrinsicParams as ExtrinsicParams<T>>::new(client_state, params)?;
 
     // Return these details, ready to construct a signed extrinsic from.
-    Ok(PartialTransaction {
+    Ok(PartialTransactionV5 {
         call_data,
         additional_and_extra_params,
-        recommended_tx_version: tx_version,
         tx_extensions_version,
     })
 }
 
-/// Creates a signed extrinsic without submitting it.
-///
-/// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
-/// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
-pub fn create_signed<T, Call, Signer>(
-    call: &Call,
-    client_state: &ClientState<T>,
-    signer: &Signer,
-    params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-) -> Result<Transaction<T>, Error>
-where
-    T: Config,
-    Call: Payload,
-    Signer: SignerT<T>,
-{
-    // 1. Validate this call against the current node metadata if the call comes
-    // with a hash allowing us to do so.
-    validate(call, &client_state.metadata)?;
-
-    // 2. Gather the "additional" and "extra" params along with the encoded call data,
-    //    ready to be signed.
-    let mut partial_signed = create_partial(call, client_state, params)?;
-
-    // 3. Sign and construct an extrinsic from these details.
-    Ok(partial_signed.sign(signer))
-}
-
-/// This represents a partially constructed transaction that needs signing before it is ready
-/// to submit. Use [`PartialTransaction::signer_payload()`] to return the payload that needs signing,
-/// [`PartialTransaction::sign()`] to sign the transaction using a [`SignerT`] impl, or
-/// [`PartialTransaction::sign_with_account_and_signature()`] to apply an existing signature and account ID
-/// to the transaction.
-pub struct PartialTransaction<T: Config> {
+/// A partially constructed V4 extrinsic, ready to be signed.
+pub struct PartialTransactionV4<T: Config> {
     call_data: Vec<u8>,
     additional_and_extra_params: T::ExtrinsicParams,
-    // Based on the metadata, which version transaction should we build?
-    // This is only a suggestion and can be overridden.
-    recommended_tx_version: TransactionVersion,
-    // What version of transaction extensions are we encoding?
-    tx_extensions_version: u8,
 }
 
-impl<T: Config> PartialTransaction<T> {
+impl<T: Config> PartialTransactionV4<T> {
+    /// Return the bytes representing the call data for this partially constructed
+    /// extrinsic.
+    pub fn call_data(&self) -> &[u8] {
+        &self.call_data
+    }
+
     // Obtain bytes representing the signer payload and run call some function
     // with them. This can avoid an allocation in some cases when compared to
     // [`PartialExtrinsic::signer_payload()`].
-    fn with_signer_payload<F, R>(&self, version: TransactionVersion, f: F) -> R
+    fn with_signer_payload<F, R>(&self, f: F) -> R
     where
         F: for<'a> FnOnce(Cow<'a, [u8]>) -> R,
     {
@@ -252,103 +260,39 @@ impl<T: Config> PartialTransaction<T> {
         self.additional_and_extra_params
             .encode_implicit_to(&mut bytes);
 
-        // For V4 transactions we only hash if >256 bytes.
-        // For V5 transactions we _always_ hash.
-        if version == TransactionVersion::V5 || bytes.len() > 256 {
-            f(Cow::Borrowed(blake2_256(&bytes).as_ref()))
+        if bytes.len() > 256 {
+            f(Cow::Borrowed(&blake2_256(&bytes)))
         } else {
             f(Cow::Owned(bytes))
         }
     }
 
-    /// Return the signer payload for this extrinsic. These are the bytes that must
-    /// be signed in order to produce a valid signature for the extrinsic.
-    ///
-    /// This payload can be used with the non-versioned `sign*` methods (ie any method without
-    /// `v4` or `v5` in the name). If you wish to use the versioned `sign*` methods, use
-    /// [`Self::v4_signer_payload`] or [`Self::v5_signer_payload`] to construct the correct
-    /// payload for that version.
-    pub fn signer_payload(&self) -> Vec<u8> {
-        self.with_signer_payload(self.recommended_tx_version, |bytes| bytes.to_vec())
-    }
-
     /// Return the V4 signer payload for this extrinsic. These are the bytes that must
     /// be signed in order to produce a valid signature for the extrinsic.
-    pub fn v4_signer_payload(&self) -> Vec<u8> {
-        self.with_signer_payload(TransactionVersion::V4, |bytes| bytes.to_vec())
-    }
-
-    /// Return the V5 signer payload for this extrinsic. These are the bytes that must
-    /// be signed in order to produce a valid signature for the extrinsic.
-    pub fn v5_signer_payload(&self) -> Vec<u8> {
-        self.with_signer_payload(TransactionVersion::V5, |bytes| bytes.to_vec())
-    }
-
-    /// Return the bytes representing the call data for this partially constructed
-    /// extrinsic.
-    pub fn call_data(&self) -> &[u8] {
-        &self.call_data
-    }
-
-    /// Convert this [`PartialTransaction`] into a [`Transaction`], ready to submit.
-    /// The provided `signer` is responsible for providing the "from" address for the transaction,
-    /// as well as providing a signature to attach to it.
-    ///
-    /// This builds either a V4 or V5 transaction depending on the provided chain metadata.
-    pub fn sign<Signer>(&mut self, signer: &Signer) -> Transaction<T>
-    where
-        Signer: SignerT<T>,
-    {
-        // Given our signer, we can sign the payload representing this extrinsic.
-        let signature =
-            self.with_signer_payload(self.recommended_tx_version, |bytes| signer.sign(&bytes));
-        // Now, use the signature and "from" address to build the extrinsic.
-        self.sign_with_account_and_signature(&signer.account_id(), &signature)
-    }
-
-    /// Convert this [`PartialTransaction`] into a [`Transaction`], ready to submit.
-    /// An account ID, and something representing a signature that can be SCALE encoded, are both
-    /// needed in order to construct it. If you have a `Signer` to hand, you can use
-    /// [`PartialTransaction::sign()`] instead.
-    ///
-    /// This builds either a V4 or V5 transaction depending on the provided chain metadata.
-    pub fn sign_with_account_and_signature(
-        &mut self,
-        account_id: &T::AccountId,
-        signature: &T::Signature,
-    ) -> Transaction<T> {
-        match self.recommended_tx_version {
-            TransactionVersion::V4 => {
-                let address: T::Address = account_id.clone().into();
-                self.to_v4_signed_with_address_and_signature(&address, signature)
-            }
-            TransactionVersion::V5 => {
-                self.to_v5_general_with_account_and_signature(account_id, signature)
-            }
-        }
+    pub fn signer_payload(&self) -> Vec<u8> {
+        self.with_signer_payload(|bytes| bytes.to_vec())
     }
 
     /// Convert this [`PartialTransaction`] into a V4 signed [`Transaction`], ready to submit.
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
-    pub fn to_v4_signed<Signer>(&self, signer: &Signer) -> Transaction<T>
+    pub fn sign<Signer>(&self, signer: &Signer) -> Transaction<T>
     where
         Signer: SignerT<T>,
     {
         // Given our signer, we can sign the payload representing this extrinsic.
-        let signature =
-            self.with_signer_payload(TransactionVersion::V4, |bytes| signer.sign(&bytes));
+        let signature = self.with_signer_payload(|bytes| signer.sign(&bytes));
         // Now, use the signature and "from" address to build the extrinsic.
-        self.to_v4_signed_with_address_and_signature(&signer.address(), &signature)
+        self.sign_with_account_and_signature(signer.account_id(), &signature)
     }
 
     /// Convert this [`PartialTransaction`] into a V4 signed [`Transaction`], ready to submit.
     /// The provided `address` and `signature` will be used.
     ///
     /// The signature should be derived by signing [`Self::v4_signer_payload`].
-    pub fn to_v4_signed_with_address_and_signature(
+    pub fn sign_with_account_and_signature(
         &self,
-        address: &T::Address,
+        account_id: T::AccountId,
         signature: &T::Signature,
     ) -> Transaction<T> {
         let extrinsic = {
@@ -356,6 +300,7 @@ impl<T: Config> PartialTransaction<T> {
             // "is signed" + transaction protocol version (4)
             (0b10000000 + 4u8).encode_to(&mut encoded_inner);
             // from address for signature
+            let address: T::Address = account_id.into();
             address.encode_to(&mut encoded_inner);
             // the signature
             signature.encode_to(&mut encoded_inner);
@@ -377,13 +322,41 @@ impl<T: Config> PartialTransaction<T> {
         // Return an extrinsic ready to be submitted.
         Transaction::from_bytes(extrinsic)
     }
+}
 
-    /// Convert this [`PartialTransaction`] into a V5 "general" [`Transaction`].
+/// A partially constructed V5 general extrinsic, ready to be signed or emitted as-is.
+pub struct PartialTransactionV5<T: Config> {
+    call_data: Vec<u8>,
+    additional_and_extra_params: T::ExtrinsicParams,
+    tx_extensions_version: u8,
+}
+
+impl<T: Config> PartialTransactionV5<T> {
+    /// Return the bytes representing the call data for this partially constructed
+    /// extrinsic.
+    pub fn call_data(&self) -> &[u8] {
+        &self.call_data
+    }
+
+    /// Return the V5 signer payload for this extrinsic. These are the bytes that must
+    /// be signed in order to produce a valid signature for the extrinsic.
+    pub fn signer_payload(&self) -> [u8; 32] {
+        let mut bytes = self.call_data.clone();
+
+        self.additional_and_extra_params
+            .encode_signer_payload_value_to(&mut bytes);
+        self.additional_and_extra_params
+            .encode_implicit_to(&mut bytes);
+
+        blake2_256(&bytes)
+    }
+
+    /// Convert this [`PartialTransactionV5`] into a V5 "general" [`Transaction`].
     ///
     /// This transaction has not been explicitly signed. Use [`Self::to_v5_general_with_signer`]
     /// or [`Self::to_v5_general_with_account_and_signature`] if you wish to provide a
     /// signature (this is usually a necessary step).
-    pub fn to_v5_general(&self) -> Transaction<T> {
+    pub fn to_transaction(&self) -> Transaction<T> {
         let extrinsic = {
             let mut encoded_inner = Vec::new();
             // "is general" + transaction protocol version (5)
@@ -409,23 +382,28 @@ impl<T: Config> PartialTransaction<T> {
         Transaction::from_bytes(extrinsic)
     }
 
-    /// Convert this [`PartialTransaction`] into a V5 "general" [`Transaction`] with a signature.
-    pub fn to_v5_general_with_signer<Signer>(&mut self, signer: &Signer) -> Transaction<T>
+    /// Convert this [`PartialTransactionV5`] into a V5 "general" [`Transaction`] with a signature.
+    ///
+    /// Signing the transaction injects the signature into the transaction extension data, which is why
+    /// this method borrows self mutably. Signing repeatedly will override the previous signature.
+    pub fn sign<Signer>(&mut self, signer: &Signer) -> Transaction<T>
     where
         Signer: SignerT<T>,
     {
         // Given our signer, we can sign the payload representing this extrinsic.
-        let signature =
-            self.with_signer_payload(TransactionVersion::V5, |bytes| signer.sign(&bytes));
+        let signature = signer.sign(&self.signer_payload());
         // Now, use the signature and "from" account to build the extrinsic.
-        self.to_v5_general_with_account_and_signature(&signer.account_id(), &signature)
+        self.sign_with_account_and_signature(&signer.account_id(), &signature)
     }
 
-    /// Convert this [`PartialTransaction`] into a V5 "general" [`Transaction`] with a signature.
-    /// Prefer [`Self::to_v5_general_with_signer`] if you have a [`SignerT`] instance to use.
+    /// Convert this [`PartialTransactionV5`] into a V5 "general" [`Transaction`] with a signature.
+    /// Prefer [`Self::sign`] if you have a [`SignerT`] instance to use.
     ///
-    /// The signature should be derived by signing [`Self::v5_signer_payload`].
-    pub fn to_v5_general_with_account_and_signature(
+    /// The signature should be derived by signing [`Self::signer_payload()`].
+    ///
+    /// Signing the transaction injects the signature into the transaction extension data, which is why
+    /// this method borrows self mutably. Signing repeatedly will override the previous signature.
+    pub fn sign_with_account_and_signature(
         &mut self,
         account_id: &T::AccountId,
         signature: &T::Signature,
@@ -435,7 +413,7 @@ impl<T: Config> PartialTransaction<T> {
         self.additional_and_extra_params
             .inject_signature(account_id, signature);
 
-        self.to_v5_general()
+        self.to_transaction()
     }
 }
 
@@ -471,41 +449,5 @@ impl<T: Config> Transaction<T> {
     /// extrinsic bytes.
     pub fn into_encoded(self) -> Vec<u8> {
         self.encoded.0
-    }
-}
-
-/// This represents the transaction versions supported by Subxt.
-#[derive(PartialEq, Copy, Clone, Debug)]
-enum TransactionVersion {
-    V4,
-    V5,
-}
-
-impl TransactionVersion {
-    fn from_metadata(metadata: &Metadata) -> Result<Self, Error> {
-        metadata
-            .extrinsic()
-            .supported_versions()
-            .iter()
-            .filter_map(|n| TransactionVersion::from_u8(*n).ok())
-            .next()
-            .ok_or(Error::Extrinsic(ExtrinsicError::UnsupportedVersion))
-    }
-
-    fn from_u8(n: u8) -> Result<Self, Error> {
-        if n == 4 {
-            Ok(TransactionVersion::V4)
-        } else if n == 5 {
-            Ok(TransactionVersion::V5)
-        } else {
-            Err(Error::Extrinsic(ExtrinsicError::UnsupportedVersion))
-        }
-    }
-
-    fn to_u8(self) -> u8 {
-        match self {
-            TransactionVersion::V4 => 4,
-            TransactionVersion::V5 => 5,
-        }
     }
 }

@@ -85,10 +85,10 @@ async fn v4_signed_encode_decode() -> Result<(), subxt::Error> {
 
     let tx_bytes = api
         .tx()
-        .create_partial(&call, &dev::alice().public_key().into(), Default::default())
+        .create_v4_partial(&call, &dev::alice().public_key().into(), Default::default())
         .await
         .unwrap()
-        .to_v4_signed(&dev::alice())
+        .sign(&dev::alice())
         .into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
@@ -114,6 +114,7 @@ async fn v5_general_encode_decode() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
     let md = api.metadata();
+    let dummy_signer = dev::alice();
 
     let call = node_runtime::tx()
         .balances()
@@ -121,10 +122,10 @@ async fn v5_general_encode_decode() -> Result<(), subxt::Error> {
 
     let tx_bytes = api
         .tx()
-        .create_partial(&call, &dev::alice().public_key().into(), Default::default())
+        .create_v5_partial(&call, &dev::alice().public_key().into(), Default::default())
         .await
         .unwrap()
-        .to_v5_general() // No signature added in the transaction extensions
+        .sign(&dummy_signer) // No signature payload is added, but may be inserted into tx extensions.
         .into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
