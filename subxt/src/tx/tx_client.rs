@@ -53,8 +53,8 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 
     /// Creates an unsigned extrinsic without submitting it. Depending on the metadata, we might end
     /// up constructing either a V4 or V5 extrinsic. See [`subxt_core::tx`] if you'd like to manually
-    /// pick the version to construct, and then [`SubmittableExtrinsic::from_core`]
-    pub fn create_unsigned<Call>(&self, call: &Call) -> Result<SubmittableExtrinsic<T, C>, Error>
+    /// pick the version to construct, and then [`SubmittableTransaction::from_core`]
+    pub fn create_unsigned<Call>(&self, call: &Call) -> Result<SubmittableTransaction<T, C>, Error>
     where
         Call: Payload,
     {
@@ -64,7 +64,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             TransactionVersion::V5 => subxt_core::tx::create_v5_bare(call, &metadata),
         }?;
 
-        Ok(SubmittableExtrinsic {
+        Ok(SubmittableTransaction {
             client: self.client.clone(),
             inner: tx,
         })
@@ -74,14 +74,17 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     ///
     /// Prefer [`Self::create_unsigned()`] if you don't know which version to create; this will pick the
     /// most suitable one for the given chain.
-    pub fn create_v4_unsigned<Call>(&self, call: &Call) -> Result<SubmittableExtrinsic<T, C>, Error>
+    pub fn create_v4_unsigned<Call>(
+        &self,
+        call: &Call,
+    ) -> Result<SubmittableTransaction<T, C>, Error>
     where
         Call: Payload,
     {
         let metadata = self.client.metadata();
         let tx = subxt_core::tx::create_v4_unsigned(call, &metadata)?;
 
-        Ok(SubmittableExtrinsic {
+        Ok(SubmittableTransaction {
             client: self.client.clone(),
             inner: tx,
         })
@@ -91,14 +94,14 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     ///
     /// Prefer [`Self::create_unsigned()`] if you don't know which version to create; this will pick the
     /// most suitable one for the given chain.
-    pub fn create_v5_bare<Call>(&self, call: &Call) -> Result<SubmittableExtrinsic<T, C>, Error>
+    pub fn create_v5_bare<Call>(&self, call: &Call) -> Result<SubmittableTransaction<T, C>, Error>
     where
         Call: Payload,
     {
         let metadata = self.client.metadata();
         let tx = subxt_core::tx::create_v5_bare(call, &metadata)?;
 
-        Ok(SubmittableExtrinsic {
+        Ok(SubmittableTransaction {
             client: self.client.clone(),
             inner: tx,
         })
@@ -113,22 +116,21 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialExtrinsic<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, Error>
     where
         Call: Payload,
     {
         let metadata = self.client.metadata();
-        let tx =
-            match subxt_core::tx::suggested_version(&metadata)? {
-                TransactionVersion::V4 => PartialExtrinsicInner::V4(
-                    subxt_core::tx::create_v4_signed(call, &self.client.client_state(), params)?,
-                ),
-                TransactionVersion::V5 => PartialExtrinsicInner::V5(
-                    subxt_core::tx::create_v5_general(call, &self.client.client_state(), params)?,
-                ),
-            };
+        let tx = match subxt_core::tx::suggested_version(&metadata)? {
+            TransactionVersion::V4 => PartialTransactionInner::V4(
+                subxt_core::tx::create_v4_signed(call, &self.client.client_state(), params)?,
+            ),
+            TransactionVersion::V5 => PartialTransactionInner::V5(
+                subxt_core::tx::create_v5_general(call, &self.client.client_state(), params)?,
+            ),
+        };
 
-        Ok(PartialExtrinsic {
+        Ok(PartialTransaction {
             client: self.client.clone(),
             inner: tx,
         })
@@ -145,17 +147,17 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialExtrinsic<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, Error>
     where
         Call: Payload,
     {
-        let tx = PartialExtrinsicInner::V4(subxt_core::tx::create_v4_signed(
+        let tx = PartialTransactionInner::V4(subxt_core::tx::create_v4_signed(
             call,
             &self.client.client_state(),
             params,
         )?);
 
-        Ok(PartialExtrinsic {
+        Ok(PartialTransaction {
             client: self.client.clone(),
             inner: tx,
         })
@@ -172,17 +174,17 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialExtrinsic<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, Error>
     where
         Call: Payload,
     {
-        let tx = PartialExtrinsicInner::V5(subxt_core::tx::create_v5_general(
+        let tx = PartialTransactionInner::V5(subxt_core::tx::create_v5_general(
             call,
             &self.client.client_state(),
             params,
         )?);
 
-        Ok(PartialExtrinsic {
+        Ok(PartialTransaction {
             client: self.client.clone(),
             inner: tx,
         })
@@ -206,7 +208,7 @@ where
         call: &Call,
         account_id: &T::AccountId,
         mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialExtrinsic<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, Error>
     where
         Call: Payload,
     {
@@ -223,7 +225,7 @@ where
         call: &Call,
         account_id: &T::AccountId,
         mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialExtrinsic<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, Error>
     where
         Call: Payload,
     {
@@ -240,7 +242,7 @@ where
         call: &Call,
         account_id: &T::AccountId,
         mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialExtrinsic<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, Error>
     where
         Call: Payload,
     {
@@ -254,7 +256,7 @@ where
         call: &Call,
         signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<SubmittableExtrinsic<T, C>, Error>
+    ) -> Result<SubmittableTransaction<T, C>, Error>
     where
         Call: Payload,
         Signer: SignerT<T>,
@@ -354,17 +356,17 @@ where
 }
 
 /// This payload contains the information needed to produce an extrinsic.
-pub struct PartialExtrinsic<T: Config, C> {
+pub struct PartialTransaction<T: Config, C> {
     client: C,
-    inner: PartialExtrinsicInner<T>,
+    inner: PartialTransactionInner<T>,
 }
 
-enum PartialExtrinsicInner<T: Config> {
+enum PartialTransactionInner<T: Config> {
     V4(subxt_core::tx::PartialTransactionV4<T>),
     V5(subxt_core::tx::PartialTransactionV5<T>),
 }
 
-impl<T, C> PartialExtrinsic<T, C>
+impl<T, C> PartialTransaction<T, C>
 where
     T: Config,
     C: OfflineClientT<T>,
@@ -373,8 +375,8 @@ where
     /// be signed in order to produce a valid signature for the extrinsic.
     pub fn signer_payload(&self) -> Vec<u8> {
         match &self.inner {
-            PartialExtrinsicInner::V4(tx) => tx.signer_payload(),
-            PartialExtrinsicInner::V5(tx) => tx.signer_payload().to_vec(),
+            PartialTransactionInner::V4(tx) => tx.signer_payload(),
+            PartialTransactionInner::V5(tx) => tx.signer_payload().to_vec(),
         }
     }
 
@@ -382,48 +384,48 @@ where
     /// extrinsic.
     pub fn call_data(&self) -> &[u8] {
         match &self.inner {
-            PartialExtrinsicInner::V4(tx) => tx.call_data(),
-            PartialExtrinsicInner::V5(tx) => tx.call_data(),
+            PartialTransactionInner::V4(tx) => tx.call_data(),
+            PartialTransactionInner::V5(tx) => tx.call_data(),
         }
     }
 
-    /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
+    /// Convert this [`PartialTransaction`] into a [`SubmittableTransaction`], ready to submit.
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
-    pub fn sign<Signer>(&mut self, signer: &Signer) -> SubmittableExtrinsic<T, C>
+    pub fn sign<Signer>(&mut self, signer: &Signer) -> SubmittableTransaction<T, C>
     where
         Signer: SignerT<T>,
     {
         let tx = match &mut self.inner {
-            PartialExtrinsicInner::V4(tx) => tx.sign(signer),
-            PartialExtrinsicInner::V5(tx) => tx.sign(signer),
+            PartialTransactionInner::V4(tx) => tx.sign(signer),
+            PartialTransactionInner::V5(tx) => tx.sign(signer),
         };
 
-        SubmittableExtrinsic {
+        SubmittableTransaction {
             client: self.client.clone(),
             inner: tx,
         }
     }
 
-    /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
+    /// Convert this [`PartialTransaction`] into a [`SubmittableTransaction`], ready to submit.
     /// An address, and something representing a signature that can be SCALE encoded, are both
     /// needed in order to construct it. If you have a `Signer` to hand, you can use
-    /// [`PartialExtrinsic::sign()`] instead.
+    /// [`PartialTransaction::sign()`] instead.
     pub fn sign_with_account_and_signature(
         &mut self,
         account_id: &T::AccountId,
         signature: &T::Signature,
-    ) -> SubmittableExtrinsic<T, C> {
+    ) -> SubmittableTransaction<T, C> {
         let tx = match &mut self.inner {
-            PartialExtrinsicInner::V4(tx) => {
+            PartialTransactionInner::V4(tx) => {
                 tx.sign_with_account_and_signature(account_id.clone(), signature)
             }
-            PartialExtrinsicInner::V5(tx) => {
+            PartialTransactionInner::V5(tx) => {
                 tx.sign_with_account_and_signature(account_id, signature)
             }
         };
 
-        SubmittableExtrinsic {
+        SubmittableTransaction {
             client: self.client.clone(),
             inner: tx,
         }
@@ -431,17 +433,17 @@ where
 }
 
 /// This represents an extrinsic that has been signed and is ready to submit.
-pub struct SubmittableExtrinsic<T, C> {
+pub struct SubmittableTransaction<T, C> {
     client: C,
     inner: subxt_core::tx::Transaction<T>,
 }
 
-impl<T, C> SubmittableExtrinsic<T, C>
+impl<T, C> SubmittableTransaction<T, C>
 where
     T: Config,
     C: OfflineClientT<T>,
 {
-    /// Create a [`SubmittableExtrinsic`] from some already-signed and prepared
+    /// Create a [`SubmittableTransaction`] from some already-signed and prepared
     /// extrinsic bytes, and some client (anything implementing [`OfflineClientT`]
     /// or [`OnlineClientT`]).
     ///
@@ -465,14 +467,14 @@ where
         self.inner.encoded()
     }
 
-    /// Consumes [`SubmittableExtrinsic`] and returns the SCALE encoded
+    /// Consumes [`SubmittableTransaction`] and returns the SCALE encoded
     /// extrinsic bytes.
     pub fn into_encoded(self) -> Vec<u8> {
         self.inner.into_encoded()
     }
 }
 
-impl<T, C> SubmittableExtrinsic<T, C>
+impl<T, C> SubmittableTransaction<T, C>
 where
     T: Config,
     C: OnlineClientT<T>,
@@ -642,7 +644,7 @@ impl ValidationResult {
     }
 }
 
-/// The result of performing [`SubmittableExtrinsic::validate()`].
+/// The result of performing [`SubmittableTransaction::validate()`].
 #[derive(Clone, Debug, PartialEq)]
 pub enum ValidationResult {
     /// The transaction is valid

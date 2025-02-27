@@ -6,7 +6,7 @@ use subxt::{OnlineClient, PolkadotConfig};
 use subxt::config::DefaultExtrinsicParamsBuilder;
 use subxt::ext::codec::{Decode, Encode};
 use subxt::tx::Payload as _;
-use subxt::tx::SubmittableExtrinsic;
+use subxt::tx::SubmittableTransaction;
 use subxt::utils::{AccountId32, MultiSignature};
 
 use crate::services::{extension_signature_for_extrinsic, get_accounts, polkadot, Account};
@@ -51,7 +51,7 @@ pub enum SigningStage {
 
 pub enum SubmittingStage {
     Initial {
-        signed_extrinsic: SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>,
+        signed_extrinsic: SubmittableTransaction<PolkadotConfig, OnlineClient<PolkadotConfig>>,
     },
     Submitting,
     Success {
@@ -70,7 +70,7 @@ pub enum Message {
     SignWithAccount(usize),
     ReceivedSignature(
         MultiSignature,
-        SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>,
+        SubmittableTransaction<PolkadotConfig, OnlineClient<PolkadotConfig>>,
     ),
     SubmitSigned,
     ExtrinsicFinalized {
@@ -169,7 +169,7 @@ impl Component for SigningExamplesComponent {
                         let Ok(mut partial_signed) =
                             api.tx().create_partial_offline(&remark_call, params)
                         else {
-                            return Message::Error(anyhow!("PartialExtrinsic creation failed"));
+                            return Message::Error(anyhow!("PartialTransaction creation failed"));
                         };
 
                         // Apply the signature
@@ -394,7 +394,7 @@ impl Component for SigningExamplesComponent {
 }
 
 async fn submit_wait_finalized_and_get_extrinsic_success_event(
-    extrinsic: SubmittableExtrinsic<PolkadotConfig, OnlineClient<PolkadotConfig>>,
+    extrinsic: SubmittableTransaction<PolkadotConfig, OnlineClient<PolkadotConfig>>,
 ) -> Result<polkadot::system::events::ExtrinsicSuccess, anyhow::Error> {
     let events = extrinsic
         .submit_and_watch()

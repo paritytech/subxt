@@ -71,15 +71,6 @@ use sp_crypto_hashing::blake2_256;
 // Expose these here since we expect them in some calls below.
 pub use crate::client::{ClientState, RuntimeVersion};
 
-// TODO:
-// `supported_versions(Metadata) -> impl iterator<u8>`
-// - only have methods for specific versions in Core
-// - only have "high level" methods in subxt itself
-// - have method to build `SubmittableExtrinsic` from core methods so there is a way
-//   to manually construct txs if preferred without polluting the high level APIs.
-// - check whether some extension uses signature/account and error if no such extension but
-//   we need to sign a v5 extrinsic? Or just ensure to prefer V4 always.
-
 /// Run the validation logic against some extrinsic you'd like to submit. Returns `Ok(())`
 /// if the call is valid (or if it's not possible to check since the call has no validation hash).
 /// Return an error if the call was not valid or something went wrong trying to validate it (ie
@@ -248,8 +239,7 @@ impl<T: Config> PartialTransactionV4<T> {
     }
 
     // Obtain bytes representing the signer payload and run call some function
-    // with them. This can avoid an allocation in some cases when compared to
-    // [`PartialExtrinsic::signer_payload()`].
+    // with them. This can avoid an allocation in some cases.
     fn with_signer_payload<F, R>(&self, f: F) -> R
     where
         F: for<'a> FnOnce(Cow<'a, [u8]>) -> R,
