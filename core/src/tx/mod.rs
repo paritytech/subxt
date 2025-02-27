@@ -263,7 +263,7 @@ impl<T: Config> PartialTransactionV4<T> {
         self.with_signer_payload(|bytes| bytes.to_vec())
     }
 
-    /// Convert this [`PartialTransaction`] into a V4 signed [`Transaction`], ready to submit.
+    /// Convert this [`PartialTransactionV4`] into a V4 signed [`Transaction`], ready to submit.
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
     pub fn sign<Signer>(&self, signer: &Signer) -> Transaction<T>
@@ -276,7 +276,7 @@ impl<T: Config> PartialTransactionV4<T> {
         self.sign_with_account_and_signature(signer.account_id(), &signature)
     }
 
-    /// Convert this [`PartialTransaction`] into a V4 signed [`Transaction`], ready to submit.
+    /// Convert this [`PartialTransactionV4`] into a V4 signed [`Transaction`], ready to submit.
     /// The provided `address` and `signature` will be used.
     ///
     /// The signature should be derived by signing [`Self::v4_signer_payload`].
@@ -343,8 +343,8 @@ impl<T: Config> PartialTransactionV5<T> {
 
     /// Convert this [`PartialTransactionV5`] into a V5 "general" [`Transaction`].
     ///
-    /// This transaction has not been explicitly signed. Use [`Self::to_v5_general_with_signer`]
-    /// or [`Self::to_v5_general_with_account_and_signature`] if you wish to provide a
+    /// This transaction has not been explicitly signed. Use [`Self::sign`]
+    /// or [`Self::sign_with_account_and_signature`] if you wish to provide a
     /// signature (this is usually a necessary step).
     pub fn to_transaction(&self) -> Transaction<T> {
         let extrinsic = {
