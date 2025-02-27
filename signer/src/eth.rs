@@ -267,10 +267,6 @@ mod subxt_compat {
             self.public_key().into()
         }
 
-        fn address(&self) -> T::Address {
-            self.public_key().into()
-        }
-
         fn sign(&self, signer_payload: &[u8]) -> T::Signature {
             self.sign(signer_payload).into()
         }
@@ -402,11 +398,6 @@ mod test {
             assert_eq!(account_id_derived_from_pk, account_id);
             assert_eq!(keypair.public_key().to_account_id(), account_id);
 
-        }
-
-        #[test]
-        fn check_account_id_eq_address(keypair in keypair()) {
-            assert_eq!(SubxtSigner::account_id(&keypair), SubxtSigner::address(&keypair));
         }
 
         #[test]

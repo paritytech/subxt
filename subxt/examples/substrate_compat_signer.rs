@@ -68,11 +68,7 @@ mod pair_signer {
         fn account_id(&self) -> <PolkadotConfig as Config>::AccountId {
             self.account_id.clone()
         }
-
-        fn address(&self) -> <PolkadotConfig as Config>::Address {
-            self.account_id.clone().into()
-        }
-
+        
         fn sign(&self, signer_payload: &[u8]) -> <PolkadotConfig as Config>::Signature {
             let signature = self.signer.sign(signer_payload);
             MultiSignature::Sr25519(signature.0)

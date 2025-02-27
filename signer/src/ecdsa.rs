@@ -345,10 +345,6 @@ mod subxt_compat {
             self.public_key().into()
         }
 
-        fn address(&self) -> T::Address {
-            self.public_key().into()
-        }
-
         fn sign(&self, signer_payload: &[u8]) -> T::Signature {
             self.sign(signer_payload).into()
         }
