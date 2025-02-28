@@ -48,7 +48,9 @@
 //! tx::validate(&call, &state.metadata).unwrap();
 //!
 //! // We can build a signed transaction:
-//! let signed_call = tx::create_signed(&call, &state, &dev::alice(), params).unwrap();
+//! let signed_call = tx::create_v4_signed(&call, &state, params)
+//!     .unwrap()
+//!     .sign(&dev::alice());
 //!
 //! // And log it:
 //! println!("Tx: 0x{}", hex::encode(signed_call.encoded()));
@@ -278,8 +280,6 @@ impl<T: Config> PartialTransactionV4<T> {
 
     /// Convert this [`PartialTransactionV4`] into a V4 signed [`Transaction`], ready to submit.
     /// The provided `address` and `signature` will be used.
-    ///
-    /// The signature should be derived by signing [`Self::v4_signer_payload`].
     pub fn sign_with_account_and_signature(
         &self,
         account_id: T::AccountId,
@@ -388,8 +388,6 @@ impl<T: Config> PartialTransactionV5<T> {
 
     /// Convert this [`PartialTransactionV5`] into a V5 "general" [`Transaction`] with a signature.
     /// Prefer [`Self::sign`] if you have a [`SignerT`] instance to use.
-    ///
-    /// The signature should be derived by signing [`Self::signer_payload()`].
     ///
     /// Signing the transaction injects the signature into the transaction extension data, which is why
     /// this method borrows self mutably. Signing repeatedly will override the previous signature.
