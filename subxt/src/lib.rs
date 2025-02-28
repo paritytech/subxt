@@ -157,7 +157,7 @@ pub mod ext {
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
-///     runtime_metadata_path = "../artifacts/westend_runtime.wasm",
+///     runtime_path = "../artifacts/westend_runtime.wasm",
 /// )]
 /// mod polkadot {}
 /// ```
