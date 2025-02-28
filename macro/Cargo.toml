@@ -15,7 +15,7 @@ description = "Generate types and helpers for interacting with Substrate runtime
 
 [features]
 web = ["subxt-codegen/web"]
-runtime-metadata-path = ["sc-executor", "sc-executor-common", "sp-maybe-compressed-blob", "sp-io", "sp-state-machine"]
+runtime-wasm-path = ["sc-executor", "sc-executor-common", "sp-maybe-compressed-blob", "sp-io", "sp-state-machine"]
 runtime-metadata-insecure-url = ["subxt-utils-fetchmetadata/url"]
 
 [lib]

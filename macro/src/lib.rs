@@ -16,7 +16,7 @@ use scale_typegen::typegen::{
 use subxt_codegen::{CodegenBuilder, CodegenError, Metadata};
 use syn::{parse_macro_input, punctuated::Punctuated};
 
-#[cfg(feature = "runtime-metadata-path")]
+#[cfg(feature = "runtime-wasm-path")]
 mod wasm_loader;
 
 #[derive(Clone, Debug)]
@@ -56,7 +56,7 @@ struct RuntimeMetadataArgs {
     no_default_substitutions: bool,
     #[darling(default)]
     unstable_metadata: darling::util::Flag,
-    #[cfg(feature = "runtime-metadata-path")]
+    #[cfg(feature = "runtime-wasm-path")]
     #[darling(default)]
     runtime_path: Option<String>,
 }
@@ -206,7 +206,7 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
     // Do we want to fetch unstable metadata? This only works if fetching from a URL.
     let unstable_metadata = args.unstable_metadata.is_present();
 
-    #[cfg(feature = "runtime-metadata-path")]
+    #[cfg(feature = "runtime-wasm-path")]
     if let Some(path) = &args.runtime_path {
         if args.runtime_metadata_insecure_url.is_some() || args.runtime_metadata_path.is_some() {
             abort_call_site!(
@@ -263,25 +263,25 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 "'runtime_metadata_insecure_url' requires the 'runtime-metadata-insecure-url' feature to be enabled"
             )
         }
-        #[cfg(feature = "runtime-metadata-path")]
+        #[cfg(feature = "runtime-wasm-path")]
         (None, None) => {
             abort_call_site!(
                     "At least one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided"
                 )
         }
-        #[cfg(not(feature = "runtime-metadata-path"))]
+        #[cfg(not(feature = "runtime-wasm-path"))]
         (None, None) => {
             abort_call_site!(
                 "At least one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' can be provided"
             )
         }
-        #[cfg(feature = "runtime-metadata-path")]
+        #[cfg(feature = "runtime-wasm-path")]
         _ => {
             abort_call_site!(
                     "Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided"
                 )
         }
-        #[cfg(not(feature = "runtime-metadata-path"))]
+        #[cfg(not(feature = "runtime-wasm-path"))]
         _ => {
             abort_call_site!(
                 "Only one of 'runtime_metadata_path' or 'runtime_metadata_insecure_url' can be provided"
