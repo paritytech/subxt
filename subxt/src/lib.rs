@@ -110,7 +110,7 @@ pub mod ext {
     }
 }
 
-/// Generate a strongly typed API for interacting with a Substrate runtime from its metadata.
+/// Generate a strongly typed API for interacting with a Substrate runtime from its metadata of WASM.
 ///
 /// # Metadata
 ///
@@ -128,7 +128,19 @@ pub mod ext {
 ///
 /// # Basic usage
 ///
-/// Annotate a Rust module with the `subxt` attribute referencing the aforementioned metadata file.
+/// We can generate an interface to a chain given either:
+/// - A locally saved SCALE encoded metadata file (see above) for that chain,
+/// - The Runtime WASM for that chain, or
+/// - A URL pointing at the JSON-RPC interface for a node on that chain.
+///
+/// In each case, the `subxt` macro will use this data to populate the annotated module with all of the methods
+/// and types required for interacting with the chain that the Runtime/metadata was loaded from.
+///
+/// Let's look at each of these:
+///
+/// ## Using a locally saved metadata file
+///
+/// Annotate a Rust module with the `subxt` attribute referencing a metadata file like so:
 ///
 /// ```rust,no_run
 /// #[subxt::subxt(
@@ -137,8 +149,37 @@ pub mod ext {
 /// mod polkadot {}
 /// ```
 ///
-/// The `subxt` macro will populate the annotated module with all of the methods and types required
-/// for interacting with the runtime that the metadata is in via Subxt.
+/// ## Using a WASM runtime via `runtime_path = "..."`
+///
+/// This requires the `runtime-wasm-path` feature flag.
+///
+/// Annotate a Rust module with the `subxt` attribute referencing some runtime WASM like so:
+///
+/// ```rust,no_run
+/// #[subxt::subxt(
+///     runtime_path = "../artifacts/westend_runtime.wasm",
+/// )]
+/// mod polkadot {}
+/// ```
+///
+/// ## Connecting to a node to download metadata via `runtime_metadata_insecure_url = "..."`
+///
+/// This will, at compile time, connect to the JSON-RPC interface for some node at the URL given,
+/// download the metadata from it, and use that. This can be useful in CI, but is **not recommended**
+/// in production code, because:
+///
+/// - The compilation time is increased since we have to download metadata from a URL each time. If
+///   the node we connect to is unresponsive, this will be slow or could fail.
+/// - The metadata may change from what is expected without notice, causing compilation to fail if
+///   it leads to changes in the generated interfaces that are being used.
+/// - The node that you connect to could be malicious and provide incorrect metadata for the chain.
+///
+/// ```rust,ignore
+/// #[subxt::subxt(
+///     runtime_metadata_insecure_url = "wss://rpc.polkadot.io:443"
+/// )]
+/// mod polkadot {}
+/// ```
 ///
 /// # Configuration
 ///
@@ -247,19 +288,6 @@ pub mod ext {
 ///     derive_for_all_types = "Eq, PartialEq",
 ///     derive_for_type(path = "frame_support::PalletId", derive = "Ord, PartialOrd"),
 ///     derive_for_type(path = "sp_runtime::ModuleError", derive = "Hash"),
-/// )]
-/// mod polkadot {}
-/// ```
-///
-/// ## `runtime_metadata_insecure_url = "..."`
-///
-/// This attribute can be used instead of `runtime_metadata_path` and will tell the macro to download metadata from a node running
-/// at the provided URL, rather than a node running locally. This can be useful in CI, but is **not recommended** in production code,
-/// since it runs at compile time and will cause compilation to fail if the node at the given address is unavailable or unresponsive.
-///
-/// ```rust,ignore
-/// #[subxt::subxt(
-///     runtime_metadata_insecure_url = "wss://rpc.polkadot.io:443"
 /// )]
 /// mod polkadot {}
 /// ```
