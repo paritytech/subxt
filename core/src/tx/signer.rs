@@ -14,9 +14,6 @@ pub trait Signer<T: Config> {
     /// Return the "from" account ID.
     fn account_id(&self) -> T::AccountId;
 
-    /// Return the "from" address.
-    fn address(&self) -> T::Address;
-
     /// Takes a signer payload for an extrinsic, and returns a signature based on it.
     ///
     /// Some signers may fail, for instance because the hardware on which the keys are located has

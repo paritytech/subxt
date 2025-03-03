@@ -15,7 +15,7 @@ mod tx_progress;
 pub use subxt_core::tx::payload::{dynamic, DefaultPayload, DynamicPayload, Payload};
 pub use subxt_core::tx::signer::{self, Signer};
 pub use tx_client::{
-    PartialExtrinsic, SubmittableExtrinsic, TransactionInvalid, TransactionUnknown, TxClient,
+    PartialTransaction, SubmittableTransaction, TransactionInvalid, TransactionUnknown, TxClient,
     ValidationResult,
 };
 pub use tx_progress::{TxInBlock, TxProgress, TxStatus};

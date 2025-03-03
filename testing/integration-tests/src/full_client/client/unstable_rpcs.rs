@@ -271,8 +271,9 @@ async fn transactionwatch_v1_submit_and_watch() {
     let tx_bytes = ctx
         .client()
         .tx()
-        .create_signed_offline(&payload, &dev::alice(), Default::default())
+        .create_partial_offline(&payload, Default::default())
         .unwrap()
+        .sign(&dev::alice())
         .into_encoded();
 
     // Test submitting it:
@@ -337,8 +338,9 @@ async fn transaction_v1_broadcast() {
     let tx = ctx
         .client()
         .tx()
-        .create_signed_offline(&tx_payload, &dev::alice(), Default::default())
-        .unwrap();
+        .create_partial_offline(&tx_payload, Default::default())
+        .unwrap()
+        .sign(&dev::alice());
 
     let tx_hash = tx.hash();
     let tx_bytes = tx.into_encoded();
@@ -407,8 +409,9 @@ async fn transaction_v1_stop() {
     let tx_bytes = ctx
         .client()
         .tx()
-        .create_signed_offline(&tx, &dev::alice(), Default::default())
+        .create_partial_offline(&tx, Default::default())
         .unwrap()
+        .sign(&dev::alice())
         .into_encoded();
 
     // Submit the transaction.

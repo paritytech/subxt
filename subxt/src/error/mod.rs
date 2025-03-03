@@ -21,7 +21,7 @@ pub use dispatch_error::{
 pub use crate::metadata::Metadata;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
-pub use subxt_core::error::{ExtrinsicParamsError, MetadataError, StorageAddressError};
+pub use subxt_core::error::{ExtrinsicError, MetadataError, StorageAddressError};
 pub use subxt_metadata::TryFromError as MetadataTryFromError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
@@ -62,7 +62,7 @@ pub enum Error {
     Transaction(#[from] TransactionError),
     /// Error constructing the appropriate extrinsic params.
     #[error("Extrinsic params error: {0}")]
-    ExtrinsicParams(#[from] ExtrinsicParamsError),
+    Extrinsic(#[from] ExtrinsicError),
     /// Block related error.
     #[error("Block error: {0}")]
     Block(#[from] BlockError),
@@ -90,7 +90,7 @@ impl From<CoreError> for Error {
             CoreError::StorageAddress(e) => Error::StorageAddress(e),
             CoreError::Decode(e) => Error::Decode(e),
             CoreError::Encode(e) => Error::Encode(e),
-            CoreError::ExtrinsicParams(e) => Error::ExtrinsicParams(e),
+            CoreError::Extrinsic(e) => Error::Extrinsic(e),
             CoreError::Block(e) => Error::Block(e.into()),
         }
     }

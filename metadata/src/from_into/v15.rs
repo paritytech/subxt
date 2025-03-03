@@ -8,10 +8,11 @@ use crate::utils::variant_index::VariantIndex;
 use crate::{
     utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, ExtrinsicMetadata, Metadata,
     OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner, RuntimeApiMethodMetadata,
-    RuntimeApiMethodParamMetadata, SignedExtensionMetadata, StorageEntryMetadata,
-    StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
+    RuntimeApiMethodParamMetadata, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
+    StorageHasher, StorageMetadata, TransactionExtensionMetadata,
 };
 use alloc::borrow::ToOwned;
+use alloc::vec;
 use frame_metadata::v15;
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;
@@ -102,8 +103,8 @@ mod from_v15 {
 
     fn from_signed_extension_metadata(
         value: v15::SignedExtensionMetadata<PortableForm>,
-    ) -> SignedExtensionMetadata {
-        SignedExtensionMetadata {
+    ) -> TransactionExtensionMetadata {
+        TransactionExtensionMetadata {
             identifier: value.identifier,
             extra_ty: value.ty.id,
             additional_ty: value.additional_signed.id,
@@ -112,8 +113,8 @@ mod from_v15 {
 
     fn from_extrinsic_metadata(value: v15::ExtrinsicMetadata<PortableForm>) -> ExtrinsicMetadata {
         ExtrinsicMetadata {
-            version: value.version,
-            signed_extensions: value
+            supported_versions: vec![value.version],
+            transaction_extensions: value
                 .signed_extensions
                 .into_iter()
                 .map(from_signed_extension_metadata)
@@ -122,6 +123,7 @@ mod from_v15 {
             call_ty: value.call_ty.id,
             signature_ty: value.signature_ty.id,
             extra_ty: value.extra_ty.id,
+            transaction_extensions_version: 0,
         }
     }
 
@@ -330,9 +332,23 @@ mod into_v15 {
 
     fn from_extrinsic_metadata(e: ExtrinsicMetadata) -> v15::ExtrinsicMetadata<PortableForm> {
         v15::ExtrinsicMetadata {
-            version: e.version,
+            // V16 and above metadata can have multiple supported extrinsic versions. We have to
+            // pick just one of these if converting back to V14/V15 metadata.
+            //
+            // - Picking the largest may mean that older tooling won't be compatible (it may only
+            //   check/support older version).
+            // - Picking the smallest may mean that newer tooling won't work, or newer methods won't
+            //   work.
+            //
+            // Either could make sense, but we keep the oldest to prioritize backward compat with
+            // older tooling.
+            version: *e
+                .supported_versions
+                .iter()
+                .min()
+                .expect("at least one extrinsic version expected"),
             signed_extensions: e
-                .signed_extensions
+                .transaction_extensions
                 .into_iter()
                 .map(from_signed_extension_metadata)
                 .collect(),
@@ -344,7 +360,7 @@ mod into_v15 {
     }
 
     fn from_signed_extension_metadata(
-        s: SignedExtensionMetadata,
+        s: TransactionExtensionMetadata,
     ) -> v15::SignedExtensionMetadata<PortableForm> {
         v15::SignedExtensionMetadata {
             identifier: s.identifier,

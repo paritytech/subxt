@@ -95,7 +95,7 @@ impl TypeSet {
             self.insert(ty);
         }
 
-        for signed in &extrinsic.signed_extensions {
+        for signed in &extrinsic.transaction_extensions {
             self.insert(signed.extra_ty);
             self.insert(signed.additional_ty);
         }
@@ -294,7 +294,7 @@ fn iterate_metadata_types(metadata: &mut Metadata) -> impl Iterator<Item = &mut 
         types.push(ty);
     }
 
-    for signed in &mut metadata.extrinsic.signed_extensions {
+    for signed in &mut metadata.extrinsic.transaction_extensions {
         types.push(&mut signed.extra_ty);
         types.push(&mut signed.additional_ty);
     }
