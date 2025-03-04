@@ -19,9 +19,11 @@ use subxt::{
 use subxt_signer::sr25519::dev;
 
 #[cfg(fullclient)]
+mod archive_rpcs;
+#[cfg(fullclient)]
 mod legacy_rpcs;
 
-mod unstable_rpcs;
+mod chain_head_rpcs;
 
 #[cfg(fullclient)]
 #[subxt_test]

@@ -321,6 +321,9 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
             success: bool,
             value: Option<Bytes>,
             error: Option<String>,
+            // This was accidentally used instead of value in Substrate,
+            // so to support those impls we try it here if needed:
+            result: Option<Bytes>,
         }
 
         let res: Response = self
@@ -331,7 +334,8 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
             )
             .await?;
 
-        match (res.success, res.value, res.error) {
+        let value = res.value.or(res.result);
+        match (res.success, value, res.error) {
             (true, Some(value), _) => Ok(ArchiveCallResult::Success(value)),
             (false, _, err) => Ok(ArchiveCallResult::Error(err.unwrap_or(String::new()))),
             (true, None, _) => {
@@ -373,9 +377,18 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
         &self,
         block_hash: T::Hash,
     ) -> Result<Option<T::Header>, Error> {
-        self.client
+        let maybe_encoded_header: Option<Bytes> = self
+            .client
             .request("archive_unstable_header", rpc_params![block_hash])
-            .await
+            .await?;
+
+        let Some(encoded_header) = maybe_encoded_header else {
+            return Ok(None);
+        };
+
+        let header =
+            <T::Header as codec::Decode>::decode(&mut &*encoded_header.0).map_err(Error::Decode)?;
+        Ok(Some(header))
     }
 
     /// Query the node storage and return a subscription which streams corresponding storage events back.
@@ -872,6 +885,28 @@ pub enum ArchiveCallResult {
     Error(String),
 }
 
+impl ArchiveCallResult {
+    /// Unwrap a successful value from the call, panicking if it was an error.
+    pub fn unwrap_success(self) -> Bytes {
+        match self {
+            ArchiveCallResult::Success(bytes) => bytes,
+            ArchiveCallResult::Error(e) => {
+                panic!("Cannot unwrap ArchiveCallResult::Success: was error: {e}")
+            }
+        }
+    }
+
+    /// Unwrap an error value from the call, panicking if it was actually successful.
+    pub fn unwrap_error(self) -> String {
+        match self {
+            ArchiveCallResult::Success(_) => {
+                panic!("Cannot unwrap ArchiveCallResult::Error: was success")
+            }
+            ArchiveCallResult::Error(e) => e,
+        }
+    }
+}
+
 /// A subscription which returns follow events, and ends when a Stop event occurs.
 pub struct ArchiveStorageSubscription<Hash> {
     sub: RpcSubscription<ArchiveStorageEvent<Hash>>,
@@ -901,9 +936,8 @@ impl<Hash: BlockHash> Stream for ArchiveStorageSubscription<Hash> {
 
         let res = self.sub.poll_next_unpin(cx);
 
-        if let Poll::Ready(Some(Ok(
-            ArchiveStorageEvent::StorageDone | ArchiveStorageEvent::StorageError(..),
-        ))) = &res
+        if let Poll::Ready(Some(Ok(ArchiveStorageEvent::Done | ArchiveStorageEvent::Error(..)))) =
+            &res
         {
             // No more events will occur after "done" or "error" events.
             self.done = true;
@@ -915,16 +949,44 @@ impl<Hash: BlockHash> Stream for ArchiveStorageSubscription<Hash> {
 
 /// Responses returned from [`ArchiveStorageSubscription`].
 #[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
 #[serde(tag = "event")]
 pub enum ArchiveStorageEvent<Hash> {
-    /// No more storage events will be emitted after this.
-    StorageDone,
+    /// A storage response for one of the requested items.
+    #[serde(rename = "storage")]
+    Item(ArchiveStorageEventItem<Hash>),
     /// A human-readable error indicating what went wrong. No more storage events
     /// will be emitted after this.
-    StorageError(ArchiveStorageEventError),
-    /// A storage response for one of the requested items.
-    Storage(ArchiveStorageEventItem<Hash>),
+    #[serde(rename = "storageError")]
+    Error(ArchiveStorageEventError),
+    /// No more storage events will be emitted after this.
+    #[serde(rename = "storageDone")]
+    Done,
+}
+
+impl<Hash> ArchiveStorageEvent<Hash> {
+    /// Return a storage item, panicking if not available.
+    pub fn unwrap_item(self) -> ArchiveStorageEventItem<Hash> {
+        match self {
+            ArchiveStorageEvent::Item(item) => item,
+            _ => panic!("Cannot unwrap item from ArchiveStorageEvent"),
+        }
+    }
+
+    /// Return a storage error, panicking if not available.
+    pub fn unwrap_error(self) -> ArchiveStorageEventError {
+        match self {
+            ArchiveStorageEvent::Error(e) => e,
+            _ => panic!("Cannot unwrap error from ArchiveStorageEvent"),
+        }
+    }
+
+    /// Return if storage done, panicking if not.
+    pub fn unwrap_done(self) {
+        match self {
+            ArchiveStorageEvent::Done => (),
+            _ => panic!("Cannot unwrap done from ArchiveStorageEvent"),
+        }
+    }
 }
 
 /// Something went wrong during the [`ChainHeadRpcMethods::archive_unstable_storage()`] subscription.

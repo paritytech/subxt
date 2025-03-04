@@ -130,7 +130,10 @@ impl SubstrateNodeBuilder {
             .stdout(process::Stdio::piped())
             .stderr(process::Stdio::piped())
             .arg("--dev")
-            .arg("--port=0");
+            .arg("--port=0")
+            // To test archive_* RPC-v2 methods we need the node in archive mode:
+            .arg("--blocks-pruning=archive-canonical")
+            .arg("--state-pruning=archive-canonical");
 
         for (key, val) in custom_flags {
             let arg = match val {
