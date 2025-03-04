@@ -886,23 +886,19 @@ pub enum ArchiveCallResult {
 }
 
 impl ArchiveCallResult {
-    /// Unwrap a successful value from the call, panicking if it was an error.
-    pub fn unwrap_success(self) -> Bytes {
+    /// Return the bytes on success, or `None` if not an [`ArchiveCallResult::Success`].
+    pub fn as_success(self) -> Option<Bytes> {
         match self {
-            ArchiveCallResult::Success(bytes) => bytes,
-            ArchiveCallResult::Error(e) => {
-                panic!("Cannot unwrap ArchiveCallResult::Success: was error: {e}")
-            }
+            ArchiveCallResult::Success(bytes) => Some(bytes),
+            _ => None,
         }
     }
 
-    /// Unwrap an error value from the call, panicking if it was actually successful.
-    pub fn unwrap_error(self) -> String {
+    /// Return the error message on call failure, or `None` if not an [`ArchiveCallResult::Error`].
+    pub fn as_error(self) -> Option<String> {
         match self {
-            ArchiveCallResult::Success(_) => {
-                panic!("Cannot unwrap ArchiveCallResult::Error: was success")
-            }
-            ArchiveCallResult::Error(e) => e,
+            ArchiveCallResult::Success(_) => None,
+            ArchiveCallResult::Error(e) => Some(e),
         }
     }
 }
@@ -964,27 +960,27 @@ pub enum ArchiveStorageEvent<Hash> {
 }
 
 impl<Hash> ArchiveStorageEvent<Hash> {
-    /// Return a storage item, panicking if not available.
-    pub fn unwrap_item(self) -> ArchiveStorageEventItem<Hash> {
+    /// Return a storage item or `None` if not an [`ArchiveStorageEvent::Item`].
+    pub fn as_item(self) -> Option<ArchiveStorageEventItem<Hash>> {
         match self {
-            ArchiveStorageEvent::Item(item) => item,
-            _ => panic!("Cannot unwrap item from ArchiveStorageEvent"),
+            ArchiveStorageEvent::Item(item) => Some(item),
+            _ => None,
         }
     }
 
-    /// Return a storage error, panicking if not available.
-    pub fn unwrap_error(self) -> ArchiveStorageEventError {
+    /// Return a storage error or `None` if not an [`ArchiveStorageEvent::Error`].
+    pub fn as_error(self) -> Option<ArchiveStorageEventError> {
         match self {
-            ArchiveStorageEvent::Error(e) => e,
-            _ => panic!("Cannot unwrap error from ArchiveStorageEvent"),
+            ArchiveStorageEvent::Error(e) => Some(e),
+            _ => None,
         }
     }
 
-    /// Return if storage done, panicking if not.
-    pub fn unwrap_done(self) {
+    /// Is this an [`ArchiveStorageEvent::Done`].
+    pub fn is_done(self) -> bool {
         match self {
-            ArchiveStorageEvent::Done => (),
-            _ => panic!("Cannot unwrap done from ArchiveStorageEvent"),
+            ArchiveStorageEvent::Done => true,
+            _ => false,
         }
     }
 }

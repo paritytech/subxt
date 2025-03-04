@@ -85,7 +85,8 @@ async fn archive_unstable_call() {
             .archive_unstable_call(block.hash(), "Metadata_metadata_versions", &[])
             .await
             .unwrap()
-            .unwrap_success()
+            .as_success()
+            .unwrap()
             .0;
 
         assert_eq!(subxt_metadata_versions, archive_metadata_versions);
@@ -202,7 +203,7 @@ async fn archive_unstable_storage() {
             .unwrap();
 
         // Expect item back first in archive response
-        let query_item = res.next().await.unwrap().unwrap().unwrap_item();
+        let query_item = res.next().await.unwrap().unwrap().as_item().unwrap();
 
         assert_eq!(
             query_item,
@@ -216,7 +217,7 @@ async fn archive_unstable_storage() {
         );
 
         // Expect item hash back next
-        let query_item_hash = res.next().await.unwrap().unwrap().unwrap_item();
+        let query_item_hash = res.next().await.unwrap().unwrap().as_item().unwrap();
 
         assert_eq!(
             query_item_hash,
@@ -232,7 +233,7 @@ async fn archive_unstable_storage() {
         );
 
         // Expect nothing else back after
-        res.next().await.unwrap().unwrap().unwrap_done();
+        assert!(res.next().await.unwrap().unwrap().is_done());
         assert!(res.next().await.is_none());
     }
 }
