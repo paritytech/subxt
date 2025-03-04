@@ -978,10 +978,7 @@ impl<Hash> ArchiveStorageEvent<Hash> {
 
     /// Is this an [`ArchiveStorageEvent::Done`].
     pub fn is_done(self) -> bool {
-        match self {
-            ArchiveStorageEvent::Done => true,
-            _ => false,
-        }
+        matches!(self, ArchiveStorageEvent::Done)
     }
 }
 
