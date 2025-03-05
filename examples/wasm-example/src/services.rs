@@ -140,7 +140,7 @@ pub async fn extension_signature_for_extrinsic(
     let signed_extensions: Vec<String> = api
         .metadata()
         .extrinsic()
-        .signed_extensions()
+        .transaction_extensions()
         .iter()
         .map(|e| e.identifier().to_string())
         .collect();

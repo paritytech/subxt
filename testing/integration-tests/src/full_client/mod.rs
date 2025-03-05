@@ -6,6 +6,7 @@ mod blocks;
 mod client;
 mod codegen;
 mod frame;
-mod metadata;
+mod metadata_validation;
 mod runtime_api;
 mod storage;
+mod transactions;

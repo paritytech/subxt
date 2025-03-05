@@ -27,9 +27,9 @@ pub enum Error {
     /// Error encoding from a [`crate::dynamic::Value`].
     #[error("Error encoding from dynamic value: {0}")]
     Encode(#[from] scale_encode::Error),
-    /// Error constructing the appropriate extrinsic params.
-    #[error(transparent)]
-    ExtrinsicParams(#[from] ExtrinsicParamsError),
+    /// Error constructing an extrinsic.
+    #[error("Error constructing transaction: {0}")]
+    Extrinsic(#[from] ExtrinsicError),
     /// Block body error.
     #[error("Error working with block_body: {0}")]
     Block(#[from] BlockError),
@@ -162,6 +162,24 @@ pub enum StorageAddressError {
     },
 }
 
+/// An error that can be encountered when constructing a transaction.
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+pub enum ExtrinsicError {
+    /// Transaction version not supported by Subxt.
+    #[error("Subxt does not support the extrinsic versions expected by the chain")]
+    UnsupportedVersion,
+    /// Issue encoding transaction extensions.
+    #[error("Cannot construct the required transaction extensions: {0}")]
+    Params(#[from] ExtrinsicParamsError),
+}
+
+impl From<ExtrinsicParamsError> for Error {
+    fn from(value: ExtrinsicParamsError) -> Self {
+        Error::Extrinsic(value.into())
+    }
+}
+
 /// An error that can be emitted when trying to construct an instance of [`crate::config::ExtrinsicParams`],
 /// encode data from the instance, or match on signed extensions.
 #[derive(Debug, DeriveError)]
@@ -178,7 +196,7 @@ pub enum ExtrinsicParamsError {
     },
     /// A signed extension in use on some chain was not provided.
     #[error("The chain expects a signed extension with the name {0}, but we did not provide one")]
-    UnknownSignedExtension(String),
+    UnknownTransactionExtension(String),
     /// Some custom error.
     #[error("Error constructing extrinsic parameters: {0}")]
     Custom(Box<dyn CustomError>),

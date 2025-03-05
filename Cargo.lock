@@ -2403,6 +2403,7 @@ version = "0.39.0"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
+ "frame-decode",
  "frame-metadata",
  "futures",
  "hex",

@@ -48,11 +48,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 println!("          {}", event_values);
             }
 
-            println!("      Signed Extensions:");
-            if let Some(signed_extensions) = ext.signed_extensions() {
-                for signed_extension in signed_extensions.iter() {
-                    let name = signed_extension.name();
-                    let value = signed_extension.value()?.to_string();
+            println!("      Transaction Extensions:");
+            if let Some(transaction_extensions) = ext.transaction_extensions() {
+                for transaction_extension in transaction_extensions.iter() {
+                    let name = transaction_extension.name();
+                    let value = transaction_extension.value()?.to_string();
                     println!("        {name}: {value}");
                 }
             }
