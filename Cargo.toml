@@ -78,8 +78,8 @@ darling = "0.20.10"
 derive-where = "1.2.7"
 either = { version = "1.13.0", default-features = false }
 finito = { version = "0.1.0", default-features = false }
-frame-decode = { version = "0.6.0", default-features = false }
-frame-metadata = { version = "18.0.0", default-features = false }
+frame-decode = { version = "0.7.0", default-features = false }
+frame-metadata = { version = "20.0.0", default-features = false }
 futures = { version = "0.3.31", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
 hashbrown = "0.14.5"
@@ -99,8 +99,8 @@ scale-value = { version = "0.18.0", default-features = false }
 scale-bits = { version = "0.7.0", default-features = false }
 scale-decode = { version = "0.16.0", default-features = false }
 scale-encode = { version = "0.10.0", default-features = false }
-scale-typegen = "0.10.0"
-scale-typegen-description = "0.10.0"
+scale-typegen = "0.11.0"
+scale-typegen-description = "0.11.0"
 serde = { version = "1.0.210", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.128", default-features = false }
 syn = { version = "2.0.77", features = ["full", "extra-traits"] }
