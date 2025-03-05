@@ -47,6 +47,7 @@ pub use subxt_rpcs::methods::chain_head::ChainHeadRpcMethods;
 /// Configure and build an [`ChainHeadBackend`].
 pub struct ChainHeadBackendBuilder<T> {
     max_block_life: usize,
+    transaction_timeout_secs: usize,
     _marker: std::marker::PhantomData<T>,
 }
 
@@ -61,6 +62,7 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
     pub fn new() -> Self {
         Self {
             max_block_life: usize::MAX,
+            transaction_timeout_secs: 240,
             _marker: std::marker::PhantomData,
         }
     }
@@ -74,6 +76,16 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
     /// we are forced to resubscribe, losing any pinned blocks.
     pub fn max_block_life(mut self, max_block_life: usize) -> Self {
         self.max_block_life = max_block_life;
+        self
+    }
+
+    /// When a transaction is submitted, we wait for events indicating it's successfully made it into a finalized
+    /// block. If it takes too long for this to happen, we assume that something went wrong and that we should
+    /// give up waiting.
+    ///
+    /// Provide a value here to denote how long, in seconds, to wait before giving up. Defaults to 240 seconds.
+    pub fn transaction_timeout(mut self, timeout_secs: usize) -> Self {
+        self.transaction_timeout_secs = timeout_secs;
         self
     }
 
@@ -104,6 +116,7 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
         let backend = ChainHeadBackend {
             methods: rpc_methods,
             follow_handle: follow_stream_driver.handle(),
+            transaction_timeout_secs: self.transaction_timeout_secs,
         };
         let driver = ChainHeadBackendDriver {
             driver: follow_stream_driver,
@@ -172,6 +185,8 @@ pub struct ChainHeadBackend<T: Config> {
     methods: ChainHeadRpcMethods<T>,
     // A handle to the chainHead_follow subscription:
     follow_handle: FollowStreamDriverHandle<T::Hash>,
+    // How long to wait until giving up on transactions:
+    transaction_timeout_secs: usize,
 }
 
 impl<T: Config> ChainHeadBackend<T> {
@@ -543,6 +558,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         &self,
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
+        let transaction_timeout_secs = self.transaction_timeout_secs;
+
         // We care about new and finalized block hashes.
         enum SeenBlockMarker {
             New,
@@ -581,7 +598,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                 }
 
                 // Bail if we exceed 4 mins; something very likely went wrong.
-                if start_instant.elapsed().as_secs() > 240 {
+                if start_instant.elapsed().as_secs() > transaction_timeout_secs {
                     return Poll::Ready(err_other(
                         "Timeout waiting for the transaction to be finalized",
                     ));
