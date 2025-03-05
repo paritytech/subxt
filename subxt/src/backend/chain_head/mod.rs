@@ -47,7 +47,7 @@ pub use subxt_rpcs::methods::chain_head::ChainHeadRpcMethods;
 /// Configure and build an [`ChainHeadBackend`].
 pub struct ChainHeadBackendBuilder<T> {
     max_block_life: usize,
-    transaction_timeout_secs: u64,
+    transaction_timeout_secs: usize,
     _marker: std::marker::PhantomData<T>,
 }
 
@@ -84,7 +84,7 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
     /// give up waiting.
     ///
     /// Provide a value here to denote how long, in seconds, to wait before giving up. Defaults to 240 seconds.
-    pub fn transaction_timeout(mut self, timeout_secs: u64) -> Self {
+    pub fn transaction_timeout(mut self, timeout_secs: usize) -> Self {
         self.transaction_timeout_secs = timeout_secs;
         self
     }
@@ -186,7 +186,7 @@ pub struct ChainHeadBackend<T: Config> {
     // A handle to the chainHead_follow subscription:
     follow_handle: FollowStreamDriverHandle<T::Hash>,
     // How long to wait until giving up on transactions:
-    transaction_timeout_secs: u64,
+    transaction_timeout_secs: usize,
 }
 
 impl<T: Config> ChainHeadBackend<T> {
@@ -558,7 +558,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         &self,
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
-        let transaction_timeout_secs = self.transaction_timeout_secs;
+        let transaction_timeout_secs = self.transaction_timeout_secs as u64;
 
         // We care about new and finalized block hashes.
         enum SeenBlockMarker {
