@@ -593,11 +593,12 @@ pub mod api {
             #[doc = " The only reasons why these calls might return an error are listed in the [`Error`] enum."]
             pub struct DryRunApi;
             impl DryRunApi {
-                #[doc = " Dry run call."]
+                #[doc = " Dry run call V2."]
                 pub fn dry_run_call(
                     &self,
                     origin: types::dry_run_call::Origin,
                     call: types::dry_run_call::Call,
+                    result_xcms_version: types::dry_run_call::ResultXcmsVersion,
                 ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
                     types::DryRunCall,
                     types::dry_run_call::output::Output,
@@ -605,12 +606,16 @@ pub mod api {
                     ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "DryRunApi",
                         "dry_run_call",
-                        types::DryRunCall { origin, call },
+                        types::DryRunCall {
+                            origin,
+                            call,
+                            result_xcms_version,
+                        },
                         [
-                            175u8, 75u8, 34u8, 75u8, 105u8, 97u8, 75u8, 245u8, 20u8, 209u8, 200u8,
-                            127u8, 16u8, 81u8, 203u8, 24u8, 233u8, 151u8, 241u8, 241u8, 180u8,
-                            82u8, 167u8, 26u8, 151u8, 125u8, 184u8, 236u8, 95u8, 255u8, 150u8,
-                            78u8,
+                            148u8, 42u8, 29u8, 49u8, 44u8, 101u8, 192u8, 106u8, 99u8, 115u8, 107u8,
+                            244u8, 43u8, 241u8, 206u8, 20u8, 169u8, 114u8, 112u8, 206u8, 117u8,
+                            162u8, 168u8, 44u8, 78u8, 164u8, 88u8, 116u8, 174u8, 182u8, 73u8,
+                            109u8,
                         ],
                     )
                 }
@@ -631,10 +636,10 @@ pub mod api {
                             xcm,
                         },
                         [
-                            53u8, 46u8, 92u8, 51u8, 119u8, 150u8, 208u8, 201u8, 238u8, 252u8,
-                            175u8, 182u8, 203u8, 63u8, 255u8, 170u8, 217u8, 216u8, 211u8, 236u8,
-                            161u8, 223u8, 201u8, 234u8, 9u8, 153u8, 231u8, 47u8, 218u8, 236u8,
-                            193u8, 174u8,
+                            239u8, 11u8, 57u8, 149u8, 238u8, 196u8, 240u8, 146u8, 55u8, 143u8,
+                            191u8, 92u8, 83u8, 83u8, 67u8, 60u8, 199u8, 30u8, 217u8, 185u8, 141u8,
+                            186u8, 110u8, 227u8, 13u8, 207u8, 35u8, 141u8, 88u8, 81u8, 139u8,
+                            115u8,
                         ],
                     )
                 }
@@ -645,6 +650,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type Origin = runtime_types::rococo_runtime::OriginCaller;
                     pub type Call = runtime_types::rococo_runtime::RuntimeCall;
+                    pub type ResultXcmsVersion = ::core::primitive::u32;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ::core::result::Result<
@@ -673,6 +679,7 @@ pub mod api {
                 pub struct DryRunCall {
                     pub origin: dry_run_call::Origin,
                     pub call: dry_run_call::Call,
+                    pub result_xcms_version: dry_run_call::ResultXcmsVersion,
                 }
                 pub mod dry_run_xcm {
                     use super::runtime_types;
@@ -5399,9 +5406,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                39u8, 110u8, 32u8, 91u8, 248u8, 134u8, 235u8, 149u8, 168u8, 236u8, 181u8, 184u8,
-                182u8, 56u8, 209u8, 86u8, 5u8, 139u8, 135u8, 39u8, 251u8, 96u8, 190u8, 240u8, 98u8,
-                10u8, 61u8, 230u8, 29u8, 3u8, 5u8, 43u8,
+                254u8, 105u8, 24u8, 219u8, 47u8, 174u8, 250u8, 3u8, 240u8, 1u8, 122u8, 69u8, 23u8,
+                86u8, 179u8, 181u8, 37u8, 65u8, 183u8, 110u8, 52u8, 99u8, 146u8, 131u8, 77u8, 11u8,
+                113u8, 107u8, 159u8, 174u8, 160u8, 205u8,
             ]
     }
     pub mod system {
@@ -6565,9 +6572,10 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            162u8, 156u8, 54u8, 126u8, 122u8, 62u8, 72u8, 8u8, 216u8, 223u8, 150u8,
-                            28u8, 11u8, 138u8, 173u8, 22u8, 53u8, 129u8, 161u8, 1u8, 185u8, 81u8,
-                            159u8, 191u8, 174u8, 182u8, 198u8, 53u8, 92u8, 221u8, 24u8, 77u8,
+                            86u8, 208u8, 95u8, 168u8, 8u8, 238u8, 114u8, 147u8, 225u8, 157u8,
+                            143u8, 149u8, 51u8, 91u8, 71u8, 225u8, 87u8, 158u8, 12u8, 11u8, 58u8,
+                            217u8, 135u8, 94u8, 142u8, 41u8, 11u8, 242u8, 55u8, 166u8, 252u8,
+                            223u8,
                         ],
                     )
                 }
@@ -8135,6 +8143,42 @@ pub mod api {
                     const PALLET: &'static str = "Indices";
                     const CALL: &'static str = "freeze";
                 }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Poke the deposit reserved for an index."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Signed_ and the signing account must have a"]
+                #[doc = "non-frozen account `index`."]
+                #[doc = ""]
+                #[doc = "The transaction fees is waived if the deposit is changed after poking/reconsideration."]
+                #[doc = ""]
+                #[doc = "- `index`: the index whose deposit is to be poked/reconsidered."]
+                #[doc = ""]
+                #[doc = "Emits `DepositPoked` if successful."]
+                pub struct PokeDeposit {
+                    pub index: poke_deposit::Index,
+                }
+                pub mod poke_deposit {
+                    use super::runtime_types;
+                    pub type Index = ::core::primitive::u32;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for PokeDeposit {
+                    const PALLET: &'static str = "Indices";
+                    const CALL: &'static str = "poke_deposit";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -8286,6 +8330,33 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = "Poke the deposit reserved for an index."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Signed_ and the signing account must have a"]
+                #[doc = "non-frozen account `index`."]
+                #[doc = ""]
+                #[doc = "The transaction fees is waived if the deposit is changed after poking/reconsideration."]
+                #[doc = ""]
+                #[doc = "- `index`: the index whose deposit is to be poked/reconsidered."]
+                #[doc = ""]
+                #[doc = "Emits `DepositPoked` if successful."]
+                pub fn poke_deposit(
+                    &self,
+                    index: types::poke_deposit::Index,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PokeDeposit>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Indices",
+                        "poke_deposit",
+                        types::PokeDeposit { index },
+                        [
+                            105u8, 242u8, 155u8, 137u8, 22u8, 179u8, 151u8, 68u8, 214u8, 99u8,
+                            110u8, 144u8, 91u8, 37u8, 222u8, 116u8, 67u8, 21u8, 100u8, 59u8, 145u8,
+                            185u8, 181u8, 166u8, 236u8, 138u8, 153u8, 73u8, 138u8, 81u8, 206u8,
+                            238u8,
+                        ],
+                    )
+                }
             }
         }
         #[doc = "The `Event` enum of this pallet"]
@@ -8364,6 +8435,35 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for IndexFrozen {
                 const PALLET: &'static str = "Indices";
                 const EVENT: &'static str = "IndexFrozen";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A deposit to reserve an index has been poked/reconsidered."]
+            pub struct DepositPoked {
+                pub who: deposit_poked::Who,
+                pub index: deposit_poked::Index,
+                pub old_deposit: deposit_poked::OldDeposit,
+                pub new_deposit: deposit_poked::NewDeposit,
+            }
+            pub mod deposit_poked {
+                use super::runtime_types;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Index = ::core::primitive::u32;
+                pub type OldDeposit = ::core::primitive::u128;
+                pub type NewDeposit = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for DepositPoked {
+                const PALLET: &'static str = "Indices";
+                const EVENT: &'static str = "DepositPoked";
             }
         }
         pub mod storage {
@@ -10879,6 +10979,52 @@ pub mod api {
                 const PALLET: &'static str = "Session";
                 const EVENT: &'static str = "NewSession";
             }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Validator has been disabled."]
+            pub struct ValidatorDisabled {
+                pub validator: validator_disabled::Validator,
+            }
+            pub mod validator_disabled {
+                use super::runtime_types;
+                pub type Validator = ::subxt::ext::subxt_core::utils::AccountId32;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for ValidatorDisabled {
+                const PALLET: &'static str = "Session";
+                const EVENT: &'static str = "ValidatorDisabled";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Validator has been re-enabled."]
+            pub struct ValidatorReenabled {
+                pub validator: validator_reenabled::Validator,
+            }
+            pub mod validator_reenabled {
+                use super::runtime_types;
+                pub type Validator = ::subxt::ext::subxt_core::utils::AccountId32;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for ValidatorReenabled {
+                const PALLET: &'static str = "Session";
+                const EVENT: &'static str = "ValidatorReenabled";
+            }
         }
         pub mod storage {
             use super::runtime_types;
@@ -10907,8 +11053,10 @@ pub mod api {
                 }
                 pub mod disabled_validators {
                     use super::runtime_types;
-                    pub type DisabledValidators =
-                        ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u32>;
+                    pub type DisabledValidators = ::subxt::ext::subxt_core::alloc::vec::Vec<(
+                        ::core::primitive::u32,
+                        runtime_types::sp_staking::offence::OffenceSeverity,
+                    )>;
                 }
                 pub mod next_keys {
                     use super::runtime_types;
@@ -11032,9 +11180,9 @@ pub mod api {
                         "DisabledValidators",
                         (),
                         [
-                            213u8, 19u8, 168u8, 234u8, 187u8, 200u8, 180u8, 97u8, 234u8, 189u8,
-                            36u8, 233u8, 158u8, 184u8, 45u8, 35u8, 129u8, 213u8, 133u8, 8u8, 104u8,
-                            183u8, 46u8, 68u8, 154u8, 240u8, 132u8, 22u8, 247u8, 11u8, 54u8, 221u8,
+                            214u8, 48u8, 28u8, 150u8, 143u8, 29u8, 183u8, 40u8, 236u8, 227u8,
+                            195u8, 5u8, 202u8, 54u8, 184u8, 26u8, 239u8, 237u8, 113u8, 39u8, 200u8,
+                            111u8, 163u8, 3u8, 24u8, 101u8, 107u8, 91u8, 228u8, 135u8, 12u8, 86u8,
                         ],
                     )
                 }
@@ -15245,26 +15393,24 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Information concerning the different referendum tracks."]
                 pub fn tracks(
                     &self,
                 ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
-                    ::subxt::ext::subxt_core::alloc::vec::Vec<(
-                        ::core::primitive::u16,
-                        runtime_types::pallet_referenda::types::TrackInfo<
+                    ::subxt::ext::subxt_core::alloc::vec::Vec<
+                        runtime_types::pallet_referenda::types::Track<
+                            ::core::primitive::u16,
                             ::core::primitive::u128,
                             ::core::primitive::u32,
                         >,
-                    )>,
+                    >,
                 > {
                     ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Referenda",
                         "Tracks",
                         [
-                            35u8, 226u8, 207u8, 234u8, 184u8, 139u8, 187u8, 184u8, 128u8, 199u8,
-                            227u8, 15u8, 31u8, 196u8, 5u8, 207u8, 138u8, 174u8, 130u8, 201u8,
-                            200u8, 113u8, 86u8, 93u8, 221u8, 243u8, 229u8, 24u8, 18u8, 150u8, 56u8,
-                            159u8,
+                            177u8, 134u8, 10u8, 183u8, 88u8, 118u8, 116u8, 152u8, 225u8, 152u8,
+                            183u8, 6u8, 188u8, 218u8, 188u8, 246u8, 213u8, 112u8, 3u8, 234u8, 96u8,
+                            88u8, 169u8, 132u8, 209u8, 1u8, 206u8, 32u8, 241u8, 231u8, 69u8, 99u8,
                         ],
                     )
                 }
@@ -17629,26 +17775,24 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Information concerning the different referendum tracks."]
                 pub fn tracks(
                     &self,
                 ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
-                    ::subxt::ext::subxt_core::alloc::vec::Vec<(
-                        ::core::primitive::u16,
-                        runtime_types::pallet_referenda::types::TrackInfo<
+                    ::subxt::ext::subxt_core::alloc::vec::Vec<
+                        runtime_types::pallet_referenda::types::Track<
+                            ::core::primitive::u16,
                             ::core::primitive::u128,
                             ::core::primitive::u32,
                         >,
-                    )>,
+                    >,
                 > {
                     ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "Tracks",
                         [
-                            35u8, 226u8, 207u8, 234u8, 184u8, 139u8, 187u8, 184u8, 128u8, 199u8,
-                            227u8, 15u8, 31u8, 196u8, 5u8, 207u8, 138u8, 174u8, 130u8, 201u8,
-                            200u8, 113u8, 86u8, 93u8, 221u8, 243u8, 229u8, 24u8, 18u8, 150u8, 56u8,
-                            159u8,
+                            177u8, 134u8, 10u8, 183u8, 88u8, 118u8, 116u8, 152u8, 225u8, 152u8,
+                            183u8, 6u8, 188u8, 218u8, 188u8, 246u8, 213u8, 112u8, 3u8, 234u8, 96u8,
+                            88u8, 169u8, 132u8, 209u8, 1u8, 206u8, 32u8, 241u8, 231u8, 69u8, 99u8,
                         ],
                     )
                 }
@@ -17857,9 +18001,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            94u8, 33u8, 10u8, 102u8, 5u8, 231u8, 127u8, 126u8, 194u8, 250u8, 145u8,
-                            59u8, 198u8, 10u8, 149u8, 111u8, 228u8, 248u8, 115u8, 135u8, 68u8,
-                            119u8, 231u8, 68u8, 228u8, 60u8, 142u8, 67u8, 65u8, 243u8, 75u8, 174u8,
+                            63u8, 40u8, 56u8, 73u8, 91u8, 126u8, 6u8, 216u8, 157u8, 72u8, 20u8,
+                            148u8, 132u8, 183u8, 79u8, 6u8, 13u8, 47u8, 93u8, 237u8, 228u8, 208u8,
+                            30u8, 201u8, 108u8, 236u8, 157u8, 0u8, 73u8, 149u8, 235u8, 86u8,
                         ],
                     )
                 }
@@ -19023,6 +19167,92 @@ pub mod api {
                     const PALLET: &'static str = "Utility";
                     const CALL: &'static str = "with_weight";
                 }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Dispatch a fallback call in the event the main call fails to execute."]
+                #[doc = "May be called from any origin except `None`."]
+                #[doc = ""]
+                #[doc = "This function first attempts to dispatch the `main` call."]
+                #[doc = "If the `main` call fails, the `fallback` is attemted."]
+                #[doc = "if the fallback is successfully dispatched, the weights of both calls"]
+                #[doc = "are accumulated and an event containing the main call error is deposited."]
+                #[doc = ""]
+                #[doc = "In the event of a fallback failure the whole call fails"]
+                #[doc = "with the weights returned."]
+                #[doc = ""]
+                #[doc = "- `main`: The main call to be dispatched. This is the primary action to execute."]
+                #[doc = "- `fallback`: The fallback call to be dispatched in case the `main` call fails."]
+                #[doc = ""]
+                #[doc = "## Dispatch Logic"]
+                #[doc = "- If the origin is `root`, both the main and fallback calls are executed without"]
+                #[doc = "  applying any origin filters."]
+                #[doc = "- If the origin is not `root`, the origin filter is applied to both the `main` and"]
+                #[doc = "  `fallback` calls."]
+                #[doc = ""]
+                #[doc = "## Use Case"]
+                #[doc = "- Some use cases might involve submitting a `batch` type call in either main, fallback"]
+                #[doc = "  or both."]
+                pub struct IfElse {
+                    pub main: ::subxt::ext::subxt_core::alloc::boxed::Box<if_else::Main>,
+                    pub fallback: ::subxt::ext::subxt_core::alloc::boxed::Box<if_else::Fallback>,
+                }
+                pub mod if_else {
+                    use super::runtime_types;
+                    pub type Main = runtime_types::rococo_runtime::RuntimeCall;
+                    pub type Fallback = runtime_types::rococo_runtime::RuntimeCall;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for IfElse {
+                    const PALLET: &'static str = "Utility";
+                    const CALL: &'static str = "if_else";
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Dispatches a function call with a provided origin."]
+                #[doc = ""]
+                #[doc = "Almost the same as [`Pallet::dispatch_as`] but forwards any error of the inner call."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Root_."]
+                pub struct DispatchAsFallible {
+                    pub as_origin:
+                        ::subxt::ext::subxt_core::alloc::boxed::Box<dispatch_as_fallible::AsOrigin>,
+                    pub call:
+                        ::subxt::ext::subxt_core::alloc::boxed::Box<dispatch_as_fallible::Call>,
+                }
+                pub mod dispatch_as_fallible {
+                    use super::runtime_types;
+                    pub type AsOrigin = runtime_types::rococo_runtime::OriginCaller;
+                    pub type Call = runtime_types::rococo_runtime::RuntimeCall;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for DispatchAsFallible {
+                    const PALLET: &'static str = "Utility";
+                    const CALL: &'static str = "dispatch_as_fallible";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -19054,9 +19284,10 @@ pub mod api {
                         "batch",
                         types::Batch { calls },
                         [
-                            39u8, 155u8, 90u8, 41u8, 40u8, 115u8, 92u8, 108u8, 46u8, 200u8, 249u8,
-                            209u8, 110u8, 41u8, 107u8, 21u8, 115u8, 227u8, 115u8, 40u8, 33u8, 12u8,
-                            33u8, 8u8, 27u8, 177u8, 171u8, 142u8, 103u8, 114u8, 30u8, 189u8,
+                            100u8, 72u8, 247u8, 154u8, 206u8, 132u8, 5u8, 102u8, 159u8, 145u8,
+                            236u8, 149u8, 19u8, 186u8, 171u8, 31u8, 217u8, 124u8, 193u8, 180u8,
+                            227u8, 20u8, 26u8, 244u8, 169u8, 198u8, 166u8, 209u8, 62u8, 246u8,
+                            132u8, 159u8,
                         ],
                     )
                 }
@@ -19087,10 +19318,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            108u8, 168u8, 47u8, 141u8, 127u8, 46u8, 60u8, 75u8, 167u8, 138u8,
-                            199u8, 11u8, 93u8, 40u8, 59u8, 23u8, 155u8, 206u8, 142u8, 16u8, 1u8,
-                            62u8, 60u8, 252u8, 121u8, 127u8, 107u8, 173u8, 94u8, 234u8, 114u8,
-                            89u8,
+                            217u8, 43u8, 84u8, 90u8, 235u8, 151u8, 166u8, 93u8, 103u8, 192u8, 62u8,
+                            68u8, 212u8, 50u8, 38u8, 40u8, 220u8, 117u8, 50u8, 73u8, 72u8, 228u8,
+                            130u8, 12u8, 230u8, 32u8, 234u8, 122u8, 45u8, 150u8, 147u8, 188u8,
                         ],
                     )
                 }
@@ -19117,9 +19347,9 @@ pub mod api {
                         "batch_all",
                         types::BatchAll { calls },
                         [
-                            146u8, 111u8, 232u8, 194u8, 52u8, 57u8, 58u8, 20u8, 139u8, 192u8,
-                            236u8, 90u8, 162u8, 72u8, 166u8, 31u8, 81u8, 251u8, 32u8, 54u8, 23u8,
-                            0u8, 51u8, 56u8, 224u8, 120u8, 154u8, 154u8, 112u8, 64u8, 182u8, 219u8,
+                            221u8, 80u8, 13u8, 201u8, 128u8, 141u8, 154u8, 177u8, 69u8, 143u8,
+                            126u8, 111u8, 92u8, 129u8, 154u8, 185u8, 27u8, 95u8, 24u8, 64u8, 199u8,
+                            37u8, 47u8, 15u8, 198u8, 0u8, 122u8, 19u8, 196u8, 48u8, 31u8, 177u8,
                         ],
                     )
                 }
@@ -19143,10 +19373,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            30u8, 65u8, 215u8, 215u8, 53u8, 226u8, 131u8, 179u8, 212u8, 189u8,
-                            43u8, 143u8, 13u8, 238u8, 231u8, 161u8, 163u8, 30u8, 77u8, 229u8,
-                            224u8, 70u8, 163u8, 48u8, 100u8, 179u8, 45u8, 101u8, 241u8, 164u8,
-                            26u8, 8u8,
+                            130u8, 120u8, 178u8, 159u8, 153u8, 100u8, 44u8, 145u8, 51u8, 184u8,
+                            85u8, 127u8, 0u8, 222u8, 121u8, 179u8, 68u8, 72u8, 17u8, 60u8, 224u8,
+                            44u8, 25u8, 166u8, 152u8, 154u8, 43u8, 203u8, 11u8, 33u8, 105u8, 160u8,
                         ],
                     )
                 }
@@ -19173,10 +19402,9 @@ pub mod api {
                         "force_batch",
                         types::ForceBatch { calls },
                         [
-                            103u8, 148u8, 67u8, 75u8, 102u8, 212u8, 142u8, 47u8, 103u8, 31u8,
-                            200u8, 223u8, 118u8, 28u8, 209u8, 90u8, 222u8, 169u8, 155u8, 176u8,
-                            168u8, 90u8, 157u8, 43u8, 41u8, 188u8, 7u8, 111u8, 35u8, 237u8, 179u8,
-                            53u8,
+                            143u8, 136u8, 65u8, 255u8, 179u8, 145u8, 123u8, 248u8, 159u8, 252u8,
+                            212u8, 18u8, 80u8, 107u8, 223u8, 29u8, 126u8, 130u8, 65u8, 156u8, 48u8,
+                            249u8, 71u8, 217u8, 24u8, 86u8, 100u8, 26u8, 17u8, 32u8, 221u8, 156u8,
                         ],
                     )
                 }
@@ -19200,10 +19428,77 @@ pub mod api {
                             weight,
                         },
                         [
-                            140u8, 138u8, 157u8, 81u8, 113u8, 233u8, 172u8, 3u8, 212u8, 165u8,
-                            49u8, 157u8, 78u8, 200u8, 22u8, 128u8, 174u8, 128u8, 188u8, 174u8,
-                            141u8, 115u8, 112u8, 18u8, 255u8, 80u8, 59u8, 143u8, 31u8, 65u8, 2u8,
-                            244u8,
+                            252u8, 15u8, 164u8, 55u8, 111u8, 84u8, 202u8, 20u8, 0u8, 252u8, 252u8,
+                            144u8, 44u8, 143u8, 54u8, 20u8, 51u8, 239u8, 39u8, 127u8, 191u8, 65u8,
+                            141u8, 27u8, 31u8, 160u8, 131u8, 221u8, 187u8, 209u8, 103u8, 110u8,
+                        ],
+                    )
+                }
+                #[doc = "Dispatch a fallback call in the event the main call fails to execute."]
+                #[doc = "May be called from any origin except `None`."]
+                #[doc = ""]
+                #[doc = "This function first attempts to dispatch the `main` call."]
+                #[doc = "If the `main` call fails, the `fallback` is attemted."]
+                #[doc = "if the fallback is successfully dispatched, the weights of both calls"]
+                #[doc = "are accumulated and an event containing the main call error is deposited."]
+                #[doc = ""]
+                #[doc = "In the event of a fallback failure the whole call fails"]
+                #[doc = "with the weights returned."]
+                #[doc = ""]
+                #[doc = "- `main`: The main call to be dispatched. This is the primary action to execute."]
+                #[doc = "- `fallback`: The fallback call to be dispatched in case the `main` call fails."]
+                #[doc = ""]
+                #[doc = "## Dispatch Logic"]
+                #[doc = "- If the origin is `root`, both the main and fallback calls are executed without"]
+                #[doc = "  applying any origin filters."]
+                #[doc = "- If the origin is not `root`, the origin filter is applied to both the `main` and"]
+                #[doc = "  `fallback` calls."]
+                #[doc = ""]
+                #[doc = "## Use Case"]
+                #[doc = "- Some use cases might involve submitting a `batch` type call in either main, fallback"]
+                #[doc = "  or both."]
+                pub fn if_else(
+                    &self,
+                    main: types::if_else::Main,
+                    fallback: types::if_else::Fallback,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::IfElse>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Utility",
+                        "if_else",
+                        types::IfElse {
+                            main: ::subxt::ext::subxt_core::alloc::boxed::Box::new(main),
+                            fallback: ::subxt::ext::subxt_core::alloc::boxed::Box::new(fallback),
+                        },
+                        [
+                            166u8, 245u8, 213u8, 231u8, 52u8, 129u8, 30u8, 37u8, 38u8, 163u8, 10u8,
+                            96u8, 76u8, 63u8, 249u8, 131u8, 146u8, 95u8, 21u8, 161u8, 248u8, 211u8,
+                            131u8, 176u8, 241u8, 227u8, 26u8, 126u8, 137u8, 33u8, 213u8, 71u8,
+                        ],
+                    )
+                }
+                #[doc = "Dispatches a function call with a provided origin."]
+                #[doc = ""]
+                #[doc = "Almost the same as [`Pallet::dispatch_as`] but forwards any error of the inner call."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Root_."]
+                pub fn dispatch_as_fallible(
+                    &self,
+                    as_origin: types::dispatch_as_fallible::AsOrigin,
+                    call: types::dispatch_as_fallible::Call,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::DispatchAsFallible>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Utility",
+                        "dispatch_as_fallible",
+                        types::DispatchAsFallible {
+                            as_origin: ::subxt::ext::subxt_core::alloc::boxed::Box::new(as_origin),
+                            call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
+                        },
+                        [
+                            251u8, 147u8, 91u8, 27u8, 92u8, 54u8, 122u8, 70u8, 49u8, 128u8, 120u8,
+                            218u8, 163u8, 139u8, 48u8, 209u8, 185u8, 36u8, 153u8, 232u8, 48u8,
+                            13u8, 185u8, 59u8, 227u8, 203u8, 106u8, 60u8, 201u8, 8u8, 242u8, 232u8,
                         ],
                     )
                 }
@@ -19336,6 +19631,46 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for DispatchedAs {
                 const PALLET: &'static str = "Utility";
                 const EVENT: &'static str = "DispatchedAs";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Main call was dispatched."]
+            pub struct IfElseMainSuccess;
+            impl ::subxt::ext::subxt_core::events::StaticEvent for IfElseMainSuccess {
+                const PALLET: &'static str = "Utility";
+                const EVENT: &'static str = "IfElseMainSuccess";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "The fallback call was dispatched."]
+            pub struct IfElseFallbackCalled {
+                pub main_error: if_else_fallback_called::MainError,
+            }
+            pub mod if_else_fallback_called {
+                use super::runtime_types;
+                pub type MainError = runtime_types::sp_runtime::DispatchError;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for IfElseFallbackCalled {
+                const PALLET: &'static str = "Utility";
+                const EVENT: &'static str = "IfElseFallbackCalled";
             }
         }
         pub mod constants {
@@ -25124,10 +25459,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            0u8, 184u8, 247u8, 3u8, 213u8, 55u8, 81u8, 143u8, 250u8, 11u8, 168u8,
-                            128u8, 229u8, 160u8, 229u8, 204u8, 99u8, 150u8, 171u8, 183u8, 125u8,
-                            117u8, 61u8, 54u8, 193u8, 10u8, 197u8, 248u8, 61u8, 138u8, 114u8,
-                            252u8,
+                            51u8, 25u8, 194u8, 16u8, 80u8, 107u8, 198u8, 16u8, 118u8, 226u8, 217u8,
+                            68u8, 197u8, 178u8, 79u8, 218u8, 6u8, 105u8, 94u8, 94u8, 149u8, 192u8,
+                            232u8, 251u8, 171u8, 198u8, 214u8, 57u8, 184u8, 28u8, 54u8, 246u8,
                         ],
                     )
                 }
@@ -26849,10 +27183,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            117u8, 233u8, 201u8, 170u8, 70u8, 99u8, 220u8, 106u8, 35u8, 223u8,
-                            90u8, 133u8, 189u8, 236u8, 3u8, 41u8, 2u8, 219u8, 209u8, 141u8, 1u8,
-                            229u8, 125u8, 100u8, 7u8, 164u8, 30u8, 127u8, 166u8, 232u8, 105u8,
-                            53u8,
+                            233u8, 80u8, 78u8, 133u8, 196u8, 112u8, 0u8, 179u8, 98u8, 1u8, 184u8,
+                            146u8, 237u8, 221u8, 211u8, 67u8, 73u8, 109u8, 20u8, 248u8, 70u8, 6u8,
+                            235u8, 53u8, 161u8, 134u8, 216u8, 24u8, 76u8, 109u8, 83u8, 174u8,
                         ],
                     )
                 }
@@ -26896,10 +27229,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            209u8, 152u8, 177u8, 101u8, 142u8, 127u8, 178u8, 106u8, 85u8, 75u8,
-                            70u8, 119u8, 93u8, 50u8, 189u8, 75u8, 118u8, 175u8, 235u8, 111u8,
-                            216u8, 136u8, 114u8, 51u8, 41u8, 187u8, 207u8, 252u8, 164u8, 17u8,
-                            225u8, 128u8,
+                            219u8, 79u8, 93u8, 103u8, 122u8, 167u8, 183u8, 55u8, 155u8, 78u8,
+                            133u8, 238u8, 243u8, 218u8, 191u8, 252u8, 253u8, 124u8, 252u8, 125u8,
+                            67u8, 56u8, 87u8, 147u8, 7u8, 19u8, 103u8, 64u8, 0u8, 125u8, 123u8,
+                            242u8,
                         ],
                     )
                 }
@@ -26939,9 +27272,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            96u8, 88u8, 45u8, 42u8, 92u8, 203u8, 87u8, 198u8, 77u8, 46u8, 20u8,
-                            67u8, 209u8, 22u8, 75u8, 193u8, 48u8, 140u8, 218u8, 140u8, 106u8,
-                            151u8, 8u8, 247u8, 221u8, 153u8, 11u8, 25u8, 255u8, 28u8, 134u8, 161u8,
+                            93u8, 69u8, 17u8, 125u8, 16u8, 191u8, 52u8, 206u8, 107u8, 136u8, 26u8,
+                            138u8, 76u8, 179u8, 138u8, 28u8, 116u8, 97u8, 219u8, 199u8, 109u8,
+                            78u8, 102u8, 113u8, 218u8, 144u8, 178u8, 159u8, 116u8, 62u8, 167u8,
+                            205u8,
                         ],
                     )
                 }
@@ -26966,10 +27300,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            47u8, 209u8, 80u8, 240u8, 223u8, 199u8, 121u8, 41u8, 239u8, 187u8,
-                            154u8, 21u8, 183u8, 156u8, 224u8, 239u8, 224u8, 16u8, 167u8, 161u8,
-                            22u8, 108u8, 100u8, 203u8, 11u8, 81u8, 38u8, 142u8, 23u8, 51u8, 142u8,
-                            71u8,
+                            209u8, 76u8, 141u8, 95u8, 209u8, 140u8, 233u8, 55u8, 123u8, 25u8, 59u8,
+                            68u8, 45u8, 240u8, 251u8, 120u8, 148u8, 176u8, 14u8, 204u8, 193u8,
+                            198u8, 72u8, 205u8, 236u8, 237u8, 115u8, 150u8, 39u8, 128u8, 159u8,
+                            84u8,
                         ],
                     )
                 }
@@ -28085,9 +28419,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            76u8, 45u8, 84u8, 165u8, 231u8, 88u8, 129u8, 218u8, 97u8, 161u8, 150u8,
-                            57u8, 216u8, 207u8, 67u8, 126u8, 86u8, 245u8, 76u8, 24u8, 164u8, 8u8,
-                            121u8, 121u8, 111u8, 94u8, 65u8, 190u8, 98u8, 194u8, 90u8, 244u8,
+                            126u8, 48u8, 115u8, 79u8, 16u8, 92u8, 175u8, 145u8, 152u8, 185u8,
+                            107u8, 184u8, 134u8, 127u8, 10u8, 118u8, 47u8, 230u8, 70u8, 242u8,
+                            171u8, 136u8, 184u8, 23u8, 239u8, 40u8, 248u8, 166u8, 169u8, 55u8,
+                            190u8, 164u8,
                         ],
                     )
                 }
@@ -28375,9 +28710,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            125u8, 36u8, 135u8, 147u8, 201u8, 206u8, 21u8, 88u8, 147u8, 169u8,
-                            92u8, 144u8, 251u8, 92u8, 16u8, 203u8, 211u8, 151u8, 7u8, 234u8, 146u8,
-                            6u8, 229u8, 185u8, 239u8, 45u8, 234u8, 85u8, 66u8, 127u8, 82u8, 70u8,
+                            17u8, 6u8, 157u8, 128u8, 213u8, 20u8, 130u8, 125u8, 165u8, 30u8, 159u8,
+                            138u8, 148u8, 87u8, 126u8, 4u8, 130u8, 134u8, 37u8, 240u8, 233u8,
+                            103u8, 86u8, 22u8, 56u8, 220u8, 113u8, 201u8, 219u8, 92u8, 33u8, 217u8,
                         ],
                     )
                 }
@@ -29037,6 +29372,51 @@ pub mod api {
                     const PALLET: &'static str = "Multisig";
                     const CALL: &'static str = "cancel_as_multi";
                 }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Poke the deposit reserved for an existing multisig operation."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Signed_ and must be the original depositor of"]
+                #[doc = "the multisig operation."]
+                #[doc = ""]
+                #[doc = "The transaction fee is waived if the deposit amount has changed."]
+                #[doc = ""]
+                #[doc = "- `threshold`: The total number of approvals needed for this multisig."]
+                #[doc = "- `other_signatories`: The accounts (other than the sender) who are part of the"]
+                #[doc = "  multisig."]
+                #[doc = "- `call_hash`: The hash of the call this deposit is reserved for."]
+                #[doc = ""]
+                #[doc = "Emits `DepositPoked` if successful."]
+                pub struct PokeDeposit {
+                    pub threshold: poke_deposit::Threshold,
+                    pub other_signatories: poke_deposit::OtherSignatories,
+                    pub call_hash: poke_deposit::CallHash,
+                }
+                pub mod poke_deposit {
+                    use super::runtime_types;
+                    pub type Threshold = ::core::primitive::u16;
+                    pub type OtherSignatories = ::subxt::ext::subxt_core::alloc::vec::Vec<
+                        ::subxt::ext::subxt_core::utils::AccountId32,
+                    >;
+                    pub type CallHash = [::core::primitive::u8; 32usize];
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for PokeDeposit {
+                    const PALLET: &'static str = "Multisig";
+                    const CALL: &'static str = "poke_deposit";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -29066,10 +29446,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            252u8, 234u8, 186u8, 250u8, 57u8, 228u8, 124u8, 212u8, 226u8, 168u8,
-                            235u8, 162u8, 241u8, 70u8, 158u8, 227u8, 204u8, 163u8, 168u8, 117u8,
-                            160u8, 86u8, 233u8, 8u8, 155u8, 255u8, 132u8, 87u8, 159u8, 146u8,
-                            204u8, 192u8,
+                            174u8, 223u8, 140u8, 155u8, 55u8, 113u8, 194u8, 132u8, 35u8, 31u8,
+                            34u8, 36u8, 214u8, 81u8, 101u8, 56u8, 115u8, 221u8, 141u8, 82u8, 8u8,
+                            31u8, 45u8, 101u8, 249u8, 253u8, 157u8, 159u8, 61u8, 36u8, 127u8,
+                            205u8,
                         ],
                     )
                 }
@@ -29132,10 +29512,9 @@ pub mod api {
                             max_weight,
                         },
                         [
-                            187u8, 113u8, 229u8, 139u8, 235u8, 34u8, 44u8, 104u8, 84u8, 194u8,
-                            165u8, 170u8, 167u8, 18u8, 103u8, 139u8, 188u8, 254u8, 167u8, 35u8,
-                            156u8, 210u8, 9u8, 166u8, 59u8, 221u8, 229u8, 231u8, 128u8, 9u8, 120u8,
-                            38u8,
+                            135u8, 226u8, 7u8, 204u8, 228u8, 21u8, 197u8, 97u8, 16u8, 41u8, 33u8,
+                            180u8, 58u8, 93u8, 208u8, 64u8, 225u8, 240u8, 131u8, 127u8, 34u8, 6u8,
+                            173u8, 157u8, 18u8, 15u8, 136u8, 128u8, 47u8, 8u8, 51u8, 80u8,
                         ],
                     )
                 }
@@ -29237,6 +29616,42 @@ pub mod api {
                             212u8, 179u8, 123u8, 40u8, 209u8, 228u8, 181u8, 0u8, 109u8, 28u8, 27u8,
                             48u8, 15u8, 47u8, 203u8, 54u8, 106u8, 114u8, 28u8, 118u8, 101u8, 201u8,
                             95u8, 187u8, 46u8, 182u8, 4u8, 30u8, 227u8, 105u8, 14u8, 81u8,
+                        ],
+                    )
+                }
+                #[doc = "Poke the deposit reserved for an existing multisig operation."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Signed_ and must be the original depositor of"]
+                #[doc = "the multisig operation."]
+                #[doc = ""]
+                #[doc = "The transaction fee is waived if the deposit amount has changed."]
+                #[doc = ""]
+                #[doc = "- `threshold`: The total number of approvals needed for this multisig."]
+                #[doc = "- `other_signatories`: The accounts (other than the sender) who are part of the"]
+                #[doc = "  multisig."]
+                #[doc = "- `call_hash`: The hash of the call this deposit is reserved for."]
+                #[doc = ""]
+                #[doc = "Emits `DepositPoked` if successful."]
+                pub fn poke_deposit(
+                    &self,
+                    threshold: types::poke_deposit::Threshold,
+                    other_signatories: types::poke_deposit::OtherSignatories,
+                    call_hash: types::poke_deposit::CallHash,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PokeDeposit>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Multisig",
+                        "poke_deposit",
+                        types::PokeDeposit {
+                            threshold,
+                            other_signatories,
+                            call_hash,
+                        },
+                        [
+                            246u8, 199u8, 149u8, 204u8, 29u8, 162u8, 169u8, 44u8, 250u8, 24u8,
+                            64u8, 191u8, 18u8, 238u8, 140u8, 153u8, 139u8, 208u8, 157u8, 245u8,
+                            145u8, 205u8, 56u8, 130u8, 119u8, 246u8, 174u8, 111u8, 83u8, 221u8,
+                            85u8, 84u8,
                         ],
                     )
                 }
@@ -29365,6 +29780,35 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for MultisigCancelled {
                 const PALLET: &'static str = "Multisig";
                 const EVENT: &'static str = "MultisigCancelled";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "The deposit for a multisig operation has been updated/poked."]
+            pub struct DepositPoked {
+                pub who: deposit_poked::Who,
+                pub call_hash: deposit_poked::CallHash,
+                pub old_deposit: deposit_poked::OldDeposit,
+                pub new_deposit: deposit_poked::NewDeposit,
+            }
+            pub mod deposit_poked {
+                use super::runtime_types;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type CallHash = [::core::primitive::u8; 32usize];
+                pub type OldDeposit = ::core::primitive::u128;
+                pub type NewDeposit = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for DepositPoked {
+                const PALLET: &'static str = "Multisig";
+                const EVENT: &'static str = "DepositPoked";
             }
         }
         pub mod storage {
@@ -54394,10 +54838,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            47u8, 185u8, 129u8, 250u8, 230u8, 250u8, 85u8, 201u8, 34u8, 128u8,
-                            102u8, 72u8, 188u8, 138u8, 54u8, 43u8, 236u8, 57u8, 177u8, 147u8,
-                            207u8, 3u8, 207u8, 150u8, 175u8, 62u8, 51u8, 132u8, 129u8, 3u8, 194u8,
-                            47u8,
+                            64u8, 227u8, 67u8, 6u8, 223u8, 22u8, 95u8, 129u8, 182u8, 250u8, 78u8,
+                            102u8, 236u8, 203u8, 212u8, 194u8, 165u8, 28u8, 242u8, 168u8, 41u8,
+                            187u8, 183u8, 16u8, 152u8, 20u8, 128u8, 182u8, 113u8, 91u8, 87u8,
+                            146u8,
                         ],
                     )
                 }
@@ -54420,10 +54864,9 @@ pub mod api {
                             weight,
                         },
                         [
-                            149u8, 21u8, 171u8, 89u8, 100u8, 181u8, 224u8, 136u8, 169u8, 208u8,
-                            150u8, 114u8, 163u8, 104u8, 103u8, 111u8, 59u8, 206u8, 30u8, 174u8,
-                            62u8, 88u8, 17u8, 13u8, 232u8, 214u8, 54u8, 176u8, 31u8, 249u8, 191u8,
-                            142u8,
+                            162u8, 248u8, 123u8, 106u8, 223u8, 142u8, 254u8, 122u8, 150u8, 242u8,
+                            121u8, 58u8, 91u8, 30u8, 54u8, 96u8, 238u8, 87u8, 155u8, 227u8, 175u8,
+                            170u8, 248u8, 179u8, 202u8, 12u8, 8u8, 218u8, 63u8, 221u8, 57u8, 195u8,
                         ],
                     )
                 }
@@ -54463,9 +54906,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            242u8, 146u8, 208u8, 132u8, 156u8, 141u8, 144u8, 221u8, 170u8, 33u8,
-                            128u8, 12u8, 119u8, 46u8, 10u8, 208u8, 239u8, 124u8, 97u8, 29u8, 34u8,
-                            204u8, 82u8, 112u8, 101u8, 85u8, 35u8, 21u8, 44u8, 66u8, 43u8, 180u8,
+                            204u8, 157u8, 76u8, 185u8, 16u8, 56u8, 209u8, 22u8, 4u8, 53u8, 9u8,
+                            150u8, 76u8, 205u8, 154u8, 120u8, 132u8, 208u8, 99u8, 58u8, 20u8,
+                            106u8, 54u8, 65u8, 53u8, 232u8, 232u8, 200u8, 116u8, 217u8, 14u8,
+                            198u8,
                         ],
                     )
                 }
@@ -58838,6 +59282,18 @@ pub mod api {
                     #[doc = "## Complexity"]
                     #[doc = "- `O(1)`."]
                     freeze { index: ::core::primitive::u32 },
+                    #[codec(index = 5)]
+                    #[doc = "Poke the deposit reserved for an index."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the signing account must have a"]
+                    #[doc = "non-frozen account `index`."]
+                    #[doc = ""]
+                    #[doc = "The transaction fees is waived if the deposit is changed after poking/reconsideration."]
+                    #[doc = ""]
+                    #[doc = "- `index`: the index whose deposit is to be poked/reconsidered."]
+                    #[doc = ""]
+                    #[doc = "Emits `DepositPoked` if successful."]
+                    poke_deposit { index: ::core::primitive::u32 },
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -58903,6 +59359,14 @@ pub mod api {
                     IndexFrozen {
                         index: ::core::primitive::u32,
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
+                    },
+                    #[codec(index = 3)]
+                    #[doc = "A deposit to reserve an index has been poked/reconsidered."]
+                    DepositPoked {
+                        who: ::subxt::ext::subxt_core::utils::AccountId32,
+                        index: ::core::primitive::u32,
+                        old_deposit: ::core::primitive::u128,
+                        new_deposit: ::core::primitive::u128,
                     },
                 }
             }
@@ -59438,6 +59902,27 @@ pub mod api {
                             runtime_types::pallet_multisig::Timepoint<::core::primitive::u32>,
                         call_hash: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 4)]
+                    #[doc = "Poke the deposit reserved for an existing multisig operation."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and must be the original depositor of"]
+                    #[doc = "the multisig operation."]
+                    #[doc = ""]
+                    #[doc = "The transaction fee is waived if the deposit amount has changed."]
+                    #[doc = ""]
+                    #[doc = "- `threshold`: The total number of approvals needed for this multisig."]
+                    #[doc = "- `other_signatories`: The accounts (other than the sender) who are part of the"]
+                    #[doc = "  multisig."]
+                    #[doc = "- `call_hash`: The hash of the call this deposit is reserved for."]
+                    #[doc = ""]
+                    #[doc = "Emits `DepositPoked` if successful."]
+                    poke_deposit {
+                        threshold: ::core::primitive::u16,
+                        other_signatories: ::subxt::ext::subxt_core::alloc::vec::Vec<
+                            ::subxt::ext::subxt_core::utils::AccountId32,
+                        >,
+                        call_hash: [::core::primitive::u8; 32usize],
+                    },
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -59478,10 +59963,11 @@ pub mod api {
                     #[doc = "The sender was contained in the other signatories; it shouldn't be."]
                     SenderInSignatories,
                     #[codec(index = 7)]
-                    #[doc = "Multisig operation not found when attempting to cancel."]
+                    #[doc = "Multisig operation not found in storage."]
                     NotFound,
                     #[codec(index = 8)]
-                    #[doc = "Only the account that originally created the multisig is able to cancel it."]
+                    #[doc = "Only the account that originally created the multisig is able to cancel it or update"]
+                    #[doc = "its deposits."]
                     NotOwner,
                     #[codec(index = 9)]
                     #[doc = "No timepoint was given, yet the multisig operation is already underway."]
@@ -59551,6 +60037,14 @@ pub mod api {
                             runtime_types::pallet_multisig::Timepoint<::core::primitive::u32>,
                         multisig: ::subxt::ext::subxt_core::utils::AccountId32,
                         call_hash: [::core::primitive::u8; 32usize],
+                    },
+                    #[codec(index = 4)]
+                    #[doc = "The deposit for a multisig operation has been updated/poked."]
+                    DepositPoked {
+                        who: ::subxt::ext::subxt_core::utils::AccountId32,
+                        call_hash: [::core::primitive::u8; 32usize],
+                        old_deposit: ::core::primitive::u128,
+                        new_deposit: ::core::primitive::u128,
                     },
                 }
             }
@@ -61785,8 +62279,27 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
+                pub struct Track<_0, _1, _2> {
+                    pub id: _0,
+                    pub info: runtime_types::pallet_referenda::types::TrackInfo<_1, _2>,
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
                 pub struct TrackInfo<_0, _1> {
-                    pub name: ::subxt::ext::subxt_core::alloc::string::String,
+                    pub name: [::core::primitive::u8; 25usize],
                     pub max_deciding: ::core::primitive::u32,
                     pub decision_deposit: _0,
                     pub prepare_period: _1,
@@ -62236,6 +62749,16 @@ pub mod api {
                     #[doc = "block number as the type might suggest."]
                     NewSession {
                         session_index: ::core::primitive::u32,
+                    },
+                    #[codec(index = 1)]
+                    #[doc = "Validator has been disabled."]
+                    ValidatorDisabled {
+                        validator: ::subxt::ext::subxt_core::utils::AccountId32,
+                    },
+                    #[codec(index = 2)]
+                    #[doc = "Validator has been re-enabled."]
+                    ValidatorReenabled {
+                        validator: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
                 }
             }
@@ -63983,6 +64506,52 @@ pub mod api {
                         >,
                         weight: runtime_types::sp_weights::weight_v2::Weight,
                     },
+                    #[codec(index = 6)]
+                    #[doc = "Dispatch a fallback call in the event the main call fails to execute."]
+                    #[doc = "May be called from any origin except `None`."]
+                    #[doc = ""]
+                    #[doc = "This function first attempts to dispatch the `main` call."]
+                    #[doc = "If the `main` call fails, the `fallback` is attemted."]
+                    #[doc = "if the fallback is successfully dispatched, the weights of both calls"]
+                    #[doc = "are accumulated and an event containing the main call error is deposited."]
+                    #[doc = ""]
+                    #[doc = "In the event of a fallback failure the whole call fails"]
+                    #[doc = "with the weights returned."]
+                    #[doc = ""]
+                    #[doc = "- `main`: The main call to be dispatched. This is the primary action to execute."]
+                    #[doc = "- `fallback`: The fallback call to be dispatched in case the `main` call fails."]
+                    #[doc = ""]
+                    #[doc = "## Dispatch Logic"]
+                    #[doc = "- If the origin is `root`, both the main and fallback calls are executed without"]
+                    #[doc = "  applying any origin filters."]
+                    #[doc = "- If the origin is not `root`, the origin filter is applied to both the `main` and"]
+                    #[doc = "  `fallback` calls."]
+                    #[doc = ""]
+                    #[doc = "## Use Case"]
+                    #[doc = "- Some use cases might involve submitting a `batch` type call in either main, fallback"]
+                    #[doc = "  or both."]
+                    if_else {
+                        main: ::subxt::ext::subxt_core::alloc::boxed::Box<
+                            runtime_types::rococo_runtime::RuntimeCall,
+                        >,
+                        fallback: ::subxt::ext::subxt_core::alloc::boxed::Box<
+                            runtime_types::rococo_runtime::RuntimeCall,
+                        >,
+                    },
+                    #[codec(index = 7)]
+                    #[doc = "Dispatches a function call with a provided origin."]
+                    #[doc = ""]
+                    #[doc = "Almost the same as [`Pallet::dispatch_as`] but forwards any error of the inner call."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Root_."]
+                    dispatch_as_fallible {
+                        as_origin: ::subxt::ext::subxt_core::alloc::boxed::Box<
+                            runtime_types::rococo_runtime::OriginCaller,
+                        >,
+                        call: ::subxt::ext::subxt_core::alloc::boxed::Box<
+                            runtime_types::rococo_runtime::RuntimeCall,
+                        >,
+                    },
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -64048,6 +64617,14 @@ pub mod api {
                     DispatchedAs {
                         result:
                             ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
+                    },
+                    #[codec(index = 6)]
+                    #[doc = "Main call was dispatched."]
+                    IfElseMainSuccess,
+                    #[codec(index = 7)]
+                    #[doc = "The fallback call was dispatched."]
+                    IfElseFallbackCalled {
+                        main_error: runtime_types::sp_runtime::DispatchError,
                     },
                 }
             }
@@ -72152,6 +72729,22 @@ pub mod api {
                     pub offender: _1,
                     pub reporters: ::subxt::ext::subxt_core::alloc::vec::Vec<_0>,
                 }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct OffenceSeverity(pub runtime_types::sp_arithmetic::per_things::Perbill);
             }
         }
         pub mod sp_version {
