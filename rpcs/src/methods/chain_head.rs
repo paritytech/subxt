@@ -411,7 +411,7 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
             .subscribe(
                 "archive_unstable_storage",
                 rpc_params![block_hash, items, child_key.map(to_hex)],
-                "archive_unstable_storage_unsub", // TODO unsub method undefined in spec: look it up/add to spec
+                "archive_unstable_stopStorage",
             )
             .await?;
 
