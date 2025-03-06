@@ -5,13 +5,16 @@
 //! This module exposes the types and such necessary for working with events.
 //! The two main entry points into events are [`crate::OnlineClient::events()`]
 //! and calls like [crate::tx::TxProgress::wait_for_finalized_success()].
+
+mod events_client;
+mod events_type;
+
 use crate::client::OnlineClientT;
 use crate::Error;
 use subxt_core::{Config, Metadata};
 
-mod events_client;
 pub use events_client::EventsClient;
-pub use subxt_core::events::{EventDetails, Events, Phase, StaticEvent};
+pub use events_type::{EventDetails, EventMetadataDetails, Events, Phase, StaticEvent};
 
 /// Creates a new [`Events`] instance by fetching the corresponding bytes at `block_hash` from the client.
 pub async fn new_events_from_client<T, C>(

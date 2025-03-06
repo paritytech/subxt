@@ -1,7 +1,9 @@
-use crate::{ Config, Error };
-use subxt_core::events::{ Events as CoreEvents, EventDetails as CoreEventDetails };
+use crate::{Config, Error, Metadata};
+use derive_where::derive_where;
+use scale_decode::DecodeAsType;
+use subxt_core::events::{EventDetails as CoreEventDetails, Events as CoreEvents};
 
-pub use subxt_core::events::{ StaticEvent, EventMetadata };
+pub use subxt_core::events::{EventMetadataDetails, Phase, StaticEvent};
 
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
@@ -10,13 +12,15 @@ pub use subxt_core::events::{ StaticEvent, EventMetadata };
 // API returning a different error type (ie the subxt_core::Error).
 #[derive_where(Clone, Debug)]
 pub struct Events<T> {
-    inner: CoreEvents<T>
+    inner: CoreEvents<T>,
 }
 
-impl <T: Config> Events<T> {
+impl<T: Config> Events<T> {
     /// Create a new [`Events`] instance from the given bytes.
     pub fn decode_from(event_bytes: Vec<u8>, metadata: Metadata) -> Self {
-        Self { inner: CoreEvents::decode_from(event_bytes, metadata) }
+        Self {
+            inner: CoreEvents::decode_from(event_bytes, metadata),
+        }
     }
 
     /// The number of events.
@@ -43,9 +47,9 @@ impl <T: Config> Events<T> {
     pub fn iter(
         &self,
     ) -> impl Iterator<Item = Result<EventDetails<T>, Error>> + Send + Sync + 'static {
-        self.inner.iter().map(|item| {
-            item.map(|e| EventDetails { inner: e }).map_err(Into::into)
-        })
+        self.inner
+            .iter()
+            .map(|item| item.map(|e| EventDetails { inner: e }).map_err(Into::into))
     }
 
     /// Iterate through the events using metadata to dynamically decode and skip
@@ -76,7 +80,7 @@ impl <T: Config> Events<T> {
 /// The event details.
 #[derive(Debug, Clone)]
 pub struct EventDetails<T: Config> {
-    inner: CoreEventDetails<T>
+    inner: CoreEventDetails<T>,
 }
 
 impl<T: Config> EventDetails<T> {
