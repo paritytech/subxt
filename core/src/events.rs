@@ -75,7 +75,7 @@ pub trait StaticEvent: DecodeAsFields {
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
 #[derive_where(Clone)]
-pub struct Events<T: Config> {
+pub struct Events<T> {
     metadata: Metadata,
     // Note; raw event bytes are prefixed with a Compact<u32> containing
     // the number of events to be decoded. The start_idx reflects that, so
@@ -87,7 +87,7 @@ pub struct Events<T: Config> {
 }
 
 // Ignore the Metadata when debug-logging events; it's big and distracting.
-impl<T: Config> core::fmt::Debug for Events<T> {
+impl<T> core::fmt::Debug for Events<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("Events")
             .field("event_bytes", &self.event_bytes)
