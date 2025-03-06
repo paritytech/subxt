@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.40.0] - 2025-03-06
+
+This release reverts the usage of the polkadot-sdk umbrella crate, which was causing issues such as an increased number of dependencies in Cargo.lock. For more details, see #1925.
+
+Additionally, this update bumps the Polkadot SDK-related dependencies to their latest versions, ensuring compatibility and stability.
+
+### Fixed
+- Remove usage of polkadot-sdk umbrella crate ([#1926](https://github.com/paritytech/subxt/pull/1926))
+
 ## [0.39.0] - 2025-02-04
 
 This release is mostly bug fixes and changes. The only change that should be a breaking change is removing the `substrate-compat` feature flag (see [#1850](https://github.com/paritytech/subxt/pull/1850)), which we'll go into more detail about.
