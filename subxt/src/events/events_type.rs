@@ -29,7 +29,7 @@ impl<T: Config> Events<T> {
     }
 
     /// Are there no events in this block?
-    // Note: mainly here to satisfy clippy.
+    // Note: mainly here to satisfy clippy..
     pub fn is_empty(&self) -> bool {
         self.inner.is_empty()
     }
