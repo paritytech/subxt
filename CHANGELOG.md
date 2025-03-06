@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This a bug-fix release that reverts the usage of polkadot-sdk umbrella crate which was causing issues with
 for example an increased number of dependencies in Cargo.lock, see [#1925](https://github.com/paritytech/subxt/issues/1925) for further information.
 
-
 ### Fixed
 - Remove usage of polkadot-sdk umbrella crate ([#1926](https://github.com/paritytech/subxt/pull/1926))
 
