@@ -1729,11 +1729,11 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.6.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8a784e501ed2cec99eb00a1e78e42740fcb05f1aea7bbea90bf46f0a9f255bb"
+checksum = "50c554ce2394e2c04426a070b4cb133c72f6f14c86b665f4e13094addd8e8958"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 20.0.0",
  "parity-scale-codec",
  "scale-decode",
  "scale-info",
@@ -1746,6 +1746,18 @@ name = "frame-metadata"
 version = "18.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "daaf440c68eb2c3d88e5760fe8c7af3f9fee9181fab6c2f2c4e7cc48dcc40bb8"
+dependencies = [
+ "cfg-if",
+ "parity-scale-codec",
+ "scale-info",
+ "serde",
+]
+
+[[package]]
+name = "frame-metadata"
+version = "20.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26de808fa6461f2485dc51811aefed108850064994fb4a62b3ac21ffa62ac8df"
 dependencies = [
  "cfg-if",
  "parity-scale-codec",
@@ -1894,7 +1906,7 @@ dependencies = [
 name = "generate-custom-metadata"
 version = "0.39.0"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 20.0.0",
  "parity-scale-codec",
  "scale-info",
 ]
@@ -2403,7 +2415,7 @@ version = "0.39.0"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
- "frame-metadata",
+ "frame-metadata 20.0.0",
  "futures",
  "hex",
  "parity-scale-codec",
@@ -4016,7 +4028,7 @@ dependencies = [
  "scale-decode-derive",
  "scale-type-resolver",
  "smallvec",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
@@ -4043,7 +4055,7 @@ dependencies = [
  "scale-encode-derive",
  "scale-type-resolver",
  "smallvec",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
@@ -4097,22 +4109,22 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc3173be608895eb117cf397ab4f31f00e2ed2c7af1c6e0b8f5d51d0a0967053"
+checksum = "6aebea322734465f39e4ad8100e1f9708c6c6c325d92b8780015d30c44fae791"
 dependencies = [
  "proc-macro2",
  "quote",
  "scale-info",
  "syn 2.0.87",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
 name = "scale-typegen-description"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bac04b5165c69d87ec4f89e35f47cf98afe3c3bc1b91fa50770cb09e6383af7f"
+checksum = "c622e7c4a26f32957cf5e55006d65ab574ac566d6c1780af4a49bc73cd38e383"
 dependencies = [
  "anyhow",
  "peekmore",
@@ -4141,7 +4153,7 @@ dependencies = [
  "scale-encode",
  "scale-type-resolver",
  "serde",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
  "yap",
 ]
 
@@ -4841,7 +4853,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "427be4e8e6a33cb8ffc8c91f8834b9c6f563daf246e8f0da16e9e0db3db55f5a"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 18.0.0",
  "parity-scale-codec",
  "scale-info",
 ]
@@ -5176,7 +5188,7 @@ dependencies = [
  "bitvec",
  "derive-where",
  "either",
- "frame-metadata",
+ "frame-metadata 20.0.0",
  "futures",
  "hex",
  "http-body",
@@ -5201,7 +5213,7 @@ dependencies = [
  "subxt-metadata",
  "subxt-rpcs",
  "subxt-signer",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
  "tokio",
  "tokio-util",
  "tower",
@@ -5218,7 +5230,7 @@ version = "0.39.0"
 dependencies = [
  "clap",
  "color-eyre",
- "frame-metadata",
+ "frame-metadata 20.0.0",
  "heck",
  "hex",
  "indoc",
@@ -5238,7 +5250,7 @@ dependencies = [
  "subxt-metadata",
  "subxt-utils-fetchmetadata",
  "syn 2.0.87",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
  "tokio",
 ]
 
@@ -5246,7 +5258,7 @@ dependencies = [
 name = "subxt-codegen"
 version = "0.39.0"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 20.0.0",
  "getrandom",
  "heck",
  "parity-scale-codec",
@@ -5256,7 +5268,7 @@ dependencies = [
  "scale-typegen",
  "subxt-metadata",
  "syn 2.0.87",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
@@ -5269,7 +5281,7 @@ dependencies = [
  "blake2",
  "derive-where",
  "frame-decode",
- "frame-metadata",
+ "frame-metadata 20.0.0",
  "hashbrown 0.14.5",
  "hex",
  "impl-serde",
@@ -5289,7 +5301,7 @@ dependencies = [
  "subxt-macro",
  "subxt-metadata",
  "subxt-signer",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
  "tracing",
 ]
 
@@ -5308,7 +5320,7 @@ dependencies = [
  "serde_json",
  "smoldot",
  "smoldot-light",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
  "tokio",
  "tokio-stream",
  "tracing",
@@ -5344,12 +5356,12 @@ dependencies = [
  "bitvec",
  "criterion",
  "frame-decode",
- "frame-metadata",
+ "frame-metadata 20.0.0",
  "hashbrown 0.14.5",
  "parity-scale-codec",
  "scale-info",
  "sp-crypto-hashing",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
@@ -5358,7 +5370,7 @@ version = "0.39.0"
 dependencies = [
  "derive-where",
  "finito",
- "frame-metadata",
+ "frame-metadata 20.0.0",
  "futures",
  "getrandom",
  "hex",
@@ -5372,7 +5384,7 @@ dependencies = [
  "serde_json",
  "subxt-core",
  "subxt-lightclient",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
  "tokio",
  "tokio-util",
  "tower",
@@ -5410,7 +5422,7 @@ dependencies = [
  "sp-crypto-hashing",
  "sp-keyring",
  "subxt-core",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
  "zeroize",
 ]
 
@@ -5426,11 +5438,11 @@ dependencies = [
 name = "subxt-utils-fetchmetadata"
 version = "0.39.0"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 20.0.0",
  "hex",
  "jsonrpsee",
  "parity-scale-codec",
- "thiserror 2.0.0",
+ "thiserror 2.0.12",
  "tokio",
  "url",
 ]
@@ -5517,11 +5529,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.0"
+version = "2.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15291287e9bff1bc6f9ff3409ed9af665bec7a5fc8ac079ea96be07bca0e2668"
+checksum = "567b8a2dae586314f7be2a752ec7474332959c6460e02bde30d702a66d488708"
 dependencies = [
- "thiserror-impl 2.0.0",
+ "thiserror-impl 2.0.12",
 ]
 
 [[package]]
@@ -5537,9 +5549,9 @@ dependencies = [
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.0"
+version = "2.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22efd00f33f93fa62848a7cab956c3d38c8d43095efda1decfc2b3a5dc0b8972"
+checksum = "7f7cf42b4507d8ea322120659672cf1b9dbb93f8f2d4ecfd6e51350ff5b17a1d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5909,7 +5921,7 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 name = "ui-tests"
 version = "0.39.0"
 dependencies = [
- "frame-metadata",
+ "frame-metadata 20.0.0",
  "generate-custom-metadata",
  "hex",
  "parity-scale-codec",
