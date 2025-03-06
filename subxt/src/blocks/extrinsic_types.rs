@@ -308,14 +308,11 @@ impl<T: Config> ExtrinsicEvents<T> {
     /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
     pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails<T>, Error>> + '_ {
-        self.events
-            .iter()
-            .filter(|ev| {
-                ev.as_ref()
-                    .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))
-                    .unwrap_or(true) // Keep any errors.
-            })
-            .map(|e| e.map_err(Error::from))
+        self.events.iter().filter(|ev| {
+            ev.as_ref()
+                .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))
+                .unwrap_or(true) // Keep any errors.
+        })
     }
 
     /// Find all of the transaction events matching the event type provided as a generic parameter.
@@ -323,10 +320,8 @@ impl<T: Config> ExtrinsicEvents<T> {
     /// This works in the same way that [`events::Events::find()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
     pub fn find<Ev: events::StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> + '_ {
-        self.iter().filter_map(|ev| {
-            ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
-                .transpose()
-        })
+        self.iter()
+            .filter_map(|ev| ev.and_then(|ev| ev.as_event::<Ev>()).transpose())
     }
 
     /// Iterate through the transaction events using metadata to dynamically decode and skip
