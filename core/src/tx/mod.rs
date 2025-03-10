@@ -150,7 +150,7 @@ fn create_unsigned_at_version<T: Config, Call: Payload>(
     // with a hash allowing us to do so.
     validate(call, metadata)?;
 
-    // 3. Encode extrinsic
+    // 2. Encode extrinsic
     let extrinsic = {
         let mut encoded_inner = Vec::new();
         // encode the transaction version first.
