@@ -19,8 +19,7 @@ use subxt::{
     SubstrateConfig,
 };
 use subxt_rpcs::methods::chain_head::{
-    ArchiveStorageEventItem, Bytes, FollowEvent, Initialized, MethodResponse, RuntimeEvent,
-    RuntimeVersionEvent, StorageQuery, StorageQueryType,
+    ArchiveStorageEventItem, Bytes, StorageQuery, StorageQueryType,
 };
 
 use subxt_signer::sr25519::dev;
