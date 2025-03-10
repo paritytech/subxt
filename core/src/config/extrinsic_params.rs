@@ -54,13 +54,13 @@ pub trait ExtrinsicParamsEncoder: 'static {
     /// Set the signature. This happens after we have constructed the extrinsic params,
     /// and so is defined here rather than on the params, below. We need to use `&dyn Any`
     /// to keep this trait object safe, but can downcast in the impls.
-    /// 
+    ///
     /// # Panics
-    /// 
+    ///
     /// Implementations of this will likely try to downcast the provided `account_id`
     /// and `signature` into `T::AccountId` and `T::Signature` (where `T: Config`), and are
     /// free to panic if this downcasting does not succeed.
-    /// 
+    ///
     /// In typical usage, this is not a problem, since this method is only called internally
     /// and provided values which line up with the relevant `Config`. In theory though, this
     /// method can be called manually with any types, hence this warning.
