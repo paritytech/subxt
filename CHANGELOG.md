@@ -27,7 +27,7 @@ Example usage via `jsonrpsee` feature:
 use subxt_rpcs::{RpcClient, ChainHeadRpcMethods};
 
 // Connect to a local node:
-let client = RpcClient::("ws://127.0.0.1:9944").await?;
+let client = RpcClient::from_url("ws://127.0.0.1:9944").await?;
 // Use chainHead/archive V2 methods:
 let methods = ChainHeadRpcMethods::new(client);
 

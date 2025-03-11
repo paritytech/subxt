@@ -4,6 +4,8 @@
 
 //! Subxt utils fetch metadata.
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 // Internal helper macros
 #[macro_use]
 mod macros;

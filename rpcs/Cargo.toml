@@ -94,5 +94,9 @@ tower = { workspace = true }
 hyper = { workspace = true }
 http-body = { workspace = true }
 
+[package.metadata.docs.rs]
+default-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [lints]
 workspace = true
