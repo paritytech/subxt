@@ -2415,6 +2415,7 @@ version = "0.39.0"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
+ "frame-decode",
  "frame-metadata 20.0.0",
  "futures",
  "hex",
