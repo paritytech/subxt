@@ -24,7 +24,7 @@ Custom clients can be implemented if preferred.
 Example usage via `jsonrpsee` feature:
 
 ```rust
-use subxt_rpcs::{ RpcClient, ChainHeadRpcMethods };
+use subxt_rpcs::{RpcClient, ChainHeadRpcMethods};
 
 // Connect to a local node:
 let client = RpcClient::("ws://127.0.0.1:9944").await?;
@@ -64,7 +64,6 @@ A full list of the relevant changes is as follows:
 - Wrap the subxt::events::Events type to avoid exposing subxt_core errors and types unnecessarily ([#1948](https://github.com/paritytech/subxt/pull/1948))
 - Allow transaction timeout in ChainheadBackend to be configured ([#1943](https://github.com/paritytech/subxt/pull/1943))
 - refactor: make ExtrinsicEvents::new public for external access ([#1933](https://github.com/paritytech/subxt/pull/1933))
-- deps: remove polkadot-sdk umbrella crate ([#1926](https://github.com/paritytech/subxt/pull/1926))
 
 ## [0.40.0] - 2025-03-06
 
