@@ -292,7 +292,7 @@ checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
 
 [[package]]
 name = "artifacts"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "substrate-runner",
 ]
@@ -1904,7 +1904,7 @@ dependencies = [
 
 [[package]]
 name = "generate-custom-metadata"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "frame-metadata 20.0.0",
  "parity-scale-codec",
@@ -2411,10 +2411,11 @@ dependencies = [
 
 [[package]]
 name = "integration-tests"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
+ "frame-decode",
  "frame-metadata 20.0.0",
  "futures",
  "hex",
@@ -5176,7 +5177,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-runner"
-version = "0.39.0"
+version = "0.41.0"
 
 [[package]]
 name = "subtle"
@@ -5186,7 +5187,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "subxt"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "assert_matches",
  "async-trait",
@@ -5231,7 +5232,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-cli"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "clap",
  "color-eyre",
@@ -5261,7 +5262,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "frame-metadata 20.0.0",
  "getrandom",
@@ -5278,7 +5279,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-core"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "assert_matches",
  "base58",
@@ -5312,7 +5313,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "futures",
  "futures-timer",
@@ -5337,7 +5338,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "darling",
  "parity-scale-codec",
@@ -5356,7 +5357,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "bitvec",
  "criterion",
@@ -5371,7 +5372,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-rpcs"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "derive-where",
  "finito",
@@ -5400,7 +5401,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "base64 0.22.1",
  "bip32",
@@ -5433,7 +5434,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-test-macro"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "quote",
  "syn 2.0.87",
@@ -5441,7 +5442,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-utils-fetchmetadata"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "frame-metadata 20.0.0",
  "hex",
@@ -5509,7 +5510,7 @@ dependencies = [
 
 [[package]]
 name = "test-runtime"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "hex",
  "impl-serde",
@@ -5924,7 +5925,7 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "ui-tests"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "frame-metadata 20.0.0",
  "generate-custom-metadata",

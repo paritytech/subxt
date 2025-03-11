@@ -4,6 +4,80 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.41.0] - 2025-03-10
+
+This release makes two main changes:
+
+### Add `subxt-rpcs` crate.
+
+Previously, if you wanted to make raw RPC calls but weren't otherwise interested in using the higher level Subxt interface, you still needed to include the entire Subxt crate.
+
+Now, one can depend on `subxt-rpcs` directly. This crate implements the new RPC-V2 `chainHead`/`transaction` endpoints as well as the currently unstable `archive` endpoints. it also implements various legacy endpoints that Subxt uses as a fallback to the modern ones. It also provides several feature gated clients for interacting with them:
+
+- **jsonrpsee**: A `jsonrpsee` based RPC client for connecting to individual RPC nodes.
+- **unstable-light-client**: A Smoldot based light client which connects to multiple nodes in chains via p2p and verifies everything handed back, removing the need to trust any individual nodes.
+- **reconnecting-rpc-client**: Another `jsonrpsee` based client which handles reconnecting automatically in the event of network issues.
+- **mock-rpc-client**: A mock RPC client that can be used in tests.
+
+Custom clients can be implemented if preferred.
+
+Example usage via `jsonrpsee` feature:
+
+```rust
+use subxt_rpcs::{ RpcClient, ChainHeadRpcMethods };
+
+// Connect to a local node:
+let client = RpcClient::("ws://127.0.0.1:9944").await?;
+// Use chainHead/archive V2 methods:
+let methods = ChainHeadRpcMethods::new(client);
+
+// Call some RPC methods (in this case a subscription):
+let mut follow_subscription = methods.chainhead_v1_follow(false).await.unwrap();
+while let Some(follow_event) = follow_subscription.next().await {
+    // do something with events..
+}
+```
+
+### Support creating V5 transactions.
+
+Subxt has supported decoding V5 transactions from blocks since 0.38.0, but now it also supports constructing V5 transactions where allowed. Some naming changes have also taken place to align with the Substrate terminology now around transactions (see [#1931](https://github.com/paritytech/subxt/pull/1931) for more!).
+
+The main changes here are:
+
+- `subxt_core` now contains versioned methods for creating each of the possible types of transaction (V4 unsigned, V4 signed, V5 "bare" or V5 "general"), enabling the APIs to be tailored for each case.
+- `subxt` exposes higher level wrappers these (ie `api.tx().create_v4_unsigned(..)`, `api.tx().create_v5_bare(..)`), but also continues to expose the same standard APIs for creating transactions which will, under the hood, decide what to create based on the chain we're connected to.
+- APIs like `sign_and_submit` now take a `T::AccountId` rather than a `T::Address` since it was found to not be useful to provide the latter, and V5 transactions only expect an `T::AccountId`.
+- Signed Extensions are now referred to as _Transaction Extensions_, and we've tweaked the interface around how these work slightly to accomodate the fact that in V5 transactions, the signature is passed into a transaction extension where applicable (`VerifySignature`).
+- As a side effect, it's simpler to set mortality on transactions; no more block hash needs to be provided; only the number of blocks you would like a transaction to live for.
+
+A full list of the relevant changes is as follows:
+
+### Added
+
+- Support constructing and submitting V5 transactions ([#1931](https://github.com/paritytech/subxt/pull/1931))
+- Add archive RPCs to subxt-rpcs ([#1940](https://github.com/paritytech/subxt/pull/1940))
+- Document generating interface from Runtime WASM and change feature to `runtime-wasm-path` ([#1936](https://github.com/paritytech/subxt/pull/1936))
+- Split RPCs into a separate crate ([#1910](https://github.com/paritytech/subxt/pull/1910))
+
+### Changed
+
+- Wrap the subxt::events::Events type to avoid exposing subxt_core errors and types unnecessarily ([#1948](https://github.com/paritytech/subxt/pull/1948))
+- Allow transaction timeout in ChainheadBackend to be configured ([#1943](https://github.com/paritytech/subxt/pull/1943))
+- refactor: make ExtrinsicEvents::new public for external access ([#1933](https://github.com/paritytech/subxt/pull/1933))
+- deps: remove polkadot-sdk umbrella crate ([#1926](https://github.com/paritytech/subxt/pull/1926))
+
+## [0.40.0] - 2025-03-06
+
+This release reverts the usage of the `polkadot-sdk` umbrella crate, which was causing issues such as an increased number of dependencies in Cargo.lock. For more details, see [#1925](https://github.com/paritytech/subxt/issues/1925).
+
+Additionally, this update bumps the Polkadot SDK-related dependencies to their latest versions, ensuring compatibility and stability.
+
+### Fixed
+
+- Remove usage of polkadot-sdk umbrella crate ([#1926](https://github.com/paritytech/subxt/pull/1926))
+
+**Full Changelog**: https://github.com/paritytech/subxt/compare/v0.39.0...v0.40.0
+
 ## [0.39.0] - 2025-02-04
 
 This release is mostly bug fixes and changes. The only change that should be a breaking change is removing the `substrate-compat` feature flag (see [#1850](https://github.com/paritytech/subxt/pull/1850)), which we'll go into more detail about.
