@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::BlockError;
-use crate::blocks::extrinsic_signed_extensions::ExtrinsicSignedExtensions;
+use crate::blocks::extrinsic_transaction_extensions::ExtrinsicTransactionExtensions;
 use crate::{
     config::{Config, Hasher},
     error::{Error, MetadataError},
@@ -232,17 +232,17 @@ where
     /// They do *not* include the `additional` signed bytes that are used as part of the payload that is signed.
     ///
     /// Note: Returns `None` if the extrinsic is not signed.
-    pub fn signed_extensions_bytes(&self) -> Option<&[u8]> {
+    pub fn transaction_extensions_bytes(&self) -> Option<&[u8]> {
         self.decoded_info()
             .transaction_extension_payload()
             .map(|t| &self.bytes()[t.range()])
     }
 
     /// Returns `None` if the extrinsic is not signed.
-    pub fn signed_extensions(&self) -> Option<ExtrinsicSignedExtensions<'_, T>> {
+    pub fn transaction_extensions(&self) -> Option<ExtrinsicTransactionExtensions<'_, T>> {
         self.decoded_info()
             .transaction_extension_payload()
-            .map(|t| ExtrinsicSignedExtensions::new(self.bytes(), &self.metadata, t))
+            .map(|t| ExtrinsicTransactionExtensions::new(self.bytes(), &self.metadata, t))
     }
 
     /// The index of the pallet that the extrinsic originated from.
@@ -544,7 +544,7 @@ mod tests {
         );
 
         // Encoded TX ready to submit.
-        let tx_encoded = crate::tx::create_unsigned::<SubstrateConfig, _>(&tx, &metadata)
+        let tx_encoded = crate::tx::create_v4_unsigned::<SubstrateConfig, _>(&tx, &metadata)
             .expect("Valid dynamic parameters are provided");
 
         // Extrinsic details ready to decode.
@@ -575,7 +575,7 @@ mod tests {
                 Value::string("SomeValue"),
             ],
         );
-        let tx_encoded = crate::tx::create_unsigned::<SubstrateConfig, _>(&tx, &metadata)
+        let tx_encoded = crate::tx::create_v4_unsigned::<SubstrateConfig, _>(&tx, &metadata)
             .expect("Valid dynamic parameters are provided");
 
         // Note: `create_unsigned` produces the extrinsic bytes by prefixing the extrinsic length.

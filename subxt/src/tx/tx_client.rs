@@ -5,13 +5,14 @@
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, ExtrinsicParams, Header, RefineParams, RefineParamsData},
+    config::{Config, ExtrinsicParams, Header},
     error::{BlockError, Error},
     tx::{Payload, Signer as SignerT, TxProgress},
     utils::PhantomDataSendSync,
 };
 use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
+use subxt_core::tx::TransactionVersion;
 
 /// A client for working with transactions.
 #[derive_where(Clone; Client)]
@@ -31,7 +32,7 @@ impl<T: Config, Client> TxClient<T, Client> {
 }
 
 impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
-    /// Run the validation logic against some extrinsic you'd like to submit. Returns `Ok(())`
+    /// Run the validation logic against some transaction you'd like to submit. Returns `Ok(())`
     /// if the call is valid (or if it's not possible to check since the call has no validation hash).
     /// Return an error if the call was not valid or something went wrong trying to validate it (ie
     /// the pallet or call in question do not exist at all).
@@ -50,59 +51,143 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         subxt_core::tx::call_data(call, &self.client.metadata()).map_err(Into::into)
     }
 
-    /// Creates an unsigned extrinsic without submitting it.
-    pub fn create_unsigned<Call>(&self, call: &Call) -> Result<SubmittableExtrinsic<T, C>, Error>
+    /// Creates an unsigned transaction without submitting it. Depending on the metadata, we might end
+    /// up constructing either a v4 or v5 transaction. See [`Self::create_v4_unsigned`] or
+    /// [`Self::create_v5_bare`] if you'd like to explicitly create an unsigned transaction of a certain version.
+    pub fn create_unsigned<Call>(&self, call: &Call) -> Result<SubmittableTransaction<T, C>, Error>
     where
         Call: Payload,
     {
-        subxt_core::tx::create_unsigned(call, &self.client.metadata())
-            .map(|tx| SubmittableExtrinsic {
-                client: self.client.clone(),
-                inner: tx,
-            })
-            .map_err(Into::into)
+        let metadata = self.client.metadata();
+        let tx = match subxt_core::tx::suggested_version(&metadata)? {
+            TransactionVersion::V4 => subxt_core::tx::create_v4_unsigned(call, &metadata),
+            TransactionVersion::V5 => subxt_core::tx::create_v5_bare(call, &metadata),
+        }?;
+
+        Ok(SubmittableTransaction {
+            client: self.client.clone(),
+            inner: tx,
+        })
     }
 
-    /// Create a partial extrinsic.
+    /// Creates a v4 unsigned (no signature or transaction extensions) transaction without submitting it.
+    ///
+    /// Prefer [`Self::create_unsigned()`] if you don't know which version to create; this will pick the
+    /// most suitable one for the given chain.
+    pub fn create_v4_unsigned<Call>(
+        &self,
+        call: &Call,
+    ) -> Result<SubmittableTransaction<T, C>, Error>
+    where
+        Call: Payload,
+    {
+        let metadata = self.client.metadata();
+        let tx = subxt_core::tx::create_v4_unsigned(call, &metadata)?;
+
+        Ok(SubmittableTransaction {
+            client: self.client.clone(),
+            inner: tx,
+        })
+    }
+
+    /// Creates a v5 "bare" (no signature or transaction extensions) transaction without submitting it.
+    ///
+    /// Prefer [`Self::create_unsigned()`] if you don't know which version to create; this will pick the
+    /// most suitable one for the given chain.
+    pub fn create_v5_bare<Call>(&self, call: &Call) -> Result<SubmittableTransaction<T, C>, Error>
+    where
+        Call: Payload,
+    {
+        let metadata = self.client.metadata();
+        let tx = subxt_core::tx::create_v5_bare(call, &metadata)?;
+
+        Ok(SubmittableTransaction {
+            client: self.client.clone(),
+            inner: tx,
+        })
+    }
+
+    /// Create a partial transaction. Depending on the metadata, we might end up constructing either a v4 or
+    /// v5 transaction. See [`subxt_core::tx`] if you'd like to manually pick the version to construct
     ///
     /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
     /// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
-    pub fn create_partial_signed_offline<Call>(
+    pub fn create_partial_offline<Call>(
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialExtrinsic<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, Error>
     where
         Call: Payload,
     {
-        subxt_core::tx::create_partial_signed(call, &self.client.client_state(), params)
-            .map(|tx| PartialExtrinsic {
-                client: self.client.clone(),
-                inner: tx,
-            })
-            .map_err(Into::into)
+        let metadata = self.client.metadata();
+        let tx = match subxt_core::tx::suggested_version(&metadata)? {
+            TransactionVersion::V4 => PartialTransactionInner::V4(
+                subxt_core::tx::create_v4_signed(call, &self.client.client_state(), params)?,
+            ),
+            TransactionVersion::V5 => PartialTransactionInner::V5(
+                subxt_core::tx::create_v5_general(call, &self.client.client_state(), params)?,
+            ),
+        };
+
+        Ok(PartialTransaction {
+            client: self.client.clone(),
+            inner: tx,
+        })
     }
 
-    /// Creates a signed extrinsic without submitting it.
+    /// Create a v4 partial transaction, ready to sign.
     ///
     /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
     /// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
-    pub fn create_signed_offline<Call, Signer>(
+    ///
+    /// Prefer [`Self::create_partial_offline()`] if you don't know which version to create; this will pick the
+    /// most suitable one for the given chain.
+    pub fn create_v4_partial_offline<Call>(
         &self,
         call: &Call,
-        signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<SubmittableExtrinsic<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, Error>
     where
         Call: Payload,
-        Signer: SignerT<T>,
     {
-        subxt_core::tx::create_signed(call, &self.client.client_state(), signer, params)
-            .map(|tx| SubmittableExtrinsic {
-                client: self.client.clone(),
-                inner: tx,
-            })
-            .map_err(Into::into)
+        let tx = PartialTransactionInner::V4(subxt_core::tx::create_v4_signed(
+            call,
+            &self.client.client_state(),
+            params,
+        )?);
+
+        Ok(PartialTransaction {
+            client: self.client.clone(),
+            inner: tx,
+        })
+    }
+
+    /// Create a v5 partial transaction, ready to sign.
+    ///
+    /// Note: if not provided, the default account nonce will be set to 0 and the default mortality will be _immortal_.
+    /// This is because this method runs offline, and so is unable to fetch the data needed for more appropriate values.
+    ///
+    /// Prefer [`Self::create_partial_offline()`] if you don't know which version to create; this will pick the
+    /// most suitable one for the given chain.
+    pub fn create_v5_partial_offline<Call>(
+        &self,
+        call: &Call,
+        params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
+    ) -> Result<PartialTransaction<T, C>, Error>
+    where
+        Call: Payload,
+    {
+        let tx = PartialTransactionInner::V5(subxt_core::tx::create_v5_general(
+            call,
+            &self.client.client_state(),
+            params,
+        )?);
+
+        Ok(PartialTransaction {
+            client: self.client.clone(),
+            inner: tx,
+        })
     }
 }
 
@@ -111,84 +196,85 @@ where
     T: Config,
     C: OnlineClientT<T>,
 {
-    /// Fetch the latest block header and account nonce from the backend and use them to refine [`ExtrinsicParams::Params`].
-    async fn refine_params(
-        &self,
-        account_id: &T::AccountId,
-        params: &mut <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<(), Error> {
-        let block_ref = self.client.backend().latest_finalized_block_ref().await?;
-        let block_header = self
-            .client
-            .backend()
-            .block_header(block_ref.hash())
-            .await?
-            .ok_or_else(|| Error::Block(BlockError::not_found(block_ref.hash())))?;
-        let account_nonce =
-            crate::blocks::get_account_nonce(&self.client, account_id, block_ref.hash()).await?;
-
-        params.refine(&RefineParamsData::new(
-            account_nonce,
-            block_header.number().into(),
-            block_header.hash(),
-        ));
-        Ok(())
-    }
-
     /// Get the account nonce for a given account ID.
     pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, Error> {
         let block_ref = self.client.backend().latest_finalized_block_ref().await?;
         crate::blocks::get_account_nonce(&self.client, account_id, block_ref.hash()).await
     }
 
-    /// Creates a partial signed extrinsic, without submitting it.
-    pub async fn create_partial_signed<Call>(
+    /// Creates a partial transaction, without submitting it. This can then be signed and submitted.
+    pub async fn create_partial<Call>(
         &self,
         call: &Call,
         account_id: &T::AccountId,
         mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialExtrinsic<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, Error>
     where
         Call: Payload,
     {
-        // Refine the params by adding account nonce and latest block information:
-        self.refine_params(account_id, &mut params).await?;
-        // Create the partial extrinsic with the refined params:
-        self.create_partial_signed_offline(call, params)
+        inject_account_nonce_and_block(&self.client, account_id, &mut params).await?;
+        self.create_partial_offline(call, params)
     }
 
-    /// Creates a signed extrinsic, without submitting it.
-    pub async fn create_signed<Call, Signer>(
+    /// Creates a partial V4 transaction, without submitting it. This can then be signed and submitted.
+    ///
+    /// Prefer [`Self::create_partial()`] if you don't know which version to create; this will pick the
+    /// most suitable one for the given chain.
+    pub async fn create_v4_partial<Call>(
         &self,
+        call: &Call,
+        account_id: &T::AccountId,
+        mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
+    ) -> Result<PartialTransaction<T, C>, Error>
+    where
+        Call: Payload,
+    {
+        inject_account_nonce_and_block(&self.client, account_id, &mut params).await?;
+        self.create_v4_partial_offline(call, params)
+    }
+
+    /// Creates a partial V5 transaction, without submitting it. This can then be signed and submitted.
+    ///
+    /// Prefer [`Self::create_partial()`] if you don't know which version to create; this will pick the
+    /// most suitable one for the given chain.
+    pub async fn create_v5_partial<Call>(
+        &self,
+        call: &Call,
+        account_id: &T::AccountId,
+        mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
+    ) -> Result<PartialTransaction<T, C>, Error>
+    where
+        Call: Payload,
+    {
+        inject_account_nonce_and_block(&self.client, account_id, &mut params).await?;
+        self.create_v5_partial_offline(call, params)
+    }
+
+    /// Creates a signed transaction, without submitting it.
+    pub async fn create_signed<Call, Signer>(
+        &mut self,
         call: &Call,
         signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<SubmittableExtrinsic<T, C>, Error>
+    ) -> Result<SubmittableTransaction<T, C>, Error>
     where
         Call: Payload,
         Signer: SignerT<T>,
     {
-        // 1. Validate this call against the current node metadata if the call comes
-        // with a hash allowing us to do so.
-        self.validate(call)?;
-
-        // 2. Gather the "additional" and "extra" params along with the encoded call data,
-        //    ready to be signed.
-        let partial_signed = self
-            .create_partial_signed(call, &signer.account_id(), params)
+        let mut partial = self
+            .create_partial(call, &signer.account_id(), params)
             .await?;
 
-        // 3. Sign and construct an extrinsic from these details.
-        Ok(partial_signed.sign(signer))
+        Ok(partial.sign(signer))
     }
 
-    /// Creates and signs an extrinsic and submits it to the chain. Passes default parameters
-    /// to construct the "signed extra" and "additional" payloads needed by the extrinsic.
+    /// Creates and signs an transaction and submits it to the chain. Passes default parameters
+    /// to construct the "signed extra" and "additional" payloads needed by the transaction.
     ///
     /// Returns a [`TxProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch_default<Call, Signer>(
-        &self,
+        &mut self,
         call: &Call,
         signer: &Signer,
     ) -> Result<TxProgress<T, C>, Error>
@@ -201,12 +287,12 @@ where
             .await
     }
 
-    /// Creates and signs an extrinsic and submits it to the chain.
+    /// Creates and signs an transaction and submits it to the chain.
     ///
     /// Returns a [`TxProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch<Call, Signer>(
-        &self,
+        &mut self,
         call: &Call,
         signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
@@ -221,18 +307,18 @@ where
             .await
     }
 
-    /// Creates and signs an extrinsic and submits to the chain for block inclusion. Passes
+    /// Creates and signs an transaction and submits to the chain for block inclusion. Passes
     /// default parameters to construct the "signed extra" and "additional" payloads needed
-    /// by the extrinsic.
+    /// by the transaction.
     ///
-    /// Returns `Ok` with the extrinsic hash if it is valid extrinsic.
+    /// Returns `Ok` with the transaction hash if it is valid transaction.
     ///
     /// # Note
     ///
-    /// Success does not mean the extrinsic has been included in the block, just that it is valid
+    /// Success does not mean the transaction has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
     pub async fn sign_and_submit_default<Call, Signer>(
-        &self,
+        &mut self,
         call: &Call,
         signer: &Signer,
     ) -> Result<T::Hash, Error>
@@ -244,16 +330,16 @@ where
         self.sign_and_submit(call, signer, Default::default()).await
     }
 
-    /// Creates and signs an extrinsic and submits to the chain for block inclusion.
+    /// Creates and signs an transaction and submits to the chain for block inclusion.
     ///
-    /// Returns `Ok` with the extrinsic hash if it is valid extrinsic.
+    /// Returns `Ok` with the transaction hash if it is valid transaction.
     ///
     /// # Note
     ///
-    /// Success does not mean the extrinsic has been included in the block, just that it is valid
+    /// Success does not mean the transaction has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
     pub async fn sign_and_submit<Call, Signer>(
-        &self,
+        &mut self,
         call: &Call,
         signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
@@ -269,76 +355,99 @@ where
     }
 }
 
-/// This payload contains the information needed to produce an extrinsic.
-pub struct PartialExtrinsic<T: Config, C> {
+/// This payload contains the information needed to produce an transaction.
+pub struct PartialTransaction<T: Config, C> {
     client: C,
-    inner: subxt_core::tx::PartialTransaction<T>,
+    inner: PartialTransactionInner<T>,
 }
 
-impl<T, C> PartialExtrinsic<T, C>
+enum PartialTransactionInner<T: Config> {
+    V4(subxt_core::tx::PartialTransactionV4<T>),
+    V5(subxt_core::tx::PartialTransactionV5<T>),
+}
+
+impl<T, C> PartialTransaction<T, C>
 where
     T: Config,
     C: OfflineClientT<T>,
 {
-    /// Return the signer payload for this extrinsic. These are the bytes that must
-    /// be signed in order to produce a valid signature for the extrinsic.
+    /// Return the signer payload for this transaction. These are the bytes that must
+    /// be signed in order to produce a valid signature for the transaction.
     pub fn signer_payload(&self) -> Vec<u8> {
-        self.inner.signer_payload()
-    }
-
-    /// Return the bytes representing the call data for this partially constructed
-    /// extrinsic.
-    pub fn call_data(&self) -> &[u8] {
-        self.inner.call_data()
-    }
-
-    /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
-    /// The provided `signer` is responsible for providing the "from" address for the transaction,
-    /// as well as providing a signature to attach to it.
-    pub fn sign<Signer>(&self, signer: &Signer) -> SubmittableExtrinsic<T, C>
-    where
-        Signer: SignerT<T>,
-    {
-        SubmittableExtrinsic {
-            client: self.client.clone(),
-            inner: self.inner.sign(signer),
+        match &self.inner {
+            PartialTransactionInner::V4(tx) => tx.signer_payload(),
+            PartialTransactionInner::V5(tx) => tx.signer_payload().to_vec(),
         }
     }
 
-    /// Convert this [`PartialExtrinsic`] into a [`SubmittableExtrinsic`], ready to submit.
+    /// Return the bytes representing the call data for this partially constructed
+    /// transaction.
+    pub fn call_data(&self) -> &[u8] {
+        match &self.inner {
+            PartialTransactionInner::V4(tx) => tx.call_data(),
+            PartialTransactionInner::V5(tx) => tx.call_data(),
+        }
+    }
+
+    /// Convert this [`PartialTransaction`] into a [`SubmittableTransaction`], ready to submit.
+    /// The provided `signer` is responsible for providing the "from" address for the transaction,
+    /// as well as providing a signature to attach to it.
+    pub fn sign<Signer>(&mut self, signer: &Signer) -> SubmittableTransaction<T, C>
+    where
+        Signer: SignerT<T>,
+    {
+        let tx = match &mut self.inner {
+            PartialTransactionInner::V4(tx) => tx.sign(signer),
+            PartialTransactionInner::V5(tx) => tx.sign(signer),
+        };
+
+        SubmittableTransaction {
+            client: self.client.clone(),
+            inner: tx,
+        }
+    }
+
+    /// Convert this [`PartialTransaction`] into a [`SubmittableTransaction`], ready to submit.
     /// An address, and something representing a signature that can be SCALE encoded, are both
     /// needed in order to construct it. If you have a `Signer` to hand, you can use
-    /// [`PartialExtrinsic::sign()`] instead.
-    pub fn sign_with_address_and_signature(
-        &self,
-        address: &T::Address,
+    /// [`PartialTransaction::sign()`] instead.
+    pub fn sign_with_account_and_signature(
+        &mut self,
+        account_id: &T::AccountId,
         signature: &T::Signature,
-    ) -> SubmittableExtrinsic<T, C> {
-        SubmittableExtrinsic {
+    ) -> SubmittableTransaction<T, C> {
+        let tx = match &mut self.inner {
+            PartialTransactionInner::V4(tx) => {
+                tx.sign_with_account_and_signature(account_id.clone(), signature)
+            }
+            PartialTransactionInner::V5(tx) => {
+                tx.sign_with_account_and_signature(account_id, signature)
+            }
+        };
+
+        SubmittableTransaction {
             client: self.client.clone(),
-            inner: self
-                .inner
-                .sign_with_address_and_signature(address, signature),
+            inner: tx,
         }
     }
 }
 
-/// This represents an extrinsic that has been signed and is ready to submit.
-pub struct SubmittableExtrinsic<T, C> {
+/// This represents an transaction that has been signed and is ready to submit.
+pub struct SubmittableTransaction<T, C> {
     client: C,
     inner: subxt_core::tx::Transaction<T>,
 }
 
-impl<T, C> SubmittableExtrinsic<T, C>
+impl<T, C> SubmittableTransaction<T, C>
 where
     T: Config,
     C: OfflineClientT<T>,
 {
-    /// Create a [`SubmittableExtrinsic`] from some already-signed and prepared
-    /// extrinsic bytes, and some client (anything implementing [`OfflineClientT`]
+    /// Create a [`SubmittableTransaction`] from some already-signed and prepared
+    /// transaction bytes, and some client (anything implementing [`OfflineClientT`]
     /// or [`OnlineClientT`]).
     ///
-    /// Prefer to use [`TxClient`] to create and sign extrinsics. This is simply
+    /// Prefer to use [`TxClient`] to create and sign transactions. This is simply
     /// exposed in case you want to skip this process and submit something you've
     /// already created.
     pub fn from_bytes(client: C, tx_bytes: Vec<u8>) -> Self {
@@ -348,34 +457,34 @@ where
         }
     }
 
-    /// Calculate and return the hash of the extrinsic, based on the configured hasher.
+    /// Calculate and return the hash of the transaction, based on the configured hasher.
     pub fn hash(&self) -> T::Hash {
         self.inner.hash()
     }
 
-    /// Returns the SCALE encoded extrinsic bytes.
+    /// Returns the SCALE encoded transaction bytes.
     pub fn encoded(&self) -> &[u8] {
         self.inner.encoded()
     }
 
-    /// Consumes [`SubmittableExtrinsic`] and returns the SCALE encoded
-    /// extrinsic bytes.
+    /// Consumes [`SubmittableTransaction`] and returns the SCALE encoded
+    /// transaction bytes.
     pub fn into_encoded(self) -> Vec<u8> {
         self.inner.into_encoded()
     }
 }
 
-impl<T, C> SubmittableExtrinsic<T, C>
+impl<T, C> SubmittableTransaction<T, C>
 where
     T: Config,
     C: OnlineClientT<T>,
 {
-    /// Submits the extrinsic to the chain.
+    /// Submits the transaction to the chain.
     ///
     /// Returns a [`TxProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
     pub async fn submit_and_watch(&self) -> Result<TxProgress<T, C>, Error> {
-        // Get a hash of the extrinsic (we'll need this later).
+        // Get a hash of the transaction (we'll need this later).
         let ext_hash = self.hash();
 
         // Submit and watch for transaction progress.
@@ -388,7 +497,7 @@ where
         Ok(TxProgress::new(sub, self.client.clone(), ext_hash))
     }
 
-    /// Submits the extrinsic to the chain for block inclusion.
+    /// Submits the transaction to the chain for block inclusion.
     ///
     /// It's usually better to call `submit_and_watch` to get an idea of the progress of the
     /// submission and whether it's eventually successful or not. This call does not guarantee
@@ -429,7 +538,7 @@ where
     /// Validate a transaction by submitting it to the relevant Runtime API. A transaction that is
     /// valid can be added to a block, but may still end up in an error state.
     ///
-    /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the extrinsic.
+    /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the transaction.
     pub async fn validate(&self) -> Result<ValidationResult, Error> {
         let latest_block_ref = self.client.backend().latest_finalized_block_ref().await?;
         self.validate_at(latest_block_ref).await
@@ -438,7 +547,7 @@ where
     /// Validate a transaction by submitting it to the relevant Runtime API. A transaction that is
     /// valid can be added to a block, but may still end up in an error state.
     ///
-    /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the extrinsic.
+    /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the transaction.
     pub async fn validate_at(
         &self,
         at: impl Into<BlockRef<T::Hash>>,
@@ -464,7 +573,7 @@ where
         ValidationResult::try_from_bytes(res)
     }
 
-    /// This returns an estimate for what the extrinsic is expected to cost to execute, less any tips.
+    /// This returns an estimate for what the transaction is expected to cost to execute, less any tips.
     /// The actual amount paid can vary from block to block based on node traffic and other factors.
     pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
         let mut params = self.encoded().to_vec();
@@ -484,6 +593,29 @@ where
             .await?;
         Ok(partial_fee)
     }
+}
+
+/// Fetch the latest block header and account nonce from the backend and use them to refine [`ExtrinsicParams::Params`].
+async fn inject_account_nonce_and_block<T: Config, Client: OnlineClientT<T>>(
+    client: &Client,
+    account_id: &T::AccountId,
+    params: &mut <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
+) -> Result<(), Error> {
+    use subxt_core::config::transaction_extensions::Params;
+
+    let block_ref = client.backend().latest_finalized_block_ref().await?;
+    let block_header = client
+        .backend()
+        .block_header(block_ref.hash())
+        .await?
+        .ok_or_else(|| Error::Block(BlockError::not_found(block_ref.hash())))?;
+    let account_nonce =
+        crate::blocks::get_account_nonce(client, account_id, block_ref.hash()).await?;
+
+    params.inject_account_nonce(account_nonce);
+    params.inject_block(block_header.number().into(), block_header.hash());
+
+    Ok(())
 }
 
 impl ValidationResult {
@@ -512,7 +644,7 @@ impl ValidationResult {
     }
 }
 
-/// The result of performing [`SubmittableExtrinsic::validate()`].
+/// The result of performing [`SubmittableTransaction::validate()`].
 #[derive(Clone, Debug, PartialEq)]
 pub enum ValidationResult {
     /// The transaction is valid
@@ -611,12 +743,12 @@ pub enum TransactionInvalid {
     ExhaustsResources,
     /// Any other custom invalid validity that is not covered by this enum.
     Custom(u8),
-    /// An extrinsic with a Mandatory dispatch resulted in Error. This is indicative of either a
+    /// An transaction with a Mandatory dispatch resulted in Error. This is indicative of either a
     /// malicious validator or a buggy `provide_inherent`. In any case, it can result in
     /// dangerously overweight blocks and therefore if found, invalidates the block.
     BadMandatory,
-    /// An extrinsic with a mandatory dispatch tried to be validated.
-    /// This is invalid; only inherent extrinsics are allowed to have mandatory dispatches.
+    /// An transaction with a mandatory dispatch tried to be validated.
+    /// This is invalid; only inherent transactions are allowed to have mandatory dispatches.
     MandatoryValidation,
     /// The sending address is disabled or known to be invalid.
     BadSigner,

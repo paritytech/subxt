@@ -113,8 +113,8 @@
 //! ]);
 //!
 //! // Construct the tx but don't sign it. The account nonce here defaults to 0.
-//! // You can use `create_partial_signed` to fetch the correct nonce.
-//! let partial_tx = client.tx().create_partial_signed_offline(
+//! // You can use `create_partial` to fetch the correct nonce.
+//! let mut partial_tx = client.tx().create_partial_offline(
 //!     &payload,
 //!     Default::default()
 //! )?;
@@ -126,16 +126,16 @@
 //! // Ultimately we need to be given back a `signature` (or really, anything
 //! // that can be SCALE encoded) and an `address`:
 //! let signature;
-//! let address;
+//! let account_id;
 //! # use subxt::tx::Signer;
 //! # let signer = subxt_signer::sr25519::dev::alice();
 //! # signature = signer.sign(&signer_payload).into();
-//! # address = signer.public_key().to_address();
+//! # account_id = signer.public_key().to_account_id();
 //!
 //! // Now we can build an tx, which one can call `submit` or `submit_and_watch`
 //! // on to submit to a node and optionally watch the status.
-//! let tx = partial_tx.sign_with_address_and_signature(
-//!     &address,
+//! let tx = partial_tx.sign_with_account_and_signature(
+//!     &account_id,
 //!     &signature
 //! );
 //! # Ok(())

@@ -190,9 +190,9 @@ async fn external_signing() {
     // Create a partial extrinsic. We can get the signer payload at this point, to be
     // signed externally.
     let tx = node_runtime::tx().preimage().note_preimage(vec![0u8]);
-    let partial_extrinsic = api
+    let mut partial_extrinsic = api
         .tx()
-        .create_partial_signed(&tx, &alice.public_key().into(), Default::default())
+        .create_partial(&tx, &alice.public_key().into(), Default::default())
         .await
         .unwrap();
 
@@ -202,7 +202,7 @@ async fn external_signing() {
     let signature = alice.sign(&signer_payload);
     // Use this to build a signed extrinsic.
     let extrinsic = partial_extrinsic
-        .sign_with_address_and_signature(&alice.public_key().into(), &signature.into());
+        .sign_with_account_and_signature(&alice.public_key().into(), &signature.into());
 
     // And now submit it.
     extrinsic

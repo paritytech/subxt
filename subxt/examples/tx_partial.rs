@@ -10,7 +10,7 @@ pub mod polkadot {}
 #[tokio::main]
 async fn main() -> Result<(), BoxedError> {
     // Spawned tasks require things held across await points to impl Send,
-    // so we use one to demonstrate that this is possible with `PartialExtrinsic`
+    // so we use one to demonstrate that this is possible with `PartialTransaction`
     tokio::spawn(signing_example()).await??;
     Ok(())
 }
@@ -25,9 +25,9 @@ async fn signing_example() -> Result<(), BoxedError> {
     let alice = dev::alice();
 
     // Create partial tx, ready to be signed.
-    let partial_tx = api
+    let mut partial_tx = api
         .tx()
-        .create_partial_signed(
+        .create_partial(
             &balance_transfer_tx,
             &alice.public_key().to_account_id(),
             Default::default(),
@@ -35,13 +35,13 @@ async fn signing_example() -> Result<(), BoxedError> {
         .await?;
 
     // Simulate taking some time to get a signature back, in part to
-    // show that the `PartialExtrinsic` can be held across await points.
+    // show that the `PartialTransaction` can be held across await points.
     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
     let signature = alice.sign(&partial_tx.signer_payload());
 
     // Sign the transaction.
     let tx = partial_tx
-        .sign_with_address_and_signature(&alice.public_key().to_address(), &signature.into());
+        .sign_with_account_and_signature(&alice.public_key().to_account_id(), &signature.into());
 
     // Submit it.
     tx.submit_and_watch()

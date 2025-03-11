@@ -131,7 +131,7 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         Ok(ExtrinsicExtensionInfo {
             extension_ids: self
                 .extrinsic()
-                .signed_extensions()
+                .transaction_extensions()
                 .iter()
                 .map(|f| ExtrinsicInfoArg {
                     name: Cow::Borrowed(f.identifier()),
@@ -601,10 +601,14 @@ pub struct ExtrinsicMetadata {
     signature_ty: u32,
     /// The type of the outermost Extra enum.
     extra_ty: u32,
-    /// Extrinsic version.
-    version: u8,
+    /// Which extrinsic versions are supported by this chain.
+    supported_versions: Vec<u8>,
     /// The signed extensions in the order they appear in the extrinsic.
-    signed_extensions: Vec<SignedExtensionMetadata>,
+    transaction_extensions: Vec<TransactionExtensionMetadata>,
+    /// Version of the transaction extensions.
+    // TODO [jsdw]: V16 metadata groups transaction extensions by version.
+    // need to work out what to do once there is more than one version to deal with.
+    transaction_extensions_version: u8,
 }
 
 impl ExtrinsicMetadata {
@@ -626,20 +630,25 @@ impl ExtrinsicMetadata {
         self.extra_ty
     }
 
-    /// Extrinsic version.
-    pub fn version(&self) -> u8 {
-        self.version
+    /// Which extrinsic versions are supported.
+    pub fn supported_versions(&self) -> &[u8] {
+        &self.supported_versions
     }
 
     /// The extra/additional information associated with the extrinsic.
-    pub fn signed_extensions(&self) -> &[SignedExtensionMetadata] {
-        &self.signed_extensions
+    pub fn transaction_extensions(&self) -> &[TransactionExtensionMetadata] {
+        &self.transaction_extensions
+    }
+
+    /// Which version are these transaction extensions?
+    pub fn transaction_extensions_version(&self) -> u8 {
+        self.transaction_extensions_version
     }
 }
 
 /// Metadata for the signed extensions used by extrinsics.
 #[derive(Debug, Clone)]
-pub struct SignedExtensionMetadata {
+pub struct TransactionExtensionMetadata {
     /// The unique signed extension identifier, which may be different from the type name.
     identifier: String,
     /// The type of the signed extension, with the data to be included in the extrinsic.
@@ -648,7 +657,7 @@ pub struct SignedExtensionMetadata {
     additional_ty: u32,
 }
 
-impl SignedExtensionMetadata {
+impl TransactionExtensionMetadata {
     /// The unique signed extension identifier, which may be different from the type name.
     pub fn identifier(&self) -> &str {
         &self.identifier

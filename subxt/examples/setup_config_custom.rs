@@ -2,7 +2,8 @@
 use codec::Encode;
 use subxt::client::ClientState;
 use subxt::config::{
-    Config, ExtrinsicParams, ExtrinsicParamsEncoder, ExtrinsicParamsError, RefineParams,
+    transaction_extensions::Params, Config, ExtrinsicParams, ExtrinsicParamsEncoder,
+    ExtrinsicParamsError,
 };
 use subxt_signer::sr25519::dev;
 
@@ -53,7 +54,7 @@ impl CustomExtrinsicParamsBuilder {
     }
 }
 
-impl<T: Config> RefineParams<T> for CustomExtrinsicParamsBuilder {}
+impl<T: Config> Params<T> for CustomExtrinsicParamsBuilder {}
 
 // Describe how to fetch and then encode the params:
 impl<T: Config> ExtrinsicParams<T> for CustomExtrinsicParams<T> {
@@ -69,14 +70,12 @@ impl<T: Config> ExtrinsicParams<T> for CustomExtrinsicParams<T> {
     }
 }
 
-impl<T: Config> RefineParams<T> for CustomExtrinsicParams<T> {}
-
 // Encode the relevant params when asked:
 impl<T: Config> ExtrinsicParamsEncoder for CustomExtrinsicParams<T> {
-    fn encode_extra_to(&self, v: &mut Vec<u8>) {
+    fn encode_value_to(&self, v: &mut Vec<u8>) {
         (self.tip, self.foo).encode_to(v);
     }
-    fn encode_additional_to(&self, v: &mut Vec<u8>) {
+    fn encode_implicit_to(&self, v: &mut Vec<u8>) {
         self.genesis_hash.encode_to(v)
     }
 }
