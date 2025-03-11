@@ -382,7 +382,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                         }
                         // These 5 mean that the stream will very likely end:
                         RpcTransactionStatus::FinalityTimeout(_) => {
-                            Some(TransactionStatus::Invalid {
+                            Some(TransactionStatus::Dropped {
                                 message: "Finality timeout".into(),
                             })
                         }
