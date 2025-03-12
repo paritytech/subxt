@@ -135,10 +135,10 @@ impl Executor {
                 "Metadata_metadata_at_version",
                 &version.encode(),
             )
-            .map_err(|_| {
-                CodegenError::Wasm(
-                    "method \"Metadata_metadata_at_version\" doesnt exist".to_owned(),
-                )
+            .map_err(|e| {
+                CodegenError::Wasm(format!(
+                    "Failed to call \"Metadata_metadata_at_version\" on WASM runtime. Cause: {e}"
+                ))
             })?;
         let Some(encoded_metadata) =
             <Option<Vec<u8>>>::decode(&mut &encoded_metadata[..]).map_err(CodegenError::Decode)?
