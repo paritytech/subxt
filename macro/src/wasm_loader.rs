@@ -113,7 +113,7 @@ impl Executor {
             .uncached_call(
                 self.runtime_blob.clone(),
                 &mut self.externalities,
-                false,
+                true,
                 "Metadata_metadata",
                 &[],
             )
@@ -133,7 +133,7 @@ impl Executor {
             .uncached_call(
                 self.runtime_blob.clone(),
                 &mut self.externalities,
-                false,
+                true,
                 "Metadata_metadata_at_version",
                 &version.encode(),
             )
