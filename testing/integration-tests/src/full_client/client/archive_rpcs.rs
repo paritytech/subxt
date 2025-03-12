@@ -10,7 +10,8 @@ use crate::{
     utils::{node_runtime, TestNodeProcess},
 };
 use codec::Encode;
-use futures::{Stream, StreamExt};
+use futures::{stream, Stream, StreamExt};
+use std::task::Poll;
 use subxt::{
     blocks::Block,
     client::OnlineClient,
@@ -33,6 +34,7 @@ async fn fetch_finalized_blocks<T: Config>(
         .subscribe_finalized()
         .await
         .expect("issue subscribing to finalized in fetch_finalized_blocks")
+        .skip(1) // <- skip first block incase next is close to being ready already.
         .take(n)
         .map(|r| r.expect("issue fetching block in fetch_finalized_blocks"))
 }
