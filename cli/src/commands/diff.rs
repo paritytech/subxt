@@ -230,7 +230,7 @@ impl StorageEntryDiff {
             .type_hash(value_1_ty_id)
             .expect("type is in metadata; qed");
         let value_2_ty_id = storage_entry_2.entry_type().value_ty();
-        let value_2_hash = metadata_1
+        let value_2_hash = metadata_2
             .type_hash(value_2_ty_id)
             .expect("type is in metadata; qed");
         let value_different = value_1_hash != value_2_hash;
