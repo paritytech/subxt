@@ -113,12 +113,14 @@ impl Executor {
             .uncached_call(
                 self.runtime_blob.clone(),
                 &mut self.externalities,
-                false,
+                true,
                 "Metadata_metadata",
                 &[],
             )
-            .map_err(|_| {
-                CodegenError::Wasm("method \"Metadata_metadata\" doesnt exist".to_owned())
+            .map_err(|e| {
+                CodegenError::Wasm(format!(
+                    "Failed to call \"Metadata_metadata\" on WASM runtime. Cause: {e}"
+                ))
             })?;
         let encoded_metadata =
             <Vec<u8>>::decode(&mut &encoded_metadata[..]).map_err(CodegenError::Decode)?;
@@ -131,14 +133,14 @@ impl Executor {
             .uncached_call(
                 self.runtime_blob.clone(),
                 &mut self.externalities,
-                false,
+                true,
                 "Metadata_metadata_at_version",
                 &version.encode(),
             )
-            .map_err(|_| {
-                CodegenError::Wasm(
-                    "method \"Metadata_metadata_at_version\" doesnt exist".to_owned(),
-                )
+            .map_err(|e| {
+                CodegenError::Wasm(format!(
+                    "Failed to call \"Metadata_metadata_at_version\" on WASM runtime. Cause: {e}"
+                ))
             })?;
         let Some(encoded_metadata) =
             <Option<Vec<u8>>>::decode(&mut &encoded_metadata[..]).map_err(CodegenError::Decode)?
