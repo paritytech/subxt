@@ -6,7 +6,7 @@ use crate::utils::{validate_url_security, FileOrUrl};
 use clap::Parser as ClapParser;
 use codec::{Decode, Encode};
 use color_eyre::eyre::{self, bail};
-use frame_metadata::{v15::RuntimeMetadataV15, RuntimeMetadata, RuntimeMetadataPrefixed};
+use frame_metadata::{v14::RuntimeMetadataV14, v15::RuntimeMetadataV15, v16::RuntimeMetadataV16, RuntimeMetadata, RuntimeMetadataPrefixed};
 use std::{io::Write, path::PathBuf};
 use subxt_metadata::Metadata;
 
@@ -43,11 +43,13 @@ pub struct Opts {
 pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> {
     validate_url_security(opts.file_or_url.url.as_ref(), opts.allow_insecure)?;
     let bytes = opts.file_or_url.fetch().await?;
+
     let mut metadata = RuntimeMetadataPrefixed::decode(&mut &bytes[..])?;
 
     let version = match &metadata.1 {
         RuntimeMetadata::V14(_) => Version::V14,
         RuntimeMetadata::V15(_) => Version::V15,
+        RuntimeMetadata::V16(_) => Version::V16,
         _ => Version::Unknown,
     };
 
@@ -68,8 +70,9 @@ pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> 
 
         // Convert back to wire format, preserving version:
         metadata = match version {
-            Version::V14 => RuntimeMetadataV15::from(md).into(),
+            Version::V14 => RuntimeMetadataV14::from(md).into(),
             Version::V15 => RuntimeMetadataV15::from(md).into(),
+            Version::V16 => RuntimeMetadataV16::from(md).into(),
             Version::Unknown => {
                 bail!("Unsupported metadata version; V14 or V15 metadata is expected.")
             }
@@ -107,5 +110,6 @@ pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> 
 enum Version {
     V14,
     V15,
+    V16,
     Unknown,
 }

@@ -8,19 +8,21 @@ use crate::utils::variant_index::VariantIndex;
 use crate::{
     utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, ExtrinsicMetadata, Metadata,
     OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner, RuntimeApiMethodMetadataInner,
-    MethodParamMetadata, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
-    StorageHasher, StorageMetadata, TransactionExtensionMetadataInner,
+    MethodParamMetadata, TransactionExtensionMetadataInner, StorageEntryMetadata,
+    StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata, PalletViewFunctionMetadataInner,
 };
-use alloc::vec;
-use alloc::vec::Vec;
-use alloc::collections::BTreeMap;
-use frame_metadata::v15;
+use frame_metadata::{v15, v16};
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;
 
-impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
+impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
     type Error = TryFromError;
-    fn try_from(m: v15::RuntimeMetadataV15) -> Result<Self, TryFromError> {
+    fn try_from(m: v16::RuntimeMetadataV16) -> Result<Self, TryFromError> {
+        let mut types = m.types;
+
+        // Use a dummy type for anything we have discarded and need a type ID for.
+        let dummy_type_id = crate::utils::push_dummy_type_to_registry(&mut types);
+
         let mut pallets = OrderedMap::new();
         let mut pallets_by_index = HashMap::new();
         for (pos, p) in m.pallets.into_iter().enumerate() {
@@ -41,13 +43,16 @@ impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
                 let name: ArcStr = c.name.clone().into();
                 (name.clone(), from_constant_metadata(name, c))
             });
+            let view_functions = p.view_functions
+                .into_iter()
+                .map(from_view_function_metadata);
 
             let call_variant_index =
-                VariantIndex::build(p.calls.as_ref().map(|c| c.ty.id), &m.types);
+                VariantIndex::build(p.calls.as_ref().map(|c| c.ty.id), &types);
             let error_variant_index =
-                VariantIndex::build(p.error.as_ref().map(|e| e.ty.id), &m.types);
+                VariantIndex::build(p.error.as_ref().map(|e| e.ty.id), &types);
             let event_variant_index =
-                VariantIndex::build(p.event.as_ref().map(|e| e.ty.id), &m.types);
+                VariantIndex::build(p.event.as_ref().map(|e| e.ty.id), &types);
 
             pallets_by_index.insert(p.index, pos);
             pallets.push_insert(
@@ -63,7 +68,7 @@ impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
                     error_ty: p.error.map(|e| e.ty.id),
                     error_variant_index,
                     constants: constants.collect(),
-                    view_functions: vec![],
+                    view_functions: view_functions.collect(),
                     docs: p.docs,
                 },
             );
@@ -74,18 +79,25 @@ impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
             (name.clone(), from_runtime_api_metadata(name, api))
         });
 
-        let dispatch_error_ty = m
-            .types
+        let custom_map = m.custom.map.into_iter().map(|(key, val)| {
+            let custom_val = v15::CustomValueMetadata {
+                ty: val.ty,
+                value: val.value
+            };
+            (key, custom_val)
+        }).collect();
+
+        let dispatch_error_ty = types
             .types
             .iter()
             .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
             .map(|ty| ty.id);
 
         Ok(Metadata {
-            types: m.types,
+            types,
             pallets,
             pallets_by_index,
-            extrinsic: from_extrinsic_metadata(m.extrinsic),
+            extrinsic: from_extrinsic_metadata(m.extrinsic, dummy_type_id),
             dispatch_error_ty,
             apis: apis.collect(),
             outer_enums: OuterEnumsMetadata {
@@ -93,57 +105,53 @@ impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
                 event_enum_ty: m.outer_enums.event_enum_ty.id,
                 error_enum_ty: m.outer_enums.error_enum_ty.id,
             },
-            custom: m.custom,
+            custom: v15::CustomMetadata { map: custom_map },
         })
     }
 }
 
-fn from_signed_extension_metadata(
-    value: v15::SignedExtensionMetadata<PortableForm>,
+fn from_transaction_extension_metadata(
+    value: v16::TransactionExtensionMetadata<PortableForm>,
 ) -> TransactionExtensionMetadataInner {
     TransactionExtensionMetadataInner {
         identifier: value.identifier,
         extra_ty: value.ty.id,
-        additional_ty: value.additional_signed.id,
+        additional_ty: value.implicit.id,
     }
 }
 
-fn from_extrinsic_metadata(value: v15::ExtrinsicMetadata<PortableForm>) -> ExtrinsicMetadata {
-    let transaction_extensions: Vec<_> = value
-        .signed_extensions
-        .into_iter()
-        .map(from_signed_extension_metadata)
-        .collect();
-
-    let transaction_extension_indexes = (0..transaction_extensions.len() as u32).collect();
-
+fn from_extrinsic_metadata(value: v16::ExtrinsicMetadata<PortableForm>, dummy_type_id: u32) -> ExtrinsicMetadata {
     ExtrinsicMetadata {
-        supported_versions: vec![value.version],
-        transaction_extensions,
+        supported_versions: value.versions,
+        transaction_extensions_by_version: value.transaction_extensions_by_version,
+        transaction_extensions: value
+            .transaction_extensions
+            .into_iter()
+            .map(from_transaction_extension_metadata)
+            .collect(),
         address_ty: value.address_ty.id,
-        call_ty: value.call_ty.id,
+        call_ty: dummy_type_id,
         signature_ty: value.signature_ty.id,
-        extra_ty: value.extra_ty.id,
-        transaction_extensions_by_version: BTreeMap::from_iter([(0, transaction_extension_indexes)]),
+        extra_ty: dummy_type_id,
     }
 }
 
-fn from_storage_hasher(value: v15::StorageHasher) -> StorageHasher {
+fn from_storage_hasher(value: v16::StorageHasher) -> StorageHasher {
     match value {
-        v15::StorageHasher::Blake2_128 => StorageHasher::Blake2_128,
-        v15::StorageHasher::Blake2_256 => StorageHasher::Blake2_256,
-        v15::StorageHasher::Blake2_128Concat => StorageHasher::Blake2_128Concat,
-        v15::StorageHasher::Twox128 => StorageHasher::Twox128,
-        v15::StorageHasher::Twox256 => StorageHasher::Twox256,
-        v15::StorageHasher::Twox64Concat => StorageHasher::Twox64Concat,
-        v15::StorageHasher::Identity => StorageHasher::Identity,
+        v16::StorageHasher::Blake2_128 => StorageHasher::Blake2_128,
+        v16::StorageHasher::Blake2_256 => StorageHasher::Blake2_256,
+        v16::StorageHasher::Blake2_128Concat => StorageHasher::Blake2_128Concat,
+        v16::StorageHasher::Twox128 => StorageHasher::Twox128,
+        v16::StorageHasher::Twox256 => StorageHasher::Twox256,
+        v16::StorageHasher::Twox64Concat => StorageHasher::Twox64Concat,
+        v16::StorageHasher::Identity => StorageHasher::Identity,
     }
 }
 
-fn from_storage_entry_type(value: v15::StorageEntryType<PortableForm>) -> StorageEntryType {
+fn from_storage_entry_type(value: v16::StorageEntryType<PortableForm>) -> StorageEntryType {
     match value {
-        v15::StorageEntryType::Plain(ty) => StorageEntryType::Plain(ty.id),
-        v15::StorageEntryType::Map {
+        v16::StorageEntryType::Plain(ty) => StorageEntryType::Plain(ty.id),
+        v16::StorageEntryType::Map {
             hashers,
             key,
             value,
@@ -155,16 +163,16 @@ fn from_storage_entry_type(value: v15::StorageEntryType<PortableForm>) -> Storag
     }
 }
 
-fn from_storage_entry_modifier(value: v15::StorageEntryModifier) -> StorageEntryModifier {
+fn from_storage_entry_modifier(value: v16::StorageEntryModifier) -> StorageEntryModifier {
     match value {
-        v15::StorageEntryModifier::Optional => StorageEntryModifier::Optional,
-        v15::StorageEntryModifier::Default => StorageEntryModifier::Default,
+        v16::StorageEntryModifier::Optional => StorageEntryModifier::Optional,
+        v16::StorageEntryModifier::Default => StorageEntryModifier::Default,
     }
 }
 
 fn from_storage_entry_metadata(
     name: ArcStr,
-    s: v15::StorageEntryMetadata<PortableForm>,
+    s: v16::StorageEntryMetadata<PortableForm>,
 ) -> StorageEntryMetadata {
     StorageEntryMetadata {
         name,
@@ -177,7 +185,7 @@ fn from_storage_entry_metadata(
 
 fn from_constant_metadata(
     name: ArcStr,
-    s: v15::PalletConstantMetadata<PortableForm>,
+    s: v16::PalletConstantMetadata<PortableForm>,
 ) -> ConstantMetadata {
     ConstantMetadata {
         name,
@@ -189,7 +197,7 @@ fn from_constant_metadata(
 
 fn from_runtime_api_metadata(
     name: ArcStr,
-    s: v15::RuntimeApiMetadata<PortableForm>,
+    s: v16::RuntimeApiMetadata<PortableForm>,
 ) -> RuntimeApiMetadataInner {
     RuntimeApiMetadataInner {
         name,
@@ -207,25 +215,38 @@ fn from_runtime_api_metadata(
 
 fn from_runtime_api_method_metadata(
     name: ArcStr,
-    s: v15::RuntimeApiMethodMetadata<PortableForm>,
+    s: v16::RuntimeApiMethodMetadata<PortableForm>,
 ) -> RuntimeApiMethodMetadataInner {
     RuntimeApiMethodMetadataInner {
         name,
         inputs: s
             .inputs
             .into_iter()
-            .map(from_runtime_api_method_param_metadata)
+            .map(|param| MethodParamMetadata {
+                name: param.name,
+                ty: param.ty.id,
+            })
             .collect(),
         output_ty: s.output.id,
         docs: s.docs,
     }
 }
 
-fn from_runtime_api_method_param_metadata(
-    s: v15::RuntimeApiMethodParamMetadata<PortableForm>,
-) -> MethodParamMetadata {
-    MethodParamMetadata {
+fn from_view_function_metadata(
+    s: v16::PalletViewFunctionMetadata<PortableForm>
+) -> PalletViewFunctionMetadataInner {
+    PalletViewFunctionMetadataInner {
         name: s.name,
-        ty: s.ty.id,
+        query_id: s.id,
+        inputs: s
+            .inputs
+            .into_iter()
+            .map(|param| MethodParamMetadata {
+                name: param.name,
+                ty: param.ty.id,
+            })
+        .collect(),
+        output_ty: s.output.id,
+        docs: s.docs,
     }
 }

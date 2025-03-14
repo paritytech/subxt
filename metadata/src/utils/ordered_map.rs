@@ -100,11 +100,6 @@ where
     pub fn values_mut(&mut self) -> &mut [V] {
         &mut self.values
     }
-
-    /// Return the underlying values.
-    pub fn into_values(self) -> Vec<V> {
-        self.values
-    }
 }
 
 impl<K, V> FromIterator<(K, V)> for OrderedMap<K, V>

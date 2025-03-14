@@ -299,8 +299,6 @@ fn iterate_metadata_types(metadata: &mut Metadata) -> impl Iterator<Item = &mut 
         types.push(&mut signed.additional_ty);
     }
 
-    types.push(&mut metadata.runtime_ty);
-
     // collect runtime_api_types
     for api in metadata.apis.values_mut() {
         for method in api.methods.values_mut() {

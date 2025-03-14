@@ -5,8 +5,7 @@
 //! Utility functions for metadata validation.
 
 use crate::{
-    CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, PalletMetadata,
-    RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType,
+    CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, PalletMetadata, PalletViewFunctionMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType
 };
 use alloc::vec::Vec;
 use hashbrown::HashMap;
@@ -357,65 +356,6 @@ fn get_storage_entry_hash(
     }
 }
 
-/// Get the hash corresponding to a single runtime API method.
-fn get_runtime_method_hash(
-    registry: &PortableRegistry,
-    trait_name: &str,
-    method_metadata: &RuntimeApiMethodMetadata,
-    outer_enum_hashes: &OuterEnumHashes,
-) -> Hash {
-    // The trait name is part of the runtime API call that is being
-    // generated for this method. Therefore the trait name is strongly
-    // connected to the method in the same way as a parameter is
-    // to the method.
-    let mut bytes = concat_and_hash2(
-        &hash(trait_name.as_bytes()),
-        &hash(method_metadata.name.as_bytes()),
-    );
-
-    for input in &method_metadata.inputs {
-        bytes = concat_and_hash3(
-            &bytes,
-            &hash(input.name.as_bytes()),
-            &get_type_hash(registry, input.ty, outer_enum_hashes),
-        );
-    }
-
-    bytes = concat_and_hash2(
-        &bytes,
-        &get_type_hash(registry, method_metadata.output_ty, outer_enum_hashes),
-    );
-
-    bytes
-}
-
-/// Obtain the hash of all of a runtime API trait, including all of its methods.
-pub fn get_runtime_trait_hash(
-    trait_metadata: RuntimeApiMetadata,
-    outer_enum_hashes: &OuterEnumHashes,
-) -> Hash {
-    let trait_name = &*trait_metadata.inner.name;
-    let method_bytes = trait_metadata
-        .methods()
-        .fold([0u8; HASH_LEN], |bytes, method_metadata| {
-            // We don't care what order the trait methods exist in, and want the hash to
-            // be identical regardless. For this, we can just XOR the hashes for each method
-            // together; we'll get the same output whichever order they are XOR'd together in,
-            // so long as each individual method is the same.
-            xor(
-                bytes,
-                get_runtime_method_hash(
-                    trait_metadata.types,
-                    trait_name,
-                    method_metadata,
-                    outer_enum_hashes,
-                ),
-            )
-        });
-
-    concat_and_hash2(&hash(trait_name.as_bytes()), &method_bytes)
-}
-
 fn get_custom_metadata_hash(
     custom_metadata: &CustomMetadata,
     outer_enum_hashes: &OuterEnumHashes,
@@ -484,17 +424,106 @@ pub fn get_call_hash(pallet: &PalletMetadata, call_name: &str) -> Option<Hash> {
     Some(hash)
 }
 
-/// Obtain the hash of a specific runtime API function, or an error if it's not found.
-pub fn get_runtime_api_hash(runtime_apis: &RuntimeApiMetadata, method_name: &str) -> Option<Hash> {
-    let trait_name = &*runtime_apis.inner.name;
-    let method_metadata = runtime_apis.method_by_name(method_name)?;
+/// Obtain the hash of a specific runtime API method, or an error if it's not found.
+pub fn get_runtime_api_hash(runtime_api: &RuntimeApiMethodMetadata, outer_enum_hashes: &OuterEnumHashes) -> Hash {
+    let registry = runtime_api.types;
 
-    Some(get_runtime_method_hash(
-        runtime_apis.types,
-        trait_name,
-        method_metadata,
-        &OuterEnumHashes::empty(),
-    ))
+    // The trait name is part of the runtime API call that is being
+    // generated for this method. Therefore the trait name is strongly
+    // connected to the method in the same way as a parameter is
+    // to the method.
+    let mut bytes = concat_and_hash2(
+        &hash(runtime_api.trait_name.as_bytes()),
+        &hash(runtime_api.name().as_bytes()),
+    );
+
+    for input in runtime_api.inputs() {
+        bytes = concat_and_hash3(
+            &bytes,
+            &hash(input.name.as_bytes()),
+            &get_type_hash(registry, input.ty, outer_enum_hashes),
+        );
+    }
+
+    bytes = concat_and_hash2(
+        &bytes,
+        &get_type_hash(registry, runtime_api.output_ty(), outer_enum_hashes),
+    );
+
+    bytes
+}
+
+/// Obtain the hash of all of a runtime API trait, including all of its methods.
+pub fn get_runtime_apis_hash(
+    trait_metadata: RuntimeApiMetadata,
+    outer_enum_hashes: &OuterEnumHashes,
+) -> Hash {
+    // Each API is already hashed considering the trait name, so we don't need
+    // to consider thr trait name again here.
+    trait_metadata
+        .methods()
+        .fold([0u8; HASH_LEN], |bytes, method_metadata| {
+            // We don't care what order the trait methods exist in, and want the hash to
+            // be identical regardless. For this, we can just XOR the hashes for each method
+            // together; we'll get the same output whichever order they are XOR'd together in,
+            // so long as each individual method is the same.
+            xor(
+                bytes,
+                get_runtime_api_hash(
+                    &method_metadata,
+                    outer_enum_hashes,
+                ),
+            )
+        })
+}
+
+/// Obtain the hash of a specific pallet view function, or an error if it's not found.
+pub fn get_pallet_view_function_hash(view_function: &PalletViewFunctionMetadata, outer_enum_hashes: &OuterEnumHashes) -> Hash {
+    let registry = view_function.types;
+
+    // The Query ID is `twox_128(pallet_name) ++ twox_128("fn_name(fnarg_types) -> return_ty")`.
+    let mut bytes = view_function.query_id();
+
+    // This only takes type _names_ into account, so we beef this up by combining with actual
+    // type hashes, in a similar approach to runtime APIs..
+    for input in view_function.inputs() {
+        bytes = concat_and_hash3(
+            &bytes,
+            &hash(input.name.as_bytes()),
+            &get_type_hash(registry, input.ty, outer_enum_hashes),
+        );
+    }
+
+    bytes = concat_and_hash2(
+        &bytes,
+        &get_type_hash(registry, view_function.output_ty(), outer_enum_hashes),
+    );
+
+    bytes
+}
+
+/// Obtain the hash of all of the view functions in a pallet, including all of its methods.
+fn get_pallet_view_functions_hash(
+    pallet_metadata: &PalletMetadata,
+    outer_enum_hashes: &OuterEnumHashes,
+) -> Hash {
+    // Each API is already hashed considering the trait name, so we don't need
+    // to consider thr trait name again here.
+    pallet_metadata
+        .view_functions()
+        .fold([0u8; HASH_LEN], |bytes, method_metadata| {
+            // We don't care what order the view functions are declared in, and want the hash to
+            // be identical regardless. For this, we can just XOR the hashes for each method
+            // together; we'll get the same output whichever order they are XOR'd together in,
+            // so long as each individual method is the same.
+            xor(
+                bytes,
+                get_pallet_view_function_hash(
+                    &method_metadata,
+                    outer_enum_hashes,
+                ),
+            )
+        })
 }
 
 /// Obtain the hash representation of a `frame_metadata::v15::PalletMetadata`.
@@ -540,14 +569,19 @@ pub fn get_pallet_hash(pallet: PalletMetadata, outer_enum_hashes: &OuterEnumHash
         }
         None => [0u8; HASH_LEN],
     };
+    let view_functions_bytes = get_pallet_view_functions_hash(
+        &pallet, 
+        outer_enum_hashes
+    );
 
     // Hash all of the above together:
-    concat_and_hash5(
+    concat_and_hash6(
         &call_bytes,
         &event_bytes,
         &error_bytes,
         &constant_bytes,
         &storage_bytes,
+        &view_functions_bytes
     )
 }
 
@@ -633,7 +667,7 @@ impl<'a> MetadataHasher<'a> {
                 // We don't care what order the runtime APIs are seen in, so XOR their
                 // hashes together to be order independent.
                 if should_hash {
-                    xor(bytes, get_runtime_trait_hash(api, &outer_enum_hashes))
+                    xor(bytes, get_runtime_apis_hash(api, &outer_enum_hashes))
                 } else {
                     bytes
                 }
@@ -641,18 +675,15 @@ impl<'a> MetadataHasher<'a> {
 
         let extrinsic_hash =
             get_extrinsic_hash(&metadata.types, &metadata.extrinsic, &outer_enum_hashes);
-        let runtime_hash =
-            get_type_hash(&metadata.types, metadata.runtime_ty(), &outer_enum_hashes);
         let custom_values_hash = self
             .include_custom_values
             .then(|| get_custom_metadata_hash(&metadata.custom(), &outer_enum_hashes))
             .unwrap_or_default();
 
-        concat_and_hash6(
+        concat_and_hash5(
             &pallet_hash,
             &apis_hash,
             &extrinsic_hash,
-            &runtime_hash,
             &outer_enum_hashes.combined_hash(),
             &custom_values_hash,
         )

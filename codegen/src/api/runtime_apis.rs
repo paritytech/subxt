@@ -33,7 +33,7 @@ fn generate_runtime_api(
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
 
-    let structs_and_methods: Vec<_> = api
+    let structs_and_methods = api
         .methods()
         .map(|method| {
             let method_name = format_ident!("{}", method.name());
@@ -126,13 +126,7 @@ fn generate_runtime_api(
                 }
             );
 
-            let Some(call_hash) = api.method_hash(method.name()) else {
-                return Err(CodegenError::MissingRuntimeApiMetadata(
-                    trait_name_str.to_owned(),
-                    method_name_str.to_owned(),
-                ))
-            };
-
+            let call_hash = method.hash();
             let method = quote!(
                 #docs
                 pub fn #method_name(&self, #( #fn_params, )* ) -> #crate_path::runtime_api::payload::StaticPayload<types::#struct_name, types::#method_name::output::Output> {
@@ -147,7 +141,7 @@ fn generate_runtime_api(
 
             Ok((struct_input, method))
         })
-        .collect::<Result<_, _>>()?;
+        .collect::<Result<Vec<_>, CodegenError>>()?;
 
     let trait_name = format_ident!("{}", trait_name_str);
 
