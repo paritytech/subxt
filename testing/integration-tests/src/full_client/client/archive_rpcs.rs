@@ -10,8 +10,7 @@ use crate::{
     utils::{node_runtime, TestNodeProcess},
 };
 use codec::Encode;
-use futures::{stream, Stream, StreamExt};
-use std::task::Poll;
+use futures::{Stream, StreamExt};
 use subxt::{
     blocks::Block,
     client::OnlineClient,

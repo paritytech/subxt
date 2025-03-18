@@ -100,12 +100,7 @@ impl MetadataTestRunnerCaseBuilder {
     ///
     /// The generated code will be tidied up when the `MetadataTestRunner` that
     /// this was handed out from is dropped.
-    pub fn build<M>(self, macro_metadata: M) -> String
-    where
-        M: TryInto<Metadata>,
-        M::Error: std::fmt::Debug,
-    {
-        let macro_metadata = macro_metadata.try_into().expect("can into Metadata");
+    pub fn build(self, macro_metadata: frame_metadata::RuntimeMetadataPrefixed) -> String {
         let validation_metadata = self
             .validation_metadata
             .unwrap_or_else(|| macro_metadata.clone());

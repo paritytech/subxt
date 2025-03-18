@@ -18,10 +18,7 @@ use scale_info::form::PortableForm;
 impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
     type Error = TryFromError;
     fn try_from(m: v16::RuntimeMetadataV16) -> Result<Self, TryFromError> {
-        let mut types = m.types;
-
-        // Use a dummy type for anything we have discarded and need a type ID for.
-        let dummy_type_id = crate::utils::push_dummy_type_to_registry(&mut types);
+        let types = m.types;
 
         let mut pallets = OrderedMap::new();
         let mut pallets_by_index = HashMap::new();
@@ -97,7 +94,7 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
             types,
             pallets,
             pallets_by_index,
-            extrinsic: from_extrinsic_metadata(m.extrinsic, dummy_type_id),
+            extrinsic: from_extrinsic_metadata(m.extrinsic),
             dispatch_error_ty,
             apis: apis.collect(),
             outer_enums: OuterEnumsMetadata {
@@ -120,7 +117,7 @@ fn from_transaction_extension_metadata(
     }
 }
 
-fn from_extrinsic_metadata(value: v16::ExtrinsicMetadata<PortableForm>, dummy_type_id: u32) -> ExtrinsicMetadata {
+fn from_extrinsic_metadata(value: v16::ExtrinsicMetadata<PortableForm>) -> ExtrinsicMetadata {
     ExtrinsicMetadata {
         supported_versions: value.versions,
         transaction_extensions_by_version: value.transaction_extensions_by_version,
@@ -130,9 +127,7 @@ fn from_extrinsic_metadata(value: v16::ExtrinsicMetadata<PortableForm>, dummy_ty
             .map(from_transaction_extension_metadata)
             .collect(),
         address_ty: value.address_ty.id,
-        call_ty: dummy_type_id,
         signature_ty: value.signature_ty.id,
-        extra_ty: dummy_type_id,
     }
 }
 

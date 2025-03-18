@@ -47,6 +47,11 @@ pub use utils::validation::MetadataHasher;
 
 type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;
 
+/// Utility functions to help with metadata related things.
+pub mod utilities {
+    pub use crate::utils::outer_enums::OuterEnums;
+}
+
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
 /// which is then decoded into this. We aim to preserve all of the existing information in
 /// the incoming metadata while optimizing the format a little for Subxt's use cases.
@@ -112,8 +117,8 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         &self,
     ) -> Result<ExtrinsicSignatureInfo<Self::TypeId>, ExtrinsicInfoError<'_>> {
         Ok(ExtrinsicSignatureInfo {
-            address_id: self.extrinsic().address_ty(),
-            signature_id: self.extrinsic().signature_ty(),
+            address_id: self.extrinsic().address_ty,
+            signature_id: self.extrinsic().signature_ty,
         })
     }
 
@@ -600,14 +605,12 @@ impl ConstantMetadata {
 /// Metadata for the extrinsic type.
 #[derive(Debug, Clone)]
 pub struct ExtrinsicMetadata {
-    /// The type of the address that signs the extrinsic
+    /// The type of the address that signs the extrinsic.
+    /// Used to help decode tx signatures.
     address_ty: u32,
-    /// The type of the outermost Call enum.
-    call_ty: u32,
     /// The type of the extrinsic's signature.
+    /// Used to help decode tx signatures.
     signature_ty: u32,
-    /// The type of the outermost Extra enum.
-    extra_ty: u32,
     /// Which extrinsic versions are supported by this chain.
     supported_versions: Vec<u8>,
     /// The signed extensions in the order they appear in the extrinsic.
@@ -619,24 +622,6 @@ pub struct ExtrinsicMetadata {
 }
 
 impl ExtrinsicMetadata {
-    /// The type of the address that signs the extrinsic
-    pub fn address_ty(&self) -> u32 {
-        self.address_ty
-    }
-
-    /// The type of the outermost Call enum.
-    pub fn call_ty(&self) -> u32 {
-        self.call_ty
-    }
-    /// The type of the extrinsic's signature.
-    pub fn signature_ty(&self) -> u32 {
-        self.signature_ty
-    }
-    /// The type of the outermost Extra enum.
-    pub fn extra_ty(&self) -> u32 {
-        self.extra_ty
-    }
-
     /// Which extrinsic versions are supported.
     pub fn supported_versions(&self) -> &[u8] {
         &self.supported_versions
@@ -795,7 +780,7 @@ pub struct RuntimeApiMethodMetadata<'a> {
 
 impl <'a> RuntimeApiMethodMetadata<'a> {
     /// Method name.
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'a str {
         &self.inner.name
     }
     /// Method documentation.

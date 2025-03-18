@@ -120,9 +120,7 @@ fn from_extrinsic_metadata(value: v14::ExtrinsicMetadata<PortableForm>, missing_
         supported_versions: vec![value.version],
         transaction_extensions,
         address_ty: missing_ids.address,
-        call_ty: missing_ids.call,
         signature_ty: missing_ids.signature,
-        extra_ty: missing_ids.extra,
         transaction_extensions_by_version: BTreeMap::from_iter([(0, transaction_extension_indexes)]),
     }
 }
@@ -189,44 +187,29 @@ fn from_constant_metadata(
 fn generate_outer_enums(
     metadata: &mut v14::RuntimeMetadataV14,
 ) -> Result<frame_metadata::v15::OuterEnums<scale_info::form::PortableForm>, TryFromError> {
-    let find_type = |name: &str| {
-        metadata.types.types.iter().find_map(|ty| {
-            let ident = ty.ty.path.ident()?;
+    let outer_enums = crate::utilities::OuterEnums::find_in(&metadata.types); 
 
-            if ident != name {
-                return None;
-            }
-
-            let scale_info::TypeDef::Variant(_) = &ty.ty.type_def else {
-                return None;
-            };
-
-            Some((ty.id, ty.ty.path.segments.clone()))
-        })
-    };
-
-    let Some((call_enum, mut call_path)) = find_type("RuntimeCall") else {
+    let Some(call_enum_id) = outer_enums.call_ty else {
         return Err(TryFromError::TypeNameNotFound("RuntimeCall".into()));
     };
-
-    let Some((event_enum, _)) = find_type("RuntimeEvent") else {
+    let Some(event_type_id) = outer_enums.event_ty else {
         return Err(TryFromError::TypeNameNotFound("RuntimeEvent".into()));
     };
+    let error_type_id = if let Some(id) = outer_enums.error_ty { id } else {
+        let call_enum = &metadata.types.types[call_enum_id as usize];
+        let mut error_path = call_enum.ty.path.segments.clone();
 
-    let error_enum = if let Some((error_enum, _)) = find_type("RuntimeError") {
-        error_enum
-    } else {
-        let Some(last) = call_path.last_mut() else {
+        let Some(last) = error_path.last_mut() else {
             return Err(TryFromError::InvalidTypePath("RuntimeCall".into()));
         };
         "RuntimeError".clone_into(last);
-        generate_outer_error_enum_type(metadata, call_path)
+        generate_outer_error_enum_type(metadata, error_path)
     };
 
     Ok(frame_metadata::v15::OuterEnums {
-        call_enum_ty: call_enum.into(),
-        event_enum_ty: event_enum.into(),
-        error_enum_ty: error_enum.into(),
+        call_enum_ty: call_enum_id.into(),
+        event_enum_ty: event_type_id.into(),
+        error_enum_ty: error_type_id.into(),
     })
 }
 
@@ -285,9 +268,7 @@ fn generate_outer_error_enum_type(
 
 fn generate_missing_extrinsic_type_ids(metadata: &v14::RuntimeMetadataV14) -> Result<MissingExtrinsicTypeIds, TryFromError> {
     const ADDRESS: &str = "Address";
-    const CALL: &str = "Call";
     const SIGNATURE: &str = "Signature";
-    const EXTRA: &str = "Extra";
 
     let extrinsic_id = metadata.extrinsic.ty.id;
     let Some(extrinsic_ty) = metadata.types.resolve(extrinsic_id) else {
@@ -306,21 +287,13 @@ fn generate_missing_extrinsic_type_ids(metadata: &v14::RuntimeMetadataV14) -> Re
     let Some(address) = find_param(ADDRESS) else {
         return Err(TryFromError::TypeNameNotFound(ADDRESS.into()));
     };
-    let Some(call) = find_param(CALL) else {
-        return Err(TryFromError::TypeNameNotFound(CALL.into()));
-    };
     let Some(signature) = find_param(SIGNATURE) else {
         return Err(TryFromError::TypeNameNotFound(SIGNATURE.into()));
-    };
-    let Some(extra) = find_param(EXTRA) else {
-        return Err(TryFromError::TypeNameNotFound(EXTRA.into()));
     };
 
     Ok(MissingExtrinsicTypeIds {
         address,
-        call,
         signature,
-        extra,
     })
 }
 
@@ -330,7 +303,5 @@ fn generate_missing_extrinsic_type_ids(metadata: &v14::RuntimeMetadataV14) -> Re
 #[derive(Clone,Copy)]
 struct MissingExtrinsicTypeIds {
     address: u32,
-    call: u32,
     signature: u32,
-    extra: u32,
 }

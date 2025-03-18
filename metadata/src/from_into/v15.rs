@@ -121,9 +121,7 @@ fn from_extrinsic_metadata(value: v15::ExtrinsicMetadata<PortableForm>) -> Extri
         supported_versions: vec![value.version],
         transaction_extensions,
         address_ty: value.address_ty.id,
-        call_ty: value.call_ty.id,
         signature_ty: value.signature_ty.id,
-        extra_ty: value.extra_ty.id,
         transaction_extensions_by_version: BTreeMap::from_iter([(0, transaction_extension_indexes)]),
     }
 }
