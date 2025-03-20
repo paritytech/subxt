@@ -322,9 +322,6 @@ impl RuntimeGenerator {
                         .hasher()
                         .only_these_pallets(&PALLETS)
                         .only_these_runtime_apis(&RUNTIME_APIS)
-                        .strip_call_enum_variants(CALL_ENUM_VARIANTS_MATCH_PALLETS)
-                        .strip_event_enum_variants(EVENT_ENUM_VARIANTS_MATCH_PALLETS)
-                        .strip_error_enum_variants(ERROR_ENUM_VARIANTS_MATCH_PALLETS)
                         .hash();
                     runtime_metadata_hash == [ #(#metadata_hash,)* ]
                 }

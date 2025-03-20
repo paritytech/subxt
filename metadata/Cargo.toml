@@ -30,6 +30,7 @@ thiserror = { workspace = true, default-features = false }
 bitvec = { workspace = true, features = ["alloc"] }
 criterion = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
+subxt-utils-stripmetadata = { workspace = true }
 
 [lib]
 # Without this, libtest cli opts interfere with criterion benches:

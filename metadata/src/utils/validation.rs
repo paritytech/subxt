@@ -564,9 +564,6 @@ pub struct MetadataHasher<'a> {
     metadata: &'a Metadata,
     specific_pallets: Option<Vec<&'a str>>,
     specific_runtime_apis: Option<Vec<&'a str>>,
-    strip_call_enum_variants: bool,
-    strip_event_enum_variants: bool,
-    strip_error_enum_variants: bool,
     include_custom_values: bool,
 }
 
@@ -577,9 +574,6 @@ impl<'a> MetadataHasher<'a> {
             metadata,
             specific_pallets: None,
             specific_runtime_apis: None,
-            strip_call_enum_variants: false,
-            strip_event_enum_variants: false,
-            strip_error_enum_variants: false,
             include_custom_values: true,
         }
     }
@@ -597,36 +591,6 @@ impl<'a> MetadataHasher<'a> {
     ) -> &mut Self {
         self.specific_runtime_apis =
             Some(specific_runtime_apis.iter().map(|n| n.as_ref()).collect());
-        self
-    }
-
-    /// Should we strip the variants of the "Call" outer enum to match the pallet names
-    /// given in [`Self::only_these_pallets`] when hashing said outer enum?
-    /// 
-    /// We'll want to do this if the metadata we want to compare the hash with was stripped,
-    /// and in doing so also had the variants of said enum stripped (which isn't a given).
-    pub fn strip_call_enum_variants(&mut self, b: bool) -> &mut Self {
-        self.strip_call_enum_variants = b;
-        self
-    }
-
-    /// Should we strip the variants of the "Call" outer enum to match the pallet names
-    /// given in [`Self::only_these_pallets`] when hashing said outer enum?
-    /// 
-    /// We'll want to do this if the metadata we want to compare the hash with was stripped,
-    /// and in doing so also had the variants of said enum stripped (which isn't a given).
-    pub fn strip_event_enum_variants(&mut self, b: bool) -> &mut Self {
-        self.strip_event_enum_variants = b;
-        self
-    }
-
-    /// Should we strip the variants of the "Call" outer enum to match the pallet names
-    /// given in [`Self::only_these_pallets`] when hashing said outer enum?
-    /// 
-    /// We'll want to do this if the metadata we want to compare the hash with was stripped,
-    /// and in doing so also had the variants of said enum stripped (which isn't a given).
-    pub fn strip_error_enum_variants(&mut self, b: bool) -> &mut Self {
-        self.strip_error_enum_variants = b;
         self
     }
 
@@ -1278,13 +1242,19 @@ mod tests {
 
     #[test]
     fn hash_comparison_trimmed_metadata() {
+        use subxt_utils_stripmetadata::StripMetadata;
+
         // trim the metadata:
         let metadata = metadata_with_pallet_events();
         let trimmed_metadata = {
             let mut m = metadata.clone();
-            m.(|e| e == "First", |_| true);
+            m.strip_metadata(|e| e == "First", |_| true);
             m
         };
+
+        // Now convert it into our inner repr:
+        let metadata = Metadata::try_from(metadata).unwrap();
+        let trimmed_metadata = Metadata::try_from(trimmed_metadata).unwrap();
 
         // test that the hashes are the same:
         let hash = MetadataHasher::new(&metadata)

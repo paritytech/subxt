@@ -5255,6 +5255,7 @@ dependencies = [
  "subxt-codegen",
  "subxt-metadata",
  "subxt-utils-fetchmetadata",
+ "subxt-utils-stripmetadata",
  "syn 2.0.87",
  "thiserror 2.0.12",
  "tokio",
@@ -5367,6 +5368,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-info",
  "sp-crypto-hashing",
+ "subxt-utils-stripmetadata",
  "thiserror 2.0.12",
 ]
 
