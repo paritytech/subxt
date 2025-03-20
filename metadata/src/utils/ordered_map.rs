@@ -3,7 +3,6 @@
 // see LICENSE for license details.
 
 use alloc::vec::Vec;
-use core::mem;
 use hashbrown::HashMap;
 
 /// A minimal ordered map to let one search for
@@ -44,32 +43,6 @@ where
         self.values.is_empty()
     }
 
-    /// Retain specific entries.
-    pub fn retain<F>(&mut self, mut f: F)
-    where
-        F: FnMut(&V) -> bool,
-    {
-        let values = mem::take(&mut self.values);
-        let map = mem::take(&mut self.map);
-
-        // Filter the values, storing a map from old to new positions:
-        let mut new_values = Vec::new();
-        let mut old_pos_to_new_pos = HashMap::new();
-        for (pos, value) in values.into_iter().enumerate().filter(|(_, v)| f(v)) {
-            old_pos_to_new_pos.insert(pos, new_values.len());
-            new_values.push(value);
-        }
-
-        // Update the values now we've filtered them:
-        self.values = new_values;
-
-        // Rebuild the map using the new positions:
-        self.map = map
-            .into_iter()
-            .filter_map(|(k, v)| old_pos_to_new_pos.get(&v).map(|v2| (k, *v2)))
-            .collect();
-    }
-
     /// Push/insert an item to the end of the map.
     pub fn push_insert(&mut self, key: K, value: V) {
         let idx = self.values.len();
@@ -95,11 +68,6 @@ where
     pub fn values(&self) -> &[V] {
         &self.values
     }
-
-    /// Mutable access to the underlying values.
-    pub fn values_mut(&mut self) -> &mut [V] {
-        &mut self.values
-    }
 }
 
 impl<K, V> FromIterator<(K, V)> for OrderedMap<K, V>
@@ -112,23 +80,5 @@ where
             map.push_insert(k, v)
         }
         map
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn retain() {
-        let mut m = OrderedMap::from_iter([(1, 'a'), (2, 'b'), (3, 'c')]);
-
-        m.retain(|v| *v != 'b');
-
-        assert_eq!(m.get_by_key(&1), Some(&'a'));
-        assert_eq!(m.get_by_key(&2), None);
-        assert_eq!(m.get_by_key(&3), Some(&'c'));
-
-        assert_eq!(m.values(), &['a', 'c'])
     }
 }

@@ -5,6 +5,7 @@
 //! Utility functions for working with v14 metadata.
 
 use scale_info::PortableRegistry;
+use crate::Metadata;
 
 /// Outer enum type IDs, if found
 pub struct OuterEnums {
@@ -17,16 +18,19 @@ pub struct OuterEnums {
 }
 
 impl OuterEnums {
-    /// Iterate over the available outer enum type IDs.
-    pub fn iter(&self) -> impl Iterator<Item = u32> + '_ {
-        self.call_ty
-            .iter()
-            .chain(self.event_ty.iter())
-            .chain(self.error_ty.iter())
-            .copied()
+    /// Generate this struct from the provided metadata.
+    pub fn from_metadata(metadata: &Metadata) -> Self {
+        let enums = metadata.outer_enums();
+
+        OuterEnums {
+            call_ty: Some(enums.call_enum_ty()),
+            event_ty: Some(enums.event_enum_ty()),
+            error_ty: Some(enums.error_enum_ty()),
+        }
     }
 
-    /// Search for the outer enums in some type registry
+    /// Search for the outer enums in some type registry. This is required for
+    /// V14 metadata, which doesn't explicitly state the IDs.
     pub fn find_in(types: &PortableRegistry) -> OuterEnums {
         let find_type = |name: &str| {
             types.types.iter().find_map(|ty| {
@@ -49,5 +53,14 @@ impl OuterEnums {
             event_ty: find_type("RuntimeEvent"),
             error_ty: find_type("RuntimeError")
         }
+    }
+
+    /// Iterate over the available outer enum type IDs.
+    pub fn iter(&self) -> impl Iterator<Item = u32> + '_ {
+        self.call_ty
+            .iter()
+            .chain(self.event_ty.iter())
+            .chain(self.error_ty.iter())
+            .copied()
     }
 }

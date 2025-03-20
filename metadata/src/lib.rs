@@ -34,8 +34,7 @@ use frame_decode::extrinsics::{
 use hashbrown::HashMap;
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
 use utils::{
-    ordered_map::OrderedMap, 
-    validation::outer_enum_hashes::OuterEnumHashes, 
+    ordered_map::OrderedMap,
     variant_index::VariantIndex,
     validation::{get_custom_value_hash, HASH_LEN},
 };
@@ -234,25 +233,12 @@ impl Metadata {
         MetadataHasher::new(self)
     }
 
-    /// Filter out any pallets and/or runtime_apis that we don't want to keep, retaining only those that we do.
-    /// Note:
-    /// only filter by `pallet`s will not lead to significant metadata size reduction because the return types are kept to ensure that those can be decoded.
-    ///
-    pub fn retain<F, G>(&mut self, pallet_filter: F, api_filter: G)
-    where
-        F: FnMut(&str) -> bool,
-        G: FnMut(&str) -> bool,
-    {
-        utils::retain::retain_metadata(self, pallet_filter, api_filter);
-    }
-
     /// Get type hash for a type in the registry
     pub fn type_hash(&self, id: u32) -> Option<[u8; HASH_LEN]> {
         self.types.resolve(id)?;
         Some(crate::utils::validation::get_type_hash(
             &self.types,
             id,
-            &OuterEnumHashes::empty(),
         ))
     }
 }
@@ -384,7 +370,7 @@ impl<'a> PalletMetadata<'a> {
 
     /// Return a hash for the entire pallet.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        crate::utils::validation::get_pallet_hash(*self, &OuterEnumHashes::empty())
+        crate::utils::validation::get_pallet_hash(*self)
     }
 }
 
@@ -756,7 +742,7 @@ impl<'a> RuntimeApiMetadata<'a> {
     }
     /// Return a hash for the runtime API trait.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        crate::utils::validation::get_runtime_apis_hash(*self, &OuterEnumHashes::empty())
+        crate::utils::validation::get_runtime_apis_hash(*self)
     }
 }
 
@@ -797,7 +783,7 @@ impl <'a> RuntimeApiMethodMetadata<'a> {
     }
     /// Return a hash for the method.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        crate::utils::validation::get_runtime_api_hash(self, &OuterEnumHashes::empty())
+        crate::utils::validation::get_runtime_api_hash(self)
     }
 }
 
@@ -935,7 +921,7 @@ impl<'a> CustomValueMetadata<'a> {
 
     /// Calculates the hash for the CustomValueMetadata.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        get_custom_value_hash(self, &OuterEnumHashes::empty())
+        get_custom_value_hash(self)
     }
 }
 

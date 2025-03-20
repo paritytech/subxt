@@ -17,6 +17,7 @@ members = [
     "subxt",
     "scripts/artifacts",
     "utils/fetch-metadata",
+    "utils/strip-metadata",
 ]
 
 # We exclude any crates that would depend on non mutually
@@ -160,6 +161,7 @@ subxt-signer = { version = "0.41.0", path = "signer", default-features = false }
 subxt-rpcs = { version = "0.41.0", path = "rpcs", default-features = false }
 subxt-lightclient = { version = "0.41.0", path = "lightclient", default-features = false }
 subxt-utils-fetchmetadata = { version = "0.41.0", path = "utils/fetch-metadata", default-features = false }
+subxt-utils-stripmetadata = { version = "0.41.0", path = "utils/strip-metadata", default-features = false }
 test-runtime = { path = "testing/test-runtime" }
 substrate-runner = { path = "testing/substrate-runner" }
 

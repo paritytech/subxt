@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-mod retain;
+mod strip_metadata;
 
 use crate::utils::{validate_url_security, FileOrUrl};
 use clap::Parser as ClapParser;
@@ -10,7 +10,7 @@ use codec::{Decode, Encode};
 use color_eyre::eyre::{self, bail};
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use std::{io::Write, path::PathBuf};
-use retain::RetainMetadata;
+use strip_metadata::StripMetadata;
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]
@@ -50,19 +50,19 @@ pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> 
 
     // Strip pallets or runtime APIs if names are provided:
     if opts.pallets.is_some() || opts.runtime_apis.is_some() {
-        let retain_pallets_fn: Box<dyn Fn(&str) -> bool> = match opts.pallets.as_ref() {
+        let keep_pallets_fn: Box<dyn Fn(&str) -> bool> = match opts.pallets.as_ref() {
             Some(pallets) => Box::new(|name| pallets.iter().any(|p| &**p == name)),
             None => Box::new(|_| true),
         };
-        let retain_runtime_apis_fn: Box<dyn Fn(&str) -> bool> = match opts.runtime_apis.as_ref() {
+        let keep_runtime_apis_fn: Box<dyn Fn(&str) -> bool> = match opts.runtime_apis.as_ref() {
             Some(apis) => Box::new(|name| apis.iter().any(|p| &**p == name)),
             None => Box::new(|_| true),
         };
 
         match &mut metadata.1 {
-            RuntimeMetadata::V14(md) => md.retain_metadata(retain_pallets_fn, retain_runtime_apis_fn),
-            RuntimeMetadata::V15(md) => md.retain_metadata(retain_pallets_fn, retain_runtime_apis_fn),
-            RuntimeMetadata::V16(md) => md.retain_metadata(retain_pallets_fn, retain_runtime_apis_fn),
+            RuntimeMetadata::V14(md) => md.strip_metadata(keep_pallets_fn, keep_runtime_apis_fn),
+            RuntimeMetadata::V15(md) => md.strip_metadata(keep_pallets_fn, keep_runtime_apis_fn),
+            RuntimeMetadata::V16(md) => md.strip_metadata(keep_pallets_fn, keep_runtime_apis_fn),
             _ => {
                 bail!("Unsupported metadata version for stripping pallets/runtime APIs: V14, V15 or V16 metadata is expected.")
             }

@@ -1,0 +1,28 @@
+[package]
+name = "subxt-utils-stripmetadata"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = true
+autotests = false
+
+license.workspace = true
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+description = "subxt utils strip metadata"
+
+[dependencies]
+frame-metadata = { workspace = true, features = ["std"] }
+scale-info = { workspace = true, features = ["std"] }
+
+[package.metadata.docs.rs]
+features = ["url"]
+rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.playground]
+default-features = true
+
+[lints]
+workspace = true

@@ -4,6 +4,5 @@
 
 pub mod outer_enums;
 pub mod ordered_map;
-pub mod retain;
 pub mod validation;
 pub mod variant_index;

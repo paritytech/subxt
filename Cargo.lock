@@ -5454,6 +5454,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "subxt-utils-stripmetadata"
+version = "0.41.0"
+dependencies = [
+ "frame-metadata 20.0.0",
+ "scale-info",
+]
+
+[[package]]
 name = "syn"
 version = "1.0.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
