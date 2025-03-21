@@ -141,7 +141,6 @@ pub async fn extension_signature_for_extrinsic(
         .metadata()
         .extrinsic()
         .transaction_extensions_by_version(0)
-        .iter()
         .map(|e| e.identifier().to_string())
         .collect();
     let tip = encode_then_hex(&Compact(0u128));
