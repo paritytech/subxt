@@ -612,9 +612,9 @@ pub mod api {
                             result_xcms_version,
                         },
                         [
-                            213u8, 102u8, 240u8, 124u8, 242u8, 201u8, 101u8, 134u8, 249u8, 6u8,
-                            49u8, 254u8, 193u8, 80u8, 38u8, 31u8, 72u8, 194u8, 16u8, 122u8, 219u8,
-                            14u8, 129u8, 240u8, 52u8, 6u8, 25u8, 143u8, 124u8, 200u8, 8u8, 10u8,
+                            157u8, 172u8, 23u8, 131u8, 81u8, 90u8, 231u8, 21u8, 28u8, 146u8, 182u8,
+                            212u8, 177u8, 166u8, 145u8, 162u8, 109u8, 82u8, 4u8, 38u8, 197u8, 73u8,
+                            177u8, 162u8, 51u8, 121u8, 53u8, 154u8, 80u8, 251u8, 93u8, 46u8,
                         ],
                     )
                 }
@@ -635,9 +635,10 @@ pub mod api {
                             xcm,
                         },
                         [
-                            86u8, 206u8, 52u8, 19u8, 192u8, 167u8, 206u8, 136u8, 172u8, 2u8, 2u8,
-                            19u8, 78u8, 110u8, 188u8, 124u8, 134u8, 212u8, 165u8, 2u8, 33u8, 0u8,
-                            97u8, 213u8, 202u8, 249u8, 173u8, 0u8, 52u8, 177u8, 245u8, 183u8,
+                            242u8, 150u8, 29u8, 160u8, 203u8, 165u8, 45u8, 72u8, 117u8, 52u8,
+                            178u8, 60u8, 16u8, 103u8, 63u8, 167u8, 202u8, 44u8, 11u8, 139u8, 169u8,
+                            37u8, 201u8, 49u8, 236u8, 243u8, 78u8, 176u8, 185u8, 203u8, 234u8,
+                            201u8,
                         ],
                     )
                 }
@@ -5446,9 +5447,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                86u8, 11u8, 9u8, 226u8, 205u8, 59u8, 71u8, 136u8, 166u8, 231u8, 0u8, 89u8, 102u8,
-                52u8, 199u8, 81u8, 28u8, 140u8, 162u8, 129u8, 147u8, 145u8, 137u8, 10u8, 230u8,
-                38u8, 129u8, 81u8, 57u8, 96u8, 106u8, 114u8,
+                112u8, 31u8, 38u8, 42u8, 200u8, 86u8, 165u8, 173u8, 22u8, 167u8, 141u8, 251u8,
+                65u8, 138u8, 166u8, 199u8, 237u8, 126u8, 228u8, 60u8, 177u8, 165u8, 89u8, 69u8,
+                141u8, 54u8, 87u8, 72u8, 94u8, 45u8, 163u8, 40u8,
             ]
     }
     pub mod system {
@@ -6637,9 +6638,10 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            43u8, 106u8, 111u8, 225u8, 86u8, 33u8, 146u8, 190u8, 54u8, 109u8, 5u8,
-                            17u8, 185u8, 91u8, 5u8, 170u8, 94u8, 102u8, 54u8, 12u8, 17u8, 172u8,
-                            176u8, 10u8, 14u8, 67u8, 107u8, 239u8, 233u8, 180u8, 197u8, 183u8,
+                            113u8, 63u8, 203u8, 58u8, 8u8, 164u8, 44u8, 71u8, 92u8, 109u8, 92u8,
+                            78u8, 112u8, 218u8, 208u8, 137u8, 49u8, 144u8, 56u8, 137u8, 101u8,
+                            142u8, 245u8, 71u8, 123u8, 93u8, 134u8, 123u8, 181u8, 111u8, 139u8,
+                            232u8,
                         ],
                     )
                 }
@@ -50322,7 +50324,7 @@ pub mod api {
             #[codec(dumb_trait_bound)]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            #[doc = "A XCM message was sent."]
+            #[doc = "An XCM message was sent."]
             pub struct Sent {
                 pub origin: sent::Origin,
                 pub destination: sent::Destination,
@@ -50339,6 +50341,62 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for Sent {
                 const PALLET: &'static str = "XcmPallet";
                 const EVENT: &'static str = "Sent";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "An XCM message failed to send."]
+            pub struct SendFailed {
+                pub origin: send_failed::Origin,
+                pub destination: send_failed::Destination,
+                pub error: send_failed::Error,
+                pub message_id: send_failed::MessageId,
+            }
+            pub mod send_failed {
+                use super::runtime_types;
+                pub type Origin = runtime_types::staging_xcm::v5::location::Location;
+                pub type Destination = runtime_types::staging_xcm::v5::location::Location;
+                pub type Error = runtime_types::xcm::v3::traits::SendError;
+                pub type MessageId = [::core::primitive::u8; 32usize];
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for SendFailed {
+                const PALLET: &'static str = "XcmPallet";
+                const EVENT: &'static str = "SendFailed";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+            #[codec(dumb_trait_bound)]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "An XCM message failed to process."]
+            pub struct ProcessXcmError {
+                pub origin: process_xcm_error::Origin,
+                pub error: process_xcm_error::Error,
+                pub message_id: process_xcm_error::MessageId,
+            }
+            pub mod process_xcm_error {
+                use super::runtime_types;
+                pub type Origin = runtime_types::staging_xcm::v5::location::Location;
+                pub type Error = runtime_types::xcm::v5::traits::Error;
+                pub type MessageId = [::core::primitive::u8; 32usize];
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for ProcessXcmError {
+                const PALLET: &'static str = "XcmPallet";
+                const EVENT: &'static str = "ProcessXcmError";
             }
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
@@ -65345,7 +65403,7 @@ pub mod api {
                         outcome: runtime_types::staging_xcm::v5::traits::Outcome,
                     },
                     #[codec(index = 1)]
-                    #[doc = "A XCM message was sent."]
+                    #[doc = "An XCM message was sent."]
                     Sent {
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         destination: runtime_types::staging_xcm::v5::location::Location,
@@ -65353,6 +65411,21 @@ pub mod api {
                         message_id: [::core::primitive::u8; 32usize],
                     },
                     #[codec(index = 2)]
+                    #[doc = "An XCM message failed to send."]
+                    SendFailed {
+                        origin: runtime_types::staging_xcm::v5::location::Location,
+                        destination: runtime_types::staging_xcm::v5::location::Location,
+                        error: runtime_types::xcm::v3::traits::SendError,
+                        message_id: [::core::primitive::u8; 32usize],
+                    },
+                    #[codec(index = 3)]
+                    #[doc = "An XCM message failed to process."]
+                    ProcessXcmError {
+                        origin: runtime_types::staging_xcm::v5::location::Location,
+                        error: runtime_types::xcm::v5::traits::Error,
+                        message_id: [::core::primitive::u8; 32usize],
+                    },
+                    #[codec(index = 4)]
                     #[doc = "Query response received which does not match a registered query. This may be because a"]
                     #[doc = "matching query was never registered, it may be because it is a duplicate response, or"]
                     #[doc = "because the query timed out."]
@@ -65360,14 +65433,14 @@ pub mod api {
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         query_id: ::core::primitive::u64,
                     },
-                    #[codec(index = 3)]
+                    #[codec(index = 5)]
                     #[doc = "Query response has been received and is ready for taking with `take_response`. There is"]
                     #[doc = "no registered notification call."]
                     ResponseReady {
                         query_id: ::core::primitive::u64,
                         response: runtime_types::staging_xcm::v5::Response,
                     },
-                    #[codec(index = 4)]
+                    #[codec(index = 6)]
                     #[doc = "Query response has been received and query is removed. The registered notification has"]
                     #[doc = "been dispatched and executed successfully."]
                     Notified {
@@ -65375,7 +65448,7 @@ pub mod api {
                         pallet_index: ::core::primitive::u8,
                         call_index: ::core::primitive::u8,
                     },
-                    #[codec(index = 5)]
+                    #[codec(index = 7)]
                     #[doc = "Query response has been received and query is removed. The registered notification"]
                     #[doc = "could not be dispatched because the dispatch weight is greater than the maximum weight"]
                     #[doc = "originally budgeted by this runtime for the query result."]
@@ -65386,7 +65459,7 @@ pub mod api {
                         actual_weight: runtime_types::sp_weights::weight_v2::Weight,
                         max_budgeted_weight: runtime_types::sp_weights::weight_v2::Weight,
                     },
-                    #[codec(index = 6)]
+                    #[codec(index = 8)]
                     #[doc = "Query response has been received and query is removed. There was a general error with"]
                     #[doc = "dispatching the notification call."]
                     NotifyDispatchError {
@@ -65394,7 +65467,7 @@ pub mod api {
                         pallet_index: ::core::primitive::u8,
                         call_index: ::core::primitive::u8,
                     },
-                    #[codec(index = 7)]
+                    #[codec(index = 9)]
                     #[doc = "Query response has been received and query is removed. The dispatch was unable to be"]
                     #[doc = "decoded into a `Call`; this might be due to dispatch function having a signature which"]
                     #[doc = "is not `(origin, QueryId, Response)`."]
@@ -65403,7 +65476,7 @@ pub mod api {
                         pallet_index: ::core::primitive::u8,
                         call_index: ::core::primitive::u8,
                     },
-                    #[codec(index = 8)]
+                    #[codec(index = 10)]
                     #[doc = "Expected query response has been received but the origin location of the response does"]
                     #[doc = "not match that expected. The query remains registered for a later, valid, response to"]
                     #[doc = "be received and acted upon."]
@@ -65414,7 +65487,7 @@ pub mod api {
                             runtime_types::staging_xcm::v5::location::Location,
                         >,
                     },
-                    #[codec(index = 9)]
+                    #[codec(index = 11)]
                     #[doc = "Expected query response has been received but the expected origin location placed in"]
                     #[doc = "storage by this runtime previously cannot be decoded. The query remains registered."]
                     #[doc = ""]
@@ -65426,17 +65499,17 @@ pub mod api {
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         query_id: ::core::primitive::u64,
                     },
-                    #[codec(index = 10)]
+                    #[codec(index = 12)]
                     #[doc = "Received query response has been read and removed."]
                     ResponseTaken { query_id: ::core::primitive::u64 },
-                    #[codec(index = 11)]
+                    #[codec(index = 13)]
                     #[doc = "Some assets have been placed in an asset trap."]
                     AssetsTrapped {
                         hash: ::subxt::ext::subxt_core::utils::H256,
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         assets: runtime_types::xcm::VersionedAssets,
                     },
-                    #[codec(index = 12)]
+                    #[codec(index = 14)]
                     #[doc = "An XCM version change notification message has been attempted to be sent."]
                     #[doc = ""]
                     #[doc = "The cost of sending it (borne by the chain) is included."]
@@ -65446,14 +65519,14 @@ pub mod api {
                         cost: runtime_types::staging_xcm::v5::asset::Assets,
                         message_id: [::core::primitive::u8; 32usize],
                     },
-                    #[codec(index = 13)]
+                    #[codec(index = 15)]
                     #[doc = "The supported version of a location has been changed. This might be through an"]
                     #[doc = "automatic notification or a manual intervention."]
                     SupportedVersionChanged {
                         location: runtime_types::staging_xcm::v5::location::Location,
                         version: ::core::primitive::u32,
                     },
-                    #[codec(index = 14)]
+                    #[codec(index = 16)]
                     #[doc = "A given location which had a version change subscription was dropped owing to an error"]
                     #[doc = "sending the notification to it."]
                     NotifyTargetSendFail {
@@ -65461,14 +65534,14 @@ pub mod api {
                         query_id: ::core::primitive::u64,
                         error: runtime_types::xcm::v5::traits::Error,
                     },
-                    #[codec(index = 15)]
+                    #[codec(index = 17)]
                     #[doc = "A given location which had a version change subscription was dropped owing to an error"]
                     #[doc = "migrating the location to our new XCM format."]
                     NotifyTargetMigrationFail {
                         location: runtime_types::xcm::VersionedLocation,
                         query_id: ::core::primitive::u64,
                     },
-                    #[codec(index = 16)]
+                    #[codec(index = 18)]
                     #[doc = "Expected query response has been received but the expected querier location placed in"]
                     #[doc = "storage by this runtime previously cannot be decoded. The query remains registered."]
                     #[doc = ""]
@@ -65480,7 +65553,7 @@ pub mod api {
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         query_id: ::core::primitive::u64,
                     },
-                    #[codec(index = 17)]
+                    #[codec(index = 19)]
                     #[doc = "Expected query response has been received but the querier location of the response does"]
                     #[doc = "not match the expected. The query remains registered for a later, valid, response to"]
                     #[doc = "be received and acted upon."]
@@ -65492,7 +65565,7 @@ pub mod api {
                             runtime_types::staging_xcm::v5::location::Location,
                         >,
                     },
-                    #[codec(index = 18)]
+                    #[codec(index = 20)]
                     #[doc = "A remote has requested XCM version change notification from us and we have honored it."]
                     #[doc = "A version information message is sent to them and its cost is included."]
                     VersionNotifyStarted {
@@ -65500,14 +65573,14 @@ pub mod api {
                         cost: runtime_types::staging_xcm::v5::asset::Assets,
                         message_id: [::core::primitive::u8; 32usize],
                     },
-                    #[codec(index = 19)]
+                    #[codec(index = 21)]
                     #[doc = "We have requested that a remote chain send us XCM version change notifications."]
                     VersionNotifyRequested {
                         destination: runtime_types::staging_xcm::v5::location::Location,
                         cost: runtime_types::staging_xcm::v5::asset::Assets,
                         message_id: [::core::primitive::u8; 32usize],
                     },
-                    #[codec(index = 20)]
+                    #[codec(index = 22)]
                     #[doc = "We have requested that a remote chain stops sending us XCM version change"]
                     #[doc = "notifications."]
                     VersionNotifyUnrequested {
@@ -65515,20 +65588,20 @@ pub mod api {
                         cost: runtime_types::staging_xcm::v5::asset::Assets,
                         message_id: [::core::primitive::u8; 32usize],
                     },
-                    #[codec(index = 21)]
+                    #[codec(index = 23)]
                     #[doc = "Fees were paid from a location for an operation (often for using `SendXcm`)."]
                     FeesPaid {
                         paying: runtime_types::staging_xcm::v5::location::Location,
                         fees: runtime_types::staging_xcm::v5::asset::Assets,
                     },
-                    #[codec(index = 22)]
+                    #[codec(index = 24)]
                     #[doc = "Some assets have been claimed from an asset trap"]
                     AssetsClaimed {
                         hash: ::subxt::ext::subxt_core::utils::H256,
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         assets: runtime_types::xcm::VersionedAssets,
                     },
-                    #[codec(index = 23)]
+                    #[codec(index = 25)]
                     #[doc = "A XCM version migration finished."]
                     VersionMigrationFinished { version: ::core::primitive::u32 },
                 }
@@ -75147,6 +75220,37 @@ pub mod api {
                         WeightNotComputable,
                         #[codec(index = 39)]
                         ExceedsStackLimit,
+                    }
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                        :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                    #[codec(dumb_trait_bound)]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    pub enum SendError {
+                        #[codec(index = 0)]
+                        NotApplicable,
+                        #[codec(index = 1)]
+                        Transport,
+                        #[codec(index = 2)]
+                        Unroutable,
+                        #[codec(index = 3)]
+                        DestinationUnsupported,
+                        #[codec(index = 4)]
+                        ExceedsMaxMessageSize,
+                        #[codec(index = 5)]
+                        MissingArgument,
+                        #[codec(index = 6)]
+                        Fees,
                     }
                 }
                 #[derive(
