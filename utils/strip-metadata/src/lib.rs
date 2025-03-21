@@ -13,10 +13,11 @@ use std::collections::BTreeSet;
 ///
 /// To implement the [`StripMetadata::strip_metadata`] method for a new metadata version, you'll probably:
 /// - Remove any pallets and runtime APIs from the metadata based on the filter functions.
-/// - Call `self.iterate_all_type_ids().collect()` to gather all of the type IDs to keep.
+/// - Call `self.iter_type_ids_mut().collect()` to gather all of the type IDs to keep.
 /// - This will require implementing [`IterateTypeIds`], which is the thing that iterates over all of the
 ///   type IDs still present in the metadata such that we know what we need to keep.
 /// - Call `self.types.retain(..)` to filter any types not matching the IDs above out of the registry.
+/// - Map type IDs found in the metadata to the new IDs that retain resulted in.
 pub trait StripMetadata {
     /// Strip out any pallets and runtime APIs for which the provided filter functions return false.
     fn strip_metadata<PalletFilter, RuntimeApiFilter>(
@@ -41,8 +42,14 @@ impl StripMetadata for v14::RuntimeMetadataV14 {
         self.pallets.retain(|pallet| keep_pallet(&pallet.name));
 
         // Iterate over the type IDs and retain any that we still need:
-        let keep_these_ids: BTreeSet<u32> = self.iterate_all_type_ids().collect();
-        self.types.retain(|id| keep_these_ids.contains(&id));
+        let keep_these_ids: BTreeSet<u32> = self.iter_type_ids_mut().map(|id| *id).collect();
+        let new_ids = self.types.retain(|id| keep_these_ids.contains(&id));
+
+        // Map IDs found in the metadata to new ones as needed after the retaining:
+        self.iter_type_ids_mut().for_each(|id| {
+            let Some(new_id) = new_ids.get(id) else { return };
+            *id = *new_id;
+        });
     }
 }
 
@@ -60,8 +67,14 @@ impl StripMetadata for v15::RuntimeMetadataV15 {
         self.apis.retain(|api| keep_runtime_api(&api.name));
 
         // Iterate over the type IDs and retain any that we still need:
-        let keep_these_ids: BTreeSet<u32> = self.iterate_all_type_ids().collect();
-        self.types.retain(|id| keep_these_ids.contains(&id));
+        let keep_these_ids: BTreeSet<u32> = self.iter_type_ids_mut().map(|id| *id).collect();
+        let new_ids = self.types.retain(|id| keep_these_ids.contains(&id));
+
+        // Map IDs found in the metadata to new ones as needed after the retaining:
+        self.iter_type_ids_mut().for_each(|id| {
+            let Some(new_id) = new_ids.get(id) else { return };
+            *id = *new_id;
+        });
     }
 }
 
@@ -79,8 +92,14 @@ impl StripMetadata for v16::RuntimeMetadataV16 {
         self.apis.retain(|api| keep_runtime_api(&api.name));
 
         // Iterate over the type IDs and retain any that we still need:
-        let keep_these_ids: BTreeSet<u32> = self.iterate_all_type_ids().collect();
-        self.types.retain(|id| keep_these_ids.contains(&id));
+        let keep_these_ids: BTreeSet<u32> = self.iter_type_ids_mut().map(|id| *id).collect();
+        let new_ids = self.types.retain(|id| keep_these_ids.contains(&id));
+
+        // Map IDs found in the metadata to new ones as needed after the retaining:
+        self.iter_type_ids_mut().for_each(|id| {
+            let Some(new_id) = new_ids.get(id) else { return };
+            *id = *new_id;
+        });
     }
 }
 
@@ -90,32 +109,32 @@ impl StripMetadata for v16::RuntimeMetadataV16 {
 /// ones we can remove).
 trait IterateTypeIds {
     /// This should iterate over all type IDs found in the metadata.
-    fn iterate_all_type_ids(&self) -> impl Iterator<Item = u32>;
+    fn iter_type_ids_mut(&mut self) -> impl Iterator<Item = &mut u32>;
 }
 
 impl IterateTypeIds for v14::RuntimeMetadataV14 {
-    fn iterate_all_type_ids(&self) -> impl Iterator<Item = u32> {
+    fn iter_type_ids_mut(&mut self) -> impl Iterator<Item = &mut u32> {
         // Gather pallet types:
-        let pallet_types = self.pallets.iter().flat_map(|pallet| {
-            let pallet_call_types = pallet.calls.as_ref().into_iter().map(|calls| calls.ty.id);
+        let pallet_types = self.pallets.iter_mut().flat_map(|pallet| {
+            let pallet_call_types = pallet.calls.as_mut().into_iter().map(|calls| &mut calls.ty.id);
 
             let pallet_storage_types = pallet
                 .storage
-                .as_ref()
+                .as_mut()
                 .into_iter()
-                .flat_map(|s| &s.entries)
-                .flat_map(|storage_entry| match &storage_entry.ty {
-                    v14::StorageEntryType::Plain(ty) => Either::A(core::iter::once(ty.id)),
+                .flat_map(|s| &mut s.entries)
+                .flat_map(|storage_entry| match &mut storage_entry.ty {
+                    v14::StorageEntryType::Plain(ty) => Either::A(core::iter::once(&mut ty.id)),
                     v14::StorageEntryType::Map { key, value, .. } => {
-                        Either::B([key.id, value.id].into_iter())
+                        Either::B([&mut key.id, &mut value.id].into_iter())
                     }
                 });
 
-            let pallet_constant_types = pallet.constants.iter().map(|constant| constant.ty.id);
+            let pallet_constant_types = pallet.constants.iter_mut().map(|constant| &mut constant.ty.id);
 
-            let pallet_event_type = pallet.event.as_ref().into_iter().map(|events| events.ty.id);
+            let pallet_event_type = pallet.event.as_mut().into_iter().map(|events| &mut events.ty.id);
 
-            let pallet_error_type = pallet.error.as_ref().into_iter().map(|error| error.ty.id);
+            let pallet_error_type = pallet.error.as_mut().into_iter().map(|error| &mut error.ty.id);
 
             pallet_call_types
                 .chain(pallet_storage_types)
@@ -128,14 +147,14 @@ impl IterateTypeIds for v14::RuntimeMetadataV14 {
         let transaction_extension_types = self
             .extrinsic
             .signed_extensions
-            .iter()
-            .flat_map(|ext| [ext.ty.id, ext.additional_signed.id].into_iter());
+            .iter_mut()
+            .flat_map(|ext| [&mut ext.ty.id, &mut ext.additional_signed.id].into_iter());
 
         // The extrinsic type:
-        let extrinsic_type_id = self.extrinsic.ty.id;
+        let extrinsic_type_id = &mut self.extrinsic.ty.id;
 
         // Subxt needs this type so we preserve it regardless:
-        let dispatch_error_ty = iter_dispatch_error_type(&self.types);
+        let dispatch_error_ty = iter_dispatch_error_type(&mut self.types);
 
         // Return all IDs gathered:
         pallet_types
@@ -146,28 +165,28 @@ impl IterateTypeIds for v14::RuntimeMetadataV14 {
 }
 
 impl IterateTypeIds for v15::RuntimeMetadataV15 {
-    fn iterate_all_type_ids(&self) -> impl Iterator<Item = u32> {
+    fn iter_type_ids_mut(&mut self) -> impl Iterator<Item = &mut u32> {
         // Gather pallet types:
-        let pallet_types = self.pallets.iter().flat_map(|pallet| {
-            let pallet_call_types = pallet.calls.as_ref().into_iter().map(|calls| calls.ty.id);
+        let pallet_types = self.pallets.iter_mut().flat_map(|pallet| {
+            let pallet_call_types = pallet.calls.as_mut().into_iter().map(|calls| &mut calls.ty.id);
 
             let pallet_storage_types = pallet
                 .storage
-                .as_ref()
+                .as_mut()
                 .into_iter()
-                .flat_map(|s| &s.entries)
-                .flat_map(|storage_entry| match &storage_entry.ty {
-                    v15::StorageEntryType::Plain(ty) => Either::A(core::iter::once(ty.id)),
-                    v15::StorageEntryType::Map { key, value, .. } => {
-                        Either::B([key.id, value.id].into_iter())
+                .flat_map(|s| &mut s.entries)
+                .flat_map(|storage_entry| match &mut storage_entry.ty {
+                    v14::StorageEntryType::Plain(ty) => Either::A(core::iter::once(&mut ty.id)),
+                    v14::StorageEntryType::Map { key, value, .. } => {
+                        Either::B([&mut key.id, &mut value.id].into_iter())
                     }
                 });
 
-            let pallet_constant_types = pallet.constants.iter().map(|constant| constant.ty.id);
+            let pallet_constant_types = pallet.constants.iter_mut().map(|constant| &mut constant.ty.id);
 
-            let pallet_event_type = pallet.event.as_ref().into_iter().map(|events| events.ty.id);
+            let pallet_event_type = pallet.event.as_mut().into_iter().map(|events| &mut events.ty.id);
 
-            let pallet_error_type = pallet.error.as_ref().into_iter().map(|error| error.ty.id);
+            let pallet_error_type = pallet.error.as_mut().into_iter().map(|error| &mut error.ty.id);
 
             pallet_call_types
                 .chain(pallet_storage_types)
@@ -179,41 +198,41 @@ impl IterateTypeIds for v15::RuntimeMetadataV15 {
         // Runtime APIs:
         let runtime_api_types = self
             .apis
-            .iter()
-            .flat_map(|api| &api.methods)
+            .iter_mut()
+            .flat_map(|api| &mut api.methods)
             .flat_map(|method| {
-                let method_inputs = method.inputs.iter().map(|input| input.ty.id);
-                let method_output = method.output.id;
+                let method_inputs = method.inputs.iter_mut().map(|input| &mut input.ty.id);
+                let method_output = &mut method.output.id;
                 method_inputs.chain(core::iter::once(method_output))
             });
 
         // The extrinsic type IDs:
         let extrinsic_type_ids = [
-            self.extrinsic.call_ty.id,
-            self.extrinsic.address_ty.id,
-            self.extrinsic.extra_ty.id,
-            self.extrinsic.signature_ty.id,
+            &mut self.extrinsic.call_ty.id,
+            &mut self.extrinsic.address_ty.id,
+            &mut self.extrinsic.extra_ty.id,
+            &mut self.extrinsic.signature_ty.id,
         ];
 
         // Outer enum type IDs:
         let outer_enum_type_ids = [
-            self.outer_enums.call_enum_ty.id,
-            self.outer_enums.event_enum_ty.id,
-            self.outer_enums.error_enum_ty.id,
+            &mut self.outer_enums.call_enum_ty.id,
+            &mut self.outer_enums.event_enum_ty.id,
+            &mut self.outer_enums.error_enum_ty.id,
         ];
 
         // Transaction Extension types:
         let transaction_extension_types = self
             .extrinsic
             .signed_extensions
-            .iter()
-            .flat_map(|ext| [ext.ty.id, ext.additional_signed.id].into_iter());
+            .iter_mut()
+            .flat_map(|ext| [&mut ext.ty.id, &mut ext.additional_signed.id].into_iter());
 
         // Custom types:
-        let custom_type_ids = self.custom.map.values().map(|value| value.ty.id);
+        let custom_type_ids = self.custom.map.values_mut().map(|value| &mut value.ty.id);
 
         // Subxt needs this type so we preserve it regardless:
-        let dispatch_error_ty = iter_dispatch_error_type(&self.types);
+        let dispatch_error_ty = iter_dispatch_error_type(&mut self.types);
 
         // Return all IDs gathered:
         pallet_types
@@ -227,40 +246,40 @@ impl IterateTypeIds for v15::RuntimeMetadataV15 {
 }
 
 impl IterateTypeIds for v16::RuntimeMetadataV16 {
-    fn iterate_all_type_ids(&self) -> impl Iterator<Item = u32> {
+    fn iter_type_ids_mut(&mut self) -> impl Iterator<Item = &mut u32> {
         // Gather pallet types:
-        let pallet_types = self.pallets.iter().flat_map(|pallet| {
-            let pallet_call_types = pallet.calls.as_ref().into_iter().map(|calls| calls.ty.id);
+        let pallet_types = self.pallets.iter_mut().flat_map(|pallet| {
+            let pallet_call_types = pallet.calls.as_mut().into_iter().map(|calls| &mut calls.ty.id);
 
             let pallet_storage_types = pallet
                 .storage
-                .as_ref()
+                .as_mut()
                 .into_iter()
-                .flat_map(|s| &s.entries)
-                .flat_map(|storage_entry| match &storage_entry.ty {
-                    v16::StorageEntryType::Plain(ty) => Either::A(core::iter::once(ty.id)),
+                .flat_map(|s| &mut s.entries)
+                .flat_map(|storage_entry| match &mut storage_entry.ty {
+                    v16::StorageEntryType::Plain(ty) => Either::A(core::iter::once(&mut ty.id)),
                     v16::StorageEntryType::Map { key, value, .. } => {
-                        Either::B([key.id, value.id].into_iter())
+                        Either::B([&mut key.id, &mut value.id].into_iter())
                     }
                 });
 
-            let pallet_constant_types = pallet.constants.iter().map(|constant| constant.ty.id);
+            let pallet_constant_types = pallet.constants.iter_mut().map(|constant| &mut constant.ty.id);
 
-            let pallet_event_type = pallet.event.as_ref().into_iter().map(|events| events.ty.id);
+            let pallet_event_type = pallet.event.as_mut().into_iter().map(|events| &mut events.ty.id);
 
-            let pallet_error_type = pallet.error.as_ref().into_iter().map(|error| error.ty.id);
+            let pallet_error_type = pallet.error.as_mut().into_iter().map(|error| &mut error.ty.id);
 
-            let pallet_view_fns = pallet.view_functions.iter().flat_map(|vf| {
-                let inputs = vf.inputs.iter().map(|input| input.ty.id);
-                let output = vf.output.id;
+            let pallet_view_fns = pallet.view_functions.iter_mut().flat_map(|vf| {
+                let inputs = vf.inputs.iter_mut().map(|input| &mut input.ty.id);
+                let output = &mut vf.output.id;
 
                 inputs.chain(core::iter::once(output))
             });
 
             let pallet_associated_types = pallet
                 .associated_types
-                .iter()
-                .map(|associated_type| associated_type.ty.id);
+                .iter_mut()
+                .map(|associated_type| &mut associated_type.ty.id);
 
             pallet_call_types
                 .chain(pallet_storage_types)
@@ -274,36 +293,36 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
         // Runtime APIs:
         let runtime_api_types = self
             .apis
-            .iter()
-            .flat_map(|api| &api.methods)
+            .iter_mut()
+            .flat_map(|api| &mut api.methods)
             .flat_map(|method| {
-                let method_inputs = method.inputs.iter().map(|input| input.ty.id);
-                let method_output = method.output.id;
+                let method_inputs = method.inputs.iter_mut().map(|input| &mut input.ty.id);
+                let method_output = &mut method.output.id;
                 method_inputs.chain(core::iter::once(method_output))
             });
 
         // The extrinsic type IDs:
-        let extrinsic_type_ids = [self.extrinsic.address_ty.id, self.extrinsic.signature_ty.id];
+        let extrinsic_type_ids = [&mut self.extrinsic.address_ty.id, &mut self.extrinsic.signature_ty.id];
 
         // Outer enum type IDs:
         let outer_enum_type_ids = [
-            self.outer_enums.call_enum_ty.id,
-            self.outer_enums.event_enum_ty.id,
-            self.outer_enums.error_enum_ty.id,
+            &mut self.outer_enums.call_enum_ty.id,
+            &mut self.outer_enums.event_enum_ty.id,
+            &mut self.outer_enums.error_enum_ty.id,
         ];
 
         // Transaction Extension types:
         let transaction_extension_types = self
             .extrinsic
             .transaction_extensions
-            .iter()
-            .flat_map(|ext| [ext.ty.id, ext.implicit.id].into_iter());
+            .iter_mut()
+            .flat_map(|ext| [&mut ext.ty.id, &mut ext.implicit.id].into_iter());
 
         // Custom types:
-        let custom_type_ids = self.custom.map.values().map(|value| value.ty.id);
+        let custom_type_ids = self.custom.map.values_mut().map(|value| &mut value.ty.id);
 
         // Subxt needs this type so we preserve it regardless:
-        let dispatch_error_ty = iter_dispatch_error_type(&self.types);
+        let dispatch_error_ty = iter_dispatch_error_type(&mut self.types);
 
         // Return all IDs gathered:
         pallet_types
@@ -318,14 +337,15 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
 
 /// Subxt needs this type so we always ensure to preserve it
 /// even if it's not explicitly mentioned anywhere:
-fn iter_dispatch_error_type(types: &PortableRegistry) -> impl Iterator<Item = u32> + '_ {
+fn iter_dispatch_error_type(types: &mut PortableRegistry) -> impl Iterator<Item = &mut u32> {
     core::iter::once_with(|| {
-        types
+        let ty = types
             .types
-            .iter()
+            .iter_mut()
             .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
-            .expect("Metadata must contain sp_runtime::DispatchError")
-            .id
+            .expect("Metadata must contain sp_runtime::DispatchError");
+
+        &mut ty.id
     })
 }
 
