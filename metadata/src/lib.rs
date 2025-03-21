@@ -136,9 +136,7 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         let extension_ids = self
             .extrinsic()
             .transaction_extensions_by_version(extension_version)
-            .ok_or_else(|| ExtrinsicInfoError::ExtrinsicExtensionVersionNotFound {
-                extension_version,
-            })?
+            .ok_or(ExtrinsicInfoError::ExtrinsicExtensionVersionNotFound { extension_version })?
             .map(|f| ExtrinsicInfoArg {
                 name: Cow::Borrowed(f.identifier()),
                 id: f.extra_ty(),
@@ -627,7 +625,7 @@ impl ExtrinsicMetadata {
                 .expect("transaction extension should exist if index is in transaction_extensions_by_version");
 
             TransactionExtensionMetadata {
-                identifier: &*tx_metadata.identifier,
+                identifier: &tx_metadata.identifier,
                 extra_ty: tx_metadata.extra_ty,
                 additional_ty: tx_metadata.additional_ty,
             }
@@ -813,7 +811,7 @@ pub struct PalletViewFunctionMetadata<'a> {
     types: &'a PortableRegistry,
 }
 
-impl<'a> PalletViewFunctionMetadata<'a> {
+impl PalletViewFunctionMetadata<'_> {
     /// Method name.
     pub fn name(&self) -> &str {
         &self.inner.name
