@@ -5944,6 +5944,7 @@ dependencies = [
  "scale-info",
  "subxt",
  "subxt-metadata",
+ "subxt-utils-stripmetadata",
  "trybuild",
 ]
 

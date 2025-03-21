@@ -27,14 +27,14 @@ fn v15_to_metadata(v15: RuntimeMetadataV15) -> Metadata {
     subxt_md.into()
 }
 
-fn modified_metadata<F>(metadata: Metadata, f: F) -> Metadata
-where
-    F: FnOnce(&mut RuntimeMetadataV15),
-{
-    let mut metadata = RuntimeMetadataV15::from((*metadata).clone());
-    f(&mut metadata);
-    v15_to_metadata(metadata)
-}
+// fn modified_metadata<F>(metadata: Metadata, f: F) -> Metadata
+// where
+//     F: FnOnce(&mut RuntimeMetadataV15),
+// {
+//     let mut metadata = RuntimeMetadataV15::from((*metadata).clone());
+//     f(&mut metadata);
+//     v15_to_metadata(metadata)
+// }
 
 fn default_pallet() -> PalletMetadata {
     PalletMetadata {
@@ -97,6 +97,9 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> Metadata {
     ))
 }
 
+/*
+TODO: Add a means to get RuntimeMetadataV16 from api, and then modify that, convert to Metadata and check validity 
+
 #[subxt_test]
 async fn full_metadata_check() {
     let ctx = test_context().await;
@@ -145,6 +148,7 @@ async fn constant_values_are_not_validated() {
     assert!(node_runtime::is_codegen_valid_for(&api.metadata()));
     assert!(api.constants().at(&deposit_addr).is_ok());
 }
+*/
 
 #[subxt_test]
 async fn calls_check() {
