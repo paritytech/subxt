@@ -98,7 +98,7 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> Metadata {
 }
 
 /*
-TODO: Add a means to get RuntimeMetadataV16 from api, and then modify that, convert to Metadata and check validity 
+TODO: Add a means to get RuntimeMetadataV16 from api, and then modify that, convert to Metadata and check validity
 
 #[subxt_test]
 async fn full_metadata_check() {

@@ -16,16 +16,19 @@ mod runtime_apis;
 mod storage;
 mod utils;
 
-use frame_metadata::{RuntimeMetadataPrefixed, RuntimeMetadata};
-use subxt_utils_stripmetadata::StripMetadata;
 use crate::utils::MetadataTestRunner;
+use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
+use subxt_utils_stripmetadata::StripMetadata;
 
 // Each of these tests leads to some rust code being compiled and
 // executed to test that compilation is successful (or errors in the
 // way that we'd expect).
 
-fn strip_metadata<Pallets, Apis>(metadata: &mut RuntimeMetadataPrefixed, pallets: Pallets, apis: Apis) 
-where
+fn strip_metadata<Pallets, Apis>(
+    metadata: &mut RuntimeMetadataPrefixed,
+    pallets: Pallets,
+    apis: Apis,
+) where
     Pallets: Fn(&str) -> bool,
     Apis: Fn(&str) -> bool,
 {
@@ -33,7 +36,10 @@ where
         RuntimeMetadata::V14(m) => m.strip_metadata(pallets, apis),
         RuntimeMetadata::V15(m) => m.strip_metadata(pallets, apis),
         RuntimeMetadata::V16(m) => m.strip_metadata(pallets, apis),
-        m => panic!("Metadata should be V14, V15 or V16, but is V{}", m.version())
+        m => panic!(
+            "Metadata should be V14, V15 or V16, but is V{}",
+            m.version()
+        ),
     }
 }
 
@@ -128,8 +134,8 @@ fn ui_tests() {
         let mut validation_metadata = MetadataTestRunner::load_metadata();
         strip_metadata(
             &mut validation_metadata,
-            |p| p != "Claims", 
-            |r| r != "Metadata"
+            |p| p != "Claims",
+            |r| r != "Metadata",
         );
 
         t.pass(

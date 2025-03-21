@@ -7,13 +7,13 @@ use super::TryFromError;
 use crate::utils::variant_index::VariantIndex;
 use crate::{
     utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, ExtrinsicMetadata, Metadata,
-    OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner, RuntimeApiMethodMetadataInner,
-    MethodParamMetadata, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
+    MethodParamMetadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
+    RuntimeApiMethodMetadataInner, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
     StorageHasher, StorageMetadata, TransactionExtensionMetadataInner,
 };
+use alloc::collections::BTreeMap;
 use alloc::vec;
 use alloc::vec::Vec;
-use alloc::collections::BTreeMap;
 use frame_metadata::v15;
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;
@@ -122,7 +122,10 @@ fn from_extrinsic_metadata(value: v15::ExtrinsicMetadata<PortableForm>) -> Extri
         transaction_extensions,
         address_ty: value.address_ty.id,
         signature_ty: value.signature_ty.id,
-        transaction_extensions_by_version: BTreeMap::from_iter([(0, transaction_extension_indexes)]),
+        transaction_extensions_by_version: BTreeMap::from_iter([(
+            0,
+            transaction_extension_indexes,
+        )]),
     }
 }
 

@@ -23,10 +23,10 @@ mod from_into;
 mod utils;
 
 use alloc::borrow::Cow;
+use alloc::collections::BTreeMap;
 use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
-use alloc::collections::BTreeMap;
 use frame_decode::extrinsics::{
     ExtrinsicCallInfo, ExtrinsicExtensionInfo, ExtrinsicInfoArg, ExtrinsicInfoError,
     ExtrinsicSignatureInfo,
@@ -35,8 +35,8 @@ use hashbrown::HashMap;
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
 use utils::{
     ordered_map::OrderedMap,
-    variant_index::VariantIndex,
     validation::{get_custom_value_hash, HASH_LEN},
+    variant_index::VariantIndex,
 };
 
 type ArcStr = Arc<str>;
@@ -129,13 +129,16 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
             // We have some transaction, probably a V4 one with no extension version,
             // but our metadata may support multiple versions. Use the metadata to decide
             // what version to assume we'll decode it as.
-            self.extrinsic().transaction_extension_version_to_use_for_decoding()
+            self.extrinsic()
+                .transaction_extension_version_to_use_for_decoding()
         });
 
         let extension_ids = self
             .extrinsic()
             .transaction_extensions_by_version(extension_version)
-            .ok_or_else(|| ExtrinsicInfoError::ExtrinsicExtensionVersionNotFound { extension_version })?
+            .ok_or_else(|| ExtrinsicInfoError::ExtrinsicExtensionVersionNotFound {
+                extension_version,
+            })?
             .map(|f| ExtrinsicInfoArg {
                 name: Cow::Borrowed(f.identifier()),
                 id: f.extra_ty(),
@@ -236,10 +239,7 @@ impl Metadata {
     /// Get type hash for a type in the registry
     pub fn type_hash(&self, id: u32) -> Option<[u8; HASH_LEN]> {
         self.types.resolve(id)?;
-        Some(crate::utils::validation::get_type_hash(
-            &self.types,
-            id,
-        ))
+        Some(crate::utils::validation::get_type_hash(&self.types, id))
     }
 }
 
@@ -302,12 +302,13 @@ impl<'a> PalletMetadata<'a> {
 
     /// Return an iterator over the View Functions in this pallet, if any.
     pub fn view_functions(&self) -> impl ExactSizeIterator<Item = PalletViewFunctionMetadata<'a>> {
-        self.inner.view_functions.iter().map(|vf: &'a _| {
-            PalletViewFunctionMetadata {
+        self.inner
+            .view_functions
+            .iter()
+            .map(|vf: &'a _| PalletViewFunctionMetadata {
                 inner: vf,
-                types: self.types
-            }
-        })
+                types: self.types,
+            })
     }
 
     /// Return all of the call variants, if a call type exists.
@@ -614,7 +615,10 @@ impl ExtrinsicMetadata {
     }
 
     /// The extra/additional information associated with the extrinsic.
-    pub fn transaction_extensions_by_version(&self, version: u8) -> Option<impl Iterator<Item = TransactionExtensionMetadata<'_>>> {
+    pub fn transaction_extensions_by_version(
+        &self,
+        version: u8,
+    ) -> Option<impl Iterator<Item = TransactionExtensionMetadata<'_>>> {
         let extension_indexes = self.transaction_extensions_by_version.get(&version)?;
         let iter = extension_indexes.iter().map(|index| {
             let tx_metadata = self
@@ -661,7 +665,7 @@ struct TransactionExtensionMetadataInner {
     additional_ty: u32,
 }
 
-impl <'a> TransactionExtensionMetadata<'a> {
+impl<'a> TransactionExtensionMetadata<'a> {
     /// The unique signed extension identifier, which may be different from the type name.
     pub fn identifier(&self) -> &'a str {
         self.identifier
@@ -722,23 +726,26 @@ impl<'a> RuntimeApiMetadata<'a> {
     }
     /// An iterator over the trait methods.
     pub fn methods(&self) -> impl ExactSizeIterator<Item = RuntimeApiMethodMetadata<'a>> {
-        self.inner.methods.values().iter().map(|item| {
-            RuntimeApiMethodMetadata {
+        self.inner
+            .methods
+            .values()
+            .iter()
+            .map(|item| RuntimeApiMethodMetadata {
                 trait_name: &self.inner.name,
                 inner: item,
-                types: self.types
-            }
-        })
+                types: self.types,
+            })
     }
     /// Get a specific trait method given its name.
     pub fn method_by_name(&self, name: &str) -> Option<RuntimeApiMethodMetadata<'a>> {
-        self.inner.methods.get_by_key(name).map(|item| {
-            RuntimeApiMethodMetadata {
+        self.inner
+            .methods
+            .get_by_key(name)
+            .map(|item| RuntimeApiMethodMetadata {
                 trait_name: &self.inner.name,
                 inner: item,
-                types: self.types
-            }
-        })
+                types: self.types,
+            })
     }
     /// Return a hash for the runtime API trait.
     pub fn hash(&self) -> [u8; HASH_LEN] {
@@ -761,10 +768,10 @@ struct RuntimeApiMetadataInner {
 pub struct RuntimeApiMethodMetadata<'a> {
     trait_name: &'a str,
     inner: &'a RuntimeApiMethodMetadataInner,
-    types: &'a PortableRegistry
+    types: &'a PortableRegistry,
 }
 
-impl <'a> RuntimeApiMethodMetadata<'a> {
+impl<'a> RuntimeApiMethodMetadata<'a> {
     /// Method name.
     pub fn name(&self) -> &'a str {
         &self.inner.name
@@ -841,7 +848,7 @@ struct PalletViewFunctionMetadataInner {
     /// Output type.
     output_ty: u32,
     /// Documentation.
-    docs: Vec<String>
+    docs: Vec<String>,
 }
 
 /// Metadata for a single input parameter to a runtime API method / pallet view function.

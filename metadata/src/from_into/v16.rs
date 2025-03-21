@@ -7,9 +7,10 @@ use super::TryFromError;
 use crate::utils::variant_index::VariantIndex;
 use crate::{
     utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, ExtrinsicMetadata, Metadata,
-    OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner, RuntimeApiMethodMetadataInner,
-    MethodParamMetadata, TransactionExtensionMetadataInner, StorageEntryMetadata,
-    StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata, PalletViewFunctionMetadataInner,
+    MethodParamMetadata, OuterEnumsMetadata, PalletMetadataInner, PalletViewFunctionMetadataInner,
+    RuntimeApiMetadataInner, RuntimeApiMethodMetadataInner, StorageEntryMetadata,
+    StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
+    TransactionExtensionMetadataInner,
 };
 use frame_metadata::{v15, v16};
 use hashbrown::HashMap;
@@ -40,12 +41,12 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
                 let name: ArcStr = c.name.clone().into();
                 (name.clone(), from_constant_metadata(name, c))
             });
-            let view_functions = p.view_functions
+            let view_functions = p
+                .view_functions
                 .into_iter()
                 .map(from_view_function_metadata);
 
-            let call_variant_index =
-                VariantIndex::build(p.calls.as_ref().map(|c| c.ty.id), &types);
+            let call_variant_index = VariantIndex::build(p.calls.as_ref().map(|c| c.ty.id), &types);
             let error_variant_index =
                 VariantIndex::build(p.error.as_ref().map(|e| e.ty.id), &types);
             let event_variant_index =
@@ -76,13 +77,18 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
             (name.clone(), from_runtime_api_metadata(name, api))
         });
 
-        let custom_map = m.custom.map.into_iter().map(|(key, val)| {
-            let custom_val = v15::CustomValueMetadata {
-                ty: val.ty,
-                value: val.value
-            };
-            (key, custom_val)
-        }).collect();
+        let custom_map = m
+            .custom
+            .map
+            .into_iter()
+            .map(|(key, val)| {
+                let custom_val = v15::CustomValueMetadata {
+                    ty: val.ty,
+                    value: val.value,
+                };
+                (key, custom_val)
+            })
+            .collect();
 
         let dispatch_error_ty = types
             .types
@@ -228,7 +234,7 @@ fn from_runtime_api_method_metadata(
 }
 
 fn from_view_function_metadata(
-    s: v16::PalletViewFunctionMetadata<PortableForm>
+    s: v16::PalletViewFunctionMetadata<PortableForm>,
 ) -> PalletViewFunctionMetadataInner {
     PalletViewFunctionMetadataInner {
         name: s.name,
@@ -240,7 +246,7 @@ fn from_view_function_metadata(
                 name: param.name,
                 ty: param.ty.id,
             })
-        .collect(),
+            .collect(),
         output_ty: s.output.id,
         docs: s.docs,
     }

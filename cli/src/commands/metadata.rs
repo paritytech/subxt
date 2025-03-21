@@ -2,13 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use subxt_utils_stripmetadata::StripMetadata;
 use crate::utils::{validate_url_security, FileOrUrl};
 use clap::Parser as ClapParser;
 use codec::{Decode, Encode};
 use color_eyre::eyre::{self, bail};
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use std::{io::Write, path::PathBuf};
+use subxt_utils_stripmetadata::StripMetadata;
 
 /// Download metadata from a substrate node, for use with `subxt` codegen.
 #[derive(Debug, ClapParser)]

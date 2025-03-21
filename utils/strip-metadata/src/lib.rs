@@ -5,12 +5,12 @@
 //! This utility crate provides a [`StripMetadata`] trait which exposes a [`StripMetadata::strip_metadata`] method
 //! able to remove pallets and runtime APIs from the metadata in question.
 
-use std::collections::BTreeSet;
-use frame_metadata::{ v14, v15, v16 };
+use frame_metadata::{v14, v15, v16};
 use scale_info::PortableRegistry;
+use std::collections::BTreeSet;
 
 /// This trait is implemented for metadata versions to enable us to strip pallets and runtime APIs from them.
-/// 
+///
 /// To implement the [`StripMetadata::strip_metadata`] method for a new metadata version, you'll probably:
 /// - Remove any pallets and runtime APIs from the metadata based on the filter functions.
 /// - Call `self.iterate_all_type_ids().collect()` to gather all of the type IDs to keep.
@@ -23,8 +23,7 @@ pub trait StripMetadata {
         &mut self,
         keep_pallet: PalletFilter,
         keep_runtime_api: RuntimeApiFilter,
-    )
-    where
+    ) where
         PalletFilter: Fn(&str) -> bool,
         RuntimeApiFilter: Fn(&str) -> bool;
 }
@@ -34,19 +33,16 @@ impl StripMetadata for v14::RuntimeMetadataV14 {
         &mut self,
         keep_pallet: PalletFilter,
         _keep_runtime_api: RuntimeApiFilter,
-    )
-    where
+    ) where
         PalletFilter: Fn(&str) -> bool,
-        RuntimeApiFilter: Fn(&str) -> bool 
+        RuntimeApiFilter: Fn(&str) -> bool,
     {
         // Throw away pallets we don't care about:
-        self.pallets.retain(|pallet| {
-            keep_pallet(&pallet.name)
-        });
+        self.pallets.retain(|pallet| keep_pallet(&pallet.name));
 
         // Iterate over the type IDs and retain any that we still need:
         let keep_these_ids: BTreeSet<u32> = self.iterate_all_type_ids().collect();
-        self.types.retain(|id | keep_these_ids.contains(&id));
+        self.types.retain(|id| keep_these_ids.contains(&id));
     }
 }
 
@@ -55,22 +51,17 @@ impl StripMetadata for v15::RuntimeMetadataV15 {
         &mut self,
         keep_pallet: PalletFilter,
         keep_runtime_api: RuntimeApiFilter,
-    )
-    where
+    ) where
         PalletFilter: Fn(&str) -> bool,
-        RuntimeApiFilter: Fn(&str) -> bool 
+        RuntimeApiFilter: Fn(&str) -> bool,
     {
         // Throw away pallets and runtime APIs we don't care about:
-        self.pallets.retain(|pallet| {
-            keep_pallet(&pallet.name)
-        });
-        self.apis.retain(|api| {
-            keep_runtime_api(&api.name)
-        });
+        self.pallets.retain(|pallet| keep_pallet(&pallet.name));
+        self.apis.retain(|api| keep_runtime_api(&api.name));
 
         // Iterate over the type IDs and retain any that we still need:
         let keep_these_ids: BTreeSet<u32> = self.iterate_all_type_ids().collect();
-        self.types.retain(|id | keep_these_ids.contains(&id));
+        self.types.retain(|id| keep_these_ids.contains(&id));
     }
 }
 
@@ -79,66 +70,52 @@ impl StripMetadata for v16::RuntimeMetadataV16 {
         &mut self,
         keep_pallet: PalletFilter,
         keep_runtime_api: RuntimeApiFilter,
-    )
-    where
+    ) where
         PalletFilter: Fn(&str) -> bool,
-        RuntimeApiFilter: Fn(&str) -> bool 
+        RuntimeApiFilter: Fn(&str) -> bool,
     {
         // Throw away pallets and runtime APIs we don't care about:
-        self.pallets.retain(|pallet| {
-            keep_pallet(&pallet.name)
-        });
-        self.apis.retain(|api| {
-            keep_runtime_api(&api.name)
-        });
+        self.pallets.retain(|pallet| keep_pallet(&pallet.name));
+        self.apis.retain(|api| keep_runtime_api(&api.name));
 
         // Iterate over the type IDs and retain any that we still need:
         let keep_these_ids: BTreeSet<u32> = self.iterate_all_type_ids().collect();
-        self.types.retain(|id | keep_these_ids.contains(&id));
+        self.types.retain(|id| keep_these_ids.contains(&id));
     }
 }
 
 /// This trait is implemented for metadatas, and its purpose is to hand back iterators over
 /// all of the type IDs (doesn't need to recurse into them) that are used in the metadata,
-/// so that we know which ones we need to keep around in the type registry (and thus which 
+/// so that we know which ones we need to keep around in the type registry (and thus which
 /// ones we can remove).
 trait IterateTypeIds {
     /// This should iterate over all type IDs found in the metadata.
-    fn iterate_all_type_ids(&self) -> impl Iterator<Item=u32>;
+    fn iterate_all_type_ids(&self) -> impl Iterator<Item = u32>;
 }
 
 impl IterateTypeIds for v14::RuntimeMetadataV14 {
-    fn iterate_all_type_ids(&self) -> impl Iterator<Item=u32> {
+    fn iterate_all_type_ids(&self) -> impl Iterator<Item = u32> {
         // Gather pallet types:
         let pallet_types = self.pallets.iter().flat_map(|pallet| {
-            let pallet_call_types = pallet.calls.as_ref().into_iter().map(|calls| {
-                calls.ty.id
-            });
+            let pallet_call_types = pallet.calls.as_ref().into_iter().map(|calls| calls.ty.id);
 
-            let pallet_storage_types = pallet.storage.as_ref().into_iter().flat_map(|s| {
-                &s.entries
-            }).flat_map(|storage_entry| {
-                match &storage_entry.ty {
-                    v14::StorageEntryType::Plain(ty) => {
-                        Either::A(core::iter::once(ty.id))
-                    }
-                    v14::StorageEntryType::Map { key, value, ..} => {
+            let pallet_storage_types = pallet
+                .storage
+                .as_ref()
+                .into_iter()
+                .flat_map(|s| &s.entries)
+                .flat_map(|storage_entry| match &storage_entry.ty {
+                    v14::StorageEntryType::Plain(ty) => Either::A(core::iter::once(ty.id)),
+                    v14::StorageEntryType::Map { key, value, .. } => {
                         Either::B([key.id, value.id].into_iter())
                     }
-                }
-            });
+                });
 
-            let pallet_constant_types = pallet.constants.iter().map(|constant| {
-                constant.ty.id
-            });
-    
-            let pallet_event_type = pallet.event.as_ref().into_iter().map(|events| {
-                events.ty.id
-            });
-    
-            let pallet_error_type = pallet.error.as_ref().into_iter().map(|error| {
-                error.ty.id
-            });
+            let pallet_constant_types = pallet.constants.iter().map(|constant| constant.ty.id);
+
+            let pallet_event_type = pallet.event.as_ref().into_iter().map(|events| events.ty.id);
+
+            let pallet_error_type = pallet.error.as_ref().into_iter().map(|error| error.ty.id);
 
             pallet_call_types
                 .chain(pallet_storage_types)
@@ -148,9 +125,11 @@ impl IterateTypeIds for v14::RuntimeMetadataV14 {
         });
 
         // Transaction Extension types:
-        let transaction_extension_types = self.extrinsic.signed_extensions.iter().flat_map(|ext| {
-            [ext.ty.id, ext.additional_signed.id].into_iter()
-        });
+        let transaction_extension_types = self
+            .extrinsic
+            .signed_extensions
+            .iter()
+            .flat_map(|ext| [ext.ty.id, ext.additional_signed.id].into_iter());
 
         // The extrinsic type:
         let extrinsic_type_id = self.extrinsic.ty.id;
@@ -167,37 +146,28 @@ impl IterateTypeIds for v14::RuntimeMetadataV14 {
 }
 
 impl IterateTypeIds for v15::RuntimeMetadataV15 {
-    fn iterate_all_type_ids(&self) -> impl Iterator<Item=u32> {
+    fn iterate_all_type_ids(&self) -> impl Iterator<Item = u32> {
         // Gather pallet types:
         let pallet_types = self.pallets.iter().flat_map(|pallet| {
-            let pallet_call_types = pallet.calls.as_ref().into_iter().map(|calls| {
-                calls.ty.id
-            });
-            
-            let pallet_storage_types = pallet.storage.as_ref().into_iter().flat_map(|s| {
-                &s.entries
-            }).flat_map(|storage_entry| {
-                match &storage_entry.ty {
-                    v15::StorageEntryType::Plain(ty) => {
-                        Either::A(core::iter::once(ty.id))
-                    }
-                    v15::StorageEntryType::Map { key, value, ..} => {
+            let pallet_call_types = pallet.calls.as_ref().into_iter().map(|calls| calls.ty.id);
+
+            let pallet_storage_types = pallet
+                .storage
+                .as_ref()
+                .into_iter()
+                .flat_map(|s| &s.entries)
+                .flat_map(|storage_entry| match &storage_entry.ty {
+                    v15::StorageEntryType::Plain(ty) => Either::A(core::iter::once(ty.id)),
+                    v15::StorageEntryType::Map { key, value, .. } => {
                         Either::B([key.id, value.id].into_iter())
                     }
-                }
-            });
-            
-            let pallet_constant_types = pallet.constants.iter().map(|constant| {
-                constant.ty.id
-            });
-    
-            let pallet_event_type = pallet.event.as_ref().into_iter().map(|events| {
-                events.ty.id
-            });
-    
-            let pallet_error_type = pallet.error.as_ref().into_iter().map(|error| {
-                error.ty.id
-            });
+                });
+
+            let pallet_constant_types = pallet.constants.iter().map(|constant| constant.ty.id);
+
+            let pallet_event_type = pallet.event.as_ref().into_iter().map(|events| events.ty.id);
+
+            let pallet_error_type = pallet.error.as_ref().into_iter().map(|error| error.ty.id);
 
             pallet_call_types
                 .chain(pallet_storage_types)
@@ -207,20 +177,22 @@ impl IterateTypeIds for v15::RuntimeMetadataV15 {
         });
 
         // Runtime APIs:
-        let runtime_api_types = self.apis.iter().flat_map(|api| {
-            &api.methods
-        }).flat_map(|method| {
-            let method_inputs = method.inputs.iter().map(|input| input.ty.id);
-            let method_output = method.output.id;
-            method_inputs.chain(core::iter::once(method_output))
-        });
+        let runtime_api_types = self
+            .apis
+            .iter()
+            .flat_map(|api| &api.methods)
+            .flat_map(|method| {
+                let method_inputs = method.inputs.iter().map(|input| input.ty.id);
+                let method_output = method.output.id;
+                method_inputs.chain(core::iter::once(method_output))
+            });
 
         // The extrinsic type IDs:
         let extrinsic_type_ids = [
             self.extrinsic.call_ty.id,
             self.extrinsic.address_ty.id,
             self.extrinsic.extra_ty.id,
-            self.extrinsic.signature_ty.id
+            self.extrinsic.signature_ty.id,
         ];
 
         // Outer enum type IDs:
@@ -231,14 +203,14 @@ impl IterateTypeIds for v15::RuntimeMetadataV15 {
         ];
 
         // Transaction Extension types:
-        let transaction_extension_types = self.extrinsic.signed_extensions.iter().flat_map(|ext| {
-            [ext.ty.id, ext.additional_signed.id].into_iter()
-        });
+        let transaction_extension_types = self
+            .extrinsic
+            .signed_extensions
+            .iter()
+            .flat_map(|ext| [ext.ty.id, ext.additional_signed.id].into_iter());
 
         // Custom types:
-        let custom_type_ids = self.custom.map.values().map(|value| {
-            value.ty.id
-        });
+        let custom_type_ids = self.custom.map.values().map(|value| value.ty.id);
 
         // Subxt needs this type so we preserve it regardless:
         let dispatch_error_ty = iter_dispatch_error_type(&self.types);
@@ -255,37 +227,28 @@ impl IterateTypeIds for v15::RuntimeMetadataV15 {
 }
 
 impl IterateTypeIds for v16::RuntimeMetadataV16 {
-    fn iterate_all_type_ids(&self) -> impl Iterator<Item=u32> {
+    fn iterate_all_type_ids(&self) -> impl Iterator<Item = u32> {
         // Gather pallet types:
         let pallet_types = self.pallets.iter().flat_map(|pallet| {
-            let pallet_call_types = pallet.calls.as_ref().into_iter().map(|calls| {
-                calls.ty.id
-            });
-            
-            let pallet_storage_types = pallet.storage.as_ref().into_iter().flat_map(|s| {
-                &s.entries
-            }).flat_map(|storage_entry| {
-                match &storage_entry.ty {
-                    v16::StorageEntryType::Plain(ty) => {
-                        Either::A(core::iter::once(ty.id))
-                    }
-                    v16::StorageEntryType::Map { key, value, ..} => {
+            let pallet_call_types = pallet.calls.as_ref().into_iter().map(|calls| calls.ty.id);
+
+            let pallet_storage_types = pallet
+                .storage
+                .as_ref()
+                .into_iter()
+                .flat_map(|s| &s.entries)
+                .flat_map(|storage_entry| match &storage_entry.ty {
+                    v16::StorageEntryType::Plain(ty) => Either::A(core::iter::once(ty.id)),
+                    v16::StorageEntryType::Map { key, value, .. } => {
                         Either::B([key.id, value.id].into_iter())
                     }
-                }
-            });
-            
-            let pallet_constant_types = pallet.constants.iter().map(|constant| {
-                constant.ty.id
-            });
-    
-            let pallet_event_type = pallet.event.as_ref().into_iter().map(|events| {
-                events.ty.id
-            });
-    
-            let pallet_error_type = pallet.error.as_ref().into_iter().map(|error| {
-                error.ty.id
-            });
+                });
+
+            let pallet_constant_types = pallet.constants.iter().map(|constant| constant.ty.id);
+
+            let pallet_event_type = pallet.event.as_ref().into_iter().map(|events| events.ty.id);
+
+            let pallet_error_type = pallet.error.as_ref().into_iter().map(|error| error.ty.id);
 
             let pallet_view_fns = pallet.view_functions.iter().flat_map(|vf| {
                 let inputs = vf.inputs.iter().map(|input| input.ty.id);
@@ -294,9 +257,10 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
                 inputs.chain(core::iter::once(output))
             });
 
-            let pallet_associated_types = pallet.associated_types.iter().map(|associated_type| {
-                associated_type.ty.id
-            });
+            let pallet_associated_types = pallet
+                .associated_types
+                .iter()
+                .map(|associated_type| associated_type.ty.id);
 
             pallet_call_types
                 .chain(pallet_storage_types)
@@ -308,20 +272,19 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
         });
 
         // Runtime APIs:
-        let runtime_api_types = self.apis.iter().flat_map(|api| {
-            &api.methods
-        }).flat_map(|method| {
-            let method_inputs = method.inputs.iter().map(|input| input.ty.id);
-            let method_output = method.output.id;
-            method_inputs.chain(core::iter::once(method_output))
-        });
+        let runtime_api_types = self
+            .apis
+            .iter()
+            .flat_map(|api| &api.methods)
+            .flat_map(|method| {
+                let method_inputs = method.inputs.iter().map(|input| input.ty.id);
+                let method_output = method.output.id;
+                method_inputs.chain(core::iter::once(method_output))
+            });
 
         // The extrinsic type IDs:
-        let extrinsic_type_ids = [
-            self.extrinsic.address_ty.id,
-            self.extrinsic.signature_ty.id
-        ];
-        
+        let extrinsic_type_ids = [self.extrinsic.address_ty.id, self.extrinsic.signature_ty.id];
+
         // Outer enum type IDs:
         let outer_enum_type_ids = [
             self.outer_enums.call_enum_ty.id,
@@ -330,14 +293,14 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
         ];
 
         // Transaction Extension types:
-        let transaction_extension_types = self.extrinsic.transaction_extensions.iter().flat_map(|ext| {
-            [ext.ty.id, ext.implicit.id].into_iter()
-        });
+        let transaction_extension_types = self
+            .extrinsic
+            .transaction_extensions
+            .iter()
+            .flat_map(|ext| [ext.ty.id, ext.implicit.id].into_iter());
 
         // Custom types:
-        let custom_type_ids = self.custom.map.values().map(|value| {
-            value.ty.id
-        });
+        let custom_type_ids = self.custom.map.values().map(|value| value.ty.id);
 
         // Subxt needs this type so we preserve it regardless:
         let dispatch_error_ty = iter_dispatch_error_type(&self.types);
@@ -353,17 +316,17 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
     }
 }
 
-/// Subxt needs this type so we always ensure to preserve it 
+/// Subxt needs this type so we always ensure to preserve it
 /// even if it's not explicitly mentioned anywhere:
 fn iter_dispatch_error_type(types: &PortableRegistry) -> impl Iterator<Item = u32> + '_ {
-        core::iter::once_with(|| {
-            types
-                .types
-                .iter()
-                .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
-                .expect("Metadata must contain sp_runtime::DispatchError")
-                .id
-        })
+    core::iter::once_with(|| {
+        types
+            .types
+            .iter()
+            .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
+            .expect("Metadata must contain sp_runtime::DispatchError")
+            .id
+    })
 }
 
 /// Create Either enums which can be iterated over.
@@ -374,7 +337,7 @@ macro_rules! either{
             $( $tok($tok), )*
         }
 
-        impl <$first_tok, $($tok),+> Iterator for $name<$first_tok, $($tok),+> 
+        impl <$first_tok, $($tok),+> Iterator for $name<$first_tok, $($tok),+>
         where
             $first_tok: Iterator,
             $($tok: Iterator<Item = $first_tok::Item>,)*
@@ -406,7 +369,7 @@ mod test {
                 struct $name {}
                 impl scale_info::TypeInfo for $name {
                     type Identity = $name;
-            
+
                     fn type_info() -> scale_info::Type {
                         scale_info::Type {
                             path: scale_info::Path {
@@ -467,7 +430,9 @@ mod test {
                     segments: vec!["sp_runtime", "DispatchError"],
                 },
                 type_params: vec![],
-                type_def: scale_info::TypeDef::Variant(scale_info::TypeDefVariant { variants: vec![] }),
+                type_def: scale_info::TypeDef::Variant(scale_info::TypeDefVariant {
+                    variants: vec![],
+                }),
                 docs: vec![],
             }
         }
@@ -506,14 +471,12 @@ mod test {
                 }),
                 storage: None,
                 event: None,
-                constants: vec![
-                    v14::PalletConstantMetadata {
-                        name: "SomeConstant",
-                        ty: meta_type::<D>(),
-                        value: vec![],
-                        docs: vec![]
-                    }
-                ],
+                constants: vec![v14::PalletConstantMetadata {
+                    name: "SomeConstant",
+                    ty: meta_type::<D>(),
+                    value: vec![],
+                    docs: vec![],
+                }],
                 error: None,
             },
         ];
@@ -521,14 +484,11 @@ mod test {
         let extrinsic = v14::ExtrinsicMetadata {
             version: 0,
             signed_extensions: vec![],
-            ty: meta_type::<E>()
+            ty: meta_type::<E>(),
         };
 
-        let metadata = v14::RuntimeMetadataV14::new(
-            pallets,
-            extrinsic,
-            meta_type::<DummyDispatchError>(),
-        );
+        let metadata =
+            v14::RuntimeMetadataV14::new(pallets, extrinsic, meta_type::<DummyDispatchError>());
 
         assert_eq!(metadata.types.types.len(), 6);
         assert_is_in_types!(A B C D E => metadata.types);
@@ -559,7 +519,7 @@ mod test {
 
         let no_pallets = {
             let mut md = metadata.clone();
-            md.strip_metadata(|_| false,|_| true);
+            md.strip_metadata(|_| false, |_| true);
             md
         };
 
@@ -603,14 +563,12 @@ mod test {
                 }),
                 storage: None,
                 event: None,
-                constants: vec![
-                    v15::PalletConstantMetadata {
-                        name: "SomeConstant",
-                        ty: meta_type::<D>(),
-                        value: vec![],
-                        docs: vec![]
-                    }
-                ],
+                constants: vec![v15::PalletConstantMetadata {
+                    name: "SomeConstant",
+                    ty: meta_type::<D>(),
+                    value: vec![],
+                    docs: vec![],
+                }],
                 error: None,
                 docs: vec![],
             },
@@ -629,36 +587,28 @@ mod test {
             v15::RuntimeApiMetadata {
                 name: "SomeApi",
                 docs: vec![],
-                methods: vec![
-                    v15::RuntimeApiMethodMetadata {
-                        name: "some_method",
-                        inputs: vec![
-                            v15::RuntimeApiMethodParamMetadata {
-                                name: "input1",
-                                ty: meta_type::<I>()
-                            }
-                        ],
-                        output: meta_type::<J>(),
-                        docs: vec![],
-                    }
-                ]
+                methods: vec![v15::RuntimeApiMethodMetadata {
+                    name: "some_method",
+                    inputs: vec![v15::RuntimeApiMethodParamMetadata {
+                        name: "input1",
+                        ty: meta_type::<I>(),
+                    }],
+                    output: meta_type::<J>(),
+                    docs: vec![],
+                }],
             },
             v15::RuntimeApiMetadata {
                 name: "AnotherApi",
                 docs: vec![],
-                methods: vec![
-                    v15::RuntimeApiMethodMetadata {
-                        name: "another_method",
-                        inputs: vec![
-                            v15::RuntimeApiMethodParamMetadata {
-                                name: "input1",
-                                ty: meta_type::<K>()
-                            }
-                        ],
-                        output: meta_type::<L>(),
-                        docs: vec![],
-                    }
-                ]
+                methods: vec![v15::RuntimeApiMethodMetadata {
+                    name: "another_method",
+                    inputs: vec![v15::RuntimeApiMethodParamMetadata {
+                        name: "input1",
+                        ty: meta_type::<K>(),
+                    }],
+                    output: meta_type::<L>(),
+                    docs: vec![],
+                }],
             },
         ];
 
@@ -669,12 +619,13 @@ mod test {
         };
 
         let custom_values = v15::CustomMetadata {
-            map: BTreeMap::from_iter(vec![
-                ("Item", v15::CustomValueMetadata {
+            map: BTreeMap::from_iter(vec![(
+                "Item",
+                v15::CustomValueMetadata {
                     ty: meta_type::<P>(),
-                    value: vec![]
-                })
-            ])
+                    value: vec![],
+                },
+            )]),
         };
 
         let metadata = v15::RuntimeMetadataV15::new(
@@ -712,7 +663,7 @@ mod test {
 
         let no_pallets = {
             let mut md = metadata.clone();
-            md.strip_metadata(|_| false,|_| true);
+            md.strip_metadata(|_| false, |_| true);
             md
         };
 
@@ -772,37 +723,29 @@ mod test {
                 }),
                 storage: None,
                 event: None,
-                constants: vec![
-                    v16::PalletConstantMetadata {
-                        name: "SomeConstant",
-                        ty: meta_type::<D>(),
-                        value: vec![],
-                        docs: vec![],
-                        deprecation_info: v16::DeprecationStatus::NotDeprecated,
-                    }
-                ],
-                associated_types: vec![
-                    v16::PalletAssociatedTypeMetadata {
-                        name: "Hasher",
-                        ty: meta_type::<E>(),
-                        docs: vec![],
-                    }
-                ],
-                view_functions: vec![
-                    v16::PalletViewFunctionMetadata {
-                        name: "some_view_function",
-                        id: [0; 32],
-                        inputs: vec![
-                            v16::PalletViewFunctionParamMetadata {
-                                name: "input1",
-                                ty: meta_type::<F>(),
-                            }
-                        ],
-                        output: meta_type::<G>(),
-                        docs: vec![],
-                        deprecation_info: v16::DeprecationStatus::NotDeprecated,
-                    }
-                ],
+                constants: vec![v16::PalletConstantMetadata {
+                    name: "SomeConstant",
+                    ty: meta_type::<D>(),
+                    value: vec![],
+                    docs: vec![],
+                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                }],
+                associated_types: vec![v16::PalletAssociatedTypeMetadata {
+                    name: "Hasher",
+                    ty: meta_type::<E>(),
+                    docs: vec![],
+                }],
+                view_functions: vec![v16::PalletViewFunctionMetadata {
+                    name: "some_view_function",
+                    id: [0; 32],
+                    inputs: vec![v16::PalletViewFunctionParamMetadata {
+                        name: "input1",
+                        ty: meta_type::<F>(),
+                    }],
+                    output: meta_type::<G>(),
+                    docs: vec![],
+                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                }],
                 error: None,
                 docs: vec![],
                 deprecation_info: v16::DeprecationStatus::NotDeprecated,
@@ -823,40 +766,32 @@ mod test {
                 version: 2,
                 docs: vec![],
                 deprecation_info: v16::DeprecationStatus::NotDeprecated,
-                methods: vec![
-                    v16::RuntimeApiMethodMetadata {
-                        name: "some_method",
-                        inputs: vec![
-                            v16::RuntimeApiMethodParamMetadata {
-                                name: "input1",
-                                ty: meta_type::<J>()
-                            }
-                        ],
-                        output: meta_type::<K>(),
-                        docs: vec![],
-                        deprecation_info: v16::DeprecationStatus::NotDeprecated,
-                    }
-                ],
+                methods: vec![v16::RuntimeApiMethodMetadata {
+                    name: "some_method",
+                    inputs: vec![v16::RuntimeApiMethodParamMetadata {
+                        name: "input1",
+                        ty: meta_type::<J>(),
+                    }],
+                    output: meta_type::<K>(),
+                    docs: vec![],
+                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                }],
             },
             v16::RuntimeApiMetadata {
                 name: "AnotherApi",
                 version: 1,
                 docs: vec![],
                 deprecation_info: v16::DeprecationStatus::NotDeprecated,
-                methods: vec![
-                    v16::RuntimeApiMethodMetadata {
-                        name: "another_method",
-                        inputs: vec![
-                            v16::RuntimeApiMethodParamMetadata {
-                                name: "input1",
-                                ty: meta_type::<L>()
-                            }
-                        ],
-                        output: meta_type::<M>(),
-                        docs: vec![],
-                        deprecation_info: v16::DeprecationStatus::NotDeprecated,
-                    }
-                ]
+                methods: vec![v16::RuntimeApiMethodMetadata {
+                    name: "another_method",
+                    inputs: vec![v16::RuntimeApiMethodParamMetadata {
+                        name: "input1",
+                        ty: meta_type::<L>(),
+                    }],
+                    output: meta_type::<M>(),
+                    docs: vec![],
+                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                }],
             },
         ];
 
@@ -867,12 +802,13 @@ mod test {
         };
 
         let custom_values = v16::CustomMetadata {
-            map: BTreeMap::from_iter(vec![
-                ("Item", v16::CustomValueMetadata {
+            map: BTreeMap::from_iter(vec![(
+                "Item",
+                v16::CustomValueMetadata {
                     ty: meta_type::<DummyDispatchError>(),
-                    value: vec![]
-                })
-            ])
+                    value: vec![],
+                },
+            )]),
         };
 
         let metadata = v16::RuntimeMetadataV16::new(
@@ -909,7 +845,7 @@ mod test {
 
         let no_pallets = {
             let mut md = metadata.clone();
-            md.strip_metadata(|_| false,|_| true);
+            md.strip_metadata(|_| false, |_| true);
             md
         };
 
@@ -928,5 +864,4 @@ mod test {
         assert_eq!(only_second_runtime_api.pallets.len(), 2);
         assert_eq!(only_second_runtime_api.apis.len(), 1);
     }
-
 }

@@ -6,15 +6,16 @@ use super::TryFromError;
 
 use crate::utils::variant_index::VariantIndex;
 use crate::{
-    utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, ExtrinsicMetadata, Metadata,
-    OuterEnumsMetadata, PalletMetadataInner, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
-    StorageHasher, StorageMetadata, TransactionExtensionMetadataInner, CustomMetadataInner
+    utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, CustomMetadataInner,
+    ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner, StorageEntryMetadata,
+    StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
+    TransactionExtensionMetadataInner,
 };
 use alloc::borrow::ToOwned;
-use alloc::vec;
-use alloc::vec::Vec;
 use alloc::collections::BTreeMap;
 use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
 use frame_metadata::v14;
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;
@@ -92,7 +93,9 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
                 error_enum_ty: outer_enums.error_enum_ty.id,
             },
             apis: Default::default(),
-            custom: CustomMetadataInner { map: Default::default() },
+            custom: CustomMetadataInner {
+                map: Default::default(),
+            },
         })
     }
 }
@@ -107,7 +110,10 @@ fn from_signed_extension_metadata(
     }
 }
 
-fn from_extrinsic_metadata(value: v14::ExtrinsicMetadata<PortableForm>, missing_ids: MissingExtrinsicTypeIds) -> ExtrinsicMetadata {
+fn from_extrinsic_metadata(
+    value: v14::ExtrinsicMetadata<PortableForm>,
+    missing_ids: MissingExtrinsicTypeIds,
+) -> ExtrinsicMetadata {
     let transaction_extensions: Vec<_> = value
         .signed_extensions
         .into_iter()
@@ -121,7 +127,10 @@ fn from_extrinsic_metadata(value: v14::ExtrinsicMetadata<PortableForm>, missing_
         transaction_extensions,
         address_ty: missing_ids.address,
         signature_ty: missing_ids.signature,
-        transaction_extensions_by_version: BTreeMap::from_iter([(0, transaction_extension_indexes)]),
+        transaction_extensions_by_version: BTreeMap::from_iter([(
+            0,
+            transaction_extension_indexes,
+        )]),
     }
 }
 
@@ -187,7 +196,7 @@ fn from_constant_metadata(
 fn generate_outer_enums(
     metadata: &mut v14::RuntimeMetadataV14,
 ) -> Result<frame_metadata::v15::OuterEnums<scale_info::form::PortableForm>, TryFromError> {
-    let outer_enums = crate::utilities::OuterEnums::find_in(&metadata.types); 
+    let outer_enums = crate::utilities::OuterEnums::find_in(&metadata.types);
 
     let Some(call_enum_id) = outer_enums.call_ty else {
         return Err(TryFromError::TypeNameNotFound("RuntimeCall".into()));
@@ -195,7 +204,9 @@ fn generate_outer_enums(
     let Some(event_type_id) = outer_enums.event_ty else {
         return Err(TryFromError::TypeNameNotFound("RuntimeEvent".into()));
     };
-    let error_type_id = if let Some(id) = outer_enums.error_ty { id } else {
+    let error_type_id = if let Some(id) = outer_enums.error_ty {
+        id
+    } else {
         let call_enum = &metadata.types.types[call_enum_id as usize];
         let mut error_path = call_enum.ty.path.segments.clone();
 
@@ -266,7 +277,9 @@ fn generate_outer_error_enum_type(
     enum_type_id
 }
 
-fn generate_missing_extrinsic_type_ids(metadata: &v14::RuntimeMetadataV14) -> Result<MissingExtrinsicTypeIds, TryFromError> {
+fn generate_missing_extrinsic_type_ids(
+    metadata: &v14::RuntimeMetadataV14,
+) -> Result<MissingExtrinsicTypeIds, TryFromError> {
     const ADDRESS: &str = "Address";
     const SIGNATURE: &str = "Signature";
 
@@ -291,16 +304,13 @@ fn generate_missing_extrinsic_type_ids(metadata: &v14::RuntimeMetadataV14) -> Re
         return Err(TryFromError::TypeNameNotFound(SIGNATURE.into()));
     };
 
-    Ok(MissingExtrinsicTypeIds {
-        address,
-        signature,
-    })
+    Ok(MissingExtrinsicTypeIds { address, signature })
 }
 
 /// The type IDs extracted from the metadata that represent the
 /// generic type parameters passed to the `UncheckedExtrinsic` from
 /// the substrate-based chain.
-#[derive(Clone,Copy)]
+#[derive(Clone, Copy)]
 struct MissingExtrinsicTypeIds {
     address: u32,
     signature: u32,

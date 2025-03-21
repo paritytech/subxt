@@ -5,7 +5,9 @@
 //! Utility functions for metadata validation.
 
 use crate::{
-    CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, PalletMetadata, PalletViewFunctionMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType
+    CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, PalletMetadata,
+    PalletViewFunctionMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata,
+    StorageEntryType,
 };
 use alloc::vec::Vec;
 use hashbrown::HashMap;
@@ -97,10 +99,7 @@ fn get_variant_hash(
     let variant_field_bytes = var.fields.iter().fold([0u8; HASH_LEN], |bytes, field| {
         // EncodeAsType and DecodeAsType don't care about variant field ordering,
         // so XOR the fields to ensure that it doesn't matter.
-        xor(
-            bytes,
-            get_field_hash(registry, field, cache),
-        )
+        xor(bytes, get_field_hash(registry, field, cache))
     });
 
     concat_and_hash2(&variant_name_bytes, &variant_field_bytes)
@@ -121,10 +120,7 @@ fn get_type_def_variant_hash(
             .map(|only_these_variants| only_these_variants.contains(&var.name.as_str()))
             .unwrap_or(true);
         if should_hash {
-            xor(
-                bytes,
-                get_variant_hash(registry, var, cache),
-            )
+            xor(bytes, get_variant_hash(registry, var, cache))
         } else {
             bytes
         }
@@ -148,16 +144,11 @@ fn get_type_def_hash(
                     .fold([0u8; HASH_LEN], |bytes, field| {
                         // With EncodeAsType and DecodeAsType we no longer care which order the fields are in,
                         // as long as all of the names+types are there. XOR to not care about ordering.
-                        xor(
-                            bytes,
-                            get_field_hash(registry, field, cache),
-                        )
+                        xor(bytes, get_field_hash(registry, field, cache))
                     });
             concat_and_hash2(&composite_id_bytes, &composite_field_bytes)
         }
-        TypeDef::Variant(variant) => {
-            get_type_def_variant_hash(registry, variant, None, cache)
-        }
+        TypeDef::Variant(variant) => get_type_def_variant_hash(registry, variant, None, cache),
         TypeDef::Sequence(sequence) => concat_and_hash2(
             &[TypeBeingHashed::Sequence as u8; HASH_LEN],
             &get_type_hash_recurse(registry, sequence.type_param.id, cache),
@@ -178,10 +169,7 @@ fn get_type_def_hash(
         TypeDef::Tuple(tuple) => {
             let mut bytes = hash(&[TypeBeingHashed::Tuple as u8]);
             for field in &tuple.fields {
-                bytes = concat_and_hash2(
-                    &bytes,
-                    &get_type_hash_recurse(registry, field.id, cache),
-                );
+                bytes = concat_and_hash2(&bytes, &get_type_hash_recurse(registry, field.id, cache));
             }
             bytes
         }
@@ -227,10 +215,7 @@ impl CachedHash {
 ///
 /// The reason for this unintuitive behavior is that we sometimes want to trim the outer enum types
 /// beforehand to only include certain pallets, which affects their hash values.
-pub fn get_type_hash(
-    registry: &PortableRegistry,
-    id: u32,
-) -> Hash {
+pub fn get_type_hash(registry: &PortableRegistry, id: u32) -> Hash {
     get_type_hash_recurse(registry, id, &mut HashMap::new())
 }
 
@@ -266,10 +251,7 @@ fn get_type_hash_recurse(
 }
 
 /// Obtain the hash representation of a `frame_metadata::v15::ExtrinsicMetadata`.
-fn get_extrinsic_hash(
-    registry: &PortableRegistry,
-    extrinsic: &ExtrinsicMetadata,
-) -> Hash {
+fn get_extrinsic_hash(registry: &PortableRegistry, extrinsic: &ExtrinsicMetadata) -> Hash {
     // Get the hashes of the extrinsic type.
     let address_hash = get_type_hash(registry, extrinsic.address_ty);
     // The `RuntimeCall` type is intentionally omitted and hashed by the outer enums instead.
@@ -305,10 +287,7 @@ fn get_extrinsic_hash(
 }
 
 /// Get the hash corresponding to a single storage entry.
-fn get_storage_entry_hash(
-    registry: &PortableRegistry,
-    entry: &StorageEntryMetadata,
-) -> Hash {
+fn get_storage_entry_hash(registry: &PortableRegistry, entry: &StorageEntryMetadata) -> Hash {
     let mut bytes = concat_and_hash3(
         &hash(entry.name.as_bytes()),
         // Cloning 'entry.modifier' should essentially be a copy.
@@ -317,9 +296,7 @@ fn get_storage_entry_hash(
     );
 
     match &entry.entry_type {
-        StorageEntryType::Plain(ty) => {
-            concat_and_hash2(&bytes, &get_type_hash(registry, *ty))
-        }
+        StorageEntryType::Plain(ty) => concat_and_hash2(&bytes, &get_type_hash(registry, *ty)),
         StorageEntryType::Map {
             hashers,
             key_ty,
@@ -338,16 +315,11 @@ fn get_storage_entry_hash(
     }
 }
 
-fn get_custom_metadata_hash(
-    custom_metadata: &CustomMetadata,
-) -> Hash {
+fn get_custom_metadata_hash(custom_metadata: &CustomMetadata) -> Hash {
     custom_metadata
         .iter()
         .fold([0u8; HASH_LEN], |bytes, custom_value| {
-            xor(
-                bytes,
-                get_custom_value_hash(&custom_value),
-            )
+            xor(bytes, get_custom_value_hash(&custom_value))
         })
 }
 
@@ -355,19 +327,14 @@ fn get_custom_metadata_hash(
 ///
 /// If the `custom_value` has a type id that is not present in the metadata,
 /// only the name and bytes are used for hashing.
-pub fn get_custom_value_hash(
-    custom_value: &CustomValueMetadata,
-) -> Hash {
+pub fn get_custom_value_hash(custom_value: &CustomValueMetadata) -> Hash {
     let name_hash = hash(custom_value.name.as_bytes());
     if custom_value.types.resolve(custom_value.type_id()).is_none() {
         hash(&name_hash)
     } else {
         concat_and_hash2(
             &name_hash,
-            &get_type_hash(
-                custom_value.types,
-                custom_value.type_id(),
-            ),
+            &get_type_hash(custom_value.types, custom_value.type_id()),
         )
     }
 }
@@ -394,11 +361,7 @@ pub fn get_call_hash(pallet: &PalletMetadata, call_name: &str) -> Option<Hash> {
     let call_variant = pallet.call_variant_by_name(call_name)?;
 
     // hash the specific variant representing the call we are interested in.
-    let hash = get_variant_hash(
-        pallet.types,
-        call_variant,
-        &mut HashMap::new(),
-    );
+    let hash = get_variant_hash(pallet.types, call_variant, &mut HashMap::new());
     Some(hash)
 }
 
@@ -423,18 +386,13 @@ pub fn get_runtime_api_hash(runtime_api: &RuntimeApiMethodMetadata) -> Hash {
         );
     }
 
-    bytes = concat_and_hash2(
-        &bytes,
-        &get_type_hash(registry, runtime_api.output_ty()),
-    );
+    bytes = concat_and_hash2(&bytes, &get_type_hash(registry, runtime_api.output_ty()));
 
     bytes
 }
 
 /// Obtain the hash of all of a runtime API trait, including all of its methods.
-pub fn get_runtime_apis_hash(
-    trait_metadata: RuntimeApiMetadata,
-) -> Hash {
+pub fn get_runtime_apis_hash(trait_metadata: RuntimeApiMetadata) -> Hash {
     // Each API is already hashed considering the trait name, so we don't need
     // to consider thr trait name again here.
     trait_metadata
@@ -444,12 +402,7 @@ pub fn get_runtime_apis_hash(
             // be identical regardless. For this, we can just XOR the hashes for each method
             // together; we'll get the same output whichever order they are XOR'd together in,
             // so long as each individual method is the same.
-            xor(
-                bytes,
-                get_runtime_api_hash(
-                    &method_metadata,
-                ),
-            )
+            xor(bytes, get_runtime_api_hash(&method_metadata))
         })
 }
 
@@ -470,18 +423,13 @@ pub fn get_pallet_view_function_hash(view_function: &PalletViewFunctionMetadata)
         );
     }
 
-    bytes = concat_and_hash2(
-        &bytes,
-        &get_type_hash(registry, view_function.output_ty()),
-    );
+    bytes = concat_and_hash2(&bytes, &get_type_hash(registry, view_function.output_ty()));
 
     bytes
 }
 
 /// Obtain the hash of all of the view functions in a pallet, including all of its methods.
-fn get_pallet_view_functions_hash(
-    pallet_metadata: &PalletMetadata,
-) -> Hash {
+fn get_pallet_view_functions_hash(pallet_metadata: &PalletMetadata) -> Hash {
     // Each API is already hashed considering the trait name, so we don't need
     // to consider thr trait name again here.
     pallet_metadata
@@ -491,12 +439,7 @@ fn get_pallet_view_functions_hash(
             // be identical regardless. For this, we can just XOR the hashes for each method
             // together; we'll get the same output whichever order they are XOR'd together in,
             // so long as each individual method is the same.
-            xor(
-                bytes,
-                get_pallet_view_function_hash(
-                    &method_metadata,
-                ),
-            )
+            xor(bytes, get_pallet_view_function_hash(&method_metadata))
         })
 }
 
@@ -534,18 +477,13 @@ pub fn get_pallet_hash(pallet: PalletMetadata) -> Hash {
                 .fold([0u8; HASH_LEN], |bytes, entry| {
                     // We don't care what order the storage entries occur in, so XOR them together
                     // to make the order irrelevant.
-                    xor(
-                        bytes,
-                        get_storage_entry_hash(registry, entry),
-                    )
+                    xor(bytes, get_storage_entry_hash(registry, entry))
                 });
             concat_and_hash2(&prefix_hash, &entries_hash)
         }
         None => [0u8; HASH_LEN],
     };
-    let view_functions_bytes = get_pallet_view_functions_hash(
-        &pallet,
-    );
+    let view_functions_bytes = get_pallet_view_functions_hash(&pallet);
 
     // Hash all of the above together:
     concat_and_hash6(
@@ -554,7 +492,7 @@ pub fn get_pallet_hash(pallet: PalletMetadata) -> Hash {
         &error_bytes,
         &constant_bytes,
         &storage_bytes,
-        &view_functions_bytes
+        &view_functions_bytes,
     )
 }
 
@@ -640,12 +578,11 @@ impl<'a> MetadataHasher<'a> {
 
         let outer_enums_hash = concat_and_hash3(
             &get_type_hash(&metadata.types, metadata.outer_enums.call_enum_ty),
-            &get_type_hash(&metadata.types, metadata.outer_enums.event_enum_ty), 
-            &get_type_hash(&metadata.types, metadata.outer_enums.error_enum_ty), 
+            &get_type_hash(&metadata.types, metadata.outer_enums.event_enum_ty),
+            &get_type_hash(&metadata.types, metadata.outer_enums.error_enum_ty),
         );
 
-        let extrinsic_hash =
-            get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
+        let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
 
         let custom_values_hash = self
             .include_custom_values

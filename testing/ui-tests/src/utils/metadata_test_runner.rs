@@ -3,8 +3,8 @@
 // see LICENSE for license details.
 
 use codec::{Decode, Encode};
-use std::io::Read;
 use frame_metadata::RuntimeMetadataPrefixed;
+use std::io::Read;
 
 static TEST_DIR_PREFIX: &str = "subxt_generated_ui_tests_";
 static METADATA_FILE: &str = "../../artifacts/polkadot_metadata_full.scale";

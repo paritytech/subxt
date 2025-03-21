@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-pub mod outer_enums;
 pub mod ordered_map;
+pub mod outer_enums;
 pub mod validation;
 pub mod variant_index;
