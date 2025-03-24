@@ -1898,6 +1898,25 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = " Retrieve the maximum uncompressed code size."]
+                pub fn validation_code_bomb_limit(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::ValidationCodeBombLimit,
+                    types::validation_code_bomb_limit::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "ParachainHost",
+                        "validation_code_bomb_limit",
+                        types::ValidationCodeBombLimit {},
+                        [
+                            87u8, 223u8, 184u8, 180u8, 216u8, 213u8, 191u8, 201u8, 250u8, 22u8,
+                            169u8, 184u8, 114u8, 220u8, 151u8, 57u8, 105u8, 160u8, 19u8, 105u8,
+                            0u8, 70u8, 177u8, 91u8, 128u8, 112u8, 61u8, 1u8, 202u8, 74u8, 165u8,
+                            244u8,
+                        ],
+                    )
+                }
                 #[doc = " Returns the constraints on the actions that can be taken by a new parachain"]
                 #[doc = " block."]
                 pub fn backing_constraints(
@@ -1934,25 +1953,6 @@ pub mod api {
                             238u8, 207u8, 238u8, 9u8, 154u8, 57u8, 151u8, 63u8, 211u8, 149u8,
                             167u8, 57u8, 121u8, 230u8, 159u8, 206u8, 252u8, 153u8, 141u8, 5u8,
                             143u8,
-                        ],
-                    )
-                }
-                #[doc = " Retrieve the maximum uncompressed code size."]
-                pub fn validation_code_bomb_limit(
-                    &self,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
-                    types::ValidationCodeBombLimit,
-                    types::validation_code_bomb_limit::output::Output,
-                > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
-                        "ParachainHost",
-                        "validation_code_bomb_limit",
-                        types::ValidationCodeBombLimit {},
-                        [
-                            87u8, 223u8, 184u8, 180u8, 216u8, 213u8, 191u8, 201u8, 250u8, 22u8,
-                            169u8, 184u8, 114u8, 220u8, 151u8, 57u8, 105u8, 160u8, 19u8, 105u8,
-                            0u8, 70u8, 177u8, 91u8, 128u8, 112u8, 61u8, 1u8, 202u8, 74u8, 165u8,
-                            244u8,
                         ],
                     )
                 }
@@ -2814,6 +2814,29 @@ pub mod api {
                 pub struct CandidatesPendingAvailability {
                     pub para_id: candidates_pending_availability::ParaId,
                 }
+                pub mod validation_code_bomb_limit {
+                    use super::runtime_types;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::core::primitive::u32;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
+                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
+                #[codec(dumb_trait_bound)]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct ValidationCodeBombLimit {}
                 pub mod backing_constraints {
                     use super::runtime_types;
                     pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
@@ -2863,29 +2886,6 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct SchedulingLookahead {}
-                pub mod validation_code_bomb_limit {
-                    use super::runtime_types;
-                    pub mod output {
-                        use super::runtime_types;
-                        pub type Output = ::core::primitive::u32;
-                    }
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct ValidationCodeBombLimit {}
             }
         }
         pub mod beefy_api {
@@ -5447,9 +5447,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                112u8, 31u8, 38u8, 42u8, 200u8, 86u8, 165u8, 173u8, 22u8, 167u8, 141u8, 251u8,
-                65u8, 138u8, 166u8, 199u8, 237u8, 126u8, 228u8, 60u8, 177u8, 165u8, 89u8, 69u8,
-                141u8, 54u8, 87u8, 72u8, 94u8, 45u8, 163u8, 40u8,
+                5u8, 123u8, 163u8, 181u8, 253u8, 139u8, 176u8, 42u8, 241u8, 184u8, 140u8, 157u8,
+                29u8, 68u8, 116u8, 94u8, 53u8, 17u8, 102u8, 144u8, 145u8, 139u8, 49u8, 169u8,
+                110u8, 13u8, 209u8, 151u8, 128u8, 119u8, 200u8, 131u8,
             ]
     }
     pub mod system {
@@ -13263,6 +13263,23 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = " Gets this pallet's derived pot account."]
+                pub fn pot_account(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::subxt::ext::subxt_core::utils::AccountId32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+                        "Treasury",
+                        "pot_account",
+                        [
+                            115u8, 233u8, 13u8, 223u8, 88u8, 20u8, 202u8, 139u8, 153u8, 28u8,
+                            155u8, 157u8, 224u8, 66u8, 3u8, 250u8, 23u8, 53u8, 88u8, 168u8, 211u8,
+                            204u8, 122u8, 166u8, 248u8, 23u8, 174u8, 225u8, 99u8, 108u8, 89u8,
+                            135u8,
+                        ],
+                    )
+                }
             }
         }
     }
@@ -15459,24 +15476,29 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = " A list of tracks."]
+                #[doc = ""]
+                #[doc = " Note: if the tracks are dynamic, the value in the static metadata might be inaccurate."]
                 pub fn tracks(
                     &self,
                 ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
-                    ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::pallet_referenda::types::Track<
-                            ::core::primitive::u16,
+                    ::subxt::ext::subxt_core::alloc::vec::Vec<(
+                        ::core::primitive::u16,
+                        runtime_types::pallet_referenda::types::TrackDetails<
                             ::core::primitive::u128,
                             ::core::primitive::u32,
+                            ::subxt::ext::subxt_core::alloc::string::String,
                         >,
-                    >,
+                    )>,
                 > {
                     ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Referenda",
                         "Tracks",
                         [
-                            177u8, 134u8, 10u8, 183u8, 88u8, 118u8, 116u8, 152u8, 225u8, 152u8,
-                            183u8, 6u8, 188u8, 218u8, 188u8, 246u8, 213u8, 112u8, 3u8, 234u8, 96u8,
-                            88u8, 169u8, 132u8, 209u8, 1u8, 206u8, 32u8, 241u8, 231u8, 69u8, 99u8,
+                            35u8, 226u8, 207u8, 234u8, 184u8, 139u8, 187u8, 184u8, 128u8, 199u8,
+                            227u8, 15u8, 31u8, 196u8, 5u8, 207u8, 138u8, 174u8, 130u8, 201u8,
+                            200u8, 113u8, 86u8, 93u8, 221u8, 243u8, 229u8, 24u8, 18u8, 150u8, 56u8,
+                            159u8,
                         ],
                     )
                 }
@@ -17841,24 +17863,29 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = " A list of tracks."]
+                #[doc = ""]
+                #[doc = " Note: if the tracks are dynamic, the value in the static metadata might be inaccurate."]
                 pub fn tracks(
                     &self,
                 ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
-                    ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::pallet_referenda::types::Track<
-                            ::core::primitive::u16,
+                    ::subxt::ext::subxt_core::alloc::vec::Vec<(
+                        ::core::primitive::u16,
+                        runtime_types::pallet_referenda::types::TrackDetails<
                             ::core::primitive::u128,
                             ::core::primitive::u32,
+                            ::subxt::ext::subxt_core::alloc::string::String,
                         >,
-                    >,
+                    )>,
                 > {
                     ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "FellowshipReferenda",
                         "Tracks",
                         [
-                            177u8, 134u8, 10u8, 183u8, 88u8, 118u8, 116u8, 152u8, 225u8, 152u8,
-                            183u8, 6u8, 188u8, 218u8, 188u8, 246u8, 213u8, 112u8, 3u8, 234u8, 96u8,
-                            88u8, 169u8, 132u8, 209u8, 1u8, 206u8, 32u8, 241u8, 231u8, 69u8, 99u8,
+                            35u8, 226u8, 207u8, 234u8, 184u8, 139u8, 187u8, 184u8, 128u8, 199u8,
+                            227u8, 15u8, 31u8, 196u8, 5u8, 207u8, 138u8, 174u8, 130u8, 201u8,
+                            200u8, 113u8, 86u8, 93u8, 221u8, 243u8, 229u8, 24u8, 18u8, 150u8, 56u8,
+                            159u8,
                         ],
                     )
                 }
@@ -32228,7 +32255,12 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Bounty duration in blocks."]
+                #[doc = " The time limit for a curator to act before a bounty expires."]
+                #[doc = ""]
+                #[doc = " The period that starts when a curator is approved, during which they must execute or"]
+                #[doc = " update the bounty via `extend_bounty_expiry`. If missed, the bounty expires, and the"]
+                #[doc = " curator may be slashed. If `BlockNumberFor::MAX`, bounties stay active indefinitely,"]
+                #[doc = " removing the need for `extend_bounty_expiry`."]
                 pub fn bounty_update_period(
                     &self,
                 ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
@@ -62549,27 +62581,8 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                pub struct Track<_0, _1, _2> {
-                    pub id: _0,
-                    pub info: runtime_types::pallet_referenda::types::TrackInfo<_1, _2>,
-                }
-                #[derive(
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Decode,
-                    :: subxt :: ext :: subxt_core :: ext :: codec :: Encode,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                # [codec (crate = :: subxt :: ext :: subxt_core :: ext :: codec)]
-                #[codec(dumb_trait_bound)]
-                #[decode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
-                )]
-                #[encode_as_type(
-                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
-                )]
-                pub struct TrackInfo<_0, _1> {
-                    pub name: [::core::primitive::u8; 25usize],
+                pub struct TrackDetails<_0, _1, _2> {
+                    pub name: _2,
                     pub max_deciding: ::core::primitive::u32,
                     pub decision_deposit: _0,
                     pub prepare_period: _1,
