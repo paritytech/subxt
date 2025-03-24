@@ -47,7 +47,9 @@ impl StripMetadata for v14::RuntimeMetadataV14 {
 
         // Map IDs found in the metadata to new ones as needed after the retaining:
         self.iter_type_ids_mut().for_each(|id| {
-            let Some(new_id) = new_ids.get(id) else { return };
+            let Some(new_id) = new_ids.get(id) else {
+                return;
+            };
             *id = *new_id;
         });
     }
@@ -72,7 +74,9 @@ impl StripMetadata for v15::RuntimeMetadataV15 {
 
         // Map IDs found in the metadata to new ones as needed after the retaining:
         self.iter_type_ids_mut().for_each(|id| {
-            let Some(new_id) = new_ids.get(id) else { return };
+            let Some(new_id) = new_ids.get(id) else {
+                return;
+            };
             *id = *new_id;
         });
     }
@@ -97,7 +101,9 @@ impl StripMetadata for v16::RuntimeMetadataV16 {
 
         // Map IDs found in the metadata to new ones as needed after the retaining:
         self.iter_type_ids_mut().for_each(|id| {
-            let Some(new_id) = new_ids.get(id) else { return };
+            let Some(new_id) = new_ids.get(id) else {
+                return;
+            };
             *id = *new_id;
         });
     }
@@ -116,7 +122,11 @@ impl IterateTypeIds for v14::RuntimeMetadataV14 {
     fn iter_type_ids_mut(&mut self) -> impl Iterator<Item = &mut u32> {
         // Gather pallet types:
         let pallet_types = self.pallets.iter_mut().flat_map(|pallet| {
-            let pallet_call_types = pallet.calls.as_mut().into_iter().map(|calls| &mut calls.ty.id);
+            let pallet_call_types = pallet
+                .calls
+                .as_mut()
+                .into_iter()
+                .map(|calls| &mut calls.ty.id);
 
             let pallet_storage_types = pallet
                 .storage
@@ -130,11 +140,22 @@ impl IterateTypeIds for v14::RuntimeMetadataV14 {
                     }
                 });
 
-            let pallet_constant_types = pallet.constants.iter_mut().map(|constant| &mut constant.ty.id);
+            let pallet_constant_types = pallet
+                .constants
+                .iter_mut()
+                .map(|constant| &mut constant.ty.id);
 
-            let pallet_event_type = pallet.event.as_mut().into_iter().map(|events| &mut events.ty.id);
+            let pallet_event_type = pallet
+                .event
+                .as_mut()
+                .into_iter()
+                .map(|events| &mut events.ty.id);
 
-            let pallet_error_type = pallet.error.as_mut().into_iter().map(|error| &mut error.ty.id);
+            let pallet_error_type = pallet
+                .error
+                .as_mut()
+                .into_iter()
+                .map(|error| &mut error.ty.id);
 
             pallet_call_types
                 .chain(pallet_storage_types)
@@ -168,7 +189,11 @@ impl IterateTypeIds for v15::RuntimeMetadataV15 {
     fn iter_type_ids_mut(&mut self) -> impl Iterator<Item = &mut u32> {
         // Gather pallet types:
         let pallet_types = self.pallets.iter_mut().flat_map(|pallet| {
-            let pallet_call_types = pallet.calls.as_mut().into_iter().map(|calls| &mut calls.ty.id);
+            let pallet_call_types = pallet
+                .calls
+                .as_mut()
+                .into_iter()
+                .map(|calls| &mut calls.ty.id);
 
             let pallet_storage_types = pallet
                 .storage
@@ -182,11 +207,22 @@ impl IterateTypeIds for v15::RuntimeMetadataV15 {
                     }
                 });
 
-            let pallet_constant_types = pallet.constants.iter_mut().map(|constant| &mut constant.ty.id);
+            let pallet_constant_types = pallet
+                .constants
+                .iter_mut()
+                .map(|constant| &mut constant.ty.id);
 
-            let pallet_event_type = pallet.event.as_mut().into_iter().map(|events| &mut events.ty.id);
+            let pallet_event_type = pallet
+                .event
+                .as_mut()
+                .into_iter()
+                .map(|events| &mut events.ty.id);
 
-            let pallet_error_type = pallet.error.as_mut().into_iter().map(|error| &mut error.ty.id);
+            let pallet_error_type = pallet
+                .error
+                .as_mut()
+                .into_iter()
+                .map(|error| &mut error.ty.id);
 
             pallet_call_types
                 .chain(pallet_storage_types)
@@ -249,7 +285,11 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
     fn iter_type_ids_mut(&mut self) -> impl Iterator<Item = &mut u32> {
         // Gather pallet types:
         let pallet_types = self.pallets.iter_mut().flat_map(|pallet| {
-            let pallet_call_types = pallet.calls.as_mut().into_iter().map(|calls| &mut calls.ty.id);
+            let pallet_call_types = pallet
+                .calls
+                .as_mut()
+                .into_iter()
+                .map(|calls| &mut calls.ty.id);
 
             let pallet_storage_types = pallet
                 .storage
@@ -263,11 +303,22 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
                     }
                 });
 
-            let pallet_constant_types = pallet.constants.iter_mut().map(|constant| &mut constant.ty.id);
+            let pallet_constant_types = pallet
+                .constants
+                .iter_mut()
+                .map(|constant| &mut constant.ty.id);
 
-            let pallet_event_type = pallet.event.as_mut().into_iter().map(|events| &mut events.ty.id);
+            let pallet_event_type = pallet
+                .event
+                .as_mut()
+                .into_iter()
+                .map(|events| &mut events.ty.id);
 
-            let pallet_error_type = pallet.error.as_mut().into_iter().map(|error| &mut error.ty.id);
+            let pallet_error_type = pallet
+                .error
+                .as_mut()
+                .into_iter()
+                .map(|error| &mut error.ty.id);
 
             let pallet_view_fns = pallet.view_functions.iter_mut().flat_map(|vf| {
                 let inputs = vf.inputs.iter_mut().map(|input| &mut input.ty.id);
@@ -302,7 +353,10 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
             });
 
         // The extrinsic type IDs:
-        let extrinsic_type_ids = [&mut self.extrinsic.address_ty.id, &mut self.extrinsic.signature_ty.id];
+        let extrinsic_type_ids = [
+            &mut self.extrinsic.address_ty.id,
+            &mut self.extrinsic.signature_ty.id,
+        ];
 
         // Outer enum type IDs:
         let outer_enum_type_ids = [
