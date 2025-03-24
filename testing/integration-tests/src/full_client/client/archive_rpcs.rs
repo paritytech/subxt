@@ -97,15 +97,31 @@ async fn archive_unstable_call() {
 async fn archive_unstable_finalized_height() {
     let ctx = test_context().await;
     let rpc = ctx.chainhead_rpc_methods().await;
-    let mut blocks = fetch_finalized_blocks(&ctx, 3).await;
 
-    while let Some(block) = blocks.next().await {
-        let subxt_block_height = block.number() as usize;
+    // This test is quite ugly. Originally, we asked for finalized blocks from subxt and
+    // asserted that the archive height we then get back matches, but that is subject to
+    // races between subxt's stream and reality (and failed surprisingly often). To try
+    // to avoid this, we weaken the test to just check that the height increments over time.
+    let mut last_block_height = None;
+    loop {
+        // Fetch archive block height.
         let archive_block_height = rpc.archive_unstable_finalized_height().await.unwrap();
 
-        // Note: may be prone to race if call is super slow for some reason, since a new
-        // block may have been finalized since subxt reported it.
-        assert_eq!(subxt_block_height, archive_block_height);
+        // On a dev node we expect blocks to be finalized 1 by 1, so panic
+        // if the height we fetch has grown by more than 1.
+        if let Some(last) = last_block_height {
+            if archive_block_height != last && archive_block_height != last + 1 {
+                panic!("Archive block height should increase 1 at a time, but jumped from {last} to {archive_block_height}");
+            }
+        }
+
+        last_block_height = Some(archive_block_height);
+        if archive_block_height > 5 {
+            break;
+        }
+
+        // Wait a little before looping
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
     }
 }
 
