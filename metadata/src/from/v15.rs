@@ -64,6 +64,7 @@ impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
                     error_variant_index,
                     constants: constants.collect(),
                     view_functions: vec![],
+                    associated_types: Default::default(),
                     docs: p.docs,
                 },
             );

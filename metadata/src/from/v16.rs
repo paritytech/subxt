@@ -52,6 +52,12 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
             let event_variant_index =
                 VariantIndex::build(p.event.as_ref().map(|e| e.ty.id), &types);
 
+            let associated_types = p
+                .associated_types
+                .into_iter()
+                .map(|t| (t.name, t.ty.id))
+                .collect();
+
             pallets_by_index.insert(p.index, pos);
             pallets.push_insert(
                 name.clone(),
@@ -67,6 +73,7 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
                     error_variant_index,
                     constants: constants.collect(),
                     view_functions: view_functions.collect(),
+                    associated_types,
                     docs: p.docs,
                 },
             );

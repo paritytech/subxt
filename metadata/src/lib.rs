@@ -19,7 +19,7 @@
 
 extern crate alloc;
 
-mod from_into;
+mod from;
 mod utils;
 
 use alloc::borrow::Cow;
@@ -41,7 +41,7 @@ use utils::{
 
 type ArcStr = Arc<str>;
 
-pub use from_into::TryFromError;
+pub use from::TryFromError;
 pub use utils::validation::MetadataHasher;
 
 type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;
@@ -309,6 +309,19 @@ impl<'a> PalletMetadata<'a> {
             })
     }
 
+    /// Iterate (in no particular order) over the associated type names and type IDs for this pallet.
+    pub fn associated_types(&self) -> impl ExactSizeIterator<Item = (&str, u32)> {
+        self.inner
+            .associated_types
+            .iter()
+            .map(|(name, ty)| (&**name, *ty))
+    }
+
+    /// Fetch an associated type ID given the associated type name.
+    pub fn associated_type_id(&self, name: &str) -> Option<u32> {
+        self.inner.associated_types.get(name).copied()
+    }
+
     /// Return all of the call variants, if a call type exists.
     pub fn call_variants(&self) -> Option<&'a [Variant<PortableForm>]> {
         VariantIndex::get(self.inner.call_ty, self.types)
@@ -397,6 +410,8 @@ struct PalletMetadataInner {
     constants: OrderedMap<ArcStr, ConstantMetadata>,
     /// Details about each of the pallet view functions.
     view_functions: Vec<PalletViewFunctionMetadataInner>,
+    /// Mapping from associated type to type ID describing its shape.
+    associated_types: BTreeMap<String, u32>,
     /// Pallet documentation.
     docs: Vec<String>,
 }
