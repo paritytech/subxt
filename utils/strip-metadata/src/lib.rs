@@ -16,8 +16,9 @@ use std::collections::BTreeSet;
 /// - Call `self.iter_type_ids_mut().collect()` to gather all of the type IDs to keep.
 /// - This will require implementing [`IterateTypeIds`], which is the thing that iterates over all of the
 ///   type IDs still present in the metadata such that we know what we need to keep.
-/// - Call `self.types.retain(..)` to filter any types not matching the IDs above out of the registry.
-/// - Map type IDs found in the metadata to the new IDs that retain resulted in.
+/// - Call `self.types.retain(..)` to filter any types not matching the type IDs above out of the registry.
+/// - Iterate over the type IDs again, mapping those found in the metadata to the new IDs that calling
+///   `self.types.retain(..)` handed back.
 pub trait StripMetadata {
     /// Strip out any pallets and runtime APIs for which the provided filter functions return false.
     fn strip_metadata<PalletFilter, RuntimeApiFilter>(
