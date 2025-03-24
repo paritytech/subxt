@@ -42,17 +42,8 @@ impl StripMetadata for v14::RuntimeMetadataV14 {
         // Throw away pallets we don't care about:
         self.pallets.retain(|pallet| keep_pallet(&pallet.name));
 
-        // Iterate over the type IDs and retain any that we still need:
-        let keep_these_ids: BTreeSet<u32> = self.iter_type_ids_mut().map(|id| *id).collect();
-        let new_ids = self.types.retain(|id| keep_these_ids.contains(&id));
-
-        // Map IDs found in the metadata to new ones as needed after the retaining:
-        self.iter_type_ids_mut().for_each(|id| {
-            let Some(new_id) = new_ids.get(id) else {
-                return;
-            };
-            *id = *new_id;
-        });
+        // Now, only retain types we care about in the registry:
+        retain_types(self);
     }
 }
 
@@ -69,17 +60,8 @@ impl StripMetadata for v15::RuntimeMetadataV15 {
         self.pallets.retain(|pallet| keep_pallet(&pallet.name));
         self.apis.retain(|api| keep_runtime_api(&api.name));
 
-        // Iterate over the type IDs and retain any that we still need:
-        let keep_these_ids: BTreeSet<u32> = self.iter_type_ids_mut().map(|id| *id).collect();
-        let new_ids = self.types.retain(|id| keep_these_ids.contains(&id));
-
-        // Map IDs found in the metadata to new ones as needed after the retaining:
-        self.iter_type_ids_mut().for_each(|id| {
-            let Some(new_id) = new_ids.get(id) else {
-                return;
-            };
-            *id = *new_id;
-        });
+        // Now, only retain types we care about in the registry:
+        retain_types(self);
     }
 }
 
@@ -96,18 +78,31 @@ impl StripMetadata for v16::RuntimeMetadataV16 {
         self.pallets.retain(|pallet| keep_pallet(&pallet.name));
         self.apis.retain(|api| keep_runtime_api(&api.name));
 
-        // Iterate over the type IDs and retain any that we still need:
-        let keep_these_ids: BTreeSet<u32> = self.iter_type_ids_mut().map(|id| *id).collect();
-        let new_ids = self.types.retain(|id| keep_these_ids.contains(&id));
-
-        // Map IDs found in the metadata to new ones as needed after the retaining:
-        self.iter_type_ids_mut().for_each(|id| {
-            let Some(new_id) = new_ids.get(id) else {
-                return;
-            };
-            *id = *new_id;
-        });
+        // Now, only retain types we care about in the registry:
+        retain_types(self);
     }
+}
+
+fn retain_types<M: GetTypes + IterateTypeIds>(m: &mut M) {
+    // We want to preserve this type even if it's not used anywhere:
+    let dispatch_err_type_id = find_dispatch_error_type(m.get_types_mut());
+
+    // Iterate over the type IDs and retain any that we still need:
+    let keep_these_ids: BTreeSet<u32> = m
+        .iter_type_ids_mut()
+        .map(|id| *id)
+        .chain(Some(dispatch_err_type_id))
+        .collect();
+
+    let new_ids = m.get_types_mut().retain(|id| keep_these_ids.contains(&id));
+
+    // Map IDs found in the metadata to new ones as needed after the retaining:
+    m.iter_type_ids_mut().for_each(|id| {
+        let Some(new_id) = new_ids.get(id) else {
+            return;
+        };
+        *id = *new_id;
+    });
 }
 
 /// This trait is implemented for metadatas, and its purpose is to hand back iterators over
@@ -175,14 +170,10 @@ impl IterateTypeIds for v14::RuntimeMetadataV14 {
         // The extrinsic type:
         let extrinsic_type_id = &mut self.extrinsic.ty.id;
 
-        // Subxt needs this type so we preserve it regardless:
-        let dispatch_error_ty = iter_dispatch_error_type(&mut self.types);
-
         // Return all IDs gathered:
         pallet_types
             .chain(Some(extrinsic_type_id))
             .chain(transaction_extension_types)
-            .chain(dispatch_error_ty)
     }
 }
 
@@ -268,9 +259,6 @@ impl IterateTypeIds for v15::RuntimeMetadataV15 {
         // Custom types:
         let custom_type_ids = self.custom.map.values_mut().map(|value| &mut value.ty.id);
 
-        // Subxt needs this type so we preserve it regardless:
-        let dispatch_error_ty = iter_dispatch_error_type(&mut self.types);
-
         // Return all IDs gathered:
         pallet_types
             .chain(runtime_api_types)
@@ -278,7 +266,6 @@ impl IterateTypeIds for v15::RuntimeMetadataV15 {
             .chain(outer_enum_type_ids)
             .chain(transaction_extension_types)
             .chain(custom_type_ids)
-            .chain(dispatch_error_ty)
     }
 }
 
@@ -376,9 +363,6 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
         // Custom types:
         let custom_type_ids = self.custom.map.values_mut().map(|value| &mut value.ty.id);
 
-        // Subxt needs this type so we preserve it regardless:
-        let dispatch_error_ty = iter_dispatch_error_type(&mut self.types);
-
         // Return all IDs gathered:
         pallet_types
             .chain(runtime_api_types)
@@ -386,22 +370,42 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
             .chain(outer_enum_type_ids)
             .chain(transaction_extension_types)
             .chain(custom_type_ids)
-            .chain(dispatch_error_ty)
+    }
+}
+
+/// This trait defines how to get a type registry from the metadata
+trait GetTypes {
+    fn get_types_mut(&mut self) -> &mut PortableRegistry;
+}
+
+impl GetTypes for v14::RuntimeMetadataV14 {
+    fn get_types_mut(&mut self) -> &mut PortableRegistry {
+        &mut self.types
+    }
+}
+
+impl GetTypes for v15::RuntimeMetadataV15 {
+    fn get_types_mut(&mut self) -> &mut PortableRegistry {
+        &mut self.types
+    }
+}
+
+impl GetTypes for v16::RuntimeMetadataV16 {
+    fn get_types_mut(&mut self) -> &mut PortableRegistry {
+        &mut self.types
     }
 }
 
 /// Subxt needs this type so we always ensure to preserve it
 /// even if it's not explicitly mentioned anywhere:
-fn iter_dispatch_error_type(types: &mut PortableRegistry) -> impl Iterator<Item = &mut u32> {
-    core::iter::once_with(|| {
-        let ty = types
-            .types
-            .iter_mut()
-            .find(|ty| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
-            .expect("Metadata must contain sp_runtime::DispatchError");
-
-        &mut ty.id
-    })
+fn find_dispatch_error_type(types: &mut PortableRegistry) -> u32 {
+    types
+        .types
+        .iter()
+        .enumerate()
+        .find(|(_idx, ty)| ty.ty.path.segments == ["sp_runtime", "DispatchError"])
+        .expect("Metadata must contain sp_runtime::DispatchError")
+        .0 as u32
 }
 
 /// Create Either enums which can be iterated over.
