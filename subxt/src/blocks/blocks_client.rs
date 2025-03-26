@@ -94,8 +94,9 @@ where
         Client: Send + Sync + 'static,
     {
         let client = self.client.clone();
+        let hasher = client.hasher();
         header_sub_fut_to_block_sub(self.clone(), async move {
-            let stream = client.backend().stream_all_block_headers().await?;
+            let stream = client.backend().stream_all_block_headers(hasher).await?;
             BlockStreamRes::Ok(stream)
         })
     }
@@ -111,8 +112,9 @@ where
         Client: Send + Sync + 'static,
     {
         let client = self.client.clone();
+        let hasher = client.hasher();
         header_sub_fut_to_block_sub(self.clone(), async move {
-            let stream = client.backend().stream_best_block_headers().await?;
+            let stream = client.backend().stream_best_block_headers(hasher).await?;
             BlockStreamRes::Ok(stream)
         })
     }
@@ -125,8 +127,12 @@ where
         Client: Send + Sync + 'static,
     {
         let client = self.client.clone();
+        let hasher = client.hasher();
         header_sub_fut_to_block_sub(self.clone(), async move {
-            let stream = client.backend().stream_finalized_block_headers().await?;
+            let stream = client
+                .backend()
+                .stream_finalized_block_headers(hasher)
+                .await?;
             BlockStreamRes::Ok(stream)
         })
     }

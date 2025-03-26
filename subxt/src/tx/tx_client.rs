@@ -459,7 +459,7 @@ where
 
     /// Calculate and return the hash of the transaction, based on the configured hasher.
     pub fn hash(&self) -> T::Hash {
-        self.inner.hash()
+        self.inner.hash_with(self.client.hasher())
     }
 
     /// Returns the SCALE encoded transaction bytes.
@@ -613,7 +613,7 @@ async fn inject_account_nonce_and_block<T: Config, Client: OnlineClientT<T>>(
         crate::blocks::get_account_nonce(client, account_id, block_ref.hash()).await?;
 
     params.inject_account_nonce(account_nonce);
-    params.inject_block(block_header.number().into(), block_header.hash());
+    params.inject_block(block_header.number().into(), block_ref.hash());
 
     Ok(())
 }

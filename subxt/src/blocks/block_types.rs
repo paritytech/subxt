@@ -74,12 +74,12 @@ where
 {
     /// Return the events associated with the block, fetching them from the node if necessary.
     pub async fn events(&self) -> Result<events::Events<T>, Error> {
-        get_events(&self.client, self.header.hash(), &self.cached_events).await
+        get_events(&self.client, self.hash(), &self.cached_events).await
     }
 
     /// Fetch and return the extrinsics in the block body.
     pub async fn extrinsics(&self) -> Result<Extrinsics<T, C>, Error> {
-        let block_hash = self.header.hash();
+        let block_hash = self.hash();
         let Some(extrinsics) = self.client.backend().block_body(block_hash).await? else {
             return Err(BlockError::not_found(block_hash).into());
         };

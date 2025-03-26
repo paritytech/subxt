@@ -40,6 +40,7 @@ struct Inner<T: Config> {
     genesis_hash: T::Hash,
     runtime_version: RuntimeVersion,
     metadata: Metadata,
+    hasher: T::Hasher,
 }
 
 impl<T: Config> std::fmt::Debug for OnlineClient<T> {
@@ -146,11 +147,17 @@ impl<T: Config> OnlineClient<T> {
         metadata: impl Into<Metadata>,
         backend: Arc<B>,
     ) -> Result<OnlineClient<T>, Error> {
+        use subxt_core::config::Hasher;
+
+        let metadata = metadata.into();
+        let hasher = T::Hasher::new(&metadata);
+
         Ok(OnlineClient {
             inner: Arc::new(RwLock::new(Inner {
                 genesis_hash,
                 runtime_version,
-                metadata: metadata.into(),
+                metadata,
+                hasher,
             })),
             backend,
         })
@@ -244,6 +251,11 @@ impl<T: Config> OnlineClient<T> {
     /// ```
     pub fn updater(&self) -> ClientRuntimeUpdater<T> {
         ClientRuntimeUpdater(self.clone())
+    }
+
+    /// Return the hasher configured for hashing blocks and extrinsics.
+    pub fn hasher(&self) -> T::Hasher {
+        self.inner.read().expect("shouldn't be poisoned").hasher
     }
 
     /// Return the [`Metadata`] used in this client.
@@ -360,6 +372,9 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     }
     fn runtime_version(&self) -> RuntimeVersion {
         self.runtime_version()
+    }
+    fn hasher(&self) -> T::Hasher {
+        self.hasher()
     }
     // This is provided by default, but we can optimise here and only lock once:
     fn client_state(&self) -> ClientState<T> {
@@ -504,7 +519,17 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
 ) -> Option<Result<BlockRef<T::Hash>, Error>> {
     use scale_value::At;
 
-    let mut block_sub = match client.backend().stream_finalized_block_headers().await {
+    let hasher = client
+        .inner
+        .read()
+        .expect("Lock shouldn't be poisoned")
+        .hasher;
+
+    let mut block_sub = match client
+        .backend()
+        .stream_finalized_block_headers(hasher)
+        .await
+    {
         Ok(s) => s,
         Err(err) => return Some(Err(err)),
     };

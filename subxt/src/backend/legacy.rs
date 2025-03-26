@@ -270,16 +270,16 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
     async fn stream_all_block_headers(
         &self,
+        hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let methods = self.methods.clone();
-
         let retry_sub = retry_stream(move || {
             let methods = methods.clone();
             Box::pin(async move {
                 let sub = methods.chain_subscribe_all_heads().await?;
-                let sub = sub.map_err(|e| e.into()).map(|r| {
+                let sub = sub.map_err(|e| e.into()).map(move |r| {
                     r.map(|h| {
-                        let hash = h.hash();
+                        let hash = h.hash_with(hasher);
                         (h, BlockRef::from_hash(hash))
                     })
                 });
@@ -293,6 +293,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
     async fn stream_best_block_headers(
         &self,
+        hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let methods = self.methods.clone();
 
@@ -300,9 +301,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
             let methods = methods.clone();
             Box::pin(async move {
                 let sub = methods.chain_subscribe_new_heads().await?;
-                let sub = sub.map_err(|e| e.into()).map(|r| {
+                let sub = sub.map_err(|e| e.into()).map(move |r| {
                     r.map(|h| {
-                        let hash = h.hash();
+                        let hash = h.hash_with(hasher);
                         (h, BlockRef::from_hash(hash))
                     })
                 });
@@ -316,6 +317,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
     async fn stream_finalized_block_headers(
         &self,
+        hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         let this = self.clone();
 
@@ -338,9 +340,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                     sub,
                     last_finalized_block_num,
                 );
-                let sub = sub.map(|r| {
+                let sub = sub.map(move |r| {
                     r.map(|h| {
-                        let hash = h.hash();
+                        let hash = h.hash_with(hasher);
                         (h, BlockRef::from_hash(hash))
                     })
                 });

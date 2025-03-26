@@ -24,6 +24,9 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Return the provided [`RuntimeVersion`].
     fn runtime_version(&self) -> RuntimeVersion;
 
+    /// Return the hasher used on the chain.
+    fn hasher(&self) -> T::Hasher;
+
     /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
     fn client_state(&self) -> ClientState<T> {
         ClientState {
@@ -74,6 +77,7 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
 #[derive_where(Debug, Clone)]
 pub struct OfflineClient<T: Config> {
     inner: Arc<ClientState<T>>,
+    hasher: T::Hasher,
 }
 
 impl<T: Config> OfflineClient<T> {
@@ -85,8 +89,10 @@ impl<T: Config> OfflineClient<T> {
         metadata: impl Into<Metadata>,
     ) -> OfflineClient<T> {
         let metadata = metadata.into();
+        let hasher = <T::Hasher as subxt_core::config::Hasher>::new(&metadata);
 
         OfflineClient {
+            hasher,
             inner: Arc::new(ClientState {
                 genesis_hash,
                 runtime_version,
@@ -108,6 +114,11 @@ impl<T: Config> OfflineClient<T> {
     /// Return the [`Metadata`] used in this client.
     pub fn metadata(&self) -> Metadata {
         self.inner.metadata.clone()
+    }
+
+    /// Return the hasher used for the chain.
+    pub fn hasher(&self) -> T::Hasher {
+        self.hasher
     }
 
     // Just a copy of the most important trait methods so that people
@@ -148,6 +159,9 @@ impl<T: Config> OfflineClientT<T> for OfflineClient<T> {
     }
     fn metadata(&self) -> Metadata {
         self.metadata()
+    }
+    fn hasher(&self) -> T::Hasher {
+        self.hasher()
     }
 }
 

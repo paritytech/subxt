@@ -281,6 +281,8 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
     pub async fn fetch_events(&self) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
+        let hasher = self.client.hasher();
+
         let block_body = self
             .client
             .backend()
@@ -295,7 +297,7 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
                 let Ok((_, stripped)) = strip_compact_prefix(ext) else {
                     return false;
                 };
-                let hash = T::Hasher::hash_of(&stripped);
+                let hash = hasher.hash_of(&stripped);
                 hash == self.ext_hash
             })
             // If we successfully obtain the block hash we think contains our
@@ -343,6 +345,10 @@ mod test {
         }
 
         fn runtime_version(&self) -> RuntimeVersion {
+            unimplemented!("just a mock impl to satisfy trait bounds")
+        }
+
+        fn hasher(&self) -> <SubstrateConfig as Config>::Hasher {
             unimplemented!("just a mock impl to satisfy trait bounds")
         }
 

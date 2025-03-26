@@ -422,9 +422,12 @@ impl<T: Config> Transaction<T> {
         }
     }
 
-    /// Calculate and return the hash of the extrinsic, based on the configured hasher.
-    pub fn hash(&self) -> T::Hash {
-        T::Hasher::hash_of(&self.encoded)
+    /// Calculate and return the hash of the extrinsic, based on the provided hasher.
+    /// If you don't have a hasher to hand, you can construct one using the metadata
+    /// with `T::Hasher::new(&metadata)`. This will create a hasher suitable for the
+    /// current chain where possible.
+    pub fn hash_with(&self, hasher: T::Hasher) -> T::Hash {
+        hasher.hash_of(&self.encoded)
     }
 
     /// Returns the SCALE encoded extrinsic bytes.

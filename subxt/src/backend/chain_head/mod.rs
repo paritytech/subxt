@@ -543,6 +543,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
 
     async fn stream_all_block_headers(
         &self,
+        _hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         // TODO: https://github.com/paritytech/subxt/issues/1568
         //
@@ -560,6 +561,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
 
     async fn stream_best_block_headers(
         &self,
+        _hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         // TODO: https://github.com/paritytech/subxt/issues/1568
         //
@@ -575,6 +577,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
 
     async fn stream_finalized_block_headers(
         &self,
+        _hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
         self.stream_headers(|ev| match ev {
             FollowEvent::Initialized(init) => init.finalized_block_hashes,

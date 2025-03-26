@@ -9,7 +9,7 @@
 
 use super::extrinsic_params::ExtrinsicParams;
 use crate::client::ClientState;
-use crate::config::{ExtrinsicParamsEncoder, Header};
+use crate::config::ExtrinsicParamsEncoder;
 use crate::error::ExtrinsicParamsError;
 use crate::utils::{Era, Static};
 use crate::Config;
@@ -368,15 +368,7 @@ impl<T: Config> CheckMortalityParams<T> {
     pub fn mortal(for_n_blocks: u64) -> Self {
         Self(CheckMortalityParamsInner::MortalForBlocks(for_n_blocks))
     }
-    /// Configure a transaction that will be mortal for the number of blocks given,
-    /// and from the block header provided.
-    pub fn mortal_from(for_n_blocks: u64, from_block: T::Header) -> Self {
-        Self(CheckMortalityParamsInner::MortalFromBlock {
-            for_n_blocks,
-            from_block_n: from_block.number().into(),
-            from_block_hash: from_block.hash(),
-        })
-    }
+
     /// Configure a transaction that will be mortal for the number of blocks given,
     /// and from the block details provided. Prefer to use [`CheckMortalityParams::mortal()`]
     /// or [`CheckMortalityParams::mortal_from()`] which both avoid the block number and hash

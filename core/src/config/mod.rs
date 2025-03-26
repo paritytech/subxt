@@ -20,6 +20,7 @@ use core::fmt::Debug;
 use scale_decode::DecodeAsType;
 use scale_encode::EncodeAsType;
 use serde::{de::DeserializeOwned, Serialize};
+use subxt_metadata::Metadata;
 
 pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
 pub use extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder};
@@ -46,7 +47,7 @@ pub trait Config: Sized + Send + Sync + 'static {
     type Signature: Debug + Clone + Encode + Decode + Send;
 
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
-    type Hasher: Debug + Hasher<Output = Self::Hash>;
+    type Hasher: Debug + Clone + Copy + Hasher<Output = Self::Hash> + Send + Sync;
 
     /// The block header.
     type Header: Debug + Header<Hasher = Self::Hasher> + Sync + Send + DeserializeOwned;
@@ -99,13 +100,16 @@ pub trait Hasher {
     /// The type given back from the hash operation
     type Output;
 
+    /// Construct a new hasher.
+    fn new(metadata: &Metadata) -> Self;
+
     /// Hash some bytes to the given output type.
-    fn hash(s: &[u8]) -> Self::Output;
+    fn hash(&self, s: &[u8]) -> Self::Output;
 
     /// Hash some SCALE encodable type to the given output type.
-    fn hash_of<S: Encode>(s: &S) -> Self::Output {
+    fn hash_of<S: Encode>(&self, s: &S) -> Self::Output {
         let out = s.encode();
-        Self::hash(&out)
+        self.hash(&out)
     }
 }
 
@@ -120,7 +124,7 @@ pub trait Header: Sized + Encode + Decode {
     fn number(&self) -> Self::Number;
 
     /// Hash this header.
-    fn hash(&self) -> <Self::Hasher as Hasher>::Output {
-        Self::Hasher::hash_of(self)
+    fn hash_with(&self, hasher: Self::Hasher) -> <Self::Hasher as Hasher>::Output {
+        hasher.hash_of(self)
     }
 }

@@ -123,16 +123,19 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     /// A stream of all new block headers as they arrive.
     async fn stream_all_block_headers(
         &self,
+        hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>;
 
     /// A stream of best block headers.
     async fn stream_best_block_headers(
         &self,
+        hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>;
 
     /// A stream of finalized block headers.
     async fn stream_finalized_block_headers(
         &self,
+        hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>;
 
     /// Submit a transaction. This will return a stream of events about it.
