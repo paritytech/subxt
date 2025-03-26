@@ -371,8 +371,7 @@ impl<T: Config> CheckMortalityParams<T> {
 
     /// Configure a transaction that will be mortal for the number of blocks given,
     /// and from the block details provided. Prefer to use [`CheckMortalityParams::mortal()`]
-    /// or [`CheckMortalityParams::mortal_from()`] which both avoid the block number and hash
-    /// from being misaligned.
+    /// where possible, which prevents the block number and hash from being misaligned.
     pub fn mortal_from_unchecked(
         for_n_blocks: u64,
         from_block_n: u64,

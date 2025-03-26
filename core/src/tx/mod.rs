@@ -406,7 +406,8 @@ impl<T: Config> PartialTransactionV5<T> {
 
 /// This represents a signed transaction that's ready to be submitted.
 /// Use [`Transaction::encoded()`] or [`Transaction::into_encoded()`] to
-/// get the bytes for it, or [`Transaction::hash()`] to get the hash.
+/// get the bytes for it, or [`Transaction::hash_with()`] to hash the transaction
+/// given an instance of [`Config::Hasher`].
 pub struct Transaction<T> {
     encoded: Encoded,
     marker: core::marker::PhantomData<T>,
