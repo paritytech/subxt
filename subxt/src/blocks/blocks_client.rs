@@ -6,7 +6,7 @@ use super::Block;
 use crate::{
     backend::{BlockRef, StreamOfResults},
     client::OnlineClientT,
-    config::Config,
+    config::{Config, HashFor},
     error::{BlockError, Error},
     utils::PhantomDataSendSync,
 };
@@ -48,7 +48,7 @@ where
     /// but may run into errors attempting to work with them.
     pub fn at(
         &self,
-        block_ref: impl Into<BlockRef<T::Hash>>,
+        block_ref: impl Into<BlockRef<HashFor<T>>>,
     ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
         self.at_or_latest(Some(block_ref.into()))
     }
@@ -64,7 +64,7 @@ where
     /// provided.
     fn at_or_latest(
         &self,
-        block_ref: Option<BlockRef<T::Hash>>,
+        block_ref: Option<BlockRef<HashFor<T>>>,
     ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
         let client = self.client.clone();
         async move {
@@ -146,7 +146,9 @@ async fn header_sub_fut_to_block_sub<T, Client, S>(
 ) -> Result<BlockStream<Block<T, Client>>, Error>
 where
     T: Config,
-    S: Future<Output = Result<BlockStream<(T::Header, BlockRef<T::Hash>)>, Error>> + Send + 'static,
+    S: Future<Output = Result<BlockStream<(T::Header, BlockRef<HashFor<T>>)>, Error>>
+        + Send
+        + 'static,
     Client: OnlineClientT<T> + Send + Sync + 'static,
 {
     let sub = sub.await?.then(move |header_and_ref| {

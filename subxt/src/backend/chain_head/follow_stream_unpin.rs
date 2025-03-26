@@ -4,7 +4,7 @@
 
 use super::follow_stream::FollowStream;
 use super::ChainHeadRpcMethods;
-use crate::config::{BlockHash, Config};
+use crate::config::{BlockHash, Config, HashFor};
 use crate::error::Error;
 use futures::stream::{FuturesUnordered, Stream, StreamExt};
 use subxt_rpcs::methods::chain_head::{
@@ -274,11 +274,11 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
 
     /// Create a new [`FollowStreamUnpin`] given the RPC methods.
     pub fn from_methods<T: Config>(
-        follow_stream: FollowStream<T::Hash>,
+        follow_stream: FollowStream<HashFor<T>>,
         methods: ChainHeadRpcMethods<T>,
         max_block_life: usize,
-    ) -> FollowStreamUnpin<T::Hash> {
-        let unpin_method = Box::new(move |hash: T::Hash, sub_id: Arc<str>| {
+    ) -> FollowStreamUnpin<HashFor<T>> {
+        let unpin_method = Box::new(move |hash: HashFor<T>, sub_id: Arc<str>| {
             let methods = methods.clone();
             let fut: UnpinFut = Box::pin(async move {
                 // We ignore any errors trying to unpin at the moment.

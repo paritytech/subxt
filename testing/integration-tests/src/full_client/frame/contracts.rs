@@ -12,7 +12,12 @@ use crate::{
     subxt_test, test_context, TestClient, TestConfig, TestContext,
 };
 use subxt::ext::futures::StreamExt;
-use subxt::{tx::TxProgress, utils::MultiAddress, Config, Error};
+use subxt::{
+    config::{Config, HashFor},
+    tx::TxProgress,
+    utils::MultiAddress,
+    Error,
+};
 use subxt_signer::sr25519::{self, dev};
 
 struct ContractsTestContext {
@@ -20,7 +25,7 @@ struct ContractsTestContext {
     signer: sr25519::Keypair,
 }
 
-type Hash = <TestConfig as Config>::Hash;
+type Hash = HashFor<TestConfig>;
 type AccountId = <TestConfig as Config>::AccountId;
 
 /// A dummy contract which does nothing at all.

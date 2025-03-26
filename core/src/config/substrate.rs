@@ -22,7 +22,6 @@ use subxt_metadata::Metadata;
 pub enum SubstrateConfig {}
 
 impl Config for SubstrateConfig {
-    type Hash = H256;
     type AccountId = AccountId32;
     type Address = MultiAddress<Self::AccountId, u32>;
     type Signature = MultiSignature;

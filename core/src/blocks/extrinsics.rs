@@ -5,7 +5,7 @@
 use super::BlockError;
 use crate::blocks::extrinsic_transaction_extensions::ExtrinsicTransactionExtensions;
 use crate::{
-    config::{Config, Hasher},
+    config::{Config, HashFor, Hasher},
     error::{Error, MetadataError},
     Metadata,
 };
@@ -171,7 +171,7 @@ where
     }
 
     /// Calculate and return the hash of the extrinsic, based on the configured hasher.
-    pub fn hash(&self) -> T::Hash {
+    pub fn hash(&self) -> HashFor<T> {
         // Use hash(), not hash_of(), because we don't want to double encode the bytes.
         self.hasher.hash(self.bytes())
     }

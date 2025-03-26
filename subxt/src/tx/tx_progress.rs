@@ -9,18 +9,18 @@ use std::task::Poll;
 use crate::{
     backend::{BlockRef, StreamOfResults, TransactionStatus as BackendTxStatus},
     client::OnlineClientT,
+    config::{Config, HashFor},
     error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
     utils::strip_compact_prefix,
-    Config,
 };
 use derive_where::derive_where;
 use futures::{Stream, StreamExt};
 
 /// This struct represents a subscription to the progress of some transaction.
 pub struct TxProgress<T: Config, C> {
-    sub: Option<StreamOfResults<BackendTxStatus<T::Hash>>>,
-    ext_hash: T::Hash,
+    sub: Option<StreamOfResults<BackendTxStatus<HashFor<T>>>>,
+    ext_hash: HashFor<T>,
     client: C,
 }
 
@@ -42,9 +42,9 @@ impl<T: Config, C> Unpin for TxProgress<T, C> {}
 impl<T: Config, C> TxProgress<T, C> {
     /// Instantiate a new [`TxProgress`] from a custom subscription.
     pub fn new(
-        sub: StreamOfResults<BackendTxStatus<T::Hash>>,
+        sub: StreamOfResults<BackendTxStatus<HashFor<T>>>,
         client: C,
-        ext_hash: T::Hash,
+        ext_hash: HashFor<T>,
     ) -> Self {
         Self {
             sub: Some(sub),
@@ -54,7 +54,7 @@ impl<T: Config, C> TxProgress<T, C> {
     }
 
     /// Return the hash of the extrinsic.
-    pub fn extrinsic_hash(&self) -> T::Hash {
+    pub fn extrinsic_hash(&self) -> HashFor<T> {
         self.ext_hash
     }
 }
@@ -219,13 +219,13 @@ impl<T: Config, C> TxStatus<T, C> {
 /// This struct represents a transaction that has made it into a block.
 #[derive_where(Debug; C)]
 pub struct TxInBlock<T: Config, C> {
-    block_ref: BlockRef<T::Hash>,
-    ext_hash: T::Hash,
+    block_ref: BlockRef<HashFor<T>>,
+    ext_hash: HashFor<T>,
     client: C,
 }
 
 impl<T: Config, C> TxInBlock<T, C> {
-    pub(crate) fn new(block_ref: BlockRef<T::Hash>, ext_hash: T::Hash, client: C) -> Self {
+    pub(crate) fn new(block_ref: BlockRef<HashFor<T>>, ext_hash: HashFor<T>, client: C) -> Self {
         Self {
             block_ref,
             ext_hash,
@@ -234,12 +234,12 @@ impl<T: Config, C> TxInBlock<T, C> {
     }
 
     /// Return the hash of the block that the transaction has made it into.
-    pub fn block_hash(&self) -> T::Hash {
+    pub fn block_hash(&self) -> HashFor<T> {
         self.block_ref.hash()
     }
 
     /// Return the hash of the extrinsic that was submitted.
-    pub fn extrinsic_hash(&self) -> T::Hash {
+    pub fn extrinsic_hash(&self) -> HashFor<T> {
         self.ext_hash
     }
 }
@@ -323,12 +323,13 @@ mod test {
     use crate::{
         backend::{StreamOfResults, TransactionStatus},
         client::{OfflineClientT, OnlineClientT},
+        config::{Config, HashFor},
         tx::TxProgress,
-        Config, Error, SubstrateConfig,
+        Error, SubstrateConfig,
     };
 
     type MockTxProgress = TxProgress<SubstrateConfig, MockClient>;
-    type MockHash = <SubstrateConfig as Config>::Hash;
+    type MockHash = HashFor<SubstrateConfig>;
     type MockSubstrateTxStatus = TransactionStatus<MockHash>;
 
     /// a mock client to satisfy trait bounds in tests

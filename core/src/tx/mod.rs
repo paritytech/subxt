@@ -9,7 +9,7 @@
 //! ```rust
 //! use subxt_signer::sr25519::dev;
 //! use subxt_macro::subxt;
-//! use subxt_core::config::PolkadotConfig;
+//! use subxt_core::config::{PolkadotConfig, HashFor};
 //! use subxt_core::config::DefaultExtrinsicParamsBuilder as Params;
 //! use subxt_core::tx;
 //! use subxt_core::utils::H256;
@@ -59,7 +59,7 @@
 pub mod payload;
 pub mod signer;
 
-use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher};
+use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, HashFor, Hasher};
 use crate::error::{Error, ExtrinsicError, MetadataError};
 use crate::metadata::Metadata;
 use crate::utils::Encoded;
@@ -426,7 +426,7 @@ impl<T: Config> Transaction<T> {
     /// If you don't have a hasher to hand, you can construct one using the metadata
     /// with `T::Hasher::new(&metadata)`. This will create a hasher suitable for the
     /// current chain where possible.
-    pub fn hash_with(&self, hasher: T::Hasher) -> T::Hash {
+    pub fn hash_with(&self, hasher: T::Hasher) -> HashFor<T> {
         hasher.hash_of(&self.encoded)
     }
 

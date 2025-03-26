@@ -4,8 +4,14 @@
 
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    blocks::BlocksClient, constants::ConstantsClient, events::EventsClient,
-    runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient, Config, Metadata,
+    blocks::BlocksClient,
+    config::{Config, HashFor},
+    constants::ConstantsClient,
+    events::EventsClient,
+    runtime_api::RuntimeApiClient,
+    storage::StorageClient,
+    tx::TxClient,
+    Metadata,
 };
 
 use derive_where::derive_where;
@@ -19,7 +25,7 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     fn metadata(&self) -> Metadata;
 
     /// Return the provided genesis hash.
-    fn genesis_hash(&self) -> T::Hash;
+    fn genesis_hash(&self) -> HashFor<T>;
 
     /// Return the provided [`RuntimeVersion`].
     fn runtime_version(&self) -> RuntimeVersion;
@@ -84,7 +90,7 @@ impl<T: Config> OfflineClient<T> {
     /// Construct a new [`OfflineClient`], providing
     /// the necessary runtime and compile-time arguments.
     pub fn new(
-        genesis_hash: T::Hash,
+        genesis_hash: HashFor<T>,
         runtime_version: RuntimeVersion,
         metadata: impl Into<Metadata>,
     ) -> OfflineClient<T> {
@@ -102,7 +108,7 @@ impl<T: Config> OfflineClient<T> {
     }
 
     /// Return the genesis hash.
-    pub fn genesis_hash(&self) -> T::Hash {
+    pub fn genesis_hash(&self) -> HashFor<T> {
         self.inner.genesis_hash
     }
 
@@ -151,7 +157,7 @@ impl<T: Config> OfflineClient<T> {
 }
 
 impl<T: Config> OfflineClientT<T> for OfflineClient<T> {
-    fn genesis_hash(&self) -> T::Hash {
+    fn genesis_hash(&self) -> HashFor<T> {
         self.genesis_hash()
     }
     fn runtime_version(&self) -> RuntimeVersion {

@@ -10,9 +10,9 @@ pub mod chain_head;
 pub mod legacy;
 pub mod utils;
 
+use crate::config::{Config, HashFor};
 use crate::error::Error;
 use crate::metadata::Metadata;
-use crate::Config;
 use async_trait::async_trait;
 use codec::{Decode, Encode};
 use futures::{Stream, StreamExt};
@@ -82,37 +82,37 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     async fn storage_fetch_values(
         &self,
         keys: Vec<Vec<u8>>,
-        at: T::Hash,
+        at: HashFor<T>,
     ) -> Result<StreamOfResults<StorageResponse>, Error>;
 
     /// Fetch keys underneath the given key from storage.
     async fn storage_fetch_descendant_keys(
         &self,
         key: Vec<u8>,
-        at: T::Hash,
+        at: HashFor<T>,
     ) -> Result<StreamOfResults<Vec<u8>>, Error>;
 
     /// Fetch values underneath the given key from storage.
     async fn storage_fetch_descendant_values(
         &self,
         key: Vec<u8>,
-        at: T::Hash,
+        at: HashFor<T>,
     ) -> Result<StreamOfResults<StorageResponse>, Error>;
 
     /// Fetch the genesis hash
-    async fn genesis_hash(&self) -> Result<T::Hash, Error>;
+    async fn genesis_hash(&self) -> Result<HashFor<T>, Error>;
 
     /// Get a block header
-    async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error>;
+    async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, Error>;
 
     /// Return the extrinsics found in the block. Each extrinsic is represented
     /// by a vector of bytes which has _not_ been SCALE decoded (in other words, the
     /// first bytes in the vector will decode to the compact encoded length of the extrinsic)
-    async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error>;
+    async fn block_body(&self, at: HashFor<T>) -> Result<Option<Vec<Vec<u8>>>, Error>;
 
     /// Get the most recent finalized block hash.
     /// Note: needed only in blocks client for finalized block stream; can prolly be removed.
-    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error>;
+    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<HashFor<T>>, Error>;
 
     /// Get information about the current runtime.
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error>;
@@ -124,32 +124,32 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     async fn stream_all_block_headers(
         &self,
         hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>;
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error>;
 
     /// A stream of best block headers.
     async fn stream_best_block_headers(
         &self,
         hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>;
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error>;
 
     /// A stream of finalized block headers.
     async fn stream_finalized_block_headers(
         &self,
         hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>;
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error>;
 
     /// Submit a transaction. This will return a stream of events about it.
     async fn submit_transaction(
         &self,
         bytes: &[u8],
-    ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error>;
+    ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, Error>;
 
     /// Make a call to some runtime API.
     async fn call(
         &self,
         method: &str,
         call_parameters: Option<&[u8]>,
-        at: T::Hash,
+        at: HashFor<T>,
     ) -> Result<Vec<u8>, Error>;
 }
 
@@ -160,7 +160,7 @@ pub trait BackendExt<T: Config>: Backend<T> {
     async fn storage_fetch_value(
         &self,
         key: Vec<u8>,
-        at: T::Hash,
+        at: HashFor<T>,
     ) -> Result<Option<Vec<u8>>, Error> {
         self.storage_fetch_values(vec![key], at)
             .await?
@@ -176,7 +176,7 @@ pub trait BackendExt<T: Config>: Backend<T> {
         &self,
         method: &str,
         call_parameters: Option<&[u8]>,
-        at: T::Hash,
+        at: HashFor<T>,
     ) -> Result<D, Error> {
         let bytes = self.call(method, call_parameters, at).await?;
         let res = D::decode(&mut &*bytes)?;
@@ -184,7 +184,7 @@ pub trait BackendExt<T: Config>: Backend<T> {
     }
 
     /// Return the metadata at some version.
-    async fn metadata_at_version(&self, version: u32, at: T::Hash) -> Result<Metadata, Error> {
+    async fn metadata_at_version(&self, version: u32, at: HashFor<T>) -> Result<Metadata, Error> {
         let param = version.encode();
 
         let opaque: Option<frame_metadata::OpaqueMetadata> = self
@@ -199,7 +199,7 @@ pub trait BackendExt<T: Config>: Backend<T> {
     }
 
     /// Return V14 metadata from the legacy `Metadata_metadata` call.
-    async fn legacy_metadata(&self, at: T::Hash) -> Result<Metadata, Error> {
+    async fn legacy_metadata(&self, at: HashFor<T>) -> Result<Metadata, Error> {
         let opaque: frame_metadata::OpaqueMetadata =
             self.call_decoding("Metadata_metadata", None, at).await?;
         let metadata: Metadata = Decode::decode(&mut &opaque.0[..])?;
@@ -415,7 +415,6 @@ mod test {
     // Define dummy config
     enum Conf {}
     impl Config for Conf {
-        type Hash = H256;
         type AccountId = crate::utils::AccountId32;
         type Address = crate::utils::MultiAddress<Self::AccountId, ()>;
         type Signature = crate::utils::MultiSignature;
@@ -543,7 +542,7 @@ mod test {
         /// - `call`
         /// The test covers them because they follow the simple pattern of:
         /// ```no_run
-        ///  async fn THE_THING(&self) -> Result<T::Hash, Error> {
+        ///  async fn THE_THING(&self) -> Result<HashFor<T>, Error> {
         ///    retry(|| <DO THE THING> ).await
         ///  }
         /// ```
@@ -576,7 +575,7 @@ mod test {
         /// ```no_run
         /// async fn stream_the_thing(
         ///     &self,
-        /// ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+        /// ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {
         ///     let methods = self.methods.clone();
         ///     let retry_sub = retry_stream(move || {
         ///         let methods = methods.clone();
@@ -695,7 +694,7 @@ mod test {
             serde_json::from_value(spec).expect("Mock runtime spec should be the right shape")
         }
 
-        type FollowEvent = chain_head::FollowEvent<<Conf as Config>::Hash>;
+        type FollowEvent = chain_head::FollowEvent<HashFor<Conf>>;
 
         /// Build a mock client which can handle `chainHead_v1_follow` subscriptions.
         /// Messages from the provided receiver are sent to the latest active subscription.
@@ -750,7 +749,7 @@ mod test {
                     async move {
                         if let Some(id) = id {
                             let follow_event =
-                                FollowEvent::Initialized(Initialized::<<Conf as Config>::Hash> {
+                                FollowEvent::Initialized(Initialized::<HashFor<Conf>> {
                                     finalized_block_hashes: vec![random_hash()],
                                     finalized_block_runtime: Some(chain_head::RuntimeEvent::Valid(
                                         RuntimeVersionEvent {

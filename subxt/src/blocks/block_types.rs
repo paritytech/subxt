@@ -6,7 +6,7 @@ use crate::{
     backend::BlockRef,
     blocks::Extrinsics,
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, Header},
+    config::{Config, HashFor, Header},
     error::{BlockError, DecodeError, Error},
     events,
     runtime_api::RuntimeApi,
@@ -20,7 +20,7 @@ use std::sync::Arc;
 /// A representation of a block.
 pub struct Block<T: Config, C> {
     header: T::Header,
-    block_ref: BlockRef<T::Hash>,
+    block_ref: BlockRef<HashFor<T>>,
     client: C,
     // Since we obtain the same events for every extrinsic, let's
     // cache them so that we only ever do that once:
@@ -36,7 +36,7 @@ where
     T: Config,
     C: OfflineClientT<T>,
 {
-    pub(crate) fn new(header: T::Header, block_ref: BlockRef<T::Hash>, client: C) -> Self {
+    pub(crate) fn new(header: T::Header, block_ref: BlockRef<HashFor<T>>, client: C) -> Self {
         Block {
             header,
             block_ref,
@@ -47,12 +47,12 @@ where
 
     /// Return a reference to the given block. While this reference is kept alive,
     /// the backend will (if possible) endeavour to keep hold of the block.
-    pub fn reference(&self) -> BlockRef<T::Hash> {
+    pub fn reference(&self) -> BlockRef<HashFor<T>> {
         self.block_ref.clone()
     }
 
     /// Return the block hash.
-    pub fn hash(&self) -> T::Hash {
+    pub fn hash(&self) -> HashFor<T> {
         self.block_ref.hash()
     }
 
@@ -111,7 +111,7 @@ where
 // Return Events from the cache, or fetch from the node if needed.
 pub(crate) async fn get_events<C, T>(
     client: &C,
-    block_hash: T::Hash,
+    block_hash: HashFor<T>,
     cached_events: &AsyncMutex<Option<events::Events<T>>>,
 ) -> Result<events::Events<T>, Error>
 where
@@ -140,7 +140,7 @@ where
 pub(crate) async fn get_account_nonce<C, T>(
     client: &C,
     account_id: &T::AccountId,
-    block_hash: T::Hash,
+    block_hash: HashFor<T>,
 ) -> Result<u64, Error>
 where
     C: OnlineClientT<T>,

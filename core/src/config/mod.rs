@@ -34,9 +34,6 @@ pub use transaction_extensions::TransactionExtension;
 // And we want the compiler to infer `Send` and `Sync` OK for things which have `T: Config`
 // rather than having to `unsafe impl` them ourselves.
 pub trait Config: Sized + Send + Sync + 'static {
-    /// The output of the `Hasher` function.
-    type Hash: BlockHash;
-
     /// The account ID type.
     type AccountId: Debug + Clone + Encode + Decode + Serialize + Send;
 
@@ -47,7 +44,7 @@ pub trait Config: Sized + Send + Sync + 'static {
     type Signature: Debug + Clone + Encode + Decode + Send;
 
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
-    type Hasher: Debug + Clone + Copy + Hasher<Output = Self::Hash> + Send + Sync;
+    type Hasher: Debug + Clone + Copy + Hasher + Send + Sync;
 
     /// The block header.
     type Header: Debug + Header<Hasher = Self::Hasher> + Sync + Send + DeserializeOwned;
@@ -58,6 +55,9 @@ pub trait Config: Sized + Send + Sync + 'static {
     /// This is used to identify an asset in the `ChargeAssetTxPayment` signed extension.
     type AssetId: Debug + Clone + Encode + DecodeAsType + EncodeAsType + Send;
 }
+
+/// Given some [`Config`], this returns the type of hash used.
+pub type HashFor<T> = <<T as Config>::Hasher as Hasher>::Output;
 
 /// given some [`Config`], this return the other params needed for its `ExtrinsicParams`.
 pub type ParamsFor<T> = <<T as Config>::ExtrinsicParams as ExtrinsicParams<T>>::Params;
@@ -98,7 +98,7 @@ impl<T> BlockHash for T where
 /// and extrinsics.
 pub trait Hasher {
     /// The type given back from the hash operation
-    type Output;
+    type Output: BlockHash;
 
     /// Construct a new hasher.
     fn new(metadata: &Metadata) -> Self;

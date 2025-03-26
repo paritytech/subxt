@@ -3,7 +3,12 @@
 // see LICENSE for license details.
 
 use crate::backend::{Backend, BackendExt, BlockRef};
-use crate::{client::OnlineClientT, error::Error, events::Events, Config};
+use crate::{
+    client::OnlineClientT,
+    config::{Config, HashFor},
+    error::Error,
+    events::Events,
+};
 use derive_where::derive_where;
 use std::future::Future;
 
@@ -38,7 +43,7 @@ where
     /// but may run into errors attempting to work with them.
     pub fn at(
         &self,
-        block_ref: impl Into<BlockRef<T::Hash>>,
+        block_ref: impl Into<BlockRef<HashFor<T>>>,
     ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
         self.at_or_latest(Some(block_ref.into()))
     }
@@ -51,7 +56,7 @@ where
     /// Obtain events at some block hash.
     fn at_or_latest(
         &self,
-        block_ref: Option<BlockRef<T::Hash>>,
+        block_ref: Option<BlockRef<HashFor<T>>>,
     ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
@@ -82,7 +87,7 @@ fn system_events_key() -> [u8; 32] {
 // Get the event bytes from the provided client, at the provided block hash.
 pub(crate) async fn get_event_bytes<T: Config>(
     backend: &dyn Backend<T>,
-    block_hash: T::Hash,
+    block_hash: HashFor<T>,
 ) -> Result<Vec<u8>, Error> {
     Ok(backend
         .storage_fetch_value(system_events_key().to_vec(), block_hash)
