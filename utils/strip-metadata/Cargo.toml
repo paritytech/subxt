@@ -11,7 +11,7 @@ license.workspace = true
 repository.workspace = true
 documentation.workspace = true
 homepage.workspace = true
-description = "subxt utils strip metadata"
+description = "subxt utility to strip metadata"
 
 [dependencies]
 frame-metadata = { workspace = true, features = ["std"] }

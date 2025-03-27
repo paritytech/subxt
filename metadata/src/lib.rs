@@ -46,11 +46,6 @@ pub use utils::validation::MetadataHasher;
 
 type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;
 
-/// Utility functions to help with metadata related things.
-pub mod utilities {
-    pub use crate::utils::outer_enums::OuterEnums;
-}
-
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
 /// which is then decoded into this. We aim to preserve all of the existing information in
 /// the incoming metadata while optimizing the format a little for Subxt's use cases.
@@ -651,7 +646,11 @@ impl ExtrinsicMetadata {
 
     /// When constructing a v5 extrinsic, use this transaction extensions version.
     pub fn transaction_extension_version_to_use_for_encoding(&self) -> u8 {
-        *self.transaction_extensions_by_version.keys().max().unwrap()
+        *self
+            .transaction_extensions_by_version
+            .keys()
+            .max()
+            .expect("At least one version of transaction extensions is expected")
     }
 
     /// An iterator of the transaction extensions to use when encoding a transaction. Basically equivalent to
@@ -666,7 +665,11 @@ impl ExtrinsicMetadata {
 
     /// When presented with a v4 extrinsic that has no version, treat it as being this version.
     pub fn transaction_extension_version_to_use_for_decoding(&self) -> u8 {
-        *self.transaction_extensions_by_version.keys().max().unwrap()
+        *self
+            .transaction_extensions_by_version
+            .keys()
+            .max()
+            .expect("At least one version of transaction extensions is expected")
     }
 }
 

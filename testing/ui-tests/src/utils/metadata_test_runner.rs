@@ -101,9 +101,11 @@ impl MetadataTestRunnerCaseBuilder {
     /// The generated code will be tidied up when the `MetadataTestRunner` that
     /// this was handed out from is dropped.
     pub fn build(self, macro_metadata: frame_metadata::RuntimeMetadataPrefixed) -> String {
-        let validation_metadata = self
-            .validation_metadata
-            .unwrap_or_else(|| clone_via_encode(&macro_metadata));
+        let validation_metadata = self.validation_metadata.unwrap_or_else(|| {
+            // RuntimeMetadataPrefixed doesn't implement Clone for some reason (we should prob fix that).
+            // until then, this hack clones it by encoding and then decoding it again from bytes..
+            clone_via_encode(&macro_metadata)
+        });
 
         let index = self.index;
         let mut tmp_dir = std::env::temp_dir();

@@ -24,7 +24,7 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
     type Error = TryFromError;
     fn try_from(mut m: v14::RuntimeMetadataV14) -> Result<Self, TryFromError> {
         let outer_enums = generate_outer_enums(&mut m)?;
-        let missing_extrinsic_type_ids = generate_missing_extrinsic_type_ids(&m)?;
+        let missing_extrinsic_type_ids = MissingExtrinsicTypeIds::generate_from(&m)?;
 
         let mut pallets = OrderedMap::new();
         let mut pallets_by_index = HashMap::new();
@@ -197,7 +197,7 @@ fn from_constant_metadata(
 fn generate_outer_enums(
     metadata: &mut v14::RuntimeMetadataV14,
 ) -> Result<frame_metadata::v15::OuterEnums<scale_info::form::PortableForm>, TryFromError> {
-    let outer_enums = crate::utilities::OuterEnums::find_in(&metadata.types);
+    let outer_enums = OuterEnums::find_in(&metadata.types);
 
     let Some(call_enum_id) = outer_enums.call_ty else {
         return Err(TryFromError::TypeNameNotFound("RuntimeCall".into()));
@@ -273,36 +273,6 @@ fn generate_outer_error_enum_type(
     enum_type_id
 }
 
-fn generate_missing_extrinsic_type_ids(
-    metadata: &v14::RuntimeMetadataV14,
-) -> Result<MissingExtrinsicTypeIds, TryFromError> {
-    const ADDRESS: &str = "Address";
-    const SIGNATURE: &str = "Signature";
-
-    let extrinsic_id = metadata.extrinsic.ty.id;
-    let Some(extrinsic_ty) = metadata.types.resolve(extrinsic_id) else {
-        return Err(TryFromError::TypeNotFound(extrinsic_id));
-    };
-
-    let find_param = |name: &'static str| -> Option<u32> {
-        extrinsic_ty
-            .type_params
-            .iter()
-            .find(|param| param.name.as_str() == name)
-            .and_then(|param| param.ty.as_ref())
-            .map(|ty| ty.id)
-    };
-
-    let Some(address) = find_param(ADDRESS) else {
-        return Err(TryFromError::TypeNameNotFound(ADDRESS.into()));
-    };
-    let Some(signature) = find_param(SIGNATURE) else {
-        return Err(TryFromError::TypeNameNotFound(SIGNATURE.into()));
-    };
-
-    Ok(MissingExtrinsicTypeIds { address, signature })
-}
-
 /// The type IDs extracted from the metadata that represent the
 /// generic type parameters passed to the `UncheckedExtrinsic` from
 /// the substrate-based chain.
@@ -310,4 +280,72 @@ fn generate_missing_extrinsic_type_ids(
 struct MissingExtrinsicTypeIds {
     address: u32,
     signature: u32,
+}
+
+impl MissingExtrinsicTypeIds {
+    fn generate_from(
+        metadata: &v14::RuntimeMetadataV14,
+    ) -> Result<MissingExtrinsicTypeIds, TryFromError> {
+        const ADDRESS: &str = "Address";
+        const SIGNATURE: &str = "Signature";
+
+        let extrinsic_id = metadata.extrinsic.ty.id;
+        let Some(extrinsic_ty) = metadata.types.resolve(extrinsic_id) else {
+            return Err(TryFromError::TypeNotFound(extrinsic_id));
+        };
+
+        let find_param = |name: &'static str| -> Option<u32> {
+            extrinsic_ty
+                .type_params
+                .iter()
+                .find(|param| param.name.as_str() == name)
+                .and_then(|param| param.ty.as_ref())
+                .map(|ty| ty.id)
+        };
+
+        let Some(address) = find_param(ADDRESS) else {
+            return Err(TryFromError::TypeNameNotFound(ADDRESS.into()));
+        };
+        let Some(signature) = find_param(SIGNATURE) else {
+            return Err(TryFromError::TypeNameNotFound(SIGNATURE.into()));
+        };
+
+        Ok(MissingExtrinsicTypeIds { address, signature })
+    }
+}
+
+/// Outer enum IDs, which are required in Subxt but are not present in V14 metadata.
+pub struct OuterEnums {
+    /// The RuntimeCall type ID.
+    pub call_ty: Option<u32>,
+    /// The RuntimeEvent type ID.
+    pub event_ty: Option<u32>,
+    /// The RuntimeError type ID.
+    pub error_ty: Option<u32>,
+}
+
+impl OuterEnums {
+    pub fn find_in(types: &scale_info::PortableRegistry) -> OuterEnums {
+        let find_type = |name: &str| {
+            types.types.iter().find_map(|ty| {
+                let ident = ty.ty.path.ident()?;
+
+                if ident != name {
+                    return None;
+                }
+
+                let scale_info::TypeDef::Variant(_) = &ty.ty.type_def else {
+                    return None;
+                };
+
+                Some(ty.id)
+            })
+        };
+
+        OuterEnums {
+            call_ty: find_type("RuntimeCall"),
+            event_ty: find_type("RuntimeEvent"),
+            error_ty: find_type("RuntimeError"),
+        }
+    }
 }
