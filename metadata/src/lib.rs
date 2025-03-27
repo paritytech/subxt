@@ -654,6 +654,16 @@ impl ExtrinsicMetadata {
         *self.transaction_extensions_by_version.keys().max().unwrap()
     }
 
+    /// An iterator of the transaction extensions to use when encoding a transaction. Basically equivalent to
+    /// `self.transaction_extensions_by_version(self.transaction_extension_version_to_use_for_encoding()).unwrap()`
+    pub fn transaction_extensions_to_use_for_encoding(
+        &self,
+    ) -> impl Iterator<Item = TransactionExtensionMetadata<'_>> {
+        let encoding_version = self.transaction_extension_version_to_use_for_encoding();
+        self.transaction_extensions_by_version(encoding_version)
+            .unwrap()
+    }
+
     /// When presented with a v4 extrinsic that has no version, treat it as being this version.
     pub fn transaction_extension_version_to_use_for_decoding(&self) -> u8 {
         *self.transaction_extensions_by_version.keys().max().unwrap()

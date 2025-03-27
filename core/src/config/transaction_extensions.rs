@@ -582,13 +582,12 @@ macro_rules! impl_tuples {
             ) -> Result<Self, ExtrinsicParamsError> {
                 let metadata = &client.metadata;
                 let types = metadata.types();
-                let tx_extension_version = metadata.extrinsic().transaction_extension_version_to_use_for_encoding();
 
                 // For each transaction extension in the tuple, find the matching index in the metadata, if
                 // there is one, and add it to a map with that index as the key.
                 let mut exts_by_index = HashMap::new();
                 $({
-                    for (idx, e) in metadata.extrinsic().transaction_extensions_by_version(tx_extension_version).unwrap().enumerate() {
+                    for (idx, e) in metadata.extrinsic().transaction_extensions_to_use_for_encoding().enumerate() {
                         // Skip over any exts that have a match already:
                         if exts_by_index.contains_key(&idx) {
                             continue
@@ -605,7 +604,7 @@ macro_rules! impl_tuples {
 
                 // Next, turn these into an ordered vec, erroring if we haven't matched on any exts yet.
                 let mut params = Vec::new();
-                for (idx, e) in metadata.extrinsic().transaction_extensions_by_version(tx_extension_version).unwrap().enumerate() {
+                for (idx, e) in metadata.extrinsic().transaction_extensions_to_use_for_encoding().enumerate() {
                     let Some(ext) = exts_by_index.remove(&idx) else {
                         if is_type_empty(e.extra_ty(), types) {
                             continue

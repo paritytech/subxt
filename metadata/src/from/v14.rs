@@ -14,8 +14,8 @@ use crate::{
 use alloc::borrow::ToOwned;
 use alloc::collections::BTreeMap;
 use alloc::string::String;
-use alloc::vec;
 use alloc::vec::Vec;
+use alloc::{format, vec};
 use frame_metadata::v14;
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;
@@ -237,12 +237,7 @@ fn generate_outer_error_enum_type(
         .iter()
         .filter_map(|pallet| {
             let error = pallet.error.as_ref()?;
-
-            // Note:  using the `alloc::format!` macro like in `let path = format!("{}Error", pallet.name);`
-            // leads to linker errors about extern function `_Unwind_Resume` not being defined.
-            use alloc::fmt::Write;
-            let mut path = String::new();
-            write!(path, "{}Error", pallet.name).expect("Cannot panic, qed;");
+            let path = format!("{}Error", pallet.name);
             let ty = error.ty.id.into();
 
             Some(scale_info::Variant {
