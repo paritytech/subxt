@@ -21,7 +21,7 @@ use crate::backend::{
     utils::retry, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf,
     StreamOfResults, TransactionStatus,
 };
-use crate::config::{BlockHash, Config, HashFor};
+use crate::config::{Config, Hash, HashFor};
 use crate::error::{Error, RpcError};
 use async_trait::async_trait;
 use follow_stream_driver::{FollowStreamDriver, FollowStreamDriverHandle};
@@ -275,9 +275,9 @@ impl<T: Config> ChainHeadBackend<T> {
     }
 }
 
-impl<Hash: BlockHash + 'static> BlockRefT for follow_stream_unpin::BlockRef<Hash> {}
-impl<Hash: BlockHash + 'static> From<follow_stream_unpin::BlockRef<Hash>> for BlockRef<Hash> {
-    fn from(b: follow_stream_unpin::BlockRef<Hash>) -> Self {
+impl<H: Hash + 'static> BlockRefT for follow_stream_unpin::BlockRef<H> {}
+impl<H: Hash + 'static> From<follow_stream_unpin::BlockRef<H>> for BlockRef<H> {
+    fn from(b: follow_stream_unpin::BlockRef<H>) -> Self {
         BlockRef::new(b.hash(), b)
     }
 }
@@ -859,8 +859,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
 }
 
 /// A helper to obtain a subscription ID.
-async fn get_subscription_id<Hash: BlockHash>(
-    follow_handle: &FollowStreamDriverHandle<Hash>,
+async fn get_subscription_id<H: Hash>(
+    follow_handle: &FollowStreamDriverHandle<H>,
 ) -> Result<String, Error> {
     let Some(sub_id) = follow_handle.subscribe().subscription_id().await else {
         return Err(RpcError::SubscriptionDropped.into());

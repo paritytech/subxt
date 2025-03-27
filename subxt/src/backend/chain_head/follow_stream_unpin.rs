@@ -4,7 +4,7 @@
 
 use super::follow_stream::FollowStream;
 use super::ChainHeadRpcMethods;
-use crate::config::{BlockHash, Config, HashFor};
+use crate::config::{Config, Hash, HashFor};
 use crate::error::Error;
 use futures::stream::{FuturesUnordered, Stream, StreamExt};
 use subxt_rpcs::methods::chain_head::{
@@ -27,11 +27,11 @@ pub use super::follow_stream::FollowStreamMsg;
 /// result). Put simply, it tries to keep every block pinned as long as possible until the block is no longer
 /// used anywhere.
 #[derive(Debug)]
-pub struct FollowStreamUnpin<Hash: BlockHash> {
+pub struct FollowStreamUnpin<H: Hash> {
     // The underlying stream of events.
-    inner: FollowStream<Hash>,
+    inner: FollowStream<H>,
     // A method to call to unpin a block, given a block hash and a subscription ID.
-    unpin_method: UnpinMethodHolder<Hash>,
+    unpin_method: UnpinMethodHolder<H>,
     // Futures for sending unpin events that we'll poll to completion as
     // part of polling the stream as a whole.
     unpin_futs: FuturesUnordered<UnpinFut>,
@@ -46,14 +46,14 @@ pub struct FollowStreamUnpin<Hash: BlockHash> {
     // The longest period a block can be pinned for.
     max_block_life: usize,
     // The currently seen and pinned blocks.
-    pinned: HashMap<Hash, PinnedDetails<Hash>>,
+    pinned: HashMap<H, PinnedDetails<H>>,
     // Shared state about blocks we've flagged to unpin from elsewhere
-    unpin_flags: UnpinFlags<Hash>,
+    unpin_flags: UnpinFlags<H>,
 }
 
 // Just a wrapper to make implementing debug on the whole thing easier.
-struct UnpinMethodHolder<Hash>(UnpinMethod<Hash>);
-impl<Hash> std::fmt::Debug for UnpinMethodHolder<Hash> {
+struct UnpinMethodHolder<H>(UnpinMethod<H>);
+impl<H> std::fmt::Debug for UnpinMethodHolder<H> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -63,15 +63,15 @@ impl<Hash> std::fmt::Debug for UnpinMethodHolder<Hash> {
 }
 
 /// The type of the unpin method that we need to provide.
-pub type UnpinMethod<Hash> = Box<dyn FnMut(Hash, Arc<str>) -> UnpinFut + Send>;
+pub type UnpinMethod<H> = Box<dyn FnMut(H, Arc<str>) -> UnpinFut + Send>;
 
 /// The future returned from [`UnpinMethod`].
 pub type UnpinFut = Pin<Box<dyn Future<Output = ()> + Send + 'static>>;
 
-impl<Hash: BlockHash> std::marker::Unpin for FollowStreamUnpin<Hash> {}
+impl<H: Hash> std::marker::Unpin for FollowStreamUnpin<H> {}
 
-impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
-    type Item = Result<FollowStreamMsg<BlockRef<Hash>>, Error>;
+impl<H: Hash> Stream for FollowStreamUnpin<H> {
+    type Item = Result<FollowStreamMsg<BlockRef<H>>, Error>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let mut this = self.as_mut();
@@ -253,11 +253,11 @@ impl<Hash: BlockHash> Stream for FollowStreamUnpin<Hash> {
     }
 }
 
-impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
+impl<H: Hash> FollowStreamUnpin<H> {
     /// Create a new [`FollowStreamUnpin`].
     pub fn new(
-        follow_stream: FollowStream<Hash>,
-        unpin_method: UnpinMethod<Hash>,
+        follow_stream: FollowStream<H>,
+        unpin_method: UnpinMethod<H>,
         max_block_life: usize,
     ) -> Self {
         Self {
@@ -291,14 +291,14 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
     }
 
     /// Is the block hash currently pinned.
-    pub fn is_pinned(&self, hash: &Hash) -> bool {
+    pub fn is_pinned(&self, hash: &H) -> bool {
         self.pinned.contains_key(hash)
     }
 
     /// Pin a block, or return the reference to an already-pinned block. If the block has been registered to
     /// be unpinned, we'll clear those flags, so that it won't be unpinned. If the unpin request has already
     /// been sent though, then the block will be unpinned.
-    fn pin_block_at(&mut self, rel_block_age: usize, hash: Hash) -> BlockRef<Hash> {
+    fn pin_block_at(&mut self, rel_block_age: usize, hash: H) -> BlockRef<H> {
         self.pin_block_at_setting_unpinnable_flag(rel_block_age, hash, false)
     }
 
@@ -306,16 +306,16 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
     ///
     /// This is the same as [`Self::pin_block_at`], except that it also marks the block as being unpinnable now,
     /// which should be done for any block that will no longer be seen in future events.
-    fn pin_unpinnable_block_at(&mut self, rel_block_age: usize, hash: Hash) -> BlockRef<Hash> {
+    fn pin_unpinnable_block_at(&mut self, rel_block_age: usize, hash: H) -> BlockRef<H> {
         self.pin_block_at_setting_unpinnable_flag(rel_block_age, hash, true)
     }
 
     fn pin_block_at_setting_unpinnable_flag(
         &mut self,
         rel_block_age: usize,
-        hash: Hash,
+        hash: H,
         can_be_unpinned: bool,
-    ) -> BlockRef<Hash> {
+    ) -> BlockRef<H> {
         let entry = self
             .pinned
             .entry(hash)
@@ -390,10 +390,10 @@ impl<Hash: BlockHash> FollowStreamUnpin<Hash> {
 
 // The set of block hashes that can be unpinned when ready.
 // BlockRefs write to this when they are dropped.
-type UnpinFlags<Hash> = Arc<Mutex<HashSet<Hash>>>;
+type UnpinFlags<H> = Arc<Mutex<HashSet<H>>>;
 
 #[derive(Debug)]
-struct PinnedDetails<Hash: BlockHash> {
+struct PinnedDetails<H: Hash> {
     /// Relatively speaking, how old is the block? When we start following
     /// blocks, the first finalized block gets an age of 0, the second an age
     /// of 1 and so on.
@@ -401,7 +401,7 @@ struct PinnedDetails<Hash: BlockHash> {
     /// A block ref we can hand out to keep blocks pinned.
     /// Because we store one here until it's unpinned, the live count
     /// will only drop to 1 when no external refs are left.
-    block_ref: BlockRef<Hash>,
+    block_ref: BlockRef<H>,
     /// Has this block showed up in the list of pruned blocks, or has it
     /// been finalized? In this case, it can now been pinned as it won't
     /// show up again in future events (except as a "parent block" of some
@@ -411,21 +411,21 @@ struct PinnedDetails<Hash: BlockHash> {
 
 /// All blocks reported will be wrapped in this.
 #[derive(Debug, Clone)]
-pub struct BlockRef<Hash: BlockHash> {
-    inner: Arc<BlockRefInner<Hash>>,
+pub struct BlockRef<H: Hash> {
+    inner: Arc<BlockRefInner<H>>,
 }
 
 #[derive(Debug)]
-struct BlockRefInner<Hash> {
-    hash: Hash,
-    unpin_flags: UnpinFlags<Hash>,
+struct BlockRefInner<H> {
+    hash: H,
+    unpin_flags: UnpinFlags<H>,
 }
 
-impl<Hash: BlockHash> BlockRef<Hash> {
+impl<H: Hash> BlockRef<H> {
     /// For testing purposes only, create a BlockRef from a hash
     /// that isn't pinned.
     #[cfg(test)]
-    pub fn new(hash: Hash) -> Self {
+    pub fn new(hash: H) -> Self {
         BlockRef {
             inner: Arc::new(BlockRefInner {
                 hash,
@@ -435,24 +435,24 @@ impl<Hash: BlockHash> BlockRef<Hash> {
     }
 
     /// Return the hash for this block.
-    pub fn hash(&self) -> Hash {
+    pub fn hash(&self) -> H {
         self.inner.hash
     }
 }
 
-impl<Hash: BlockHash> PartialEq for BlockRef<Hash> {
+impl<H: Hash> PartialEq for BlockRef<H> {
     fn eq(&self, other: &Self) -> bool {
         self.inner.hash == other.inner.hash
     }
 }
 
-impl<Hash: BlockHash> PartialEq<Hash> for BlockRef<Hash> {
-    fn eq(&self, other: &Hash) -> bool {
+impl<H: Hash> PartialEq<H> for BlockRef<H> {
+    fn eq(&self, other: &H) -> bool {
         &self.inner.hash == other
     }
 }
 
-impl<Hash: BlockHash> Drop for BlockRef<Hash> {
+impl<H: Hash> Drop for BlockRef<H> {
     fn drop(&mut self) {
         // PinnedDetails keeps one ref, so if this is the second ref, it's the
         // only "external" one left and we should ask to unpin it now. if it's
@@ -472,23 +472,23 @@ pub(super) mod test_utils {
     use super::*;
     use crate::config::substrate::H256;
 
-    pub type UnpinRx<Hash> = std::sync::mpsc::Receiver<(Hash, Arc<str>)>;
+    pub type UnpinRx<H> = std::sync::mpsc::Receiver<(H, Arc<str>)>;
 
     /// Get a [`FollowStreamUnpin`] from an iterator over events.
-    pub fn test_unpin_stream_getter<Hash, F, I>(
+    pub fn test_unpin_stream_getter<H, F, I>(
         events: F,
         max_life: usize,
-    ) -> (FollowStreamUnpin<Hash>, UnpinRx<Hash>)
+    ) -> (FollowStreamUnpin<H>, UnpinRx<H>)
     where
-        Hash: BlockHash + 'static,
+        H: Hash + 'static,
         F: Fn() -> I + Send + 'static,
-        I: IntoIterator<Item = Result<FollowEvent<Hash>, Error>>,
+        I: IntoIterator<Item = Result<FollowEvent<H>, Error>>,
     {
         // Unpin requests will come here so that we can look out for them.
         let (unpin_tx, unpin_rx) = std::sync::mpsc::channel();
 
         let follow_stream = FollowStream::new(test_stream_getter(events));
-        let unpin_method: UnpinMethod<Hash> = Box::new(move |hash, sub_id| {
+        let unpin_method: UnpinMethod<H> = Box::new(move |hash, sub_id| {
             unpin_tx.send((hash, sub_id)).unwrap();
             Box::pin(std::future::ready(()))
         });
@@ -498,11 +498,11 @@ pub(super) mod test_utils {
     }
 
     /// Assert that the unpinned blocks sent from the `UnpinRx` channel match the items given.
-    pub fn assert_from_unpin_rx<Hash: BlockHash + 'static>(
-        unpin_rx: &UnpinRx<Hash>,
-        items: impl IntoIterator<Item = Hash>,
+    pub fn assert_from_unpin_rx<H: Hash + 'static>(
+        unpin_rx: &UnpinRx<H>,
+        items: impl IntoIterator<Item = H>,
     ) {
-        let expected_hashes = HashSet::<Hash>::from_iter(items);
+        let expected_hashes = HashSet::<H>::from_iter(items);
         for i in 0..expected_hashes.len() {
             let Ok((hash, _)) = unpin_rx.try_recv() else {
                 panic!("Another unpin event is expected, but failed to pull item {i} from channel");

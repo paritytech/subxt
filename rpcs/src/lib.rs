@@ -45,7 +45,7 @@ pub trait RpcConfig {
     /// The block header type.
     type Header: Header;
     /// The block hash type.
-    type Hash: BlockHash;
+    type Hash: Hash;
     /// The Account ID type.
     type AccountId: AccountId;
 }
@@ -55,8 +55,8 @@ pub trait Header: std::fmt::Debug + codec::Decode + serde::de::DeserializeOwned 
 impl<T> Header for T where T: std::fmt::Debug + codec::Decode + serde::de::DeserializeOwned {}
 
 /// A trait which is applied to any type that is a valid block hash.
-pub trait BlockHash: serde::de::DeserializeOwned + serde::Serialize {}
-impl<T> BlockHash for T where T: serde::de::DeserializeOwned + serde::Serialize {}
+pub trait Hash: serde::de::DeserializeOwned + serde::Serialize {}
+impl<T> Hash for T where T: serde::de::DeserializeOwned + serde::Serialize {}
 
 /// A trait which is applied to any type that is a valid Account ID.
 pub trait AccountId: serde::Serialize {}

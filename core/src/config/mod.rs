@@ -63,7 +63,7 @@ pub type HashFor<T> = <<T as Config>::Hasher as Hasher>::Output;
 pub type ParamsFor<T> = <<T as Config>::ExtrinsicParams as ExtrinsicParams<T>>::Params;
 
 /// Block hashes must conform to a bunch of things to be used in Subxt.
-pub trait BlockHash:
+pub trait Hash:
     Debug
     + Copy
     + Send
@@ -78,7 +78,7 @@ pub trait BlockHash:
     + core::hash::Hash
 {
 }
-impl<T> BlockHash for T where
+impl<T> Hash for T where
     T: Debug
         + Copy
         + Send
@@ -98,7 +98,7 @@ impl<T> BlockHash for T where
 /// and extrinsics.
 pub trait Hasher {
     /// The type given back from the hash operation
-    type Output: BlockHash;
+    type Output: Hash;
 
     /// Construct a new hasher.
     fn new(metadata: &Metadata) -> Self;

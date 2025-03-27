@@ -57,10 +57,10 @@ pub mod utils;
 /// Polkadot node.
 pub mod config {
     pub use subxt_core::config::{
-        polkadot, substrate, transaction_extensions, BlockHash, Config, DefaultExtrinsicParams,
-        DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder, HashFor, Hasher,
-        Header, PolkadotConfig, PolkadotExtrinsicParams, SubstrateConfig, SubstrateExtrinsicParams,
-        TransactionExtension,
+        polkadot, substrate, transaction_extensions, Config, DefaultExtrinsicParams,
+        DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder, Hash, HashFor,
+        Hasher, Header, PolkadotConfig, PolkadotExtrinsicParams, SubstrateConfig,
+        SubstrateExtrinsicParams, TransactionExtension,
     };
     pub use subxt_core::error::ExtrinsicParamsError;
 }

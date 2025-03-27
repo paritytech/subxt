@@ -62,8 +62,11 @@ pub struct DynamicHasher256(HashType);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum HashType {
+    // Most chains use this:
     BlakeTwo256,
+    // Chains like Hyperbridge use this (tends to be eth compatible chains)
     Keccak256,
+    // If we don't have V16 metadata, we'll emit this and default to BlakeTwo256.
     Unknown,
 }
 
@@ -75,18 +78,18 @@ impl Hasher for DynamicHasher256 {
         let Some(system_pallet) = metadata.pallet_by_name("System") else {
             return Self(HashType::Unknown);
         };
-        let Some(hash_ty_id) = system_pallet.associated_type_id("Hash") else {
+        let Some(hash_ty_id) = system_pallet.associated_type_id("Hashing") else {
             return Self(HashType::Unknown);
         };
 
         let ty = metadata
             .types()
             .resolve(hash_ty_id)
-            .expect("Type information for 'Hash' associated tyoe should be in metadata");
+            .expect("Type information for 'Hashing' associated tyoe should be in metadata");
 
         let hash_type = match ty.path.ident().as_deref().unwrap_or("") {
             "BlakeTwo256" => HashType::BlakeTwo256,
-            "Keccak" => HashType::Keccak256,
+            "Keccak256" => HashType::Keccak256,
             _ => HashType::Unknown,
         };
 
@@ -131,6 +134,7 @@ where
 {
     type Number = N;
     type Hasher = H;
+
     fn number(&self) -> Self::Number {
         self.number
     }
