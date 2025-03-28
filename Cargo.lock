@@ -5459,6 +5459,7 @@ dependencies = [
 name = "subxt-utils-stripmetadata"
 version = "0.41.0"
 dependencies = [
+ "either",
  "frame-metadata 20.0.0",
  "scale-info",
 ]

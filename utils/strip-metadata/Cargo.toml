@@ -16,6 +16,7 @@ description = "subxt utility to strip metadata"
 [dependencies]
 frame-metadata = { workspace = true, features = ["std"] }
 scale-info = { workspace = true, features = ["std"] }
+either = { workspace = true }
 
 [package.metadata.docs.rs]
 features = ["url"]

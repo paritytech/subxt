@@ -5,6 +5,7 @@
 //! This utility crate provides a [`StripMetadata`] trait which exposes a [`StripMetadata::strip_metadata`] method
 //! able to remove pallets and runtime APIs from the metadata in question.
 
+use either::Either;
 use frame_metadata::{v14, v15, v16};
 use scale_info::PortableRegistry;
 use std::collections::BTreeSet;
@@ -97,12 +98,11 @@ fn retain_types<M: GetTypes + IterateTypeIds>(m: &mut M) {
     let new_ids = m.get_types_mut().retain(|id| keep_these_ids.contains(&id));
 
     // Map IDs found in the metadata to new ones as needed after the retaining:
-    m.iter_type_ids_mut().for_each(|id| {
-        let Some(new_id) = new_ids.get(id) else {
-            return;
+    for id in m.iter_type_ids_mut() {
+        if let Some(new_id) = new_ids.get(id) {
+            *id = *new_id;
         };
-        *id = *new_id;
-    });
+    }
 }
 
 /// This trait is implemented for metadatas, and its purpose is to hand back iterators over
@@ -130,9 +130,9 @@ impl IterateTypeIds for v14::RuntimeMetadataV14 {
                 .into_iter()
                 .flat_map(|s| &mut s.entries)
                 .flat_map(|storage_entry| match &mut storage_entry.ty {
-                    v14::StorageEntryType::Plain(ty) => Either::A(core::iter::once(&mut ty.id)),
+                    v14::StorageEntryType::Plain(ty) => Either::Left(core::iter::once(&mut ty.id)),
                     v14::StorageEntryType::Map { key, value, .. } => {
-                        Either::B([&mut key.id, &mut value.id].into_iter())
+                        Either::Right([&mut key.id, &mut value.id].into_iter())
                     }
                 });
 
@@ -193,9 +193,9 @@ impl IterateTypeIds for v15::RuntimeMetadataV15 {
                 .into_iter()
                 .flat_map(|s| &mut s.entries)
                 .flat_map(|storage_entry| match &mut storage_entry.ty {
-                    v14::StorageEntryType::Plain(ty) => Either::A(core::iter::once(&mut ty.id)),
+                    v14::StorageEntryType::Plain(ty) => Either::Left(core::iter::once(&mut ty.id)),
                     v14::StorageEntryType::Map { key, value, .. } => {
-                        Either::B([&mut key.id, &mut value.id].into_iter())
+                        Either::Right([&mut key.id, &mut value.id].into_iter())
                     }
                 });
 
@@ -285,9 +285,9 @@ impl IterateTypeIds for v16::RuntimeMetadataV16 {
                 .into_iter()
                 .flat_map(|s| &mut s.entries)
                 .flat_map(|storage_entry| match &mut storage_entry.ty {
-                    v16::StorageEntryType::Plain(ty) => Either::A(core::iter::once(&mut ty.id)),
+                    v16::StorageEntryType::Plain(ty) => Either::Left(core::iter::once(&mut ty.id)),
                     v16::StorageEntryType::Map { key, value, .. } => {
-                        Either::B([&mut key.id, &mut value.id].into_iter())
+                        Either::Right([&mut key.id, &mut value.id].into_iter())
                     }
                 });
 
@@ -407,32 +407,6 @@ fn find_dispatch_error_type(types: &mut PortableRegistry) -> u32 {
         .expect("Metadata must contain sp_runtime::DispatchError")
         .0 as u32
 }
-
-/// Create Either enums which can be iterated over.
-macro_rules! either{
-    ($name:ident: $first_tok:ident $($tok:ident)*) => {
-        enum $name<$first_tok, $($tok),+> {
-            $first_tok($first_tok),
-            $( $tok($tok), )*
-        }
-
-        impl <$first_tok, $($tok),+> Iterator for $name<$first_tok, $($tok),+>
-        where
-            $first_tok: Iterator,
-            $($tok: Iterator<Item = $first_tok::Item>,)*
-        {
-            type Item = $first_tok::Item;
-            fn next(&mut self) -> Option<Self::Item> {
-                match self {
-                    $name::$first_tok(item) => item.next(),
-                    $($name::$tok(item) => item.next(),)*
-                }
-            }
-        }
-    }
-}
-
-either!(Either: A B);
 
 #[cfg(test)]
 mod test {
