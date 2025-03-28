@@ -3,16 +3,41 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, subxt_test, test_context, TestContext};
-use frame_metadata::v15::{
-    CustomMetadata, ExtrinsicMetadata, OuterEnums, PalletCallMetadata, PalletMetadata,
-    PalletStorageMetadata, RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier,
-    StorageEntryType,
+use codec::Decode;
+use frame_metadata::{
+    v15::{
+        CustomMetadata, ExtrinsicMetadata, OuterEnums, PalletCallMetadata, PalletMetadata,
+        PalletStorageMetadata, RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier,
+        StorageEntryType,
+    },
+    RuntimeMetadata, RuntimeMetadataPrefixed,
 };
 use scale_info::{
     build::{Fields, Variants},
     meta_type, Path, Type, TypeInfo,
 };
-use subxt::{Metadata, OfflineClient, SubstrateConfig};
+use subxt::{Metadata, OfflineClient, OnlineClient, SubstrateConfig};
+
+async fn fetch_v15_metadata(client: &OnlineClient<SubstrateConfig>) -> RuntimeMetadataV15 {
+    let payload = node_runtime::apis().metadata().metadata_at_version(15);
+    let runtime_metadata_bytes = client
+        .runtime_api()
+        .at_latest()
+        .await
+        .unwrap()
+        .call(payload)
+        .await
+        .unwrap()
+        .unwrap()
+        .0;
+    let runtime_metadata = RuntimeMetadataPrefixed::decode(&mut &*runtime_metadata_bytes)
+        .unwrap()
+        .1;
+    let RuntimeMetadata::V15(v15_metadata) = runtime_metadata else {
+        panic!("Metadata is not v15")
+    };
+    v15_metadata
+}
 
 async fn metadata_to_api(metadata: Metadata, ctx: &TestContext) -> OfflineClient<SubstrateConfig> {
     OfflineClient::new(
@@ -25,15 +50,6 @@ async fn metadata_to_api(metadata: Metadata, ctx: &TestContext) -> OfflineClient
 fn v15_to_metadata(v15: RuntimeMetadataV15) -> Metadata {
     let subxt_md: subxt_metadata::Metadata = v15.try_into().unwrap();
     subxt_md.into()
-}
-
-fn modified_metadata<F>(metadata: Metadata, f: F) -> Metadata
-where
-    F: FnOnce(&mut RuntimeMetadataV15),
-{
-    let mut metadata = RuntimeMetadataV15::from((*metadata).clone());
-    f(&mut metadata);
-    v15_to_metadata(metadata)
 }
 
 fn default_pallet() -> PalletMetadata {
@@ -98,71 +114,71 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> Metadata {
 }
 
 #[subxt_test]
-async fn metadata_converting_works_ok() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    assert!(
-        node_runtime::is_codegen_valid_for(&api.metadata()),
-        "Should be valid initially"
-    );
-
-    let metadata = RuntimeMetadataV15::from((*api.metadata()).clone());
-    let metadata = v15_to_metadata(metadata);
-
-    assert!(
-        node_runtime::is_codegen_valid_for(&metadata),
-        "Should still be valid after conversion back and forth"
-    );
-}
-
-#[subxt_test]
 async fn full_metadata_check() {
     let ctx = test_context().await;
     let api = ctx.client();
+    let mut v15_metadata = fetch_v15_metadata(&api).await;
 
-    // Runtime metadata is identical to the metadata used during API generation.
-    assert!(node_runtime::is_codegen_valid_for(&api.metadata()));
+    // Runtime metadata is identical to the metadata we just downloaded
+    let metadata_before = v15_to_metadata(v15_metadata.clone());
+    assert!(node_runtime::is_codegen_valid_for(&metadata_before));
 
     // Modify the metadata.
-    let metadata = modified_metadata(api.metadata(), |md| {
-        md.pallets[0].name = "NewPallet".to_string();
-    });
+    v15_metadata.pallets[0].name = "NewPallet".to_string();
 
     // It should now be invalid:
-    assert!(!node_runtime::is_codegen_valid_for(&metadata));
+    let metadata_after = v15_to_metadata(v15_metadata);
+    assert!(!node_runtime::is_codegen_valid_for(&metadata_after));
 }
 
 #[subxt_test]
 async fn constant_values_are_not_validated() {
     let ctx = test_context().await;
     let api = ctx.client();
+    let mut v15_metadata = fetch_v15_metadata(&api).await;
+
+    // Build an api from our v15 metadata to confirm that it's good, just like
+    // the metadata downloaded by the API itself.
+    let api_from_original_metadata = {
+        let metadata_before = v15_to_metadata(v15_metadata.clone());
+        metadata_to_api(metadata_before, &ctx).await
+    };
 
     let deposit_addr = node_runtime::constants().balances().existential_deposit();
 
     // Retrieve existential deposit to validate it and confirm that it's OK.
-    assert!(api.constants().at(&deposit_addr).is_ok());
+    assert!(api_from_original_metadata
+        .constants()
+        .at(&deposit_addr)
+        .is_ok());
 
     // Modify the metadata.
-    let metadata = modified_metadata(api.metadata(), |md| {
-        let existential = md
-            .pallets
-            .iter_mut()
-            .find(|pallet| pallet.name == "Balances")
-            .expect("Metadata must contain Balances pallet")
-            .constants
-            .iter_mut()
-            .find(|constant| constant.name == "ExistentialDeposit")
-            .expect("ExistentialDeposit constant must be present");
+    let existential = v15_metadata
+        .pallets
+        .iter_mut()
+        .find(|pallet| pallet.name == "Balances")
+        .expect("Metadata must contain Balances pallet")
+        .constants
+        .iter_mut()
+        .find(|constant| constant.name == "ExistentialDeposit")
+        .expect("ExistentialDeposit constant must be present");
 
-        // Modifying a constant value should not lead to an error:
-        existential.value = vec![0u8; 32];
-    });
+    // Modifying a constant value should not lead to an error:
+    existential.value = vec![0u8; 32];
 
-    let api = metadata_to_api(metadata, &ctx).await;
+    // Build our API again, this time form the metadata we've tweaked.
+    let api_from_modified_metadata = {
+        let metadata_before = v15_to_metadata(v15_metadata);
+        metadata_to_api(metadata_before, &ctx).await
+    };
 
-    assert!(node_runtime::is_codegen_valid_for(&api.metadata()));
-    assert!(api.constants().at(&deposit_addr).is_ok());
+    assert!(node_runtime::is_codegen_valid_for(
+        &api_from_modified_metadata.metadata()
+    ));
+    assert!(api_from_modified_metadata
+        .constants()
+        .at(&deposit_addr)
+        .is_ok());
 }
 
 #[subxt_test]

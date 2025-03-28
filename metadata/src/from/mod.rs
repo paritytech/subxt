@@ -6,6 +6,7 @@ use alloc::string::String;
 use thiserror::Error as DeriveError;
 mod v14;
 mod v15;
+mod v16;
 
 /// An error emitted if something goes wrong converting [`frame_metadata`]
 /// types into [`crate::Metadata`].
@@ -27,13 +28,6 @@ pub enum TryFromError {
     /// Invalid type path.
     #[error("Type has an invalid path {0}")]
     InvalidTypePath(String),
-}
-
-impl From<crate::Metadata> for frame_metadata::RuntimeMetadataPrefixed {
-    fn from(value: crate::Metadata) -> Self {
-        let m: frame_metadata::v15::RuntimeMetadataV15 = value.into();
-        m.into()
-    }
 }
 
 impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for crate::Metadata {

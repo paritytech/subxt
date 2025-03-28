@@ -665,9 +665,9 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.6.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8a784e501ed2cec99eb00a1e78e42740fcb05f1aea7bbea90bf46f0a9f255bb"
+checksum = "50c554ce2394e2c04426a070b4cb133c72f6f14c86b665f4e13094addd8e8958"
 dependencies = [
  "frame-metadata",
  "parity-scale-codec",
@@ -679,9 +679,9 @@ dependencies = [
 
 [[package]]
 name = "frame-metadata"
-version = "18.0.0"
+version = "20.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "daaf440c68eb2c3d88e5760fe8c7af3f9fee9181fab6c2f2c4e7cc48dcc40bb8"
+checksum = "26de808fa6461f2485dc51811aefed108850064994fb4a62b3ac21ffa62ac8df"
 dependencies = [
  "cfg-if",
  "parity-scale-codec",
@@ -2110,9 +2110,9 @@ dependencies = [
 
 [[package]]
 name = "scale-typegen"
-version = "0.10.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc3173be608895eb117cf397ab4f31f00e2ed2c7af1c6e0b8f5d51d0a0967053"
+checksum = "6aebea322734465f39e4ad8100e1f9708c6c6c325d92b8780015d30c44fae791"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2471,7 +2471,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "subxt"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "async-trait",
  "derive-where",
@@ -2505,7 +2505,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "getrandom",
  "heck",
@@ -2521,7 +2521,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-core"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "base58",
  "blake2",
@@ -2549,7 +2549,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "futures",
  "futures-timer",
@@ -2574,7 +2574,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "darling",
  "parity-scale-codec",
@@ -2588,7 +2588,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "frame-decode",
  "frame-metadata",
@@ -2601,7 +2601,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-rpcs"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "derive-where",
  "finito",
@@ -2626,7 +2626,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-utils-fetchmetadata"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "hex",
  "parity-scale-codec",

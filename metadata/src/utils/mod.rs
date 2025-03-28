@@ -3,6 +3,5 @@
 // see LICENSE for license details.
 
 pub mod ordered_map;
-pub mod retain;
 pub mod validation;
 pub mod variant_index;

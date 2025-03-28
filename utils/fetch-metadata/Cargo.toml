@@ -11,7 +11,7 @@ license.workspace = true
 repository.workspace = true
 documentation.workspace = true
 homepage.workspace = true
-description = "subxt utils fetch metadata"
+description = "subxt utility to fetch metadata"
 
 [features]
 url = ["dep:jsonrpsee", "dep:tokio", "dep:url", "frame-metadata"]

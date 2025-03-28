@@ -140,8 +140,8 @@ pub async fn extension_signature_for_extrinsic(
     let signed_extensions: Vec<String> = api
         .metadata()
         .extrinsic()
-        .transaction_extensions()
-        .iter()
+        .transaction_extensions_by_version(0)
+        .unwrap()
         .map(|e| e.identifier().to_string())
         .collect();
     let tip = encode_then_hex(&Compact(0u128));

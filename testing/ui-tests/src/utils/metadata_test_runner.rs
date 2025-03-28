@@ -3,8 +3,8 @@
 // see LICENSE for license details.
 
 use codec::{Decode, Encode};
+use frame_metadata::RuntimeMetadataPrefixed;
 use std::io::Read;
-use subxt_metadata::Metadata;
 
 static TEST_DIR_PREFIX: &str = "subxt_generated_ui_tests_";
 static METADATA_FILE: &str = "../../artifacts/polkadot_metadata_full.scale";
@@ -17,7 +17,7 @@ pub struct MetadataTestRunner {
 impl MetadataTestRunner {
     /// Loads metadata that we can use in our tests. Panics if
     /// there is some issue decoding the metadata.
-    pub fn load_metadata() -> Metadata {
+    pub fn load_metadata() -> RuntimeMetadataPrefixed {
         let mut file =
             std::fs::File::open(METADATA_FILE).expect("Cannot open metadata.scale artifact");
 
@@ -25,7 +25,7 @@ impl MetadataTestRunner {
         file.read_to_end(&mut bytes)
             .expect("Failed to read metadata.scale file");
 
-        Metadata::decode(&mut &*bytes).expect("Cannot decode metadata bytes")
+        RuntimeMetadataPrefixed::decode(&mut &*bytes).expect("Cannot decode metadata bytes")
     }
 
     /// Create a new test case.
@@ -54,7 +54,7 @@ impl Drop for MetadataTestRunner {
 pub struct MetadataTestRunnerCaseBuilder {
     index: usize,
     name: String,
-    validation_metadata: Option<Metadata>,
+    validation_metadata: Option<RuntimeMetadataPrefixed>,
     should_be_valid: bool,
 }
 
@@ -76,7 +76,7 @@ impl MetadataTestRunnerCaseBuilder {
 
     /// Set metadata to be validated against the generated code.
     /// By default, we'll validate the same metadata used to generate the code.
-    pub fn validation_metadata(mut self, md: impl Into<Metadata>) -> Self {
+    pub fn validation_metadata(mut self, md: impl Into<RuntimeMetadataPrefixed>) -> Self {
         self.validation_metadata = Some(md.into());
         self
     }
@@ -100,15 +100,12 @@ impl MetadataTestRunnerCaseBuilder {
     ///
     /// The generated code will be tidied up when the `MetadataTestRunner` that
     /// this was handed out from is dropped.
-    pub fn build<M>(self, macro_metadata: M) -> String
-    where
-        M: TryInto<Metadata>,
-        M::Error: std::fmt::Debug,
-    {
-        let macro_metadata = macro_metadata.try_into().expect("can into Metadata");
-        let validation_metadata = self
-            .validation_metadata
-            .unwrap_or_else(|| macro_metadata.clone());
+    pub fn build(self, macro_metadata: frame_metadata::RuntimeMetadataPrefixed) -> String {
+        let validation_metadata = self.validation_metadata.unwrap_or_else(|| {
+            // RuntimeMetadataPrefixed doesn't implement Clone for some reason (we should prob fix that).
+            // until then, this hack clones it by encoding and then decoding it again from bytes..
+            clone_via_encode(&macro_metadata)
+        });
 
         let index = self.index;
         let mut tmp_dir = std::env::temp_dir();
@@ -177,4 +174,9 @@ impl MetadataTestRunnerCaseBuilder {
 
         tmp_rust_path
     }
+}
+
+fn clone_via_encode<T: codec::Encode + codec::Decode>(item: &T) -> T {
+    let bytes = item.encode();
+    T::decode(&mut &*bytes).unwrap()
 }

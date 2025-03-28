@@ -61,10 +61,11 @@ pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), Erro
     };
 
     let api_trait = metadata.runtime_api_trait_by_name_err(payload.trait_name())?;
-
-    let Some(runtime_hash) = api_trait.method_hash(payload.method_name()) else {
+    let Some(api_method) = api_trait.method_by_name(payload.method_name()) else {
         return Err(MetadataError::IncompatibleCodegen.into());
     };
+
+    let runtime_hash = api_method.hash();
     if static_hash != runtime_hash {
         return Err(MetadataError::IncompatibleCodegen.into());
     }

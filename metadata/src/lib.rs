@@ -19,10 +19,11 @@
 
 extern crate alloc;
 
-mod from_into;
+mod from;
 mod utils;
 
 use alloc::borrow::Cow;
+use alloc::collections::BTreeMap;
 use alloc::string::String;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -32,14 +33,18 @@ use frame_decode::extrinsics::{
 };
 use hashbrown::HashMap;
 use scale_info::{form::PortableForm, PortableRegistry, Variant};
-use utils::variant_index::VariantIndex;
-use utils::{ordered_map::OrderedMap, validation::outer_enum_hashes::OuterEnumHashes};
+use utils::{
+    ordered_map::OrderedMap,
+    validation::{get_custom_value_hash, HASH_LEN},
+    variant_index::VariantIndex,
+};
 
 type ArcStr = Arc<str>;
 
-use crate::utils::validation::{get_custom_value_hash, HASH_LEN};
-pub use from_into::TryFromError;
+pub use from::TryFromError;
 pub use utils::validation::MetadataHasher;
+
+type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;
 
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
 /// which is then decoded into this. We aim to preserve all of the existing information in
@@ -54,8 +59,6 @@ pub struct Metadata {
     pallets_by_index: HashMap<u8, usize>,
     /// Metadata of the extrinsic.
     extrinsic: ExtrinsicMetadata,
-    /// The type ID of the `Runtime` type.
-    runtime_ty: u32,
     /// The types of the outer enums.
     outer_enums: OuterEnumsMetadata,
     /// The type Id of the `DispatchError` type, which Subxt makes use of.
@@ -63,7 +66,7 @@ pub struct Metadata {
     /// Details about each of the runtime API traits.
     apis: OrderedMap<ArcStr, RuntimeApiMetadataInner>,
     /// Allows users to add custom types to the metadata. A map that associates a string key to a `CustomValueMetadata`.
-    custom: frame_metadata::v15::CustomMetadata<PortableForm>,
+    custom: CustomMetadataInner,
 }
 
 // Since we've abstracted away from frame-metadatas, we impl this on our custom Metadata
@@ -108,8 +111,8 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         &self,
     ) -> Result<ExtrinsicSignatureInfo<Self::TypeId>, ExtrinsicInfoError<'_>> {
         Ok(ExtrinsicSignatureInfo {
-            address_id: self.extrinsic().address_ty(),
-            signature_id: self.extrinsic().signature_ty(),
+            address_id: self.extrinsic().address_ty,
+            signature_id: self.extrinsic().signature_ty,
         })
     }
 
@@ -117,28 +120,25 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         &self,
         extension_version: Option<u8>,
     ) -> Result<ExtrinsicExtensionInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
-        // For now, if there exists an extension version that's non-zero, we say we don't know
-        // how to decode it. When multiple extension versions exist, we may have to tighten up
-        // on this and require V16 metadata to decode.
-        if let Some(extension_version) = extension_version {
-            if extension_version != 0 {
-                return Err(ExtrinsicInfoError::ExtrinsicExtensionVersionNotSupported {
-                    extension_version,
-                });
-            }
-        }
+        let extension_version = extension_version.unwrap_or_else(|| {
+            // We have some transaction, probably a V4 one with no extension version,
+            // but our metadata may support multiple versions. Use the metadata to decide
+            // what version to assume we'll decode it as.
+            self.extrinsic()
+                .transaction_extension_version_to_use_for_decoding()
+        });
 
-        Ok(ExtrinsicExtensionInfo {
-            extension_ids: self
-                .extrinsic()
-                .transaction_extensions()
-                .iter()
-                .map(|f| ExtrinsicInfoArg {
-                    name: Cow::Borrowed(f.identifier()),
-                    id: f.extra_ty(),
-                })
-                .collect(),
-        })
+        let extension_ids = self
+            .extrinsic()
+            .transaction_extensions_by_version(extension_version)
+            .ok_or(ExtrinsicInfoError::ExtrinsicExtensionVersionNotFound { extension_version })?
+            .map(|f| ExtrinsicInfoArg {
+                name: Cow::Borrowed(f.identifier()),
+                id: f.extra_ty(),
+            })
+            .collect();
+
+        Ok(ExtrinsicExtensionInfo { extension_ids })
     }
 }
 
@@ -151,11 +151,6 @@ impl Metadata {
     /// Mutable access to the underlying type registry.
     pub fn types_mut(&mut self) -> &mut PortableRegistry {
         &mut self.types
-    }
-
-    /// The type ID of the `Runtime` type.
-    pub fn runtime_ty(&self) -> u32 {
-        self.runtime_ty
     }
 
     /// The type ID of the `DispatchError` type, if it exists.
@@ -234,26 +229,10 @@ impl Metadata {
         MetadataHasher::new(self)
     }
 
-    /// Filter out any pallets and/or runtime_apis that we don't want to keep, retaining only those that we do.
-    /// Note:
-    /// only filter by `pallet`s will not lead to significant metadata size reduction because the return types are kept to ensure that those can be decoded.
-    ///
-    pub fn retain<F, G>(&mut self, pallet_filter: F, api_filter: G)
-    where
-        F: FnMut(&str) -> bool,
-        G: FnMut(&str) -> bool,
-    {
-        utils::retain::retain_metadata(self, pallet_filter, api_filter);
-    }
-
     /// Get type hash for a type in the registry
     pub fn type_hash(&self, id: u32) -> Option<[u8; HASH_LEN]> {
         self.types.resolve(id)?;
-        Some(crate::utils::validation::get_type_hash(
-            &self.types,
-            id,
-            &OuterEnumHashes::empty(),
-        ))
+        Some(crate::utils::validation::get_type_hash(&self.types, id))
     }
 }
 
@@ -312,6 +291,30 @@ impl<'a> PalletMetadata<'a> {
             self.inner.event_ty,
             self.types,
         )
+    }
+
+    /// Return an iterator over the View Functions in this pallet, if any.
+    pub fn view_functions(&self) -> impl ExactSizeIterator<Item = PalletViewFunctionMetadata<'a>> {
+        self.inner
+            .view_functions
+            .iter()
+            .map(|vf: &'a _| PalletViewFunctionMetadata {
+                inner: vf,
+                types: self.types,
+            })
+    }
+
+    /// Iterate (in no particular order) over the associated type names and type IDs for this pallet.
+    pub fn associated_types(&self) -> impl ExactSizeIterator<Item = (&str, u32)> {
+        self.inner
+            .associated_types
+            .iter()
+            .map(|(name, ty)| (&**name, *ty))
+    }
+
+    /// Fetch an associated type ID given the associated type name.
+    pub fn associated_type_id(&self, name: &str) -> Option<u32> {
+        self.inner.associated_types.get(name).copied()
     }
 
     /// Return all of the call variants, if a call type exists.
@@ -374,7 +377,7 @@ impl<'a> PalletMetadata<'a> {
 
     /// Return a hash for the entire pallet.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        crate::utils::validation::get_pallet_hash(*self, &OuterEnumHashes::empty())
+        crate::utils::validation::get_pallet_hash(*self)
     }
 }
 
@@ -400,6 +403,10 @@ struct PalletMetadataInner {
     error_variant_index: VariantIndex,
     /// Map from constant name to constant details.
     constants: OrderedMap<ArcStr, ConstantMetadata>,
+    /// Details about each of the pallet view functions.
+    view_functions: Vec<PalletViewFunctionMetadataInner>,
+    /// Mapping from associated type to type ID describing its shape.
+    associated_types: BTreeMap<String, u32>,
     /// Pallet documentation.
     docs: Vec<String>,
 }
@@ -593,74 +600,101 @@ impl ConstantMetadata {
 /// Metadata for the extrinsic type.
 #[derive(Debug, Clone)]
 pub struct ExtrinsicMetadata {
-    /// The type of the address that signs the extrinsic
+    /// The type of the address that signs the extrinsic.
+    /// Used to help decode tx signatures.
     address_ty: u32,
-    /// The type of the outermost Call enum.
-    call_ty: u32,
     /// The type of the extrinsic's signature.
+    /// Used to help decode tx signatures.
     signature_ty: u32,
-    /// The type of the outermost Extra enum.
-    extra_ty: u32,
     /// Which extrinsic versions are supported by this chain.
     supported_versions: Vec<u8>,
     /// The signed extensions in the order they appear in the extrinsic.
-    transaction_extensions: Vec<TransactionExtensionMetadata>,
-    /// Version of the transaction extensions.
-    // TODO [jsdw]: V16 metadata groups transaction extensions by version.
-    // need to work out what to do once there is more than one version to deal with.
-    transaction_extensions_version: u8,
+    transaction_extensions: Vec<TransactionExtensionMetadataInner>,
+    /// Different versions of transaction extensions can exist. Each version
+    /// is a u8 which corresponds to the indexes of the transaction extensions
+    /// seen in the above Vec, in order, that exist at that version.
+    transaction_extensions_by_version: BTreeMap<u8, Vec<u32>>,
 }
 
 impl ExtrinsicMetadata {
-    /// The type of the address that signs the extrinsic
-    pub fn address_ty(&self) -> u32 {
-        self.address_ty
-    }
-
-    /// The type of the outermost Call enum.
-    pub fn call_ty(&self) -> u32 {
-        self.call_ty
-    }
-    /// The type of the extrinsic's signature.
-    pub fn signature_ty(&self) -> u32 {
-        self.signature_ty
-    }
-    /// The type of the outermost Extra enum.
-    pub fn extra_ty(&self) -> u32 {
-        self.extra_ty
-    }
-
     /// Which extrinsic versions are supported.
     pub fn supported_versions(&self) -> &[u8] {
         &self.supported_versions
     }
 
     /// The extra/additional information associated with the extrinsic.
-    pub fn transaction_extensions(&self) -> &[TransactionExtensionMetadata] {
-        &self.transaction_extensions
+    pub fn transaction_extensions_by_version(
+        &self,
+        version: u8,
+    ) -> Option<impl Iterator<Item = TransactionExtensionMetadata<'_>>> {
+        let extension_indexes = self.transaction_extensions_by_version.get(&version)?;
+        let iter = extension_indexes.iter().map(|index| {
+            let tx_metadata = self
+                .transaction_extensions
+                .get(*index as usize)
+                .expect("transaction extension should exist if index is in transaction_extensions_by_version");
+
+            TransactionExtensionMetadata {
+                identifier: &tx_metadata.identifier,
+                extra_ty: tx_metadata.extra_ty,
+                additional_ty: tx_metadata.additional_ty,
+            }
+        });
+
+        Some(iter)
     }
 
-    /// Which version are these transaction extensions?
-    pub fn transaction_extensions_version(&self) -> u8 {
-        self.transaction_extensions_version
+    /// When constructing a v5 extrinsic, use this transaction extensions version.
+    pub fn transaction_extension_version_to_use_for_encoding(&self) -> u8 {
+        *self
+            .transaction_extensions_by_version
+            .keys()
+            .max()
+            .expect("At least one version of transaction extensions is expected")
+    }
+
+    /// An iterator of the transaction extensions to use when encoding a transaction. Basically equivalent to
+    /// `self.transaction_extensions_by_version(self.transaction_extension_version_to_use_for_encoding()).unwrap()`
+    pub fn transaction_extensions_to_use_for_encoding(
+        &self,
+    ) -> impl Iterator<Item = TransactionExtensionMetadata<'_>> {
+        let encoding_version = self.transaction_extension_version_to_use_for_encoding();
+        self.transaction_extensions_by_version(encoding_version)
+            .unwrap()
+    }
+
+    /// When presented with a v4 extrinsic that has no version, treat it as being this version.
+    pub fn transaction_extension_version_to_use_for_decoding(&self) -> u8 {
+        *self
+            .transaction_extensions_by_version
+            .keys()
+            .max()
+            .expect("At least one version of transaction extensions is expected")
     }
 }
 
 /// Metadata for the signed extensions used by extrinsics.
 #[derive(Debug, Clone)]
-pub struct TransactionExtensionMetadata {
-    /// The unique signed extension identifier, which may be different from the type name.
-    identifier: String,
-    /// The type of the signed extension, with the data to be included in the extrinsic.
+pub struct TransactionExtensionMetadata<'a> {
+    /// The unique transaction extension identifier, which may be different from the type name.
+    identifier: &'a str,
+    /// The type of the transaction extension, with the data to be included in the extrinsic.
     extra_ty: u32,
-    /// The type of the additional signed data, with the data to be included in the signed payload
+    /// The type of the additional signed data, with the data to be included in the signed payload.
     additional_ty: u32,
 }
 
-impl TransactionExtensionMetadata {
+#[derive(Debug, Clone)]
+struct TransactionExtensionMetadataInner {
+    identifier: String,
+    extra_ty: u32,
+    additional_ty: u32,
+}
+
+impl<'a> TransactionExtensionMetadata<'a> {
     /// The unique signed extension identifier, which may be different from the type name.
-    pub fn identifier(&self) -> &str {
-        &self.identifier
+    pub fn identifier(&self) -> &'a str {
+        self.identifier
     }
     /// The type of the signed extension, with the data to be included in the extrinsic.
     pub fn extra_ty(&self) -> u32 {
@@ -717,21 +751,31 @@ impl<'a> RuntimeApiMetadata<'a> {
         &self.inner.docs
     }
     /// An iterator over the trait methods.
-    pub fn methods(&self) -> impl ExactSizeIterator<Item = &'a RuntimeApiMethodMetadata> {
-        self.inner.methods.values().iter()
+    pub fn methods(&self) -> impl ExactSizeIterator<Item = RuntimeApiMethodMetadata<'a>> {
+        self.inner
+            .methods
+            .values()
+            .iter()
+            .map(|item| RuntimeApiMethodMetadata {
+                trait_name: &self.inner.name,
+                inner: item,
+                types: self.types,
+            })
     }
     /// Get a specific trait method given its name.
-    pub fn method_by_name(&self, name: &str) -> Option<&'a RuntimeApiMethodMetadata> {
-        self.inner.methods.get_by_key(name)
+    pub fn method_by_name(&self, name: &str) -> Option<RuntimeApiMethodMetadata<'a>> {
+        self.inner
+            .methods
+            .get_by_key(name)
+            .map(|item| RuntimeApiMethodMetadata {
+                trait_name: &self.inner.name,
+                inner: item,
+                types: self.types,
+            })
     }
-    /// Return a hash for the constant, or None if it was not found.
-    pub fn method_hash(&self, method_name: &str) -> Option<[u8; HASH_LEN]> {
-        crate::utils::validation::get_runtime_api_hash(self, method_name)
-    }
-
     /// Return a hash for the runtime API trait.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        crate::utils::validation::get_runtime_trait_hash(*self, &OuterEnumHashes::empty())
+        crate::utils::validation::get_runtime_apis_hash(*self)
     }
 }
 
@@ -740,46 +784,102 @@ struct RuntimeApiMetadataInner {
     /// Trait name.
     name: ArcStr,
     /// Trait methods.
-    methods: OrderedMap<ArcStr, RuntimeApiMethodMetadata>,
+    methods: OrderedMap<ArcStr, RuntimeApiMethodMetadataInner>,
     /// Trait documentation.
     docs: Vec<String>,
 }
 
 /// Metadata for a single runtime API method.
 #[derive(Debug, Clone)]
-pub struct RuntimeApiMethodMetadata {
+pub struct RuntimeApiMethodMetadata<'a> {
+    trait_name: &'a str,
+    inner: &'a RuntimeApiMethodMetadataInner,
+    types: &'a PortableRegistry,
+}
+
+impl<'a> RuntimeApiMethodMetadata<'a> {
+    /// Method name.
+    pub fn name(&self) -> &'a str {
+        &self.inner.name
+    }
+    /// Method documentation.
+    pub fn docs(&self) -> &[String] {
+        &self.inner.docs
+    }
+    /// Method inputs.
+    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &MethodParamMetadata> {
+        self.inner.inputs.iter()
+    }
+    /// Method return type.
+    pub fn output_ty(&self) -> u32 {
+        self.inner.output_ty
+    }
+    /// Return a hash for the method.
+    pub fn hash(&self) -> [u8; HASH_LEN] {
+        crate::utils::validation::get_runtime_api_hash(self)
+    }
+}
+
+#[derive(Debug, Clone)]
+struct RuntimeApiMethodMetadataInner {
     /// Method name.
     name: ArcStr,
     /// Method parameters.
-    inputs: Vec<RuntimeApiMethodParamMetadata>,
+    inputs: Vec<MethodParamMetadata>,
     /// Method output type.
     output_ty: u32,
     /// Method documentation.
     docs: Vec<String>,
 }
 
-impl RuntimeApiMethodMetadata {
+/// Metadata for the available pallet View Functions.
+#[derive(Debug, Clone, Copy)]
+pub struct PalletViewFunctionMetadata<'a> {
+    inner: &'a PalletViewFunctionMetadataInner,
+    types: &'a PortableRegistry,
+}
+
+impl PalletViewFunctionMetadata<'_> {
     /// Method name.
     pub fn name(&self) -> &str {
-        &self.name
+        &self.inner.name
+    }
+    /// Query ID. This is used to query the function. Roughly, it is constructed by doing
+    /// `twox_128(pallet_name) ++ twox_128("fn_name(fnarg_types) -> return_ty")` .
+    pub fn query_id(&self) -> [u8; 32] {
+        self.inner.query_id
     }
     /// Method documentation.
     pub fn docs(&self) -> &[String] {
-        &self.docs
+        &self.inner.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &RuntimeApiMethodParamMetadata> {
-        self.inputs.iter()
+    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &MethodParamMetadata> {
+        self.inner.inputs.iter()
     }
     /// Method return type.
     pub fn output_ty(&self) -> u32 {
-        self.output_ty
+        self.inner.output_ty
     }
 }
 
-/// Metadata for a single input parameter to a runtime API method.
 #[derive(Debug, Clone)]
-pub struct RuntimeApiMethodParamMetadata {
+struct PalletViewFunctionMetadataInner {
+    /// View function name.
+    name: String,
+    /// View function query ID.
+    query_id: [u8; 32],
+    /// Input types.
+    inputs: Vec<MethodParamMetadata>,
+    /// Output type.
+    output_ty: u32,
+    /// Documentation.
+    docs: Vec<String>,
+}
+
+/// Metadata for a single input parameter to a runtime API method / pallet view function.
+#[derive(Debug, Clone)]
+pub struct MethodParamMetadata {
     /// Parameter name.
     pub name: String,
     /// Parameter type.
@@ -790,7 +890,7 @@ pub struct RuntimeApiMethodParamMetadata {
 #[derive(Debug, Clone)]
 pub struct CustomMetadata<'a> {
     types: &'a PortableRegistry,
-    inner: &'a frame_metadata::v15::CustomMetadata<PortableForm>,
+    inner: &'a CustomMetadataInner,
 }
 
 impl<'a> CustomMetadata<'a> {
@@ -854,7 +954,7 @@ impl<'a> CustomValueMetadata<'a> {
 
     /// Calculates the hash for the CustomValueMetadata.
     pub fn hash(&self) -> [u8; HASH_LEN] {
-        get_custom_value_hash(self, &OuterEnumHashes::empty())
+        get_custom_value_hash(self)
     }
 }
 
@@ -870,47 +970,5 @@ impl codec::Decode for Metadata {
         };
 
         metadata.map_err(|_e| "Cannot try_into() to Metadata.".into())
-    }
-}
-
-// Metadata can be encoded, too. It will encode into a format that's compatible with what
-// Subxt requires, and that it can be decoded back from. The actual specifics of the format
-// can change over time.
-impl codec::Encode for Metadata {
-    fn encode_to<T: codec::Output + ?Sized>(&self, dest: &mut T) {
-        let m: frame_metadata::v15::RuntimeMetadataV15 = self.clone().into();
-        let m: frame_metadata::RuntimeMetadataPrefixed = m.into();
-        m.encode_to(dest)
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use codec::{Decode, Encode};
-
-    fn load_metadata() -> Vec<u8> {
-        std::fs::read("../artifacts/polkadot_metadata_full.scale").unwrap()
-    }
-
-    // We don't expect to lose any information converting back and forth between
-    // our own representation and the latest version emitted from a node that we can
-    // work with.
-    #[test]
-    fn is_isomorphic_to_v15() {
-        let bytes = load_metadata();
-
-        // Decode into our metadata struct:
-        let metadata = Metadata::decode(&mut &*bytes).unwrap();
-
-        // Convert into v15 metadata:
-        let v15: frame_metadata::v15::RuntimeMetadataV15 = metadata.into();
-        let prefixed = frame_metadata::RuntimeMetadataPrefixed::from(v15);
-
-        // Re-encode that:
-        let new_bytes = prefixed.encode();
-
-        // The bytes should be identical:
-        assert_eq!(bytes, new_bytes);
     }
 }

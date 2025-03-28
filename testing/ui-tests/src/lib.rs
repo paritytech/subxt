@@ -17,10 +17,31 @@ mod storage;
 mod utils;
 
 use crate::utils::MetadataTestRunner;
+use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
+use subxt_utils_stripmetadata::StripMetadata;
 
 // Each of these tests leads to some rust code being compiled and
 // executed to test that compilation is successful (or errors in the
 // way that we'd expect).
+
+fn strip_metadata<Pallets, Apis>(
+    metadata: &mut RuntimeMetadataPrefixed,
+    pallets: Pallets,
+    apis: Apis,
+) where
+    Pallets: Fn(&str) -> bool,
+    Apis: Fn(&str) -> bool,
+{
+    match &mut metadata.1 {
+        RuntimeMetadata::V14(m) => m.strip_metadata(pallets, apis),
+        RuntimeMetadata::V15(m) => m.strip_metadata(pallets, apis),
+        RuntimeMetadata::V16(m) => m.strip_metadata(pallets, apis),
+        m => panic!(
+            "Metadata should be V14, V15 or V16, but is V{}",
+            m.version()
+        ),
+    }
+}
 
 #[test]
 fn ui_tests() {
@@ -62,7 +83,7 @@ fn ui_tests() {
     // Test retaining only specific pallets and ensure that works.
     for pallet in ["Babe", "Claims", "Grandpa", "Balances"] {
         let mut metadata = MetadataTestRunner::load_metadata();
-        metadata.retain(|p| p == pallet, |_| true);
+        strip_metadata(&mut metadata, |p| p == pallet, |_| true);
 
         t.pass(
             m.new_test_case()
@@ -74,7 +95,7 @@ fn ui_tests() {
     // Test retaining only specific runtime APIs to ensure that works.
     for runtime_api in ["Core", "Metadata"] {
         let mut metadata = MetadataTestRunner::load_metadata();
-        metadata.retain(|_| true, |r| r == runtime_api);
+        strip_metadata(&mut metadata, |_| true, |r| r == runtime_api);
 
         t.pass(
             m.new_test_case()
@@ -87,7 +108,8 @@ fn ui_tests() {
     // client state is full:
     {
         let mut metadata = MetadataTestRunner::load_metadata();
-        metadata.retain(
+        strip_metadata(
+            &mut metadata,
             |p| ["Babe", "Claims"].contains(&p),
             |r| ["Core", "Metadata"].contains(&r),
         );
@@ -104,12 +126,17 @@ fn ui_tests() {
     // _not_ compare valid against client with differently stripped metadata.
     {
         let mut codegen_metadata = MetadataTestRunner::load_metadata();
-        codegen_metadata.retain(
+        strip_metadata(
+            &mut codegen_metadata,
             |p| ["Babe", "Claims"].contains(&p),
             |r| ["Core", "Metadata"].contains(&r),
         );
         let mut validation_metadata = MetadataTestRunner::load_metadata();
-        validation_metadata.retain(|p| p != "Claims", |r| r != "Metadata");
+        strip_metadata(
+            &mut validation_metadata,
+            |p| p != "Claims",
+            |r| r != "Metadata",
+        );
 
         t.pass(
             m.new_test_case()

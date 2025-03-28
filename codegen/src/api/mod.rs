@@ -157,8 +157,6 @@ impl RuntimeGenerator {
             .collect();
         let runtime_api_names_len = runtime_api_names.len();
 
-        let metadata_hash = self.metadata.hasher().hash();
-
         let modules = pallets_with_mod_names
             .iter()
             .map(|(pallet, mod_name)| {
@@ -219,7 +217,6 @@ impl RuntimeGenerator {
 
         // Fetch the paths of the outer enums.
         // Substrate exposes those under `kitchensink_runtime`, while Polkadot under `polkadot_runtime`.
-
         let call_path = type_gen
             .resolve_type_path(self.metadata.outer_enums().call_enum_ty())?
             .to_token_stream(type_gen.settings());
@@ -229,6 +226,8 @@ impl RuntimeGenerator {
         let error_path = type_gen
             .resolve_type_path(self.metadata.outer_enums().error_enum_ty())?
             .to_token_stream(type_gen.settings());
+
+        let metadata_hash = self.metadata.hasher().hash();
 
         let custom_values = generate_custom_values(&self.metadata, &type_gen, &crate_path);
 

@@ -205,12 +205,11 @@ pub fn create_v5_general<T: Config, Call: Payload>(
     // with a hash allowing us to do so.
     validate(call, &client_state.metadata)?;
 
-    // 2. Work out which TX extension version to target based on metadata (unless we
-    // explicitly ask for a specific transaction version at a later step).
+    // 2. Work out which TX extension version to target based on metadata.
     let tx_extensions_version = client_state
         .metadata
         .extrinsic()
-        .transaction_extensions_version();
+        .transaction_extension_version_to_use_for_encoding();
 
     // 3. SCALE encode call data to bytes (pallet u8, call u8, call params).
     let call_data = call_data(call, &client_state.metadata)?;
