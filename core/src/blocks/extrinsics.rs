@@ -5,7 +5,7 @@
 use super::BlockError;
 use crate::blocks::extrinsic_transaction_extensions::ExtrinsicTransactionExtensions;
 use crate::{
-    config::{Config, Hasher},
+    config::{Config, HashFor, Hasher},
     error::{Error, MetadataError},
     Metadata,
 };
@@ -22,6 +22,7 @@ pub use crate::blocks::StaticExtrinsic;
 pub struct Extrinsics<T: Config> {
     extrinsics: Vec<Arc<(Extrinsic<'static, u32>, Vec<u8>)>>,
     metadata: Metadata,
+    hasher: T::Hasher,
     _marker: core::marker::PhantomData<T>,
 }
 
@@ -30,6 +31,7 @@ impl<T: Config> Extrinsics<T> {
     /// each extrinsic hash (in the form of bytes) and some metadata that
     /// we'll use to decode them.
     pub fn decode_from(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, Error> {
+        let hasher = T::Hasher::new(&metadata);
         let extrinsics = extrinsics
             .into_iter()
             .enumerate()
@@ -63,6 +65,7 @@ impl<T: Config> Extrinsics<T> {
 
         Ok(Self {
             extrinsics,
+            hasher,
             metadata,
             _marker: core::marker::PhantomData,
         })
@@ -85,10 +88,16 @@ impl<T: Config> Extrinsics<T> {
     pub fn iter(&self) -> impl Iterator<Item = ExtrinsicDetails<T>> + Send + Sync + 'static {
         let extrinsics = self.extrinsics.clone();
         let num_extrinsics = self.extrinsics.len();
+        let hasher = self.hasher;
         let metadata = self.metadata.clone();
 
         (0..num_extrinsics).map(move |index| {
-            ExtrinsicDetails::new(index as u32, extrinsics[index].clone(), metadata.clone())
+            ExtrinsicDetails::new(
+                index as u32,
+                extrinsics[index].clone(),
+                hasher,
+                metadata.clone(),
+            )
         })
     }
 
@@ -133,6 +142,8 @@ pub struct ExtrinsicDetails<T: Config> {
     index: u32,
     /// Extrinsic bytes and decode info.
     ext: Arc<(Extrinsic<'static, u32>, Vec<u8>)>,
+    /// Hash the extrinsic if we want.
+    hasher: T::Hasher,
     /// Subxt metadata to fetch the extrinsic metadata.
     metadata: Metadata,
     _marker: core::marker::PhantomData<T>,
@@ -147,20 +158,22 @@ where
     pub fn new(
         index: u32,
         ext: Arc<(Extrinsic<'static, u32>, Vec<u8>)>,
+        hasher: T::Hasher,
         metadata: Metadata,
     ) -> ExtrinsicDetails<T> {
         ExtrinsicDetails {
             index,
             ext,
+            hasher,
             metadata,
             _marker: core::marker::PhantomData,
         }
     }
 
     /// Calculate and return the hash of the extrinsic, based on the configured hasher.
-    pub fn hash(&self) -> T::Hash {
+    pub fn hash(&self) -> HashFor<T> {
         // Use hash(), not hash_of(), because we don't want to double encode the bytes.
-        T::Hasher::hash(self.bytes())
+        self.hasher.hash(self.bytes())
     }
 
     /// Is the extrinsic signed?
@@ -532,6 +545,7 @@ mod tests {
     #[test]
     fn tx_hashes_line_up() {
         let metadata = metadata();
+        let hasher = <SubstrateConfig as Config>::Hasher::new(&metadata);
 
         let tx = crate::dynamic::tx(
             "Test",
@@ -559,7 +573,11 @@ mod tests {
         // Both of these types should produce the same bytes.
         assert_eq!(tx_encoded.encoded(), extrinsic.bytes(), "bytes should eq");
         // Both of these types should produce the same hash.
-        assert_eq!(tx_encoded.hash(), extrinsic.hash(), "hashes should eq");
+        assert_eq!(
+            tx_encoded.hash_with(hasher),
+            extrinsic.hash(),
+            "hashes should eq"
+        );
     }
 
     #[test]

@@ -310,14 +310,13 @@ mod test {
     use secp256k1::Secp256k1;
     use subxt_core::utils::AccountId20;
 
-    use subxt_core::{config::*, tx::signer::Signer as SignerT, utils::H256};
+    use subxt_core::{config::*, tx::signer::Signer as SignerT};
 
     use super::*;
 
     enum StubEthRuntimeConfig {}
 
     impl Config for StubEthRuntimeConfig {
-        type Hash = H256;
         type AccountId = AccountId20;
         type Address = AccountId20;
         type Signature = Signature;

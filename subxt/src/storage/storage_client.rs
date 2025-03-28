@@ -6,8 +6,8 @@ use super::storage_type::Storage;
 use crate::{
     backend::BlockRef,
     client::{OfflineClientT, OnlineClientT},
+    config::{Config, HashFor},
     error::Error,
-    Config,
 };
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
@@ -65,7 +65,7 @@ where
     Client: OnlineClientT<T>,
 {
     /// Obtain storage at some block hash.
-    pub fn at(&self, block_ref: impl Into<BlockRef<T::Hash>>) -> Storage<T, Client> {
+    pub fn at(&self, block_ref: impl Into<BlockRef<HashFor<T>>>) -> Storage<T, Client> {
         Storage::new(self.client.clone(), block_ref.into())
     }
 

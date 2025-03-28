@@ -9,7 +9,7 @@
 //! ```rust
 //! use subxt_signer::sr25519::dev;
 //! use subxt_macro::subxt;
-//! use subxt_core::config::PolkadotConfig;
+//! use subxt_core::config::{PolkadotConfig, HashFor};
 //! use subxt_core::config::DefaultExtrinsicParamsBuilder as Params;
 //! use subxt_core::tx;
 //! use subxt_core::utils::H256;
@@ -59,7 +59,7 @@
 pub mod payload;
 pub mod signer;
 
-use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher};
+use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, HashFor, Hasher};
 use crate::error::{Error, ExtrinsicError, MetadataError};
 use crate::metadata::Metadata;
 use crate::utils::Encoded;
@@ -406,7 +406,8 @@ impl<T: Config> PartialTransactionV5<T> {
 
 /// This represents a signed transaction that's ready to be submitted.
 /// Use [`Transaction::encoded()`] or [`Transaction::into_encoded()`] to
-/// get the bytes for it, or [`Transaction::hash()`] to get the hash.
+/// get the bytes for it, or [`Transaction::hash_with()`] to hash the transaction
+/// given an instance of [`Config::Hasher`].
 pub struct Transaction<T> {
     encoded: Encoded,
     marker: core::marker::PhantomData<T>,
@@ -422,9 +423,12 @@ impl<T: Config> Transaction<T> {
         }
     }
 
-    /// Calculate and return the hash of the extrinsic, based on the configured hasher.
-    pub fn hash(&self) -> T::Hash {
-        T::Hasher::hash_of(&self.encoded)
+    /// Calculate and return the hash of the extrinsic, based on the provided hasher.
+    /// If you don't have a hasher to hand, you can construct one using the metadata
+    /// with `T::Hasher::new(&metadata)`. This will create a hasher suitable for the
+    /// current chain where possible.
+    pub fn hash_with(&self, hasher: T::Hasher) -> HashFor<T> {
+        hasher.hash_of(&self.encoded)
     }
 
     /// Returns the SCALE encoded extrinsic bytes.
