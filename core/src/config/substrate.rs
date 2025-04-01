@@ -57,6 +57,8 @@ impl Hasher for BlakeTwo256 {
 
 /// A hasher (ie implements [`Hasher`]) which inspects the runtime metadata to decide how to
 /// hash types, falling back to blake2_256 if the hasher information is not available.
+/// 
+/// Currently this hasher supports only `BlakeTwo256` and `Keccak256` hashing methods.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DynamicHasher256(HashType);
 
