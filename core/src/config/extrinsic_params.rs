@@ -81,7 +81,6 @@ impl<T: Config> Params<T> for () {}
 
 macro_rules! impl_tuples {
     ($($ident:ident $index:tt),+) => {
-
         impl <T: Config, $($ident : Params<T>),+> Params<T> for ($($ident,)+){
             fn inject_account_nonce(&mut self, nonce: u64) {
                 $(self.$index.inject_account_nonce(nonce);)+
