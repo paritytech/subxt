@@ -296,10 +296,7 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
     ///
     /// Returns an array of the hexadecimal-encoded scale-encoded extrinsics found in the block,
     /// or `None` if the block wasn't found.
-    pub async fn archive_v1_body(
-        &self,
-        block_hash: T::Hash,
-    ) -> Result<Option<Vec<Bytes>>, Error> {
+    pub async fn archive_v1_body(&self, block_hash: T::Hash) -> Result<Option<Vec<Bytes>>, Error> {
         self.client
             .request("archive_v1_body", rpc_params![block_hash])
             .await
@@ -363,20 +360,14 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
     /// For blocks older than the latest finalized block, only one entry will be returned. For blocks
     /// newer than the latest finalized block, it's possible to have 0, 1 or multiple blocks at
     /// that height given that forks could occur.
-    pub async fn archive_v1_hash_by_height(
-        &self,
-        height: usize,
-    ) -> Result<Vec<T::Hash>, Error> {
+    pub async fn archive_v1_hash_by_height(&self, height: usize) -> Result<Vec<T::Hash>, Error> {
         self.client
             .request("archive_v1_hashByHeight", rpc_params![height])
             .await
     }
 
     /// Fetch the header for a block with the given hash, or `None` if no block with that hash exists.
-    pub async fn archive_v1_header(
-        &self,
-        block_hash: T::Hash,
-    ) -> Result<Option<T::Header>, Error> {
+    pub async fn archive_v1_header(&self, block_hash: T::Hash) -> Result<Option<T::Header>, Error> {
         let maybe_encoded_header: Option<Bytes> = self
             .client
             .request("archive_v1_header", rpc_params![block_hash])
@@ -409,9 +400,9 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
         let sub = self
             .client
             .subscribe(
-                "archive_unstable_storage",
+                "archive_v1_storage",
                 rpc_params![block_hash, items, child_key.map(to_hex)],
-                "archive_unstable_stopStorage",
+                "archive_v1_stopStorage",
             )
             .await?;
 
@@ -420,6 +411,8 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
 
     // Dev note: we continue to support the latest "unstable" archive methods because
     // they will be around for a while before the stable ones make it into a release.
+    // The below are just a copy-paste of the v1 methods, above, but calling the
+    // "unstable" RPCs instead. Eventually we'll remove them.
 
     /// Fetch the block body (ie the extrinsics in the block) given its hash.
     ///
@@ -429,7 +422,9 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
         &self,
         block_hash: T::Hash,
     ) -> Result<Option<Vec<Bytes>>, Error> {
-        self.archive_v1_body(block_hash).await
+        self.client
+            .request("archive_unstable_body", rpc_params![block_hash])
+            .await
     }
 
     /// Call the `archive_unstable_call` method and return the response.
@@ -439,17 +434,51 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
         function: &str,
         call_parameters: &[u8],
     ) -> Result<ArchiveCallResult, Error> {
-        self.archive_v1_call(block_hash, function, call_parameters).await
+        use serde::de::Error as _;
+
+        // We deserialize to this intermediate shape, since
+        // we can't have a boolean tag to denote variants.
+        #[derive(Deserialize)]
+        struct Response {
+            success: bool,
+            value: Option<Bytes>,
+            error: Option<String>,
+            // This was accidentally used instead of value in Substrate,
+            // so to support those impls we try it here if needed:
+            result: Option<Bytes>,
+        }
+
+        let res: Response = self
+            .client
+            .request(
+                "archive_unstable_call",
+                rpc_params![block_hash, function, to_hex(call_parameters)],
+            )
+            .await?;
+
+        let value = res.value.or(res.result);
+        match (res.success, value, res.error) {
+            (true, Some(value), _) => Ok(ArchiveCallResult::Success(value)),
+            (false, _, err) => Ok(ArchiveCallResult::Error(err.unwrap_or(String::new()))),
+            (true, None, _) => {
+                let m = "archive_unstable_call: 'success: true' response should have `value: 0x1234` alongside it";
+                Err(Error::Deserialization(serde_json::Error::custom(m)))
+            }
+        }
     }
 
     /// Return the finalized block height of the chain.
     pub async fn archive_unstable_finalized_height(&self) -> Result<usize, Error> {
-        self.archive_v1_finalized_height().await
+        self.client
+            .request("archive_unstable_finalizedHeight", rpc_params![])
+            .await
     }
 
     /// Return the genesis hash.
     pub async fn archive_unstable_genesis_hash(&self) -> Result<T::Hash, Error> {
-        self.archive_v1_genesis_hash().await
+        self.client
+            .request("archive_unstable_genesisHash", rpc_params![])
+            .await
     }
 
     /// Given a block height, return the hashes of the zero or more blocks at that height.
@@ -460,7 +489,9 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
         &self,
         height: usize,
     ) -> Result<Vec<T::Hash>, Error> {
-        self.archive_v1_hash_by_height(height).await
+        self.client
+            .request("archive_unstable_hashByHeight", rpc_params![height])
+            .await
     }
 
     /// Fetch the header for a block with the given hash, or `None` if no block with that hash exists.
@@ -468,7 +499,18 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
         &self,
         block_hash: T::Hash,
     ) -> Result<Option<T::Header>, Error> {
-        self.archive_v1_header(block_hash).await
+        let maybe_encoded_header: Option<Bytes> = self
+            .client
+            .request("archive_unstable_header", rpc_params![block_hash])
+            .await?;
+
+        let Some(encoded_header) = maybe_encoded_header else {
+            return Ok(None);
+        };
+
+        let header =
+            <T::Header as codec::Decode>::decode(&mut &*encoded_header.0).map_err(Error::Decode)?;
+        Ok(Some(header))
     }
 
     /// Query the node storage and return a subscription which streams corresponding storage events back.
@@ -478,7 +520,24 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
         items: impl IntoIterator<Item = StorageQuery<&[u8]>>,
         child_key: Option<&[u8]>,
     ) -> Result<ArchiveStorageSubscription<T::Hash>, Error> {
-        self.archive_v1_storage(block_hash, items, child_key).await
+        let items: Vec<StorageQuery<String>> = items
+            .into_iter()
+            .map(|item| StorageQuery {
+                key: to_hex(item.key),
+                query_type: item.query_type,
+            })
+            .collect();
+
+        let sub = self
+            .client
+            .subscribe(
+                "archive_unstable_storage",
+                rpc_params![block_hash, items, child_key.map(to_hex)],
+                "archive_unstable_stopStorage",
+            )
+            .await?;
+
+        Ok(ArchiveStorageSubscription { sub, done: false })
     }
 }
 
