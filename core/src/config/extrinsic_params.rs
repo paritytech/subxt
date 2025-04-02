@@ -81,11 +81,11 @@ impl<T: Config> Params<T> for () {}
 
 macro_rules! impl_tuples {
     ($($ident:ident $index:tt),+) => {
-        impl <T: Config, $($ident : Params<T>),+> Params<T> for ($($ident,)+){
+        impl <Conf: Config, $($ident : Params<Conf>),+> Params<Conf> for ($($ident,)+){
             fn inject_account_nonce(&mut self, nonce: u64) {
                 $(self.$index.inject_account_nonce(nonce);)+
             }
-            fn inject_block(&mut self, number: u64, hash: T::Hash) {
+            fn inject_block(&mut self, number: u64, hash: Conf::Hash) {
                 $(self.$index.inject_block(number, hash);)+
             }
         }
