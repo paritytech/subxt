@@ -47,7 +47,7 @@ impl ContractsTestContext {
     }
 
     async fn upload_code(&self) -> Result<Hash, Error> {
-        let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
+        let code = wat::parse_str(CONTRACT).expect("invalid wat");
 
         let upload_tx =
             node_runtime::tx()
@@ -74,8 +74,7 @@ impl ContractsTestContext {
     }
 
     async fn instantiate_with_code(&self) -> Result<(Hash, AccountId), Error> {
-        tracing::info!("instantiate_with_code:");
-        let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
+        let code = wat::parse_str(CONTRACT).expect("invalid wat");
 
         let instantiate_tx = node_runtime::tx().contracts().instantiate_with_code(
             100_000_000_000_000_000, // endowment
