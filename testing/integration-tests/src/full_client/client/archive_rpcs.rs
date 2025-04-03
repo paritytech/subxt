@@ -38,7 +38,7 @@ async fn fetch_finalized_blocks<T: Config>(
 }
 
 #[subxt_test]
-async fn archive_unstable_body() {
+async fn archive_v1_body() {
     let ctx = test_context().await;
     let rpc = ctx.chainhead_rpc_methods().await;
     let mut blocks = fetch_finalized_blocks(&ctx, 3).await;
@@ -51,7 +51,7 @@ async fn archive_unstable_body() {
             .iter()
             .map(|e| e.bytes().to_vec());
         let archive_block_bodies = rpc
-            .archive_unstable_body(block.hash())
+            .archive_v1_body(block.hash())
             .await
             .unwrap()
             .into_iter()
@@ -66,7 +66,7 @@ async fn archive_unstable_body() {
 }
 
 #[subxt_test]
-async fn archive_unstable_call() {
+async fn archive_v1_call() {
     let ctx = test_context().await;
     let rpc = ctx.chainhead_rpc_methods().await;
     let mut blocks = fetch_finalized_blocks(&ctx, 3).await;
@@ -81,7 +81,7 @@ async fn archive_unstable_call() {
             .unwrap()
             .encode();
         let archive_metadata_versions = rpc
-            .archive_unstable_call(block.hash(), "Metadata_metadata_versions", &[])
+            .archive_v1_call(block.hash(), "Metadata_metadata_versions", &[])
             .await
             .unwrap()
             .as_success()
@@ -93,7 +93,7 @@ async fn archive_unstable_call() {
 }
 
 #[subxt_test]
-async fn archive_unstable_finalized_height() {
+async fn archive_v1_finalized_height() {
     let ctx = test_context().await;
     let rpc = ctx.chainhead_rpc_methods().await;
 
@@ -104,7 +104,7 @@ async fn archive_unstable_finalized_height() {
     let mut last_block_height = None;
     loop {
         // Fetch archive block height.
-        let archive_block_height = rpc.archive_unstable_finalized_height().await.unwrap();
+        let archive_block_height = rpc.archive_v1_finalized_height().await.unwrap();
 
         // On a dev node we expect blocks to be finalized 1 by 1, so panic
         // if the height we fetch has grown by more than 1.
@@ -125,18 +125,18 @@ async fn archive_unstable_finalized_height() {
 }
 
 #[subxt_test]
-async fn archive_unstable_genesis_hash() {
+async fn archive_v1_genesis_hash() {
     let ctx = test_context().await;
     let rpc = ctx.chainhead_rpc_methods().await;
 
     let chain_head_genesis_hash = rpc.chainspec_v1_genesis_hash().await.unwrap();
-    let archive_genesis_hash = rpc.archive_unstable_genesis_hash().await.unwrap();
+    let archive_genesis_hash = rpc.archive_v1_genesis_hash().await.unwrap();
 
     assert_eq!(chain_head_genesis_hash, archive_genesis_hash);
 }
 
 #[subxt_test]
-async fn archive_unstable_hash_by_height() {
+async fn archive_v1_hash_by_height() {
     let ctx = test_context().await;
     let rpc = ctx.chainhead_rpc_methods().await;
     let mut blocks = fetch_finalized_blocks(&ctx, 3).await;
@@ -146,7 +146,7 @@ async fn archive_unstable_hash_by_height() {
         let subxt_block_hash = block.hash();
 
         let archive_block_hash = rpc
-            .archive_unstable_hash_by_height(subxt_block_height)
+            .archive_v1_hash_by_height(subxt_block_height)
             .await
             .unwrap();
 
@@ -157,7 +157,7 @@ async fn archive_unstable_hash_by_height() {
 }
 
 #[subxt_test]
-async fn archive_unstable_header() {
+async fn archive_v1_header() {
     let ctx = test_context().await;
     let rpc = ctx.chainhead_rpc_methods().await;
     let mut blocks = fetch_finalized_blocks(&ctx, 3).await;
@@ -166,18 +166,14 @@ async fn archive_unstable_header() {
         let block_hash = block.hash();
 
         let subxt_block_header = block.header();
-        let archive_block_header = rpc
-            .archive_unstable_header(block_hash)
-            .await
-            .unwrap()
-            .unwrap();
+        let archive_block_header = rpc.archive_v1_header(block_hash).await.unwrap().unwrap();
 
         assert_eq!(subxt_block_header, &archive_block_header);
     }
 }
 
 #[subxt_test]
-async fn archive_unstable_storage() {
+async fn archive_v1_storage() {
     let ctx = test_context().await;
     let rpc = ctx.chainhead_rpc_methods().await;
     let api = ctx.client();
@@ -214,7 +210,7 @@ async fn archive_unstable_storage() {
         ];
 
         let mut res = rpc
-            .archive_unstable_storage(block_hash, storage_query, None)
+            .archive_v1_storage(block_hash, storage_query, None)
             .await
             .unwrap();
 

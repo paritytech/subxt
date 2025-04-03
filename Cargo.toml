@@ -112,7 +112,7 @@ tracing-wasm = "0.2.1"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 trybuild = "1.0.99"
 url = "2.5.2"
-wabt = "0.10.0"
+wat = "1.228.0"
 wasm-bindgen-test = "0.3.24"
 which = "6.0.3"
 strip-ansi-escapes = "0.2.0"
