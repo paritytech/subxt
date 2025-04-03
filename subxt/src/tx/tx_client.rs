@@ -515,7 +515,7 @@ where
         match sub.next().await {
             Some(Ok(status)) => match status {
                 TransactionStatus::Validated
-                | TransactionStatus::Broadcasted { .. }
+                | TransactionStatus::Broadcasted
                 | TransactionStatus::InBestBlock { .. }
                 | TransactionStatus::NoLongerInBestBlock
                 | TransactionStatus::InFinalizedBlock { .. } => Ok(ext_hash),
