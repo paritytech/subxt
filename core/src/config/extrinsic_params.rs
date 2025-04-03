@@ -7,7 +7,11 @@
 //! [`crate::config::DefaultExtrinsicParams`] provides a general-purpose
 //! implementation of this that will work in many cases.
 
-use crate::{client::ClientState, error::ExtrinsicParamsError, Config};
+use crate::{
+    client::ClientState,
+    config::{Config, HashFor},
+    error::ExtrinsicParamsError,
+};
 use alloc::vec::Vec;
 use core::any::Any;
 
@@ -74,7 +78,7 @@ pub trait Params<T: Config> {
     /// Set the account nonce.
     fn inject_account_nonce(&mut self, _nonce: u64) {}
     /// Set the current block.
-    fn inject_block(&mut self, _number: u64, _hash: T::Hash) {}
+    fn inject_block(&mut self, _number: u64, _hash: HashFor<T>) {}
 }
 
 impl<T: Config> Params<T> for () {}
@@ -86,7 +90,7 @@ macro_rules! impl_tuples {
             fn inject_account_nonce(&mut self, nonce: u64) {
                 $(self.$index.inject_account_nonce(nonce);)+
             }
-            fn inject_block(&mut self, number: u64, hash: T::Hash) {
+            fn inject_block(&mut self, number: u64, hash: HashFor<T>) {
                 $(self.$index.inject_block(number, hash);)+
             }
         }

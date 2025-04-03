@@ -4,8 +4,14 @@
 
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    blocks::BlocksClient, constants::ConstantsClient, events::EventsClient,
-    runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient, Config, Metadata,
+    blocks::BlocksClient,
+    config::{Config, HashFor},
+    constants::ConstantsClient,
+    events::EventsClient,
+    runtime_api::RuntimeApiClient,
+    storage::StorageClient,
+    tx::TxClient,
+    Metadata,
 };
 
 use derive_where::derive_where;
@@ -19,10 +25,13 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     fn metadata(&self) -> Metadata;
 
     /// Return the provided genesis hash.
-    fn genesis_hash(&self) -> T::Hash;
+    fn genesis_hash(&self) -> HashFor<T>;
 
     /// Return the provided [`RuntimeVersion`].
     fn runtime_version(&self) -> RuntimeVersion;
+
+    /// Return the hasher used on the chain.
+    fn hasher(&self) -> T::Hasher;
 
     /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
     fn client_state(&self) -> ClientState<T> {
@@ -74,19 +83,22 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
 #[derive_where(Debug, Clone)]
 pub struct OfflineClient<T: Config> {
     inner: Arc<ClientState<T>>,
+    hasher: T::Hasher,
 }
 
 impl<T: Config> OfflineClient<T> {
     /// Construct a new [`OfflineClient`], providing
     /// the necessary runtime and compile-time arguments.
     pub fn new(
-        genesis_hash: T::Hash,
+        genesis_hash: HashFor<T>,
         runtime_version: RuntimeVersion,
         metadata: impl Into<Metadata>,
     ) -> OfflineClient<T> {
         let metadata = metadata.into();
+        let hasher = <T::Hasher as subxt_core::config::Hasher>::new(&metadata);
 
         OfflineClient {
+            hasher,
             inner: Arc::new(ClientState {
                 genesis_hash,
                 runtime_version,
@@ -96,7 +108,7 @@ impl<T: Config> OfflineClient<T> {
     }
 
     /// Return the genesis hash.
-    pub fn genesis_hash(&self) -> T::Hash {
+    pub fn genesis_hash(&self) -> HashFor<T> {
         self.inner.genesis_hash
     }
 
@@ -108,6 +120,11 @@ impl<T: Config> OfflineClient<T> {
     /// Return the [`Metadata`] used in this client.
     pub fn metadata(&self) -> Metadata {
         self.inner.metadata.clone()
+    }
+
+    /// Return the hasher used for the chain.
+    pub fn hasher(&self) -> T::Hasher {
+        self.hasher
     }
 
     // Just a copy of the most important trait methods so that people
@@ -140,7 +157,7 @@ impl<T: Config> OfflineClient<T> {
 }
 
 impl<T: Config> OfflineClientT<T> for OfflineClient<T> {
-    fn genesis_hash(&self) -> T::Hash {
+    fn genesis_hash(&self) -> HashFor<T> {
         self.genesis_hash()
     }
     fn runtime_version(&self) -> RuntimeVersion {
@@ -148,6 +165,9 @@ impl<T: Config> OfflineClientT<T> for OfflineClient<T> {
     }
     fn metadata(&self) -> Metadata {
         self.metadata()
+    }
+    fn hasher(&self) -> T::Hasher {
+        self.hasher()
     }
 }
 

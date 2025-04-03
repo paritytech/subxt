@@ -17,7 +17,6 @@ pub use primitive_types::{H256, U256};
 pub enum PolkadotConfig {}
 
 impl Config for PolkadotConfig {
-    type Hash = <SubstrateConfig as Config>::Hash;
     type AccountId = <SubstrateConfig as Config>::AccountId;
     type Signature = <SubstrateConfig as Config>::Signature;
     type Hasher = <SubstrateConfig as Config>::Hasher;

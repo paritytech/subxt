@@ -75,9 +75,35 @@ impl StripMetadata for v16::RuntimeMetadataV16 {
         PalletFilter: Fn(&str) -> bool,
         RuntimeApiFilter: Fn(&str) -> bool,
     {
-        // Throw away pallets and runtime APIs we don't care about:
-        self.pallets.retain(|pallet| keep_pallet(&pallet.name));
+        // Throw away pallets and runtime APIs we don't care about.
+        // Keep the System pallet, because it has some associated types that we care about in Subxt.
+        self.pallets
+            .retain(|pallet| pallet.name == "System" || keep_pallet(&pallet.name));
         self.apis.retain(|api| keep_runtime_api(&api.name));
+
+        // If the user asked to strip the System pallet, we'll strip most things from it but keep the
+        // associated types, because Subxt makes use of them.
+        if !keep_pallet("System") {
+            if let Some(system_pallet) = self.pallets.iter_mut().find(|p| p.name == "System") {
+                let index = system_pallet.index;
+                let associated_types = core::mem::take(&mut system_pallet.associated_types);
+
+                *system_pallet = v16::PalletMetadata {
+                    name: "System".to_string(),
+                    index,
+                    associated_types,
+                    // Everything else is empty:
+                    storage: None,
+                    calls: None,
+                    event: None,
+                    constants: vec![],
+                    error: None,
+                    view_functions: vec![],
+                    docs: vec![],
+                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                };
+            }
+        }
 
         // Now, only retain types we care about in the registry:
         retain_types(self);

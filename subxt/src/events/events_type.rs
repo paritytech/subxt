@@ -1,4 +1,7 @@
-use crate::{Config, Error, Metadata};
+use crate::{
+    config::{Config, HashFor},
+    Error, Metadata,
+};
 use derive_where::derive_where;
 use scale_decode::DecodeAsType;
 use subxt_core::events::{EventDetails as CoreEventDetails, Events as CoreEvents};
@@ -153,7 +156,7 @@ impl<T: Config> EventDetails<T> {
     }
 
     /// Return the topics associated with this event.
-    pub fn topics(&self) -> &[T::Hash] {
+    pub fn topics(&self) -> &[HashFor<T>] {
         self.inner.topics()
     }
 }
