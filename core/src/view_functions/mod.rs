@@ -41,7 +41,7 @@ pub fn call_name() -> &'static str {
 pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>, Error> {
     let mut call_args = vec![];
     call_args.extend_from_slice(payload.query_id());
-    payload.encode_args_to(&metadata, &mut call_args)?;
+    payload.encode_args_to(metadata, &mut call_args)?;
     Ok(call_args)
 }
 
