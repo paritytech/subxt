@@ -4,13 +4,13 @@
 
 use heck::ToUpperCamelCase as _;
 
-use scale_typegen::TypeGenerator;
-use scale_typegen::typegen::ir::ToTokensWithSettings;
-use subxt_metadata::{PalletMetadata, ViewFunctionMetadata};
-use proc_macro2::TokenStream as TokenStream2;
 use crate::CodegenError;
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
+use scale_typegen::typegen::ir::ToTokensWithSettings;
+use scale_typegen::TypeGenerator;
 use std::collections::HashSet;
+use subxt_metadata::{PalletMetadata, ViewFunctionMetadata};
 
 fn generate_pallet_view_function(
     view_function: ViewFunctionMetadata<'_>,
@@ -42,42 +42,49 @@ fn generate_pallet_view_function(
         let mut unique_names = HashSet::new();
         let mut unique_aliases = HashSet::new();
 
-        view_function.inputs().enumerate().map(|(idx, input)| {
-            // These are method names, which can just be '_', but struct field names can't
-            // just be an underscore, so fix any such names we find to work in structs.
-            let mut name = input.name.trim_start_matches('_').to_string();
-            if name.is_empty() {
-                name = format!("_{}", idx);
-            }
-            while !unique_names.insert(name.clone()) {
-                name = format!("{}_param{}", name, idx);
-            }
+        view_function
+            .inputs()
+            .enumerate()
+            .map(|(idx, input)| {
+                // These are method names, which can just be '_', but struct field names can't
+                // just be an underscore, so fix any such names we find to work in structs.
+                let mut name = input.name.trim_start_matches('_').to_string();
+                if name.is_empty() {
+                    name = format!("_{}", idx);
+                }
+                while !unique_names.insert(name.clone()) {
+                    name = format!("{}_param{}", name, idx);
+                }
 
-            // The alias type name is based on the name, above.
-            let mut alias = name.to_upper_camel_case();
-            while !unique_aliases.insert(alias.clone()) {
-                alias = format!("{}Param{}", alias, idx);
-            }
+                // The alias type name is based on the name, above.
+                let mut alias = name.to_upper_camel_case();
+                while !unique_aliases.insert(alias.clone()) {
+                    alias = format!("{}Param{}", alias, idx);
+                }
 
-            // Path to the actual type we'll have generated for this input.
-            let type_path = type_gen
-                .resolve_type_path(input.ty)
-                .expect("view function input type is in metadata; qed")
-                .to_token_stream(type_gen.settings());
+                // Path to the actual type we'll have generated for this input.
+                let type_path = type_gen
+                    .resolve_type_path(input.ty)
+                    .expect("view function input type is in metadata; qed")
+                    .to_token_stream(type_gen.settings());
 
-            Input {
-                name: format_ident!("{name}"),
-                type_alias: format_ident!("{alias}"),
-                type_path: type_path,
-            }
-        }).collect()
+                Input {
+                    name: format_ident!("{name}"),
+                    type_alias: format_ident!("{alias}"),
+                    type_path: type_path,
+                }
+            })
+            .collect()
     };
 
-    let input_struct_params = view_function_inputs.iter().map(|i| {
-        let arg = &i.name;
-        let ty = &i.type_alias;
-        quote!(#arg: #ty)
-    }).collect::<Vec<_>>();
+    let input_struct_params = view_function_inputs
+        .iter()
+        .map(|i| {
+            let arg = &i.name;
+            let ty = &i.type_alias;
+            quote!(#arg: #ty)
+        })
+        .collect::<Vec<_>>();
 
     let input_type_aliases = view_function_inputs.iter().map(|i| {
         let ty = &i.type_alias;
@@ -85,9 +92,7 @@ fn generate_pallet_view_function(
         quote!(pub type #ty = #path;)
     });
 
-    let input_param_names = view_function_inputs
-        .iter()
-        .map(|i| &i.name);
+    let input_param_names = view_function_inputs.iter().map(|i| &i.name);
 
     let output_type_path = type_gen
         .resolve_type_path(view_function.output_ty())?

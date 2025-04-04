@@ -11,9 +11,9 @@ use crate::{
     error::Error,
     events::EventsClient,
     runtime_api::RuntimeApiClient,
-    view_functions::ViewFunctionsClient,
     storage::StorageClient,
     tx::TxClient,
+    view_functions::ViewFunctionsClient,
     Config, Metadata,
 };
 use derive_where::derive_where;

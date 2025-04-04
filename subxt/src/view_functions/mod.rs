@@ -4,11 +4,11 @@
 
 //! Types associated with executing View Function calls.
 
-mod view_functions_client;
 mod view_function_types;
+mod view_functions_client;
 
-pub use view_functions_client::ViewFunctionsClient;
-pub use view_function_types::ViewFunctionsApi;
 pub use subxt_core::view_functions::payload::{
     dynamic, DefaultPayload, DynamicPayload, Payload, StaticPayload,
 };
+pub use view_function_types::ViewFunctionsApi;
+pub use view_functions_client::ViewFunctionsClient;

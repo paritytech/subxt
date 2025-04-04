@@ -6,8 +6,8 @@
 
 use crate::{
     CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, PalletMetadata,
-    ViewFunctionMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata,
-    StorageEntryType,
+    RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType,
+    ViewFunctionMetadata,
 };
 use alloc::vec::Vec;
 use hashbrown::HashMap;

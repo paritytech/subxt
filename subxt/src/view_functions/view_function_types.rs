@@ -3,12 +3,7 @@
 // see LICENSE for license details.
 
 use super::Payload;
-use crate::{
-    backend::BlockRef,
-    client::OnlineClientT,
-    error::Error,
-    Config,
-};
+use crate::{backend::BlockRef, client::OnlineClientT, error::Error, Config};
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
 
@@ -59,7 +54,7 @@ where
             // Validate the View Function payload hash against the compile hash from codegen.
             subxt_core::view_functions::validate(&payload, &metadata)?;
 
-            // Assemble the data to call the "execute_view_function" runtime API, which 
+            // Assemble the data to call the "execute_view_function" runtime API, which
             // then calls the relevant view function.
             let mut call_args = vec![];
             call_args.extend_from_slice(payload.query_id());
@@ -68,11 +63,16 @@ where
             // Make the call.
             let bytes = client
                 .backend()
-                .call("execute_view_function", Some(call_args.as_slice()), block_hash)
+                .call(
+                    "execute_view_function",
+                    Some(call_args.as_slice()),
+                    block_hash,
+                )
                 .await?;
 
             // Decode the response.
-            let value = subxt_core::view_functions::decode_value(&mut &*bytes, &payload, &metadata)?;
+            let value =
+                subxt_core::view_functions::decode_value(&mut &*bytes, &payload, &metadata)?;
             Ok(value)
         }
     }

@@ -217,10 +217,13 @@ impl Metadata {
     }
 
     /// Access a view function given its query ID, if any.
-    pub fn view_function_by_query_id(&'_ self, query_id: &[u8; 32]) -> Option<ViewFunctionMetadata<'_>> {
+    pub fn view_function_by_query_id(
+        &'_ self,
+        query_id: &[u8; 32],
+    ) -> Option<ViewFunctionMetadata<'_>> {
         // Dev note: currently, we only have pallet view functions, and here
         // we just do a naive thing of iterating over the pallets to find the one
-        // we're looking for. Eventually we should construct a separate map of view 
+        // we're looking for. Eventually we should construct a separate map of view
         // functions for easy querying here.
         self.pallets()
             .flat_map(|p| p.view_functions())

@@ -9,9 +9,9 @@ mod constants;
 mod custom_values;
 mod errors;
 mod events;
+mod pallet_view_functions;
 mod runtime_apis;
 mod storage;
-mod pallet_view_functions;
 
 use scale_typegen::typegen::ir::type_ir::{CompositeFieldIR, CompositeIR, CompositeIRKind};
 use scale_typegen::typegen::ir::ToTokensWithSettings;
@@ -171,7 +171,11 @@ impl RuntimeGenerator {
 
                 let errors = errors::generate_error_type_alias(&type_gen, pallet)?;
 
-                let view_functions = pallet_view_functions::generate_pallet_view_functions(&type_gen, pallet, &crate_path)?;
+                let view_functions = pallet_view_functions::generate_pallet_view_functions(
+                    &type_gen,
+                    pallet,
+                    &crate_path,
+                )?;
 
                 Ok(quote! {
                     pub mod #mod_name {

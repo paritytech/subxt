@@ -106,10 +106,7 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> Payload
 
 impl<ReturnTy, ArgsData> DefaultPayload<ArgsData, ReturnTy> {
     /// Create a new [`DefaultPayload`] for a View Function call.
-    pub fn new(
-        query_id: [u8; 32],
-        args_data: ArgsData,
-    ) -> Self {
+    pub fn new(query_id: [u8; 32], args_data: ArgsData) -> Self {
         DefaultPayload {
             query_id,
             args_data,
@@ -118,7 +115,7 @@ impl<ReturnTy, ArgsData> DefaultPayload<ArgsData, ReturnTy> {
         }
     }
 
-    /// Create a new static [`DefaultPayload`] for a View Function call 
+    /// Create a new static [`DefaultPayload`] for a View Function call
     /// using static function name and scale-encoded argument data.
     ///
     /// This is only expected to be used from codegen.
@@ -151,9 +148,6 @@ impl<ReturnTy, ArgsData> DefaultPayload<ArgsData, ReturnTy> {
 }
 
 /// Create a new [`DynamicPayload`] to call a View Function.
-pub fn dynamic(
-    query_id: [u8; 32],
-    args_data: impl Into<Composite<()>>,
-) -> DynamicPayload {
+pub fn dynamic(query_id: [u8; 32], args_data: impl Into<Composite<()>>) -> DynamicPayload {
     DefaultPayload::new(query_id, args_data.into())
 }

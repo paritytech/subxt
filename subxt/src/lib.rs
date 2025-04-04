@@ -46,10 +46,10 @@ pub mod custom_values;
 pub mod error;
 pub mod events;
 pub mod runtime_api;
-pub mod view_functions;
 pub mod storage;
 pub mod tx;
 pub mod utils;
+pub mod view_functions;
 
 /// This module provides a [`Config`] type, which is used to define various
 /// types that are important in order to speak to a particular chain.
