@@ -58,6 +58,10 @@ fn generate_pallet_view_function(
 
                 // The alias type name is based on the name, above.
                 let mut alias = name.to_upper_camel_case();
+                // Note: name is not empty.
+                if alias.as_bytes()[0].is_ascii_digit() {
+                    alias = format!("Param{}", alias);
+                }
                 while !unique_aliases.insert(alias.clone()) {
                     alias = format!("{}Param{}", alias, idx);
                 }
