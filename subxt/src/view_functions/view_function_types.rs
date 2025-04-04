@@ -16,7 +16,7 @@ pub struct ViewFunctionsApi<T: Config, Client> {
 }
 
 impl<T: Config, Client> ViewFunctionsApi<T, Client> {
-    /// Create a new [`RuntimeApi`]
+    /// Create a new [`ViewFunctionsApi`]
     pub(crate) fn new(client: Client, block_ref: BlockRef<T::Hash>) -> Self {
         Self {
             client,
@@ -56,18 +56,13 @@ where
 
             // Assemble the data to call the "execute_view_function" runtime API, which
             // then calls the relevant view function.
-            let mut call_args = vec![];
-            call_args.extend_from_slice(payload.query_id());
-            payload.encode_args_to(&metadata, &mut call_args)?;
+            let call_name = subxt_core::view_functions::call_name();
+            let call_args = subxt_core::view_functions::call_args(&payload, &metadata)?;
 
             // Make the call.
             let bytes = client
                 .backend()
-                .call(
-                    "execute_view_function",
-                    Some(call_args.as_slice()),
-                    block_hash,
-                )
+                .call(call_name, Some(call_args.as_slice()), block_hash)
                 .await?;
 
             // Decode the response.

@@ -31,14 +31,18 @@ pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), Erro
     Ok(())
 }
 
-/// Return the query ID for this View Function.
-pub fn call_query_id<P: Payload>(payload: &P) -> [u8; 32] {
-    *payload.query_id()
+/// Return the name of the Runtime API call which can execute
+pub fn call_name() -> &'static str {
+    "execute_view_function"
 }
 
-/// Return the encoded call args given a View Function payload.
+/// Encode the bytes that will be passed to the "execute_view_function" Runtime API call,
+/// to execute the View Function represented by the given payload.
 pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>, Error> {
-    payload.encode_args(metadata)
+    let mut call_args = vec![];
+    call_args.extend_from_slice(payload.query_id());
+    payload.encode_args_to(&metadata, &mut call_args)?;
+    Ok(call_args)
 }
 
 /// Decode the value bytes at the location given by the provided View Function payload.

@@ -8,7 +8,7 @@ use crate::{backend::BlockRef, client::OnlineClientT, error::Error, Config};
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
 
-/// Execute runtime API calls.
+/// Make View Function calls at some block.
 #[derive_where(Clone; Client)]
 pub struct ViewFunctionsClient<T, Client> {
     client: Client,
@@ -16,7 +16,7 @@ pub struct ViewFunctionsClient<T, Client> {
 }
 
 impl<T, Client> ViewFunctionsClient<T, Client> {
-    /// Create a new [`RuntimeApiClient`]
+    /// Create a new [`ViewFunctionsClient`]
     pub fn new(client: Client) -> Self {
         Self {
             client,
@@ -30,12 +30,12 @@ where
     T: Config,
     Client: OnlineClientT<T>,
 {
-    /// Obtain a runtime API interface at some block hash.
+    /// Obtain an interface to call View Functions at some block hash.
     pub fn at(&self, block_ref: impl Into<BlockRef<T::Hash>>) -> ViewFunctionsApi<T, Client> {
         ViewFunctionsApi::new(self.client.clone(), block_ref.into())
     }
 
-    /// Obtain a runtime API interface at the latest block hash.
+    /// Obtain an interface to call View Functions at the latest block hash.
     pub fn at_latest(
         &self,
     ) -> impl Future<Output = Result<ViewFunctionsApi<T, Client>, Error>> + Send + 'static {
