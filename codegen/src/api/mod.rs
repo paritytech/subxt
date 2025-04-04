@@ -9,6 +9,7 @@ mod constants;
 mod custom_values;
 mod errors;
 mod events;
+mod pallet_view_functions;
 mod runtime_apis;
 mod storage;
 
@@ -170,12 +171,19 @@ impl RuntimeGenerator {
 
                 let errors = errors::generate_error_type_alias(&type_gen, pallet)?;
 
+                let view_functions = pallet_view_functions::generate_pallet_view_functions(
+                    &type_gen,
+                    pallet,
+                    &crate_path,
+                )?;
+
                 Ok(quote! {
                     pub mod #mod_name {
                         use super::root_mod;
                         use super::#types_mod_ident;
                         #errors
                         #calls
+                        #view_functions
                         #event
                         #storage_mod
                         #constants_mod

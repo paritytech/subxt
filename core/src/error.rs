@@ -105,6 +105,9 @@ pub enum MetadataError {
     /// Runtime method not found.
     #[error("Runtime method with name {0} not found")]
     RuntimeMethodNotFound(String),
+    /// View Function not found.
+    #[error("View Function with query ID {} not found", hex::encode(.0))]
+    ViewFunctionNotFound([u8; 32]),
     /// Call type not found in metadata.
     #[error("Call type not found in pallet with index {0}")]
     CallTypeNotFoundInPallet(u8),

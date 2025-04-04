@@ -49,6 +49,7 @@ pub mod runtime_api;
 pub mod storage;
 pub mod tx;
 pub mod utils;
+pub mod view_functions;
 
 /// This module provides a [`Config`] type, which is used to define various
 /// types that are important in order to speak to a particular chain.

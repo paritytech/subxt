@@ -36,6 +36,7 @@ pub mod runtime_api;
 pub mod storage;
 pub mod tx;
 pub mod utils;
+pub mod view_functions;
 
 pub use config::Config;
 pub use error::Error;
