@@ -7,7 +7,7 @@ use super::TryFromError;
 use crate::utils::variant_index::VariantIndex;
 use crate::{
     utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, ExtrinsicMetadata, Metadata,
-    MethodParamMetadata, OuterEnumsMetadata, PalletMetadataInner, PalletViewFunctionMetadataInner,
+    MethodParamMetadata, OuterEnumsMetadata, PalletMetadataInner, ViewFunctionMetadataInner,
     RuntimeApiMetadataInner, RuntimeApiMethodMetadataInner, StorageEntryMetadata,
     StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
     TransactionExtensionMetadataInner,
@@ -41,10 +41,10 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
                 let name: ArcStr = c.name.clone().into();
                 (name.clone(), from_constant_metadata(name, c))
             });
-            let view_functions = p
-                .view_functions
-                .into_iter()
-                .map(from_view_function_metadata);
+            let view_functions = p.view_functions.into_iter().map(|v| {
+                let name: ArcStr = v.name.clone().into();
+                (name.clone(), from_view_function_metadata(name, v))
+            });
 
             let call_variant_index = VariantIndex::build(p.calls.as_ref().map(|c| c.ty.id), &types);
             let error_variant_index =
@@ -241,10 +241,11 @@ fn from_runtime_api_method_metadata(
 }
 
 fn from_view_function_metadata(
+    name: ArcStr,
     s: v16::PalletViewFunctionMetadata<PortableForm>,
-) -> PalletViewFunctionMetadataInner {
-    PalletViewFunctionMetadataInner {
-        name: s.name,
+) -> ViewFunctionMetadataInner {
+    ViewFunctionMetadataInner {
+        name,
         query_id: s.id,
         inputs: s
             .inputs

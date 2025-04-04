@@ -28,6 +28,9 @@ pub use crate::storage::address::dynamic as storage;
 // Execute runtime API function call dynamically.
 pub use crate::runtime_api::payload::dynamic as runtime_api_call;
 
+// Execute View Function API function call dynamically.
+pub use crate::view_functions::payload::dynamic as view_function_call;
+
 /// This is the result of making a dynamic request to a node. From this,
 /// we can return the raw SCALE bytes that we were handed back, or we can
 /// complete the decoding of the bytes into a [`DecodedValue`] type.

@@ -6,7 +6,7 @@
 
 use crate::{
     CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, PalletMetadata,
-    PalletViewFunctionMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata,
+    ViewFunctionMetadata, RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata,
     StorageEntryType,
 };
 use alloc::vec::Vec;
@@ -406,12 +406,12 @@ pub fn get_runtime_apis_hash(trait_metadata: RuntimeApiMetadata) -> Hash {
         })
 }
 
-/// Obtain the hash of a specific pallet view function, or an error if it's not found.
-pub fn get_pallet_view_function_hash(view_function: &PalletViewFunctionMetadata) -> Hash {
+/// Obtain the hash of a specific view function, or an error if it's not found.
+pub fn get_view_function_hash(view_function: &ViewFunctionMetadata) -> Hash {
     let registry = view_function.types;
 
     // The Query ID is `twox_128(pallet_name) ++ twox_128("fn_name(fnarg_types) -> return_ty")`.
-    let mut bytes = view_function.query_id();
+    let mut bytes = *view_function.query_id();
 
     // This only takes type _names_ into account, so we beef this up by combining with actual
     // type hashes, in a similar approach to runtime APIs..
@@ -439,7 +439,7 @@ fn get_pallet_view_functions_hash(pallet_metadata: &PalletMetadata) -> Hash {
             // be identical regardless. For this, we can just XOR the hashes for each method
             // together; we'll get the same output whichever order they are XOR'd together in,
             // so long as each individual method is the same.
-            xor(bytes, get_pallet_view_function_hash(&method_metadata))
+            xor(bytes, get_view_function_hash(&method_metadata))
         })
 }
 

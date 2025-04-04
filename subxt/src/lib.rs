@@ -46,6 +46,7 @@ pub mod custom_values;
 pub mod error;
 pub mod events;
 pub mod runtime_api;
+pub mod view_functions;
 pub mod storage;
 pub mod tx;
 pub mod utils;

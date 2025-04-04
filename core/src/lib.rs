@@ -33,6 +33,7 @@ pub mod error;
 pub mod events;
 pub mod metadata;
 pub mod runtime_api;
+pub mod view_functions;
 pub mod storage;
 pub mod tx;
 pub mod utils;

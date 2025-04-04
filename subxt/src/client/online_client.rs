@@ -11,6 +11,7 @@ use crate::{
     error::Error,
     events::EventsClient,
     runtime_api::RuntimeApiClient,
+    view_functions::ViewFunctionsClient,
     storage::StorageClient,
     tx::TxClient,
     Config, Metadata,
@@ -335,11 +336,6 @@ impl<T: Config> OnlineClient<T> {
         <Self as OfflineClientT<T>>::constants(self)
     }
 
-    /// Access custom types.
-    pub fn custom_values(&self) -> CustomValuesClient<T, Self> {
-        <Self as OfflineClientT<T>>::custom_values(self)
-    }
-
     /// Work with blocks.
     pub fn blocks(&self) -> BlocksClient<T, Self> {
         <Self as OfflineClientT<T>>::blocks(self)
@@ -348,6 +344,16 @@ impl<T: Config> OnlineClient<T> {
     /// Work with runtime API.
     pub fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
         <Self as OfflineClientT<T>>::runtime_api(self)
+    }
+
+    /// Work with View Functions.
+    pub fn view_functions(&self) -> ViewFunctionsClient<T, Self> {
+        <Self as OfflineClientT<T>>::view_functions(self)
+    }
+
+    /// Access custom types.
+    pub fn custom_values(&self) -> CustomValuesClient<T, Self> {
+        <Self as OfflineClientT<T>>::custom_values(self)
     }
 }
 
