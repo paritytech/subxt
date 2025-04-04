@@ -71,7 +71,7 @@ fn generate_pallet_view_function(
                 Input {
                     name: format_ident!("{name}"),
                     type_alias: format_ident!("{alias}"),
-                    type_path: type_path,
+                    type_path,
                 }
             })
             .collect()

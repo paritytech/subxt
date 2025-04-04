@@ -88,7 +88,7 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> Payload
     fn encode_args_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error> {
         let view_function = metadata
             .view_function_by_query_id(&self.query_id)
-            .ok_or_else(|| MetadataError::ViewFunctionNotFound(self.query_id))?;
+            .ok_or(MetadataError::ViewFunctionNotFound(self.query_id))?;
         let mut fields = view_function
             .inputs()
             .map(|input| scale_encode::Field::named(input.ty, &input.name));
