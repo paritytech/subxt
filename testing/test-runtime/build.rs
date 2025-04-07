@@ -111,7 +111,8 @@ async fn download_and_save_metadata(version: u32, port: u16, out_dir: &str) -> S
     let metadata_bytes = bytes.expect("Metadata version not found");
 
     // Save it to a file:
-    let metadata_path = Path::new(&out_dir).join(format!("test_node_runtime_metadata_{port}_{version}.scale"));
+    let metadata_path =
+        Path::new(&out_dir).join(format!("test_node_runtime_metadata_{port}_{version}.scale"));
     fs::write(&metadata_path, metadata_bytes).expect("Couldn't write metadata output");
 
     // Convert path to string because we need this to interpolate into string

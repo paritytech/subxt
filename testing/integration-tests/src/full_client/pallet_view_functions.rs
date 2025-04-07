@@ -26,3 +26,34 @@ async fn call_view_function() -> Result<(), subxt::Error> {
 
     Ok(())
 }
+
+#[subxt_test]
+async fn call_view_function_dynamically() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+    let metadata = api.metadata();
+
+    let query_id = metadata
+        .pallet_by_name("Proxy")
+        .unwrap()
+        .view_function_by_name("check_permissions")
+        .unwrap()
+        .query_id();
+
+    use scale_value::value;
+
+    let view_function_call = subxt::dynamic::view_function_call(
+        *query_id,
+        vec![value!(System(remark(b"hi".to_vec()))), value!(Any())],
+    );
+
+    // Submit the call and get back a result.
+    let _is_call_allowed = api
+        .view_functions()
+        .at_latest()
+        .await?
+        .call(view_function_call)
+        .await?;
+
+    Ok(())
+}

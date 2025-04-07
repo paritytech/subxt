@@ -871,22 +871,22 @@ pub struct ViewFunctionMetadata<'a> {
     types: &'a PortableRegistry,
 }
 
-impl ViewFunctionMetadata<'_> {
+impl<'a> ViewFunctionMetadata<'a> {
     /// Method name.
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'a str {
         &self.inner.name
     }
     /// Query ID. This is used to query the function. Roughly, it is constructed by doing
     /// `twox_128(pallet_name) ++ twox_128("fn_name(fnarg_types) -> return_ty")` .
-    pub fn query_id(&self) -> &[u8; 32] {
+    pub fn query_id(&self) -> &'a [u8; 32] {
         &self.inner.query_id
     }
     /// Method documentation.
-    pub fn docs(&self) -> &[String] {
+    pub fn docs(&self) -> &'a [String] {
         &self.inner.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &MethodParamMetadata> {
+    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &'a MethodParamMetadata> {
         self.inner.inputs.iter()
     }
     /// Method return type.

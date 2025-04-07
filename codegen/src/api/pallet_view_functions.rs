@@ -162,7 +162,7 @@ pub fn generate_pallet_view_functions(
     crate_path: &syn::Path,
 ) -> Result<TokenStream2, CodegenError> {
     if !pallet.has_view_functions() {
-        // If there are no view functions in this pallet, we 
+        // If there are no view functions in this pallet, we
         // don't generate anything.
         return Ok(quote! {});
     }
