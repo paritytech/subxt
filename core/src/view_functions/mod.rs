@@ -33,7 +33,7 @@ pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), Erro
 
 /// Return the name of the Runtime API call which can execute
 pub fn call_name() -> &'static str {
-    "execute_view_function"
+    "RuntimeViewFunction_execute_view_function"
 }
 
 /// Encode the bytes that will be passed to the "execute_view_function" Runtime API call,
@@ -41,7 +41,13 @@ pub fn call_name() -> &'static str {
 pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>, Error> {
     let mut call_args = Vec::with_capacity(32);
     call_args.extend_from_slice(payload.query_id());
-    payload.encode_args_to(metadata, &mut call_args)?;
+
+    let mut call_arg_params = vec![];
+    payload.encode_args_to(metadata, &mut call_arg_params)?;
+
+    use codec::Encode;
+    call_arg_params.encode_to(&mut call_args);
+
     Ok(call_args)
 }
 

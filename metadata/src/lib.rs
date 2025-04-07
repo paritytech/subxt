@@ -307,6 +307,11 @@ impl<'a> PalletMetadata<'a> {
         )
     }
 
+    /// Does this pallet have any view functions?
+    pub fn has_view_functions(&self) -> bool {
+        !self.inner.view_functions.is_empty()
+    }
+
     /// Return an iterator over the View Functions in this pallet, if any.
     pub fn view_functions(&self) -> impl ExactSizeIterator<Item = ViewFunctionMetadata<'a>> {
         self.inner
@@ -999,6 +1004,7 @@ impl codec::Decode for Metadata {
         let metadata = match metadata.1 {
             frame_metadata::RuntimeMetadata::V14(md) => md.try_into(),
             frame_metadata::RuntimeMetadata::V15(md) => md.try_into(),
+            frame_metadata::RuntimeMetadata::V16(md) => md.try_into(),
             _ => return Err("Cannot try_into() to Metadata: unsupported metadata version".into()),
         };
 

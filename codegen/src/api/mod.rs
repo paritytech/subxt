@@ -214,6 +214,12 @@ impl RuntimeGenerator {
             .filter_map(|(pallet, pallet_mod_name)| pallet.call_ty_id().map(|_| pallet_mod_name))
             .collect();
 
+        let pallets_with_view_functions: Vec<_> = pallets_with_mod_names
+            .iter()
+            .filter(|(pallet, _pallet_mod_name)| pallet.has_view_functions())
+            .map(|(_, pallet_mod_name)| pallet_mod_name)
+            .collect();
+
         let rust_items = item_mod_ir.rust_items();
 
         let apis_mod = runtime_apis::generate_runtime_apis(
@@ -291,6 +297,10 @@ impl RuntimeGenerator {
 
                 #apis_mod
 
+                pub fn view_functions() -> ViewFunctionsApi {
+                    ViewFunctionsApi
+                }
+
                 pub fn custom() -> CustomValuesApi {
                     CustomValuesApi
                 }
@@ -320,6 +330,15 @@ impl RuntimeGenerator {
                     #(
                         pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi {
                             #pallets_with_calls::calls::TransactionApi
+                        }
+                    )*
+                }
+
+                pub struct ViewFunctionsApi;
+                impl ViewFunctionsApi {
+                    #(
+                        pub fn #pallets_with_view_functions(&self) -> #pallets_with_view_functions::view_functions::ViewFunctionsApi {
+                            #pallets_with_view_functions::view_functions::ViewFunctionsApi
                         }
                     )*
                 }

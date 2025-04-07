@@ -7,6 +7,7 @@ mod client;
 mod codegen;
 mod frame;
 mod metadata_validation;
+mod pallet_view_functions;
 mod runtime_api;
 mod storage;
 mod transactions;
