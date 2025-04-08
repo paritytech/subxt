@@ -42,7 +42,7 @@ pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>
     let mut call_args = Vec::with_capacity(32);
     call_args.extend_from_slice(payload.query_id());
 
-    let mut call_arg_params = vec![];
+    let mut call_arg_params = Vec::new();
     payload.encode_args_to(metadata, &mut call_arg_params)?;
 
     use codec::Encode;
