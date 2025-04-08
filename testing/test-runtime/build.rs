@@ -44,8 +44,8 @@ async fn run() {
     let out_dir = out_dir_env_var.as_ref().unwrap().to_str().unwrap();
 
     let (stable_metadata_path, unstable_metadata_path) = tokio::join!(
-        download_and_save_metadata(V15_METADATA_VERSION, port, out_dir),
-        download_and_save_metadata(UNSTABLE_METADATA_VERSION, port, out_dir)
+        download_and_save_metadata(V15_METADATA_VERSION, port, out_dir, "v15"),
+        download_and_save_metadata(UNSTABLE_METADATA_VERSION, port, out_dir, "unstable")
     );
 
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
@@ -88,7 +88,7 @@ async fn run() {
 
 // Download metadata from binary. Avoid Subxt dep on `subxt::rpc::types::Bytes`and just impl here.
 // This may at least prevent this script from running so often (ie whenever we change Subxt).
-async fn download_and_save_metadata(version: u32, port: u16, out_dir: &str) -> String {
+async fn download_and_save_metadata(version: u32, port: u16, out_dir: &str, suffix: &str) -> String {
     // Download it:
     let bytes = version.encode();
     let version: String = format!("0x{}", hex::encode(&bytes));
@@ -112,7 +112,7 @@ async fn download_and_save_metadata(version: u32, port: u16, out_dir: &str) -> S
 
     // Save it to a file:
     let metadata_path =
-        Path::new(&out_dir).join(format!("test_node_runtime_metadata_{port}_{version}.scale"));
+        Path::new(&out_dir).join(format!("test_node_runtime_metadata_{suffix}.scale"));
     fs::write(&metadata_path, metadata_bytes).expect("Couldn't write metadata output");
 
     // Convert path to string because we need this to interpolate into string

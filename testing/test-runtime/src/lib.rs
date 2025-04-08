@@ -7,7 +7,7 @@
 /// The SCALE encoded metadata obtained from a local run of a substrate node.
 pub static METADATA: &[u8] = include_bytes!(concat!(
     env!("OUT_DIR"),
-    "/test_node_runtime_metadata.scale"
+    "/test_node_runtime_metadata_v15.scale"
 ));
 
 include!(concat!(env!("OUT_DIR"), "/runtime.rs"));
