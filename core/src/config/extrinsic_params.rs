@@ -90,8 +90,7 @@ macro_rules! impl_tuples {
                 $(self.$index.inject_account_nonce(nonce);)+
             }
 
-          fn inject_block(&mut self, number: u64, hash: HashFor<Conf>) {
-            fn inject_block(&mut self, number: u64, hash: Conf::Hash) {
+            fn inject_block(&mut self, number: u64, hash: HashFor<Conf>) {
                 $(self.$index.inject_block(number, hash);)+
             }
         }
