@@ -44,8 +44,8 @@ async fn run() {
     let out_dir = out_dir_env_var.as_ref().unwrap().to_str().unwrap();
 
     let (stable_metadata_path, unstable_metadata_path) = tokio::join!(
-        download_and_save_metadata(V15_METADATA_VERSION, port, &out_dir),
-        download_and_save_metadata(UNSTABLE_METADATA_VERSION, port, &out_dir)
+        download_and_save_metadata(V15_METADATA_VERSION, port, out_dir),
+        download_and_save_metadata(UNSTABLE_METADATA_VERSION, port, out_dir)
     );
 
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
