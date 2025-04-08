@@ -88,7 +88,12 @@ async fn run() {
 
 // Download metadata from binary. Avoid Subxt dep on `subxt::rpc::types::Bytes`and just impl here.
 // This may at least prevent this script from running so often (ie whenever we change Subxt).
-async fn download_and_save_metadata(version: u32, port: u16, out_dir: &str, suffix: &str) -> String {
+async fn download_and_save_metadata(
+    version: u32,
+    port: u16,
+    out_dir: &str,
+    suffix: &str,
+) -> String {
     // Download it:
     let bytes = version.encode();
     let version: String = format!("0x{}", hex::encode(&bytes));
