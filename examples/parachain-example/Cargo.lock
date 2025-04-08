@@ -2757,7 +2757,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "subxt"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "async-trait",
  "derive-where",
@@ -2792,7 +2792,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "heck",
  "parity-scale-codec",
@@ -2807,7 +2807,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-core"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "base58",
  "blake2",
@@ -2835,7 +2835,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "futures",
  "futures-util",
@@ -2850,7 +2850,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "darling",
  "parity-scale-codec",
@@ -2864,7 +2864,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "frame-decode",
  "frame-metadata",
@@ -2877,7 +2877,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-rpcs"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "derive-where",
  "frame-metadata",
@@ -2899,7 +2899,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "base64 0.22.1",
  "bip39",
@@ -2925,7 +2925,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-utils-fetchmetadata"
-version = "0.39.0"
+version = "0.41.0"
 dependencies = [
  "hex",
  "parity-scale-codec",
@@ -3047,9 +3047,9 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "tokio"
-version = "1.43.0"
+version = "1.44.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d61fa4ffa3de412bfea335c6ecff681de2b609ba3c77ef3e00e521813a9ed9e"
+checksum = "e6b88822cbe49de4185e3a4cbf8321dd487cf5fe0c5c65695fef6346371e9c48"
 dependencies = [
  "backtrace",
  "libc",
