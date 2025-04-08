@@ -25,8 +25,6 @@ mod light_client;
 
 #[cfg(test)]
 use test_runtime::node_runtime;
-#[cfg(test)]
-use test_runtime::node_runtime_unstable;
 
 // We don't use this dependency, but it's here so that we
 // can enable logging easily if need be. Add this to a test

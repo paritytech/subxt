@@ -1,4 +1,5 @@
-use crate::{node_runtime_unstable, subxt_test, test_context};
+use crate::{subxt_test, test_context};
+use test_runtime::node_runtime_unstable;
 
 #[subxt_test]
 async fn call_view_function() -> Result<(), subxt::Error> {
