@@ -65,7 +65,7 @@ impl DeriveJunction {
     /// Get a reference to the inner junction id.
     pub fn inner(&self) -> &[u8; JUNCTION_ID_LEN] {
         match self {
-            DeriveJunction::Hard(ref c) | DeriveJunction::Soft(ref c) => c,
+            DeriveJunction::Hard(c) | DeriveJunction::Soft(c) => c,
         }
     }
 
