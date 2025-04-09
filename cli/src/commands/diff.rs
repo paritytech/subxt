@@ -5,11 +5,11 @@ use frame_metadata::RuntimeMetadataPrefixed;
 use std::collections::HashMap;
 use std::hash::Hash;
 
-use crate::utils::{validate_url_security, FileOrUrl};
+use crate::utils::{FileOrUrl, validate_url_security};
 use color_eyre::owo_colors::OwoColorize;
 
-use scale_info::form::PortableForm;
 use scale_info::Variant;
+use scale_info::form::PortableForm;
 
 use subxt_metadata::{
     ConstantMetadata, Metadata, PalletMetadata, RuntimeApiMetadata, StorageEntryMetadata,
@@ -441,7 +441,7 @@ fn diff<T, C: PartialEq, I: Hash + PartialEq + Eq + Ord>(
 
 #[cfg(test)]
 mod test {
-    use crate::commands::diff::{diff, Diff};
+    use crate::commands::diff::{Diff, diff};
 
     #[test]
     fn test_diff_fn() {

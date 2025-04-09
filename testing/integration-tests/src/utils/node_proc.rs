@@ -9,8 +9,8 @@ use std::time::Duration;
 use substrate_runner::SubstrateNode;
 use subxt::backend::rpc::reconnecting_rpc_client::{ExponentialBackoff, RpcClientBuilder};
 use subxt::{
-    backend::{chain_head, legacy, rpc},
     Config, OnlineClient,
+    backend::{chain_head, legacy, rpc},
 };
 
 // The URL that we'll connect to for our tests comes from SUBXT_TEXT_HOST env var,

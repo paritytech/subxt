@@ -313,7 +313,9 @@ pub fn validate_url_security(url: Option<&Url>, allow_insecure: bool) -> color_e
     match subxt::utils::url_is_secure(url.as_str()) {
         Ok(is_secure) => {
             if !allow_insecure && !is_secure {
-                bail!("URL {url} is not secure!\nIf you are really want to use this URL, try using --allow-insecure (-a)");
+                bail!(
+                    "URL {url} is not secure!\nIf you are really want to use this URL, try using --allow-insecure (-a)"
+                );
             }
         }
         Err(err) => {

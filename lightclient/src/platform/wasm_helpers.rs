@@ -8,7 +8,7 @@
 use super::wasm_socket::WasmSocket;
 
 use core::time::Duration;
-use futures_util::{future, FutureExt};
+use futures_util::{FutureExt, future};
 
 pub fn now_from_unix_epoch() -> Duration {
     web_time::SystemTime::now()

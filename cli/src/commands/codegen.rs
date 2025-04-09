@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::utils::{validate_url_security, FileOrUrl};
+use crate::utils::{FileOrUrl, validate_url_security};
 use clap::Parser as ClapParser;
 use codec::Decode;
 use color_eyre::eyre::eyre;

@@ -3,16 +3,17 @@
 // see LICENSE for license details.
 
 use crate::{
+    TestClient, TestConfig, TestContext,
     node_runtime::{
         self,
         contracts::events,
         runtime_types::{pallet_contracts::wasm::Determinism, sp_weights::weight_v2::Weight},
         system,
     },
-    subxt_test, test_context, TestClient, TestConfig, TestContext,
+    subxt_test, test_context,
 };
 use subxt::ext::futures::StreamExt;
-use subxt::{tx::TxProgress, utils::MultiAddress, Config, Error};
+use subxt::{Config, Error, tx::TxProgress, utils::MultiAddress};
 use subxt_signer::sr25519::{self, dev};
 
 struct ContractsTestContext {

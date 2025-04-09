@@ -9,8 +9,8 @@
 mod events_client;
 mod events_type;
 
-use crate::client::OnlineClientT;
 use crate::Error;
+use crate::client::OnlineClientT;
 use subxt_core::{Config, Metadata};
 
 pub use events_client::EventsClient;

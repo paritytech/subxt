@@ -2,12 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::config::TransactionExtension;
 use crate::config::transaction_extensions::{
     ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
 };
-use crate::config::TransactionExtension;
 use crate::dynamic::Value;
-use crate::{config::Config, error::Error, Metadata};
+use crate::{Metadata, config::Config, error::Error};
 use frame_decode::extrinsics::ExtrinsicExtensions;
 use scale_decode::DecodeAsType;
 

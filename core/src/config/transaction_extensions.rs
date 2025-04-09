@@ -8,11 +8,11 @@
 //! when interacting with a chain.
 
 use super::extrinsic_params::ExtrinsicParams;
+use crate::Config;
 use crate::client::ClientState;
 use crate::config::{ExtrinsicParamsEncoder, Header};
 use crate::error::ExtrinsicParamsError;
 use crate::utils::{Era, Static};
-use crate::Config;
 use alloc::borrow::ToOwned;
 use alloc::boxed::Box;
 use alloc::vec::Vec;

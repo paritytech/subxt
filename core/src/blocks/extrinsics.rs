@@ -5,9 +5,9 @@
 use super::BlockError;
 use crate::blocks::extrinsic_transaction_extensions::ExtrinsicTransactionExtensions;
 use crate::{
+    Metadata,
     config::{Config, Hasher},
     error::{Error, MetadataError},
-    Metadata,
 };
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -354,10 +354,10 @@ mod tests {
     use codec::{Decode, Encode};
     use frame_metadata::v15::{CustomMetadata, OuterEnums};
     use frame_metadata::{
-        v15::{ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, RuntimeMetadataV15},
         RuntimeMetadataPrefixed,
+        v15::{ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, RuntimeMetadataV15},
     };
-    use scale_info::{meta_type, TypeInfo};
+    use scale_info::{TypeInfo, meta_type};
     use scale_value::Value;
 
     // Extrinsic needs to contain at least the generic type parameter "Call"

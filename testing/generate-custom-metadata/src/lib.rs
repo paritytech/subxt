@@ -3,12 +3,12 @@
 // see LICENSE for license details.
 
 use codec::Encode;
-use frame_metadata::v15::{CustomMetadata, ExtrinsicMetadata, OuterEnums, RuntimeMetadataV15};
 use frame_metadata::RuntimeMetadataPrefixed;
+use frame_metadata::v15::{CustomMetadata, ExtrinsicMetadata, OuterEnums, RuntimeMetadataV15};
 
-use scale_info::form::PortableForm;
 use scale_info::TypeInfo;
-use scale_info::{meta_type, IntoPortable};
+use scale_info::form::PortableForm;
+use scale_info::{IntoPortable, meta_type};
 use std::collections::BTreeMap;
 
 pub mod dispatch_error;

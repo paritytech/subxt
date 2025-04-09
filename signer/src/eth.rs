@@ -105,7 +105,7 @@ impl Keypair {
 
     /// Obtain the [`eth::PublicKey`] of this keypair.
     pub fn public_key(&self) -> PublicKey {
-        let uncompressed = self.0 .0.public_key().serialize_uncompressed();
+        let uncompressed = self.0.0.public_key().serialize_uncompressed();
         PublicKey(uncompressed)
     }
 
@@ -451,7 +451,7 @@ mod test {
 
         for (case_idx, (keypair, exp_account_id, exp_priv_key)) in cases.into_iter().enumerate() {
             let act_account_id = keypair.public_key().to_account_id().checksum();
-            let act_priv_key = format!("0x{}", &keypair.0 .0.display_secret());
+            let act_priv_key = format!("0x{}", &keypair.0.0.display_secret());
 
             assert_eq!(
                 exp_account_id, act_account_id,
@@ -564,7 +564,7 @@ mod test {
             (
                 "void come effort suffer camp survey warrior heavy shoot primary clutch crush open amazing screen patrol group space point ten exist slush involve unfold",
                 "01f5bced59dec48e362f2c45b5de68b9fd6c92c6634f44d6d40aab69056506f0e35524a518034ddc1192e1dacd32c1ed3eaa3c3b131c88ed8e7e54c49a5d0998",
-            )
+            ),
         ];
 
         for (idx, (m, s)) in mnemonics_and_seeds.into_iter().enumerate() {

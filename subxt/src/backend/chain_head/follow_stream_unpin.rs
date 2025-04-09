@@ -2,8 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::follow_stream::FollowStream;
 use super::ChainHeadRpcMethods;
+use super::follow_stream::FollowStream;
 use crate::config::{BlockHash, Config};
 use crate::error::Error;
 use futures::stream::{FuturesUnordered, Stream, StreamExt};
@@ -468,7 +468,7 @@ impl<Hash: BlockHash> Drop for BlockRef<Hash> {
 
 #[cfg(test)]
 pub(super) mod test_utils {
-    use super::super::follow_stream::{test_utils::test_stream_getter, FollowStream};
+    use super::super::follow_stream::{FollowStream, test_utils::test_stream_getter};
     use super::*;
     use crate::config::substrate::H256;
 

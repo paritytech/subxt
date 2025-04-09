@@ -54,7 +54,10 @@ fn main() {
     );
 
     // Generate the polkadot chain spec.
-    run_cmd("cargo run --features chain-spec-pruning --bin subxt chain-spec --url wss://rpc.polkadot.io:443 --output-file artifacts/demo_chain_specs/polkadot.json --state-root-hash --remove-substitutes", None);
+    run_cmd(
+        "cargo run --features chain-spec-pruning --bin subxt chain-spec --url wss://rpc.polkadot.io:443 --output-file artifacts/demo_chain_specs/polkadot.json --state-root-hash --remove-substitutes",
+        None,
+    );
 }
 
 fn run_cmd(cmd: &str, out_path: Option<&str>) {

@@ -1,7 +1,7 @@
 #![allow(missing_docs)]
 use subxt::{
-    utils::{AccountId32, MultiAddress},
     OnlineClient, PolkadotConfig,
+    utils::{AccountId32, MultiAddress},
 };
 
 use codec::Decode;
@@ -47,8 +47,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let nonce = extensions.nonce().expect("Should have nonce");
 
             println!(
-                    "    Transfer of {value} DOT:\n        {sender} (Tip: {tip}, Nonce: {nonce}) ---> {receiver}",
-                );
+                "    Transfer of {value} DOT:\n        {sender} (Tip: {tip}, Nonce: {nonce}) ---> {receiver}",
+            );
         }
     }
 

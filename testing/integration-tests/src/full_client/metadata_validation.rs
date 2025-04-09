@@ -2,19 +2,20 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{node_runtime, subxt_test, test_context, TestContext};
+use crate::{TestContext, node_runtime, subxt_test, test_context};
 use codec::Decode;
 use frame_metadata::{
+    RuntimeMetadata, RuntimeMetadataPrefixed,
     v15::{
         CustomMetadata, ExtrinsicMetadata, OuterEnums, PalletCallMetadata, PalletMetadata,
         PalletStorageMetadata, RuntimeMetadataV15, StorageEntryMetadata, StorageEntryModifier,
         StorageEntryType,
     },
-    RuntimeMetadata, RuntimeMetadataPrefixed,
 };
 use scale_info::{
+    Path, Type, TypeInfo,
     build::{Fields, Variants},
-    meta_type, Path, Type, TypeInfo,
+    meta_type,
 };
 use subxt::{Metadata, OfflineClient, OnlineClient, SubstrateConfig};
 
@@ -147,10 +148,12 @@ async fn constant_values_are_not_validated() {
     let deposit_addr = node_runtime::constants().balances().existential_deposit();
 
     // Retrieve existential deposit to validate it and confirm that it's OK.
-    assert!(api_from_original_metadata
-        .constants()
-        .at(&deposit_addr)
-        .is_ok());
+    assert!(
+        api_from_original_metadata
+            .constants()
+            .at(&deposit_addr)
+            .is_ok()
+    );
 
     // Modify the metadata.
     let existential = v15_metadata
@@ -175,10 +178,12 @@ async fn constant_values_are_not_validated() {
     assert!(node_runtime::is_codegen_valid_for(
         &api_from_modified_metadata.metadata()
     ));
-    assert!(api_from_modified_metadata
-        .constants()
-        .at(&deposit_addr)
-        .is_ok());
+    assert!(
+        api_from_modified_metadata
+            .constants()
+            .at(&deposit_addr)
+            .is_ok()
+    );
 }
 
 #[subxt_test]

@@ -193,7 +193,7 @@ impl<K: codec::Decode> StaticStorageKey<K> {
 impl<K: ?Sized> StaticStorageKey<K> {
     /// Returns the scale-encoded bytes that make up this key
     pub fn bytes(&self) -> &[u8] {
-        &self.bytes.0 .0
+        &self.bytes.0.0
     }
 }
 
@@ -361,7 +361,7 @@ const _: () = {
 mod tests {
 
     use codec::Encode;
-    use scale_info::{meta_type, PortableRegistry, Registry, TypeInfo};
+    use scale_info::{PortableRegistry, Registry, TypeInfo, meta_type};
     use subxt_metadata::StorageHasher;
 
     use crate::utils::Era;
@@ -463,15 +463,15 @@ mod tests {
                                 .unwrap();
 
                         assert_eq!(keys_a.1.decoded().unwrap(), 13);
-                        assert_eq!(keys_b.1 .0.decoded().unwrap(), 13);
-                        assert_eq!(keys_c.0 .1.decoded().unwrap(), 13);
+                        assert_eq!(keys_b.1.0.decoded().unwrap(), 13);
+                        assert_eq!(keys_c.0.1.decoded().unwrap(), 13);
 
                         assert_eq!(keys_a.2.decoded().unwrap(), "Hello");
-                        assert_eq!(keys_b.1 .1.decoded().unwrap(), "Hello");
-                        assert_eq!(keys_c.1 .0.decoded().unwrap(), "Hello");
+                        assert_eq!(keys_b.1.1.decoded().unwrap(), "Hello");
+                        assert_eq!(keys_c.1.0.decoded().unwrap(), "Hello");
                         assert_eq!(keys_a.3.decoded().unwrap(), era);
                         assert_eq!(keys_b.2.decoded().unwrap(), era);
-                        assert_eq!(keys_c.1 .1.decoded().unwrap(), era);
+                        assert_eq!(keys_c.1.1.decoded().unwrap(), era);
                     }
                 }
             }

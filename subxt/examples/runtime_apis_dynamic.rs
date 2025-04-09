@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 use subxt::dynamic::Value;
-use subxt::{config::PolkadotConfig, OnlineClient};
+use subxt::{OnlineClient, config::PolkadotConfig};
 use subxt_signer::sr25519::dev;
 
 #[tokio::main]

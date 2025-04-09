@@ -11,7 +11,7 @@ use crate::{
 };
 use alloc::vec::Vec;
 use hashbrown::HashMap;
-use scale_info::{form::PortableForm, Field, PortableRegistry, TypeDef, TypeDefVariant, Variant};
+use scale_info::{Field, PortableRegistry, TypeDef, TypeDefVariant, Variant, form::PortableForm};
 
 // The number of bytes our `hash` function produces.
 pub(crate) const HASH_LEN: usize = 32;
@@ -604,7 +604,7 @@ mod tests {
     use super::*;
     use bitvec::{order::Lsb0, vec::BitVec};
     use frame_metadata::v15;
-    use scale_info::{meta_type, Registry};
+    use scale_info::{Registry, meta_type};
 
     // Define recursive types.
     #[allow(dead_code)]

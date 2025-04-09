@@ -45,7 +45,7 @@ use derive_where::derive_where;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_metadata::PalletMetadata;
 
-use crate::{error::MetadataError, Config, Error, Metadata};
+use crate::{Config, Error, Metadata, error::MetadataError};
 
 /// Create a new [`Events`] instance from the given bytes.
 ///
@@ -433,13 +433,13 @@ pub(crate) mod test_utils {
     use crate::config::{Config, SubstrateConfig};
     use codec::Encode;
     use frame_metadata::{
+        RuntimeMetadataPrefixed,
         v15::{
             CustomMetadata, ExtrinsicMetadata, OuterEnums, PalletEventMetadata, PalletMetadata,
             RuntimeMetadataV15,
         },
-        RuntimeMetadataPrefixed,
     };
-    use scale_info::{meta_type, TypeInfo};
+    use scale_info::{TypeInfo, meta_type};
 
     /// An "outer" events enum containing exactly one event.
     #[derive(
@@ -583,7 +583,7 @@ pub(crate) mod test_utils {
 #[cfg(test)]
 mod tests {
     use super::{
-        test_utils::{event_record, events, events_raw, AllEvents, EventRecord},
+        test_utils::{AllEvents, EventRecord, event_record, events, events_raw},
         *,
     };
     use crate::config::SubstrateConfig;

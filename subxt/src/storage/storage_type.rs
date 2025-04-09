@@ -3,11 +3,11 @@
 // see LICENSE for license details.
 
 use crate::{
+    Config,
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
     error::{Error, MetadataError, StorageAddressError},
     metadata::DecodeWithMetadata,
-    Config,
 };
 use codec::Decode;
 use derive_where::derive_where;

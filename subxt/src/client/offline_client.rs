@@ -4,8 +4,8 @@
 
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    blocks::BlocksClient, constants::ConstantsClient, events::EventsClient,
-    runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient, Config, Metadata,
+    Config, Metadata, blocks::BlocksClient, constants::ConstantsClient, events::EventsClient,
+    runtime_api::RuntimeApiClient, storage::StorageClient, tx::TxClient,
 };
 
 use derive_where::derive_where;
