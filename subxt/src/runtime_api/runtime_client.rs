@@ -4,7 +4,7 @@
 
 use super::runtime_types::RuntimeApi;
 
-use crate::{backend::BlockRef, client::OnlineClientT, error::Error, Config};
+use crate::{Config, backend::BlockRef, client::OnlineClientT, error::Error};
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
 

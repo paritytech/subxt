@@ -16,8 +16,8 @@ use crate::{
 use assert_matches::assert_matches;
 use subxt::error::{DispatchError, Error};
 use subxt_signer::{
-    sr25519::{self, dev},
     SecretUri,
+    sr25519::{self, dev},
 };
 
 /// Helper function to generate a crypto pair from seed

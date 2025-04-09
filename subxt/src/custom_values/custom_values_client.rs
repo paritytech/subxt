@@ -50,8 +50,8 @@ mod tests {
     use crate::{Metadata, OfflineClient, SubstrateConfig};
     use codec::Encode;
     use scale_decode::DecodeAsType;
-    use scale_info::form::PortableForm;
     use scale_info::TypeInfo;
+    use scale_info::form::PortableForm;
     use std::collections::BTreeMap;
     use subxt_core::client::RuntimeVersion;
 

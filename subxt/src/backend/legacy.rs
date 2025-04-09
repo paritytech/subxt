@@ -11,10 +11,10 @@ use crate::backend::{
     Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
     TransactionStatus,
 };
-use crate::{config::Header, Config, Error};
+use crate::{Config, Error, config::Header};
 use async_trait::async_trait;
 use futures::TryStreamExt;
-use futures::{future, future::Either, stream, Future, FutureExt, Stream, StreamExt};
+use futures::{Future, FutureExt, Stream, StreamExt, future, future::Either, stream};
 use std::collections::VecDeque;
 use std::pin::Pin;
 use std::task::{Context, Poll};

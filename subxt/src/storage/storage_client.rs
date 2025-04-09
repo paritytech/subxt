@@ -4,10 +4,10 @@
 
 use super::storage_type::Storage;
 use crate::{
+    Config,
     backend::BlockRef,
     client::{OfflineClientT, OnlineClientT},
     error::Error,
-    Config,
 };
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};

@@ -5,7 +5,7 @@
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use hashbrown::HashMap;
-use scale_info::{form::PortableForm, PortableRegistry, TypeDef, Variant};
+use scale_info::{PortableRegistry, TypeDef, Variant, form::PortableForm};
 
 /// Given some type ID and type registry, build a couple of
 /// indexes to look up variants by index or name. If the ID provided

@@ -15,34 +15,52 @@ pub enum CodegenError {
     #[error("Could not decode metadata, only V14 and V15 metadata are supported: {0}")]
     Decode(#[from] codec::Error),
     /// Out of line modules are not supported.
-    #[error("Out-of-line subxt modules are not supported, make sure you are providing a body to your module: pub mod polkadot {{ ... }}")]
+    #[error(
+        "Out-of-line subxt modules are not supported, make sure you are providing a body to your module: pub mod polkadot {{ ... }}"
+    )]
     InvalidModule(Span),
     /// Invalid type path.
     #[error("Invalid type path {0}: {1}")]
     InvalidTypePath(String, syn::Error),
     /// Metadata for constant could not be found.
-    #[error("Metadata for constant entry {0}_{1} could not be found. Make sure you are providing a valid substrate-based metadata")]
+    #[error(
+        "Metadata for constant entry {0}_{1} could not be found. Make sure you are providing a valid substrate-based metadata"
+    )]
     MissingConstantMetadata(String, String),
     /// Metadata for storage could not be found.
-    #[error("Metadata for storage entry {0}_{1} could not be found. Make sure you are providing a valid substrate-based metadata")]
+    #[error(
+        "Metadata for storage entry {0}_{1} could not be found. Make sure you are providing a valid substrate-based metadata"
+    )]
     MissingStorageMetadata(String, String),
     /// Metadata for call could not be found.
-    #[error("Metadata for call entry {0}_{1} could not be found. Make sure you are providing a valid substrate-based metadata")]
+    #[error(
+        "Metadata for call entry {0}_{1} could not be found. Make sure you are providing a valid substrate-based metadata"
+    )]
     MissingCallMetadata(String, String),
     /// Metadata for call could not be found.
-    #[error("Metadata for runtime API entry {0}_{1} could not be found. Make sure you are providing a valid substrate-based metadata")]
+    #[error(
+        "Metadata for runtime API entry {0}_{1} could not be found. Make sure you are providing a valid substrate-based metadata"
+    )]
     MissingRuntimeApiMetadata(String, String),
     /// Call variant must have all named fields.
-    #[error("Call variant for type {0} must have all named fields. Make sure you are providing a valid substrate-based metadata")]
+    #[error(
+        "Call variant for type {0} must have all named fields. Make sure you are providing a valid substrate-based metadata"
+    )]
     InvalidCallVariant(u32),
     /// Type should be an variant/enum.
-    #[error("{0} type should be an variant/enum type. Make sure you are providing a valid substrate-based metadata")]
+    #[error(
+        "{0} type should be an variant/enum type. Make sure you are providing a valid substrate-based metadata"
+    )]
     InvalidType(String),
     /// Extrinsic call type could not be found.
-    #[error("Extrinsic call type could not be found. Make sure you are providing a valid substrate-based metadata")]
+    #[error(
+        "Extrinsic call type could not be found. Make sure you are providing a valid substrate-based metadata"
+    )]
     MissingCallType,
     /// There are too many or too few hashers.
-    #[error("Could not generate functions for storage entry {storage_entry_name}. There are {key_count} keys, but only {hasher_count} hashers. The number of hashers must equal the number of keys or be exactly 1.")]
+    #[error(
+        "Could not generate functions for storage entry {storage_entry_name}. There are {key_count} keys, but only {hasher_count} hashers. The number of hashers must equal the number of keys or be exactly 1."
+    )]
     InvalidStorageHasherCount {
         /// The name of the storage entry
         storage_entry_name: String,

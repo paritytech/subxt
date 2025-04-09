@@ -4,12 +4,12 @@ use indoc::writedoc;
 use subxt::Metadata;
 use subxt_metadata::PalletMetadata;
 
-use crate::utils::{first_paragraph_of_docs, FileOrUrl, Indent};
+use crate::utils::{FileOrUrl, Indent, first_paragraph_of_docs};
 
 use self::{
     calls::CallsSubcommand,
     constants::ConstantsSubcommand,
-    events::{explore_events, EventsSubcommand},
+    events::{EventsSubcommand, explore_events},
     storage::StorageSubcommand,
 };
 

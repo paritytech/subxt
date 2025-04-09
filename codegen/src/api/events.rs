@@ -5,8 +5,8 @@
 use super::CodegenError;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use scale_typegen::typegen::ir::ToTokensWithSettings;
 use scale_typegen::TypeGenerator;
+use scale_typegen::typegen::ir::ToTokensWithSettings;
 use subxt_metadata::PalletMetadata;
 
 /// Generate events from the provided pallet metadata.

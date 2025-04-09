@@ -46,7 +46,7 @@ mod utils;
 
 pub mod address;
 
-use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
+use crate::{Error, Metadata, error::MetadataError, metadata::DecodeWithMetadata};
 use address::Address;
 use alloc::vec::Vec;
 

@@ -32,10 +32,10 @@ use frame_decode::extrinsics::{
     ExtrinsicSignatureInfo,
 };
 use hashbrown::HashMap;
-use scale_info::{form::PortableForm, PortableRegistry, Variant};
+use scale_info::{PortableRegistry, Variant, form::PortableForm};
 use utils::{
     ordered_map::OrderedMap,
-    validation::{get_custom_value_hash, HASH_LEN},
+    validation::{HASH_LEN, get_custom_value_hash},
     variant_index::VariantIndex,
 };
 

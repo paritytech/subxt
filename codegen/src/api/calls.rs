@@ -7,7 +7,7 @@ use heck::{ToSnakeCase as _, ToUpperCamelCase as _};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
 use scale_typegen::typegen::ir::ToTokensWithSettings;
-use scale_typegen::{typegen::ir::type_ir::CompositeIRKind, TypeGenerator};
+use scale_typegen::{TypeGenerator, typegen::ir::type_ir::CompositeIRKind};
 use subxt_metadata::PalletMetadata;
 
 /// Generate calls from the provided pallet's metadata. Each call returns a `StaticPayload`
@@ -53,7 +53,7 @@ pub fn generate_calls(
                     .unzip(),
                 CompositeIRKind::NoFields => Default::default(),
                 CompositeIRKind::Unnamed(_) => {
-                    return Err(CodegenError::InvalidCallVariant(call_ty))
+                    return Err(CodegenError::InvalidCallVariant(call_ty));
                 }
             };
 

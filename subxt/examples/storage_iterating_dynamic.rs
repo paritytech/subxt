@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-use subxt::{dynamic::Value, OnlineClient, PolkadotConfig};
+use subxt::{OnlineClient, PolkadotConfig, dynamic::Value};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

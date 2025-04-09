@@ -10,9 +10,9 @@ pub mod chain_head;
 pub mod legacy;
 pub mod utils;
 
+use crate::Config;
 use crate::error::Error;
 use crate::metadata::Metadata;
-use crate::Config;
 use async_trait::async_trait;
 use codec::{Decode, Encode};
 use futures::{Stream, StreamExt};
@@ -385,10 +385,10 @@ mod test {
     use primitive_types::H256;
     use rpc::RpcClientT;
     use std::collections::{HashMap, VecDeque};
-    use subxt_core::{config::DefaultExtrinsicParams, Config};
+    use subxt_core::{Config, config::DefaultExtrinsicParams};
     use subxt_rpcs::client::{
-        mock_rpc_client::{Json, MockRpcClientBuilder},
         MockRpcClient,
+        mock_rpc_client::{Json, MockRpcClientBuilder},
     };
 
     fn random_hash() -> H256 {
@@ -425,7 +425,7 @@ mod test {
     mod legacy {
         use super::*;
         use crate::{
-            backend::legacy::{rpc_methods::RuntimeVersion, LegacyBackend},
+            backend::legacy::{LegacyBackend, rpc_methods::RuntimeVersion},
             error::RpcError,
         };
 
@@ -852,11 +852,13 @@ mod test {
                 .await
                 .unwrap();
 
-            assert!(response
-                .next()
-                .await
-                .unwrap()
-                .is_err_and(|e| matches!(e, Error::Other(e) if e == "error")));
+            assert!(
+                response
+                    .next()
+                    .await
+                    .unwrap()
+                    .is_err_and(|e| matches!(e, Error::Other(e) if e == "error"))
+            );
             assert!(response.next().await.is_none());
         }
 

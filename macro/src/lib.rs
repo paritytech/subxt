@@ -5,7 +5,7 @@
 //! Subxt macro for generating Substrate runtime interfaces.
 
 use codec::Decode;
-use darling::{ast::NestedMeta, FromMeta};
+use darling::{FromMeta, ast::NestedMeta};
 use proc_macro::TokenStream;
 use proc_macro_error2::{abort_call_site, proc_macro_error};
 use quote::ToTokens;
@@ -241,7 +241,7 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
         }
         #[cfg(feature = "runtime-metadata-insecure-url")]
         (None, Some(url_string)) => {
-            use subxt_utils_fetchmetadata::{from_url_blocking, MetadataVersion, Url};
+            use subxt_utils_fetchmetadata::{MetadataVersion, Url, from_url_blocking};
 
             let url = Url::parse(url_string).unwrap_or_else(|_| {
                 abort_call_site!("Cannot download metadata; invalid url: {}", url_string)
@@ -266,8 +266,8 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
         #[cfg(feature = "runtime-wasm-path")]
         (None, None) => {
             abort_call_site!(
-                    "At least one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided"
-                )
+                "At least one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided"
+            )
         }
         #[cfg(not(feature = "runtime-wasm-path"))]
         (None, None) => {
@@ -278,8 +278,8 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
         #[cfg(feature = "runtime-wasm-path")]
         _ => {
             abort_call_site!(
-                    "Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided"
-                )
+                "Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided"
+            )
         }
         #[cfg(not(feature = "runtime-wasm-path"))]
         _ => {

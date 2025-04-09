@@ -7,7 +7,7 @@
 //! [`crate::config::DefaultExtrinsicParams`] provides a general-purpose
 //! implementation of this that will work in many cases.
 
-use crate::{client::ClientState, error::ExtrinsicParamsError, Config};
+use crate::{Config, client::ClientState, error::ExtrinsicParamsError};
 use alloc::vec::Vec;
 use core::any::Any;
 

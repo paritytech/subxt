@@ -6,8 +6,8 @@
 
 use base64::Engine;
 use crypto_secretbox::{
-    aead::{Aead, KeyInit},
     Key, Nonce, XSalsa20Poly1305,
+    aead::{Aead, KeyInit},
 };
 use serde::Deserialize;
 use subxt_core::utils::AccountId32;

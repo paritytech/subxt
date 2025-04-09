@@ -9,8 +9,8 @@ use alloc::vec::Vec;
 use codec::{Compact, Input};
 use core::marker::PhantomData;
 use scale_bits::{
-    scale::format::{Format, OrderFormat, StoreFormat},
     Bits,
+    scale::format::{Format, OrderFormat, StoreFormat},
 };
 use scale_decode::{IntoVisitor, TypeResolver};
 

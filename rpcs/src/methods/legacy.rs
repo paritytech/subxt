@@ -4,7 +4,7 @@
 
 //! An interface to call the raw legacy RPC methods.
 
-use crate::client::{rpc_params, RpcClient, RpcSubscription};
+use crate::client::{RpcClient, RpcSubscription, rpc_params};
 use crate::{Error, RpcConfig};
 use codec::Decode;
 use derive_where::derive_where;

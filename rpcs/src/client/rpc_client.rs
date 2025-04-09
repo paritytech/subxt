@@ -5,7 +5,7 @@
 use super::{RawRpcSubscription, RpcClientT};
 use crate::Error;
 use futures::{Stream, StreamExt};
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use serde_json::value::RawValue;
 use std::{pin::Pin, sync::Arc, task::Poll};
 

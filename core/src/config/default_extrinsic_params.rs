@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::Config;
-use super::{transaction_extensions, ExtrinsicParams};
+use super::{ExtrinsicParams, transaction_extensions};
 
 /// The default [`super::ExtrinsicParams`] implementation understands common signed extensions
 /// and how to apply them to a given chain.

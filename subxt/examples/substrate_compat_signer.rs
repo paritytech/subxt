@@ -6,7 +6,7 @@
 
 #![allow(missing_docs, unused)]
 
-use sp_core::{sr25519, Pair as _};
+use sp_core::{Pair as _, sr25519};
 use subxt::config::substrate::MultiAddress;
 use subxt::{Config, OnlineClient, PolkadotConfig};
 
@@ -18,8 +18,8 @@ pub mod polkadot {}
 mod pair_signer {
     use super::*;
     use sp_runtime::{
-        traits::{IdentifyAccount, Verify},
         MultiSignature as SpMultiSignature,
+        traits::{IdentifyAccount, Verify},
     };
     use subxt::{
         config::substrate::{AccountId32, MultiSignature},

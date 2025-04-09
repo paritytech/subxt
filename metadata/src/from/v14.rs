@@ -6,10 +6,10 @@ use super::TryFromError;
 
 use crate::utils::variant_index::VariantIndex;
 use crate::{
-    utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, CustomMetadataInner,
-    ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner, StorageEntryMetadata,
-    StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
-    TransactionExtensionMetadataInner,
+    ArcStr, ConstantMetadata, CustomMetadataInner, ExtrinsicMetadata, Metadata, OuterEnumsMetadata,
+    PalletMetadataInner, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
+    StorageHasher, StorageMetadata, TransactionExtensionMetadataInner,
+    utils::ordered_map::OrderedMap,
 };
 use alloc::borrow::ToOwned;
 use alloc::collections::BTreeMap;

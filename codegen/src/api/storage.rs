@@ -6,7 +6,7 @@ use heck::{ToSnakeCase as _, ToUpperCamelCase};
 use proc_macro2::{Ident, TokenStream as TokenStream2, TokenStream};
 use quote::{format_ident, quote};
 use scale_info::TypeDef;
-use scale_typegen::{typegen::type_path::TypePath, TypeGenerator};
+use scale_typegen::{TypeGenerator, typegen::type_path::TypePath};
 use subxt_metadata::{
     PalletMetadata, StorageEntryMetadata, StorageEntryModifier, StorageEntryType, StorageHasher,
 };
@@ -322,7 +322,7 @@ mod tests {
     use frame_metadata::v15;
     use heck::ToUpperCamelCase;
     use quote::{format_ident, quote};
-    use scale_info::{meta_type, MetaType};
+    use scale_info::{MetaType, meta_type};
 
     use std::borrow::Cow;
 

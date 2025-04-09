@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use codec::{Decode, Encode};
-use scale_decode::{visitor::DecodeAsTypeResult, IntoVisitor, TypeResolver, Visitor};
+use scale_decode::{IntoVisitor, TypeResolver, Visitor, visitor::DecodeAsTypeResult};
 use scale_encode::EncodeAsType;
 
 use alloc::vec::Vec;
@@ -44,7 +44,7 @@ impl<T: Decode, R: TypeResolver> Visitor for StaticDecodeAsTypeVisitor<T, R> {
         _type_id: R::TypeId,
         _types: &'info R,
     ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'info>, Self::Error>> {
-        use scale_decode::{visitor::DecodeError, Error};
+        use scale_decode::{Error, visitor::DecodeError};
         let decoded = T::decode(input)
             .map(Static)
             .map_err(|e| Error::new(DecodeError::CodecError(e).into()));

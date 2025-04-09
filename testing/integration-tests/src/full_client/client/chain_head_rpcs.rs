@@ -13,9 +13,9 @@ use assert_matches::assert_matches;
 use codec::Encode;
 use futures::Stream;
 use subxt::{
+    SubstrateConfig,
     config::Hasher,
     utils::{AccountId32, MultiAddress},
-    SubstrateConfig,
 };
 use subxt_rpcs::methods::chain_head::{
     FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,

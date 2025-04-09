@@ -170,7 +170,9 @@ pub enum BlockError {
     #[error("Could not find a block with hash {0} (perhaps it was on a non-finalized fork?)")]
     NotFound(String),
     /// Leftover bytes found after decoding the extrinsic.
-    #[error("After decoding the exntrinsic at index {extrinsic_index}, {num_leftover_bytes} bytes were left, suggesting that decoding may have failed")]
+    #[error(
+        "After decoding the exntrinsic at index {extrinsic_index}, {num_leftover_bytes} bytes were left, suggesting that decoding may have failed"
+    )]
     LeftoverBytes {
         /// Index of the extrinsic that failed to decode.
         extrinsic_index: usize,
@@ -222,7 +224,9 @@ impl BlockError {
 pub enum TransactionError {
     /// The block hash that the transaction was added to could not be found.
     /// This is probably because the block was retracted before being finalized.
-    #[error("The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)")]
+    #[error(
+        "The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)"
+    )]
     BlockNotFound,
     /// An error happened on the node that the transaction was submitted to.
     #[error("Error handling transaction: {0}")]

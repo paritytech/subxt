@@ -5,8 +5,8 @@ use std::{
     sync::{Arc, Mutex},
 };
 use subxt::{
-    backend::rpc::{RawRpcFuture, RawRpcSubscription, RawValue, RpcClient, RpcClientT},
     OnlineClient, PolkadotConfig,
+    backend::rpc::{RawRpcFuture, RawRpcSubscription, RawValue, RpcClient, RpcClientT},
 };
 
 // A dummy RPC client that doesn't actually handle requests properly

@@ -5,7 +5,7 @@
 use super::PhantomDataSendSync;
 use codec::{Compact, Decode, DecodeAll, Encode};
 use derive_where::derive_where;
-use scale_decode::{ext::scale_type_resolver::visitor, IntoVisitor, TypeResolver, Visitor};
+use scale_decode::{IntoVisitor, TypeResolver, Visitor, ext::scale_type_resolver::visitor};
 use scale_encode::EncodeAsType;
 
 use alloc::format;
@@ -135,7 +135,9 @@ impl<T, R: TypeResolver> Visitor for WrapperKeepOpaqueVisitor<T, R> {
 
         // Sanity check that the compact length we decoded lines up with the number of bytes encoded in the next field.
         if field.bytes().len() != len as usize {
-            return Err(Error::custom_str("WrapperTypeKeepOpaque compact encoded length doesn't line up with encoded byte len"));
+            return Err(Error::custom_str(
+                "WrapperTypeKeepOpaque compact encoded length doesn't line up with encoded byte len",
+            ));
         }
 
         Ok(WrapperKeepOpaque {
@@ -166,7 +168,7 @@ mod test {
     impl<T: scale_info::TypeInfo + 'static> scale_info::TypeInfo for WrapperKeepOpaque<T> {
         type Identity = Self;
         fn type_info() -> scale_info::Type {
-            use scale_info::{build::Fields, meta_type, Path, Type, TypeParameter};
+            use scale_info::{Path, Type, TypeParameter, build::Fields, meta_type};
 
             Type::builder()
                 .path(Path::new("WrapperKeepOpaque", module_path!()))

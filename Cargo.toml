@@ -35,9 +35,9 @@ resolver = "2"
 
 [workspace.package]
 authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
+edition = "2024"
 version = "0.41.0"
-rust-version = "1.81.0"
+rust-version = "1.86.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt"

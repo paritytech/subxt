@@ -7,8 +7,8 @@ use std::collections::HashSet;
 use heck::ToSnakeCase as _;
 use heck::ToUpperCamelCase as _;
 
-use scale_typegen::typegen::ir::ToTokensWithSettings;
 use scale_typegen::TypeGenerator;
+use scale_typegen::typegen::ir::ToTokensWithSettings;
 use subxt_metadata::{Metadata, RuntimeApiMetadata};
 
 use proc_macro2::TokenStream as TokenStream2;

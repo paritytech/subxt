@@ -5,7 +5,7 @@
 use crate::rpc::RpcResponse;
 use crate::shared_client::SharedClient;
 use crate::{JsonRpcError, LightClientRpcError};
-use futures::{stream::StreamExt, FutureExt};
+use futures::{FutureExt, stream::StreamExt};
 use serde_json::value::RawValue;
 use smoldot_light::platform::PlatformRef;
 use std::{collections::HashMap, str::FromStr};

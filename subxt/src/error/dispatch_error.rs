@@ -7,7 +7,7 @@
 
 use crate::metadata::{DecodeWithMetadata, Metadata};
 use core::fmt::Debug;
-use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, TypeResolver};
+use scale_decode::{DecodeAsType, TypeResolver, visitor::DecodeAsTypeResult};
 
 use std::{borrow::Cow, marker::PhantomData};
 
@@ -73,7 +73,9 @@ pub enum TokenError {
     #[error("Funds are unavailable.")]
     FundsUnavailable,
     /// Some part of the balance gives the only provider reference to the account and thus cannot be (re)moved.
-    #[error("Some part of the balance gives the only provider reference to the account and thus cannot be (re)moved.")]
+    #[error(
+        "Some part of the balance gives the only provider reference to the account and thus cannot be (re)moved."
+    )]
     OnlyProvider,
     /// Account cannot exist with the funds that would be given.
     #[error("Account cannot exist with the funds that would be given.")]
@@ -327,7 +329,9 @@ impl DispatchError {
                         module_bytes[4],
                     ]
                 } else {
-                    tracing::warn!("Can't decode error sp_runtime::DispatchError: bytes do not match known shapes");
+                    tracing::warn!(
+                        "Can't decode error sp_runtime::DispatchError: bytes do not match known shapes"
+                    );
                     // Return _all_ of the bytes; every "unknown" return should be consistent.
                     return Err(super::Error::Unknown(bytes.to_vec()));
                 };

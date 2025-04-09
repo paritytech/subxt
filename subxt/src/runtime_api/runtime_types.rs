@@ -4,10 +4,10 @@
 
 use super::Payload;
 use crate::{
+    Config,
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
     error::Error,
-    Config,
 };
 use codec::Decode;
 use derive_where::derive_where;

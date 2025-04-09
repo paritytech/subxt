@@ -12,7 +12,7 @@
 use core::marker::PhantomData;
 
 use codec::{Decode, Encode};
-use scale_decode::{visitor::DecodeAsTypeResult, DecodeAsType, IntoVisitor, TypeResolver, Visitor};
+use scale_decode::{DecodeAsType, IntoVisitor, TypeResolver, Visitor, visitor::DecodeAsTypeResult};
 
 use super::{Encoded, Static};
 use alloc::vec::Vec;
@@ -32,7 +32,7 @@ impl<Address, Call, Signature, Extra> UncheckedExtrinsic<Address, Call, Signatur
 
     /// Get the bytes of the encoded extrinsic.
     pub fn bytes(&self) -> &[u8] {
-        self.0 .0 .0.as_slice()
+        self.0.0.0.as_slice()
     }
 }
 
@@ -75,7 +75,7 @@ impl<Address, Call, Signature, Extra> From<UncheckedExtrinsic<Address, Call, Sig
     for Vec<u8>
 {
     fn from(bytes: UncheckedExtrinsic<Address, Call, Signature, Extra>) -> Self {
-        bytes.0 .0 .0
+        bytes.0.0.0
     }
 }
 
@@ -106,8 +106,8 @@ impl<Address, Call, Signature, Extra> IntoVisitor
     type AnyVisitor<R: TypeResolver> =
         UncheckedExtrinsicDecodeAsTypeVisitor<Address, Call, Signature, Extra, R>;
 
-    fn into_visitor<R: TypeResolver>(
-    ) -> UncheckedExtrinsicDecodeAsTypeVisitor<Address, Call, Signature, Extra, R> {
+    fn into_visitor<R: TypeResolver>()
+    -> UncheckedExtrinsicDecodeAsTypeVisitor<Address, Call, Signature, Extra, R> {
         UncheckedExtrinsicDecodeAsTypeVisitor(PhantomData)
     }
 }

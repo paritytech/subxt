@@ -1,6 +1,6 @@
 use crate::utils::{
-    create_client, fields_composite_example, fields_description, first_paragraph_of_docs,
-    parse_string_into_scale_value, FileOrUrl, Indent, SyntaxHighlight,
+    FileOrUrl, Indent, SyntaxHighlight, create_client, fields_composite_example,
+    fields_description, first_paragraph_of_docs, parse_string_into_scale_value,
 };
 
 use color_eyre::{
@@ -12,8 +12,8 @@ use indoc::{formatdoc, writedoc};
 use scale_typegen_description::type_description;
 use scale_value::Value;
 use subxt::{
-    ext::{scale_decode::DecodeAsType, scale_encode::EncodeAsType},
     Metadata,
+    ext::{scale_decode::DecodeAsType, scale_encode::EncodeAsType},
 };
 use subxt_metadata::RuntimeApiMetadata;
 
@@ -144,7 +144,10 @@ pub async fn run<'a>(
     }
 
     if trailing_args.len() != method.inputs().len() {
-        bail!("The number of trailing arguments you provided after the `execute` flag does not match the expected number of inputs!\n{}", execute_usage());
+        bail!(
+            "The number of trailing arguments you provided after the `execute` flag does not match the expected number of inputs!\n{}",
+            execute_usage()
+        );
     }
 
     // encode each provided input as bytes of the correct type:

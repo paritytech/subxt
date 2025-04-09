@@ -20,8 +20,8 @@ use api::RuntimeGenerator;
 use proc_macro2::TokenStream as TokenStream2;
 use scale_typegen::typegen::settings::AllocCratePath;
 use scale_typegen::{
-    typegen::settings::substitutes::absolute_path, DerivesRegistry, TypeGeneratorSettings,
-    TypeSubstitutes, TypegenError,
+    DerivesRegistry, TypeGeneratorSettings, TypeSubstitutes, TypegenError,
+    typegen::settings::substitutes::absolute_path,
 };
 use std::collections::HashMap;
 use syn::parse_quote;
@@ -225,7 +225,9 @@ impl CodegenBuilder {
         if absolute_path(crate_path.clone()).is_err() {
             // Throw an error here, because otherwise we end up with a harder to comprehend error when
             // substitute types don't begin with an absolute path.
-            panic!("The provided crate path must be an absolute path, ie prefixed with '::' or 'crate'");
+            panic!(
+                "The provided crate path must be an absolute path, ie prefixed with '::' or 'crate'"
+            );
         }
         self.crate_path = crate_path;
     }

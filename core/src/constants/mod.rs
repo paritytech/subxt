@@ -43,7 +43,7 @@ pub mod address;
 use address::Address;
 use alloc::borrow::ToOwned;
 
-use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
+use crate::{Error, Metadata, error::MetadataError, metadata::DecodeWithMetadata};
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
 /// that the shape of the constant value is the same as the shape expected by the static address.

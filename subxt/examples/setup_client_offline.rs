@@ -2,7 +2,7 @@
 use subxt::ext::codec::Decode;
 use subxt::metadata::Metadata;
 use subxt::utils::H256;
-use subxt::{config::PolkadotConfig, OfflineClient};
+use subxt::{OfflineClient, config::PolkadotConfig};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -53,7 +53,9 @@ impl From<codec::Error> for Error {
 #[derive(Debug, DeriveError)]
 pub enum BlockError {
     /// Leftover bytes found after decoding the extrinsic.
-    #[error("After decoding the extrinsic at index {extrinsic_index}, {num_leftover_bytes} bytes were left, suggesting that decoding may have failed")]
+    #[error(
+        "After decoding the extrinsic at index {extrinsic_index}, {num_leftover_bytes} bytes were left, suggesting that decoding may have failed"
+    )]
     LeftoverBytes {
         /// Index of the extrinsic that failed to decode.
         extrinsic_index: usize,
@@ -150,10 +152,14 @@ pub enum StorageAddressError {
     #[error("We have leftover bytes after decoding the storage address")]
     TooManyBytes,
     /// The bytes of a storage address are not the expected address for decoding the storage keys of the address.
-    #[error("Storage address bytes are not the expected format. Addresses need to be at least 16 bytes (pallet ++ entry) and follow a structure given by the hashers defined in the metadata")]
+    #[error(
+        "Storage address bytes are not the expected format. Addresses need to be at least 16 bytes (pallet ++ entry) and follow a structure given by the hashers defined in the metadata"
+    )]
     UnexpectedAddressBytes,
     /// An invalid hasher was used to reconstruct a value from a chunk of bytes that is part of a storage address. Hashers where the hash does not contain the original value are invalid for this purpose.
-    #[error("An invalid hasher was used to reconstruct a value with type ID {ty_id} from a hash formed by a {hasher:?} hasher. This is only possible for concat-style hashers or the identity hasher")]
+    #[error(
+        "An invalid hasher was used to reconstruct a value with type ID {ty_id} from a hash formed by a {hasher:?} hasher. This is only possible for concat-style hashers or the identity hasher"
+    )]
     HasherCannotReconstructKey {
         /// Type id of the key's type.
         ty_id: u32,

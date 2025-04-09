@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::backend::{Backend, BackendExt, BlockRef};
-use crate::{client::OnlineClientT, error::Error, events::Events, Config};
+use crate::{Config, client::OnlineClientT, error::Error, events::Events};
 use derive_where::derive_where;
 use std::future::Future;
 

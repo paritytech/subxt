@@ -7,12 +7,12 @@
 use std::task::Poll;
 
 use crate::{
+    Config,
     backend::{BlockRef, StreamOfResults, TransactionStatus as BackendTxStatus},
     client::OnlineClientT,
     error::{DispatchError, Error, RpcError, TransactionError},
     events::EventsClient,
     utils::strip_compact_prefix,
-    Config,
 };
 use derive_where::derive_where;
 use futures::{Stream, StreamExt};
@@ -89,10 +89,10 @@ where
                 // Error scenarios; return the error.
                 TxStatus::Error { message } => return Err(TransactionError::Error(message).into()),
                 TxStatus::Invalid { message } => {
-                    return Err(TransactionError::Invalid(message).into())
+                    return Err(TransactionError::Invalid(message).into());
                 }
                 TxStatus::Dropped { message } => {
-                    return Err(TransactionError::Dropped(message).into())
+                    return Err(TransactionError::Dropped(message).into());
                 }
                 // Ignore and wait for next status event:
                 _ => continue,
@@ -319,10 +319,10 @@ mod test {
     use subxt_core::client::RuntimeVersion;
 
     use crate::{
+        Config, Error, SubstrateConfig,
         backend::{StreamOfResults, TransactionStatus},
         client::{OfflineClientT, OnlineClientT},
         tx::TxProgress,
-        Config, Error, SubstrateConfig,
     };
 
     type MockTxProgress = TxProgress<SubstrateConfig, MockClient>;

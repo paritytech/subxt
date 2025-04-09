@@ -5,7 +5,7 @@ use polkadot::runtime_types::{
 };
 use subxt::utils::AccountId32;
 use subxt::{OnlineClient, PolkadotConfig};
-use subxt_signer::sr25519::{dev, Keypair};
+use subxt_signer::sr25519::{Keypair, dev};
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 pub mod polkadot {}

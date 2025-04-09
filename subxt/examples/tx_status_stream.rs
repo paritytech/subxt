@@ -1,5 +1,5 @@
 #![allow(missing_docs)]
-use subxt::{tx::TxStatus, OnlineClient, PolkadotConfig};
+use subxt::{OnlineClient, PolkadotConfig, tx::TxStatus};
 use subxt_signer::sr25519::dev;
 
 // Generate an interface that we can use from the node's metadata.

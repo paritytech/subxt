@@ -68,9 +68,9 @@ mod extrinsic_transaction_extensions;
 mod extrinsics;
 mod static_extrinsic;
 
+use crate::Metadata;
 use crate::config::Config;
 use crate::error::Error;
-use crate::Metadata;
 use alloc::vec::Vec;
 
 pub use crate::error::BlockError;

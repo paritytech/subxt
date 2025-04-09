@@ -12,13 +12,13 @@ mod events;
 mod runtime_apis;
 mod storage;
 
-use scale_typegen::typegen::ir::type_ir::{CompositeFieldIR, CompositeIR, CompositeIRKind};
+use scale_typegen::TypeGenerator;
 use scale_typegen::typegen::ir::ToTokensWithSettings;
+use scale_typegen::typegen::ir::type_ir::{CompositeFieldIR, CompositeIR, CompositeIRKind};
 use scale_typegen::typegen::type_params::TypeParameters;
 use scale_typegen::typegen::type_path::TypePath;
-use scale_typegen::TypeGenerator;
 use subxt_metadata::Metadata;
-use syn::{parse_quote, Ident};
+use syn::{Ident, parse_quote};
 
 use crate::error::CodegenError;
 use crate::subxt_type_gen_settings;
