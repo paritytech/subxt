@@ -41,7 +41,7 @@ jobs:
       - name: Fetch Artifacts
         run: cargo run --bin artifacts
 
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: app-token
         with:
           app-id: ${{ secrets.SUBXT_PR_MAKER_APP_ID }}
