@@ -56,7 +56,7 @@ where
 
             // Assemble the data to call the "execute_view_function" runtime API, which
             // then calls the relevant view function.
-            let call_name = subxt_core::view_functions::call_name();
+            let call_name = subxt_core::view_functions::CALL_NAME;
             let call_args = subxt_core::view_functions::call_args(&payload, &metadata)?;
 
             // Make the call.

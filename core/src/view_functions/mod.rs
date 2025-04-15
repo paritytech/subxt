@@ -31,10 +31,8 @@ pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), Erro
     Ok(())
 }
 
-/// Return the name of the Runtime API call which can execute
-pub fn call_name() -> &'static str {
-    "RuntimeViewFunction_execute_view_function"
-}
+/// The name of the Runtime API call which can execute
+pub const CALL_NAME: &str = "RuntimeViewFunction_execute_view_function";
 
 /// Encode the bytes that will be passed to the "execute_view_function" Runtime API call,
 /// to execute the View Function represented by the given payload.
