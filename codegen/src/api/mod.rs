@@ -9,6 +9,7 @@ mod constants;
 mod custom_values;
 mod errors;
 mod events;
+mod pallet_view_functions;
 mod runtime_apis;
 mod storage;
 
@@ -170,12 +171,19 @@ impl RuntimeGenerator {
 
                 let errors = errors::generate_error_type_alias(&type_gen, pallet)?;
 
+                let view_functions = pallet_view_functions::generate_pallet_view_functions(
+                    &type_gen,
+                    pallet,
+                    &crate_path,
+                )?;
+
                 Ok(quote! {
                     pub mod #mod_name {
                         use super::root_mod;
                         use super::#types_mod_ident;
                         #errors
                         #calls
+                        #view_functions
                         #event
                         #storage_mod
                         #constants_mod
@@ -204,6 +212,12 @@ impl RuntimeGenerator {
         let pallets_with_calls: Vec<_> = pallets_with_mod_names
             .iter()
             .filter_map(|(pallet, pallet_mod_name)| pallet.call_ty_id().map(|_| pallet_mod_name))
+            .collect();
+
+        let pallets_with_view_functions: Vec<_> = pallets_with_mod_names
+            .iter()
+            .filter(|(pallet, _pallet_mod_name)| pallet.has_view_functions())
+            .map(|(_, pallet_mod_name)| pallet_mod_name)
             .collect();
 
         let rust_items = item_mod_ir.rust_items();
@@ -283,6 +297,10 @@ impl RuntimeGenerator {
 
                 #apis_mod
 
+                pub fn view_functions() -> ViewFunctionsApi {
+                    ViewFunctionsApi
+                }
+
                 pub fn custom() -> CustomValuesApi {
                     CustomValuesApi
                 }
@@ -312,6 +330,15 @@ impl RuntimeGenerator {
                     #(
                         pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi {
                             #pallets_with_calls::calls::TransactionApi
+                        }
+                    )*
+                }
+
+                pub struct ViewFunctionsApi;
+                impl ViewFunctionsApi {
+                    #(
+                        pub fn #pallets_with_view_functions(&self) -> #pallets_with_view_functions::view_functions::ViewFunctionsApi {
+                            #pallets_with_view_functions::view_functions::ViewFunctionsApi
                         }
                     )*
                 }

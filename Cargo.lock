@@ -2413,6 +2413,7 @@ dependencies = [
  "parity-scale-codec",
  "regex",
  "scale-info",
+ "scale-value",
  "serde",
  "sp-core",
  "substrate-runner",

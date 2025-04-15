@@ -9,6 +9,9 @@ use substrate_runner::{Error as SubstrateNodeError, SubstrateNode};
 // This variable accepts a single binary name or comma separated list.
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
 
+const V15_METADATA_VERSION: u32 = 15;
+const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
+
 #[tokio::main]
 async fn main() {
     run().await;
@@ -37,11 +40,62 @@ async fn run() {
     };
 
     let port = node.ws_port();
+    let out_dir_env_var = env::var_os("OUT_DIR");
+    let out_dir = out_dir_env_var.as_ref().unwrap().to_str().unwrap();
 
-    // Download metadata from binary. Avoid Subxt dep on `subxt::rpc::types::Bytes`and just impl here.
-    // This may at least prevent this script from running so often (ie whenever we change Subxt).
-    const V15_METADATA_VERSION: u32 = 15;
-    let bytes = V15_METADATA_VERSION.encode();
+    let (stable_metadata_path, unstable_metadata_path) = tokio::join!(
+        download_and_save_metadata(V15_METADATA_VERSION, port, out_dir, "v15"),
+        download_and_save_metadata(UNSTABLE_METADATA_VERSION, port, out_dir, "unstable")
+    );
+
+    // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
+    // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to `runtime_metadata_path`,
+    // and so we need to spit it out here and include it verbatim instead.
+    let runtime_api_contents = format!(
+        r#"
+        /// Generated types for the locally running Substrate node using V15 metadata.
+        #[subxt::subxt(
+            runtime_metadata_path = "{stable_metadata_path}",
+            derive_for_all_types = "Eq, PartialEq",
+        )]
+        pub mod node_runtime {{}}
+
+        /// Generated types for the locally running Substrate node using the unstable metadata.
+        #[subxt::subxt(
+            runtime_metadata_path = "{unstable_metadata_path}",
+            derive_for_all_types = "Eq, PartialEq",
+        )]
+        pub mod node_runtime_unstable {{}}
+    "#
+    );
+    let runtime_path = Path::new(&out_dir).join("runtime.rs");
+    fs::write(runtime_path, runtime_api_contents).expect("Couldn't write runtime rust output");
+
+    for substrate_node_path in substrate_bins_vec {
+        let Ok(full_path) = which::which(substrate_node_path) else {
+            continue;
+        };
+
+        // Re-build if the substrate binary we're pointed to changes (mtime):
+        println!("cargo:rerun-if-changed={}", full_path.to_string_lossy());
+    }
+
+    // Re-build if we point to a different substrate binary:
+    println!("cargo:rerun-if-env-changed={SUBSTRATE_BIN_ENV_VAR}");
+    // Re-build if this file changes:
+    println!("cargo:rerun-if-changed=build.rs");
+}
+
+// Download metadata from binary. Avoid Subxt dep on `subxt::rpc::types::Bytes`and just impl here.
+// This may at least prevent this script from running so often (ie whenever we change Subxt).
+async fn download_and_save_metadata(
+    version: u32,
+    port: u16,
+    out_dir: &str,
+    suffix: &str,
+) -> String {
+    // Download it:
+    let bytes = version.encode();
     let version: String = format!("0x{}", hex::encode(&bytes));
     let raw: String = {
         use client::ClientT;
@@ -61,42 +115,16 @@ async fn run() {
         .unwrap_or_else(|e| panic!("Failed to decode metadata bytes: {e}"));
     let metadata_bytes = bytes.expect("Metadata version not found");
 
-    // Save metadata to a file:
-    let out_dir = env::var_os("OUT_DIR").unwrap();
-    let metadata_path = Path::new(&out_dir).join("test_node_runtime_metadata.scale");
+    // Save it to a file:
+    let metadata_path =
+        Path::new(&out_dir).join(format!("test_node_runtime_metadata_{suffix}.scale"));
     fs::write(&metadata_path, metadata_bytes).expect("Couldn't write metadata output");
 
-    // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
-    // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to `runtime_metadata_path`,
-    // and so we need to spit it out here and include it verbatim instead.
-    let runtime_api_contents = format!(
-        r#"
-        #[subxt::subxt(
-            runtime_metadata_path = "{}",
-            derive_for_all_types = "Eq, PartialEq",
-        )]
-        pub mod node_runtime {{}}
-    "#,
-        metadata_path
-            .to_str()
-            .expect("Path to metadata should be stringifiable")
-    );
-    let runtime_path = Path::new(&out_dir).join("runtime.rs");
-    fs::write(runtime_path, runtime_api_contents).expect("Couldn't write runtime rust output");
-
-    for substrate_node_path in substrate_bins_vec {
-        let Ok(full_path) = which::which(substrate_node_path) else {
-            continue;
-        };
-
-        // Re-build if the substrate binary we're pointed to changes (mtime):
-        println!("cargo:rerun-if-changed={}", full_path.to_string_lossy());
-    }
-
-    // Re-build if we point to a different substrate binary:
-    println!("cargo:rerun-if-env-changed={SUBSTRATE_BIN_ENV_VAR}");
-    // Re-build if this file changes:
-    println!("cargo:rerun-if-changed=build.rs");
+    // Convert path to string because we need this to interpolate into string
+    metadata_path
+        .to_str()
+        .expect("Path to metadata should be stringifiable")
+        .to_owned()
 }
 
 // Use jsonrpsee to obtain metadata from the node.

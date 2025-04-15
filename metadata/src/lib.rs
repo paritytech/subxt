@@ -216,6 +216,20 @@ impl Metadata {
         })
     }
 
+    /// Access a view function given its query ID, if any.
+    pub fn view_function_by_query_id(
+        &'_ self,
+        query_id: &[u8; 32],
+    ) -> Option<ViewFunctionMetadata<'_>> {
+        // Dev note: currently, we only have pallet view functions, and here
+        // we just do a naive thing of iterating over the pallets to find the one
+        // we're looking for. Eventually we should construct a separate map of view
+        // functions for easy querying here.
+        self.pallets()
+            .flat_map(|p| p.view_functions())
+            .find(|vf| vf.query_id() == query_id)
+    }
+
     /// Returns custom user defined types
     pub fn custom(&self) -> CustomMetadata<'_> {
         CustomMetadata {
@@ -293,12 +307,29 @@ impl<'a> PalletMetadata<'a> {
         )
     }
 
+    /// Does this pallet have any view functions?
+    pub fn has_view_functions(&self) -> bool {
+        !self.inner.view_functions.is_empty()
+    }
+
     /// Return an iterator over the View Functions in this pallet, if any.
-    pub fn view_functions(&self) -> impl ExactSizeIterator<Item = PalletViewFunctionMetadata<'a>> {
+    pub fn view_functions(&self) -> impl ExactSizeIterator<Item = ViewFunctionMetadata<'a>> {
         self.inner
             .view_functions
+            .values()
             .iter()
-            .map(|vf: &'a _| PalletViewFunctionMetadata {
+            .map(|vf: &'a _| ViewFunctionMetadata {
+                inner: vf,
+                types: self.types,
+            })
+    }
+
+    /// Return the view function with a given name, if any
+    pub fn view_function_by_name(&self, name: &str) -> Option<ViewFunctionMetadata<'a>> {
+        self.inner
+            .view_functions
+            .get_by_key(name)
+            .map(|vf: &'a _| ViewFunctionMetadata {
                 inner: vf,
                 types: self.types,
             })
@@ -404,7 +435,7 @@ struct PalletMetadataInner {
     /// Map from constant name to constant details.
     constants: OrderedMap<ArcStr, ConstantMetadata>,
     /// Details about each of the pallet view functions.
-    view_functions: Vec<PalletViewFunctionMetadataInner>,
+    view_functions: OrderedMap<ArcStr, ViewFunctionMetadataInner>,
     /// Mapping from associated type to type ID describing its shape.
     associated_types: BTreeMap<String, u32>,
     /// Pallet documentation.
@@ -832,41 +863,48 @@ struct RuntimeApiMethodMetadataInner {
     docs: Vec<String>,
 }
 
-/// Metadata for the available pallet View Functions.
+/// Metadata for the available View Functions. Currently these exist only
+/// at the pallet level, but eventually they could exist at the runtime level too.
 #[derive(Debug, Clone, Copy)]
-pub struct PalletViewFunctionMetadata<'a> {
-    inner: &'a PalletViewFunctionMetadataInner,
+pub struct ViewFunctionMetadata<'a> {
+    inner: &'a ViewFunctionMetadataInner,
     types: &'a PortableRegistry,
 }
 
-impl PalletViewFunctionMetadata<'_> {
+impl<'a> ViewFunctionMetadata<'a> {
     /// Method name.
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'a str {
         &self.inner.name
     }
     /// Query ID. This is used to query the function. Roughly, it is constructed by doing
     /// `twox_128(pallet_name) ++ twox_128("fn_name(fnarg_types) -> return_ty")` .
-    pub fn query_id(&self) -> [u8; 32] {
-        self.inner.query_id
+    pub fn query_id(&self) -> &'a [u8; 32] {
+        &self.inner.query_id
     }
     /// Method documentation.
-    pub fn docs(&self) -> &[String] {
+    pub fn docs(&self) -> &'a [String] {
         &self.inner.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &MethodParamMetadata> {
+    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &'a MethodParamMetadata> {
         self.inner.inputs.iter()
     }
     /// Method return type.
     pub fn output_ty(&self) -> u32 {
         self.inner.output_ty
     }
+    /// Return a hash for the method. The query ID of a view function validates it to some
+    /// degree, but only takes type _names_ into account. This hash takes into account the
+    /// actual _shape_ of each argument and the return type.
+    pub fn hash(&self) -> [u8; HASH_LEN] {
+        crate::utils::validation::get_view_function_hash(self)
+    }
 }
 
 #[derive(Debug, Clone)]
-struct PalletViewFunctionMetadataInner {
+struct ViewFunctionMetadataInner {
     /// View function name.
-    name: String,
+    name: ArcStr,
     /// View function query ID.
     query_id: [u8; 32],
     /// Input types.
@@ -966,6 +1004,7 @@ impl codec::Decode for Metadata {
         let metadata = match metadata.1 {
             frame_metadata::RuntimeMetadata::V14(md) => md.try_into(),
             frame_metadata::RuntimeMetadata::V15(md) => md.try_into(),
+            frame_metadata::RuntimeMetadata::V16(md) => md.try_into(),
             _ => return Err("Cannot try_into() to Metadata: unsupported metadata version".into()),
         };
 
