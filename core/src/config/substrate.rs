@@ -87,7 +87,7 @@ impl Hasher for DynamicHasher256 {
         let ty = metadata
             .types()
             .resolve(hash_ty_id)
-            .expect("Type information for 'Hashing' associated tyoe should be in metadata");
+            .expect("Type information for 'Hashing' associated type should be in metadata");
 
         let hash_type = match ty.path.ident().as_deref().unwrap_or("") {
             "BlakeTwo256" => HashType::BlakeTwo256,
