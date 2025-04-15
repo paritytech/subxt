@@ -5,7 +5,7 @@
 use crate::{
     blocks::block_types::{get_events, CachedEvents},
     client::{OfflineClientT, OnlineClientT},
-    config::Config,
+    config::{Config, HashFor},
     error::Error,
     events,
 };
@@ -25,7 +25,7 @@ pub struct Extrinsics<T: Config, C> {
     inner: CoreExtrinsics<T>,
     client: C,
     cached_events: CachedEvents<T>,
-    hash: T::Hash,
+    hash: HashFor<T>,
 }
 
 impl<T, C> Extrinsics<T, C>
@@ -37,7 +37,7 @@ where
         client: C,
         extrinsics: Vec<Vec<u8>>,
         cached_events: CachedEvents<T>,
-        hash: T::Hash,
+        hash: HashFor<T>,
     ) -> Result<Self, Error> {
         let inner = CoreExtrinsics::decode_from(extrinsics, client.metadata())?;
         Ok(Self {
@@ -59,7 +59,7 @@ where
     }
 
     /// Return the block hash that these extrinsics are from.
-    pub fn block_hash(&self) -> T::Hash {
+    pub fn block_hash(&self) -> HashFor<T> {
         self.hash
     }
 
@@ -125,7 +125,7 @@ where
 pub struct ExtrinsicDetails<T: Config, C> {
     inner: CoreExtrinsicDetails<T>,
     /// The block hash of this extrinsic (needed to fetch events).
-    block_hash: T::Hash,
+    block_hash: HashFor<T>,
     /// Subxt client.
     client: C,
     /// Cached events.
@@ -141,7 +141,7 @@ where
     pub(crate) fn new(
         inner: CoreExtrinsicDetails<T>,
         client: C,
-        block_hash: T::Hash,
+        block_hash: HashFor<T>,
         cached_events: CachedEvents<T>,
     ) -> ExtrinsicDetails<T, C> {
         ExtrinsicDetails {
@@ -153,7 +153,7 @@ where
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::hash()`].
-    pub fn hash(&self) -> T::Hash {
+    pub fn hash(&self) -> HashFor<T> {
         self.inner.hash()
     }
 
@@ -271,7 +271,7 @@ pub struct ExtrinsicEvents<T: Config> {
     // this type is returned from TxProgress things in the most
     // basic flows, so it's the only place people can access it
     // without complicating things for themselves).
-    ext_hash: T::Hash,
+    ext_hash: HashFor<T>,
     // The index of the extrinsic:
     idx: u32,
     // All of the events in the block:
@@ -281,7 +281,7 @@ pub struct ExtrinsicEvents<T: Config> {
 impl<T: Config> ExtrinsicEvents<T> {
     /// Creates a new instance of `ExtrinsicEvents`.
     #[doc(hidden)]
-    pub fn new(ext_hash: T::Hash, idx: u32, events: events::Events<T>) -> Self {
+    pub fn new(ext_hash: HashFor<T>, idx: u32, events: events::Events<T>) -> Self {
         Self {
             ext_hash,
             idx,
@@ -295,7 +295,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     }
 
     /// Return the hash of the extrinsic.
-    pub fn extrinsic_hash(&self) -> T::Hash {
+    pub fn extrinsic_hash(&self) -> HashFor<T> {
         self.ext_hash
     }
 

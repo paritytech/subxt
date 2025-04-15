@@ -7,7 +7,7 @@
 //! methods exposed here.
 
 use crate::client::{rpc_params, RpcClient, RpcSubscription};
-use crate::BlockHash;
+use crate::Hash;
 use crate::{Error, RpcConfig};
 use derive_where::derive_where;
 use futures::{Stream, StreamExt};
@@ -871,7 +871,7 @@ pub struct FollowSubscription<Hash> {
     done: bool,
 }
 
-impl<Hash: BlockHash> FollowSubscription<Hash> {
+impl<H: Hash> FollowSubscription<H> {
     /// Fetch the next item in the stream.
     pub async fn next(&mut self) -> Option<<Self as Stream>::Item> {
         <Self as StreamExt>::next(self).await
@@ -882,8 +882,8 @@ impl<Hash: BlockHash> FollowSubscription<Hash> {
     }
 }
 
-impl<Hash: BlockHash> Stream for FollowSubscription<Hash> {
-    type Item = <RpcSubscription<FollowEvent<Hash>> as Stream>::Item;
+impl<H: Hash> Stream for FollowSubscription<H> {
+    type Item = <RpcSubscription<FollowEvent<H>> as Stream>::Item;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
@@ -910,15 +910,15 @@ pub struct TransactionSubscription<Hash> {
     done: bool,
 }
 
-impl<Hash: BlockHash> TransactionSubscription<Hash> {
+impl<H: Hash> TransactionSubscription<H> {
     /// Fetch the next item in the stream.
     pub async fn next(&mut self) -> Option<<Self as Stream>::Item> {
         <Self as StreamExt>::next(self).await
     }
 }
 
-impl<Hash: BlockHash> Stream for TransactionSubscription<Hash> {
-    type Item = <RpcSubscription<TransactionStatus<Hash>> as Stream>::Item;
+impl<H: Hash> Stream for TransactionSubscription<H> {
+    type Item = <RpcSubscription<TransactionStatus<H>> as Stream>::Item;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
@@ -1031,7 +1031,7 @@ pub struct ArchiveStorageSubscription<Hash> {
     done: bool,
 }
 
-impl<Hash: BlockHash> ArchiveStorageSubscription<Hash> {
+impl<H: Hash> ArchiveStorageSubscription<H> {
     /// Fetch the next item in the stream.
     pub async fn next(&mut self) -> Option<<Self as Stream>::Item> {
         <Self as StreamExt>::next(self).await
@@ -1042,8 +1042,8 @@ impl<Hash: BlockHash> ArchiveStorageSubscription<Hash> {
     }
 }
 
-impl<Hash: BlockHash> Stream for ArchiveStorageSubscription<Hash> {
-    type Item = <RpcSubscription<ArchiveStorageEvent<Hash>> as Stream>::Item;
+impl<H: Hash> Stream for ArchiveStorageSubscription<H> {
+    type Item = <RpcSubscription<ArchiveStorageEvent<H>> as Stream>::Item;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
