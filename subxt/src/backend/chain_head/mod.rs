@@ -21,9 +21,8 @@ use crate::backend::{
     utils::retry, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf,
     StreamOfResults, TransactionStatus,
 };
-use crate::config::BlockHash;
+use crate::config::{Config, Hash, HashFor};
 use crate::error::{Error, RpcError};
-use crate::Config;
 use async_trait::async_trait;
 use follow_stream_driver::{FollowStreamDriver, FollowStreamDriverHandle};
 use futures::future::Either;
@@ -130,12 +129,13 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
         // Construct the underlying follow_stream layers:
         let rpc_methods = ChainHeadRpcMethods::new(client.into());
         let follow_stream =
-            follow_stream::FollowStream::<T::Hash>::from_methods(rpc_methods.clone());
-        let follow_stream_unpin = follow_stream_unpin::FollowStreamUnpin::<T::Hash>::from_methods(
-            follow_stream,
-            rpc_methods.clone(),
-            self.max_block_life,
-        );
+            follow_stream::FollowStream::<HashFor<T>>::from_methods(rpc_methods.clone());
+        let follow_stream_unpin =
+            follow_stream_unpin::FollowStreamUnpin::<HashFor<T>>::from_methods(
+                follow_stream,
+                rpc_methods.clone(),
+                self.max_block_life,
+            );
         let follow_stream_driver = FollowStreamDriver::new(follow_stream_unpin);
 
         // Wrap these into the backend and driver that we'll expose.
@@ -193,11 +193,11 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
 /// backend to make progress.
 #[derive(Debug)]
 pub struct ChainHeadBackendDriver<T: Config> {
-    driver: FollowStreamDriver<T::Hash>,
+    driver: FollowStreamDriver<HashFor<T>>,
 }
 
 impl<T: Config> Stream for ChainHeadBackendDriver<T> {
-    type Item = <FollowStreamDriver<T::Hash> as Stream>::Item;
+    type Item = <FollowStreamDriver<HashFor<T>> as Stream>::Item;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
@@ -212,7 +212,7 @@ pub struct ChainHeadBackend<T: Config> {
     // RPC methods we'll want to call:
     methods: ChainHeadRpcMethods<T>,
     // A handle to the chainHead_follow subscription:
-    follow_handle: FollowStreamDriverHandle<T::Hash>,
+    follow_handle: FollowStreamDriverHandle<HashFor<T>>,
     // How long to wait until giving up on transactions:
     transaction_timeout_secs: usize,
     // Don't synchronise blocks with chainHead_follow when submitting txs:
@@ -229,11 +229,11 @@ impl<T: Config> ChainHeadBackend<T> {
     async fn stream_headers<F>(
         &self,
         f: F,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error>
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error>
     where
         F: Fn(
-                FollowEvent<follow_stream_unpin::BlockRef<T::Hash>>,
-            ) -> Vec<follow_stream_unpin::BlockRef<T::Hash>>
+                FollowEvent<follow_stream_unpin::BlockRef<HashFor<T>>>,
+            ) -> Vec<follow_stream_unpin::BlockRef<HashFor<T>>>
             + Send
             + Sync
             + 'static,
@@ -275,9 +275,9 @@ impl<T: Config> ChainHeadBackend<T> {
     }
 }
 
-impl<Hash: BlockHash + 'static> BlockRefT for follow_stream_unpin::BlockRef<Hash> {}
-impl<Hash: BlockHash + 'static> From<follow_stream_unpin::BlockRef<Hash>> for BlockRef<Hash> {
-    fn from(b: follow_stream_unpin::BlockRef<Hash>) -> Self {
+impl<H: Hash + 'static> BlockRefT for follow_stream_unpin::BlockRef<H> {}
+impl<H: Hash + 'static> From<follow_stream_unpin::BlockRef<H>> for BlockRef<H> {
+    fn from(b: follow_stream_unpin::BlockRef<H>) -> Self {
         BlockRef::new(b.hash(), b)
     }
 }
@@ -289,7 +289,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
     async fn storage_fetch_values(
         &self,
         keys: Vec<Vec<u8>>,
-        at: T::Hash,
+        at: HashFor<T>,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
         retry(|| async {
             let queries = keys.iter().map(|key| StorageQuery {
@@ -324,7 +324,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
     async fn storage_fetch_descendant_keys(
         &self,
         key: Vec<u8>,
-        at: T::Hash,
+        at: HashFor<T>,
     ) -> Result<StreamOfResults<Vec<u8>>, Error> {
         retry(|| async {
             // Ask for hashes, and then just ignore them and return the keys that come back.
@@ -350,7 +350,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
     async fn storage_fetch_descendant_values(
         &self,
         key: Vec<u8>,
-        at: T::Hash,
+        at: HashFor<T>,
     ) -> Result<StreamOfResults<StorageResponse>, Error> {
         retry(|| async {
             let query = StorageQuery {
@@ -386,7 +386,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         .await
     }
 
-    async fn genesis_hash(&self) -> Result<T::Hash, Error> {
+    async fn genesis_hash(&self) -> Result<HashFor<T>, Error> {
         retry(|| async {
             let genesis_hash = self.methods.chainspec_v1_genesis_hash().await?;
             Ok(genesis_hash)
@@ -394,7 +394,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         .await
     }
 
-    async fn block_header(&self, at: T::Hash) -> Result<Option<T::Header>, Error> {
+    async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, Error> {
         retry(|| async {
             let sub_id = get_subscription_id(&self.follow_handle).await?;
             let header = self.methods.chainhead_v1_header(&sub_id, at).await?;
@@ -403,7 +403,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         .await
     }
 
-    async fn block_body(&self, at: T::Hash) -> Result<Option<Vec<Vec<u8>>>, Error> {
+    async fn block_body(&self, at: HashFor<T>) -> Result<Option<Vec<Vec<u8>>>, Error> {
         retry(|| async {
             let sub_id = get_subscription_id(&self.follow_handle).await?;
 
@@ -432,8 +432,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         .await
     }
 
-    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<T::Hash>, Error> {
-        let next_ref: Option<BlockRef<T::Hash>> = self
+    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<HashFor<T>>, Error> {
+        let next_ref: Option<BlockRef<HashFor<T>>> = self
             .follow_handle
             .subscribe()
             .events()
@@ -543,7 +543,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
 
     async fn stream_all_block_headers(
         &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+        _hasher: T::Hasher,
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {
         // TODO: https://github.com/paritytech/subxt/issues/1568
         //
         // It's possible that blocks may be silently missed if
@@ -560,7 +561,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
 
     async fn stream_best_block_headers(
         &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+        _hasher: T::Hasher,
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {
         // TODO: https://github.com/paritytech/subxt/issues/1568
         //
         // It's possible that blocks may be silently missed if
@@ -575,7 +577,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
 
     async fn stream_finalized_block_headers(
         &self,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<T::Hash>)>, Error> {
+        _hasher: T::Hasher,
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {
         self.stream_headers(|ev| match ev {
             FollowEvent::Initialized(init) => init.finalized_block_hashes,
             FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
@@ -587,12 +590,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
     async fn submit_transaction(
         &self,
         extrinsic: &[u8],
-    ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
+    ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, Error> {
         // Submit a transaction. This makes no attempt to sync with follow events,
         async fn submit_transaction_ignoring_follow_events<T: Config>(
             extrinsic: &[u8],
             methods: &ChainHeadRpcMethods<T>,
-        ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
+        ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, Error> {
             let tx_progress = methods
                 .transactionwatch_v1_submit_and_watch(extrinsic)
                 .await?
@@ -633,8 +636,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
             extrinsic: &[u8],
             transaction_timeout_secs: u64,
             methods: &ChainHeadRpcMethods<T>,
-            follow_handle: &FollowStreamDriverHandle<T::Hash>,
-        ) -> Result<StreamOfResults<TransactionStatus<T::Hash>>, Error> {
+            follow_handle: &FollowStreamDriverHandle<HashFor<T>>,
+        ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, Error> {
             // We care about new and finalized block hashes.
             enum SeenBlockMarker {
                 New,
@@ -655,7 +658,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
             // If we see the finalized event, we start waiting until we find a finalized block that
             // matches, so we can guarantee to return a pinned block hash and be properly in sync
             // with chainHead_follow.
-            let mut finalized_hash: Option<T::Hash> = None;
+            let mut finalized_hash: Option<HashFor<T>> = None;
 
             // Record the start time so that we can time out if things appear to take too long.
             let start_instant = web_time::Instant::now();
@@ -818,7 +821,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         &self,
         method: &str,
         call_parameters: Option<&[u8]>,
-        at: T::Hash,
+        at: HashFor<T>,
     ) -> Result<Vec<u8>, Error> {
         retry(|| async {
             let sub_id = get_subscription_id(&self.follow_handle).await?;
@@ -856,8 +859,8 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
 }
 
 /// A helper to obtain a subscription ID.
-async fn get_subscription_id<Hash: BlockHash>(
-    follow_handle: &FollowStreamDriverHandle<Hash>,
+async fn get_subscription_id<H: Hash>(
+    follow_handle: &FollowStreamDriverHandle<H>,
 ) -> Result<String, Error> {
     let Some(sub_id) = follow_handle.subscribe().subscription_id().await else {
         return Err(RpcError::SubscriptionDropped.into());

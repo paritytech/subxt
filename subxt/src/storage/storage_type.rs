@@ -5,9 +5,9 @@
 use crate::{
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
+    config::{Config, HashFor},
     error::{Error, MetadataError, StorageAddressError},
     metadata::DecodeWithMetadata,
-    Config,
 };
 use codec::Decode;
 use derive_where::derive_where;
@@ -23,13 +23,13 @@ pub use crate::backend::StreamOfResults;
 #[derive_where(Clone; Client)]
 pub struct Storage<T: Config, Client> {
     client: Client,
-    block_ref: BlockRef<T::Hash>,
+    block_ref: BlockRef<HashFor<T>>,
     _marker: PhantomData<T>,
 }
 
 impl<T: Config, Client> Storage<T, Client> {
     /// Create a new [`Storage`]
-    pub(crate) fn new(client: Client, block_ref: BlockRef<T::Hash>) -> Self {
+    pub(crate) fn new(client: Client, block_ref: BlockRef<HashFor<T>>) -> Self {
         Self {
             client,
             block_ref,

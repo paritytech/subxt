@@ -7,6 +7,7 @@ use crate::custom_values::CustomValuesClient;
 use crate::{
     backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, StreamOfResults},
     blocks::{BlockRef, BlocksClient},
+    config::{Config, HashFor},
     constants::ConstantsClient,
     error::Error,
     events::EventsClient,
@@ -14,7 +15,7 @@ use crate::{
     storage::StorageClient,
     tx::TxClient,
     view_functions::ViewFunctionsClient,
-    Config, Metadata,
+    Metadata,
 };
 use derive_where::derive_where;
 use futures::future;
@@ -38,9 +39,10 @@ pub struct OnlineClient<T: Config> {
 
 #[derive_where(Debug)]
 struct Inner<T: Config> {
-    genesis_hash: T::Hash,
+    genesis_hash: HashFor<T>,
     runtime_version: RuntimeVersion,
     metadata: Metadata,
+    hasher: T::Hasher,
 }
 
 impl<T: Config> std::fmt::Debug for OnlineClient<T> {
@@ -104,7 +106,7 @@ impl<T: Config> OnlineClient<T> {
     /// If you're unsure what you're doing, prefer one of the alternate methods to instantiate
     /// a client.
     pub fn from_rpc_client_with(
-        genesis_hash: T::Hash,
+        genesis_hash: HashFor<T>,
         runtime_version: RuntimeVersion,
         metadata: impl Into<Metadata>,
         rpc_client: impl Into<RpcClient>,
@@ -142,16 +144,22 @@ impl<T: Config> OnlineClient<T> {
     /// If you're unsure what you're doing, prefer one of the alternate methods to instantiate
     /// a client.
     pub fn from_backend_with<B: Backend<T>>(
-        genesis_hash: T::Hash,
+        genesis_hash: HashFor<T>,
         runtime_version: RuntimeVersion,
         metadata: impl Into<Metadata>,
         backend: Arc<B>,
     ) -> Result<OnlineClient<T>, Error> {
+        use subxt_core::config::Hasher;
+
+        let metadata = metadata.into();
+        let hasher = T::Hasher::new(&metadata);
+
         Ok(OnlineClient {
             inner: Arc::new(RwLock::new(Inner {
                 genesis_hash,
                 runtime_version,
-                metadata: metadata.into(),
+                metadata,
+                hasher,
             })),
             backend,
         })
@@ -160,7 +168,7 @@ impl<T: Config> OnlineClient<T> {
     /// Fetch the metadata from substrate using the runtime API.
     async fn fetch_metadata(
         backend: &dyn Backend<T>,
-        block_hash: T::Hash,
+        block_hash: HashFor<T>,
     ) -> Result<Metadata, Error> {
         #[cfg(feature = "unstable-metadata")]
         {
@@ -185,7 +193,7 @@ impl<T: Config> OnlineClient<T> {
     /// Fetch the latest stable metadata from the node.
     async fn fetch_latest_stable_metadata(
         backend: &dyn Backend<T>,
-        block_hash: T::Hash,
+        block_hash: HashFor<T>,
     ) -> Result<Metadata, Error> {
         // This is the latest stable metadata that subxt can utilize.
         const V15_METADATA_VERSION: u32 = 15;
@@ -247,6 +255,11 @@ impl<T: Config> OnlineClient<T> {
         ClientRuntimeUpdater(self.clone())
     }
 
+    /// Return the hasher configured for hashing blocks and extrinsics.
+    pub fn hasher(&self) -> T::Hasher {
+        self.inner.read().expect("shouldn't be poisoned").hasher
+    }
+
     /// Return the [`Metadata`] used in this client.
     pub fn metadata(&self) -> Metadata {
         let inner = self.inner.read().expect("shouldn't be poisoned");
@@ -265,7 +278,7 @@ impl<T: Config> OnlineClient<T> {
     }
 
     /// Return the genesis hash.
-    pub fn genesis_hash(&self) -> T::Hash {
+    pub fn genesis_hash(&self) -> HashFor<T> {
         let inner = self.inner.read().expect("shouldn't be poisoned");
         inner.genesis_hash
     }
@@ -276,7 +289,7 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// Setting a custom genesis hash may leave Subxt unable to
     /// submit valid transactions.
-    pub fn set_genesis_hash(&self, genesis_hash: T::Hash) {
+    pub fn set_genesis_hash(&self, genesis_hash: HashFor<T>) {
         let mut inner = self.inner.write().expect("shouldn't be poisoned");
         inner.genesis_hash = genesis_hash;
     }
@@ -361,11 +374,14 @@ impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     fn metadata(&self) -> Metadata {
         self.metadata()
     }
-    fn genesis_hash(&self) -> T::Hash {
+    fn genesis_hash(&self) -> HashFor<T> {
         self.genesis_hash()
     }
     fn runtime_version(&self) -> RuntimeVersion {
         self.runtime_version()
+    }
+    fn hasher(&self) -> T::Hasher {
+        self.hasher()
     }
     // This is provided by default, but we can optimise here and only lock once:
     fn client_state(&self) -> ClientState<T> {
@@ -507,10 +523,20 @@ impl Update {
 async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
     client: &OnlineClient<T>,
     runtime_version: &RuntimeVersion,
-) -> Option<Result<BlockRef<T::Hash>, Error>> {
+) -> Option<Result<BlockRef<HashFor<T>>, Error>> {
     use scale_value::At;
 
-    let mut block_sub = match client.backend().stream_finalized_block_headers().await {
+    let hasher = client
+        .inner
+        .read()
+        .expect("Lock shouldn't be poisoned")
+        .hasher;
+
+    let mut block_sub = match client
+        .backend()
+        .stream_finalized_block_headers(hasher)
+        .await
+    {
         Ok(s) => s,
         Err(err) => return Some(Err(err)),
     };

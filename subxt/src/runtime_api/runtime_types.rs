@@ -6,8 +6,8 @@ use super::Payload;
 use crate::{
     backend::{BackendExt, BlockRef},
     client::OnlineClientT,
+    config::{Config, HashFor},
     error::Error,
-    Config,
 };
 use codec::Decode;
 use derive_where::derive_where;
@@ -17,13 +17,13 @@ use std::{future::Future, marker::PhantomData};
 #[derive_where(Clone; Client)]
 pub struct RuntimeApi<T: Config, Client> {
     client: Client,
-    block_ref: BlockRef<T::Hash>,
+    block_ref: BlockRef<HashFor<T>>,
     _marker: PhantomData<T>,
 }
 
 impl<T: Config, Client> RuntimeApi<T, Client> {
     /// Create a new [`RuntimeApi`]
-    pub(crate) fn new(client: Client, block_ref: BlockRef<T::Hash>) -> Self {
+    pub(crate) fn new(client: Client, block_ref: BlockRef<HashFor<T>>) -> Self {
         Self {
             client,
             block_ref,

@@ -31,7 +31,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f0deed1e0edfc6a9be95417288c0e1099b1eeec3 # v2.7.7
+        uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
 
       # This starts a substrate node and runs a few subxt cli child processes to fetch metadata from it and generate code.
       # In particular it generates:
@@ -41,7 +41,7 @@ jobs:
       - name: Fetch Artifacts
         run: cargo run --bin artifacts
 
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: app-token
         with:
           app-id: ${{ secrets.SUBXT_PR_MAKER_APP_ID }}

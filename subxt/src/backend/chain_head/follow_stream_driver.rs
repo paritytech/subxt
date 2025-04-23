@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
-use crate::config::BlockHash;
+use crate::config::Hash;
 use crate::error::{Error, RpcError};
 use futures::stream::{Stream, StreamExt};
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -18,15 +18,15 @@ use subxt_rpcs::methods::chain_head::{FollowEvent, Initialized, RuntimeEvent};
 /// blocks since then, as if they were each creating a unique `chainHead_follow` subscription). This
 /// is the "top" layer of our follow stream subscriptions, and the one that's interacted with elsewhere.
 #[derive(Debug)]
-pub struct FollowStreamDriver<Hash: BlockHash> {
-    inner: FollowStreamUnpin<Hash>,
-    shared: Shared<Hash>,
+pub struct FollowStreamDriver<H: Hash> {
+    inner: FollowStreamUnpin<H>,
+    shared: Shared<H>,
 }
 
-impl<Hash: BlockHash> FollowStreamDriver<Hash> {
+impl<H: Hash> FollowStreamDriver<H> {
     /// Create a new [`FollowStreamDriver`]. This must be polled by some executor
     /// in order for any progress to be made. Things can subscribe to events.
-    pub fn new(follow_unpin: FollowStreamUnpin<Hash>) -> Self {
+    pub fn new(follow_unpin: FollowStreamUnpin<H>) -> Self {
         Self {
             inner: follow_unpin,
             shared: Shared::default(),
@@ -34,14 +34,14 @@ impl<Hash: BlockHash> FollowStreamDriver<Hash> {
     }
 
     /// Return a handle from which we can create new subscriptions to follow events.
-    pub fn handle(&self) -> FollowStreamDriverHandle<Hash> {
+    pub fn handle(&self) -> FollowStreamDriverHandle<H> {
         FollowStreamDriverHandle {
             shared: self.shared.clone(),
         }
     }
 }
 
-impl<Hash: BlockHash> Stream for FollowStreamDriver<Hash> {
+impl<H: Hash> Stream for FollowStreamDriver<H> {
     type Item = Result<(), Error>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
@@ -65,13 +65,13 @@ impl<Hash: BlockHash> Stream for FollowStreamDriver<Hash> {
 /// A handle that can be used to create subscribers, but that doesn't
 /// itself subscribe to events.
 #[derive(Debug, Clone)]
-pub struct FollowStreamDriverHandle<Hash: BlockHash> {
-    shared: Shared<Hash>,
+pub struct FollowStreamDriverHandle<H: Hash> {
+    shared: Shared<H>,
 }
 
-impl<Hash: BlockHash> FollowStreamDriverHandle<Hash> {
+impl<H: Hash> FollowStreamDriverHandle<H> {
     /// Subscribe to follow events.
-    pub fn subscribe(&self) -> FollowStreamDriverSubscription<Hash> {
+    pub fn subscribe(&self) -> FollowStreamDriverSubscription<H> {
         self.shared.subscribe()
     }
 }
@@ -82,15 +82,15 @@ impl<Hash: BlockHash> FollowStreamDriverHandle<Hash> {
 /// runtime information, and then any new/best block events and so on received since
 /// the latest finalized block.
 #[derive(Debug)]
-pub struct FollowStreamDriverSubscription<Hash: BlockHash> {
+pub struct FollowStreamDriverSubscription<H: Hash> {
     id: usize,
     done: bool,
-    shared: Shared<Hash>,
-    local_items: VecDeque<FollowStreamMsg<BlockRef<Hash>>>,
+    shared: Shared<H>,
+    local_items: VecDeque<FollowStreamMsg<BlockRef<H>>>,
 }
 
-impl<Hash: BlockHash> Stream for FollowStreamDriverSubscription<Hash> {
-    type Item = FollowStreamMsg<BlockRef<Hash>>;
+impl<H: Hash> Stream for FollowStreamDriverSubscription<H> {
+    type Item = FollowStreamMsg<BlockRef<H>>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         if self.done {
@@ -122,7 +122,7 @@ impl<Hash: BlockHash> Stream for FollowStreamDriverSubscription<Hash> {
     }
 }
 
-impl<Hash: BlockHash> FollowStreamDriverSubscription<Hash> {
+impl<H: Hash> FollowStreamDriverSubscription<H> {
     /// Return the current subscription ID. If the subscription has stopped, then this will
     /// wait until a new subscription has started with a new ID.
     pub async fn subscription_id(self) -> Option<String> {
@@ -138,18 +138,18 @@ impl<Hash: BlockHash> FollowStreamDriverSubscription<Hash> {
     }
 
     /// Subscribe to the follow events, ignoring any other messages.
-    pub fn events(self) -> impl Stream<Item = FollowEvent<BlockRef<Hash>>> + Send + Sync {
+    pub fn events(self) -> impl Stream<Item = FollowEvent<BlockRef<H>>> + Send + Sync {
         self.filter_map(|ev| std::future::ready(ev.into_event()))
     }
 }
 
-impl<Hash: BlockHash> Clone for FollowStreamDriverSubscription<Hash> {
+impl<H: Hash> Clone for FollowStreamDriverSubscription<H> {
     fn clone(&self) -> Self {
         self.shared.subscribe()
     }
 }
 
-impl<Hash: BlockHash> Drop for FollowStreamDriverSubscription<Hash> {
+impl<H: Hash> Drop for FollowStreamDriverSubscription<H> {
     fn drop(&mut self) {
         self.shared.remove_sub(self.id);
     }
@@ -159,25 +159,25 @@ impl<Hash: BlockHash> Drop for FollowStreamDriverSubscription<Hash> {
 /// events to any subscribers, and subscribers will access it to pull the
 /// events destined for themselves.
 #[derive(Debug, Clone)]
-struct Shared<Hash: BlockHash>(Arc<Mutex<SharedState<Hash>>>);
+struct Shared<H: Hash>(Arc<Mutex<SharedState<H>>>);
 
 #[derive(Debug)]
-struct SharedState<Hash: BlockHash> {
+struct SharedState<H: Hash> {
     done: bool,
     next_id: usize,
-    subscribers: HashMap<usize, SubscriberDetails<Hash>>,
+    subscribers: HashMap<usize, SubscriberDetails<H>>,
     /// Keep a buffer of all events that should be handed to a new subscription.
-    block_events_for_new_subscriptions: VecDeque<FollowEvent<BlockRef<Hash>>>,
+    block_events_for_new_subscriptions: VecDeque<FollowEvent<BlockRef<H>>>,
     // Keep track of the subscription ID we send out on new subs.
     current_subscription_id: Option<String>,
     // Keep track of the init message we send out on new subs.
-    current_init_message: Option<Initialized<BlockRef<Hash>>>,
+    current_init_message: Option<Initialized<BlockRef<H>>>,
     // Runtime events by block hash; we need to track these to know
     // whether the runtime has changed when we see a finalized block notification.
-    seen_runtime_events: HashMap<Hash, RuntimeEvent>,
+    seen_runtime_events: HashMap<H, RuntimeEvent>,
 }
 
-impl<Hash: BlockHash> Default for Shared<Hash> {
+impl<H: Hash> Default for Shared<H> {
     fn default() -> Self {
         Shared(Arc::new(Mutex::new(SharedState {
             next_id: 1,
@@ -191,7 +191,7 @@ impl<Hash: BlockHash> Default for Shared<Hash> {
     }
 }
 
-impl<Hash: BlockHash> Shared<Hash> {
+impl<H: Hash> Shared<H> {
     /// Set the shared state to "done"; no more items will be handed to it.
     pub fn done(&self) {
         let mut shared = self.0.lock().unwrap();
@@ -216,7 +216,7 @@ impl<Hash: BlockHash> Shared<Hash> {
         &self,
         sub_id: usize,
         waker: &Waker,
-    ) -> Option<VecDeque<FollowStreamMsg<BlockRef<Hash>>>> {
+    ) -> Option<VecDeque<FollowStreamMsg<BlockRef<H>>>> {
         let mut shared = self.0.lock().unwrap();
 
         let is_done = shared.done;
@@ -236,7 +236,7 @@ impl<Hash: BlockHash> Shared<Hash> {
     }
 
     /// Push a new item out to subscribers.
-    pub fn push_item(&self, item: FollowStreamMsg<BlockRef<Hash>>) {
+    pub fn push_item(&self, item: FollowStreamMsg<BlockRef<H>>) {
         let mut shared = self.0.lock().unwrap();
         let shared = shared.deref_mut();
 
@@ -289,7 +289,7 @@ impl<Hash: BlockHash> Shared<Hash> {
                 // the state at the head of the chain, therefore it is correct to remove those as well.
                 // Idem for the pruned hashes; they will never be reported again and we remove
                 // them from the window of events.
-                let to_remove: HashSet<Hash> = finalized_ev
+                let to_remove: HashSet<H> = finalized_ev
                     .finalized_block_hashes
                     .iter()
                     .chain(finalized_ev.pruned_block_hashes.iter())
@@ -337,7 +337,7 @@ impl<Hash: BlockHash> Shared<Hash> {
     }
 
     /// Create a new subscription.
-    pub fn subscribe(&self) -> FollowStreamDriverSubscription<Hash> {
+    pub fn subscribe(&self) -> FollowStreamDriverSubscription<H> {
         let mut shared = self.0.lock().unwrap();
 
         let id = shared.next_id;
@@ -382,30 +382,30 @@ impl<Hash: BlockHash> Shared<Hash> {
 /// Details for a given subscriber: any items it's not yet claimed,
 /// and a way to wake it up when there are more items for it.
 #[derive(Debug)]
-struct SubscriberDetails<Hash: BlockHash> {
-    items: VecDeque<FollowStreamMsg<BlockRef<Hash>>>,
+struct SubscriberDetails<H: Hash> {
+    items: VecDeque<FollowStreamMsg<BlockRef<H>>>,
     waker: Option<Waker>,
 }
 
 /// A stream that subscribes to finalized blocks
 /// and indicates whether a block was missed if was restarted.
 #[derive(Debug)]
-pub struct FollowStreamFinalizedHeads<Hash: BlockHash, F> {
-    stream: FollowStreamDriverSubscription<Hash>,
+pub struct FollowStreamFinalizedHeads<H: Hash, F> {
+    stream: FollowStreamDriverSubscription<H>,
     sub_id: Option<String>,
-    last_seen_block: Option<BlockRef<Hash>>,
+    last_seen_block: Option<BlockRef<H>>,
     f: F,
     is_done: bool,
 }
 
-impl<Hash: BlockHash, F> Unpin for FollowStreamFinalizedHeads<Hash, F> {}
+impl<H: Hash, F> Unpin for FollowStreamFinalizedHeads<H, F> {}
 
-impl<Hash, F> FollowStreamFinalizedHeads<Hash, F>
+impl<H, F> FollowStreamFinalizedHeads<H, F>
 where
-    Hash: BlockHash,
-    F: Fn(FollowEvent<BlockRef<Hash>>) -> Vec<BlockRef<Hash>>,
+    H: Hash,
+    F: Fn(FollowEvent<BlockRef<H>>) -> Vec<BlockRef<H>>,
 {
-    pub fn new(stream: FollowStreamDriverSubscription<Hash>, f: F) -> Self {
+    pub fn new(stream: FollowStreamDriverSubscription<H>, f: F) -> Self {
         Self {
             stream,
             sub_id: None,
@@ -416,12 +416,12 @@ where
     }
 }
 
-impl<Hash, F> Stream for FollowStreamFinalizedHeads<Hash, F>
+impl<H, F> Stream for FollowStreamFinalizedHeads<H, F>
 where
-    Hash: BlockHash,
-    F: Fn(FollowEvent<BlockRef<Hash>>) -> Vec<BlockRef<Hash>>,
+    H: Hash,
+    F: Fn(FollowEvent<BlockRef<H>>) -> Vec<BlockRef<H>>,
 {
-    type Item = Result<(String, Vec<BlockRef<Hash>>), Error>;
+    type Item = Result<(String, Vec<BlockRef<H>>), Error>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         if self.is_done {
@@ -493,14 +493,14 @@ mod test_utils {
     use super::*;
 
     /// Return a `FollowStreamDriver`
-    pub fn test_follow_stream_driver_getter<Hash, F, I>(
+    pub fn test_follow_stream_driver_getter<H, F, I>(
         events: F,
         max_life: usize,
-    ) -> FollowStreamDriver<Hash>
+    ) -> FollowStreamDriver<H>
     where
-        Hash: BlockHash + 'static,
+        H: Hash + 'static,
         F: Fn() -> I + Send + 'static,
-        I: IntoIterator<Item = Result<FollowEvent<Hash>, Error>>,
+        I: IntoIterator<Item = Result<FollowEvent<H>, Error>>,
     {
         let (stream, _) = test_unpin_stream_getter(events, max_life);
         FollowStreamDriver::new(stream)

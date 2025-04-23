@@ -4,7 +4,12 @@
 
 use super::view_function_types::ViewFunctionsApi;
 
-use crate::{backend::BlockRef, client::OnlineClientT, error::Error, Config};
+use crate::{
+    backend::BlockRef,
+    client::OnlineClientT,
+    config::{Config, HashFor},
+    error::Error,
+};
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
 
@@ -31,7 +36,7 @@ where
     Client: OnlineClientT<T>,
 {
     /// Obtain an interface to call View Functions at some block hash.
-    pub fn at(&self, block_ref: impl Into<BlockRef<T::Hash>>) -> ViewFunctionsApi<T, Client> {
+    pub fn at(&self, block_ref: impl Into<BlockRef<HashFor<T>>>) -> ViewFunctionsApi<T, Client> {
         ViewFunctionsApi::new(self.client.clone(), block_ref.into())
     }
 

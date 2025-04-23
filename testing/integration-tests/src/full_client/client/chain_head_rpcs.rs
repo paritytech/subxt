@@ -15,7 +15,6 @@ use futures::Stream;
 use subxt::{
     config::Hasher,
     utils::{AccountId32, MultiAddress},
-    SubstrateConfig,
 };
 use subxt_rpcs::methods::chain_head::{
     FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
@@ -329,6 +328,7 @@ async fn transaction_v1_broadcast() {
 
     let ctx = test_context().await;
     let api = ctx.client();
+    let hasher = api.hasher();
     let rpc = ctx.chainhead_rpc_methods().await;
 
     let tx_payload = node_runtime::tx()
@@ -374,7 +374,7 @@ async fn transaction_v1_broadcast() {
 
         let Some(ext) = block_extrinsics
             .iter()
-            .find(|ext| <SubstrateConfig as subxt::Config>::Hasher::hash(ext.bytes()) == tx_hash)
+            .find(|ext| hasher.hash(ext.bytes()) == tx_hash)
         else {
             continue;
         };

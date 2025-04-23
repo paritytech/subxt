@@ -15,7 +15,6 @@ mod eth_runtime {}
 enum EthRuntimeConfig {}
 
 impl subxt::Config for EthRuntimeConfig {
-    type Hash = subxt::utils::H256;
     type AccountId = AccountId20;
     type Address = AccountId20;
     type Signature = Signature;

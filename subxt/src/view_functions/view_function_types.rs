@@ -3,7 +3,12 @@
 // see LICENSE for license details.
 
 use super::Payload;
-use crate::{backend::BlockRef, client::OnlineClientT, error::Error, Config};
+use crate::{
+    backend::BlockRef,
+    client::OnlineClientT,
+    config::{Config, HashFor},
+    error::Error,
+};
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
 
@@ -11,13 +16,13 @@ use std::{future::Future, marker::PhantomData};
 #[derive_where(Clone; Client)]
 pub struct ViewFunctionsApi<T: Config, Client> {
     client: Client,
-    block_ref: BlockRef<T::Hash>,
+    block_ref: BlockRef<HashFor<T>>,
     _marker: PhantomData<T>,
 }
 
 impl<T: Config, Client> ViewFunctionsApi<T, Client> {
     /// Create a new [`ViewFunctionsApi`]
-    pub(crate) fn new(client: Client, block_ref: BlockRef<T::Hash>) -> Self {
+    pub(crate) fn new(client: Client, block_ref: BlockRef<HashFor<T>>) -> Self {
         Self {
             client,
             block_ref,

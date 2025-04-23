@@ -3,7 +3,7 @@ use codec::Encode;
 use subxt::client::ClientState;
 use subxt::config::{
     transaction_extensions::Params, Config, ExtrinsicParams, ExtrinsicParamsEncoder,
-    ExtrinsicParamsError,
+    ExtrinsicParamsError, HashFor,
 };
 use subxt_signer::sr25519::dev;
 
@@ -15,7 +15,6 @@ pub mod runtime {}
 pub enum CustomConfig {}
 
 impl Config for CustomConfig {
-    type Hash = subxt::utils::H256;
     type AccountId = subxt::utils::AccountId32;
     type Address = subxt::utils::MultiAddress<Self::AccountId, ()>;
     type Signature = subxt::utils::MultiSignature;
@@ -28,7 +27,7 @@ impl Config for CustomConfig {
 // This represents some arbitrary (and nonsensical) custom parameters that
 // will be attached to transaction extra and additional payloads:
 pub struct CustomExtrinsicParams<T: Config> {
-    genesis_hash: T::Hash,
+    genesis_hash: HashFor<T>,
     tip: u128,
     foo: bool,
 }
