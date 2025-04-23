@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::config::Config;
+use crate::config::{Config, HashFor};
 use crate::error::Error;
 use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
 use std::future::Future;
@@ -99,7 +99,7 @@ impl<Hash> FollowStream<Hash> {
     }
 
     /// Create a new [`FollowStream`] given the RPC methods.
-    pub fn from_methods<T: Config>(methods: ChainHeadRpcMethods<T>) -> FollowStream<T::Hash> {
+    pub fn from_methods<T: Config>(methods: ChainHeadRpcMethods<T>) -> FollowStream<HashFor<T>> {
         FollowStream {
             stream_getter: Box::new(move || {
                 let methods = methods.clone();
@@ -115,7 +115,7 @@ impl<Hash> FollowStream<Hash> {
                     };
                     // Map stream errors into the higher level subxt one:
                     let stream = stream.map_err(|e| e.into());
-                    let stream: FollowEventStream<T::Hash> = Box::pin(stream);
+                    let stream: FollowEventStream<HashFor<T>> = Box::pin(stream);
                     // Return both:
                     Ok((stream, sub_id))
                 })

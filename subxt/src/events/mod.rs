@@ -11,7 +11,10 @@ mod events_type;
 
 use crate::client::OnlineClientT;
 use crate::Error;
-use subxt_core::{Config, Metadata};
+use subxt_core::{
+    config::{Config, HashFor},
+    Metadata,
+};
 
 pub use events_client::EventsClient;
 pub use events_type::{EventDetails, EventMetadataDetails, Events, Phase, StaticEvent};
@@ -19,7 +22,7 @@ pub use events_type::{EventDetails, EventMetadataDetails, Events, Phase, StaticE
 /// Creates a new [`Events`] instance by fetching the corresponding bytes at `block_hash` from the client.
 pub async fn new_events_from_client<T, C>(
     metadata: Metadata,
-    block_hash: T::Hash,
+    block_hash: HashFor<T>,
     client: C,
 ) -> Result<Events<T>, Error>
 where

@@ -31,8 +31,9 @@ async fn wasm_ws_transport_works() {
     let client = subxt::client::OnlineClient::<SubstrateConfig>::from_url("ws://127.0.0.1:9944")
         .await
         .unwrap();
+    let hasher = client.hasher();
 
-    let mut stream = client.backend().stream_best_block_headers().await.unwrap();
+    let mut stream = client.backend().stream_best_block_headers(hasher).await.unwrap();
     assert!(stream.next().await.is_some());
 }
 
@@ -41,8 +42,9 @@ async fn wasm_ws_chainhead_works() {
     let rpc = subxt::backend::rpc::RpcClient::from_url("ws://127.0.0.1:9944").await.unwrap();
     let backend = subxt::backend::chain_head::ChainHeadBackendBuilder::new().build_with_background_driver(rpc);
     let client = subxt::client::OnlineClient::<SubstrateConfig>::from_backend(std::sync::Arc::new(backend)).await.unwrap();
+    let hasher = client.hasher();
 
-    let mut stream = client.backend().stream_best_block_headers().await.unwrap();
+    let mut stream = client.backend().stream_best_block_headers(hasher).await.unwrap();
     assert!(stream.next().await.is_some());
 }
 
@@ -50,7 +52,9 @@ async fn wasm_ws_chainhead_works() {
 async fn reconnecting_rpc_client_ws_transport_works() {
     let rpc = ReconnectingRpcClient::builder().build("ws://127.0.0.1:9944".to_string()).await.unwrap();
     let client = subxt::client::OnlineClient::<SubstrateConfig>::from_rpc_client(rpc.clone()).await.unwrap();
-    let mut stream = client.backend().stream_best_block_headers().await.unwrap();
+    let hasher = client.hasher();
+
+    let mut stream = client.backend().stream_best_block_headers(hasher).await.unwrap();
     assert!(stream.next().await.is_some());
 }
 

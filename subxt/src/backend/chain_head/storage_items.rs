@@ -4,7 +4,7 @@
 
 use super::follow_stream_driver::FollowStreamDriverHandle;
 use super::follow_stream_unpin::BlockRef;
-use crate::config::Config;
+use crate::config::{Config, HashFor};
 use crate::error::{Error, RpcError};
 use futures::{FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;
@@ -24,7 +24,7 @@ pub struct StorageItems<T: Config> {
     buffered_responses: VecDeque<StorageResult>,
     continue_call: ContinueFutGetter,
     continue_fut: Option<ContinueFut>,
-    follow_event_stream: FollowEventStream<T::Hash>,
+    follow_event_stream: FollowEventStream<HashFor<T>>,
 }
 
 impl<T: Config> StorageItems<T> {
@@ -33,8 +33,8 @@ impl<T: Config> StorageItems<T> {
     // needed, and stop when done.
     pub async fn from_methods(
         queries: impl Iterator<Item = StorageQuery<&[u8]>>,
-        at: T::Hash,
-        follow_handle: &FollowStreamDriverHandle<T::Hash>,
+        at: HashFor<T>,
+        follow_handle: &FollowStreamDriverHandle<HashFor<T>>,
         methods: ChainHeadRpcMethods<T>,
     ) -> Result<Self, Error> {
         let sub_id = super::get_subscription_id(follow_handle).await?;
@@ -76,7 +76,7 @@ impl<T: Config> StorageItems<T> {
     fn new(
         operation_id: Arc<str>,
         continue_call: ContinueFutGetter,
-        follow_event_stream: FollowEventStream<T::Hash>,
+        follow_event_stream: FollowEventStream<HashFor<T>>,
     ) -> Self {
         Self {
             done: false,

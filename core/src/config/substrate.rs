@@ -11,6 +11,7 @@ use alloc::vec::Vec;
 use codec::{Decode, Encode};
 pub use primitive_types::{H256, U256};
 use serde::{Deserialize, Serialize};
+use subxt_metadata::Metadata;
 
 /// Default set of commonly used types by Substrate runtimes.
 // Note: We only use this at the type level, so it should be impossible to
@@ -21,12 +22,11 @@ use serde::{Deserialize, Serialize};
 pub enum SubstrateConfig {}
 
 impl Config for SubstrateConfig {
-    type Hash = H256;
     type AccountId = AccountId32;
     type Address = MultiAddress<Self::AccountId, u32>;
     type Signature = MultiSignature;
-    type Hasher = BlakeTwo256;
-    type Header = SubstrateHeader<u32, BlakeTwo256>;
+    type Hasher = DynamicHasher256;
+    type Header = SubstrateHeader<u32, DynamicHasher256>;
     type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
     type AssetId = u32;
 }
@@ -39,14 +39,70 @@ pub type SubstrateExtrinsicParams<T> = DefaultExtrinsicParams<T>;
 /// This is what you provide to methods like `sign_and_submit()`.
 pub type SubstrateExtrinsicParamsBuilder<T> = DefaultExtrinsicParamsBuilder<T>;
 
-/// A type that can hash values using the blaks2_256 algorithm.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Encode)]
+/// A hasher (ie implements [`Hasher`]) which hashes values using the blaks2_256 algorithm.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BlakeTwo256;
 
 impl Hasher for BlakeTwo256 {
     type Output = H256;
-    fn hash(s: &[u8]) -> Self::Output {
+
+    fn new(_metadata: &Metadata) -> Self {
+        Self
+    }
+
+    fn hash(&self, s: &[u8]) -> Self::Output {
         sp_crypto_hashing::blake2_256(s).into()
+    }
+}
+
+/// A hasher (ie implements [`Hasher`]) which inspects the runtime metadata to decide how to
+/// hash types, falling back to blake2_256 if the hasher information is not available.
+///
+/// Currently this hasher supports only `BlakeTwo256` and `Keccak256` hashing methods.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DynamicHasher256(HashType);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum HashType {
+    // Most chains use this:
+    BlakeTwo256,
+    // Chains like Hyperbridge use this (tends to be eth compatible chains)
+    Keccak256,
+    // If we don't have V16 metadata, we'll emit this and default to BlakeTwo256.
+    Unknown,
+}
+
+impl Hasher for DynamicHasher256 {
+    type Output = H256;
+
+    fn new(metadata: &Metadata) -> Self {
+        // Determine the Hash associated type used for the current chain, if possible.
+        let Some(system_pallet) = metadata.pallet_by_name("System") else {
+            return Self(HashType::Unknown);
+        };
+        let Some(hash_ty_id) = system_pallet.associated_type_id("Hashing") else {
+            return Self(HashType::Unknown);
+        };
+
+        let ty = metadata
+            .types()
+            .resolve(hash_ty_id)
+            .expect("Type information for 'Hashing' associated type should be in metadata");
+
+        let hash_type = match ty.path.ident().as_deref().unwrap_or("") {
+            "BlakeTwo256" => HashType::BlakeTwo256,
+            "Keccak256" => HashType::Keccak256,
+            _ => HashType::Unknown,
+        };
+
+        Self(hash_type)
+    }
+
+    fn hash(&self, s: &[u8]) -> Self::Output {
+        match self.0 {
+            HashType::BlakeTwo256 | HashType::Unknown => sp_crypto_hashing::blake2_256(s).into(),
+            HashType::Keccak256 => sp_crypto_hashing::keccak_256(s).into(),
+        }
     }
 }
 
@@ -75,11 +131,12 @@ pub struct SubstrateHeader<N: Copy + Into<U256> + TryFrom<U256>, H: Hasher> {
 impl<N, H> Header for SubstrateHeader<N, H>
 where
     N: Copy + Into<u64> + Into<U256> + TryFrom<U256> + Encode,
-    H: Hasher + Encode,
+    H: Hasher,
     SubstrateHeader<N, H>: Encode + Decode,
 {
     type Number = N;
     type Hasher = H;
+
     fn number(&self) -> Self::Number {
         self.number
     }
