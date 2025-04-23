@@ -132,7 +132,11 @@ fn from_transaction_extension_metadata(
 fn from_extrinsic_metadata(value: v16::ExtrinsicMetadata<PortableForm>) -> ExtrinsicMetadata {
     ExtrinsicMetadata {
         supported_versions: value.versions,
-        transaction_extensions_by_version: value.transaction_extensions_by_version,
+        transaction_extensions_by_version: value
+            .transaction_extensions_by_version
+            .into_iter()
+            .map(|(version, idxs)| (version, idxs.into_iter().map(|idx| idx.0).collect()))
+            .collect(),
         transaction_extensions: value
             .transaction_extensions
             .into_iter()
