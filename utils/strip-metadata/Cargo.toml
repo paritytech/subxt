@@ -14,6 +14,7 @@ homepage.workspace = true
 description = "subxt utility to strip metadata"
 
 [dependencies]
+codec = { workspace = true }
 frame-metadata = { workspace = true, features = ["std"] }
 scale-info = { workspace = true, features = ["std"] }
 either = { workspace = true }

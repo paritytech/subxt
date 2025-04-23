@@ -5459,6 +5459,7 @@ version = "0.41.0"
 dependencies = [
  "either",
  "frame-metadata 21.0.0",
+ "parity-scale-codec",
  "scale-info",
 ]
 
