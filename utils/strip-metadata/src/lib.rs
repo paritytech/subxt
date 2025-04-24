@@ -439,6 +439,7 @@ mod test {
     use std::collections::BTreeMap;
 
     use super::*;
+    use codec::Compact;
     use scale_info::meta_type;
 
     /// Create dummy types that we can check the presense of with is_in_types.
@@ -817,7 +818,7 @@ mod test {
                 view_functions: vec![v16::PalletViewFunctionMetadata {
                     name: "some_view_function",
                     id: [0; 32],
-                    inputs: vec![v16::PalletViewFunctionParamMetadata {
+                    inputs: vec![v16::FunctionParamMetadata {
                         name: "input1",
                         ty: meta_type::<F>(),
                     }],
@@ -842,12 +843,12 @@ mod test {
         let runtime_apis = vec![
             v16::RuntimeApiMetadata {
                 name: "SomeApi",
-                version: 2,
+                version: Compact(2),
                 docs: vec![],
                 deprecation_info: v16::DeprecationStatus::NotDeprecated,
                 methods: vec![v16::RuntimeApiMethodMetadata {
                     name: "some_method",
-                    inputs: vec![v16::RuntimeApiMethodParamMetadata {
+                    inputs: vec![v16::FunctionParamMetadata {
                         name: "input1",
                         ty: meta_type::<J>(),
                     }],
@@ -858,12 +859,12 @@ mod test {
             },
             v16::RuntimeApiMetadata {
                 name: "AnotherApi",
-                version: 1,
+                version: Compact(1),
                 docs: vec![],
                 deprecation_info: v16::DeprecationStatus::NotDeprecated,
                 methods: vec![v16::RuntimeApiMethodMetadata {
                     name: "another_method",
-                    inputs: vec![v16::RuntimeApiMethodParamMetadata {
+                    inputs: vec![v16::FunctionParamMetadata {
                         name: "input1",
                         ty: meta_type::<L>(),
                     }],

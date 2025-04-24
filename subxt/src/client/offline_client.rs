@@ -11,6 +11,7 @@ use crate::{
     runtime_api::RuntimeApiClient,
     storage::StorageClient,
     tx::TxClient,
+    view_functions::ViewFunctionsClient,
     Metadata,
 };
 
@@ -67,9 +68,14 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
         BlocksClient::new(self.clone())
     }
 
-    /// Work with runtime API.
+    /// Work with runtime APIs.
     fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
         RuntimeApiClient::new(self.clone())
+    }
+
+    /// Work with View Functions.
+    fn view_functions(&self) -> ViewFunctionsClient<T, Self> {
+        ViewFunctionsClient::new(self.clone())
     }
 
     /// Work this custom types.
@@ -148,6 +154,21 @@ impl<T: Config> OfflineClient<T> {
     /// Access constants.
     pub fn constants(&self) -> ConstantsClient<T, Self> {
         <Self as OfflineClientT<T>>::constants(self)
+    }
+
+    /// Work with blocks.
+    pub fn blocks(&self) -> BlocksClient<T, Self> {
+        <Self as OfflineClientT<T>>::blocks(self)
+    }
+
+    /// Work with runtime APIs.
+    pub fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
+        <Self as OfflineClientT<T>>::runtime_api(self)
+    }
+
+    /// Work with View Functions.
+    pub fn view_functions(&self) -> ViewFunctionsClient<T, Self> {
+        <Self as OfflineClientT<T>>::view_functions(self)
     }
 
     /// Access custom types
