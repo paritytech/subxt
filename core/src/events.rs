@@ -722,7 +722,7 @@ mod tests {
         let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
-        // construst an Events object to iterate them:
+        // construct an Events object to iterate them:
         let event1 = Event::A(1);
         let event2 = Event::B(true);
         let event3 = Event::A(234);
