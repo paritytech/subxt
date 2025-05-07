@@ -168,11 +168,7 @@ mod test {
 
     #[test]
     fn ss58_is_compatible_with_substrate_impl() {
-        let keyrings = vec![
-            Keyring::Alice,
-            Keyring::Bob,
-            Keyring::Charlie,
-        ];
+        let keyrings = vec![Keyring::Alice, Keyring::Bob, Keyring::Charlie];
 
         for keyring in keyrings {
             let substrate_account = keyring.to_account_id();
