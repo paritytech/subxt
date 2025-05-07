@@ -164,14 +164,14 @@ impl core::str::FromStr for AccountId32 {
 mod test {
     use super::*;
     use sp_core::{self, crypto::Ss58Codec};
-    use sp_keyring::AccountKeyring;
+    use sp_keyring::sr25519::Keyring;
 
     #[test]
     fn ss58_is_compatible_with_substrate_impl() {
         let keyrings = vec![
-            AccountKeyring::Alice,
-            AccountKeyring::Bob,
-            AccountKeyring::Charlie,
+            Keyring::Alice,
+            Keyring::Bob,
+            Keyring::Charlie,
         ];
 
         for keyring in keyrings {
