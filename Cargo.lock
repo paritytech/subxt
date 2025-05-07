@@ -1753,6 +1753,17 @@ dependencies = [
  "cfg-if",
  "parity-scale-codec",
  "scale-info",
+]
+
+[[package]]
+name = "frame-metadata"
+version = "23.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d8c26fcb0454397c522c05fdad5380c4e622f8a875638af33bff5a320d1fc965"
+dependencies = [
+ "cfg-if",
+ "parity-scale-codec",
+ "scale-info",
  "serde",
 ]
 
@@ -1897,7 +1908,7 @@ dependencies = [
 name = "generate-custom-metadata"
 version = "0.41.0"
 dependencies = [
- "frame-metadata 21.0.0",
+ "frame-metadata 23.0.0",
  "parity-scale-codec",
  "scale-info",
 ]
@@ -2407,7 +2418,7 @@ dependencies = [
  "assert_matches",
  "cfg_aliases",
  "frame-decode",
- "frame-metadata 21.0.0",
+ "frame-metadata 23.0.0",
  "futures",
  "hex",
  "parity-scale-codec",
@@ -5192,7 +5203,7 @@ dependencies = [
  "bitvec",
  "derive-where",
  "either",
- "frame-metadata 21.0.0",
+ "frame-metadata 23.0.0",
  "futures",
  "hex",
  "http-body",
@@ -5234,7 +5245,7 @@ version = "0.41.0"
 dependencies = [
  "clap",
  "color-eyre",
- "frame-metadata 21.0.0",
+ "frame-metadata 23.0.0",
  "heck",
  "hex",
  "indoc",
@@ -5263,7 +5274,7 @@ dependencies = [
 name = "subxt-codegen"
 version = "0.41.0"
 dependencies = [
- "frame-metadata 21.0.0",
+ "frame-metadata 23.0.0",
  "getrandom",
  "heck",
  "parity-scale-codec",
@@ -5286,7 +5297,7 @@ dependencies = [
  "blake2",
  "derive-where",
  "frame-decode",
- "frame-metadata 21.0.0",
+ "frame-metadata 23.0.0",
  "hashbrown 0.14.5",
  "hex",
  "impl-serde",
@@ -5350,6 +5361,7 @@ dependencies = [
  "sp-maybe-compressed-blob",
  "sp-state-machine",
  "subxt-codegen",
+ "subxt-metadata",
  "subxt-utils-fetchmetadata",
  "syn 2.0.87",
 ]
@@ -5361,7 +5373,7 @@ dependencies = [
  "bitvec",
  "criterion",
  "frame-decode",
- "frame-metadata 21.0.0",
+ "frame-metadata 23.0.0",
  "hashbrown 0.14.5",
  "parity-scale-codec",
  "scale-info",
@@ -5376,7 +5388,7 @@ version = "0.41.0"
 dependencies = [
  "derive-where",
  "finito",
- "frame-metadata 21.0.0",
+ "frame-metadata 23.0.0",
  "futures",
  "getrandom",
  "hex",
@@ -5444,7 +5456,7 @@ dependencies = [
 name = "subxt-utils-fetchmetadata"
 version = "0.41.0"
 dependencies = [
- "frame-metadata 21.0.0",
+ "frame-metadata 23.0.0",
  "hex",
  "jsonrpsee",
  "parity-scale-codec",
@@ -5458,7 +5470,7 @@ name = "subxt-utils-stripmetadata"
 version = "0.41.0"
 dependencies = [
  "either",
- "frame-metadata 21.0.0",
+ "frame-metadata 23.0.0",
  "parity-scale-codec",
  "scale-info",
 ]
@@ -5937,7 +5949,7 @@ checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 name = "ui-tests"
 version = "0.41.0"
 dependencies = [
- "frame-metadata 21.0.0",
+ "frame-metadata 23.0.0",
  "generate-custom-metadata",
  "hex",
  "parity-scale-codec",
