@@ -345,7 +345,7 @@ async fn decode_transaction_extensions_from_blocks() {
         "CheckMetadataHash",
         "WeightReclaim",
     ];
-    
+
     assert_eq!(
         extensions1.iter().count(),
         expected_transaction_extensions.len()
