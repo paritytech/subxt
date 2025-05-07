@@ -80,7 +80,7 @@ derive-where = "1.2.7"
 either = { version = "1.13.0", default-features = false }
 finito = { version = "0.1.0", default-features = false }
 frame-decode = { version = "0.7.1", default-features = false }
-frame-metadata = { version = "21.0.0", default-features = false, features = ["unstable"] }
+frame-metadata = { version = "23.0.0", default-features = false, features = ["unstable"] }
 futures = { version = "0.3.31", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
 hashbrown = "0.14.5"

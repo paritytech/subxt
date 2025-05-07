@@ -195,15 +195,14 @@ impl<T: Config> OnlineClient<T> {
         backend: &dyn Backend<T>,
         block_hash: HashFor<T>,
     ) -> Result<Metadata, Error> {
-        // This is the latest stable metadata that subxt can utilize.
-        const V15_METADATA_VERSION: u32 = 15;
+        // The metadata versions we support in Subxt, from newest to oldest.
+        use subxt_metadata::SUPPORTED_METADATA_VERSIONS;
 
-        // Try to fetch the metadata version.
-        if let Ok(bytes) = backend
-            .metadata_at_version(V15_METADATA_VERSION, block_hash)
-            .await
-        {
-            return Ok(bytes);
+        // Try to fetch each version that we support in order from newest to oldest.
+        for version in SUPPORTED_METADATA_VERSIONS {
+            if let Ok(bytes) = backend.metadata_at_version(version, block_hash).await {
+                return Ok(bytes);
+            }
         }
 
         // If that fails, fetch the metadata V14 using the old API.
