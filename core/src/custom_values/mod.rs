@@ -33,7 +33,7 @@
 pub mod address;
 
 use crate::utils::Yes;
-use crate::{error::MetadataError, metadata::DecodeWithMetadata, Error, Metadata};
+use crate::{Error, Metadata, error::MetadataError, metadata::DecodeWithMetadata};
 use address::Address;
 use alloc::vec::Vec;
 
@@ -96,8 +96,8 @@ mod tests {
     use alloc::collections::BTreeMap;
     use codec::Encode;
     use scale_decode::DecodeAsType;
-    use scale_info::form::PortableForm;
     use scale_info::TypeInfo;
+    use scale_info::form::PortableForm;
 
     use alloc::borrow::ToOwned;
     use alloc::string::String;

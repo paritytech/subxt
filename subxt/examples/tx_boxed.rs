@@ -36,7 +36,7 @@ fn remark() -> Box<dyn subxt::tx::Payload> {
 }
 
 fn dynamic_remark() -> Box<dyn subxt::tx::Payload> {
-    use subxt::dynamic::{tx, Value};
+    use subxt::dynamic::{Value, tx};
     let tx_payload = tx("System", "remark", vec![Value::from_bytes("Hello")]);
 
     Box::new(tx_payload)

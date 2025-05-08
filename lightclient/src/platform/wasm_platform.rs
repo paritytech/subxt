@@ -141,7 +141,9 @@ impl PlatformRef for SubxtPlatform {
             // The API user of the `PlatformRef` trait is never supposed to open connections of
             // a type that isn't supported.
             _ => {
-                unreachable!("Connecting to an address not supported. This code path indicates a bug in smoldot. Please raise an issue at https://github.com/smol-dot/smoldot/issues")
+                unreachable!(
+                    "Connecting to an address not supported. This code path indicates a bug in smoldot. Please raise an issue at https://github.com/smol-dot/smoldot/issues"
+                )
             }
         };
 
@@ -157,7 +159,9 @@ impl PlatformRef for SubxtPlatform {
     }
 
     fn connect_multistream(&self, _address: MultiStreamAddress) -> Self::MultiStreamConnectFuture {
-        panic!("Multistreams are not currently supported. This code path indicates a bug in smoldot. Please raise an issue at https://github.com/smol-dot/smoldot/issues")
+        panic!(
+            "Multistreams are not currently supported. This code path indicates a bug in smoldot. Please raise an issue at https://github.com/smol-dot/smoldot/issues"
+        )
     }
 
     fn open_out_substream(&self, c: &mut Self::MultiStream) {

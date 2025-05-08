@@ -17,7 +17,9 @@ pub enum Error {
     #[error("Request error: {0}")]
     RequestError(#[from] jsonrpsee::core::ClientError),
     /// Failed IO when fetching from a file.
-    #[error("Failed IO for {0}, make sure that you are providing the correct file path for metadata: {1}")]
+    #[error(
+        "Failed IO for {0}, make sure that you are providing the correct file path for metadata: {1}"
+    )]
     Io(String, std::io::Error),
     /// URL scheme is not http, https, ws or wss.
     #[error("'{0}' not supported, supported URI schemes are http, https, ws or wss.")]

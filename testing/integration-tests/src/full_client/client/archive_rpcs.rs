@@ -7,7 +7,7 @@
 
 use crate::{
     subxt_test, test_context,
-    utils::{node_runtime, TestNodeProcess},
+    utils::{TestNodeProcess, node_runtime},
 };
 use codec::Encode;
 use futures::{Stream, StreamExt};
@@ -110,7 +110,9 @@ async fn archive_v1_finalized_height() {
         // if the height we fetch has grown by more than 1.
         if let Some(last) = last_block_height {
             if archive_block_height != last && archive_block_height != last + 1 {
-                panic!("Archive block height should increase 1 at a time, but jumped from {last} to {archive_block_height}");
+                panic!(
+                    "Archive block height should increase 1 at a time, but jumped from {last} to {archive_block_height}"
+                );
             }
         }
 

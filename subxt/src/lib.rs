@@ -58,10 +58,10 @@ pub mod view_functions;
 /// Polkadot node.
 pub mod config {
     pub use subxt_core::config::{
-        polkadot, substrate, transaction_extensions, Config, DefaultExtrinsicParams,
-        DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder, Hash, HashFor,
-        Hasher, Header, PolkadotConfig, PolkadotExtrinsicParams, SubstrateConfig,
-        SubstrateExtrinsicParams, TransactionExtension,
+        Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, ExtrinsicParams,
+        ExtrinsicParamsEncoder, Hash, HashFor, Hasher, Header, PolkadotConfig,
+        PolkadotExtrinsicParams, SubstrateConfig, SubstrateExtrinsicParams, TransactionExtension,
+        polkadot, substrate, transaction_extensions,
     };
     pub use subxt_core::error::ExtrinsicParamsError;
 }
@@ -76,8 +76,8 @@ pub mod metadata {
 /// Submit dynamic transactions.
 pub mod dynamic {
     pub use subxt_core::dynamic::{
-        constant, runtime_api_call, storage, tx, view_function_call, At, DecodedValue,
-        DecodedValueThunk, Value,
+        At, DecodedValue, DecodedValueThunk, Value, constant, runtime_api_call, storage, tx,
+        view_function_call,
     };
 }
 

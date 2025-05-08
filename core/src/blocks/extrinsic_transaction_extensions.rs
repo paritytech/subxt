@@ -2,12 +2,12 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::config::TransactionExtension;
 use crate::config::transaction_extensions::{
     ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
 };
-use crate::config::TransactionExtension;
 use crate::dynamic::Value;
-use crate::{config::Config, error::Error, Metadata};
+use crate::{Metadata, config::Config, error::Error};
 use frame_decode::extrinsics::ExtrinsicExtensions;
 use scale_decode::DecodeAsType;
 
@@ -35,7 +35,7 @@ impl<'a, T: Config> ExtrinsicTransactionExtensions<'a, T> {
     }
 
     /// Returns an iterator over each of the signed extension details of the extrinsic.
-    pub fn iter(&self) -> impl Iterator<Item = ExtrinsicTransactionExtension<T>> {
+    pub fn iter(&self) -> impl Iterator<Item = ExtrinsicTransactionExtension<'a, T>> + use<'a, T> {
         self.decoded_info
             .iter()
             .map(|s| ExtrinsicTransactionExtension {

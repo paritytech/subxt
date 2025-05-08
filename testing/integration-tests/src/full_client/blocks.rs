@@ -12,8 +12,8 @@ use crate::utils::node_runtime;
 #[cfg(fullclient)]
 use subxt::{
     config::{
-        transaction_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce},
         DefaultExtrinsicParamsBuilder, SubstrateConfig,
+        transaction_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce},
     },
     utils::Era,
 };
@@ -213,15 +213,19 @@ async fn fetch_block_and_decode_extrinsic_details() {
     assert_eq!(extrinsics.block_hash(), block_hash);
 
     // `.has` should work and find a transfer call.
-    assert!(extrinsics
-        .has::<node_runtime::balances::calls::types::TransferAllowDeath>()
-        .unwrap());
+    assert!(
+        extrinsics
+            .has::<node_runtime::balances::calls::types::TransferAllowDeath>()
+            .unwrap()
+    );
 
     // `.find_first` should similarly work to find the transfer call:
-    assert!(extrinsics
-        .find_first::<node_runtime::balances::calls::types::TransferAllowDeath>()
-        .unwrap()
-        .is_some());
+    assert!(
+        extrinsics
+            .find_first::<node_runtime::balances::calls::types::TransferAllowDeath>()
+            .unwrap()
+            .is_some()
+    );
 
     let block_extrinsics = extrinsics.iter().collect::<Vec<_>>();
 

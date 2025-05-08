@@ -4,7 +4,7 @@
 
 use futures::{io, prelude::*};
 use send_wrapper::SendWrapper;
-use wasm_bindgen::{prelude::*, JsCast};
+use wasm_bindgen::{JsCast, prelude::*};
 
 use std::{
     collections::VecDeque,

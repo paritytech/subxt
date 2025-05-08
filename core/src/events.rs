@@ -46,9 +46,9 @@ use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_metadata::PalletMetadata;
 
 use crate::{
+    Error, Metadata,
     config::{Config, HashFor},
     error::MetadataError,
-    Error, Metadata,
 };
 
 /// Create a new [`Events`] instance from the given bytes.
@@ -184,7 +184,7 @@ impl<T: Config> Events<T> {
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return only those which should decode to the provided `Ev` type.
     /// If an error occurs, all subsequent iterations return `None`.
-    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> + '_ {
+    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> {
         self.iter()
             .filter_map(|ev| ev.and_then(|ev| ev.as_event::<Ev>()).transpose())
     }
@@ -437,13 +437,13 @@ pub(crate) mod test_utils {
     use crate::config::{HashFor, SubstrateConfig};
     use codec::Encode;
     use frame_metadata::{
+        RuntimeMetadataPrefixed,
         v15::{
             CustomMetadata, ExtrinsicMetadata, OuterEnums, PalletEventMetadata, PalletMetadata,
             RuntimeMetadataV15,
         },
-        RuntimeMetadataPrefixed,
     };
-    use scale_info::{meta_type, TypeInfo};
+    use scale_info::{TypeInfo, meta_type};
 
     /// An "outer" events enum containing exactly one event.
     #[derive(
@@ -587,7 +587,7 @@ pub(crate) mod test_utils {
 #[cfg(test)]
 mod tests {
     use super::{
-        test_utils::{event_record, events, events_raw, AllEvents, EventRecord},
+        test_utils::{AllEvents, EventRecord, event_record, events, events_raw},
         *,
     };
     use crate::config::SubstrateConfig;

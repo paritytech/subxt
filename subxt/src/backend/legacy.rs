@@ -12,12 +12,12 @@ use crate::backend::{
     TransactionStatus,
 };
 use crate::{
-    config::{Config, HashFor, Header},
     Error,
+    config::{Config, HashFor, Header},
 };
 use async_trait::async_trait;
 use futures::TryStreamExt;
-use futures::{future, future::Either, stream, Future, FutureExt, Stream, StreamExt};
+use futures::{Future, FutureExt, Stream, StreamExt, future, future::Either, stream};
 use std::collections::VecDeque;
 use std::pin::Pin;
 use std::task::{Context, Poll};

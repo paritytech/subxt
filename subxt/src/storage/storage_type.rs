@@ -113,7 +113,7 @@ where
     pub fn fetch<'address, Addr>(
         &self,
         address: &'address Addr,
-    ) -> impl Future<Output = Result<Option<Addr::Target>, Error>> + 'address
+    ) -> impl Future<Output = Result<Option<Addr::Target>, Error>> + use<'address, Addr, Client, T>
     where
         Addr: Address<IsFetchable = Yes> + 'address,
     {
@@ -142,7 +142,7 @@ where
     pub fn fetch_or_default<'address, Addr>(
         &self,
         address: &'address Addr,
-    ) -> impl Future<Output = Result<Addr::Target, Error>> + 'address
+    ) -> impl Future<Output = Result<Addr::Target, Error>> + use<'address, Addr, Client, T>
     where
         Addr: Address<IsFetchable = Yes, IsDefaultable = Yes> + 'address,
     {

@@ -1,6 +1,6 @@
 use crate::{
-    config::{Config, HashFor},
     Error, Metadata,
+    config::{Config, HashFor},
 };
 use derive_where::derive_where;
 use scale_decode::DecodeAsType;
@@ -58,7 +58,7 @@ impl<T: Config> Events<T> {
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return only those which should decode to the provided `Ev` type.
     /// If an error occurs, all subsequent iterations return `None`.
-    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> + '_ {
+    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> {
         self.inner.find::<Ev>().map(|item| item.map_err(Into::into))
     }
 

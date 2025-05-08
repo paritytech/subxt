@@ -10,5 +10,5 @@ mod storage_type;
 pub use storage_client::StorageClient;
 pub use storage_type::{Storage, StorageKeyValuePair};
 pub use subxt_core::storage::address::{
-    dynamic, Address, DefaultAddress, DynamicAddress, StaticAddress, StaticStorageKey, StorageKey,
+    Address, DefaultAddress, DynamicAddress, StaticAddress, StaticStorageKey, StorageKey, dynamic,
 };

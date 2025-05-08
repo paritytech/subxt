@@ -218,8 +218,8 @@ impl<Hash> Stream for FollowStream<Hash> {
 pub(super) mod test_utils {
     use super::*;
     use crate::config::substrate::H256;
-    use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::Arc;
+    use std::sync::atomic::{AtomicUsize, Ordering};
     use subxt_rpcs::methods::chain_head::{BestBlockChanged, Finalized, Initialized, NewBlock};
 
     /// Given some events, returns a follow stream getter that we can use in

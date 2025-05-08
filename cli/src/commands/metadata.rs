@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::utils::{validate_url_security, FileOrUrl};
+use crate::utils::{FileOrUrl, validate_url_security};
 use clap::Parser as ClapParser;
 use codec::{Decode, Encode};
 use color_eyre::eyre::{self, bail};
@@ -62,7 +62,9 @@ pub async fn run(opts: Opts, output: &mut impl Write) -> color_eyre::Result<()> 
             RuntimeMetadata::V15(md) => md.strip_metadata(keep_pallets_fn, keep_runtime_apis_fn),
             RuntimeMetadata::V16(md) => md.strip_metadata(keep_pallets_fn, keep_runtime_apis_fn),
             _ => {
-                bail!("Unsupported metadata version for stripping pallets/runtime APIs: V14, V15 or V16 metadata is expected.")
+                bail!(
+                    "Unsupported metadata version for stripping pallets/runtime APIs: V14, V15 or V16 metadata is expected."
+                )
             }
         }
     }

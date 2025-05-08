@@ -1,6 +1,6 @@
 #![allow(missing_docs)]
 use futures::StreamExt;
-use subxt::{client::OnlineClient, lightclient::LightClient, PolkadotConfig};
+use subxt::{PolkadotConfig, client::OnlineClient, lightclient::LightClient};
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]

@@ -7,8 +7,8 @@ use proc_macro::TokenStream;
 
 use quote::{format_ident, quote};
 use syn::{
-    parse::{Parse, ParseStream},
     Error,
+    parse::{Parse, ParseStream},
 };
 
 /// Environment variable for setting the timeout for the test.

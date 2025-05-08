@@ -18,8 +18,8 @@ mod storage_items;
 
 use self::follow_stream_driver::FollowStreamFinalizedHeads;
 use crate::backend::{
-    utils::retry, Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf,
-    StreamOfResults, TransactionStatus,
+    Backend, BlockRef, BlockRefT, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
+    TransactionStatus, utils::retry,
 };
 use crate::config::{Config, Hash, HashFor};
 use crate::error::{Error, RpcError};
@@ -30,10 +30,10 @@ use futures::{Stream, StreamExt};
 use std::collections::HashMap;
 use std::task::Poll;
 use storage_items::StorageItems;
+use subxt_rpcs::RpcClient;
 use subxt_rpcs::methods::chain_head::{
     FollowEvent, MethodResponse, RuntimeEvent, StorageQuery, StorageQueryType, StorageResultType,
 };
-use subxt_rpcs::RpcClient;
 
 /// Re-export RPC types and methods from [`subxt_rpcs::methods::chain_head`].
 pub mod rpc_methods {
@@ -686,7 +686,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                         Poll::Ready(None) => {
                             return Poll::Ready(err_other(
                                 "chainHead_follow stream ended unexpectedly",
-                            ))
+                            ));
                         }
                         Poll::Ready(Some(follow_ev)) => Poll::Ready(follow_ev),
                         Poll::Pending => Poll::Pending,
@@ -722,7 +722,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                                 // in which we may lose the finalized block that the TX is in. For now, just error if
                                 // this happens, to prevent the case in which we never see a finalized block and wait
                                 // forever.
-                                return Poll::Ready(err_other("chainHead_follow emitted 'stop' event during transaction submission"));
+                                return Poll::Ready(err_other(
+                                    "chainHead_follow emitted 'stop' event during transaction submission",
+                                ));
                             }
                             _ => {}
                         }
@@ -756,7 +758,11 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                     // If we don't have a finalized block yet, we keep polling for tx progress events.
                     let tx_progress_ev = match tx_progress.poll_next_unpin(cx) {
                         Poll::Pending => return Poll::Pending,
-                        Poll::Ready(None) => return Poll::Ready(err_other("No more transaction progress events, but we haven't seen a Finalized one yet")),
+                        Poll::Ready(None) => {
+                            return Poll::Ready(err_other(
+                                "No more transaction progress events, but we haven't seen a Finalized one yet",
+                            ));
+                        }
                         Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e.into()))),
                         Poll::Ready(Some(Ok(ev))) => ev,
                     };

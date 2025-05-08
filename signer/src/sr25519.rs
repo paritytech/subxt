@@ -10,12 +10,12 @@
 
 use core::str::FromStr;
 
-use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
+use crate::crypto::{DeriveJunction, SecretUri, seed_from_entropy};
 
 use hex::FromHex;
 use schnorrkel::{
-    derive::{ChainCode, Derivation},
     ExpansionMode, MiniSecretKey,
+    derive::{ChainCode, Derivation},
 };
 use secrecy::ExposeSecret;
 
@@ -292,9 +292,9 @@ mod subxt_compat {
     use super::*;
 
     use subxt_core::{
+        Config,
         tx::signer::Signer as SignerT,
         utils::{AccountId32, MultiAddress, MultiSignature},
-        Config,
     };
 
     impl From<Signature> for MultiSignature {

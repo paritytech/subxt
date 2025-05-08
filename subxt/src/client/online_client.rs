@@ -5,7 +5,8 @@
 use super::{OfflineClient, OfflineClientT};
 use crate::custom_values::CustomValuesClient;
 use crate::{
-    backend::{legacy::LegacyBackend, rpc::RpcClient, Backend, BackendExt, StreamOfResults},
+    Metadata,
+    backend::{Backend, BackendExt, StreamOfResults, legacy::LegacyBackend, rpc::RpcClient},
     blocks::{BlockRef, BlocksClient},
     config::{Config, HashFor},
     constants::ConstantsClient,
@@ -15,7 +16,6 @@ use crate::{
     storage::StorageClient,
     tx::TxClient,
     view_functions::ViewFunctionsClient,
-    Metadata,
 };
 use derive_where::derive_where;
 use futures::future;

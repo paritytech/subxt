@@ -6,8 +6,8 @@
 //! <https://github.com/paritytech/json-rpc-interface-spec/> for details of the API
 //! methods exposed here.
 
-use crate::client::{rpc_params, RpcClient, RpcSubscription};
 use crate::Hash;
+use crate::client::{RpcClient, RpcSubscription, rpc_params};
 use crate::{Error, RpcConfig};
 use derive_where::derive_where;
 use futures::{Stream, StreamExt};
