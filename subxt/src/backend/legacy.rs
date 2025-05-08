@@ -473,7 +473,7 @@ where
                     Ok::<_, Error>(header)
                 }
             })
-            .filter_map(|h| async { h.transpose() });
+            .filter_map(async |h| h.transpose());
 
         // On the next iteration, we'll get details starting just after this end block.
         last_block_num = Some(end_block_num);

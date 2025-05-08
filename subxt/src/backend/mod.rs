@@ -511,11 +511,11 @@ mod test {
         #[tokio::test]
         async fn storage_fetch_value() {
             let rpc_client = MockRpcClient::builder()
-                .method_handler_once("state_getStorage", move |_params| async move {
+                .method_handler_once("state_getStorage", async move |_params| {
                     // Return "disconnected" error on first call
                     Err::<Infallible, _>(disconnected_will_reconnect())
                 })
-                .method_handler_once("state_getStorage", move |_param| async move {
+                .method_handler_once("state_getStorage", async move |_param| {
                     // Return some hex encoded storage value on the next one
                     Json(hex::encode("Data1"))
                 })
@@ -550,11 +550,11 @@ mod test {
         async fn simple_fetch() {
             let hash = random_hash();
             let rpc_client = MockRpcClient::builder()
-                .method_handler_once("chain_getBlockHash", move |_params| async move {
+                .method_handler_once("chain_getBlockHash", async move |_params| {
                     // Return "disconnected" error on first call
                     Err::<Infallible, _>(disconnected_will_reconnect())
                 })
-                .method_handler_once("chain_getBlockHash", move |_params| async move {
+                .method_handler_once("chain_getBlockHash", async move |_params| {
                     // Return the blockhash on next call
                     Json(hash)
                 })
@@ -870,11 +870,11 @@ mod test {
             let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
 
             let rpc_client = mock_client_builder(rx)
-                .method_handler_once("chainHead_v1_storage", move |_params| async move {
+                .method_handler_once("chainHead_v1_storage", async move |_params| {
                     // First call; return DisconnectedWillReconnect
                     Err::<Infallible, _>(disconnected_will_reconnect())
                 })
-                .method_handler_once("chainHead_v1_storage", move |_params| async move {
+                .method_handler_once("chainHead_v1_storage", async move |_params| {
                     // Otherwise, return that we'll start sending a response, and spawn
                     // task to send the relevant response via chainHead_follow.
                     tokio::spawn(async move {
@@ -927,11 +927,11 @@ mod test {
             let tx2 = tx.clone();
 
             let rpc_client = mock_client_builder(rx)
-                .method_handler_once("chainHead_v1_storage", move |_params| async move {
+                .method_handler_once("chainHead_v1_storage", async move |_params| {
                     // First call; return DisconnectedWillReconnect
                     Err::<Infallible, _>(disconnected_will_reconnect())
                 })
-                .method_handler_once("chainHead_v1_storage", move |_params| async move {
+                .method_handler_once("chainHead_v1_storage", async move |_params| {
                     // Next call, return a storage item and then a "waiting for continue".
                     tokio::spawn(async move {
                         tx.send(storage_items("Id1", &[storage_result("ID1", "Data1")]))
@@ -940,11 +940,11 @@ mod test {
                     });
                     Ok(Json(response_started("Id1")))
                 })
-                .method_handler_once("chainHead_v1_continue", move |_params| async move {
+                .method_handler_once("chainHead_v1_continue", async move |_params| {
                     // First call; return DisconnectedWillReconnect
                     Err::<Infallible, _>(disconnected_will_reconnect())
                 })
-                .method_handler_once("chainHead_v1_continue", move |_params| async move {
+                .method_handler_once("chainHead_v1_continue", async move |_params| {
                     // Next call; acknowledge the "continue" and return reamining storage items.
                     tokio::spawn(async move {
                         tx2.send(storage_items("Id1", &[storage_result("ID2", "Data2")]))
@@ -988,11 +988,11 @@ mod test {
             let hash = random_hash();
             let (_tx, rx) = tokio::sync::mpsc::unbounded_channel();
             let rpc_client = mock_client_builder(rx)
-                .method_handler_once("chainSpec_v1_genesisHash", move |_params| async move {
+                .method_handler_once("chainSpec_v1_genesisHash", async move |_params| {
                     // First call, return disconnected error.
                     Err::<Infallible, _>(disconnected_will_reconnect())
                 })
-                .method_handler_once("chainSpec_v1_genesisHash", move |_params| async move {
+                .method_handler_once("chainSpec_v1_genesisHash", async move |_params| {
                     // Next call, return the hash.
                     Ok(Json(hash))
                 })

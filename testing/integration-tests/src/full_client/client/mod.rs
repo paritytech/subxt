@@ -40,7 +40,7 @@ async fn storage_fetch_raw_keys() {
         .fetch_raw_keys(addr.to_root_bytes())
         .await
         .unwrap()
-        .filter_map(|r| async move { r.ok() })
+        .filter_map(async |r| r.ok())
         .count()
         .await;
 
@@ -65,7 +65,7 @@ async fn storage_iter() {
         .iter(addr)
         .await
         .unwrap()
-        .filter_map(|r| async move { r.ok() })
+        .filter_map(async |r| r.ok())
         .count()
         .await;
 

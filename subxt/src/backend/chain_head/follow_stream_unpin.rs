@@ -573,10 +573,7 @@ mod test {
             10,
         );
 
-        let out: Vec<_> = follow_unpin
-            .filter_map(|e| async move { e.ok() })
-            .collect()
-            .await;
+        let out: Vec<_> = follow_unpin.filter_map(async |e| e.ok()).collect().await;
 
         assert_eq!(
             out,

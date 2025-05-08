@@ -301,7 +301,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
                 StorageItems::from_methods(queries, at, &self.follow_handle, self.methods.clone())
                     .await?;
 
-            let stream = storage_items.filter_map(|val| async move {
+            let stream = storage_items.filter_map(async |val| {
                 let val = match val {
                     Ok(val) => val,
                     Err(e) => return Some(Err(e)),
@@ -366,7 +366,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
             )
             .await?;
 
-            let storage_result_stream = storage_items.filter_map(|val| async move {
+            let storage_result_stream = storage_items.filter_map(async |val| {
                 let val = match val {
                     Ok(val) => val,
                     Err(e) => return Some(Err(e)),

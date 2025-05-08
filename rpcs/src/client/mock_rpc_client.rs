@@ -19,12 +19,11 @@
 //! // Define a mock client by providing some functions which intercept 
 //! // method and subscription calls and return some response.
 //! let mock_client = MockRpcClient::builder()
-//!     .method_handler_once("foo", move |params| {
+//!     .method_handler_once("foo", async move |params| {
 //!         // Return each item from our state, and then null afterwards.
-//!         let val = state.pop();
-//!         async move { val }
+//!         state.pop()
 //!     })
-//!     .subscription_handler("bar", |params, unsub| async move {
+//!     .subscription_handler("bar", async move |params, unsub| {
 //!         // Arrays, vecs or an RpcSubscription can be returned here to
 //!         // signal the set of values to be handed back on a subscription.
 //!         vec![Json(1), Json(2), Json(3)]
@@ -477,7 +476,7 @@ mod test {
     #[tokio::test]
     async fn test_method_params() {
         let rpc_client = MockRpcClient::builder()
-            .method_handler("foo", |params| async {
+            .method_handler("foo", async |params| {
                 Json(params)
             })
             .build();
@@ -495,10 +494,10 @@ mod test {
     #[tokio::test]
     async fn test_method_handler_then_fallback() {
         let rpc_client = MockRpcClient::builder()
-            .method_handler("foo", |_params| async {
+            .method_handler("foo", async |_params| {
                 Json(1)
             })
-            .method_fallback(|name, _params| async {
+            .method_fallback(async |name, _params| {
                 Json(name)
             })
             .build();
@@ -521,10 +520,10 @@ mod test {
     #[tokio::test]
     async fn test_method_once_then_handler() {
         let rpc_client = MockRpcClient::builder()
-            .method_handler_once("foo", |_params| async {
+            .method_handler_once("foo", async |_params| {
                 Json(1)
             })
-            .method_handler("foo", |_params| async {
+            .method_handler("foo", async |_params| {
                 Json(2)
             })
             .build();
@@ -541,13 +540,13 @@ mod test {
     #[tokio::test]
     async fn test_method_once() {
         let rpc_client = MockRpcClient::builder()
-            .method_handler_once("foo", |_params| async {
+            .method_handler_once("foo", async |_params| {
                 Json(1)
             })
-            .method_handler_once("foo", |_params| async {
+            .method_handler_once("foo", async |_params| {
                 Json(2)
             })
-            .method_handler_once("foo", |_params| async {
+            .method_handler_once("foo", async |_params| {
                 Json(3)
             })
             .build();
@@ -569,13 +568,13 @@ mod test {
     #[tokio::test]
     async fn test_subscription_once_then_handler_then_fallback() {
         let rpc_client = MockRpcClient::builder()
-            .subscription_handler_once("foo", |_params, _unsub| async {
+            .subscription_handler_once("foo", async |_params, _unsub| {
                 vec![Json(0), Json(0)]
             })
-            .subscription_handler("foo", |_params, _unsub| async {
+            .subscription_handler("foo", async |_params, _unsub| {
                 vec![Json(1), Json(2), Json(3)]
             })
-            .subscription_fallback(|_name, _params, _unsub| async {
+            .subscription_fallback(async |_name, _params, _unsub| {
                 vec![Json(4)]
             })
             .build();
@@ -605,7 +604,7 @@ mod test {
         let (tx, rx) = tokio::sync::mpsc::channel(10);
 
         let rpc_client = MockRpcClient::builder()
-            .subscription_handler_once("foo", move |_params, _unsub| async move {
+            .subscription_handler_once("foo", async move |_params, _unsub| {
                 AndThen(
                     // These should be sent first..
                     vec![Json(1), Json(2), Json(3)],

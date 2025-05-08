@@ -313,7 +313,7 @@ pub mod test {
         });
 
         let s = FollowStream::new(stream_getter);
-        let out: Vec<_> = s.filter_map(|e| async move { e.ok() }).collect().await;
+        let out: Vec<_> = s.filter_map(async |e| e.ok()).collect().await;
 
         // The expected response, given the above.
         assert_eq!(
