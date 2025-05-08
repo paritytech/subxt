@@ -9,8 +9,7 @@ use sc_executor::{WasmExecutionMethod, WasmExecutor};
 use sc_executor_common::runtime_blob::RuntimeBlob;
 use sp_maybe_compressed_blob::{self, CODE_BLOB_BOMB_LIMIT};
 use subxt_codegen::{CodegenError, Metadata};
-
-static SUPPORTED_METADATA_VERSIONS: [u32; 2] = [14, 15];
+use subxt_metadata::SUPPORTED_METADATA_VERSIONS;
 
 /// Result type shorthand
 pub type WasmMetadataResult<A> = Result<A, CodegenError>;

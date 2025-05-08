@@ -8,6 +8,11 @@ mod v14;
 mod v15;
 mod v16;
 
+/// The metadata versions that we support converting into [`crate::Metadata`].
+/// These are ordest from highest to lowest, so that the metadata we'd want to
+/// pick first is first in the array.
+pub const SUPPORTED_METADATA_VERSIONS: [u32; 3] = [16, 15, 14];
+
 /// An error emitted if something goes wrong converting [`frame_metadata`]
 /// types into [`crate::Metadata`].
 #[derive(Debug, PartialEq, Eq, DeriveError)]
@@ -79,9 +84,7 @@ impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for crate::Metadata {
             }
             frame_metadata::RuntimeMetadata::V14(m) => m.try_into(),
             frame_metadata::RuntimeMetadata::V15(m) => m.try_into(),
-            frame_metadata::RuntimeMetadata::V16(_opaque) => {
-                Err(TryFromError::UnsupportedMetadataVersion(16))
-            }
+            frame_metadata::RuntimeMetadata::V16(m) => m.try_into(),
         }
     }
 }

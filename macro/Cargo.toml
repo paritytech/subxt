@@ -28,6 +28,7 @@ proc-macro-error2 = { workspace = true }
 syn = { workspace = true }
 quote = { workspace = true }
 subxt-codegen = { workspace = true }
+subxt-metadata = { workspace = true }
 subxt-utils-fetchmetadata = { workspace = true }
 scale-typegen = { workspace = true }
 sc-executor = { workspace = true, optional = true }

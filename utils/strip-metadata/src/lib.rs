@@ -100,7 +100,7 @@ impl StripMetadata for v16::RuntimeMetadataV16 {
                     error: None,
                     view_functions: vec![],
                     docs: vec![],
-                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                    deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 };
             }
         }
@@ -780,26 +780,26 @@ mod test {
                         ty: frame_metadata::v16::StorageEntryType::Plain(meta_type::<A>()),
                         default: vec![],
                         docs: vec![],
-                        deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                        deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                     }],
                 }),
                 event: Some(v16::PalletEventMetadata {
                     ty: meta_type::<B>(),
-                    deprecation_info: v16::DeprecationInfo::NotDeprecated,
+                    deprecation_info: v16::EnumDeprecationInfo::nothing_deprecated(),
                 }),
                 constants: vec![],
                 associated_types: vec![],
                 view_functions: vec![],
                 error: None,
                 docs: vec![],
-                deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
             },
             v16::PalletMetadata {
                 name: "Second",
                 index: 1,
                 calls: Some(v16::PalletCallMetadata {
                     ty: meta_type::<C>(),
-                    deprecation_info: v16::DeprecationInfo::NotDeprecated,
+                    deprecation_info: v16::EnumDeprecationInfo::nothing_deprecated(),
                 }),
                 storage: None,
                 event: None,
@@ -808,7 +808,7 @@ mod test {
                     ty: meta_type::<D>(),
                     value: vec![],
                     docs: vec![],
-                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                    deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 }],
                 associated_types: vec![v16::PalletAssociatedTypeMetadata {
                     name: "Hasher",
@@ -824,15 +824,16 @@ mod test {
                     }],
                     output: meta_type::<G>(),
                     docs: vec![],
-                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                    deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 }],
                 error: None,
                 docs: vec![],
-                deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
             },
         ];
 
         let extrinsic = v16::ExtrinsicMetadata {
+            call_ty: meta_type::<N>(), // same as outer_enums.call_enum_ty
             versions: vec![0],
             transaction_extensions_by_version: BTreeMap::new(),
             transaction_extensions: vec![],
@@ -845,7 +846,7 @@ mod test {
                 name: "SomeApi",
                 version: Compact(2),
                 docs: vec![],
-                deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 methods: vec![v16::RuntimeApiMethodMetadata {
                     name: "some_method",
                     inputs: vec![v16::FunctionParamMetadata {
@@ -854,14 +855,14 @@ mod test {
                     }],
                     output: meta_type::<K>(),
                     docs: vec![],
-                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                    deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 }],
             },
             v16::RuntimeApiMetadata {
                 name: "AnotherApi",
                 version: Compact(1),
                 docs: vec![],
-                deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 methods: vec![v16::RuntimeApiMethodMetadata {
                     name: "another_method",
                     inputs: vec![v16::FunctionParamMetadata {
@@ -870,7 +871,7 @@ mod test {
                     }],
                     output: meta_type::<M>(),
                     docs: vec![],
-                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                    deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 }],
             },
         ];

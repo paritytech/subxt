@@ -10,7 +10,6 @@ use substrate_runner::{Error as SubstrateNodeError, SubstrateNode};
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
 
 const V15_METADATA_VERSION: u32 = 15;
-const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
 
 #[tokio::main]
 async fn main() {
@@ -43,10 +42,10 @@ async fn run() {
     let out_dir_env_var = env::var_os("OUT_DIR");
     let out_dir = out_dir_env_var.as_ref().unwrap().to_str().unwrap();
 
-    let (stable_metadata_path, unstable_metadata_path) = tokio::join!(
-        download_and_save_metadata(V15_METADATA_VERSION, port, out_dir, "v15"),
-        download_and_save_metadata(UNSTABLE_METADATA_VERSION, port, out_dir, "unstable")
-    );
+    let stable_metadata_path =
+        download_and_save_metadata(V15_METADATA_VERSION, port, out_dir, "v15")
+            .await
+            .unwrap_or_else(|e| panic!("Cannot download & save v15 metadata: {e}"));
 
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
     // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to `runtime_metadata_path`,
@@ -59,13 +58,6 @@ async fn run() {
             derive_for_all_types = "Eq, PartialEq",
         )]
         pub mod node_runtime {{}}
-
-        /// Generated types for the locally running Substrate node using the unstable metadata.
-        #[subxt::subxt(
-            runtime_metadata_path = "{unstable_metadata_path}",
-            derive_for_all_types = "Eq, PartialEq",
-        )]
-        pub mod node_runtime_unstable {{}}
     "#
     );
     let runtime_path = Path::new(&out_dir).join("runtime.rs");
@@ -88,43 +80,49 @@ async fn run() {
 
 // Download metadata from binary. Avoid Subxt dep on `subxt::rpc::types::Bytes`and just impl here.
 // This may at least prevent this script from running so often (ie whenever we change Subxt).
+// If there's an error, we return a string for it.
 async fn download_and_save_metadata(
     version: u32,
     port: u16,
     out_dir: &str,
     suffix: &str,
-) -> String {
-    // Download it:
+) -> Result<String, String> {
+    // Encode version
     let bytes = version.encode();
     let version: String = format!("0x{}", hex::encode(&bytes));
+
+    // Connect to the client and request metadata
     let raw: String = {
         use client::ClientT;
         client::build(&format!("ws://localhost:{port}"))
             .await
-            .unwrap_or_else(|e| panic!("Failed to connect to node: {e}"))
+            .map_err(|e| format!("Failed to connect to node: {e}"))?
             .request(
                 "state_call",
                 client::rpc_params!["Metadata_metadata_at_version", &version],
             )
             .await
-            .unwrap_or_else(|e| panic!("Failed to obtain metadata from node: {e}"))
+            .map_err(|e| format!("Failed to obtain metadata from node: {e}"))?
     };
-    let raw_bytes = hex::decode(raw.trim_start_matches("0x"))
-        .unwrap_or_else(|e| panic!("Failed to hex-decode metadata: {e}"));
-    let bytes: Option<Vec<u8>> = Decode::decode(&mut &raw_bytes[..])
-        .unwrap_or_else(|e| panic!("Failed to decode metadata bytes: {e}"));
-    let metadata_bytes = bytes.expect("Metadata version not found");
 
-    // Save it to a file:
+    // Decode the raw metadata
+    let raw_bytes = hex::decode(raw.trim_start_matches("0x"))
+        .map_err(|e| format!("Failed to hex-decode metadata: {e}"))?;
+    let bytes: Option<Vec<u8>> = Decode::decode(&mut &raw_bytes[..])
+        .map_err(|e| format!("Failed to decode metadata bytes: {e}"))?;
+    let metadata_bytes = bytes.ok_or_else(|| "Metadata version not found".to_string())?;
+
+    // Save metadata to a file
     let metadata_path =
         Path::new(&out_dir).join(format!("test_node_runtime_metadata_{suffix}.scale"));
-    fs::write(&metadata_path, metadata_bytes).expect("Couldn't write metadata output");
+    fs::write(&metadata_path, metadata_bytes)
+        .map_err(|e| format!("Couldn't write metadata output: {e}"))?;
 
-    // Convert path to string because we need this to interpolate into string
+    // Convert path to string and return
     metadata_path
         .to_str()
-        .expect("Path to metadata should be stringifiable")
-        .to_owned()
+        .ok_or_else(|| "Path to metadata should be stringifiable".to_string())
+        .map(|s| s.to_owned())
 }
 
 // Use jsonrpsee to obtain metadata from the node.
