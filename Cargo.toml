@@ -72,15 +72,15 @@ blake2 = { version = "0.10.6", default-features = false }
 clap = { version = "4.5.18", features = ["derive", "cargo"] }
 cfg-if = "1.0.0"
 criterion = "0.5.1"
-codec = { package = "parity-scale-codec", version = "3.6.9", default-features = false }
+codec = { package = "parity-scale-codec", version = "3.7.4", default-features = false }
 color-eyre = "0.6.3"
 console_error_panic_hook = "0.1.7"
 darling = "0.20.10"
 derive-where = "1.2.7"
 either = { version = "1.13.0", default-features = false }
 finito = { version = "0.1.0", default-features = false }
-frame-decode = { version = "0.7.1", default-features = false }
-frame-metadata = { version = "21.0.0", default-features = false, features = ["unstable"] }
+frame-decode = { version = "0.8.0", default-features = false }
+frame-metadata = { version = "23.0.0", default-features = false, features = ["unstable"] }
 futures = { version = "0.3.31", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
 hashbrown = "0.14.5"
@@ -100,7 +100,7 @@ scale-value = { version = "0.18.0", default-features = false }
 scale-bits = { version = "0.7.0", default-features = false }
 scale-decode = { version = "0.16.0", default-features = false }
 scale-encode = { version = "0.10.0", default-features = false }
-scale-typegen = "0.11.0"
+scale-typegen = "0.11.1"
 scale-typegen-description = "0.11.0"
 serde = { version = "1.0.210", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.128", default-features = false }
@@ -141,15 +141,15 @@ web-time = { version = "1.1", default-features = false }
 tokio-util = "0.7.12"
 
 # Substrate crates:
-sc-executor = { version = "0.41.0", default-features = false }
-sc-executor-common = { version = "0.36.0", default-features = false }
+sc-executor = { version = "0.42.0", default-features = false }
+sc-executor-common = { version = "0.38.0", default-features = false }
 sp-crypto-hashing = { version = "0.1.0", default-features = false }
-sp-core = { version = "35.0.0", default-features = false }
-sp-keyring = { version = "40.0.0", default-features = false }
+sp-core = { version = "36.1.0", default-features = false }
+sp-keyring = { version = "41.0.0", default-features = false }
 sp-maybe-compressed-blob = { version = "11.0.0", default-features = false }
-sp-io = { version = "39.0.0", default-features = false }
-sp-state-machine = { version = "0.44.0", default-features = false }
-sp-runtime = { version = "40.0.1", default-features = false }
+sp-io = { version = "40.0.1", default-features = false }
+sp-state-machine = { version = "0.45.0", default-features = false }
+sp-runtime = { version = "41.1.0", default-features = false }
 
 # Subxt workspace crates:
 subxt = { version = "0.41.0", path = "subxt", default-features = false }

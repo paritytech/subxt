@@ -42,6 +42,7 @@ use utils::{
 type ArcStr = Arc<str>;
 
 pub use from::TryFromError;
+pub use from::SUPPORTED_METADATA_VERSIONS;
 pub use utils::validation::MetadataHasher;
 
 type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;

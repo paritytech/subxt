@@ -1,3 +1,10 @@
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// This file is dual-licensed as Apache-2.0 or GPL-3.0.
+// see LICENSE for license details.
+
+// TODO: Re-enable these once V16 is stable in Substrate nightlies,
+// and test-runtime is updated to pull in V16 metadata by default.
+/*
 use crate::{subxt_test, test_context};
 use test_runtime::node_runtime_unstable;
 
@@ -58,3 +65,4 @@ async fn call_view_function_dynamically() -> Result<(), subxt::Error> {
 
     Ok(())
 }
+*/
