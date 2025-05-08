@@ -77,7 +77,7 @@ impl<T: Config> ExtrinsicParamsEncoder for VerifySignature<T> {
         // Downcast refs back to concrete types (we use `&dyn Any`` so that the trait remains object safe)
         let account = account
             .downcast_ref::<T::AccountId>()
-            .expect("A T::AccoundId should have been provided")
+            .expect("A T::AccountId should have been provided")
             .clone();
         let signature = signature
             .downcast_ref::<T::Signature>()

@@ -136,7 +136,7 @@ async fn storage_plain_lookup(api: &Client) -> Result<(), subxt::Error> {
     Ok(())
 }
 
-// Make a dynamic constant query for `System::BlockLenght`.
+// Make a dynamic constant query for `System::BlockLength`.
 async fn dynamic_constant_query(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
     tracing::trace!("Check dynamic_constant_query");

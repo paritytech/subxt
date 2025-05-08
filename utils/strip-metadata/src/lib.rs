@@ -442,7 +442,7 @@ mod test {
     use codec::Compact;
     use scale_info::meta_type;
 
-    /// Create dummy types that we can check the presense of with is_in_types.
+    /// Create dummy types that we can check the presence of with is_in_types.
     macro_rules! make_types {
         ($($name:ident)+) => {
             $(
