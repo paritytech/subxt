@@ -75,9 +75,35 @@ impl StripMetadata for v16::RuntimeMetadataV16 {
         PalletFilter: Fn(&str) -> bool,
         RuntimeApiFilter: Fn(&str) -> bool,
     {
-        // Throw away pallets and runtime APIs we don't care about:
-        self.pallets.retain(|pallet| keep_pallet(&pallet.name));
+        // Throw away pallets and runtime APIs we don't care about.
+        // Keep the System pallet, because it has some associated types that we care about in Subxt.
+        self.pallets
+            .retain(|pallet| pallet.name == "System" || keep_pallet(&pallet.name));
         self.apis.retain(|api| keep_runtime_api(&api.name));
+
+        // If the user asked to strip the System pallet, we'll strip most things from it but keep the
+        // associated types, because Subxt makes use of them.
+        if !keep_pallet("System") {
+            if let Some(system_pallet) = self.pallets.iter_mut().find(|p| p.name == "System") {
+                let index = system_pallet.index;
+                let associated_types = core::mem::take(&mut system_pallet.associated_types);
+
+                *system_pallet = v16::PalletMetadata {
+                    name: "System".to_string(),
+                    index,
+                    associated_types,
+                    // Everything else is empty:
+                    storage: None,
+                    calls: None,
+                    event: None,
+                    constants: vec![],
+                    error: None,
+                    view_functions: vec![],
+                    docs: vec![],
+                    deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
+                };
+            }
+        }
 
         // Now, only retain types we care about in the registry:
         retain_types(self);
@@ -413,9 +439,10 @@ mod test {
     use std::collections::BTreeMap;
 
     use super::*;
+    use codec::Compact;
     use scale_info::meta_type;
 
-    /// Create dummy types that we can check the presense of with is_in_types.
+    /// Create dummy types that we can check the presence of with is_in_types.
     macro_rules! make_types {
         ($($name:ident)+) => {
             $(
@@ -753,26 +780,26 @@ mod test {
                         ty: frame_metadata::v16::StorageEntryType::Plain(meta_type::<A>()),
                         default: vec![],
                         docs: vec![],
-                        deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                        deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                     }],
                 }),
                 event: Some(v16::PalletEventMetadata {
                     ty: meta_type::<B>(),
-                    deprecation_info: v16::DeprecationInfo::NotDeprecated,
+                    deprecation_info: v16::EnumDeprecationInfo::nothing_deprecated(),
                 }),
                 constants: vec![],
                 associated_types: vec![],
                 view_functions: vec![],
                 error: None,
                 docs: vec![],
-                deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
             },
             v16::PalletMetadata {
                 name: "Second",
                 index: 1,
                 calls: Some(v16::PalletCallMetadata {
                     ty: meta_type::<C>(),
-                    deprecation_info: v16::DeprecationInfo::NotDeprecated,
+                    deprecation_info: v16::EnumDeprecationInfo::nothing_deprecated(),
                 }),
                 storage: None,
                 event: None,
@@ -781,7 +808,7 @@ mod test {
                     ty: meta_type::<D>(),
                     value: vec![],
                     docs: vec![],
-                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                    deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 }],
                 associated_types: vec![v16::PalletAssociatedTypeMetadata {
                     name: "Hasher",
@@ -791,21 +818,22 @@ mod test {
                 view_functions: vec![v16::PalletViewFunctionMetadata {
                     name: "some_view_function",
                     id: [0; 32],
-                    inputs: vec![v16::PalletViewFunctionParamMetadata {
+                    inputs: vec![v16::FunctionParamMetadata {
                         name: "input1",
                         ty: meta_type::<F>(),
                     }],
                     output: meta_type::<G>(),
                     docs: vec![],
-                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                    deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 }],
                 error: None,
                 docs: vec![],
-                deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
             },
         ];
 
         let extrinsic = v16::ExtrinsicMetadata {
+            call_ty: meta_type::<N>(), // same as outer_enums.call_enum_ty
             versions: vec![0],
             transaction_extensions_by_version: BTreeMap::new(),
             transaction_extensions: vec![],
@@ -816,34 +844,34 @@ mod test {
         let runtime_apis = vec![
             v16::RuntimeApiMetadata {
                 name: "SomeApi",
-                version: 2,
+                version: Compact(2),
                 docs: vec![],
-                deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 methods: vec![v16::RuntimeApiMethodMetadata {
                     name: "some_method",
-                    inputs: vec![v16::RuntimeApiMethodParamMetadata {
+                    inputs: vec![v16::FunctionParamMetadata {
                         name: "input1",
                         ty: meta_type::<J>(),
                     }],
                     output: meta_type::<K>(),
                     docs: vec![],
-                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                    deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 }],
             },
             v16::RuntimeApiMetadata {
                 name: "AnotherApi",
-                version: 1,
+                version: Compact(1),
                 docs: vec![],
-                deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 methods: vec![v16::RuntimeApiMethodMetadata {
                     name: "another_method",
-                    inputs: vec![v16::RuntimeApiMethodParamMetadata {
+                    inputs: vec![v16::FunctionParamMetadata {
                         name: "input1",
                         ty: meta_type::<L>(),
                     }],
                     output: meta_type::<M>(),
                     docs: vec![],
-                    deprecation_info: v16::DeprecationStatus::NotDeprecated,
+                    deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
                 }],
             },
         ];

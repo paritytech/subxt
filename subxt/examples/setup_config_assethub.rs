@@ -20,7 +20,6 @@ use runtime::runtime_types::xcm::v3::junctions::Junctions;
 pub enum AssetHubConfig {}
 
 impl Config for AssetHubConfig {
-    type Hash = <SubstrateConfig as Config>::Hash;
     type AccountId = <SubstrateConfig as Config>::AccountId;
     type Address = <PolkadotConfig as Config>::Address;
     type Signature = <SubstrateConfig as Config>::Signature;

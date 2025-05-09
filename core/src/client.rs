@@ -4,7 +4,10 @@
 
 //! A couple of client types that we use elsewhere.
 
-use crate::{config::Config, metadata::Metadata};
+use crate::{
+    config::{Config, HashFor},
+    metadata::Metadata,
+};
 use derive_where::derive_where;
 
 /// This provides access to some relevant client state in transaction extensions,
@@ -12,7 +15,7 @@ use derive_where::derive_where;
 #[derive_where(Clone, Debug)]
 pub struct ClientState<C: Config> {
     /// Genesis hash.
-    pub genesis_hash: C::Hash,
+    pub genesis_hash: HashFor<C>,
     /// Runtime version.
     pub runtime_version: RuntimeVersion,
     /// Metadata.

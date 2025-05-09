@@ -45,7 +45,11 @@ use derive_where::derive_where;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_metadata::PalletMetadata;
 
-use crate::{error::MetadataError, Config, Error, Metadata};
+use crate::{
+    config::{Config, HashFor},
+    error::MetadataError,
+    Error, Metadata,
+};
 
 /// Create a new [`Events`] instance from the given bytes.
 ///
@@ -232,7 +236,7 @@ pub struct EventDetails<T: Config> {
     // end of everything (fields + topics)
     end_idx: usize,
     metadata: Metadata,
-    topics: Vec<T::Hash>,
+    topics: Vec<HashFor<T>>,
 }
 
 impl<T: Config> EventDetails<T> {
@@ -281,7 +285,7 @@ impl<T: Config> EventDetails<T> {
         let event_fields_end_idx = all_bytes.len() - input.len();
 
         // topics come after the event data in EventRecord.
-        let topics = Vec::<T::Hash>::decode(input)?;
+        let topics = Vec::<HashFor<T>>::decode(input)?;
 
         // what bytes did we skip over in total, including topics.
         let end_idx = all_bytes.len() - input.len();
@@ -413,7 +417,7 @@ impl<T: Config> EventDetails<T> {
     }
 
     /// Return the topics associated with this event.
-    pub fn topics(&self) -> &[T::Hash] {
+    pub fn topics(&self) -> &[HashFor<T>] {
         &self.topics
     }
 }
@@ -430,7 +434,7 @@ pub struct EventMetadataDetails<'a> {
 #[cfg(test)]
 pub(crate) mod test_utils {
     use super::*;
-    use crate::config::{Config, SubstrateConfig};
+    use crate::config::{HashFor, SubstrateConfig};
     use codec::Encode;
     use frame_metadata::{
         v15::{
@@ -463,12 +467,12 @@ pub(crate) mod test_utils {
     pub struct EventRecord<E: Encode> {
         phase: Phase,
         event: AllEvents<E>,
-        topics: Vec<<SubstrateConfig as Config>::Hash>,
+        topics: Vec<HashFor<SubstrateConfig>>,
     }
 
     impl<E: Encode> EventRecord<E> {
         /// Create a new event record with the given phase, event, and topics.
-        pub fn new(phase: Phase, event: E, topics: Vec<<SubstrateConfig as Config>::Hash>) -> Self {
+        pub fn new(phase: Phase, event: E, topics: Vec<HashFor<SubstrateConfig>>) -> Self {
             Self {
                 phase,
                 event: AllEvents::Test(event),
@@ -718,7 +722,7 @@ mod tests {
         let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
-        // construst an Events object to iterate them:
+        // construct an Events object to iterate them:
         let event1 = Event::A(1);
         let event2 = Event::B(true);
         let event3 = Event::A(234);

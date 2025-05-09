@@ -19,7 +19,6 @@ pub mod runtime {}
 pub enum CustomConfig {}
 
 impl Config for CustomConfig {
-    type Hash = subxt::utils::H256;
     type AccountId = subxt::utils::AccountId32;
     type Address = subxt::utils::MultiAddress<Self::AccountId, ()>;
     type Signature = subxt::utils::MultiSignature;

@@ -90,23 +90,23 @@ async fn fetch_metadata_http(url: Url, version: MetadataVersion) -> Result<Vec<u
 async fn fetch_metadata(client: impl ClientT, version: MetadataVersion) -> Result<Vec<u8>, Error> {
     const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
 
+    // Fetch available metadata versions. If error, revert to legacy metadata code.
+    async fn fetch_available_versions(
+        client: &impl ClientT,
+    ) -> Result<Vec<u32>, Error> {
+        let res: String = client
+            .request("state_call", rpc_params!["Metadata_metadata_versions", "0x"])
+            .await?;
+        let raw_bytes = hex::decode(res.trim_start_matches("0x"))?;
+        Decode::decode(&mut &raw_bytes[..]).map_err(Into::into)
+    }
+
     // Fetch metadata using the "new" state_call interface
     async fn fetch_inner(
         client: &impl ClientT,
         version: MetadataVersion,
+        supported_versions: Vec<u32>,
     ) -> Result<Vec<u8>, Error> {
-        // Look up supported versions:
-        let supported_versions: Vec<u32> = {
-            let res: String = client
-                .request(
-                    "state_call",
-                    rpc_params!["Metadata_metadata_versions", "0x"],
-                )
-                .await?;
-            let raw_bytes = hex::decode(res.trim_start_matches("0x"))?;
-            Decode::decode(&mut &raw_bytes[..])?
-        };
-
         // Return the version the user wants if it's supported:
         let version = match version {
             MetadataVersion::Latest => *supported_versions
@@ -128,7 +128,7 @@ async fn fetch_metadata(client: impl ClientT, version: MetadataVersion) -> Resul
                     version
                 } else {
                     return Err(Error::Other(format!(
-                        "The node does not have version {version} available"
+                        "The node does not have metadata version {version} available"
                     )));
                 }
             }
@@ -150,7 +150,7 @@ async fn fetch_metadata(client: impl ClientT, version: MetadataVersion) -> Resul
             Decode::decode(&mut &metadata_bytes[..])?;
         let Some(metadata) = metadata else {
             return Err(Error::Other(format!(
-                "The node does not have version {version} available"
+                "The node does not have metadata version {version} available"
             )));
         };
         Ok(metadata.0)
@@ -159,19 +159,7 @@ async fn fetch_metadata(client: impl ClientT, version: MetadataVersion) -> Resul
     // Fetch metadata using the "old" state_call interface
     async fn fetch_inner_legacy(
         client: &impl ClientT,
-        version: MetadataVersion,
     ) -> Result<Vec<u8>, Error> {
-        // If the user specifically asks for anything other than version 14 or "latest", error.
-        if !matches!(
-            version,
-            MetadataVersion::Latest | MetadataVersion::Version(14)
-        ) {
-            return Err(Error::Other(
-                "The node can only return version 14 metadata using the legacy API but you've asked for something else"
-                    .to_string(),
-            ));
-        }
-
         // Fetch the metadata.
         let metadata_string: String = client
             .request("state_call", rpc_params!["Metadata_metadata", "0x"])
@@ -183,9 +171,19 @@ async fn fetch_metadata(client: impl ClientT, version: MetadataVersion) -> Resul
         Ok(metadata.0)
     }
 
-    // Fetch using the new interface, falling back to trying old one if there's an error.
-    match fetch_inner(&client, version).await {
-        Ok(s) => Ok(s),
-        Err(_) => fetch_inner_legacy(&client, version).await,
+    match fetch_available_versions(&client).await {
+        Ok(supported_versions) => {
+            fetch_inner(&client, version, supported_versions).await
+        },
+        Err(e) => {
+            // The "new" interface failed. if the user is asking for V14 or the "latest"
+            // metadata then try the legacy interface instead. Else, just return the
+            // reason for failure.
+            if matches!(version, MetadataVersion::Version(14) | MetadataVersion::Latest) {
+                fetch_inner_legacy(&client).await
+            } else {
+                Err(e)
+            }
+        }
     }
 }

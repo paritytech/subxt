@@ -49,6 +49,7 @@ pub mod runtime_api;
 pub mod storage;
 pub mod tx;
 pub mod utils;
+pub mod view_functions;
 
 /// This module provides a [`Config`] type, which is used to define various
 /// types that are important in order to speak to a particular chain.
@@ -57,10 +58,10 @@ pub mod utils;
 /// Polkadot node.
 pub mod config {
     pub use subxt_core::config::{
-        polkadot, substrate, transaction_extensions, BlockHash, Config, DefaultExtrinsicParams,
-        DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder, Hasher, Header,
-        PolkadotConfig, PolkadotExtrinsicParams, SubstrateConfig, SubstrateExtrinsicParams,
-        TransactionExtension,
+        polkadot, substrate, transaction_extensions, Config, DefaultExtrinsicParams,
+        DefaultExtrinsicParamsBuilder, ExtrinsicParams, ExtrinsicParamsEncoder, Hash, HashFor,
+        Hasher, Header, PolkadotConfig, PolkadotExtrinsicParams, SubstrateConfig,
+        SubstrateExtrinsicParams, TransactionExtension,
     };
     pub use subxt_core::error::ExtrinsicParamsError;
 }
@@ -75,7 +76,8 @@ pub mod metadata {
 /// Submit dynamic transactions.
 pub mod dynamic {
     pub use subxt_core::dynamic::{
-        constant, runtime_api_call, storage, tx, At, DecodedValue, DecodedValueThunk, Value,
+        constant, runtime_api_call, storage, tx, view_function_call, At, DecodedValue,
+        DecodedValueThunk, Value,
     };
 }
 

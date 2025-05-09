@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    node_runtime::{self, balances, runtime_types, system},
+    node_runtime::{self, balances, system},
     subxt_test, test_context,
 };
 use codec::Decode;
@@ -282,29 +282,9 @@ async fn storage_total_issuance() {
 
 #[subxt_test]
 async fn storage_balance_lock() -> Result<(), subxt::Error> {
-    let bob_signer = dev::bob();
     let bob: AccountId32 = dev::bob().public_key().into();
     let ctx = test_context().await;
     let api = ctx.client();
-
-    let tx = node_runtime::tx().staking().bond(
-        100_000_000_000_000,
-        runtime_types::pallet_staking::RewardDestination::Stash,
-    );
-
-    let signed_extrinsic = api
-        .tx()
-        .create_signed(&tx, &bob_signer, Default::default())
-        .await?;
-
-    signed_extrinsic
-        .submit_and_watch()
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
-        .await?
-        .find_first::<system::events::ExtrinsicSuccess>()?
-        .expect("No ExtrinsicSuccess Event found");
 
     let holds_addr = node_runtime::storage().balances().holds(bob);
 
@@ -318,7 +298,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 
     // There is now a hold on the balance being staked
     assert_eq!(holds.len(), 1);
-    assert_eq!(holds[0].amount, 100_000_000_000_000);
+    assert_eq!(holds[0].amount, 327_000_000_000_000);
 
     Ok(())
 }

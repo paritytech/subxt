@@ -7,10 +7,9 @@ use super::TryFromError;
 use crate::utils::variant_index::VariantIndex;
 use crate::{
     utils::ordered_map::OrderedMap, ArcStr, ConstantMetadata, ExtrinsicMetadata, Metadata,
-    MethodParamMetadata, OuterEnumsMetadata, PalletMetadataInner, PalletViewFunctionMetadataInner,
-    RuntimeApiMetadataInner, RuntimeApiMethodMetadataInner, StorageEntryMetadata,
-    StorageEntryModifier, StorageEntryType, StorageHasher, StorageMetadata,
-    TransactionExtensionMetadataInner,
+    MethodParamMetadata, OuterEnumsMetadata, PalletMetadataInner, RuntimeApiMetadataInner,
+    RuntimeApiMethodMetadataInner, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
+    StorageHasher, StorageMetadata, TransactionExtensionMetadataInner, ViewFunctionMetadataInner,
 };
 use frame_metadata::{v15, v16};
 use hashbrown::HashMap;
@@ -41,10 +40,10 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
                 let name: ArcStr = c.name.clone().into();
                 (name.clone(), from_constant_metadata(name, c))
             });
-            let view_functions = p
-                .view_functions
-                .into_iter()
-                .map(from_view_function_metadata);
+            let view_functions = p.view_functions.into_iter().map(|v| {
+                let name: ArcStr = v.name.clone().into();
+                (name.clone(), from_view_function_metadata(name, v))
+            });
 
             let call_variant_index = VariantIndex::build(p.calls.as_ref().map(|c| c.ty.id), &types);
             let error_variant_index =
@@ -133,7 +132,11 @@ fn from_transaction_extension_metadata(
 fn from_extrinsic_metadata(value: v16::ExtrinsicMetadata<PortableForm>) -> ExtrinsicMetadata {
     ExtrinsicMetadata {
         supported_versions: value.versions,
-        transaction_extensions_by_version: value.transaction_extensions_by_version,
+        transaction_extensions_by_version: value
+            .transaction_extensions_by_version
+            .into_iter()
+            .map(|(version, idxs)| (version, idxs.into_iter().map(|idx| idx.0).collect()))
+            .collect(),
         transaction_extensions: value
             .transaction_extensions
             .into_iter()
@@ -241,10 +244,11 @@ fn from_runtime_api_method_metadata(
 }
 
 fn from_view_function_metadata(
+    name: ArcStr,
     s: v16::PalletViewFunctionMetadata<PortableForm>,
-) -> PalletViewFunctionMetadataInner {
-    PalletViewFunctionMetadataInner {
-        name: s.name,
+) -> ViewFunctionMetadataInner {
+    ViewFunctionMetadataInner {
+        name,
         query_id: s.id,
         inputs: s
             .inputs

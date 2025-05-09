@@ -13,7 +13,6 @@ pub extern "C" fn _start(_argc: isize, _argv: *const *const u8) -> isize {
 }
 
 #[lang = "eh_personality"]
-#[no_mangle]
 pub extern "C" fn rust_eh_personality() {}
 
 #[panic_handler]

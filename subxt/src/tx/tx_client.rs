@@ -5,7 +5,7 @@
 use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
-    config::{Config, ExtrinsicParams, Header},
+    config::{Config, ExtrinsicParams, HashFor, Header},
     error::{BlockError, Error},
     tx::{Payload, Signer as SignerT, TxProgress},
     utils::PhantomDataSendSync,
@@ -321,7 +321,7 @@ where
         &mut self,
         call: &Call,
         signer: &Signer,
-    ) -> Result<T::Hash, Error>
+    ) -> Result<HashFor<T>, Error>
     where
         Call: Payload,
         Signer: SignerT<T>,
@@ -344,7 +344,7 @@ where
         call: &Call,
         signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<T::Hash, Error>
+    ) -> Result<HashFor<T>, Error>
     where
         Call: Payload,
         Signer: SignerT<T>,
@@ -459,8 +459,8 @@ where
     }
 
     /// Calculate and return the hash of the transaction, based on the configured hasher.
-    pub fn hash(&self) -> T::Hash {
-        self.inner.hash()
+    pub fn hash(&self) -> HashFor<T> {
+        self.inner.hash_with(self.client.hasher())
     }
 
     /// Returns the SCALE encoded transaction bytes.
@@ -503,7 +503,7 @@ where
     /// It's usually better to call `submit_and_watch` to get an idea of the progress of the
     /// submission and whether it's eventually successful or not. This call does not guarantee
     /// success, and is just sending the transaction to the chain.
-    pub async fn submit(&self) -> Result<T::Hash, Error> {
+    pub async fn submit(&self) -> Result<HashFor<T>, Error> {
         let ext_hash = self.hash();
         let mut sub = self
             .client
@@ -551,7 +551,7 @@ where
     /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the transaction.
     pub async fn validate_at(
         &self,
-        at: impl Into<BlockRef<T::Hash>>,
+        at: impl Into<BlockRef<HashFor<T>>>,
     ) -> Result<ValidationResult, Error> {
         let block_hash = at.into().hash();
 
@@ -614,7 +614,7 @@ async fn inject_account_nonce_and_block<T: Config, Client: OnlineClientT<T>>(
         crate::blocks::get_account_nonce(client, account_id, block_ref.hash()).await?;
 
     params.inject_account_nonce(account_nonce);
-    params.inject_block(block_header.number().into(), block_header.hash());
+    params.inject_block(block_header.number().into(), block_ref.hash());
 
     Ok(())
 }

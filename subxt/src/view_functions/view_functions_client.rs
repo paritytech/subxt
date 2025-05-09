@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::runtime_types::RuntimeApi;
+use super::view_function_types::ViewFunctionsApi;
 
 use crate::{
     backend::BlockRef,
@@ -13,15 +13,15 @@ use crate::{
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
 
-/// Execute runtime API calls.
+/// Make View Function calls at some block.
 #[derive_where(Clone; Client)]
-pub struct RuntimeApiClient<T, Client> {
+pub struct ViewFunctionsClient<T, Client> {
     client: Client,
     _marker: PhantomData<T>,
 }
 
-impl<T, Client> RuntimeApiClient<T, Client> {
-    /// Create a new [`RuntimeApiClient`]
+impl<T, Client> ViewFunctionsClient<T, Client> {
+    /// Create a new [`ViewFunctionsClient`]
     pub fn new(client: Client) -> Self {
         Self {
             client,
@@ -30,20 +30,20 @@ impl<T, Client> RuntimeApiClient<T, Client> {
     }
 }
 
-impl<T, Client> RuntimeApiClient<T, Client>
+impl<T, Client> ViewFunctionsClient<T, Client>
 where
     T: Config,
     Client: OnlineClientT<T>,
 {
-    /// Obtain a runtime API interface at some block hash.
-    pub fn at(&self, block_ref: impl Into<BlockRef<HashFor<T>>>) -> RuntimeApi<T, Client> {
-        RuntimeApi::new(self.client.clone(), block_ref.into())
+    /// Obtain an interface to call View Functions at some block hash.
+    pub fn at(&self, block_ref: impl Into<BlockRef<HashFor<T>>>) -> ViewFunctionsApi<T, Client> {
+        ViewFunctionsApi::new(self.client.clone(), block_ref.into())
     }
 
-    /// Obtain a runtime API interface at the latest block hash.
+    /// Obtain an interface to call View Functions at the latest block hash.
     pub fn at_latest(
         &self,
-    ) -> impl Future<Output = Result<RuntimeApi<T, Client>, Error>> + Send + 'static {
+    ) -> impl Future<Output = Result<ViewFunctionsApi<T, Client>, Error>> + Send + 'static {
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
@@ -51,7 +51,7 @@ where
             // get the ref for the latest finalized block and use that.
             let block_ref = client.backend().latest_finalized_block_ref().await?;
 
-            Ok(RuntimeApi::new(client, block_ref))
+            Ok(ViewFunctionsApi::new(client, block_ref))
         }
     }
 }

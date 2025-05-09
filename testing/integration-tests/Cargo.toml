@@ -35,6 +35,7 @@ hex = { workspace = true }
 regex = { workspace = true }
 serde = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
+scale-value = { workspace = true }
 sp-core = { workspace = true, features = ["std"] }
 syn = { workspace = true }
 subxt = { workspace = true, features = ["unstable-metadata", "native", "jsonrpsee", "reconnecting-rpc-client"] }

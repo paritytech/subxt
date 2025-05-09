@@ -68,7 +68,7 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
                     error_ty: p.error.map(|e| e.ty.id),
                     error_variant_index,
                     constants: constants.collect(),
-                    view_functions: vec![],
+                    view_functions: Default::default(),
                     associated_types: Default::default(),
                     docs: vec![],
                 },

@@ -9,10 +9,10 @@
 
 use super::extrinsic_params::ExtrinsicParams;
 use crate::client::ClientState;
-use crate::config::{ExtrinsicParamsEncoder, Header};
+use crate::config::ExtrinsicParamsEncoder;
+use crate::config::{Config, HashFor};
 use crate::error::ExtrinsicParamsError;
 use crate::utils::{Era, Static};
-use crate::Config;
 use alloc::borrow::ToOwned;
 use alloc::boxed::Box;
 use alloc::vec::Vec;
@@ -77,7 +77,7 @@ impl<T: Config> ExtrinsicParamsEncoder for VerifySignature<T> {
         // Downcast refs back to concrete types (we use `&dyn Any`` so that the trait remains object safe)
         let account = account
             .downcast_ref::<T::AccountId>()
-            .expect("A T::AccoundId should have been provided")
+            .expect("A T::AccountId should have been provided")
             .clone();
         let signature = signature
             .downcast_ref::<T::Signature>()
@@ -262,7 +262,7 @@ impl<T: Config> TransactionExtension<T> for CheckTxVersion {
 }
 
 /// The [`CheckGenesis`] transaction extension.
-pub struct CheckGenesis<T: Config>(T::Hash);
+pub struct CheckGenesis<T: Config>(HashFor<T>);
 
 impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
     type Params = ();
@@ -288,7 +288,7 @@ impl<T: Config> TransactionExtension<T> for CheckGenesis<T> {
 /// The [`CheckMortality`] transaction extension.
 pub struct CheckMortality<T: Config> {
     params: CheckMortalityParamsInner<T>,
-    genesis_hash: T::Hash,
+    genesis_hash: HashFor<T>,
 }
 
 impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
@@ -352,7 +352,7 @@ enum CheckMortalityParamsInner<T: Config> {
     MortalFromBlock {
         for_n_blocks: u64,
         from_block_n: u64,
-        from_block_hash: T::Hash,
+        from_block_hash: HashFor<T>,
     },
 }
 
@@ -368,23 +368,14 @@ impl<T: Config> CheckMortalityParams<T> {
     pub fn mortal(for_n_blocks: u64) -> Self {
         Self(CheckMortalityParamsInner::MortalForBlocks(for_n_blocks))
     }
-    /// Configure a transaction that will be mortal for the number of blocks given,
-    /// and from the block header provided.
-    pub fn mortal_from(for_n_blocks: u64, from_block: T::Header) -> Self {
-        Self(CheckMortalityParamsInner::MortalFromBlock {
-            for_n_blocks,
-            from_block_n: from_block.number().into(),
-            from_block_hash: from_block.hash(),
-        })
-    }
+
     /// Configure a transaction that will be mortal for the number of blocks given,
     /// and from the block details provided. Prefer to use [`CheckMortalityParams::mortal()`]
-    /// or [`CheckMortalityParams::mortal_from()`] which both avoid the block number and hash
-    /// from being misaligned.
+    /// where possible, which prevents the block number and hash from being misaligned.
     pub fn mortal_from_unchecked(
         for_n_blocks: u64,
         from_block_n: u64,
-        from_block_hash: T::Hash,
+        from_block_hash: HashFor<T>,
     ) -> Self {
         Self(CheckMortalityParamsInner::MortalFromBlock {
             for_n_blocks,
@@ -399,7 +390,7 @@ impl<T: Config> CheckMortalityParams<T> {
 }
 
 impl<T: Config> Params<T> for CheckMortalityParams<T> {
-    fn inject_block(&mut self, from_block_n: u64, from_block_hash: <T as Config>::Hash) {
+    fn inject_block(&mut self, from_block_n: u64, from_block_hash: HashFor<T>) {
         match &self.0 {
             CheckMortalityParamsInner::MortalForBlocks(n) => {
                 self.0 = CheckMortalityParamsInner::MortalFromBlock {

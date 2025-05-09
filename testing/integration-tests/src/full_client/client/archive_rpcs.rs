@@ -16,7 +16,6 @@ use subxt::{
     client::OnlineClient,
     config::{Config, Hasher},
     utils::AccountId32,
-    SubstrateConfig,
 };
 use subxt_rpcs::methods::chain_head::{
     ArchiveStorageEventItem, Bytes, StorageQuery, StorageQueryType,
@@ -178,6 +177,7 @@ async fn archive_v1_storage() {
     let ctx = test_context().await;
     let rpc = ctx.chainhead_rpc_methods().await;
     let api = ctx.client();
+    let hasher = api.hasher();
     let mut blocks = fetch_finalized_blocks(&ctx, 3).await;
 
     while let Some(block) = blocks.next().await {
@@ -236,9 +236,7 @@ async fn archive_v1_storage() {
             ArchiveStorageEventItem {
                 key: Bytes(account_info_addr),
                 value: None,
-                hash: Some(<SubstrateConfig as Config>::Hasher::hash(
-                    &subxt_account_info
-                )),
+                hash: Some(hasher.hash(&subxt_account_info)),
                 closest_descendant_merkle_value: None,
                 child_trie_key: None
             }
