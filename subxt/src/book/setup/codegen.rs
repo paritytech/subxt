@@ -13,7 +13,7 @@
 //! The most common way to generate the interface is to use the [`#[subxt]`](crate::subxt) macro.
 //! Using this macro looks something like:
 //!
-//! ```rust,no_run
+//! ```rust,no_run,standalone_crate
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_tiny.scale")]
 //! pub mod polkadot {}
 //! ```

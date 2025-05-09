@@ -96,7 +96,7 @@
 //! For statemint, the transaction extensions look like
 //! [this](https://github.com/paritytech/cumulus/blob/d4bb2215bb28ee05159c4c7df1b3435177b5bf4e/parachains/runtimes/assets/asset-hub-polkadot/src/lib.rs#L786):
 //!
-//! ```rs
+//! ```rust,ignore
 //! pub type SignedExtra = (
 //!     frame_system::CheckNonZeroSender<Runtime>,
 //!     frame_system::CheckSpecVersion<Runtime>,

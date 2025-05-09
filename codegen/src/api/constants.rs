@@ -14,7 +14,7 @@ use super::CodegenError;
 /// Generate constants from the provided pallet's metadata.
 ///
 /// The function creates a new module named `constants` under the pallet's module.
-/// ```ignore
+/// ```rust,ignore
 /// pub mod PalletName {
 ///     pub mod constants {
 ///     ...

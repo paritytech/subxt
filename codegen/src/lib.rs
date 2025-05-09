@@ -40,7 +40,7 @@ pub use syn;
 ///
 /// Generating an interface using all of the defaults:
 ///
-/// ```rust
+/// ```rust,standalone_crate
 /// use codec::Decode;
 /// use subxt_codegen::{ Metadata, CodegenBuilder };
 ///

@@ -15,7 +15,7 @@
 //!
 //! We can use the statically generated interface to build constant queries:
 //!
-//! ```rust,no_run
+//! ```rust,no_run,standalone_crate
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
 //! pub mod polkadot {}
 //!
@@ -24,7 +24,7 @@
 //!
 //! Alternately, we can dynamically construct a constant query:
 //!
-//! ```rust,no_run
+//! ```rust,no_run,standalone_crate
 //! use subxt::dynamic::Value;
 //!
 //! let storage_query = subxt::dynamic::constant("System", "BlockLength");

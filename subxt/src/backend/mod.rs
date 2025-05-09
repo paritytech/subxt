@@ -29,7 +29,7 @@ pub mod rpc {
         ///
         /// # Example
         ///
-        /// ```rust,no_run
+        /// ```rust,no_run,standalone_crate
         /// use std::time::Duration;
         /// use futures::StreamExt;
         /// use subxt::backend::rpc::reconnecting_rpc_client::{RpcClient, ExponentialBackoff};
@@ -541,7 +541,7 @@ mod test {
         /// - `current_runtime_version`
         /// - `call`
         /// The test covers them because they follow the simple pattern of:
-        /// ```no_run
+        /// ```rust,no_run,standalone_crate
         ///  async fn THE_THING(&self) -> Result<HashFor<T>, Error> {
         ///    retry(|| <DO THE THING> ).await
         ///  }
@@ -572,7 +572,7 @@ mod test {
         /// - `stream_all_block_headers`
         /// - `stream_best_block_headers`
         /// The test covers them because they follow the simple pattern of:
-        /// ```no_run
+        /// ```rust,no_run,standalone_crate
         /// async fn stream_the_thing(
         ///     &self,
         /// ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {

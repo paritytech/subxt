@@ -58,7 +58,7 @@ impl Keypair {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,standalone_crate
     /// use subxt_signer::{ SecretUri, sr25519::Keypair };
     /// use std::str::FromStr;
     ///
@@ -94,7 +94,7 @@ impl Keypair {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,standalone_crate
     /// use subxt_signer::{ bip39::Mnemonic, sr25519::Keypair };
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
@@ -144,7 +144,7 @@ impl Keypair {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,standalone_crate
     /// use subxt_signer::{ bip39::Mnemonic, sr25519::Keypair, DeriveJunction };
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
@@ -186,7 +186,7 @@ impl Keypair {
 
 /// Verify that some signature for a message was created by the owner of the [`PublicKey`].
 ///
-/// ```rust
+/// ```rust,standalone_crate
 /// use subxt_signer::{ bip39::Mnemonic, sr25519 };
 ///
 /// let keypair = sr25519::dev::alice();
