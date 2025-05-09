@@ -286,7 +286,7 @@ jobs:
     name: "Test (Native)"
     runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
