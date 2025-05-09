@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{
-    blocks::block_types::{get_events, CachedEvents},
+    blocks::block_types::{CachedEvents, get_events},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor},
     error::Error,
@@ -81,7 +81,7 @@ where
     /// If an error occurs, all subsequent iterations return `None`.
     pub fn find<E: StaticExtrinsic>(
         &self,
-    ) -> impl Iterator<Item = Result<FoundExtrinsic<T, C, E>, Error>> + '_ {
+    ) -> impl Iterator<Item = Result<FoundExtrinsic<T, C, E>, Error>> {
         self.inner.find::<E>().map(|res| {
             match res {
                 Err(e) => Err(Error::from(e)),
@@ -308,7 +308,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails<T>, Error>> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails<T>, Error>> {
         self.events.iter().filter(|ev| {
             ev.as_ref()
                 .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))
@@ -320,7 +320,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::find()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn find<Ev: events::StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> + '_ {
+    pub fn find<Ev: events::StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> {
         self.iter()
             .filter_map(|ev| ev.and_then(|ev| ev.as_event::<Ev>()).transpose())
     }

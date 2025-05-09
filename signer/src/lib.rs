@@ -52,4 +52,4 @@ pub use secrecy::{ExposeSecret, SecretString};
 
 // SecretUri's can be parsed from strings and used to generate key pairs.
 // DeriveJunctions are the "path" part of these SecretUris.
-pub use crypto::{DeriveJunction, SecretUri, SecretUriError, DEV_PHRASE};
+pub use crypto::{DEV_PHRASE, DeriveJunction, SecretUri, SecretUriError};

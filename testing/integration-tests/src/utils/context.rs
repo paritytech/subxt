@@ -4,8 +4,8 @@
 
 pub(crate) use crate::{node_runtime, utils::TestNodeProcess};
 
-use subxt::client::OnlineClient;
 use subxt::SubstrateConfig;
+use subxt::client::OnlineClient;
 
 use super::node_proc::RpcClientKind;
 

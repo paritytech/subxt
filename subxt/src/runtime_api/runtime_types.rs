@@ -50,7 +50,7 @@ where
         &self,
         function: &'a str,
         call_parameters: Option<&'a [u8]>,
-    ) -> impl Future<Output = Result<Res, Error>> + 'a {
+    ) -> impl Future<Output = Result<Res, Error>> + use<'a, Res, Client, T> {
         let client = self.client.clone();
         let block_hash = self.block_ref.hash();
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
@@ -68,7 +68,7 @@ where
     pub fn call<Call: Payload>(
         &self,
         payload: Call,
-    ) -> impl Future<Output = Result<Call::ReturnType, Error>> {
+    ) -> impl Future<Output = Result<Call::ReturnType, Error>> + use<Call, Client, T> {
         let client = self.client.clone();
         let block_hash = self.block_ref.hash();
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),

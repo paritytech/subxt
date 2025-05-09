@@ -12,12 +12,12 @@ use crate::backend::{
     TransactionStatus,
 };
 use crate::{
-    config::{Config, HashFor, Header},
     Error,
+    config::{Config, HashFor, Header},
 };
 use async_trait::async_trait;
 use futures::TryStreamExt;
-use futures::{future, future::Either, stream, Future, FutureExt, Stream, StreamExt};
+use futures::{Future, FutureExt, Stream, StreamExt, future, future::Either, stream};
 use std::collections::VecDeque;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -473,7 +473,7 @@ where
                     Ok::<_, Error>(header)
                 }
             })
-            .filter_map(|h| async { h.transpose() });
+            .filter_map(async |h| h.transpose());
 
         // On the next iteration, we'll get details starting just after this end block.
         last_block_num = Some(end_block_num);

@@ -32,17 +32,17 @@ use frame_decode::extrinsics::{
     ExtrinsicSignatureInfo,
 };
 use hashbrown::HashMap;
-use scale_info::{form::PortableForm, PortableRegistry, Variant};
+use scale_info::{PortableRegistry, Variant, form::PortableForm};
 use utils::{
     ordered_map::OrderedMap,
-    validation::{get_custom_value_hash, HASH_LEN},
+    validation::{HASH_LEN, get_custom_value_hash},
     variant_index::VariantIndex,
 };
 
 type ArcStr = Arc<str>;
 
-pub use from::TryFromError;
 pub use from::SUPPORTED_METADATA_VERSIONS;
+pub use from::TryFromError;
 pub use utils::validation::MetadataHasher;
 
 type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;
@@ -314,7 +314,9 @@ impl<'a> PalletMetadata<'a> {
     }
 
     /// Return an iterator over the View Functions in this pallet, if any.
-    pub fn view_functions(&self) -> impl ExactSizeIterator<Item = ViewFunctionMetadata<'a>> {
+    pub fn view_functions(
+        &self,
+    ) -> impl ExactSizeIterator<Item = ViewFunctionMetadata<'a>> + use<'a> {
         self.inner
             .view_functions
             .values()
@@ -337,7 +339,7 @@ impl<'a> PalletMetadata<'a> {
     }
 
     /// Iterate (in no particular order) over the associated type names and type IDs for this pallet.
-    pub fn associated_types(&self) -> impl ExactSizeIterator<Item = (&str, u32)> {
+    pub fn associated_types(&self) -> impl ExactSizeIterator<Item = (&'a str, u32)> + use<'a> {
         self.inner
             .associated_types
             .iter()
@@ -388,7 +390,7 @@ impl<'a> PalletMetadata<'a> {
     }
 
     /// An iterator over the constants in this pallet.
-    pub fn constants(&self) -> impl ExactSizeIterator<Item = &'a ConstantMetadata> {
+    pub fn constants(&self) -> impl ExactSizeIterator<Item = &'a ConstantMetadata> + use<'a> {
         self.inner.constants.values().iter()
     }
 
@@ -783,7 +785,7 @@ impl<'a> RuntimeApiMetadata<'a> {
         &self.inner.docs
     }
     /// An iterator over the trait methods.
-    pub fn methods(&self) -> impl ExactSizeIterator<Item = RuntimeApiMethodMetadata<'a>> {
+    pub fn methods(&self) -> impl ExactSizeIterator<Item = RuntimeApiMethodMetadata<'a>> + use<'a> {
         self.inner
             .methods
             .values()
@@ -839,7 +841,7 @@ impl<'a> RuntimeApiMethodMetadata<'a> {
         &self.inner.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &MethodParamMetadata> {
+    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &'a MethodParamMetadata> + use<'a> {
         self.inner.inputs.iter()
     }
     /// Method return type.
@@ -887,7 +889,7 @@ impl<'a> ViewFunctionMetadata<'a> {
         &self.inner.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &'a MethodParamMetadata> {
+    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &'a MethodParamMetadata> + use<'a> {
         self.inner.inputs.iter()
     }
     /// Method return type.
@@ -947,7 +949,7 @@ impl<'a> CustomMetadata<'a> {
     }
 
     /// Iterates over names (keys) and associated custom values
-    pub fn iter(&self) -> impl Iterator<Item = CustomValueMetadata> {
+    pub fn iter(&self) -> impl Iterator<Item = CustomValueMetadata<'a>> + use<'a> {
         self.inner.map.iter().map(|(name, e)| CustomValueMetadata {
             types: self.types,
             type_id: e.ty.id,

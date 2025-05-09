@@ -12,14 +12,14 @@ use std::write;
 use subxt::{
     ext::scale_encode::EncodeAsType,
     metadata::{
-        types::{PalletMetadata, StorageEntryType, StorageMetadata},
         Metadata,
+        types::{PalletMetadata, StorageEntryType, StorageMetadata},
     },
 };
 
 use crate::utils::{
-    create_client, first_paragraph_of_docs, parse_string_into_scale_value, type_example, FileOrUrl,
-    Indent, SyntaxHighlight,
+    FileOrUrl, Indent, SyntaxHighlight, create_client, first_paragraph_of_docs,
+    parse_string_into_scale_value, type_example,
 };
 
 #[derive(Debug, Clone, Args)]
@@ -151,7 +151,9 @@ pub async fn explore_storage(
 
     let storage_entry_keys: Vec<Value> = match (trailing_args.is_empty(), key_ty_id) {
         (false, None) => {
-            let warning = format!("Warning: You submitted a key, but no key is needed: \"{trailing_args}\". To access the storage value, please do not provide any key.");
+            let warning = format!(
+                "Warning: You submitted a key, but no key is needed: \"{trailing_args}\". To access the storage value, please do not provide any key."
+            );
             writeln!(output, "{}", warning.yellow())?;
             return Ok(());
         }

@@ -4,6 +4,7 @@
 
 use crate::custom_values::CustomValuesClient;
 use crate::{
+    Metadata,
     blocks::BlocksClient,
     config::{Config, HashFor},
     constants::ConstantsClient,
@@ -12,7 +13,6 @@ use crate::{
     storage::StorageClient,
     tx::TxClient,
     view_functions::ViewFunctionsClient,
-    Metadata,
 };
 
 use derive_where::derive_where;

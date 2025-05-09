@@ -11,9 +11,9 @@ use derive_where::derive_where;
 use scale_encode::EncodeAsFields;
 use scale_value::Composite;
 
+use crate::Error;
 use crate::dynamic::DecodedValueThunk;
 use crate::error::MetadataError;
-use crate::Error;
 
 use crate::metadata::{DecodeWithMetadata, Metadata};
 

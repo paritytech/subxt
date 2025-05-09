@@ -10,14 +10,14 @@ use std::str::FromStr;
 use subxt::tx;
 use subxt::utils::H256;
 use subxt::{
-    config::SubstrateConfig,
-    metadata::{types::PalletMetadata, Metadata},
     OfflineClient,
+    config::SubstrateConfig,
+    metadata::{Metadata, types::PalletMetadata},
 };
 
 use crate::utils::{
-    fields_composite_example, fields_description, parse_string_into_scale_value, Indent,
-    SyntaxHighlight,
+    Indent, SyntaxHighlight, fields_composite_example, fields_description,
+    parse_string_into_scale_value,
 };
 
 #[derive(Debug, Clone, Args)]

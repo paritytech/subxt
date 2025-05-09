@@ -19,7 +19,7 @@ use codec::{Decode, Encode};
 use core::fmt::Debug;
 use scale_decode::DecodeAsType;
 use scale_encode::EncodeAsType;
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use subxt_metadata::Metadata;
 
 pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};

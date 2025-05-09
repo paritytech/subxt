@@ -5,10 +5,10 @@
 //! An ecdsa keypair implementation.
 use codec::Encode;
 
-use crate::crypto::{seed_from_entropy, DeriveJunction, SecretUri};
+use crate::crypto::{DeriveJunction, SecretUri, seed_from_entropy};
 use core::str::FromStr;
 use hex::FromHex;
-use secp256k1::{ecdsa::RecoverableSignature, Message, Secp256k1, SecretKey};
+use secp256k1::{Message, Secp256k1, SecretKey, ecdsa::RecoverableSignature};
 use secrecy::ExposeSecret;
 
 use thiserror::Error as DeriveError;

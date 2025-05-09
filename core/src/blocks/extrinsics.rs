@@ -5,9 +5,9 @@
 use super::BlockError;
 use crate::blocks::extrinsic_transaction_extensions::ExtrinsicTransactionExtensions;
 use crate::{
+    Metadata,
     config::{Config, HashFor, Hasher},
     error::{Error, MetadataError},
-    Metadata,
 };
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -106,7 +106,7 @@ impl<T: Config> Extrinsics<T> {
     /// If an error occurs, all subsequent iterations return `None`.
     pub fn find<E: StaticExtrinsic>(
         &self,
-    ) -> impl Iterator<Item = Result<FoundExtrinsic<T, E>, Error>> + '_ {
+    ) -> impl Iterator<Item = Result<FoundExtrinsic<T, E>, Error>> {
         self.iter().filter_map(|details| {
             match details.as_extrinsic::<E>() {
                 // Failed to decode extrinsic:
@@ -367,10 +367,10 @@ mod tests {
     use codec::{Decode, Encode};
     use frame_metadata::v15::{CustomMetadata, OuterEnums};
     use frame_metadata::{
-        v15::{ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, RuntimeMetadataV15},
         RuntimeMetadataPrefixed,
+        v15::{ExtrinsicMetadata, PalletCallMetadata, PalletMetadata, RuntimeMetadataV15},
     };
-    use scale_info::{meta_type, TypeInfo};
+    use scale_info::{TypeInfo, meta_type};
     use scale_value::Value;
 
     // Extrinsic needs to contain at least the generic type parameter "Call"

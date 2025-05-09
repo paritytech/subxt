@@ -89,10 +89,10 @@ where
                 // Error scenarios; return the error.
                 TxStatus::Error { message } => return Err(TransactionError::Error(message).into()),
                 TxStatus::Invalid { message } => {
-                    return Err(TransactionError::Invalid(message).into())
+                    return Err(TransactionError::Invalid(message).into());
                 }
                 TxStatus::Dropped { message } => {
-                    return Err(TransactionError::Dropped(message).into())
+                    return Err(TransactionError::Dropped(message).into());
                 }
                 // Ignore and wait for next status event:
                 _ => continue,
@@ -321,11 +321,11 @@ mod test {
     use subxt_core::client::RuntimeVersion;
 
     use crate::{
+        Error, SubstrateConfig,
         backend::{StreamOfResults, TransactionStatus},
         client::{OfflineClientT, OnlineClientT},
         config::{Config, HashFor},
         tx::TxProgress,
-        Error, SubstrateConfig,
     };
 
     type MockTxProgress = TxProgress<SubstrateConfig, MockClient>;

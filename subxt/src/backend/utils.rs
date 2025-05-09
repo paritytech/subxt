@@ -246,7 +246,7 @@ mod tests {
     #[tokio::test]
     async fn retry_sub_err_terminates_stream() {
         let stream = futures::stream::iter([Ok(1)]);
-        let resubscribe = Box::new(move || async move { Err(custom_err()) }.boxed());
+        let resubscribe = Box::new(|| async move { Err(custom_err()) }.boxed());
 
         let retry_stream = RetrySubscription {
             state: Some(PendingOrStream::Stream(StreamOf::new(Box::pin(stream)))),
@@ -259,7 +259,7 @@ mod tests {
     #[tokio::test]
     async fn retry_sub_resubscribe_err() {
         let stream = futures::stream::iter([Ok(1), Err(disconnect_err())]);
-        let resubscribe = Box::new(move || async move { Err(custom_err()) }.boxed());
+        let resubscribe = Box::new(|| async move { Err(custom_err()) }.boxed());
 
         let retry_stream = RetrySubscription {
             state: Some(PendingOrStream::Stream(StreamOf::new(Box::pin(stream)))),
