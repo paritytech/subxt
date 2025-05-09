@@ -13,9 +13,6 @@ The primary benefit of this release is introducing support for the [_about-to-be
 Calling a Pallet View Function in this Subxt release will look like:
 
 ```rust
-let ctx = test_context().await;
-let api = ctx.client();
-
 use runtime::proxy::view_functions::check_permissions::{Call, ProxyType};
 
 // Construct the call, providing the two arguments.
@@ -40,8 +37,6 @@ Like Runtime APIs and others, the dynamic API can also be used to call into Pall
 ```rust
 use scale_value::value;
 
-let ctx = test_context().await;
-let api = ctx.client();
 let metadata = api.metadata();
 
 // Look up the query ID for the View Function in the node metadata:
