@@ -410,23 +410,23 @@ pub struct StructFromVariant {
 /// Returns the TokenStream of the type alias module.
 ///
 /// E.g a struct like this:
-/// 
+///
 /// ```rust,ignore
 /// pub struct SetMaxCodeSize {
 ///     pub new: ::core::primitive::u32,
 /// }
 /// ```
-/// 
+///
 /// will be made into this:
-/// 
+///
 /// ```rust,ignore
 /// pub struct SetMaxCodeSize {
 ///     pub new: set_max_code_size::New,
 /// }
 /// ```
-/// 
+///
 /// And the type alias module will look like this:
-/// 
+///
 /// ```rust,ignore
 /// pub mod set_max_code_size {
 ///     use super::runtime_types;

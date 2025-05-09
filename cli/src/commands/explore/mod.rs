@@ -20,7 +20,7 @@ mod runtime_apis;
 /// # Example
 ///
 /// Show the pallets and runtime apis that are available:
-/// 
+///
 /// ```text
 /// subxt explore --file=polkadot_metadata.scale
 /// ```
