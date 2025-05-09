@@ -21,7 +21,7 @@
 //!
 //! We can use the statically generated interface to build runtime calls:
 //!
-//! ```rust,no_run
+//! ```rust,no_run,standalone_crate
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 //! pub mod polkadot {}
 //!

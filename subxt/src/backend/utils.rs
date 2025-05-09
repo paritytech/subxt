@@ -89,7 +89,7 @@ impl<T> Stream for RetrySubscription<T> {
 ///
 /// # Example
 ///
-/// ```no_run
+/// ```rust,no_run,standalone_crate
 /// use subxt::backend::utils::retry;
 ///
 /// async fn some_future() -> Result<(), subxt::error::Error> {
@@ -149,7 +149,7 @@ where
 ///
 /// # Example
 ///
-/// ```no_run
+/// ```rust,no_run,standalone_crate
 /// use subxt::backend::{utils::retry_stream, StreamOf};
 /// use futures::future::FutureExt;
 ///

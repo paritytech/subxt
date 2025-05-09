@@ -106,7 +106,7 @@ impl std::ops::Deref for RpcClient {
 ///
 /// # Example
 ///
-/// ```rust
+/// ```rust,standalone_crate
 /// use subxt_rpcs::client::{ rpc_params, RpcParams };
 ///
 /// // If you provide no params you get `None` back
@@ -138,7 +138,7 @@ pub use rpc_params;
 ///
 /// # Example
 ///
-/// ```rust
+/// ```rust,standalone_crate
 /// use subxt_rpcs::client::RpcParams;
 ///
 /// let mut params = RpcParams::new();

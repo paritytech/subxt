@@ -84,7 +84,7 @@ where
     ///
     /// # Example
     ///
-    /// ```no_run
+    /// ```rust,no_run,standalone_crate
     /// use subxt::{ PolkadotConfig, OnlineClient };
     ///
     /// #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
@@ -161,7 +161,7 @@ where
 
     /// Returns an iterator of key value pairs.
     ///
-    /// ```no_run
+    /// ```rust,no_run,standalone_crate
     /// use subxt::{ PolkadotConfig, OnlineClient };
     ///
     /// #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]

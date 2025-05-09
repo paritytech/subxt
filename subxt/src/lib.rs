@@ -144,7 +144,7 @@ pub mod ext {
 ///
 /// Annotate a Rust module with the `subxt` attribute referencing a metadata file like so:
 ///
-/// ```rust,no_run
+/// ```rust,no_run,standalone_crate
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 /// )]
@@ -157,7 +157,7 @@ pub mod ext {
 ///
 /// Annotate a Rust module with the `subxt` attribute referencing some runtime WASM like so:
 ///
-/// ```rust,no_run
+/// ```rust,ignore
 /// #[subxt::subxt(
 ///     runtime_path = "../artifacts/westend_runtime.wasm",
 /// )]
@@ -191,7 +191,7 @@ pub mod ext {
 ///
 /// Use this attribute to specify a custom path to the `subxt_core` crate:
 ///
-/// ```rust
+/// ```rust,standalone_crate
 /// # pub extern crate subxt_core;
 /// # pub mod path { pub mod to { pub use subxt_core; } }
 /// # fn main() {}
@@ -210,7 +210,7 @@ pub mod ext {
 /// This attribute replaces any reference to the generated type at the path given by `path` with a
 /// reference to the path given by `with`.
 ///
-/// ```rust
+/// ```rust,standalone_crate
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     substitute_type(path = "sp_arithmetic::per_things::Perbill", with = "crate::Foo")
@@ -248,7 +248,7 @@ pub mod ext {
 /// If the type you're substituting contains generic parameters, you can "pattern match" on those, and
 /// make use of them in the substituted type, like so:
 ///
-/// ```rust,no_run
+/// ```rust,no_run,standalone_crate
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     substitute_type(
@@ -268,7 +268,7 @@ pub mod ext {
 /// By default, all generated types derive a small set of traits. This attribute allows you to derive additional
 /// traits on all generated types:
 ///
-/// ```rust,no_run
+/// ```rust,no_run,standalone_crate
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     derive_for_all_types = "Eq, PartialEq"
@@ -284,7 +284,7 @@ pub mod ext {
 /// Unlike the above, which derives some trait on every generated type, this attribute allows you to derive traits only
 /// for specific types. Note that any types which are used inside the specified type may also need to derive the same traits.
 ///
-/// ```rust,no_run
+/// ```rust,no_run,standalone_crate
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     derive_for_all_types = "Eq, PartialEq",
@@ -299,7 +299,7 @@ pub mod ext {
 /// By default, documentation is not generated via the macro, since IDEs do not typically make use of it. This attribute
 /// forces documentation to be generated, too.
 ///
-/// ```rust,no_run
+/// ```rust,no_run,standalone_crate
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     generate_docs
@@ -312,7 +312,7 @@ pub mod ext {
 /// By default, the macro will generate various interfaces to make using Subxt simpler in addition with any types that need
 /// generating to make this possible. This attribute makes the codegen only generate the types and not the Subxt interface.
 ///
-/// ```rust,no_run
+/// ```rust,no_run,standalone_crate
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     runtime_types_only
@@ -325,7 +325,7 @@ pub mod ext {
 /// By default, the macro will add all derives necessary for the generated code to play nicely with Subxt. Adding this attribute
 /// removes all default derives.
 ///
-/// ```rust,no_run
+/// ```rust,no_run,standalone_crate
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
 ///     runtime_types_only,

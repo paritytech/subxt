@@ -13,7 +13,7 @@ use subxt_metadata::PalletMetadata;
 ///
 /// The function creates a new module named `events` under the pallet's module.
 ///
-/// ```ignore
+/// ```rust,ignore
 /// pub mod PalletName {
 ///     pub mod events {
 ///     ...
@@ -24,7 +24,7 @@ use subxt_metadata::PalletMetadata;
 /// The function generates the events as rust structs that implement the `subxt::event::StaticEvent` trait
 /// to uniquely identify the event's identity when creating the extrinsic.
 ///
-/// ```ignore
+/// ```rust,ignore
 /// pub struct EventName {
 ///      pub event_param: type,
 /// }

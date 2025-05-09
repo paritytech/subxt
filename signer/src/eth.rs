@@ -46,7 +46,7 @@ impl Keypair {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,standalone_crate
     /// use subxt_signer::{ bip39::Mnemonic, eth::{ Keypair, DerivationPath } };
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
@@ -175,7 +175,7 @@ impl AsRef<[u8; 65]> for Signature {
 
 /// Verify that some signature for a message was created by the owner of the [`PublicKey`].
 ///
-/// ```rust
+/// ```rust,standalone_crate
 /// use subxt_signer::{ bip39::Mnemonic, eth };
 ///
 /// let keypair = eth::dev::alith();

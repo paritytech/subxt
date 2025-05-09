@@ -25,7 +25,7 @@
 //!
 //! We can use the statically generated interface to build transaction payloads:
 //!
-//! ```rust,no_run
+//! ```rust,no_run,standalone_crate
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 //! pub mod polkadot {}
 //!
@@ -41,7 +41,7 @@
 //! Alternately, we can dynamically construct a transaction payload. This will not be type checked or
 //! validated until it's submitted:
 //!
-//! ```rust,no_run
+//! ```rust,no_run,standalone_crate
 //! use subxt::dynamic::Value;
 //!
 //! let tx_payload = subxt::dynamic::tx("System", "remark", vec![
@@ -79,7 +79,7 @@
 //!
 //! Let's go through how to create a signer using the `subxt_signer` crate:
 //!
-//! ```rust
+//! ```rust,standalone_crate
 //! use subxt::config::PolkadotConfig;
 //! use std::str::FromStr;
 //!
@@ -97,7 +97,7 @@
 //!
 //! After initializing the signer, let's also go through how to create a transaction and sign it:
 //!
-//! ```rust,no_run
+//! ```rust,no_run,standalone_crate
 //! # #[tokio::main]
 //! # async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! use subxt::client::OnlineClient;
