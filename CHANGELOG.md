@@ -4,6 +4,105 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.42.0] - 2025-05-09
+
+The primary benefit of this release is introducing support for the [_about-to-be-stabilised-in-polkadot-sdk_](https://github.com/paritytech/polkadot-sdk/pull/8443) V16 metadata, and with that, support for calling Pallet View Functions on runtimes which will support this. Pallet View Functions are used much like Runtime APIs, except that they are declared in specific pallets and not declared at the runtime-wide level, allowing pallets to carry their own APIs with them.
+
+### Pallet View Functions
+
+Calling a Pallet View Function in this Subxt release will look like:
+
+```rust
+let ctx = test_context().await;
+let api = ctx.client();
+
+use runtime::proxy::view_functions::check_permissions::{Call, ProxyType};
+
+// Construct the call, providing the two arguments.
+let view_function_call = runtime::view_functions()
+    .proxy()
+    .check_permissions(
+        Call::System(runtime::system::Call::remark { remark: b"hi".to_vec() }),
+        ProxyType::Any
+    );
+
+// Submit the call and get back a result.
+let _is_call_allowed = api
+    .view_functions()
+    .at_latest()
+    .await?
+    .call(view_function_call)
+    .await?;
+```
+
+Like Runtime APIs and others, the dynamic API can also be used to call into Pallet View Functions, which has the advantage of not needing the statically generated interface, but the downside of not being strongly typed. This looks like the following:
+
+```rust
+use scale_value::value;
+
+let ctx = test_context().await;
+let api = ctx.client();
+let metadata = api.metadata();
+
+// Look up the query ID for the View Function in the node metadata:
+let query_id = metadata
+    .pallet_by_name("Proxy")
+    .unwrap()
+    .view_function_by_name("check_permissions")
+    .unwrap()
+    .query_id();
+
+// Construct the call, providing the two arguments.
+let view_function_call = subxt::dynamic::view_function_call(
+    *query_id,
+    vec![
+        value!(System(remark(b"hi".to_vec()))), 
+        value!(Any())
+    ],
+);
+
+// Submit the call and get back a result.
+let _is_call_allowed = api
+    .view_functions()
+    .at_latest()
+    .await?
+    .call(view_function_call)
+    .await?;
+```
+
+### Updated `Config` trait
+
+Another change to be aware of is that [our `Config` trait has been tweaked](https://github.com/paritytech/subxt/pull/1974). The `Hash` associated type is no longer needed, as it can be obtained via the `Hasher` associated type already, and `PolkadotConfig`/`SubstrateConfig` now set the hasher by default to be `DynamicHasher256`, which will (when V16 metadata is available for a runtime) automatically select between Keccak256 and BlakeTwo256 hashers depending on what the chain requires.
+
+### Other changes
+
+We also [solidify our support for V1 archive RPCs](https://github.com/paritytech/subxt/pull/1977), [upgrade the codebase to Rust 2024 edition](https://github.com/paritytech/subxt/pull/2001), and a bunch of other changes, the full list of which is here:
+
+### Added
+
+- Support v16 metadata and use it by default if it's available ([#1999](https://github.com/paritytech/subxt/pull/1999))
+- Metadata V16: Implement support for Pallet View Functions ([#1981](https://github.com/paritytech/subxt/pull/1981))
+- Metadata V16: Be more dynamic over which hasher is used. ([#1974](https://github.com/paritytech/subxt/pull/1974))
+
+### Changed
+
+- Update to 2024 edition ([#2001](https://github.com/paritytech/subxt/pull/2001))
+- Update Smoldot to latest version ([#1991](https://github.com/paritytech/subxt/pull/1991))
+- Update native test timeout to 45 mins ([#2002](https://github.com/paritytech/subxt/pull/2002))
+- chore(deps): tokio ^1.44.2 ([#1989](https://github.com/paritytech/subxt/pull/1989))
+- Add DefaultParams to allow more transaction extensions to be used when calling _default() methods ([#1979](https://github.com/paritytech/subxt/pull/1979))
+- Use wat instead of wabt to avoid CI cmake error (and use supported dep) ([#1980](https://github.com/paritytech/subxt/pull/1980))
+- Support v1 archive RPCs ([#1977](https://github.com/paritytech/subxt/pull/1977))
+- Support V16 metadata and refactor metadata code ([#1967](https://github.com/paritytech/subxt/pull/1967))
+- Allow submitting transactions ignoring follow events ([#1962](https://github.com/paritytech/subxt/pull/1962))
+- Improve error message regarding failure to extract metadata from WASM runtime ([#1961](https://github.com/paritytech/subxt/pull/1961))
+- Add docs for subxt-rpcs and fix example ([#1954](https://github.com/paritytech/subxt/pull/1954))
+
+### Fixed
+
+- Fix CLI storage diff ([#1958](https://github.com/paritytech/subxt/pull/1958))
+- chore: fix some typos ([#1997](https://github.com/paritytech/subxt/pull/1997))
+
 ## [0.41.0] - 2025-03-10
 
 This release makes two main changes:
