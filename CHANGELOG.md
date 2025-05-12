@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.42.1] - 2025-05-12
+
+This patch release reduces the rust-version to 1.85.0, given that we don't use any features newer than this at the moment.
+
 ## [0.42.0] - 2025-05-09
 
 The primary benefit of this release is introducing support for the [_about-to-be-stabilised-in-polkadot-sdk_](https://github.com/paritytech/polkadot-sdk/pull/8443) V16 metadata, and with that, support for calling Pallet View Functions on runtimes which will support this. Pallet View Functions are used much like Runtime APIs, except that they are declared in specific pallets and not declared at the runtime-wide level, allowing pallets to carry their own APIs with them.
