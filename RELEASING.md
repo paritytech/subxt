@@ -75,6 +75,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
         a little time in between each to let crates.io catch up with what we've published).
 
         ```
+        (cd utils/strip-metadata && cargo publish) && \
         (cd metadata && cargo publish) && \
         (cd lightclient && cargo publish) && \
         (cd utils/fetch-metadata && cargo publish) && \
