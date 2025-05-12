@@ -214,7 +214,7 @@ impl<T: Config> OnlineClient<T> {
     ///
     /// # Example
     ///
-    /// ```no_run
+    /// ```rust,no_run,standalone_crate
     /// # #[tokio::main]
     /// # async fn main() {
     /// use subxt::{ OnlineClient, PolkadotConfig };

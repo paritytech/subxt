@@ -15,7 +15,7 @@
 //!
 //! We can use the statically generated interface to build storage queries:
 //!
-//! ```rust,no_run
+//! ```rust,no_run,standalone_crate
 //! use subxt_signer::sr25519::dev;
 //!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
@@ -28,7 +28,7 @@
 //! Alternately, we can dynamically construct a storage query. This will not be type checked or
 //! validated until it's submitted:
 //!
-//! ```rust,no_run
+//! ```rust,no_run,standalone_crate
 //! use subxt_signer::sr25519::dev;
 //! use subxt::dynamic::Value;
 //!
@@ -42,7 +42,7 @@
 //! the map of account information). To do this, suffix `_iter` onto the query constructor (this
 //! will only be available on static constructors when iteration is actually possible):
 //!
-//! ```rust,no_run
+//! ```rust,no_run,standalone_crate
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 //! pub mod polkadot {}
 //!

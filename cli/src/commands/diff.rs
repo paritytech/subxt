@@ -18,7 +18,7 @@ use subxt_metadata::{
 /// Explore the differences between two nodes
 ///
 /// # Example
-/// ```
+/// ```text
 /// subxt diff ./artifacts/polkadot_metadata_small.scale ./artifacts/polkadot_metadata_tiny.scale
 /// subxt diff ./artifacts/polkadot_metadata_small.scale wss://rpc.polkadot.io:443
 /// ```

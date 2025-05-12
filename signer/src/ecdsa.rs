@@ -48,7 +48,7 @@ impl Keypair {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,standalone_crate
     /// use subxt_signer::{ SecretUri, ecdsa::Keypair };
     /// use std::str::FromStr;
     ///
@@ -84,7 +84,7 @@ impl Keypair {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,standalone_crate
     /// use subxt_signer::{ bip39::Mnemonic, ecdsa::Keypair };
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
@@ -122,7 +122,7 @@ impl Keypair {
     ///
     /// # Example
     ///
-    /// ```rust
+    /// ```rust,standalone_crate
     /// use subxt_signer::{ bip39::Mnemonic, ecdsa::Keypair, DeriveJunction };
     ///
     /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
@@ -178,7 +178,7 @@ impl Keypair {
 
 /// Verify that some signature for a message was created by the owner of the [`PublicKey`].
 ///
-/// ```rust
+/// ```rust,standalone_crate
 /// use subxt_signer::{ bip39::Mnemonic, ecdsa };
 ///
 /// let keypair = ecdsa::dev::alice();

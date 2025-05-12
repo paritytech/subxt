@@ -18,7 +18,7 @@
 //! by that transaction being executed. We can also access _all_ of the events produced in a single block using one
 //! of these two interfaces:
 //!
-//! ```rust,no_run
+//! ```rust,no_run,standalone_crate
 //! # #[tokio::main]
 //! # async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! use subxt::client::OnlineClient;
