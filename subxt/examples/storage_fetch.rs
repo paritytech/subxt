@@ -13,7 +13,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Build a storage query to access account information.
     let account = dev::alice().public_key().into();
-    let storage_query = polkadot::storage().system().account(&account);
+    let storage_query = polkadot::storage().system().account(account);
 
     // Use that query to `fetch` a result. This returns an `Option<_>`, which will be
     // `None` if no value exists at the given address. You can also use `fetch_default`

@@ -220,7 +220,7 @@ async fn tx_call() {
 
     let info_addr = node_runtime::storage()
         .contracts()
-        .contract_info_of(&contract);
+        .contract_info_of(contract.clone());
 
     let contract_info = cxt
         .client()

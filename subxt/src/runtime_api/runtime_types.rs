@@ -4,12 +4,11 @@
 
 use super::Payload;
 use crate::{
-    backend::{BackendExt, BlockRef},
+    backend::BlockRef,
     client::OnlineClientT,
     config::{Config, HashFor},
     error::Error,
 };
-use codec::Decode;
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
 
@@ -45,20 +44,21 @@ where
         subxt_core::runtime_api::validate(payload, &self.client.metadata()).map_err(Into::into)
     }
 
-    /// Execute a raw runtime API call.
-    pub fn call_raw<'a, Res: Decode>(
+    /// Execute a raw runtime API call. This returns the raw bytes representing the result
+    /// of this call. The caller is responsible for decoding the result.
+    pub fn call_raw<'a>(
         &self,
         function: &'a str,
         call_parameters: Option<&'a [u8]>,
-    ) -> impl Future<Output = Result<Res, Error>> + use<'a, Res, Client, T> {
+    ) -> impl Future<Output = Result<Vec<u8>, Error>> + use<'a, Client, T> {
         let client = self.client.clone();
         let block_hash = self.block_ref.hash();
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
         // which is a temporary thing we'll be throwing away quickly:
         async move {
-            let data: Res = client
+            let data = client
                 .backend()
-                .call_decoding(function, call_parameters, block_hash)
+                .call(function, call_parameters, block_hash)
                 .await?;
             Ok(data)
         }

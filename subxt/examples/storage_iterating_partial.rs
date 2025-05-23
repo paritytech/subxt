@@ -33,7 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let alice_bob_account_id = &new_multisig_1.multisig;
     let storage_query = polkadot::storage()
         .multisig()
-        .multisigs_iter1(alice_bob_account_id);
+        .multisigs_iter1(alice_bob_account_id.clone());
 
     // Get back an iterator of results.
     let mut results = api.storage().at_latest().await?.iter(storage_query).await?;

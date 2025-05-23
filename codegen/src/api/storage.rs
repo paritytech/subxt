@@ -6,7 +6,7 @@ use heck::{ToSnakeCase as _, ToUpperCamelCase};
 use proc_macro2::{Ident, TokenStream as TokenStream2, TokenStream};
 use quote::{format_ident, quote};
 use scale_info::TypeDef;
-use scale_typegen::{TypeGenerator, typegen::type_path::TypePath};
+use scale_typegen::TypeGenerator;
 use subxt_metadata::{
     PalletMetadata, StorageEntryMetadata, StorageEntryModifier, StorageEntryType, StorageHasher,
 };
@@ -92,7 +92,7 @@ fn generate_storage_entry_fns(
             .expect("type is in metadata; qed");
 
         let alias_name = format_ident!("Param{}", idx);
-        let alias_type = primitive_type_alias(&ty_path, type_gen.settings());
+        let alias_type = ty_path.to_token_stream(type_gen.settings());
 
         let alias_type_def = quote!( pub type #alias_name = #alias_type; );
         let alias_type_path = quote!( types::#alias_module_name::#alias_name );
@@ -206,7 +206,7 @@ fn generate_storage_entry_fns(
                 let key = &keys_slice[0];
                 if key.hasher.ends_with_key() {
                     let arg = &key.arg_name;
-                    let keys = quote!(#static_storage_key::new(#arg.borrow()));
+                    let keys = quote!(#static_storage_key::new(#arg));
                     let path = &key.alias_type_path;
                     let path = quote!(#static_storage_key<#path>);
                     (keys, path)
@@ -220,7 +220,7 @@ fn generate_storage_entry_fns(
                          arg_name, hasher, ..
                      }| {
                         if hasher.ends_with_key() {
-                            quote!( #static_storage_key::new(#arg_name.borrow()) )
+                            quote!( #static_storage_key::new(#arg_name) )
                         } else {
                             quote!(())
                         }
@@ -250,7 +250,7 @@ fn generate_storage_entry_fns(
                  arg_name,
                  alias_type_path,
                  ..
-             }| quote!( #arg_name: impl ::core::borrow::Borrow<#alias_type_path> ),
+             }| quote!( #arg_name: #alias_type_path ),
         );
 
         quote!(
@@ -298,22 +298,6 @@ fn generate_storage_entry_fns(
         },
         alias_module,
     ))
-}
-
-fn primitive_type_alias(
-    type_path: &TypePath,
-    settings: &scale_typegen::TypeGeneratorSettings,
-) -> TokenStream {
-    // Vec<T> is cast to [T]
-    if let Some(ty) = type_path.vec_type_param() {
-        let ty = ty.to_token_stream(settings);
-        return quote!([#ty]);
-    }
-    // String is cast to str
-    if type_path.is_string() {
-        return quote!(::core::primitive::str);
-    }
-    type_path.to_token_stream(settings)
 }
 
 #[cfg(test)]
