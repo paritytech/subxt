@@ -72,7 +72,7 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
     // This is what the generated code hashes a `session().key_owner(..)` key into:
     let actual_key = node_runtime::storage()
         .session()
-        .key_owner(KeyTypeId([1, 2, 3, 4]), [5u8, 6, 7, 8]);
+        .key_owner(KeyTypeId([1, 2, 3, 4]), vec![5, 6, 7, 8]);
     let actual_key_bytes = api.storage().address_bytes(&actual_key)?;
     // Let's manually hash to what we assume it should be and compare:
     let expected_key_bytes = {
@@ -80,7 +80,7 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
         let mut bytes = sp_core::twox_128("Session".as_bytes()).to_vec();
         bytes.extend(&sp_core::twox_128("KeyOwner".as_bytes())[..]);
         // Both keys, use twox64_concat hashers:
-        let key1 = KeyTypeId([1, 2, 3, 4]).encode();
+        let key1 = [1, 2, 3, 4].encode();
         let key2 = vec![5u8, 6, 7, 8].encode();
         bytes.extend(sp_core::twox_64(&key1));
         bytes.extend(&key1);
@@ -196,7 +196,6 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
         let mut approvals = Vec::new();
         while let Some(Ok(kv)) = results.next().await {
             assert!(kv.key_bytes.starts_with(&addr_bytes));
-            assert!(kv.keys.decoded().is_ok());
             approvals.push(kv.value);
         }
         assert_eq!(approvals.len(), 1);

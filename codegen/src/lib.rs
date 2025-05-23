@@ -312,15 +312,28 @@ fn subxt_type_gen_settings(
     crate_path: &syn::Path,
     should_gen_docs: bool,
 ) -> TypeGeneratorSettings {
+    // If we're using codec::Encode or codec::Decode derives, then we want to
+    // output #[codec(index = N)] and #[codec(compact)] attrs, else we don't.
+    let insert_codec_attributes = derives.default_derives().derives().iter().any(|path| {
+        let mut segments_backwards = path.segments.iter().rev();
+        let ident = segments_backwards.next();
+        let module = segments_backwards.next();
+
+        let is_ident_match = ident.is_some_and(|s| s.ident == "Encode" || s.ident == "Decode");
+        let is_module_match = module.is_some_and(|s| s.ident == "codec");
+
+        is_ident_match && is_module_match
+    });
+
     TypeGeneratorSettings {
         types_mod_ident: parse_quote!(runtime_types),
         should_gen_docs,
         derives,
         substitutes,
         decoded_bits_type_path: Some(parse_quote!(#crate_path::utils::bits::DecodedBits)),
-        compact_as_type_path: Some(parse_quote!(#crate_path::ext::codec::CompactAs)),
+        compact_as_type_path: None, // Some(parse_quote!(#crate_path::ext::codec::CompactAs)),
         compact_type_path: Some(parse_quote!(#crate_path::ext::codec::Compact)),
-        insert_codec_attributes: true,
+        insert_codec_attributes,
         alloc_crate_path: AllocCratePath::Custom(parse_quote!(#crate_path::alloc)),
     }
 }
@@ -329,19 +342,15 @@ fn default_derives(crate_path: &syn::Path) -> DerivesRegistry {
     let encode_crate_path = quote::quote! { #crate_path::ext::scale_encode }.to_string();
     let decode_crate_path = quote::quote! { #crate_path::ext::scale_decode }.to_string();
 
-    let derives: [syn::Path; 5] = [
+    let derives: [syn::Path; 3] = [
         parse_quote!(#crate_path::ext::scale_encode::EncodeAsType),
         parse_quote!(#crate_path::ext::scale_decode::DecodeAsType),
-        parse_quote!(#crate_path::ext::codec::Encode),
-        parse_quote!(#crate_path::ext::codec::Decode),
         parse_quote!(Debug),
     ];
 
-    let attributes: [syn::Attribute; 4] = [
+    let attributes: [syn::Attribute; 2] = [
         parse_quote!(#[encode_as_type(crate_path = #encode_crate_path)]),
         parse_quote!(#[decode_as_type(crate_path = #decode_crate_path)]),
-        parse_quote!(#[codec(crate = #crate_path::ext::codec)]),
-        parse_quote!(#[codec(dumb_trait_bound)]),
     ];
 
     let mut derives_registry = DerivesRegistry::new();

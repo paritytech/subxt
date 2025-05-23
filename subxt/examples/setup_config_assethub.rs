@@ -8,7 +8,7 @@ use subxt_signer::sr25519::dev;
     runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale",
     derive_for_type(
         path = "staging_xcm::v3::multilocation::MultiLocation",
-        derive = "Clone",
+        derive = "Clone, codec::Encode",
         recursive
     )
 )]

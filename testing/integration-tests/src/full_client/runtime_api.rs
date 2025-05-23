@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, subxt_test, test_context};
-use codec::Encode;
+use codec::{Decode, Encode};
 use subxt::utils::AccountId32;
 use subxt_signer::sr25519::dev;
 
@@ -81,17 +81,34 @@ async fn unchecked_extrinsic_encoding() -> Result<(), subxt::Error> {
     let mut encoded = tx_bytes.clone();
     encoded.extend(len.encode());
 
-    let expected_result: node_runtime::runtime_types::pallet_transaction_payment::types::FeeDetails<
-        ::core::primitive::u128,
-    > = api
-        .runtime_api()
-        .at_latest()
-        .await?
-        .call_raw(
-            "TransactionPaymentApi_query_fee_details",
-            Some(encoded.as_ref()),
-        )
-        .await?;
+    // Use the raw API to manually build an expected result.
+    let expected_result = {
+        let expected_result_bytes = api
+            .runtime_api()
+            .at_latest()
+            .await?
+            .call_raw(
+                "TransactionPaymentApi_query_fee_details",
+                Some(encoded.as_ref()),
+            )
+            .await?;
+
+        // manually decode, since our runtime types don't impl Decode by default.
+        let (inclusion_fee, tip): (Option<(u128, u128, u128)>, u128) =
+            Decode::decode(&mut &*expected_result_bytes)?;
+
+        // put the values into our generated type.
+        node_runtime::runtime_types::pallet_transaction_payment::types::FeeDetails {
+            inclusion_fee: inclusion_fee.map(|(base_fee, len_fee, adjusted_weight_fee)| {
+                node_runtime::runtime_types::pallet_transaction_payment::types::InclusionFee {
+                    base_fee,
+                    len_fee,
+                    adjusted_weight_fee,
+                }
+            }),
+            tip,
+        }
+    };
 
     // Use the generated API to confirm the result with the raw call.
     let runtime_api_call = node_runtime::apis()
