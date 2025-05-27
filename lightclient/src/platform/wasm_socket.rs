@@ -176,9 +176,7 @@ impl AsyncRead for WasmSocket {
         }
 
         match inner.state {
-            ConnectionState::Error => {
-                Poll::Ready(Err(io::Error::new(io::ErrorKind::Other, "Socket error")))
-            }
+            ConnectionState::Error => Poll::Ready(Err(io::Error::other("Socket error"))),
             ConnectionState::Closed => Poll::Ready(Err(io::ErrorKind::BrokenPipe.into())),
             ConnectionState::Connecting => Poll::Pending,
             ConnectionState::Opened => {
@@ -206,17 +204,12 @@ impl AsyncWrite for WasmSocket {
         inner.waker = Some(cx.waker().clone());
 
         match inner.state {
-            ConnectionState::Error => {
-                Poll::Ready(Err(io::Error::new(io::ErrorKind::Other, "Socket error")))
-            }
+            ConnectionState::Error => Poll::Ready(Err(io::Error::other("Socket error"))),
             ConnectionState::Closed => Poll::Ready(Err(io::ErrorKind::BrokenPipe.into())),
             ConnectionState::Connecting => Poll::Pending,
             ConnectionState::Opened => match self.socket.send_with_u8_array(buf) {
                 Ok(()) => Poll::Ready(Ok(buf.len())),
-                Err(err) => Poll::Ready(Err(io::Error::new(
-                    io::ErrorKind::Other,
-                    format!("Write error: {err:?}"),
-                ))),
+                Err(err) => Poll::Ready(Err(io::Error::other(format!("Write error: {err:?}")))),
             },
         }
     }
