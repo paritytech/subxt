@@ -325,13 +325,20 @@ fn subxt_type_gen_settings(
         is_ident_match && is_module_match
     });
 
+    // If we're inserting the codec attributes, we also should use `CompactAs` where necessary.
+    let compact_as_type_path = if insert_codec_attributes {
+        Some(parse_quote!(#crate_path::ext::codec::CompactAs))
+    } else {
+        None
+    };
+
     TypeGeneratorSettings {
         types_mod_ident: parse_quote!(runtime_types),
         should_gen_docs,
         derives,
         substitutes,
         decoded_bits_type_path: Some(parse_quote!(#crate_path::utils::bits::DecodedBits)),
-        compact_as_type_path: None, // Some(parse_quote!(#crate_path::ext::codec::CompactAs)),
+        compact_as_type_path,
         compact_type_path: Some(parse_quote!(#crate_path::ext::codec::Compact)),
         insert_codec_attributes,
         alloc_crate_path: AllocCratePath::Custom(parse_quote!(#crate_path::alloc)),

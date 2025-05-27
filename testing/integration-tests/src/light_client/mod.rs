@@ -107,9 +107,8 @@ async fn runtime_api_call(api: &Client) -> Result<(), subxt::Error> {
     let rt = block.runtime_api().await?;
 
     // get metadata via state_call. if it decodes ok, it's probably all good.
-    let _ = rt
-        .call_raw::<(Compact<u32>, Metadata)>("Metadata_metadata", None)
-        .await?;
+    let result_bytes = runtime_apis.call_raw("Metadata_metadata", None).await?;
+    let (_, meta): (Compact<u32>, Metadata) = Decode::decode(&mut &*result_bytes)?;
 
     tracing::trace!("Made runtime API call in {:?}\n", now.elapsed());
 
