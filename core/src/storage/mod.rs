@@ -25,7 +25,7 @@
 //!
 //! // Build a storage query to access account information.
 //! let account = dev::alice().public_key().into();
-//! let address = polkadot::storage().system().account(&account);
+//! let address = polkadot::storage().system().account(account);
 //!
 //! // We can validate that the address is compatible with the given metadata.
 //! storage::validate(&address, &metadata).unwrap();
