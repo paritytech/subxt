@@ -73,10 +73,7 @@ impl SubstrateNodeBuilder {
     pub fn spawn(mut self) -> Result<SubstrateNode, Error> {
         // Try to spawn the binary at each path, returning the
         // first "ok" or last error that we encountered.
-        let mut res = Err(io::Error::new(
-            io::ErrorKind::Other,
-            "No binary path provided",
-        ));
+        let mut res = Err(io::Error::other("No binary path provided"));
 
         let path = Command::new("mktemp")
             .arg("-d")

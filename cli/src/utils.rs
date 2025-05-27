@@ -100,7 +100,8 @@ impl FileOrUrl {
                 Ok(bytes)
             }
             (Some(PathOrStdIn::StdIn), None, None) => {
-                let res = std::io::stdin().bytes().collect::<Result<Vec<u8>, _>>();
+                let reader = std::io::BufReader::new(std::io::stdin());
+                let res = reader.bytes().collect::<Result<Vec<u8>, _>>();
 
                 match res {
                     Ok(bytes) => Ok(bytes),
@@ -191,13 +192,11 @@ fn time_based_seed() -> u64 {
 
 pub fn first_paragraph_of_docs(docs: &[String]) -> String {
     // take at most the first paragraph of documentation, such that it does not get too long.
-    let docs_str = docs
-        .iter()
+    docs.iter()
         .map(|e| e.trim())
         .take_while(|e| !e.is_empty())
         .collect::<Vec<_>>()
-        .join("\n");
-    docs_str
+        .join("\n")
 }
 
 pub trait Indent: ToString {
