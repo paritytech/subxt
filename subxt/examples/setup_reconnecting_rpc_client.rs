@@ -62,7 +62,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     println!("The RPC connection was lost and we may have missed a few blocks");
                     continue;
                 }
-                println!("Failed to fetch block");
+
                 return Err(e.into());
             }
         };
