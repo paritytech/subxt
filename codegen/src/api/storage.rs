@@ -302,14 +302,8 @@ fn generate_storage_entry_fns(
 
 #[cfg(test)]
 mod tests {
-    use crate::RuntimeGenerator;
     use frame_metadata::v15;
-    use heck::ToUpperCamelCase;
-    use quote::{format_ident, quote};
     use scale_info::{MetaType, meta_type};
-
-    use std::borrow::Cow;
-
     use subxt_metadata::Metadata;
 
     fn metadata_with_storage_entries(
