@@ -306,6 +306,8 @@ mod tests {
     use scale_info::{MetaType, meta_type};
     use subxt_metadata::Metadata;
 
+    // TODO: Think about adding tests for storage codegen which can use this sort of function.
+    #[allow(dead_code)]
     fn metadata_with_storage_entries(
         storage_entries: impl IntoIterator<Item = (&'static str, MetaType)>,
     ) -> Metadata {
