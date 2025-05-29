@@ -22,7 +22,7 @@
 //! pub mod polkadot {}
 //!
 //! let account = dev::alice().public_key().into();
-//! let storage_query = polkadot::storage().system().account(&account);
+//! let storage_query = polkadot::storage().system().account(account);
 //! ```
 //!
 //! Alternately, we can dynamically construct a storage query. This will not be type checked or

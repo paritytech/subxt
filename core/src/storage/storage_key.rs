@@ -3,14 +3,10 @@
 // see LICENSE for license details.
 
 use super::utils::hash_bytes;
-use crate::{
-    error::{Error, MetadataError, StorageAddressError},
-    utils::{Encoded, Static},
-};
+use crate::error::{Error, MetadataError, StorageAddressError};
 use alloc::vec;
 use alloc::vec::Vec;
-use derive_where::derive_where;
-use scale_decode::visitor::IgnoreVisitor;
+use scale_decode::{DecodeAsType, visitor::IgnoreVisitor};
 use scale_encode::EncodeAsType;
 use scale_info::{PortableRegistry, TypeDef};
 use scale_value::Value;
@@ -164,41 +160,27 @@ impl StorageKey for () {
     }
 }
 
-/// A storage key for static encoded values.
-/// The original value is only present at construction, but can be decoded from the contained bytes.
-#[derive_where(Clone, Debug, PartialOrd, PartialEq, Eq)]
-pub struct StaticStorageKey<K: ?Sized> {
-    bytes: Static<Encoded>,
-    _marker: core::marker::PhantomData<K>,
+/// A storage key used as part of the static codegen.
+#[derive(Clone, Debug, PartialOrd, PartialEq, Eq)]
+pub struct StaticStorageKey<K> {
+    key: K,
 }
 
-impl<K: codec::Encode + ?Sized> StaticStorageKey<K> {
-    /// Creates a new static storage key
-    pub fn new(key: &K) -> Self {
-        StaticStorageKey {
-            bytes: Static(Encoded(key.encode())),
-            _marker: core::marker::PhantomData,
-        }
+impl<K> StaticStorageKey<K> {
+    /// Creates a new static storage key.
+    pub fn new(key: K) -> Self {
+        StaticStorageKey { key }
     }
 }
 
-impl<K: codec::Decode> StaticStorageKey<K> {
-    /// Decodes the encoded inner bytes into the type `K`.
-    pub fn decoded(&self) -> Result<K, Error> {
-        let decoded = K::decode(&mut self.bytes())?;
-        Ok(decoded)
+impl<K: Clone> StaticStorageKey<K> {
+    /// Returns the decoded storage key.
+    pub fn into_key(self) -> K {
+        self.key
     }
 }
 
-impl<K: ?Sized> StaticStorageKey<K> {
-    /// Returns the scale-encoded bytes that make up this key
-    pub fn bytes(&self) -> &[u8] {
-        &self.bytes.0.0
-    }
-}
-
-// Note: The ?Sized bound is necessary to support e.g. `StorageKey<[u8]>`.
-impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
+impl<K: EncodeAsType + DecodeAsType> StorageKey for StaticStorageKey<K> {
     fn encode_storage_key(
         &self,
         bytes: &mut Vec<u8>,
@@ -206,7 +188,7 @@ impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
         types: &PortableRegistry,
     ) -> Result<(), Error> {
         let (hasher, ty_id) = hashers.next_or_err()?;
-        let encoded_value = self.bytes.encode_as_type(ty_id, types)?;
+        let encoded_value = self.key.encode_as_type(ty_id, types)?;
         hash_bytes(&encoded_value, hasher, bytes);
         Ok(())
     }
@@ -227,11 +209,9 @@ impl<K: ?Sized> StorageKey for StaticStorageKey<K> {
             return Err(StorageAddressError::HasherCannotReconstructKey { ty_id, hasher }.into());
         };
 
-        // Return the key bytes.
-        let key = StaticStorageKey {
-            bytes: Static(Encoded(key_bytes.to_vec())),
-            _marker: core::marker::PhantomData::<K>,
-        };
+        // Decode and return the key.
+        let key = K::decode_as_type(&mut &*key_bytes, ty_id, types)?;
+        let key = StaticStorageKey { key };
         Ok(key)
     }
 }
@@ -462,16 +442,16 @@ mod tests {
                             T4C::decode_storage_key(&mut &bytes[..], &mut hashers.iter(), &types)
                                 .unwrap();
 
-                        assert_eq!(keys_a.1.decoded().unwrap(), 13);
-                        assert_eq!(keys_b.1.0.decoded().unwrap(), 13);
-                        assert_eq!(keys_c.0.1.decoded().unwrap(), 13);
+                        assert_eq!(keys_a.1.into_key(), 13);
+                        assert_eq!(keys_b.1.0.into_key(), 13);
+                        assert_eq!(keys_c.0.1.into_key(), 13);
 
-                        assert_eq!(keys_a.2.decoded().unwrap(), "Hello");
-                        assert_eq!(keys_b.1.1.decoded().unwrap(), "Hello");
-                        assert_eq!(keys_c.1.0.decoded().unwrap(), "Hello");
-                        assert_eq!(keys_a.3.decoded().unwrap(), era);
-                        assert_eq!(keys_b.2.decoded().unwrap(), era);
-                        assert_eq!(keys_c.1.1.decoded().unwrap(), era);
+                        assert_eq!(keys_a.2.into_key(), "Hello");
+                        assert_eq!(keys_b.1.1.into_key(), "Hello");
+                        assert_eq!(keys_c.1.0.into_key(), "Hello");
+                        assert_eq!(keys_a.3.into_key(), era);
+                        assert_eq!(keys_b.2.into_key(), era);
+                        assert_eq!(keys_c.1.1.into_key(), era);
                     }
                 }
             }

@@ -149,8 +149,7 @@ impl PlatformRef for SubxtPlatform {
 
         let socket_future = async move {
             tracing::debug!(target: LOG_TARGET, "Connecting to addr={addr}");
-            WasmSocket::new(addr.as_str())
-                .map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err.to_string()))
+            WasmSocket::new(addr.as_str()).map_err(|err| std::io::Error::other(err.to_string()))
         };
 
         future::ready(super::wasm_helpers::Stream(with_buffers::WithBuffers::new(

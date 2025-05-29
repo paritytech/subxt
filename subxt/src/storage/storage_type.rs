@@ -95,7 +95,7 @@ where
     /// let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
     ///
     /// // Address to a storage entry we'd like to access.
-    /// let address = polkadot::storage().xcm_pallet().queries(&12345);
+    /// let address = polkadot::storage().xcm_pallet().queries(12345);
     ///
     /// // Fetch just the keys, returning up to 10 keys.
     /// let value = api

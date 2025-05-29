@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Build a storage query to iterate over open multisig extrinsics from
     // new_multisig_1.multisig which is the AccountId of the alice + bob multisig account
-    let alice_bob_account_id = &new_multisig_1.multisig;
+    let alice_bob_account_id = new_multisig_1.multisig;
     let storage_query = polkadot::storage()
         .multisig()
         .multisigs_iter1(alice_bob_account_id);

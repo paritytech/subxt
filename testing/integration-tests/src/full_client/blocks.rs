@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{subxt_test, test_context, utils::consume_initial_blocks};
-use codec::{Compact, Encode};
+use codec::{Compact, Decode, Encode};
 use futures::StreamExt;
 
 #[cfg(fullclient)]
@@ -160,13 +160,10 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     let block = sub.next().await.unwrap()?;
     let rt = block.runtime_api().await?;
 
-    // get metadata via state_call.
-    let (_, meta1) = rt
-        .call_raw::<(Compact<u32>, frame_metadata::RuntimeMetadataPrefixed)>(
-            "Metadata_metadata",
-            None,
-        )
-        .await?;
+    // get metadata via raw state_call.
+    let meta_bytes = rt.call_raw("Metadata_metadata", None).await?;
+    let (_, meta1): (Compact<u32>, frame_metadata::RuntimeMetadataPrefixed) =
+        Decode::decode(&mut &*meta_bytes)?;
 
     // get metadata via `state_getMetadata`.
     let meta2_bytes = rpc.state_get_metadata(Some(block.hash())).await?.into_raw();
