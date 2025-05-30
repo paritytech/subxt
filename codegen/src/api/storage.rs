@@ -110,47 +110,49 @@ fn generate_storage_entry_fns(
         StorageEntryType::Map {
             key_ty, hashers, ..
         } => {
-            match &type_gen
-                .resolve_type(*key_ty)
-                .expect("key type should be present")
-                .type_def
-            {
-                // An N-map; return each of the keys separately.
-                TypeDef::Tuple(tuple) => {
-                    let key_count = tuple.fields.len();
-                    let hasher_count = hashers.len();
-                    if hasher_count != 1 && hasher_count != key_count {
-                        return Err(CodegenError::InvalidStorageHasherCount {
-                            storage_entry_name: storage_entry.name().to_owned(),
-                            key_count,
-                            hasher_count,
-                        });
-                    }
-
-                    let mut map_entry_keys: Vec<MapEntryKey> = vec![];
-                    for (idx, field) in tuple.fields.iter().enumerate() {
-                        // Note: these are in bounds because of the checks above, qed;
-                        let hasher = if idx >= hasher_count {
-                            hashers[0]
-                        } else {
-                            hashers[idx]
-                        };
-                        map_entry_keys.push(map_entry_key(idx, field.id, hasher));
-                    }
-                    map_entry_keys
-                }
-                // A map with a single key; return the single key.
-                _ => {
-                    let Some(hasher) = hashers.first() else {
+            if hashers.len() == 1 {
+                // If there's exactly 1 hasher, then we have a plain StorageMap. We can't
+                // break the key down (even if it's a tuple) because the hasher applies to
+                // the whole key.
+                vec![map_entry_key(0, *key_ty, hashers[0])]
+            } else {
+                // If there are multiple hashers, then we have a StorageDoubleMap or StorageNMap.
+                // We expect the key type to be tuple, and we will return a MapEntryKey for each
+                // key in the tuple.
+                let hasher_count = hashers.len();
+                let tuple = match &type_gen
+                    .resolve_type(*key_ty)
+                    .expect("key type should be present")
+                    .type_def
+                {
+                    TypeDef::Tuple(tuple) => tuple,
+                    _ => {
                         return Err(CodegenError::InvalidStorageHasherCount {
                             storage_entry_name: storage_entry.name().to_owned(),
                             key_count: 1,
-                            hasher_count: 0,
+                            hasher_count,
                         });
-                    };
+                    }
+                };
 
-                    vec![map_entry_key(0, *key_ty, *hasher)]
+                // We should have the same number of hashers and keys.
+                let key_count = tuple.fields.len();
+                if hasher_count != key_count {
+                    return Err(CodegenError::InvalidStorageHasherCount {
+                        storage_entry_name: storage_entry.name().to_owned(),
+                        key_count,
+                        hasher_count,
+                    });
                 }
+
+                // Collect them together.
+                tuple
+                    .fields
+                    .iter()
+                    .zip(hashers)
+                    .enumerate()
+                    .map(|(idx, (field, hasher))| map_entry_key(idx, field.id, *hasher))
+                    .collect()
             }
         }
     };
