@@ -102,7 +102,7 @@ fn subxt_inner(args: TokenStream, item_mod: syn::ItemMod) -> Result<TokenStream,
         .map_err(|e| TokenStream::from(e.write_errors()))?;
 
     // Fetch metadata first, because we need it to validate some of the chosen codegen options.
-    let metadata = fetch_metadata(&args)?;
+    let mut metadata = fetch_metadata(&args)?;
 
     let mut codegen = CodegenBuilder::new();
 
@@ -135,6 +135,10 @@ fn subxt_inner(args: TokenStream, item_mod: syn::ItemMod) -> Result<TokenStream,
             .into_iter()
             .collect(),
     );
+
+    // De-dup early so de-duped types can be provided with derives (see #2011)
+    scale_typegen::utils::ensure_unique_type_paths(metadata.types_mut())
+        .expect("Duplicate type paths in metadata; this is bug please file an issue.");
     for d in args.derive_for_type {
         validate_type_path(&d.path.path, &metadata);
         codegen.add_derives_for_type(d.path, d.derive.into_iter(), d.recursive);
