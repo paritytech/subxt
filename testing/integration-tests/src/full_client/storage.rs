@@ -72,7 +72,7 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
     // This is what the generated code hashes a `session().key_owner(..)` key into:
     let actual_key = node_runtime::storage()
         .session()
-        .key_owner(KeyTypeId([1, 2, 3, 4]), vec![5, 6, 7, 8]);
+        .key_owner((KeyTypeId([1, 2, 3, 4]), vec![5, 6, 7, 8]));
     let actual_key_bytes = api.storage().address_bytes(&actual_key)?;
 
     // Let's manually hash to what we assume it should be and compare:
