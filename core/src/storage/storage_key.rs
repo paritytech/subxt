@@ -32,34 +32,45 @@ impl StorageHashers {
                 .resolve(*key_ty)
                 .ok_or(MetadataError::TypeNotFound(*key_ty))?;
 
-            if let TypeDef::Tuple(tuple) = &ty.type_def {
-                if hashers.len() == 1 {
-                    // use the same hasher for all fields, if only 1 hasher present:
-                    let hasher = hashers[0];
-                    for f in tuple.fields.iter() {
-                        hashers_and_ty_ids.push((hasher, f.id));
-                    }
-                } else if hashers.len() < tuple.fields.len() {
-                    return Err(StorageAddressError::WrongNumberOfHashers {
-                        hashers: hashers.len(),
-                        fields: tuple.fields.len(),
-                    }
-                    .into());
-                } else {
-                    for (i, f) in tuple.fields.iter().enumerate() {
-                        hashers_and_ty_ids.push((hashers[i], f.id));
-                    }
-                }
+            if hashers.len() == 1 {
+                // If there's exactly 1 hasher, then we have a plain StorageMap. We can't
+                // break the key down (even if it's a tuple) because the hasher applies to
+                // the whole key.
+                hashers_and_ty_ids = vec![(hashers[0], *key_ty)];
             } else {
-                if hashers.len() != 1 {
+                // If there are multiple hashers, then we have a StorageDoubleMap or StorageNMap.
+                // We expect the key type to be tuple, and we will return a MapEntryKey for each
+                // key in the tuple.
+                let hasher_count = hashers.len();
+                let tuple = match &ty.type_def {
+                    TypeDef::Tuple(tuple) => tuple,
+                    _ => {
+                        return Err(StorageAddressError::WrongNumberOfHashers {
+                            hashers: hasher_count,
+                            fields: 1,
+                        }
+                        .into());
+                    }
+                };
+
+                // We should have the same number of hashers and keys.
+                let key_count = tuple.fields.len();
+                if hasher_count != key_count {
                     return Err(StorageAddressError::WrongNumberOfHashers {
-                        hashers: hashers.len(),
-                        fields: 1,
+                        hashers: hasher_count,
+                        fields: key_count,
                     }
                     .into());
                 }
-                hashers_and_ty_ids.push((hashers[0], *key_ty));
-            };
+
+                // Collect them together.
+                hashers_and_ty_ids = tuple
+                    .fields
+                    .iter()
+                    .zip(hashers)
+                    .map(|(field, hasher)| (*hasher, field.id))
+                    .collect();
+            }
         }
 
         Ok(Self { hashers_and_ty_ids })
