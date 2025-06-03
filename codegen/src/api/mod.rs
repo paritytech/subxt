@@ -36,18 +36,7 @@ pub struct RuntimeGenerator {
 
 impl RuntimeGenerator {
     /// Create a new runtime generator from the provided metadata.
-    ///
-    /// **Note:** If you have the metadata path, URL or bytes to hand, prefer to use
-    /// `GenerateRuntimeApi` for generating the runtime API from that.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the runtime metadata version is not supported.
-    ///
-    /// Supported versions: v14 and v15.
-    pub fn new(mut metadata: Metadata) -> Self {
-        scale_typegen::utils::ensure_unique_type_paths(metadata.types_mut())
-            .expect("Duplicate type paths in metadata; this is bug please file an issue.");
+    pub fn new(metadata: Metadata) -> Self {
         RuntimeGenerator { metadata }
     }
 
