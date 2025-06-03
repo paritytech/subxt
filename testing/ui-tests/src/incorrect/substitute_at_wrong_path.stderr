@@ -11,9 +11,7 @@ error: Type `Event` does not exist at path `sp_runtime::multiaddress::Event`
        pallet_grandpa::pallet::Event
        pallet_treasury::pallet::Event
        pallet_conviction_voting::pallet::Event
-       pallet_referenda::pallet::Event
        pallet_ranked_collective::pallet::Event
-       pallet_referenda::pallet::Event
        pallet_whitelist::pallet::Event
        polkadot_runtime_common::claims::pallet::Event
        pallet_utility::pallet::Event

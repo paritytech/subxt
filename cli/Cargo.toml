@@ -27,6 +27,7 @@ chain-spec-pruning = ["smoldot"]
 
 [dependencies]
 subxt-codegen = { workspace = true }
+scale-typegen = { workspace = true }
 subxt-utils-fetchmetadata = { workspace = true, features = ["url"] }
 subxt-utils-stripmetadata = { workspace = true }
 subxt-metadata = { workspace = true }
