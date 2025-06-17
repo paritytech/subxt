@@ -301,8 +301,7 @@ fn try_find_substrate_port_from_output(r: impl Read + Send + 'static) -> Substra
                 // `start tcp transport listen_addresses=["/ip6/::/tcp/30333", "/ip4/0.0.0.0/tcp/30333"]`
                 // we'll split once to find the line itself and then again to find the ipv4 port.
                 line.rsplit_once("start tcp transport listen_addresses=")
-                    .map(|(_, after)| after.split_once("/ip4/0.0.0.0/tcp/"))
-                    .flatten()
+                    .and_then(|(_, after)| after.split_once("/ip4/0.0.0.0/tcp/"))
             })
             .map(|(_, address_str)| address_str);
 
