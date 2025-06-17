@@ -123,7 +123,7 @@ impl SubstrateNodeBuilder {
     ) -> Result<Child, std::io::Error> {
         let mut cmd = Command::new(binary_path);
 
-        cmd.env("RUST_LOG", "info,libp2p_tcp=debug")
+        cmd.env("RUST_LOG", "info,libp2p_tcp=debug,litep2p::tcp=debug")
             .stdout(process::Stdio::piped())
             .stderr(process::Stdio::piped())
             .arg("--dev")
@@ -295,6 +295,15 @@ fn try_find_substrate_port_from_output(r: impl Read + Send + 'static) -> Substra
             .rsplit_once("New listen address: /ip4/127.0.0.1/tcp/")
             // slightly newer message:
             .or_else(|| line.rsplit_once("New listen address address=/ip4/127.0.0.1/tcp/"))
+            // Newest message using the litep2p backend:
+            .or_else(|| {
+                // The line looks like:
+                // `start tcp transport listen_addresses=["/ip6/::/tcp/30333", "/ip4/0.0.0.0/tcp/30333"]`
+                // we'll split once to find the line itself and then again to find the ipv4 port.
+                line.rsplit_once("start tcp transport listen_addresses=")
+                    .map(|(_, after)| after.split_once("/ip4/0.0.0.0/tcp/"))
+                    .flatten()
+            })
             .map(|(_, address_str)| address_str);
 
         if let Some(line_port) = p2p_port_line {
