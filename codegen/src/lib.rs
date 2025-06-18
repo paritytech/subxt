@@ -312,9 +312,8 @@ fn subxt_type_gen_settings(
     crate_path: &syn::Path,
     should_gen_docs: bool,
 ) -> TypeGeneratorSettings {
-    // If we're using codec::Encode or codec::Decode derives, then we want to
-    // output #[codec(index = N)] and #[codec(compact)] attrs, else we don't.
-    let insert_codec_attributes = derives.default_derives().derives().iter().any(|path| {
+    // Are we using codec::Encode or codec::Decode derives?
+    let are_codec_derives_used = derives.default_derives().derives().iter().any(|path| {
         let mut segments_backwards = path.segments.iter().rev();
         let ident = segments_backwards.next();
         let module = segments_backwards.next();
@@ -325,12 +324,9 @@ fn subxt_type_gen_settings(
         is_ident_match && is_module_match
     });
 
-    // If we're inserting the codec attributes, we also should use `CompactAs` where necessary.
-    let compact_as_type_path = if insert_codec_attributes {
-        Some(parse_quote!(#crate_path::ext::codec::CompactAs))
-    } else {
-        None
-    };
+    // If we're inserting the codec derives, we also should use `CompactAs` where necessary.
+    let compact_as_type_path =
+        are_codec_derives_used.then(|| parse_quote!(#crate_path::ext::codec::CompactAs));
 
     TypeGeneratorSettings {
         types_mod_ident: parse_quote!(runtime_types),
@@ -340,8 +336,10 @@ fn subxt_type_gen_settings(
         decoded_bits_type_path: Some(parse_quote!(#crate_path::utils::bits::DecodedBits)),
         compact_as_type_path,
         compact_type_path: Some(parse_quote!(#crate_path::ext::codec::Compact)),
-        insert_codec_attributes,
         alloc_crate_path: AllocCratePath::Custom(parse_quote!(#crate_path::alloc)),
+        // Note: even when we don't use codec::Encode and codec::Decode, we need to keep #[codec(...)]
+        // attributes because `#[codec(skip)]` is still used/important with `EncodeAsType` and `DecodeAsType`.
+        insert_codec_attributes: true,
     }
 }
 
