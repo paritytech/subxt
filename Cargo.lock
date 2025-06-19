@@ -5602,6 +5602,7 @@ dependencies = [
  "pretty_assertions",
  "quote",
  "scale-info",
+ "scale-typegen",
  "scale-typegen-description",
  "scale-value",
  "serde",

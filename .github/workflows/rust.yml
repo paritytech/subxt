@@ -6,11 +6,16 @@ on:
     # master or release-like branches:
     branches:
       - master
+      # If we want to backport changes to an old release, push a branch
+      # eg v0.40.x and CI will run on it. PRs merging to such branches 
+      # will also trigger CI.
+      - v0.[0-9]+.x
   pull_request:
     # Run jobs for any external PR that wants
     # to merge to master, too:
     branches:
       - master
+      - v0.[0-9]+.x
 
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}

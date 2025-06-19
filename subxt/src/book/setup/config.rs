@@ -144,7 +144,7 @@
 //!
 //! ### Implementing [`crate::config::ExtrinsicParams`] from scratch
 //!
-//! Alternately, you are free to implement [`crate::config::ExtrinsicParams`] entirely from scratch if you know exactly what "extra" and`
+//! Alternately, you are free to implement [`crate::config::ExtrinsicParams`] entirely from scratch if you know exactly what "extra" and
 //! "additional" data your node needs and would prefer to craft your own interface.
 //!
 //! Let's see what this looks like (this config won't work on any real node):
