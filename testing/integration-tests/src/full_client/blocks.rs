@@ -375,6 +375,6 @@ async fn decode_transaction_extensions_from_blocks() {
             .find::<CheckMortality<SubstrateConfig>>()
             .unwrap()
             .unwrap();
-        assert_eq!(era, Era::Immortal)
+        assert!(matches!(era, Era::Mortal { .. }));
     }
 }
