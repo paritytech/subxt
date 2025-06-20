@@ -120,7 +120,7 @@ impl EncodeAsType for Era {
     ) -> Result<(), scale_encode::Error> {
         // Visit the type to check that it is an Era. This is only a rough check.
         let visitor = scale_type_resolver::visitor::new((), |_, _| false)
-            .visit_variant(|_, path, _variants| path.last().map_or(false, |name| name == "Era"));
+            .visit_variant(|_, path, _variants| path.last() == Some("Era"));
 
         let is_era = types
             .resolve_type(type_id.clone(), visitor)
