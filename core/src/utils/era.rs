@@ -7,7 +7,7 @@ use codec::{Decode, Encode};
 use scale_decode::{
     IntoVisitor, TypeResolver, Visitor,
     ext::scale_type_resolver,
-    visitor::{TypeIdFor, types::Variant},
+    visitor::{TypeIdFor, types::Variant, types::Composite},
 };
 use scale_encode::EncodeAsType;
 
@@ -154,6 +154,23 @@ impl<R: TypeResolver> Visitor for EraVisitor<R> {
     type Value<'scale, 'resolver> = Era;
     type Error = scale_decode::Error;
     type TypeResolver = R;
+
+    // Unwrap any newtype wrappers around the era, eg the CheckMortality extension.
+    // This allows us to decode directly from CheckMortality into Era.
+    fn visit_composite<'scale, 'resolver>(
+        self,
+        value: &mut Composite<'scale, 'resolver, Self::TypeResolver>,
+        _type_id: TypeIdFor<Self>,
+    ) -> Result<Self::Value<'scale, 'resolver>, Self::Error> {
+        if value.remaining() != 1 {
+            return Err(scale_decode::Error::custom_string(format!(
+                "Expected any wrapper around Era to have exactly one field, but got {} fields",
+                value.remaining()
+            )));
+        }
+
+        value.decode_item(self).expect("1 field expected; checked above.")
+    }
 
     fn visit_variant<'scale, 'resolver>(
         self,
