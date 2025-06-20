@@ -295,6 +295,15 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
     type Params = CheckMortalityParams<T>;
 
     fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+        // If a user has explicitly configured the transaction to be mortal for n blocks, but we get
+        // to this stage and no injected information was able to turn this into MortalFromBlock{..},
+        // then we hit an error as we are unable to construct a mortal transaction here.
+        if matches!(&params.0, CheckMortalityParamsInner::MortalForBlocks(_)) {
+            return Err(ExtrinsicParamsError::custom(
+                "CheckMortality: We cannot construct an offline extrinsic with only the number of blocks it is mortal for. Use mortal_from_unchecked instead.",
+            ));
+        }
+
         Ok(CheckMortality {
             // if nothing has been explicitly configured, we will have a mortal transaction
             // valid for 32 blocks if block info is available.
@@ -347,8 +356,15 @@ impl<T: Config> TransactionExtension<T> for CheckMortality<T> {
 pub struct CheckMortalityParams<T: Config>(CheckMortalityParamsInner<T>);
 
 enum CheckMortalityParamsInner<T: Config> {
+    /// The transaction will be immortal.
     Immortal,
+    /// The transaction is mortal for N blocks. This must be "upgraded" into
+    /// [`CheckMortalityParamsInner::MortalFromBlock`] to ultimately work.
     MortalForBlocks(u64),
+    /// The transaction is mortal for N blocks, but if it cannot be "upgraded",
+    /// then it will be set to immortal instead. This is the default if unset.
+    MortalForBlocksOrImmortalIfNotPossible(u64),
+    /// The transaction is mortal and all of the relevant information is provided.
     MortalFromBlock {
         for_n_blocks: u64,
         from_block_n: u64,
@@ -358,8 +374,8 @@ enum CheckMortalityParamsInner<T: Config> {
 
 impl<T: Config> Default for CheckMortalityParams<T> {
     fn default() -> Self {
-        // default to being mortal for 32 blocks if possible:
-        CheckMortalityParams(CheckMortalityParamsInner::MortalForBlocks(32))
+        // default to being mortal for 32 blocks if possible, else immortal:
+        CheckMortalityParams(CheckMortalityParamsInner::MortalForBlocksOrImmortalIfNotPossible(32))
     }
 }
 
@@ -392,7 +408,8 @@ impl<T: Config> CheckMortalityParams<T> {
 impl<T: Config> Params<T> for CheckMortalityParams<T> {
     fn inject_block(&mut self, from_block_n: u64, from_block_hash: HashFor<T>) {
         match &self.0 {
-            CheckMortalityParamsInner::MortalForBlocks(n) => {
+            CheckMortalityParamsInner::MortalForBlocks(n)
+            | CheckMortalityParamsInner::MortalForBlocksOrImmortalIfNotPossible(n) => {
                 self.0 = CheckMortalityParamsInner::MortalFromBlock {
                     for_n_blocks: *n,
                     from_block_n,
