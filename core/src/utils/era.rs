@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use alloc::{format, vec::Vec};
 use codec::{Decode, Encode};
 use scale_decode::{
     IntoVisitor, TypeResolver, Visitor,
