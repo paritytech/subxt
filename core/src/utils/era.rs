@@ -7,7 +7,7 @@ use codec::{Decode, Encode};
 use scale_decode::{
     IntoVisitor, TypeResolver, Visitor,
     ext::scale_type_resolver,
-    visitor::{TypeIdFor, types::Variant, types::Composite},
+    visitor::{TypeIdFor, types::Composite, types::Variant},
 };
 use scale_encode::EncodeAsType;
 
@@ -170,7 +170,9 @@ impl<R: TypeResolver> Visitor for EraVisitor<R> {
             )));
         }
 
-        value.decode_item(self).expect("1 field expected; checked above.")
+        value
+            .decode_item(self)
+            .expect("1 field expected; checked above.")
     }
 
     fn visit_variant<'scale, 'resolver>(
