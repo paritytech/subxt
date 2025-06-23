@@ -2,7 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use scale_decode::DecodeAsType;
+use alloc::{format, vec::Vec};
+use codec::{Decode, Encode};
+use scale_decode::{
+    IntoVisitor, TypeResolver, Visitor,
+    ext::scale_type_resolver,
+    visitor::{TypeIdFor, types::Composite, types::Variant},
+};
 use scale_encode::EncodeAsType;
 
 // Dev note: This and related bits taken from `sp_runtime::generic::Era`
@@ -16,8 +22,6 @@ use scale_encode::EncodeAsType;
     Debug,
     serde::Serialize,
     serde::Deserialize,
-    DecodeAsType,
-    EncodeAsType,
     scale_info::TypeInfo,
 )]
 pub enum Era {
@@ -103,5 +107,128 @@ impl codec::Decode for Era {
                 Err("Invalid period and phase".into())
             }
         }
+    }
+}
+
+/// Define manually how to encode an Era given some type information. Here we
+/// basically check that the type we're targeting is called "Era" and then codec::Encode.
+impl EncodeAsType for Era {
+    fn encode_as_type_to<R: TypeResolver>(
+        &self,
+        type_id: R::TypeId,
+        types: &R,
+        out: &mut Vec<u8>,
+    ) -> Result<(), scale_encode::Error> {
+        // Visit the type to check that it is an Era. This is only a rough check.
+        let visitor = scale_type_resolver::visitor::new((), |_, _| false)
+            .visit_variant(|_, path, _variants| path.last() == Some("Era"));
+
+        let is_era = types
+            .resolve_type(type_id.clone(), visitor)
+            .unwrap_or_default();
+        if !is_era {
+            return Err(scale_encode::Error::custom_string(format!(
+                "Type {type_id:?} is not a valid Era type; expecting either Immortal or MortalX variant"
+            )));
+        }
+
+        // if the type looks valid then just scale encode our Era.
+        self.encode_to(out);
+        Ok(())
+    }
+}
+
+/// Define manually how to decode an Era given some type information. Here we check that the
+/// variant we're decoding is one of the expected Era variants, and that the field is correct if so,
+/// ensuring that this will fail if trying to decode something that isn't an Era.
+pub struct EraVisitor<R>(core::marker::PhantomData<R>);
+
+impl IntoVisitor for Era {
+    type AnyVisitor<R: TypeResolver> = EraVisitor<R>;
+    fn into_visitor<R: TypeResolver>() -> Self::AnyVisitor<R> {
+        EraVisitor(core::marker::PhantomData)
+    }
+}
+
+impl<R: TypeResolver> Visitor for EraVisitor<R> {
+    type Value<'scale, 'resolver> = Era;
+    type Error = scale_decode::Error;
+    type TypeResolver = R;
+
+    // Unwrap any newtype wrappers around the era, eg the CheckMortality extension (which actually
+    // has 2 fields, but scale_info seems to autoamtically ignore the PhantomData field). This
+    // allows us to decode directly from CheckMortality into Era.
+    fn visit_composite<'scale, 'resolver>(
+        self,
+        value: &mut Composite<'scale, 'resolver, Self::TypeResolver>,
+        _type_id: TypeIdFor<Self>,
+    ) -> Result<Self::Value<'scale, 'resolver>, Self::Error> {
+        if value.remaining() != 1 {
+            return Err(scale_decode::Error::custom_string(format!(
+                "Expected any wrapper around Era to have exactly one field, but got {} fields",
+                value.remaining()
+            )));
+        }
+
+        value
+            .decode_item(self)
+            .expect("1 field expected; checked above.")
+    }
+
+    fn visit_variant<'scale, 'resolver>(
+        self,
+        value: &mut Variant<'scale, 'resolver, Self::TypeResolver>,
+        _type_id: TypeIdFor<Self>,
+    ) -> Result<Self::Value<'scale, 'resolver>, Self::Error> {
+        let variant = value.name();
+
+        // If the variant is immortal, we know the outcome.
+        if variant == "Immortal" {
+            return Ok(Era::Immortal);
+        }
+
+        // Otherwise, we expect a variant Mortal1..Mortal255 where the number
+        // here is the first byte, and the second byte is conceptually a field of this variant.
+        // This weird encoding is because the Era is compressed to just 1 byte if immortal and
+        // just 2 bytes if mortal.
+        //
+        // Note: We _could_ just assume we'll have 2 bytes to work with and decode the era directly,
+        // but checking the variant names ensures that the thing we think is an Era actually _is_
+        // one, based on the type info for it.
+        let first_byte = variant
+            .strip_prefix("Mortal")
+            .and_then(|s| s.parse::<u8>().ok())
+            .ok_or_else(|| {
+                scale_decode::Error::custom_string(format!(
+                    "Expected MortalX variant, but got {variant}"
+                ))
+            })?;
+
+        // We need 1 field in the MortalN variant containing the second byte.
+        let mortal_fields = value.fields();
+        if mortal_fields.remaining() != 1 {
+            return Err(scale_decode::Error::custom_string(format!(
+                "Expected Mortal{} to have one u8 field, but got {} fields",
+                first_byte,
+                mortal_fields.remaining()
+            )));
+        }
+
+        let second_byte = mortal_fields
+            .decode_item(u8::into_visitor())
+            .expect("At least one field should exist; checked above.")
+            .map_err(|e| {
+                scale_decode::Error::custom_string(format!(
+                    "Expected mortal variant field to be u8, but: {e}"
+                ))
+            })?;
+
+        // Now that we have both bytes we can decode them into the era using
+        // the same logic as the codec::Decode impl does.
+        Era::decode(&mut &[first_byte, second_byte][..]).map_err(|e| {
+            scale_decode::Error::custom_string(format!(
+                "Failed to codec::Decode Era from Mortal bytes: {e}"
+            ))
+        })
     }
 }

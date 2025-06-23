@@ -2,7 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::Config;
+use crate::config::transaction_extensions::CheckMortalityParams;
+
+use super::{Config, HashFor};
 use super::{ExtrinsicParams, transaction_extensions};
 
 /// The default [`super::ExtrinsicParams`] implementation understands common signed extensions
@@ -26,8 +28,8 @@ pub type DefaultExtrinsicParams<T> = transaction_extensions::AnyOf<
 /// [`DefaultExtrinsicParams`]. This may expose methods that aren't applicable to the current
 /// chain; such values will simply be ignored if so.
 pub struct DefaultExtrinsicParamsBuilder<T: Config> {
-    /// `None` means the tx will be immortal, else it's mortal for N blocks (if possible).
-    mortality: Option<u64>,
+    /// `None` means the tx will be immortal, else it's mortality is described.
+    mortality: transaction_extensions::CheckMortalityParams<T>,
     /// `None` means the nonce will be automatically set.
     nonce: Option<u64>,
     /// `None` means we'll use the native token.
@@ -39,7 +41,7 @@ pub struct DefaultExtrinsicParamsBuilder<T: Config> {
 impl<T: Config> Default for DefaultExtrinsicParamsBuilder<T> {
     fn default() -> Self {
         Self {
-            mortality: None,
+            mortality: CheckMortalityParams::default(),
             tip: 0,
             tip_of: 0,
             tip_of_asset_id: None,
@@ -55,10 +57,43 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
         Default::default()
     }
 
+    /// Make the transaction immortal, meaning it will never expire. This means that it could, in
+    /// theory, be pending for a long time and only be included many blocks into the future.
+    pub fn immortal(mut self) -> Self {
+        self.mortality = transaction_extensions::CheckMortalityParams::immortal();
+        self
+    }
+
     /// Make the transaction mortal, given a number of blocks it will be mortal for from
     /// the current block at the time of submission.
+    ///
+    /// # Warning
+    ///
+    /// This will ultimately return an error if used for creating extrinsic offline, because we need
+    /// additional information in order to set the mortality properly.
+    ///
+    /// When creating offline transactions, you must use [`Self::mortal_from_unchecked`] instead to set
+    /// the mortality. This provides all of the necessary information which we must otherwise be online
+    /// in order to obtain.
     pub fn mortal(mut self, for_n_blocks: u64) -> Self {
-        self.mortality = Some(for_n_blocks);
+        self.mortality = transaction_extensions::CheckMortalityParams::mortal(for_n_blocks);
+        self
+    }
+
+    /// Configure a transaction that will be mortal for the number of blocks given, and from the
+    /// block details provided. Prefer to use [`Self::mortal()`] where possible, which prevents
+    /// the block number and hash from being misaligned.
+    pub fn mortal_from_unchecked(
+        mut self,
+        for_n_blocks: u64,
+        from_block_n: u64,
+        from_block_hash: HashFor<T>,
+    ) -> Self {
+        self.mortality = transaction_extensions::CheckMortalityParams::mortal_from_unchecked(
+            for_n_blocks,
+            from_block_n,
+            from_block_hash,
+        );
         self
     }
 
@@ -88,11 +123,7 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
 
     /// Build the extrinsic parameters.
     pub fn build(self) -> <DefaultExtrinsicParams<T> as ExtrinsicParams<T>>::Params {
-        let check_mortality_params = if let Some(for_n_blocks) = self.mortality {
-            transaction_extensions::CheckMortalityParams::mortal(for_n_blocks)
-        } else {
-            transaction_extensions::CheckMortalityParams::immortal()
-        };
+        let check_mortality_params = self.mortality;
 
         let charge_asset_tx_params = if let Some(asset_id) = self.tip_of_asset_id {
             transaction_extensions::ChargeAssetTxPaymentParams::tip_of(self.tip, asset_id)
