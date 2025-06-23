@@ -261,47 +261,49 @@ async fn fetch_block_and_decode_extrinsic_details() {
     }
 }
 
+/// A helper function to submit a transaction with some params and then get it back in a block,
+/// so that we can test the decoding of it.
+async fn submit_extrinsic_and_get_it_back(
+    api: &subxt::OnlineClient<SubstrateConfig>,
+    params: subxt::config::DefaultExtrinsicParamsBuilder<SubstrateConfig>,
+) -> subxt::blocks::ExtrinsicDetails<SubstrateConfig, subxt::OnlineClient<SubstrateConfig>> {
+    let alice = dev::alice();
+    let bob = dev::bob();
+
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer_allow_death(bob.public_key().into(), 10_000);
+
+    let signed_extrinsic = api
+        .tx()
+        .create_signed(&tx, &alice, params.build())
+        .await
+        .unwrap();
+
+    let in_block = signed_extrinsic
+        .submit_and_watch()
+        .await
+        .unwrap()
+        .wait_for_finalized()
+        .await
+        .unwrap();
+
+    let block_hash = in_block.block_hash();
+    let block = api.blocks().at(block_hash).await.unwrap();
+    let extrinsics = block.extrinsics().await.unwrap();
+    let extrinsic_details = extrinsics.iter().find(|e| e.is_signed()).unwrap();
+    extrinsic_details
+}
+
 #[cfg(fullclient)]
 #[subxt_test]
 async fn decode_transaction_extensions_from_blocks() {
     let ctx = test_context().await;
     let api = ctx.client();
-    let alice = dev::alice();
-    let bob = dev::bob();
 
-    macro_rules! submit_transfer_extrinsic_and_get_it_back {
-        ($tip:expr) => {{
-            let tx = node_runtime::tx()
-                .balances()
-                .transfer_allow_death(bob.public_key().into(), 10_000);
-
-            let signed_extrinsic = api
-                .tx()
-                .create_signed(
-                    &tx,
-                    &alice,
-                    DefaultExtrinsicParamsBuilder::new().tip($tip).build(),
-                )
-                .await
-                .unwrap();
-
-            let in_block = signed_extrinsic
-                .submit_and_watch()
-                .await
-                .unwrap()
-                .wait_for_finalized()
-                .await
-                .unwrap();
-
-            let block_hash = in_block.block_hash();
-            let block = api.blocks().at(block_hash).await.unwrap();
-            let extrinsics = block.extrinsics().await.unwrap();
-            let extrinsic_details = extrinsics.iter().find(|e| e.is_signed()).unwrap();
-            extrinsic_details
-        }};
-    }
-
-    let transaction1 = submit_transfer_extrinsic_and_get_it_back!(1234);
+    let transaction1 =
+        submit_extrinsic_and_get_it_back(&api, DefaultExtrinsicParamsBuilder::new().tip(1234))
+            .await;
     let extensions1 = transaction1.transaction_extensions().unwrap();
 
     let nonce1 = extensions1.nonce().unwrap();
@@ -313,7 +315,9 @@ async fn decode_transaction_extensions_from_blocks() {
         .unwrap()
         .tip();
 
-    let transaction2 = submit_transfer_extrinsic_and_get_it_back!(5678);
+    let transaction2 =
+        submit_extrinsic_and_get_it_back(&api, DefaultExtrinsicParamsBuilder::new().tip(5678))
+            .await;
     let extensions2 = transaction2.transaction_extensions().unwrap();
     let nonce2 = extensions2.nonce().unwrap();
     let nonce2_static = extensions2.find::<CheckNonce>().unwrap().unwrap();
@@ -368,13 +372,69 @@ async fn decode_transaction_extensions_from_blocks() {
     {
         assert_eq!(e.name(), *expected_name);
     }
+}
 
-    // check that era decodes:
-    for extensions in [&extensions1, &extensions2] {
-        let era: Era = extensions
+#[cfg(fullclient)]
+#[subxt_test]
+async fn decode_block_mortality() {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    // Explicit Immortal:
+    {
+        let tx =
+            submit_extrinsic_and_get_it_back(&api, DefaultExtrinsicParamsBuilder::new().immortal())
+                .await;
+
+        let mortality = tx
+            .transaction_extensions()
+            .unwrap()
             .find::<CheckMortality<SubstrateConfig>>()
             .unwrap()
             .unwrap();
-        assert!(matches!(era, Era::Mortal { .. }));
+
+        assert_eq!(mortality, Era::Immortal);
+    }
+
+    // Explicit Mortal:
+    for for_n_blocks in [4, 16, 128] {
+        let tx = submit_extrinsic_and_get_it_back(
+            &api,
+            DefaultExtrinsicParamsBuilder::new().mortal(for_n_blocks),
+        )
+        .await;
+
+        let mortality = tx
+            .transaction_extensions()
+            .unwrap()
+            .find::<CheckMortality<SubstrateConfig>>()
+            .unwrap()
+            .unwrap();
+
+        assert!(matches!(mortality, Era::Mortal {
+            period,
+            phase: _, // depends on current block so don't test it.
+        } if period == for_n_blocks));
+    }
+
+    // Implicitly, transactions should be mortal:
+    {
+        let tx =
+            submit_extrinsic_and_get_it_back(&api, DefaultExtrinsicParamsBuilder::default()).await;
+
+        let mortality = tx
+            .transaction_extensions()
+            .unwrap()
+            .find::<CheckMortality<SubstrateConfig>>()
+            .unwrap()
+            .unwrap();
+
+        assert!(matches!(
+            mortality,
+            Era::Mortal {
+                period: 32,
+                phase: _, // depends on current block so don't test it.
+            }
+        ));
     }
 }

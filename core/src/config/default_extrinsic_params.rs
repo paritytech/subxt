@@ -57,6 +57,13 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
         Default::default()
     }
 
+    /// Make the transaction immortal, meaning it will never expire. This means that it could, in
+    /// theory, be pending for a long time and only be included many blocks into the future.
+    pub fn immortal(mut self) -> Self {
+        self.mortality = transaction_extensions::CheckMortalityParams::immortal();
+        self
+    }
+
     /// Make the transaction mortal, given a number of blocks it will be mortal for from
     /// the current block at the time of submission.
     ///
