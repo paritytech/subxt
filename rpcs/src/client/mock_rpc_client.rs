@@ -232,7 +232,7 @@ impl RpcClientT for MockRpcClient {
         }
         drop(handlers_once);
 
-        // Call a specific handler for the subscrpition if one is found.
+        // Call a specific handler for the subscriptions if one is found.
         let mut handlers = self.subscription_handlers.lock().unwrap();
         if let Some(handler) = handlers.get_mut(sub) {
             return handler(sub, params, unsub)
