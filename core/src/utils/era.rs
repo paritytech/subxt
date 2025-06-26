@@ -156,7 +156,7 @@ impl<R: TypeResolver> Visitor for EraVisitor<R> {
     type TypeResolver = R;
 
     // Unwrap any newtype wrappers around the era, eg the CheckMortality extension (which actually
-    // has 2 fields, but scale_info seems to autoamtically ignore the PhantomData field). This
+    // has 2 fields, but scale_info seems to automatically ignore the PhantomData field). This
     // allows us to decode directly from CheckMortality into Era.
     fn visit_composite<'scale, 'resolver>(
         self,

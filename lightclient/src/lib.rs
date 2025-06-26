@@ -189,7 +189,7 @@ pub struct LightClientRpc {
 }
 
 impl LightClientRpc {
-    // Dev note: this would provide a "low leveL" interface if one is needed.
+    // Dev note: this would provide a "low level" interface if one is needed.
     // Do we actually need to provide this, or can we entirely hide Smoldot?
     pub(crate) fn new_raw<TPlat, TChain>(
         client: impl Into<SharedClient<TPlat, TChain>>,
