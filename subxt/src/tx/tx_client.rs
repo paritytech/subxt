@@ -12,7 +12,7 @@ use crate::{
 };
 use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
-use futures::future::{join, try_join};
+use futures::future::try_join;
 use subxt_core::tx::TransactionVersion;
 
 /// A client for working with transactions.
