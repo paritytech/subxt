@@ -45,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let event_values = evt.field_values()?;
 
                 println!("        {pallet_name}_{event_name}");
-                println!("          {}", event_values);
+                println!("          {event_values}", );
             }
 
             println!("      Transaction Extensions:");

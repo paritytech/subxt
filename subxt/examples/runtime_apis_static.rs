@@ -23,6 +23,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .call(runtime_api_call)
         .await;
 
-    println!("AccountNonceApi_account_nonce for Alice: {:?}", nonce);
+    println!("AccountNonceApi_account_nonce for Alice: {nonce:?}");
     Ok(())
 }

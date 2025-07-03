@@ -217,7 +217,7 @@ fn storage_entries_string(storage_metadata: &StorageMetadata, pallet_name: &str)
             .collect();
         strings.sort();
         for entry in strings {
-            write!(output, "\n    {}", entry).unwrap();
+            write!(output, "\n    {entry}").unwrap();
         }
         output
     }
