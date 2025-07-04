@@ -243,7 +243,7 @@ async fn run_server_with_settings(
         drop(server_handle);
     });
 
-    Ok((tx, format!("ws://{}", addr)))
+    Ok((tx, format!("ws://{addr}")))
 }
 
 async fn serve_with_graceful_shutdown<S, B, I>(

@@ -278,8 +278,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTaskData<TPlatform, TChain> {
                     None => "null",
                 };
                 let request = format!(
-                    r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":{}}}"#,
-                    id, method, params
+                    r#"{{"jsonrpc":"2.0","id":"{id}", "method":"{method}","params":{params}}}"#
                 );
 
                 self.requests.insert(id, sender);
@@ -328,8 +327,7 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTaskData<TPlatform, TChain> {
                     None => "null",
                 };
                 let request = format!(
-                    r#"{{"jsonrpc":"2.0","id":"{}", "method":"{}","params":{}}}"#,
-                    id, method, params
+                    r#"{{"jsonrpc":"2.0","id":"{id}", "method":"{method}","params":{params}}}"#
                 );
 
                 tracing::trace!(target: LOG_TARGET, "Tracking subscription request id={id} chain={chain_id:?}");

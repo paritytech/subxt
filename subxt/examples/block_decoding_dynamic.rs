@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
             println!("    Fields:");
-            println!("      {}\n", fields);
+            println!("      {fields}\n");
         }
     }
 
