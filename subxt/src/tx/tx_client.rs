@@ -12,6 +12,7 @@ use crate::{
 };
 use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
+use futures::future::try_join;
 use subxt_core::tx::TransactionVersion;
 
 /// A client for working with transactions.
@@ -605,13 +606,15 @@ async fn inject_account_nonce_and_block<T: Config, Client: OnlineClientT<T>>(
     use subxt_core::config::transaction_extensions::Params;
 
     let block_ref = client.backend().latest_finalized_block_ref().await?;
-    let block_header = client
-        .backend()
-        .block_header(block_ref.hash())
-        .await?
-        .ok_or_else(|| Error::Block(BlockError::not_found(block_ref.hash())))?;
-    let account_nonce =
-        crate::blocks::get_account_nonce(client, account_id, block_ref.hash()).await?;
+
+    let (block_header, account_nonce) = try_join(
+        client.backend().block_header(block_ref.hash()),
+        crate::blocks::get_account_nonce(client, account_id, block_ref.hash()),
+    )
+    .await?;
+
+    let block_header =
+        block_header.ok_or_else(|| Error::Block(BlockError::not_found(block_ref.hash())))?;
 
     params.inject_account_nonce(account_nonce);
     params.inject_block(block_header.number().into(), block_ref.hash());
