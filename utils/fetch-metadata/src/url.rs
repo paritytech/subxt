@@ -35,7 +35,7 @@ impl std::str::FromStr for MetadataVersion {
             version => {
                 let num: u32 = version
                     .parse()
-                    .map_err(|_| format!("Invalid metadata version specified {:?}", version))?;
+                    .map_err(|_| format!("Invalid metadata version specified {version:?}"))?;
 
                 Ok(MetadataVersion::Version(num))
             }

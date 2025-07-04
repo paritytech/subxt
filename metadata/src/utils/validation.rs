@@ -584,10 +584,11 @@ impl<'a> MetadataHasher<'a> {
 
         let extrinsic_hash = get_extrinsic_hash(&metadata.types, &metadata.extrinsic);
 
-        let custom_values_hash = self
-            .include_custom_values
-            .then(|| get_custom_metadata_hash(&metadata.custom()))
-            .unwrap_or_default();
+        let custom_values_hash = if self.include_custom_values {
+            get_custom_metadata_hash(&metadata.custom())
+        } else {
+            Default::default()
+        };
 
         concat_and_hash5(
             &pallet_hash,

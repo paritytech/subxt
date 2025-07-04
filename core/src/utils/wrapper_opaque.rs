@@ -93,7 +93,7 @@ impl<T> EncodeAsType for WrapperKeepOpaque<T> {
 
         types
             .resolve_type(type_id.clone(), visitor)
-            .map_err(|_| Error::new(ErrorKind::TypeNotFound(format!("{:?}", type_id))))?
+            .map_err(|_| Error::new(ErrorKind::TypeNotFound(format!("{type_id:?}"))))?
     }
 }
 
