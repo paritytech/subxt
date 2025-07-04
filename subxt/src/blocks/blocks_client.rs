@@ -53,7 +53,7 @@ where
         self.at_or_latest(Some(block_ref.into()))
     }
 
-    /// Obtain block details of the latest block hash.
+    /// Obtain block details of the latest finalized block.
     pub fn at_latest(
         &self,
     ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {

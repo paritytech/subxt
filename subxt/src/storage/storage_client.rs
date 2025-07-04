@@ -69,7 +69,7 @@ where
         Storage::new(self.client.clone(), block_ref.into())
     }
 
-    /// Obtain storage at the latest block hash.
+    /// Obtain storage at the latest finalized block.
     pub fn at_latest(
         &self,
     ) -> impl Future<Output = Result<Storage<T, Client>, Error>> + Send + 'static {

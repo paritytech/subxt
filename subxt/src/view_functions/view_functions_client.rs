@@ -40,7 +40,7 @@ where
         ViewFunctionsApi::new(self.client.clone(), block_ref.into())
     }
 
-    /// Obtain an interface to call View Functions at the latest block hash.
+    /// Obtain an interface to call View Functions at the latest finalized block.
     pub fn at_latest(
         &self,
     ) -> impl Future<Output = Result<ViewFunctionsApi<T, Client>, Error>> + Send + 'static {
