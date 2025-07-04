@@ -78,7 +78,7 @@ impl WasmSocket {
     pub fn new(addr: &str) -> Result<Self, Error> {
         let socket = match web_sys::WebSocket::new(addr) {
             Ok(socket) => socket,
-            Err(err) => return Err(Error::ConnectionError(format!("{:?}", err))),
+            Err(err) => return Err(Error::ConnectionError(format!("{err:?}"))),
         };
 
         socket.set_binary_type(web_sys::BinaryType::Arraybuffer);

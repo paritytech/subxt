@@ -114,28 +114,28 @@ impl PlatformRef for SubxtPlatform {
                 port,
                 secure: true,
             } => {
-                format!("wss://{}:{}", hostname, port)
+                format!("wss://{hostname}:{port}")
             }
             Address::WebSocketDns {
                 hostname,
                 port,
                 secure: false,
             } => {
-                format!("ws://{}:{}", hostname, port)
+                format!("ws://{hostname}:{port}")
             }
             Address::WebSocketIp {
                 ip: IpAddr::V4(ip),
                 port,
             } => {
                 let addr = SocketAddr::from((ip, port));
-                format!("ws://{}", addr)
+                format!("ws://{addr}")
             }
             Address::WebSocketIp {
                 ip: IpAddr::V6(ip),
                 port,
             } => {
                 let addr = SocketAddr::from((ip, port));
-                format!("ws://{}", addr)
+                format!("ws://{addr}")
             }
 
             // The API user of the `PlatformRef` trait is never supposed to open connections of
@@ -212,15 +212,15 @@ impl PlatformRef for SubxtPlatform {
             } else {
                 let _ = write!(message_build, ", ");
             }
-            let _ = write!(message_build, "{}={}", key, value);
+            let _ = write!(message_build, "{key}={value}");
         }
 
         match log_level {
-            LogLevel::Error => tracing::error!("target={} {}", log_target, message_build),
-            LogLevel::Warn => tracing::warn!("target={} {}", log_target, message_build),
-            LogLevel::Info => tracing::info!("target={} {}", log_target, message_build),
-            LogLevel::Debug => tracing::debug!("target={} {}", log_target, message_build),
-            LogLevel::Trace => tracing::trace!("target={} {}", log_target, message_build),
+            LogLevel::Error => tracing::error!("target={log_target} {message_build}"),
+            LogLevel::Warn => tracing::warn!("target={log_target} {message_build}"),
+            LogLevel::Info => tracing::info!("target={log_target} {message_build}"),
+            LogLevel::Debug => tracing::debug!("target={log_target} {message_build}"),
+            LogLevel::Trace => tracing::trace!("target={log_target} {message_build}"),
         };
     }
 }

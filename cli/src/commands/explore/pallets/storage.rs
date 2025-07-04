@@ -206,10 +206,8 @@ fn storage_entries_string(storage_metadata: &StorageMetadata, pallet_name: &str)
     if storage_metadata.entries().is_empty() {
         format!("No {storage_entry_placeholder}'s available in the \"{pallet_name}\" pallet.")
     } else {
-        let mut output = format!(
-            "Available {storage_entry_placeholder}'s in the \"{}\" pallet:",
-            pallet_name
-        );
+        let mut output =
+            format!("Available {storage_entry_placeholder}'s in the \"{pallet_name}\" pallet:");
         let mut strings: Vec<_> = storage_metadata
             .entries()
             .iter()
@@ -217,7 +215,7 @@ fn storage_entries_string(storage_metadata: &StorageMetadata, pallet_name: &str)
             .collect();
         strings.sort();
         for entry in strings {
-            write!(output, "\n    {}", entry).unwrap();
+            write!(output, "\n    {entry}").unwrap();
         }
         output
     }
