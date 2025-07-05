@@ -277,7 +277,7 @@ pub mod api {
                 pub struct Version {}
                 pub mod execute_block {
                     use super::runtime_types;
-                    pub type Block = runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > > ;
+                    pub type Block = runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: authorize_call :: AuthorizeCall , runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > > ;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = ();
@@ -585,9 +585,9 @@ pub mod api {
                             result_xcms_version,
                         },
                         [
-                            200u8, 157u8, 81u8, 40u8, 29u8, 58u8, 129u8, 127u8, 130u8, 97u8, 84u8,
-                            187u8, 236u8, 167u8, 121u8, 106u8, 197u8, 119u8, 61u8, 91u8, 18u8,
-                            164u8, 135u8, 77u8, 117u8, 131u8, 18u8, 39u8, 178u8, 79u8, 1u8, 74u8,
+                            102u8, 87u8, 8u8, 106u8, 72u8, 124u8, 83u8, 137u8, 248u8, 102u8, 30u8,
+                            147u8, 84u8, 96u8, 22u8, 37u8, 113u8, 76u8, 5u8, 126u8, 198u8, 221u8,
+                            42u8, 57u8, 62u8, 95u8, 249u8, 56u8, 11u8, 227u8, 36u8, 199u8,
                         ],
                     )
                 }
@@ -608,10 +608,9 @@ pub mod api {
                             xcm,
                         },
                         [
-                            59u8, 7u8, 158u8, 179u8, 196u8, 165u8, 135u8, 173u8, 201u8, 80u8,
-                            111u8, 42u8, 212u8, 235u8, 243u8, 226u8, 107u8, 85u8, 176u8, 35u8,
-                            249u8, 87u8, 164u8, 244u8, 133u8, 134u8, 90u8, 228u8, 82u8, 149u8,
-                            98u8, 18u8,
+                            207u8, 156u8, 37u8, 92u8, 18u8, 49u8, 3u8, 31u8, 153u8, 59u8, 131u8,
+                            46u8, 75u8, 253u8, 233u8, 51u8, 162u8, 101u8, 86u8, 251u8, 57u8, 194u8,
+                            87u8, 161u8, 167u8, 27u8, 202u8, 71u8, 196u8, 22u8, 191u8, 159u8,
                         ],
                     )
                 }
@@ -963,7 +962,7 @@ pub mod api {
                 use super::runtime_types;
                 pub mod apply_extrinsic {
                     use super::runtime_types;
-                    pub type Extrinsic = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > ;
+                    pub type Extrinsic = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: authorize_call :: AuthorizeCall , runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > ;
                     pub mod output {
                         use super::runtime_types;
                         pub type Output = :: core :: result :: Result < :: core :: result :: Result < () , runtime_types :: sp_runtime :: DispatchError > , runtime_types :: sp_runtime :: transaction_validity :: TransactionValidityError > ;
@@ -1009,7 +1008,7 @@ pub mod api {
                     pub type Inherent = runtime_types::sp_inherents::InherentData;
                     pub mod output {
                         use super::runtime_types;
-                        pub type Output = :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > > ;
+                        pub type Output = :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: authorize_call :: AuthorizeCall , runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > > ;
                     }
                 }
                 #[derive(
@@ -1028,7 +1027,7 @@ pub mod api {
                 }
                 pub mod check_inherents {
                     use super::runtime_types;
-                    pub type Block = runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > > ;
+                    pub type Block = runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: authorize_call :: AuthorizeCall , runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > > ;
                     pub type Data = runtime_types::sp_inherents::InherentData;
                     pub mod output {
                         use super::runtime_types;
@@ -1099,7 +1098,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type Source =
                         runtime_types::sp_runtime::transaction_validity::TransactionSource;
-                    pub type Tx = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > ;
+                    pub type Tx = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: authorize_call :: AuthorizeCall , runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > ;
                     pub type BlockHash = ::subxt::ext::subxt_core::utils::H256;
                     pub mod output {
                         use super::runtime_types;
@@ -4131,7 +4130,7 @@ pub mod api {
                 use super::runtime_types;
                 pub mod query_info {
                     use super::runtime_types;
-                    pub type Uxt = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > ;
+                    pub type Uxt = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: authorize_call :: AuthorizeCall , runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > ;
                     pub type Len = ::core::primitive::u32;
                     pub mod output {
                         use super::runtime_types;
@@ -4159,7 +4158,7 @@ pub mod api {
                 }
                 pub mod query_fee_details {
                     use super::runtime_types;
-                    pub type Uxt = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > ;
+                    pub type Uxt = :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: authorize_call :: AuthorizeCall , runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > ;
                     pub type Len = ::core::primitive::u32;
                     pub mod output {
                         use super::runtime_types;
@@ -4628,6 +4627,9 @@ pub mod api {
         pub fn transaction_payment(&self) -> transaction_payment::constants::ConstantsApi {
             transaction_payment::constants::ConstantsApi
         }
+        pub fn session(&self) -> session::constants::ConstantsApi {
+            session::constants::ConstantsApi
+        }
         pub fn grandpa(&self) -> grandpa::constants::ConstantsApi {
             grandpa::constants::ConstantsApi
         }
@@ -4712,6 +4714,9 @@ pub mod api {
         }
         pub fn multi_block_migrations(&self) -> multi_block_migrations::constants::ConstantsApi {
             multi_block_migrations::constants::ConstantsApi
+        }
+        pub fn xcm_pallet(&self) -> xcm_pallet::constants::ConstantsApi {
+            xcm_pallet::constants::ConstantsApi
         }
         pub fn beefy(&self) -> beefy::constants::ConstantsApi {
             beefy::constants::ConstantsApi
@@ -5094,9 +5099,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                68u8, 176u8, 178u8, 125u8, 202u8, 35u8, 149u8, 97u8, 33u8, 151u8, 42u8, 95u8,
-                134u8, 25u8, 21u8, 201u8, 238u8, 208u8, 130u8, 149u8, 140u8, 222u8, 106u8, 218u8,
-                105u8, 83u8, 243u8, 68u8, 66u8, 222u8, 148u8, 136u8,
+                104u8, 101u8, 167u8, 115u8, 106u8, 95u8, 240u8, 114u8, 168u8, 228u8, 119u8, 90u8,
+                219u8, 119u8, 59u8, 204u8, 201u8, 222u8, 27u8, 137u8, 26u8, 177u8, 49u8, 202u8,
+                91u8, 179u8, 50u8, 141u8, 72u8, 211u8, 67u8, 23u8,
             ]
     }
     pub mod system {
@@ -6203,10 +6208,9 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            137u8, 193u8, 152u8, 88u8, 207u8, 23u8, 79u8, 118u8, 129u8, 67u8,
-                            193u8, 197u8, 21u8, 100u8, 68u8, 205u8, 43u8, 228u8, 201u8, 168u8,
-                            174u8, 224u8, 84u8, 79u8, 116u8, 71u8, 96u8, 14u8, 58u8, 60u8, 81u8,
-                            42u8,
+                            94u8, 112u8, 186u8, 225u8, 192u8, 81u8, 168u8, 148u8, 112u8, 241u8,
+                            25u8, 26u8, 173u8, 184u8, 107u8, 32u8, 150u8, 36u8, 99u8, 153u8, 118u8,
+                            176u8, 43u8, 10u8, 193u8, 145u8, 143u8, 192u8, 26u8, 81u8, 71u8, 135u8,
                         ],
                     )
                 }
@@ -7395,6 +7399,7 @@ pub mod api {
                 #[doc = "  `on_finalize`)"]
                 #[doc = "- 1 event handler `on_timestamp_set`. Must be `O(1)`."]
                 pub struct Set {
+                    #[codec(compact)]
                     pub now: set::Now,
                 }
                 pub mod set {
@@ -8157,6 +8162,7 @@ pub mod api {
                 #[doc = "The dispatch origin for this call must be `Signed` by the transactor."]
                 pub struct TransferAllowDeath {
                     pub dest: transfer_allow_death::Dest,
+                    #[codec(compact)]
                     pub value: transfer_allow_death::Value,
                 }
                 pub mod transfer_allow_death {
@@ -8187,6 +8193,7 @@ pub mod api {
                 pub struct ForceTransfer {
                     pub source: force_transfer::Source,
                     pub dest: force_transfer::Dest,
+                    #[codec(compact)]
                     pub value: force_transfer::Value,
                 }
                 pub mod force_transfer {
@@ -8224,6 +8231,7 @@ pub mod api {
                 #[doc = "[`transfer_allow_death`]: struct.Pallet.html#method.transfer"]
                 pub struct TransferKeepAlive {
                     pub dest: transfer_keep_alive::Dest,
+                    #[codec(compact)]
                     pub value: transfer_keep_alive::Value,
                 }
                 pub mod transfer_keep_alive {
@@ -8358,6 +8366,7 @@ pub mod api {
                 #[doc = "The dispatch origin for this call is `root`."]
                 pub struct ForceSetBalance {
                     pub who: force_set_balance::Who,
+                    #[codec(compact)]
                     pub new_free: force_set_balance::NewFree,
                 }
                 pub mod force_set_balance {
@@ -8390,6 +8399,7 @@ pub mod api {
                 #[doc = "# Example"]
                 pub struct ForceAdjustTotalIssuance {
                     pub direction: force_adjust_total_issuance::Direction,
+                    #[codec(compact)]
                     pub delta: force_adjust_total_issuance::Delta,
                 }
                 pub mod force_adjust_total_issuance {
@@ -8420,6 +8430,7 @@ pub mod api {
                 #[doc = "Unlike sending funds to a _burn_ address, which merely makes the funds inaccessible,"]
                 #[doc = "this `burn` operation will reduce total issuance by the amount _burned_."]
                 pub struct Burn {
+                    #[codec(compact)]
                     pub value: burn::Value,
                     pub keep_alive: burn::KeepAlive,
                 }
@@ -9434,9 +9445,9 @@ pub mod api {
                         "Holds",
                         (),
                         [
-                            72u8, 137u8, 235u8, 171u8, 118u8, 154u8, 86u8, 85u8, 70u8, 201u8, 73u8,
-                            9u8, 102u8, 160u8, 24u8, 93u8, 181u8, 22u8, 71u8, 178u8, 243u8, 94u8,
-                            3u8, 47u8, 90u8, 11u8, 219u8, 31u8, 4u8, 131u8, 154u8, 154u8,
+                            6u8, 68u8, 133u8, 169u8, 100u8, 31u8, 19u8, 164u8, 80u8, 22u8, 132u8,
+                            73u8, 190u8, 31u8, 34u8, 82u8, 132u8, 79u8, 92u8, 15u8, 204u8, 149u8,
+                            109u8, 203u8, 169u8, 162u8, 250u8, 223u8, 182u8, 170u8, 251u8, 178u8,
                         ],
                     )
                 }
@@ -9458,9 +9469,9 @@ pub mod api {
                         "Holds",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
                         [
-                            72u8, 137u8, 235u8, 171u8, 118u8, 154u8, 86u8, 85u8, 70u8, 201u8, 73u8,
-                            9u8, 102u8, 160u8, 24u8, 93u8, 181u8, 22u8, 71u8, 178u8, 243u8, 94u8,
-                            3u8, 47u8, 90u8, 11u8, 219u8, 31u8, 4u8, 131u8, 154u8, 154u8,
+                            6u8, 68u8, 133u8, 169u8, 100u8, 31u8, 19u8, 164u8, 80u8, 22u8, 132u8,
+                            73u8, 190u8, 31u8, 34u8, 82u8, 132u8, 79u8, 92u8, 15u8, 204u8, 149u8,
+                            109u8, 203u8, 169u8, 162u8, 250u8, 223u8, 182u8, 170u8, 251u8, 178u8,
                         ],
                     )
                 }
@@ -10118,6 +10129,49 @@ pub mod api {
     pub mod historical {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "The `Event` enum of this pallet"]
+        pub type Event = runtime_types::pallet_session::historical::pallet::Event;
+        pub mod events {
+            use super::runtime_types;
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "The merkle root of the validators of the said session were stored"]
+            pub struct RootStored {
+                pub index: root_stored::Index,
+            }
+            pub mod root_stored {
+                use super::runtime_types;
+                pub type Index = ::core::primitive::u32;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for RootStored {
+                const PALLET: &'static str = "Historical";
+                const EVENT: &'static str = "RootStored";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "The merkle roots of up to this session index were pruned"]
+            pub struct RootsPruned {
+                pub up_to: roots_pruned::UpTo,
+            }
+            pub mod roots_pruned {
+                use super::runtime_types;
+                pub type UpTo = ::core::primitive::u32;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for RootsPruned {
+                const PALLET: &'static str = "Historical";
+                const EVENT: &'static str = "RootsPruned";
+            }
+        }
         pub mod storage {
             use super::runtime_types;
             pub mod types {
@@ -10373,6 +10427,20 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "The `NewSession` event in the current block also implies a new validator set to be"]
+            #[doc = "queued."]
+            pub struct NewQueued;
+            impl ::subxt::ext::subxt_core::events::StaticEvent for NewQueued {
+                const PALLET: &'static str = "Session";
+                const EVENT: &'static str = "NewQueued";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             #[doc = "Validator has been disabled."]
             pub struct ValidatorDisabled {
                 pub validator: validator_disabled::Validator,
@@ -10445,9 +10513,10 @@ pub mod api {
                 pub mod key_owner {
                     use super::runtime_types;
                     pub type KeyOwner = ::subxt::ext::subxt_core::utils::AccountId32;
-                    pub type Param0 = runtime_types::sp_core::crypto::KeyTypeId;
-                    pub type Param1 =
-                        ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+                    pub type Param0 = (
+                        runtime_types::sp_core::crypto::KeyTypeId,
+                        ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+                    );
                 }
             }
             pub struct StorageApi;
@@ -10634,7 +10703,7 @@ pub mod api {
                     )
                 }
                 #[doc = " The owner of a key. The key is the `KeyTypeId` + the encoded key."]
-                pub fn key_owner_iter1(
+                pub fn key_owner(
                     &self,
                     _0: types::key_owner::Param0,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
@@ -10642,9 +10711,9 @@ pub mod api {
                         types::key_owner::Param0,
                     >,
                     types::key_owner::KeyOwner,
-                    (),
-                    (),
                     ::subxt::ext::subxt_core::utils::Yes,
+                    (),
+                    (),
                 > {
                     ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Session",
@@ -10658,37 +10727,25 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " The owner of a key. The key is the `KeyTypeId` + the encoded key."]
-                pub fn key_owner(
+            }
+        }
+        pub mod constants {
+            use super::runtime_types;
+            pub struct ConstantsApi;
+            impl ConstantsApi {
+                #[doc = " The amount to be held when setting keys."]
+                pub fn key_deposit(
                     &self,
-                    _0: types::key_owner::Param0,
-                    _1: types::key_owner::Param1,
-                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (
-                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
-                            types::key_owner::Param0,
-                        >,
-                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
-                            types::key_owner::Param1,
-                        >,
-                    ),
-                    types::key_owner::KeyOwner,
-                    ::subxt::ext::subxt_core::utils::Yes,
-                    (),
-                    (),
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u128,
                 > {
-                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "Session",
-                        "KeyOwner",
-                        (
-                            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
-                            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_1),
-                        ),
+                        "KeyDeposit",
                         [
-                            217u8, 204u8, 21u8, 114u8, 247u8, 129u8, 32u8, 242u8, 93u8, 91u8,
-                            253u8, 253u8, 248u8, 90u8, 12u8, 202u8, 195u8, 25u8, 18u8, 100u8,
-                            253u8, 109u8, 88u8, 77u8, 217u8, 140u8, 51u8, 40u8, 118u8, 35u8, 107u8,
-                            206u8,
+                            84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
+                            27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
+                            136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
                         ],
                     )
                 }
@@ -11379,6 +11436,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Emits [`Event::SpendApproved`] if successful."]
                 pub struct SpendLocal {
+                    #[codec(compact)]
                     pub amount: spend_local::Amount,
                     pub beneficiary: spend_local::Beneficiary,
                 }
@@ -11427,6 +11485,7 @@ pub mod api {
                 #[doc = "  proposal does not exist altogether, thus there is no way it would have been approved"]
                 #[doc = "  in the first place."]
                 pub struct RemoveApproval {
+                    #[codec(compact)]
                     pub proposal_id: remove_approval::ProposalId,
                 }
                 pub mod remove_approval {
@@ -11476,6 +11535,7 @@ pub mod api {
                 #[doc = "Emits [`Event::AssetSpendApproved`] if successful."]
                 pub struct Spend {
                     pub asset_kind: ::subxt::ext::subxt_core::alloc::boxed::Box<spend::AssetKind>,
+                    #[codec(compact)]
                     pub amount: spend::Amount,
                     pub beneficiary:
                         ::subxt::ext::subxt_core::alloc::boxed::Box<spend::Beneficiary>,
@@ -12518,6 +12578,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Weight: `O(R)` where R is the number of polls the voter has voted on."]
                 pub struct Vote {
+                    #[codec(compact)]
                     pub poll_index: vote::PollIndex,
                     pub vote: vote::Vote,
                 }
@@ -13610,10 +13671,10 @@ pub mod api {
                             enactment_moment,
                         },
                         [
-                            218u8, 168u8, 109u8, 14u8, 141u8, 52u8, 78u8, 245u8, 192u8, 152u8, 7u8,
-                            86u8, 63u8, 137u8, 68u8, 108u8, 60u8, 201u8, 251u8, 173u8, 115u8,
-                            234u8, 198u8, 140u8, 177u8, 117u8, 46u8, 225u8, 154u8, 196u8, 155u8,
-                            100u8,
+                            86u8, 84u8, 96u8, 114u8, 247u8, 25u8, 6u8, 101u8, 96u8, 162u8, 250u8,
+                            43u8, 112u8, 243u8, 41u8, 89u8, 137u8, 193u8, 155u8, 47u8, 105u8,
+                            195u8, 219u8, 139u8, 202u8, 232u8, 181u8, 48u8, 72u8, 230u8, 24u8,
+                            154u8,
                         ],
                     )
                 }
@@ -14253,10 +14314,9 @@ pub mod api {
                         "ReferendumInfoFor",
                         (),
                         [
-                            20u8, 120u8, 101u8, 224u8, 49u8, 178u8, 103u8, 225u8, 250u8, 168u8,
-                            55u8, 171u8, 211u8, 30u8, 122u8, 154u8, 107u8, 185u8, 16u8, 213u8,
-                            19u8, 123u8, 74u8, 182u8, 30u8, 195u8, 206u8, 27u8, 138u8, 185u8,
-                            108u8, 207u8,
+                            123u8, 87u8, 188u8, 82u8, 34u8, 134u8, 67u8, 91u8, 100u8, 213u8, 39u8,
+                            126u8, 205u8, 149u8, 10u8, 60u8, 57u8, 243u8, 173u8, 17u8, 27u8, 99u8,
+                            95u8, 52u8, 20u8, 108u8, 209u8, 15u8, 49u8, 192u8, 249u8, 23u8,
                         ],
                     )
                 }
@@ -14278,10 +14338,9 @@ pub mod api {
                         "ReferendumInfoFor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
                         [
-                            20u8, 120u8, 101u8, 224u8, 49u8, 178u8, 103u8, 225u8, 250u8, 168u8,
-                            55u8, 171u8, 211u8, 30u8, 122u8, 154u8, 107u8, 185u8, 16u8, 213u8,
-                            19u8, 123u8, 74u8, 182u8, 30u8, 195u8, 206u8, 27u8, 138u8, 185u8,
-                            108u8, 207u8,
+                            123u8, 87u8, 188u8, 82u8, 34u8, 134u8, 67u8, 91u8, 100u8, 213u8, 39u8,
+                            126u8, 205u8, 149u8, 10u8, 60u8, 57u8, 243u8, 173u8, 17u8, 27u8, 99u8,
+                            95u8, 52u8, 20u8, 108u8, 209u8, 15u8, 49u8, 192u8, 249u8, 23u8,
                         ],
                     )
                 }
@@ -15825,10 +15884,10 @@ pub mod api {
                             enactment_moment,
                         },
                         [
-                            218u8, 168u8, 109u8, 14u8, 141u8, 52u8, 78u8, 245u8, 192u8, 152u8, 7u8,
-                            86u8, 63u8, 137u8, 68u8, 108u8, 60u8, 201u8, 251u8, 173u8, 115u8,
-                            234u8, 198u8, 140u8, 177u8, 117u8, 46u8, 225u8, 154u8, 196u8, 155u8,
-                            100u8,
+                            86u8, 84u8, 96u8, 114u8, 247u8, 25u8, 6u8, 101u8, 96u8, 162u8, 250u8,
+                            43u8, 112u8, 243u8, 41u8, 89u8, 137u8, 193u8, 155u8, 47u8, 105u8,
+                            195u8, 219u8, 139u8, 202u8, 232u8, 181u8, 48u8, 72u8, 230u8, 24u8,
+                            154u8,
                         ],
                     )
                 }
@@ -16460,9 +16519,9 @@ pub mod api {
                         "ReferendumInfoFor",
                         (),
                         [
-                            107u8, 246u8, 182u8, 115u8, 137u8, 20u8, 112u8, 69u8, 64u8, 237u8, 6u8,
-                            165u8, 167u8, 156u8, 226u8, 248u8, 235u8, 240u8, 125u8, 192u8, 4u8,
-                            120u8, 17u8, 184u8, 20u8, 120u8, 146u8, 140u8, 26u8, 42u8, 64u8, 168u8,
+                            100u8, 38u8, 100u8, 224u8, 1u8, 49u8, 248u8, 77u8, 107u8, 120u8, 117u8,
+                            239u8, 75u8, 87u8, 27u8, 160u8, 174u8, 225u8, 219u8, 216u8, 166u8,
+                            213u8, 47u8, 135u8, 28u8, 159u8, 28u8, 139u8, 84u8, 249u8, 223u8, 27u8,
                         ],
                     )
                 }
@@ -16484,9 +16543,9 @@ pub mod api {
                         "ReferendumInfoFor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
                         [
-                            107u8, 246u8, 182u8, 115u8, 137u8, 20u8, 112u8, 69u8, 64u8, 237u8, 6u8,
-                            165u8, 167u8, 156u8, 226u8, 248u8, 235u8, 240u8, 125u8, 192u8, 4u8,
-                            120u8, 17u8, 184u8, 20u8, 120u8, 146u8, 140u8, 26u8, 42u8, 64u8, 168u8,
+                            100u8, 38u8, 100u8, 224u8, 1u8, 49u8, 248u8, 77u8, 107u8, 120u8, 117u8,
+                            239u8, 75u8, 87u8, 27u8, 160u8, 174u8, 225u8, 219u8, 216u8, 166u8,
+                            213u8, 47u8, 135u8, 28u8, 159u8, 28u8, 139u8, 84u8, 249u8, 223u8, 27u8,
                         ],
                     )
                 }
@@ -16938,9 +16997,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            172u8, 166u8, 123u8, 235u8, 54u8, 102u8, 191u8, 208u8, 84u8, 95u8,
-                            161u8, 49u8, 26u8, 159u8, 23u8, 202u8, 1u8, 171u8, 192u8, 91u8, 149u8,
-                            85u8, 60u8, 121u8, 7u8, 243u8, 88u8, 25u8, 3u8, 6u8, 122u8, 159u8,
+                            208u8, 102u8, 29u8, 215u8, 97u8, 242u8, 46u8, 249u8, 223u8, 99u8, 33u8,
+                            17u8, 75u8, 120u8, 133u8, 204u8, 19u8, 191u8, 117u8, 244u8, 215u8,
+                            208u8, 72u8, 194u8, 7u8, 8u8, 166u8, 216u8, 52u8, 242u8, 207u8, 50u8,
                         ],
                     )
                 }
@@ -18143,10 +18202,9 @@ pub mod api {
                         "batch",
                         types::Batch { calls },
                         [
-                            187u8, 53u8, 188u8, 120u8, 234u8, 9u8, 191u8, 20u8, 49u8, 151u8, 42u8,
-                            189u8, 126u8, 181u8, 207u8, 178u8, 103u8, 29u8, 191u8, 132u8, 91u8,
-                            185u8, 147u8, 104u8, 137u8, 126u8, 97u8, 15u8, 195u8, 0u8, 231u8,
-                            246u8,
+                            238u8, 143u8, 149u8, 119u8, 132u8, 112u8, 146u8, 246u8, 2u8, 201u8,
+                            8u8, 116u8, 235u8, 206u8, 54u8, 201u8, 211u8, 142u8, 26u8, 174u8, 63u8,
+                            168u8, 105u8, 40u8, 13u8, 209u8, 36u8, 162u8, 123u8, 224u8, 6u8, 181u8,
                         ],
                     )
                 }
@@ -18177,9 +18235,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            204u8, 220u8, 56u8, 11u8, 77u8, 64u8, 24u8, 233u8, 164u8, 89u8, 172u8,
-                            205u8, 163u8, 183u8, 29u8, 163u8, 169u8, 67u8, 58u8, 86u8, 37u8, 48u8,
-                            126u8, 13u8, 102u8, 67u8, 242u8, 175u8, 144u8, 17u8, 8u8, 8u8,
+                            63u8, 33u8, 47u8, 64u8, 238u8, 28u8, 74u8, 250u8, 244u8, 204u8, 213u8,
+                            207u8, 159u8, 177u8, 106u8, 86u8, 242u8, 43u8, 206u8, 91u8, 32u8,
+                            101u8, 154u8, 99u8, 15u8, 194u8, 177u8, 251u8, 160u8, 110u8, 224u8,
+                            156u8,
                         ],
                     )
                 }
@@ -18206,10 +18265,10 @@ pub mod api {
                         "batch_all",
                         types::BatchAll { calls },
                         [
-                            56u8, 70u8, 231u8, 117u8, 217u8, 221u8, 222u8, 161u8, 27u8, 90u8,
-                            144u8, 233u8, 159u8, 242u8, 236u8, 45u8, 211u8, 247u8, 161u8, 157u8,
-                            67u8, 73u8, 10u8, 95u8, 87u8, 29u8, 99u8, 212u8, 36u8, 8u8, 221u8,
-                            122u8,
+                            134u8, 104u8, 86u8, 160u8, 49u8, 185u8, 29u8, 124u8, 125u8, 146u8,
+                            47u8, 68u8, 177u8, 194u8, 102u8, 69u8, 6u8, 173u8, 117u8, 156u8, 139u8,
+                            42u8, 31u8, 199u8, 215u8, 68u8, 177u8, 248u8, 181u8, 158u8, 157u8,
+                            217u8,
                         ],
                     )
                 }
@@ -18233,10 +18292,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            231u8, 174u8, 32u8, 205u8, 213u8, 153u8, 39u8, 94u8, 141u8, 38u8,
-                            160u8, 196u8, 95u8, 128u8, 78u8, 30u8, 208u8, 155u8, 196u8, 218u8,
-                            99u8, 30u8, 113u8, 182u8, 216u8, 37u8, 219u8, 70u8, 9u8, 91u8, 69u8,
-                            76u8,
+                            162u8, 111u8, 9u8, 93u8, 72u8, 171u8, 104u8, 172u8, 81u8, 143u8, 228u8,
+                            75u8, 155u8, 30u8, 131u8, 203u8, 174u8, 87u8, 181u8, 91u8, 167u8,
+                            158u8, 182u8, 61u8, 34u8, 120u8, 73u8, 143u8, 59u8, 66u8, 9u8, 13u8,
                         ],
                     )
                 }
@@ -18263,10 +18321,9 @@ pub mod api {
                         "force_batch",
                         types::ForceBatch { calls },
                         [
-                            227u8, 147u8, 239u8, 15u8, 42u8, 204u8, 238u8, 159u8, 197u8, 191u8,
-                            122u8, 146u8, 138u8, 127u8, 230u8, 167u8, 211u8, 32u8, 65u8, 70u8,
-                            14u8, 142u8, 132u8, 19u8, 115u8, 122u8, 145u8, 184u8, 79u8, 45u8,
-                            220u8, 15u8,
+                            61u8, 138u8, 94u8, 134u8, 122u8, 68u8, 41u8, 246u8, 142u8, 201u8, 39u8,
+                            235u8, 193u8, 95u8, 48u8, 71u8, 184u8, 137u8, 246u8, 178u8, 223u8,
+                            50u8, 9u8, 35u8, 69u8, 168u8, 46u8, 152u8, 89u8, 167u8, 132u8, 7u8,
                         ],
                     )
                 }
@@ -18290,9 +18347,9 @@ pub mod api {
                             weight,
                         },
                         [
-                            74u8, 87u8, 117u8, 253u8, 51u8, 74u8, 25u8, 109u8, 57u8, 5u8, 186u8,
-                            56u8, 236u8, 69u8, 63u8, 103u8, 64u8, 19u8, 167u8, 102u8, 191u8, 119u8,
-                            211u8, 158u8, 191u8, 85u8, 138u8, 161u8, 206u8, 178u8, 128u8, 121u8,
+                            234u8, 54u8, 154u8, 105u8, 247u8, 52u8, 86u8, 129u8, 46u8, 98u8, 254u8,
+                            158u8, 52u8, 43u8, 31u8, 129u8, 190u8, 49u8, 166u8, 118u8, 160u8, 51u8,
+                            1u8, 22u8, 118u8, 70u8, 101u8, 154u8, 78u8, 76u8, 58u8, 90u8,
                         ],
                     )
                 }
@@ -18333,10 +18390,10 @@ pub mod api {
                             fallback: ::subxt::ext::subxt_core::alloc::boxed::Box::new(fallback),
                         },
                         [
-                            250u8, 100u8, 172u8, 233u8, 64u8, 123u8, 174u8, 177u8, 85u8, 126u8,
-                            20u8, 234u8, 190u8, 121u8, 222u8, 24u8, 253u8, 22u8, 252u8, 163u8,
-                            101u8, 4u8, 142u8, 173u8, 187u8, 137u8, 67u8, 147u8, 18u8, 211u8,
-                            106u8, 33u8,
+                            211u8, 253u8, 150u8, 222u8, 9u8, 25u8, 249u8, 193u8, 101u8, 155u8,
+                            167u8, 144u8, 245u8, 143u8, 11u8, 75u8, 77u8, 2u8, 157u8, 8u8, 59u8,
+                            232u8, 185u8, 15u8, 216u8, 23u8, 214u8, 209u8, 192u8, 177u8, 252u8,
+                            59u8,
                         ],
                     )
                 }
@@ -18359,9 +18416,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            228u8, 194u8, 0u8, 82u8, 10u8, 59u8, 123u8, 233u8, 114u8, 85u8, 159u8,
-                            83u8, 211u8, 84u8, 209u8, 8u8, 172u8, 181u8, 84u8, 72u8, 154u8, 37u8,
-                            130u8, 231u8, 205u8, 26u8, 133u8, 118u8, 10u8, 236u8, 241u8, 205u8,
+                            249u8, 51u8, 200u8, 150u8, 250u8, 202u8, 105u8, 206u8, 244u8, 152u8,
+                            21u8, 166u8, 114u8, 93u8, 127u8, 50u8, 118u8, 109u8, 123u8, 32u8,
+                            183u8, 253u8, 221u8, 122u8, 224u8, 129u8, 13u8, 40u8, 218u8, 64u8,
+                            154u8, 116u8,
                         ],
                     )
                 }
@@ -18691,7 +18749,9 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Emits `JudgementRequested` if successful."]
                 pub struct RequestJudgement {
+                    #[codec(compact)]
                     pub reg_index: request_judgement::RegIndex,
+                    #[codec(compact)]
                     pub max_fee: request_judgement::MaxFee,
                 }
                 pub mod request_judgement {
@@ -18754,7 +18814,9 @@ pub mod api {
                 #[doc = "- `index`: the index of the registrar whose fee is to be set."]
                 #[doc = "- `fee`: the new fee."]
                 pub struct SetFee {
+                    #[codec(compact)]
                     pub index: set_fee::Index,
+                    #[codec(compact)]
                     pub fee: set_fee::Fee,
                 }
                 pub mod set_fee {
@@ -18785,6 +18847,7 @@ pub mod api {
                 #[doc = "- `index`: the index of the registrar whose fee is to be set."]
                 #[doc = "- `new`: the new account ID."]
                 pub struct SetAccountId {
+                    #[codec(compact)]
                     pub index: set_account_id::Index,
                     pub new: set_account_id::New,
                 }
@@ -18819,6 +18882,7 @@ pub mod api {
                 #[doc = "- `index`: the index of the registrar whose fee is to be set."]
                 #[doc = "- `fields`: the fields that the registrar concerns themselves with."]
                 pub struct SetFields {
+                    #[codec(compact)]
                     pub index: set_fields::Index,
                     pub fields: set_fields::Fields,
                 }
@@ -18858,6 +18922,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Emits `JudgementGiven` if successful."]
                 pub struct ProvideJudgement {
+                    #[codec(compact)]
                     pub reg_index: provide_judgement::RegIndex,
                     pub target: provide_judgement::Target,
                     pub judgement: provide_judgement::Judgement,
@@ -21681,6 +21746,29 @@ pub mod api {
                     const PALLET: &'static str = "Society";
                     const CALL: &'static str = "cleanup_challenge";
                 }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Poke the deposit reserved when bidding."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Signed_ and must be the bidder."]
+                #[doc = ""]
+                #[doc = "The transaction fee is waived if the deposit is changed after poking/reconsideration."]
+                #[doc = ""]
+                #[doc = "Emits `DepositPoked` if successful."]
+                pub struct PokeDeposit;
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for PokeDeposit {
+                    const PALLET: &'static str = "Society";
+                    const CALL: &'static str = "poke_deposit";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -22177,6 +22265,28 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = "Poke the deposit reserved when bidding."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Signed_ and must be the bidder."]
+                #[doc = ""]
+                #[doc = "The transaction fee is waived if the deposit is changed after poking/reconsideration."]
+                #[doc = ""]
+                #[doc = "Emits `DepositPoked` if successful."]
+                pub fn poke_deposit(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PokeDeposit>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Society",
+                        "poke_deposit",
+                        types::PokeDeposit {},
+                        [
+                            127u8, 254u8, 187u8, 13u8, 51u8, 85u8, 145u8, 82u8, 61u8, 152u8, 218u8,
+                            135u8, 191u8, 67u8, 53u8, 140u8, 42u8, 68u8, 7u8, 14u8, 95u8, 60u8,
+                            41u8, 135u8, 32u8, 99u8, 40u8, 111u8, 10u8, 21u8, 103u8, 107u8,
+                        ],
+                    )
+                }
             }
         }
         #[doc = "The `Event` enum of this pallet"]
@@ -22529,6 +22639,29 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for Elevated {
                 const PALLET: &'static str = "Society";
                 const EVENT: &'static str = "Elevated";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A deposit was poked / adjusted."]
+            pub struct DepositPoked {
+                pub who: deposit_poked::Who,
+                pub old_deposit: deposit_poked::OldDeposit,
+                pub new_deposit: deposit_poked::NewDeposit,
+            }
+            pub mod deposit_poked {
+                use super::runtime_types;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type OldDeposit = ::core::primitive::u128;
+                pub type NewDeposit = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for DepositPoked {
+                const PALLET: &'static str = "Society";
+                const EVENT: &'static str = "DepositPoked";
             }
         }
         pub mod storage {
@@ -23850,6 +23983,56 @@ pub mod api {
                     const PALLET: &'static str = "Recovery";
                     const CALL: &'static str = "cancel_recovered";
                 }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Poke deposits for recovery configurations and / or active recoveries."]
+                #[doc = ""]
+                #[doc = "This can be used by accounts to possibly lower their locked amount."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Signed_."]
+                #[doc = ""]
+                #[doc = "Parameters:"]
+                #[doc = "- `maybe_account`: Optional recoverable account for which you have an active recovery"]
+                #[doc = "and want to adjust the deposit for the active recovery."]
+                #[doc = ""]
+                #[doc = "This function checks both recovery configuration deposit and active recovery deposits"]
+                #[doc = "of the caller:"]
+                #[doc = "- If the caller has created a recovery configuration, checks and adjusts its deposit"]
+                #[doc = "- If the caller has initiated any active recoveries, and provides the account in"]
+                #[doc = "`maybe_account`, checks and adjusts those deposits"]
+                #[doc = ""]
+                #[doc = "If any deposit is updated, the difference will be reserved/unreserved from the caller's"]
+                #[doc = "account."]
+                #[doc = ""]
+                #[doc = "The transaction is made free if any deposit is updated and paid otherwise."]
+                #[doc = ""]
+                #[doc = "Emits `DepositPoked` if any deposit is updated."]
+                #[doc = "Multiple events may be emitted in case both types of deposits are updated."]
+                pub struct PokeDeposit {
+                    pub maybe_account: poke_deposit::MaybeAccount,
+                }
+                pub mod poke_deposit {
+                    use super::runtime_types;
+                    pub type MaybeAccount = ::core::option::Option<
+                        ::subxt::ext::subxt_core::utils::MultiAddress<
+                            ::subxt::ext::subxt_core::utils::AccountId32,
+                            (),
+                        >,
+                    >;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for PokeDeposit {
+                    const PALLET: &'static str = "Recovery";
+                    const CALL: &'static str = "poke_deposit";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -23875,10 +24058,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            241u8, 208u8, 169u8, 26u8, 92u8, 56u8, 242u8, 182u8, 159u8, 37u8,
-                            223u8, 158u8, 62u8, 250u8, 195u8, 120u8, 153u8, 80u8, 118u8, 123u8,
-                            20u8, 225u8, 149u8, 24u8, 57u8, 200u8, 107u8, 36u8, 79u8, 221u8, 62u8,
-                            72u8,
+                            170u8, 5u8, 7u8, 10u8, 28u8, 76u8, 198u8, 183u8, 180u8, 200u8, 176u8,
+                            149u8, 178u8, 28u8, 124u8, 42u8, 73u8, 115u8, 32u8, 191u8, 62u8, 219u8,
+                            195u8, 179u8, 174u8, 34u8, 63u8, 91u8, 162u8, 169u8, 243u8, 115u8,
                         ],
                     )
                 }
@@ -24106,6 +24288,45 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = "Poke deposits for recovery configurations and / or active recoveries."]
+                #[doc = ""]
+                #[doc = "This can be used by accounts to possibly lower their locked amount."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Signed_."]
+                #[doc = ""]
+                #[doc = "Parameters:"]
+                #[doc = "- `maybe_account`: Optional recoverable account for which you have an active recovery"]
+                #[doc = "and want to adjust the deposit for the active recovery."]
+                #[doc = ""]
+                #[doc = "This function checks both recovery configuration deposit and active recovery deposits"]
+                #[doc = "of the caller:"]
+                #[doc = "- If the caller has created a recovery configuration, checks and adjusts its deposit"]
+                #[doc = "- If the caller has initiated any active recoveries, and provides the account in"]
+                #[doc = "`maybe_account`, checks and adjusts those deposits"]
+                #[doc = ""]
+                #[doc = "If any deposit is updated, the difference will be reserved/unreserved from the caller's"]
+                #[doc = "account."]
+                #[doc = ""]
+                #[doc = "The transaction is made free if any deposit is updated and paid otherwise."]
+                #[doc = ""]
+                #[doc = "Emits `DepositPoked` if any deposit is updated."]
+                #[doc = "Multiple events may be emitted in case both types of deposits are updated."]
+                pub fn poke_deposit(
+                    &self,
+                    maybe_account: types::poke_deposit::MaybeAccount,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PokeDeposit>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Recovery",
+                        "poke_deposit",
+                        types::PokeDeposit { maybe_account },
+                        [
+                            177u8, 98u8, 53u8, 15u8, 228u8, 36u8, 173u8, 55u8, 125u8, 3u8, 234u8,
+                            70u8, 147u8, 147u8, 124u8, 86u8, 31u8, 101u8, 171u8, 56u8, 148u8,
+                            180u8, 87u8, 149u8, 11u8, 113u8, 195u8, 35u8, 56u8, 32u8, 251u8, 56u8,
+                        ],
+                    )
+                }
             }
         }
         #[doc = "Events type."]
@@ -24235,6 +24456,33 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for RecoveryRemoved {
                 const PALLET: &'static str = "Recovery";
                 const EVENT: &'static str = "RecoveryRemoved";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A deposit has been updated."]
+            pub struct DepositPoked {
+                pub who: deposit_poked::Who,
+                pub kind: deposit_poked::Kind,
+                pub old_deposit: deposit_poked::OldDeposit,
+                pub new_deposit: deposit_poked::NewDeposit,
+            }
+            pub mod deposit_poked {
+                use super::runtime_types;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Kind = runtime_types::pallet_recovery::DepositKind<
+                    runtime_types::rococo_runtime::Runtime,
+                >;
+                pub type OldDeposit = ::core::primitive::u128;
+                pub type NewDeposit = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for DepositPoked {
+                const PALLET: &'static str = "Recovery";
+                const EVENT: &'static str = "DepositPoked";
             }
         }
         pub mod storage {
@@ -24995,6 +25243,27 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A vesting schedule has been created."]
+            pub struct VestingCreated {
+                pub account: vesting_created::Account,
+                pub schedule_index: vesting_created::ScheduleIndex,
+            }
+            pub mod vesting_created {
+                use super::runtime_types;
+                pub type Account = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type ScheduleIndex = ::core::primitive::u32;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for VestingCreated {
+                const PALLET: &'static str = "Vesting";
+                const EVENT: &'static str = "VestingCreated";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             #[doc = "The amount vested has been updated. This could indicate a change in funds available."]
             #[doc = "The balance given is the amount which is left unvested (and thus locked)."]
             pub struct VestingUpdated {
@@ -25492,9 +25761,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            120u8, 201u8, 46u8, 180u8, 223u8, 188u8, 55u8, 41u8, 76u8, 200u8,
-                            144u8, 143u8, 44u8, 195u8, 247u8, 255u8, 35u8, 10u8, 70u8, 140u8, 33u8,
-                            12u8, 146u8, 29u8, 69u8, 94u8, 181u8, 214u8, 152u8, 17u8, 0u8, 135u8,
+                            28u8, 131u8, 251u8, 76u8, 180u8, 77u8, 178u8, 31u8, 166u8, 232u8,
+                            147u8, 67u8, 15u8, 15u8, 187u8, 39u8, 210u8, 115u8, 84u8, 135u8, 22u8,
+                            233u8, 251u8, 239u8, 28u8, 62u8, 67u8, 133u8, 61u8, 156u8, 234u8, 5u8,
                         ],
                     )
                 }
@@ -25538,9 +25807,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            146u8, 17u8, 117u8, 128u8, 125u8, 121u8, 1u8, 54u8, 209u8, 131u8,
-                            242u8, 205u8, 60u8, 81u8, 169u8, 109u8, 145u8, 188u8, 58u8, 104u8, 9u8,
-                            118u8, 89u8, 225u8, 46u8, 139u8, 237u8, 247u8, 184u8, 56u8, 238u8, 0u8,
+                            53u8, 191u8, 42u8, 220u8, 246u8, 117u8, 98u8, 217u8, 237u8, 217u8,
+                            203u8, 73u8, 181u8, 225u8, 168u8, 121u8, 10u8, 143u8, 223u8, 231u8,
+                            133u8, 148u8, 68u8, 193u8, 167u8, 86u8, 185u8, 191u8, 237u8, 238u8,
+                            98u8, 196u8,
                         ],
                     )
                 }
@@ -25580,9 +25850,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            134u8, 194u8, 55u8, 141u8, 55u8, 231u8, 111u8, 250u8, 198u8, 195u8,
-                            52u8, 70u8, 80u8, 213u8, 146u8, 157u8, 75u8, 221u8, 148u8, 88u8, 99u8,
-                            67u8, 236u8, 180u8, 49u8, 247u8, 66u8, 178u8, 236u8, 202u8, 9u8, 97u8,
+                            215u8, 157u8, 221u8, 21u8, 41u8, 211u8, 158u8, 235u8, 22u8, 168u8,
+                            133u8, 162u8, 255u8, 64u8, 226u8, 177u8, 194u8, 234u8, 160u8, 27u8,
+                            175u8, 113u8, 246u8, 36u8, 149u8, 75u8, 116u8, 35u8, 43u8, 238u8, 39u8,
+                            10u8,
                         ],
                     )
                 }
@@ -25607,10 +25878,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            146u8, 237u8, 97u8, 147u8, 192u8, 56u8, 234u8, 109u8, 102u8, 88u8,
-                            188u8, 107u8, 37u8, 67u8, 81u8, 178u8, 146u8, 126u8, 93u8, 36u8, 151u8,
-                            99u8, 38u8, 251u8, 66u8, 163u8, 185u8, 140u8, 189u8, 202u8, 220u8,
-                            240u8,
+                            105u8, 139u8, 38u8, 248u8, 160u8, 252u8, 79u8, 44u8, 3u8, 84u8, 139u8,
+                            215u8, 129u8, 109u8, 65u8, 37u8, 42u8, 243u8, 46u8, 80u8, 238u8, 64u8,
+                            109u8, 204u8, 31u8, 157u8, 55u8, 206u8, 13u8, 85u8, 59u8, 108u8,
                         ],
                     )
                 }
@@ -25971,8 +26241,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type Retries =
                         runtime_types::pallet_scheduler::RetryConfig<::core::primitive::u32>;
-                    pub type Param0 = ::core::primitive::u32;
-                    pub type Param1 = ::core::primitive::u32;
+                    pub type Param0 = (::core::primitive::u32, ::core::primitive::u32);
                 }
                 pub mod lookup {
                     use super::runtime_types;
@@ -26018,9 +26287,9 @@ pub mod api {
                         "Agenda",
                         (),
                         [
-                            145u8, 10u8, 14u8, 111u8, 55u8, 31u8, 244u8, 24u8, 160u8, 123u8, 120u8,
-                            83u8, 195u8, 170u8, 17u8, 24u8, 59u8, 219u8, 154u8, 27u8, 9u8, 95u8,
-                            223u8, 85u8, 27u8, 103u8, 239u8, 52u8, 147u8, 55u8, 11u8, 150u8,
+                            148u8, 16u8, 2u8, 44u8, 137u8, 244u8, 124u8, 103u8, 156u8, 203u8, 79u8,
+                            36u8, 95u8, 50u8, 189u8, 52u8, 53u8, 67u8, 1u8, 161u8, 43u8, 194u8,
+                            225u8, 148u8, 19u8, 232u8, 184u8, 238u8, 63u8, 25u8, 18u8, 125u8,
                         ],
                     )
                 }
@@ -26042,9 +26311,9 @@ pub mod api {
                         "Agenda",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
                         [
-                            145u8, 10u8, 14u8, 111u8, 55u8, 31u8, 244u8, 24u8, 160u8, 123u8, 120u8,
-                            83u8, 195u8, 170u8, 17u8, 24u8, 59u8, 219u8, 154u8, 27u8, 9u8, 95u8,
-                            223u8, 85u8, 27u8, 103u8, 239u8, 52u8, 147u8, 55u8, 11u8, 150u8,
+                            148u8, 16u8, 2u8, 44u8, 137u8, 244u8, 124u8, 103u8, 156u8, 203u8, 79u8,
+                            36u8, 95u8, 50u8, 189u8, 52u8, 53u8, 67u8, 1u8, 161u8, 43u8, 194u8,
+                            225u8, 148u8, 19u8, 232u8, 184u8, 238u8, 63u8, 25u8, 18u8, 125u8,
                         ],
                     )
                 }
@@ -26071,7 +26340,7 @@ pub mod api {
                     )
                 }
                 #[doc = " Retry configurations for items to be executed, indexed by task address."]
-                pub fn retries_iter1(
+                pub fn retries(
                     &self,
                     _0: types::retries::Param0,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
@@ -26079,48 +26348,14 @@ pub mod api {
                         types::retries::Param0,
                     >,
                     types::retries::Retries,
-                    (),
-                    (),
                     ::subxt::ext::subxt_core::utils::Yes,
+                    (),
+                    (),
                 > {
                     ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Scheduler",
                         "Retries",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
-                        [
-                            164u8, 27u8, 208u8, 185u8, 19u8, 232u8, 190u8, 97u8, 137u8, 73u8,
-                            146u8, 10u8, 241u8, 176u8, 251u8, 140u8, 133u8, 65u8, 190u8, 162u8,
-                            59u8, 32u8, 77u8, 201u8, 27u8, 78u8, 183u8, 164u8, 74u8, 46u8, 139u8,
-                            145u8,
-                        ],
-                    )
-                }
-                #[doc = " Retry configurations for items to be executed, indexed by task address."]
-                pub fn retries(
-                    &self,
-                    _0: types::retries::Param0,
-                    _1: types::retries::Param1,
-                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (
-                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
-                            types::retries::Param0,
-                        >,
-                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
-                            types::retries::Param1,
-                        >,
-                    ),
-                    types::retries::Retries,
-                    ::subxt::ext::subxt_core::utils::Yes,
-                    (),
-                    (),
-                > {
-                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
-                        "Scheduler",
-                        "Retries",
-                        (
-                            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
-                            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_1),
-                        ),
                         [
                             164u8, 27u8, 208u8, 185u8, 19u8, 232u8, 190u8, 97u8, 137u8, 73u8,
                             146u8, 10u8, 241u8, 176u8, 251u8, 140u8, 133u8, 65u8, 190u8, 162u8,
@@ -26368,7 +26603,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call must be _Signed_."]
                 #[doc = ""]
-                #[doc = "WARNING: This may be called on accounts created by `pure`, however if done, then"]
+                #[doc = "WARNING: This may be called on accounts created by `create_pure`, however if done, then"]
                 #[doc = "the unreserved fees will be inaccessible. **All access to this account will be lost.**"]
                 pub struct RemoveProxies;
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for RemoveProxies {
@@ -26436,21 +26671,23 @@ pub mod api {
                 #[doc = "inaccessible."]
                 #[doc = ""]
                 #[doc = "Requires a `Signed` origin, and the sender account must have been created by a call to"]
-                #[doc = "`pure` with corresponding parameters."]
+                #[doc = "`create_pure` with corresponding parameters."]
                 #[doc = ""]
-                #[doc = "- `spawner`: The account that originally called `pure` to create this account."]
-                #[doc = "- `index`: The disambiguation index originally passed to `pure`. Probably `0`."]
-                #[doc = "- `proxy_type`: The proxy type originally passed to `pure`."]
-                #[doc = "- `height`: The height of the chain when the call to `pure` was processed."]
-                #[doc = "- `ext_index`: The extrinsic index in which the call to `pure` was processed."]
+                #[doc = "- `spawner`: The account that originally called `create_pure` to create this account."]
+                #[doc = "- `index`: The disambiguation index originally passed to `create_pure`. Probably `0`."]
+                #[doc = "- `proxy_type`: The proxy type originally passed to `create_pure`."]
+                #[doc = "- `height`: The height of the chain when the call to `create_pure` was processed."]
+                #[doc = "- `ext_index`: The extrinsic index in which the call to `create_pure` was processed."]
                 #[doc = ""]
                 #[doc = "Fails with `NoPermission` in case the caller is not a previously created pure"]
-                #[doc = "account whose `pure` call has corresponding parameters."]
+                #[doc = "account whose `create_pure` call has corresponding parameters."]
                 pub struct KillPure {
                     pub spawner: kill_pure::Spawner,
                     pub proxy_type: kill_pure::ProxyType,
                     pub index: kill_pure::Index,
+                    #[codec(compact)]
                     pub height: kill_pure::Height,
+                    #[codec(compact)]
                     pub ext_index: kill_pure::ExtIndex,
                 }
                 pub mod kill_pure {
@@ -26682,9 +26919,10 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            227u8, 245u8, 60u8, 37u8, 172u8, 240u8, 92u8, 80u8, 169u8, 116u8, 16u8,
-                            194u8, 249u8, 90u8, 30u8, 59u8, 28u8, 222u8, 75u8, 146u8, 74u8, 19u8,
-                            105u8, 192u8, 237u8, 166u8, 63u8, 160u8, 228u8, 131u8, 87u8, 126u8,
+                            33u8, 66u8, 109u8, 177u8, 67u8, 191u8, 170u8, 33u8, 7u8, 18u8, 61u8,
+                            183u8, 204u8, 3u8, 254u8, 251u8, 187u8, 214u8, 211u8, 212u8, 63u8,
+                            103u8, 153u8, 249u8, 146u8, 217u8, 51u8, 22u8, 53u8, 120u8, 224u8,
+                            55u8,
                         ],
                     )
                 }
@@ -26753,7 +26991,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call must be _Signed_."]
                 #[doc = ""]
-                #[doc = "WARNING: This may be called on accounts created by `pure`, however if done, then"]
+                #[doc = "WARNING: This may be called on accounts created by `create_pure`, however if done, then"]
                 #[doc = "the unreserved fees will be inaccessible. **All access to this account will be lost.**"]
                 pub fn remove_proxies(
                     &self,
@@ -26817,16 +27055,16 @@ pub mod api {
                 #[doc = "inaccessible."]
                 #[doc = ""]
                 #[doc = "Requires a `Signed` origin, and the sender account must have been created by a call to"]
-                #[doc = "`pure` with corresponding parameters."]
+                #[doc = "`create_pure` with corresponding parameters."]
                 #[doc = ""]
-                #[doc = "- `spawner`: The account that originally called `pure` to create this account."]
-                #[doc = "- `index`: The disambiguation index originally passed to `pure`. Probably `0`."]
-                #[doc = "- `proxy_type`: The proxy type originally passed to `pure`."]
-                #[doc = "- `height`: The height of the chain when the call to `pure` was processed."]
-                #[doc = "- `ext_index`: The extrinsic index in which the call to `pure` was processed."]
+                #[doc = "- `spawner`: The account that originally called `create_pure` to create this account."]
+                #[doc = "- `index`: The disambiguation index originally passed to `create_pure`. Probably `0`."]
+                #[doc = "- `proxy_type`: The proxy type originally passed to `create_pure`."]
+                #[doc = "- `height`: The height of the chain when the call to `create_pure` was processed."]
+                #[doc = "- `ext_index`: The extrinsic index in which the call to `create_pure` was processed."]
                 #[doc = ""]
                 #[doc = "Fails with `NoPermission` in case the caller is not a previously created pure"]
-                #[doc = "account whose `pure` call has corresponding parameters."]
+                #[doc = "account whose `create_pure` call has corresponding parameters."]
                 pub fn kill_pure(
                     &self,
                     spawner: types::kill_pure::Spawner,
@@ -26972,10 +27210,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            179u8, 203u8, 80u8, 126u8, 241u8, 26u8, 159u8, 184u8, 72u8, 204u8,
-                            195u8, 25u8, 74u8, 248u8, 58u8, 66u8, 41u8, 1u8, 3u8, 173u8, 6u8,
-                            105u8, 31u8, 93u8, 126u8, 24u8, 136u8, 156u8, 218u8, 160u8, 244u8,
-                            153u8,
+                            128u8, 28u8, 200u8, 21u8, 163u8, 133u8, 236u8, 15u8, 35u8, 45u8, 183u8,
+                            154u8, 30u8, 79u8, 161u8, 189u8, 225u8, 242u8, 7u8, 176u8, 40u8, 27u8,
+                            153u8, 220u8, 69u8, 125u8, 224u8, 248u8, 140u8, 138u8, 143u8, 207u8,
                         ],
                     )
                 }
@@ -27053,6 +27290,31 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for PureCreated {
                 const PALLET: &'static str = "Proxy";
                 const EVENT: &'static str = "PureCreated";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A pure proxy was killed by its spawner."]
+            pub struct PureKilled {
+                pub pure: pure_killed::Pure,
+                pub spawner: pure_killed::Spawner,
+                pub proxy_type: pure_killed::ProxyType,
+                pub disambiguation_index: pure_killed::DisambiguationIndex,
+            }
+            pub mod pure_killed {
+                use super::runtime_types;
+                pub type Pure = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Spawner = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type ProxyType = runtime_types::rococo_runtime::ProxyType;
+                pub type DisambiguationIndex = ::core::primitive::u16;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for PureKilled {
+                const PALLET: &'static str = "Proxy";
+                const EVENT: &'static str = "PureKilled";
             }
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -27713,10 +27975,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            13u8, 106u8, 252u8, 205u8, 22u8, 92u8, 176u8, 45u8, 215u8, 236u8,
-                            184u8, 76u8, 237u8, 184u8, 107u8, 107u8, 150u8, 235u8, 24u8, 25u8,
-                            196u8, 244u8, 211u8, 55u8, 82u8, 39u8, 215u8, 169u8, 88u8, 46u8, 68u8,
-                            36u8,
+                            14u8, 149u8, 179u8, 4u8, 128u8, 8u8, 190u8, 221u8, 83u8, 114u8, 48u8,
+                            213u8, 198u8, 81u8, 136u8, 239u8, 170u8, 183u8, 70u8, 165u8, 92u8,
+                            134u8, 61u8, 42u8, 0u8, 209u8, 77u8, 21u8, 236u8, 176u8, 134u8, 132u8,
                         ],
                     )
                 }
@@ -27779,10 +28040,9 @@ pub mod api {
                             max_weight,
                         },
                         [
-                            246u8, 242u8, 103u8, 39u8, 121u8, 152u8, 21u8, 104u8, 56u8, 97u8, 97u8,
-                            178u8, 213u8, 130u8, 65u8, 54u8, 122u8, 160u8, 172u8, 42u8, 235u8,
-                            78u8, 179u8, 252u8, 204u8, 153u8, 168u8, 27u8, 169u8, 131u8, 91u8,
-                            16u8,
+                            73u8, 93u8, 70u8, 21u8, 37u8, 16u8, 173u8, 153u8, 131u8, 225u8, 139u8,
+                            228u8, 254u8, 151u8, 43u8, 2u8, 141u8, 183u8, 25u8, 136u8, 67u8, 177u8,
+                            167u8, 78u8, 143u8, 109u8, 201u8, 206u8, 227u8, 72u8, 20u8, 234u8,
                         ],
                     )
                 }
@@ -28561,8 +28821,10 @@ pub mod api {
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >;
-                    pub type Param0 = ::subxt::ext::subxt_core::utils::H256;
-                    pub type Param1 = ::core::primitive::u32;
+                    pub type Param0 = (
+                        ::subxt::ext::subxt_core::utils::H256,
+                        ::core::primitive::u32,
+                    );
                 }
             }
             pub struct StorageApi;
@@ -28680,7 +28942,7 @@ pub mod api {
                         ],
                     )
                 }
-                pub fn preimage_for_iter1(
+                pub fn preimage_for(
                     &self,
                     _0: types::preimage_for::Param0,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
@@ -28688,47 +28950,14 @@ pub mod api {
                         types::preimage_for::Param0,
                     >,
                     types::preimage_for::PreimageFor,
-                    (),
-                    (),
                     ::subxt::ext::subxt_core::utils::Yes,
+                    (),
+                    (),
                 > {
                     ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Preimage",
                         "PreimageFor",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
-                        [
-                            106u8, 5u8, 17u8, 46u8, 6u8, 184u8, 177u8, 113u8, 169u8, 34u8, 119u8,
-                            141u8, 117u8, 40u8, 30u8, 94u8, 187u8, 35u8, 206u8, 216u8, 143u8,
-                            208u8, 49u8, 156u8, 200u8, 255u8, 109u8, 200u8, 210u8, 134u8, 24u8,
-                            139u8,
-                        ],
-                    )
-                }
-                pub fn preimage_for(
-                    &self,
-                    _0: types::preimage_for::Param0,
-                    _1: types::preimage_for::Param1,
-                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (
-                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
-                            types::preimage_for::Param0,
-                        >,
-                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
-                            types::preimage_for::Param1,
-                        >,
-                    ),
-                    types::preimage_for::PreimageFor,
-                    ::subxt::ext::subxt_core::utils::Yes,
-                    (),
-                    (),
-                > {
-                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
-                        "Preimage",
-                        "PreimageFor",
-                        (
-                            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
-                            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_1),
-                        ),
                         [
                             106u8, 5u8, 17u8, 46u8, 6u8, 184u8, 177u8, 113u8, 169u8, 34u8, 119u8,
                             141u8, 117u8, 40u8, 30u8, 94u8, 187u8, 35u8, 206u8, 216u8, 143u8,
@@ -29091,6 +29320,7 @@ pub mod api {
                 #[doc = "- `value`: The total payment amount of this bounty, curator fee included."]
                 #[doc = "- `description`: The description of this bounty."]
                 pub struct ProposeBounty {
+                    #[codec(compact)]
                     pub value: propose_bounty::Value,
                     pub description: propose_bounty::Description,
                 }
@@ -29123,6 +29353,7 @@ pub mod api {
                 #[doc = "## Complexity"]
                 #[doc = "- O(1)."]
                 pub struct ApproveBounty {
+                    #[codec(compact)]
                     pub bounty_id: approve_bounty::BountyId,
                 }
                 pub mod approve_bounty {
@@ -29151,8 +29382,10 @@ pub mod api {
                 #[doc = "## Complexity"]
                 #[doc = "- O(1)."]
                 pub struct ProposeCurator {
+                    #[codec(compact)]
                     pub bounty_id: propose_curator::BountyId,
                     pub curator: propose_curator::Curator,
+                    #[codec(compact)]
                     pub fee: propose_curator::Fee,
                 }
                 pub mod propose_curator {
@@ -29197,6 +29430,7 @@ pub mod api {
                 #[doc = "## Complexity"]
                 #[doc = "- O(1)."]
                 pub struct UnassignCurator {
+                    #[codec(compact)]
                     pub bounty_id: unassign_curator::BountyId,
                 }
                 pub mod unassign_curator {
@@ -29226,6 +29460,7 @@ pub mod api {
                 #[doc = "## Complexity"]
                 #[doc = "- O(1)."]
                 pub struct AcceptCurator {
+                    #[codec(compact)]
                     pub bounty_id: accept_curator::BountyId,
                 }
                 pub mod accept_curator {
@@ -29258,6 +29493,7 @@ pub mod api {
                 #[doc = "## Complexity"]
                 #[doc = "- O(1)."]
                 pub struct AwardBounty {
+                    #[codec(compact)]
                     pub bounty_id: award_bounty::BountyId,
                     pub beneficiary: award_bounty::Beneficiary,
                 }
@@ -29293,6 +29529,7 @@ pub mod api {
                 #[doc = "## Complexity"]
                 #[doc = "- O(1)."]
                 pub struct ClaimBounty {
+                    #[codec(compact)]
                     pub bounty_id: claim_bounty::BountyId,
                 }
                 pub mod claim_bounty {
@@ -29324,6 +29561,7 @@ pub mod api {
                 #[doc = "## Complexity"]
                 #[doc = "- O(1)."]
                 pub struct CloseBounty {
+                    #[codec(compact)]
                     pub bounty_id: close_bounty::BountyId,
                 }
                 pub mod close_bounty {
@@ -29355,6 +29593,7 @@ pub mod api {
                 #[doc = "## Complexity"]
                 #[doc = "- O(1)."]
                 pub struct ExtendBountyExpiry {
+                    #[codec(compact)]
                     pub bounty_id: extend_bounty_expiry::BountyId,
                     pub remark: extend_bounty_expiry::Remark,
                 }
@@ -29391,8 +29630,10 @@ pub mod api {
                 #[doc = "## Complexity"]
                 #[doc = "- O(1)."]
                 pub struct ApproveBountyWithCurator {
+                    #[codec(compact)]
                     pub bounty_id: approve_bounty_with_curator::BountyId,
                     pub curator: approve_bounty_with_curator::Curator,
+                    #[codec(compact)]
                     pub fee: approve_bounty_with_curator::Fee,
                 }
                 pub mod approve_bounty_with_curator {
@@ -29407,6 +29648,44 @@ pub mod api {
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ApproveBountyWithCurator {
                     const PALLET: &'static str = "Bounties";
                     const CALL: &'static str = "approve_bounty_with_curator";
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Poke the deposit reserved for creating a bounty proposal."]
+                #[doc = ""]
+                #[doc = "This can be used by accounts to update their reserved amount."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Signed_."]
+                #[doc = ""]
+                #[doc = "Parameters:"]
+                #[doc = "- `bounty_id`: The bounty id for which to adjust the deposit."]
+                #[doc = ""]
+                #[doc = "If the deposit is updated, the difference will be reserved/unreserved from the"]
+                #[doc = "proposer's account."]
+                #[doc = ""]
+                #[doc = "The transaction is made free if the deposit is updated and paid otherwise."]
+                #[doc = ""]
+                #[doc = "Emits `DepositPoked` if the deposit is updated."]
+                pub struct PokeDeposit {
+                    #[codec(compact)]
+                    pub bounty_id: poke_deposit::BountyId,
+                }
+                pub mod poke_deposit {
+                    use super::runtime_types;
+                    pub type BountyId = ::core::primitive::u32;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for PokeDeposit {
+                    const PALLET: &'static str = "Bounties";
+                    const CALL: &'static str = "poke_deposit";
                 }
             }
             pub struct TransactionApi;
@@ -29692,6 +29971,38 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = "Poke the deposit reserved for creating a bounty proposal."]
+                #[doc = ""]
+                #[doc = "This can be used by accounts to update their reserved amount."]
+                #[doc = ""]
+                #[doc = "The dispatch origin for this call must be _Signed_."]
+                #[doc = ""]
+                #[doc = "Parameters:"]
+                #[doc = "- `bounty_id`: The bounty id for which to adjust the deposit."]
+                #[doc = ""]
+                #[doc = "If the deposit is updated, the difference will be reserved/unreserved from the"]
+                #[doc = "proposer's account."]
+                #[doc = ""]
+                #[doc = "The transaction is made free if the deposit is updated and paid otherwise."]
+                #[doc = ""]
+                #[doc = "Emits `DepositPoked` if the deposit is updated."]
+                pub fn poke_deposit(
+                    &self,
+                    bounty_id: types::poke_deposit::BountyId,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PokeDeposit>
+                {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Bounties",
+                        "poke_deposit",
+                        types::PokeDeposit { bounty_id },
+                        [
+                            45u8, 230u8, 25u8, 162u8, 115u8, 101u8, 83u8, 123u8, 247u8, 131u8,
+                            207u8, 156u8, 156u8, 190u8, 181u8, 219u8, 133u8, 238u8, 112u8, 238u8,
+                            120u8, 40u8, 106u8, 52u8, 205u8, 76u8, 5u8, 143u8, 175u8, 241u8, 34u8,
+                            85u8,
+                        ],
+                    )
+                }
             }
         }
         #[doc = "The `Event` enum of this pallet"]
@@ -29918,6 +30229,31 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for CuratorAccepted {
                 const PALLET: &'static str = "Bounties";
                 const EVENT: &'static str = "CuratorAccepted";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A bounty deposit has been poked."]
+            pub struct DepositPoked {
+                pub bounty_id: deposit_poked::BountyId,
+                pub proposer: deposit_poked::Proposer,
+                pub old_deposit: deposit_poked::OldDeposit,
+                pub new_deposit: deposit_poked::NewDeposit,
+            }
+            pub mod deposit_poked {
+                use super::runtime_types;
+                pub type BountyId = ::core::primitive::u32;
+                pub type Proposer = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type OldDeposit = ::core::primitive::u128;
+                pub type NewDeposit = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for DepositPoked {
+                const PALLET: &'static str = "Bounties";
+                const EVENT: &'static str = "DepositPoked";
             }
         }
         pub mod storage {
@@ -30302,7 +30638,9 @@ pub mod api {
                 #[doc = "- `value`: Value for executing the proposal."]
                 #[doc = "- `description`: Text description for the child-bounty."]
                 pub struct AddChildBounty {
+                    #[codec(compact)]
                     pub parent_bounty_id: add_child_bounty::ParentBountyId,
+                    #[codec(compact)]
                     pub value: add_child_bounty::Value,
                     pub description: add_child_bounty::Description,
                 }
@@ -30344,9 +30682,12 @@ pub mod api {
                 #[doc = "- `curator`: Address of child-bounty curator."]
                 #[doc = "- `fee`: payment fee to child-bounty curator for execution."]
                 pub struct ProposeCurator {
+                    #[codec(compact)]
                     pub parent_bounty_id: propose_curator::ParentBountyId,
+                    #[codec(compact)]
                     pub child_bounty_id: propose_curator::ChildBountyId,
                     pub curator: propose_curator::Curator,
+                    #[codec(compact)]
                     pub fee: propose_curator::Fee,
                 }
                 pub mod propose_curator {
@@ -30394,7 +30735,9 @@ pub mod api {
                 #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                 #[doc = "- `child_bounty_id`: Index of child bounty."]
                 pub struct AcceptCurator {
+                    #[codec(compact)]
                     pub parent_bounty_id: accept_curator::ParentBountyId,
+                    #[codec(compact)]
                     pub child_bounty_id: accept_curator::ChildBountyId,
                 }
                 pub mod accept_curator {
@@ -30452,7 +30795,9 @@ pub mod api {
                 #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                 #[doc = "- `child_bounty_id`: Index of child bounty."]
                 pub struct UnassignCurator {
+                    #[codec(compact)]
                     pub parent_bounty_id: unassign_curator::ParentBountyId,
+                    #[codec(compact)]
                     pub child_bounty_id: unassign_curator::ChildBountyId,
                 }
                 pub mod unassign_curator {
@@ -30493,7 +30838,9 @@ pub mod api {
                 #[doc = "- `child_bounty_id`: Index of child bounty."]
                 #[doc = "- `beneficiary`: Beneficiary account."]
                 pub struct AwardChildBounty {
+                    #[codec(compact)]
                     pub parent_bounty_id: award_child_bounty::ParentBountyId,
+                    #[codec(compact)]
                     pub child_bounty_id: award_child_bounty::ChildBountyId,
                     pub beneficiary: award_child_bounty::Beneficiary,
                 }
@@ -30538,7 +30885,9 @@ pub mod api {
                 #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                 #[doc = "- `child_bounty_id`: Index of child bounty."]
                 pub struct ClaimChildBounty {
+                    #[codec(compact)]
                     pub parent_bounty_id: claim_child_bounty::ParentBountyId,
+                    #[codec(compact)]
                     pub child_bounty_id: claim_child_bounty::ChildBountyId,
                 }
                 pub mod claim_child_bounty {
@@ -30584,7 +30933,9 @@ pub mod api {
                 #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                 #[doc = "- `child_bounty_id`: Index of child bounty."]
                 pub struct CloseChildBounty {
+                    #[codec(compact)]
                     pub parent_bounty_id: close_child_bounty::ParentBountyId,
+                    #[codec(compact)]
                     pub child_bounty_id: close_child_bounty::ChildBountyId,
                 }
                 pub mod close_child_bounty {
@@ -31497,6 +31848,7 @@ pub mod api {
                 #[doc = "Complexities:"]
                 #[doc = "- `Queues[duration].len()` (just take max)."]
                 pub struct PlaceBid {
+                    #[codec(compact)]
                     pub amount: place_bid::Amount,
                     pub duration: place_bid::Duration,
                 }
@@ -31528,6 +31880,7 @@ pub mod api {
                 #[doc = "- `amount`: The amount of the previous bid."]
                 #[doc = "- `duration`: The duration of the previous bid."]
                 pub struct RetractBid {
+                    #[codec(compact)]
                     pub amount: retract_bid::Amount,
                     pub duration: retract_bid::Duration,
                 }
@@ -31579,6 +31932,7 @@ pub mod api {
                 #[doc = "- `portion`: If `Some`, then only the given portion of the receipt should be thawed. If"]
                 #[doc = "  `None`, then all of it should be."]
                 pub struct ThawPrivate {
+                    #[codec(compact)]
                     pub index: thaw_private::Index,
                     pub maybe_proportion: thaw_private::MaybeProportion,
                 }
@@ -31611,6 +31965,7 @@ pub mod api {
                 #[doc = "  for receipt `index`."]
                 #[doc = "- `index`: The index of the receipt."]
                 pub struct ThawCommunal {
+                    #[codec(compact)]
                     pub index: thaw_communal::Index,
                 }
                 pub mod thaw_communal {
@@ -31634,6 +31989,7 @@ pub mod api {
                 )]
                 #[doc = "Make a private receipt communal and create fungible counterparts for its owner."]
                 pub struct Communify {
+                    #[codec(compact)]
                     pub index: communify::Index,
                 }
                 pub mod communify {
@@ -31657,6 +32013,7 @@ pub mod api {
                 )]
                 #[doc = "Make a communal receipt private and burn fungible counterparts from its owner."]
                 pub struct Privatize {
+                    #[codec(compact)]
                     pub index: privatize::Index,
                 }
                 pub mod privatize {
@@ -32409,6 +32766,7 @@ pub mod api {
                 #[doc = "The dispatch origin for this call must be `Signed` by the transactor."]
                 pub struct TransferAllowDeath {
                     pub dest: transfer_allow_death::Dest,
+                    #[codec(compact)]
                     pub value: transfer_allow_death::Value,
                 }
                 pub mod transfer_allow_death {
@@ -32439,6 +32797,7 @@ pub mod api {
                 pub struct ForceTransfer {
                     pub source: force_transfer::Source,
                     pub dest: force_transfer::Dest,
+                    #[codec(compact)]
                     pub value: force_transfer::Value,
                 }
                 pub mod force_transfer {
@@ -32476,6 +32835,7 @@ pub mod api {
                 #[doc = "[`transfer_allow_death`]: struct.Pallet.html#method.transfer"]
                 pub struct TransferKeepAlive {
                     pub dest: transfer_keep_alive::Dest,
+                    #[codec(compact)]
                     pub value: transfer_keep_alive::Value,
                 }
                 pub mod transfer_keep_alive {
@@ -32610,6 +32970,7 @@ pub mod api {
                 #[doc = "The dispatch origin for this call is `root`."]
                 pub struct ForceSetBalance {
                     pub who: force_set_balance::Who,
+                    #[codec(compact)]
                     pub new_free: force_set_balance::NewFree,
                 }
                 pub mod force_set_balance {
@@ -32642,6 +33003,7 @@ pub mod api {
                 #[doc = "# Example"]
                 pub struct ForceAdjustTotalIssuance {
                     pub direction: force_adjust_total_issuance::Direction,
+                    #[codec(compact)]
                     pub delta: force_adjust_total_issuance::Delta,
                 }
                 pub mod force_adjust_total_issuance {
@@ -32672,6 +33034,7 @@ pub mod api {
                 #[doc = "Unlike sending funds to a _burn_ address, which merely makes the funds inaccessible,"]
                 #[doc = "this `burn` operation will reduce total issuance by the amount _burned_."]
                 pub struct Burn {
+                    #[codec(compact)]
                     pub value: burn::Value,
                     pub keep_alive: burn::KeepAlive,
                 }
@@ -33686,9 +34049,9 @@ pub mod api {
                         "Holds",
                         (),
                         [
-                            72u8, 137u8, 235u8, 171u8, 118u8, 154u8, 86u8, 85u8, 70u8, 201u8, 73u8,
-                            9u8, 102u8, 160u8, 24u8, 93u8, 181u8, 22u8, 71u8, 178u8, 243u8, 94u8,
-                            3u8, 47u8, 90u8, 11u8, 219u8, 31u8, 4u8, 131u8, 154u8, 154u8,
+                            6u8, 68u8, 133u8, 169u8, 100u8, 31u8, 19u8, 164u8, 80u8, 22u8, 132u8,
+                            73u8, 190u8, 31u8, 34u8, 82u8, 132u8, 79u8, 92u8, 15u8, 204u8, 149u8,
+                            109u8, 203u8, 169u8, 162u8, 250u8, 223u8, 182u8, 170u8, 251u8, 178u8,
                         ],
                     )
                 }
@@ -33710,9 +34073,9 @@ pub mod api {
                         "Holds",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
                         [
-                            72u8, 137u8, 235u8, 171u8, 118u8, 154u8, 86u8, 85u8, 70u8, 201u8, 73u8,
-                            9u8, 102u8, 160u8, 24u8, 93u8, 181u8, 22u8, 71u8, 178u8, 243u8, 94u8,
-                            3u8, 47u8, 90u8, 11u8, 219u8, 31u8, 4u8, 131u8, 154u8, 154u8,
+                            6u8, 68u8, 133u8, 169u8, 100u8, 31u8, 19u8, 164u8, 80u8, 22u8, 132u8,
+                            73u8, 190u8, 31u8, 34u8, 82u8, 132u8, 79u8, 92u8, 15u8, 204u8, 149u8,
+                            109u8, 203u8, 169u8, 162u8, 250u8, 223u8, 182u8, 170u8, 251u8, 178u8,
                         ],
                     )
                 }
@@ -36708,6 +37071,96 @@ pub mod api {
                     const PALLET: &'static str = "Paras";
                     const CALL: &'static str = "force_set_most_recent_context";
                 }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Remove an upgrade cooldown for a parachain."]
+                #[doc = ""]
+                #[doc = "The cost for removing the cooldown earlier depends on the time left for the cooldown"]
+                #[doc = "multiplied by [`Config::CooldownRemovalMultiplier`]. The paid tokens are burned."]
+                pub struct RemoveUpgradeCooldown {
+                    pub para: remove_upgrade_cooldown::Para,
+                }
+                pub mod remove_upgrade_cooldown {
+                    use super::runtime_types;
+                    pub type Para = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for RemoveUpgradeCooldown {
+                    const PALLET: &'static str = "Paras";
+                    const CALL: &'static str = "remove_upgrade_cooldown";
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Sets the storage for the authorized current code hash of the parachain."]
+                #[doc = "If not applied, it will be removed at the `System::block_number() + valid_period` block."]
+                #[doc = ""]
+                #[doc = "This can be useful, when triggering `Paras::force_set_current_code(para, code)`"]
+                #[doc = "from a different chain than the one where the `Paras` pallet is deployed."]
+                #[doc = ""]
+                #[doc = "The main purpose is to avoid transferring the entire `code` Wasm blob between chains."]
+                #[doc = "Instead, we authorize `code_hash` with `root`, which can later be applied by"]
+                #[doc = "`Paras::apply_authorized_force_set_current_code(para, code)` by anyone."]
+                #[doc = ""]
+                #[doc = "Authorizations are stored in an **overwriting manner**."]
+                pub struct AuthorizeForceSetCurrentCodeHash {
+                    pub para: authorize_force_set_current_code_hash::Para,
+                    pub new_code_hash: authorize_force_set_current_code_hash::NewCodeHash,
+                    pub valid_period: authorize_force_set_current_code_hash::ValidPeriod,
+                }
+                pub mod authorize_force_set_current_code_hash {
+                    use super::runtime_types;
+                    pub type Para = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                    pub type NewCodeHash = runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ;
+                    pub type ValidPeriod = ::core::primitive::u32;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for AuthorizeForceSetCurrentCodeHash {
+                    const PALLET: &'static str = "Paras";
+                    const CALL: &'static str = "authorize_force_set_current_code_hash";
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                #[doc = "Applies the already authorized current code for the parachain,"]
+                #[doc = "triggering the same functionality as `force_set_current_code`."]
+                pub struct ApplyAuthorizedForceSetCurrentCode {
+                    pub para: apply_authorized_force_set_current_code::Para,
+                    pub new_code: apply_authorized_force_set_current_code::NewCode,
+                }
+                pub mod apply_authorized_force_set_current_code {
+                    use super::runtime_types;
+                    pub type Para = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                    pub type NewCode =
+                        runtime_types::polkadot_parachain_primitives::primitives::ValidationCode;
+                }
+                impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ApplyAuthorizedForceSetCurrentCode {
+                    const PALLET: &'static str = "Paras";
+                    const CALL: &'static str = "apply_authorized_force_set_current_code";
+                }
             }
             pub struct TransactionApi;
             impl TransactionApi {
@@ -36907,6 +37360,81 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = "Remove an upgrade cooldown for a parachain."]
+                #[doc = ""]
+                #[doc = "The cost for removing the cooldown earlier depends on the time left for the cooldown"]
+                #[doc = "multiplied by [`Config::CooldownRemovalMultiplier`]. The paid tokens are burned."]
+                pub fn remove_upgrade_cooldown(
+                    &self,
+                    para: types::remove_upgrade_cooldown::Para,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::RemoveUpgradeCooldown,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Paras",
+                        "remove_upgrade_cooldown",
+                        types::RemoveUpgradeCooldown { para },
+                        [
+                            97u8, 182u8, 203u8, 33u8, 194u8, 209u8, 1u8, 8u8, 237u8, 63u8, 156u8,
+                            50u8, 23u8, 179u8, 171u8, 89u8, 74u8, 73u8, 191u8, 28u8, 102u8, 166u8,
+                            89u8, 180u8, 166u8, 219u8, 110u8, 170u8, 77u8, 170u8, 151u8, 87u8,
+                        ],
+                    )
+                }
+                #[doc = "Sets the storage for the authorized current code hash of the parachain."]
+                #[doc = "If not applied, it will be removed at the `System::block_number() + valid_period` block."]
+                #[doc = ""]
+                #[doc = "This can be useful, when triggering `Paras::force_set_current_code(para, code)`"]
+                #[doc = "from a different chain than the one where the `Paras` pallet is deployed."]
+                #[doc = ""]
+                #[doc = "The main purpose is to avoid transferring the entire `code` Wasm blob between chains."]
+                #[doc = "Instead, we authorize `code_hash` with `root`, which can later be applied by"]
+                #[doc = "`Paras::apply_authorized_force_set_current_code(para, code)` by anyone."]
+                #[doc = ""]
+                #[doc = "Authorizations are stored in an **overwriting manner**."]
+                pub fn authorize_force_set_current_code_hash(
+                    &self,
+                    para: types::authorize_force_set_current_code_hash::Para,
+                    new_code_hash: types::authorize_force_set_current_code_hash::NewCodeHash,
+                    valid_period: types::authorize_force_set_current_code_hash::ValidPeriod,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::AuthorizeForceSetCurrentCodeHash,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Paras",
+                        "authorize_force_set_current_code_hash",
+                        types::AuthorizeForceSetCurrentCodeHash {
+                            para,
+                            new_code_hash,
+                            valid_period,
+                        },
+                        [
+                            58u8, 211u8, 30u8, 92u8, 73u8, 11u8, 68u8, 77u8, 96u8, 192u8, 34u8,
+                            32u8, 13u8, 63u8, 34u8, 80u8, 193u8, 56u8, 218u8, 241u8, 64u8, 9u8,
+                            91u8, 130u8, 73u8, 246u8, 233u8, 65u8, 225u8, 244u8, 22u8, 60u8,
+                        ],
+                    )
+                }
+                #[doc = "Applies the already authorized current code for the parachain,"]
+                #[doc = "triggering the same functionality as `force_set_current_code`."]
+                pub fn apply_authorized_force_set_current_code(
+                    &self,
+                    para: types::apply_authorized_force_set_current_code::Para,
+                    new_code: types::apply_authorized_force_set_current_code::NewCode,
+                ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<
+                    types::ApplyAuthorizedForceSetCurrentCode,
+                > {
+                    ::subxt::ext::subxt_core::tx::payload::StaticPayload::new_static(
+                        "Paras",
+                        "apply_authorized_force_set_current_code",
+                        types::ApplyAuthorizedForceSetCurrentCode { para, new_code },
+                        [
+                            214u8, 157u8, 64u8, 213u8, 9u8, 144u8, 81u8, 217u8, 8u8, 212u8, 12u8,
+                            39u8, 87u8, 21u8, 255u8, 6u8, 131u8, 104u8, 92u8, 81u8, 140u8, 104u8,
+                            185u8, 225u8, 90u8, 4u8, 50u8, 42u8, 175u8, 243u8, 78u8, 62u8,
+                        ],
+                    )
+                }
             }
         }
         #[doc = "The `Event` enum of this pallet"]
@@ -37068,6 +37596,49 @@ pub mod api {
                 const PALLET: &'static str = "Paras";
                 const EVENT: &'static str = "PvfCheckRejected";
             }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "The upgrade cooldown was removed."]
+            pub struct UpgradeCooldownRemoved {
+                pub para_id: upgrade_cooldown_removed::ParaId,
+            }
+            pub mod upgrade_cooldown_removed {
+                use super::runtime_types;
+                pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for UpgradeCooldownRemoved {
+                const PALLET: &'static str = "Paras";
+                const EVENT: &'static str = "UpgradeCooldownRemoved";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A new code hash has been authorized for a Para."]
+            pub struct CodeAuthorized {
+                pub para_id: code_authorized::ParaId,
+                pub code_hash: code_authorized::CodeHash,
+                pub expire_at: code_authorized::ExpireAt,
+            }
+            pub mod code_authorized {
+                use super::runtime_types;
+                pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                pub type CodeHash =
+                    runtime_types::polkadot_parachain_primitives::primitives::ValidationCodeHash;
+                pub type ExpireAt = ::core::primitive::u32;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for CodeAuthorized {
+                const PALLET: &'static str = "Paras";
+                const EVENT: &'static str = "CodeAuthorized";
+            }
         }
         pub mod storage {
             use super::runtime_types;
@@ -37116,8 +37687,10 @@ pub mod api {
                 pub mod past_code_hash {
                     use super::runtime_types;
                     pub type PastCodeHash = runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ;
-                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
-                    pub type Param1 = ::core::primitive::u32;
+                    pub type Param0 = (
+                        runtime_types::polkadot_parachain_primitives::primitives::Id,
+                        ::core::primitive::u32,
+                    );
                 }
                 pub mod past_code_meta {
                     use super::runtime_types;
@@ -37149,6 +37722,11 @@ pub mod api {
                 pub mod future_code_hash {
                     use super::runtime_types;
                     pub type FutureCodeHash = runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                }
+                pub mod authorized_code_hash {
+                    use super::runtime_types;
+                    pub type AuthorizedCodeHash = runtime_types :: polkadot_runtime_parachains :: paras :: AuthorizedCodeHashAndExpiry < :: core :: primitive :: u32 > ;
                     pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
                 pub mod upgrade_go_ahead_signal {
@@ -37517,7 +38095,7 @@ pub mod api {
                 #[doc = " became outdated."]
                 #[doc = ""]
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
-                pub fn past_code_hash_iter1(
+                pub fn past_code_hash(
                     &self,
                     _0: types::past_code_hash::Param0,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
@@ -37525,50 +38103,14 @@ pub mod api {
                         types::past_code_hash::Param0,
                     >,
                     types::past_code_hash::PastCodeHash,
-                    (),
-                    (),
                     ::subxt::ext::subxt_core::utils::Yes,
+                    (),
+                    (),
                 > {
                     ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Paras",
                         "PastCodeHash",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
-                        [
-                            73u8, 209u8, 188u8, 36u8, 127u8, 42u8, 171u8, 136u8, 29u8, 126u8,
-                            220u8, 209u8, 230u8, 22u8, 12u8, 63u8, 8u8, 102u8, 45u8, 158u8, 178u8,
-                            232u8, 8u8, 6u8, 71u8, 188u8, 140u8, 41u8, 10u8, 215u8, 22u8, 153u8,
-                        ],
-                    )
-                }
-                #[doc = " Actual past code hash, indicated by the para id as well as the block number at which it"]
-                #[doc = " became outdated."]
-                #[doc = ""]
-                #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
-                pub fn past_code_hash(
-                    &self,
-                    _0: types::past_code_hash::Param0,
-                    _1: types::past_code_hash::Param1,
-                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (
-                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
-                            types::past_code_hash::Param0,
-                        >,
-                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
-                            types::past_code_hash::Param1,
-                        >,
-                    ),
-                    types::past_code_hash::PastCodeHash,
-                    ::subxt::ext::subxt_core::utils::Yes,
-                    (),
-                    (),
-                > {
-                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
-                        "Paras",
-                        "PastCodeHash",
-                        (
-                            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
-                            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_1),
-                        ),
                         [
                             73u8, 209u8, 188u8, 36u8, 127u8, 42u8, 171u8, 136u8, 29u8, 126u8,
                             220u8, 209u8, 230u8, 22u8, 12u8, 63u8, 8u8, 102u8, 45u8, 158u8, 178u8,
@@ -37777,6 +38319,53 @@ pub mod api {
                             62u8, 238u8, 183u8, 12u8, 197u8, 119u8, 163u8, 239u8, 192u8, 228u8,
                             110u8, 58u8, 128u8, 223u8, 32u8, 137u8, 109u8, 127u8, 41u8, 83u8, 91u8,
                             98u8, 156u8, 118u8, 96u8, 147u8, 16u8, 31u8, 5u8, 92u8, 227u8, 230u8,
+                        ],
+                    )
+                }
+                #[doc = " The code hash authorizations for a para which will expire `expire_at` `BlockNumberFor<T>`."]
+                pub fn authorized_code_hash_iter(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+                    (),
+                    types::authorized_code_hash::AuthorizedCodeHash,
+                    (),
+                    (),
+                    ::subxt::ext::subxt_core::utils::Yes,
+                > {
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+                        "Paras",
+                        "AuthorizedCodeHash",
+                        (),
+                        [
+                            40u8, 172u8, 86u8, 193u8, 229u8, 230u8, 29u8, 63u8, 188u8, 154u8,
+                            240u8, 236u8, 117u8, 218u8, 221u8, 102u8, 154u8, 246u8, 136u8, 153u8,
+                            225u8, 171u8, 156u8, 219u8, 91u8, 2u8, 69u8, 34u8, 119u8, 119u8, 206u8,
+                            145u8,
+                        ],
+                    )
+                }
+                #[doc = " The code hash authorizations for a para which will expire `expire_at` `BlockNumberFor<T>`."]
+                pub fn authorized_code_hash(
+                    &self,
+                    _0: types::authorized_code_hash::Param0,
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+                    ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
+                        types::authorized_code_hash::Param0,
+                    >,
+                    types::authorized_code_hash::AuthorizedCodeHash,
+                    ::subxt::ext::subxt_core::utils::Yes,
+                    (),
+                    (),
+                > {
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+                        "Paras",
+                        "AuthorizedCodeHash",
+                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
+                        [
+                            40u8, 172u8, 86u8, 193u8, 229u8, 230u8, 29u8, 63u8, 188u8, 154u8,
+                            240u8, 236u8, 117u8, 218u8, 221u8, 102u8, 154u8, 246u8, 136u8, 153u8,
+                            225u8, 171u8, 156u8, 219u8, 91u8, 2u8, 69u8, 34u8, 119u8, 119u8, 206u8,
+                            145u8,
                         ],
                     )
                 }
@@ -40721,7 +41310,7 @@ pub mod api {
                 pub mod report_dispute_lost_unsigned {
                     use super::runtime_types;
                     pub type DisputeProof =
-                        runtime_types::polkadot_primitives::v8::slashing::DisputeProof;
+                        runtime_types::polkadot_primitives::vstaging::DisputeProof;
                     pub type KeyOwnerProof = runtime_types::sp_session::MembershipProof;
                 }
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for ReportDisputeLostUnsigned {
@@ -40748,9 +41337,9 @@ pub mod api {
                             key_owner_proof,
                         },
                         [
-                            18u8, 73u8, 202u8, 17u8, 170u8, 157u8, 84u8, 74u8, 185u8, 45u8, 77u8,
-                            154u8, 79u8, 108u8, 36u8, 247u8, 125u8, 6u8, 170u8, 179u8, 64u8, 149u8,
-                            201u8, 138u8, 74u8, 148u8, 37u8, 120u8, 235u8, 220u8, 214u8, 95u8,
+                            56u8, 151u8, 214u8, 24u8, 108u8, 55u8, 217u8, 144u8, 199u8, 113u8,
+                            42u8, 100u8, 246u8, 216u8, 82u8, 85u8, 242u8, 84u8, 191u8, 22u8, 246u8,
+                            30u8, 54u8, 184u8, 90u8, 172u8, 233u8, 243u8, 87u8, 243u8, 219u8, 71u8,
                         ],
                     )
                 }
@@ -40763,7 +41352,7 @@ pub mod api {
                 pub mod unapplied_slashes {
                     use super::runtime_types;
                     pub type UnappliedSlashes =
-                        runtime_types::polkadot_primitives::v8::slashing::PendingSlashes;
+                        runtime_types::polkadot_primitives::vstaging::PendingSlashes;
                     pub type Param0 = ::core::primitive::u32;
                     pub type Param1 = runtime_types::polkadot_core_primitives::CandidateHash;
                 }
@@ -40790,10 +41379,10 @@ pub mod api {
                         "UnappliedSlashes",
                         (),
                         [
-                            139u8, 156u8, 52u8, 31u8, 151u8, 223u8, 139u8, 230u8, 222u8, 217u8,
-                            12u8, 49u8, 83u8, 192u8, 23u8, 89u8, 204u8, 185u8, 212u8, 185u8, 176u8,
-                            49u8, 91u8, 206u8, 184u8, 98u8, 65u8, 151u8, 246u8, 128u8, 149u8,
-                            186u8,
+                            33u8, 56u8, 255u8, 142u8, 106u8, 140u8, 122u8, 102u8, 103u8, 68u8,
+                            118u8, 101u8, 50u8, 11u8, 42u8, 230u8, 186u8, 94u8, 118u8, 217u8,
+                            121u8, 217u8, 43u8, 149u8, 143u8, 42u8, 108u8, 81u8, 56u8, 24u8, 235u8,
+                            18u8,
                         ],
                     )
                 }
@@ -40815,10 +41404,10 @@ pub mod api {
                         "UnappliedSlashes",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
                         [
-                            139u8, 156u8, 52u8, 31u8, 151u8, 223u8, 139u8, 230u8, 222u8, 217u8,
-                            12u8, 49u8, 83u8, 192u8, 23u8, 89u8, 204u8, 185u8, 212u8, 185u8, 176u8,
-                            49u8, 91u8, 206u8, 184u8, 98u8, 65u8, 151u8, 246u8, 128u8, 149u8,
-                            186u8,
+                            33u8, 56u8, 255u8, 142u8, 106u8, 140u8, 122u8, 102u8, 103u8, 68u8,
+                            118u8, 101u8, 50u8, 11u8, 42u8, 230u8, 186u8, 94u8, 118u8, 217u8,
+                            121u8, 217u8, 43u8, 149u8, 143u8, 42u8, 108u8, 81u8, 56u8, 24u8, 235u8,
+                            18u8,
                         ],
                     )
                 }
@@ -40849,10 +41438,10 @@ pub mod api {
                             ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_1),
                         ),
                         [
-                            139u8, 156u8, 52u8, 31u8, 151u8, 223u8, 139u8, 230u8, 222u8, 217u8,
-                            12u8, 49u8, 83u8, 192u8, 23u8, 89u8, 204u8, 185u8, 212u8, 185u8, 176u8,
-                            49u8, 91u8, 206u8, 184u8, 98u8, 65u8, 151u8, 246u8, 128u8, 149u8,
-                            186u8,
+                            33u8, 56u8, 255u8, 142u8, 106u8, 140u8, 122u8, 102u8, 103u8, 68u8,
+                            118u8, 101u8, 50u8, 11u8, 42u8, 230u8, 186u8, 94u8, 118u8, 217u8,
+                            121u8, 217u8, 43u8, 149u8, 143u8, 42u8, 108u8, 81u8, 56u8, 24u8, 235u8,
+                            18u8,
                         ],
                     )
                 }
@@ -42052,8 +42641,10 @@ pub mod api {
                         runtime_types::polkadot_runtime_parachains::assigner_coretime::Schedule<
                             ::core::primitive::u32,
                         >;
-                    pub type Param0 = ::core::primitive::u32;
-                    pub type Param1 = runtime_types::polkadot_primitives::v8::CoreIndex;
+                    pub type Param0 = (
+                        ::core::primitive::u32,
+                        runtime_types::polkadot_primitives::v8::CoreIndex,
+                    );
                 }
                 pub mod core_descriptors {
                     use super::runtime_types;
@@ -42091,46 +42682,20 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " Assignments as of the given block number. They will go into state once the block number is"]
                 #[doc = " reached (and replace whatever was in there before)."]
-                pub fn core_schedules_iter1(
+                pub fn core_schedules(
                     &self,
                     _0: types::core_schedules::Param0,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
                     types::core_schedules::CoreSchedules,
-                    (),
-                    (),
                     ::subxt::ext::subxt_core::utils::Yes,
+                    (),
+                    (),
                 > {
                     ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "CoretimeAssignmentProvider",
                         "CoreSchedules",
                         (),
-                        [
-                            34u8, 85u8, 91u8, 158u8, 28u8, 200u8, 76u8, 188u8, 253u8, 91u8, 153u8,
-                            42u8, 42u8, 227u8, 119u8, 181u8, 247u8, 44u8, 29u8, 24u8, 128u8, 49u8,
-                            57u8, 248u8, 24u8, 145u8, 34u8, 74u8, 21u8, 225u8, 159u8, 232u8,
-                        ],
-                    )
-                }
-                #[doc = " Scheduled assignment sets."]
-                #[doc = ""]
-                #[doc = " Assignments as of the given block number. They will go into state once the block number is"]
-                #[doc = " reached (and replace whatever was in there before)."]
-                pub fn core_schedules(
-                    &self,
-                    _0: types::core_schedules::Param0,
-                    _1: types::core_schedules::Param1,
-                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    ((), ()),
-                    types::core_schedules::CoreSchedules,
-                    ::subxt::ext::subxt_core::utils::Yes,
-                    (),
-                    (),
-                > {
-                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
-                        "CoretimeAssignmentProvider",
-                        "CoreSchedules",
-                        ((), ()),
                         [
                             34u8, 85u8, 91u8, 158u8, 28u8, 200u8, 76u8, 188u8, 253u8, 91u8, 153u8,
                             42u8, 42u8, 227u8, 119u8, 181u8, 247u8, 44u8, 29u8, 24u8, 128u8, 49u8,
@@ -43429,7 +43994,9 @@ pub mod api {
                 #[doc = "called by the root origin. Accepts the `duration` of this auction and the"]
                 #[doc = "`lease_period_index` of the initial lease period of the four that are to be auctioned."]
                 pub struct NewAuction {
+                    #[codec(compact)]
                     pub duration: new_auction::Duration,
+                    #[codec(compact)]
                     pub lease_period_index: new_auction::LeasePeriodIndex,
                 }
                 pub mod new_auction {
@@ -43469,10 +44036,15 @@ pub mod api {
                 #[doc = "- `amount` is the amount to bid to be held as deposit for the parachain should the"]
                 #[doc = "bid win. This amount is held throughout the range."]
                 pub struct Bid {
+                    #[codec(compact)]
                     pub para: bid::Para,
+                    #[codec(compact)]
                     pub auction_index: bid::AuctionIndex,
+                    #[codec(compact)]
                     pub first_slot: bid::FirstSlot,
+                    #[codec(compact)]
                     pub last_slot: bid::LastSlot,
+                    #[codec(compact)]
                     pub amount: bid::Amount,
                 }
                 pub mod bid {
@@ -43778,8 +44350,10 @@ pub mod api {
                 pub mod reserved_amounts {
                     use super::runtime_types;
                     pub type ReservedAmounts = ::core::primitive::u128;
-                    pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
-                    pub type Param1 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                    pub type Param0 = (
+                        ::subxt::ext::subxt_core::utils::AccountId32,
+                        runtime_types::polkadot_parachain_primitives::primitives::Id,
+                    );
                 }
                 pub mod winning {
                     use super::runtime_types;
@@ -43864,7 +44438,7 @@ pub mod api {
                 }
                 #[doc = " Amounts currently reserved in the accounts of the bidders currently winning"]
                 #[doc = " (sub-)ranges."]
-                pub fn reserved_amounts_iter1(
+                pub fn reserved_amounts(
                     &self,
                     _0: types::reserved_amounts::Param0,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
@@ -43872,49 +44446,14 @@ pub mod api {
                         types::reserved_amounts::Param0,
                     >,
                     types::reserved_amounts::ReservedAmounts,
-                    (),
-                    (),
                     ::subxt::ext::subxt_core::utils::Yes,
+                    (),
+                    (),
                 > {
                     ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "Auctions",
                         "ReservedAmounts",
                         ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
-                        [
-                            77u8, 44u8, 116u8, 36u8, 189u8, 213u8, 126u8, 32u8, 42u8, 131u8, 108u8,
-                            41u8, 147u8, 40u8, 247u8, 245u8, 161u8, 42u8, 152u8, 195u8, 28u8,
-                            142u8, 231u8, 209u8, 113u8, 11u8, 240u8, 37u8, 112u8, 38u8, 239u8,
-                            245u8,
-                        ],
-                    )
-                }
-                #[doc = " Amounts currently reserved in the accounts of the bidders currently winning"]
-                #[doc = " (sub-)ranges."]
-                pub fn reserved_amounts(
-                    &self,
-                    _0: types::reserved_amounts::Param0,
-                    _1: types::reserved_amounts::Param1,
-                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (
-                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
-                            types::reserved_amounts::Param0,
-                        >,
-                        ::subxt::ext::subxt_core::storage::address::StaticStorageKey<
-                            types::reserved_amounts::Param1,
-                        >,
-                    ),
-                    types::reserved_amounts::ReservedAmounts,
-                    ::subxt::ext::subxt_core::utils::Yes,
-                    (),
-                    (),
-                > {
-                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
-                        "Auctions",
-                        "ReservedAmounts",
-                        (
-                            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_0),
-                            ::subxt::ext::subxt_core::storage::address::StaticStorageKey::new(_1),
-                        ),
                         [
                             77u8, 44u8, 116u8, 36u8, 189u8, 213u8, 126u8, 32u8, 42u8, 131u8, 108u8,
                             41u8, 147u8, 40u8, 247u8, 245u8, 161u8, 42u8, 152u8, 195u8, 28u8,
@@ -44079,10 +44618,15 @@ pub mod api {
                 #[doc = "This applies a lock to your parachain configuration, ensuring that it cannot be changed"]
                 #[doc = "by the parachain manager."]
                 pub struct Create {
+                    #[codec(compact)]
                     pub index: create::Index,
+                    #[codec(compact)]
                     pub cap: create::Cap,
+                    #[codec(compact)]
                     pub first_period: create::FirstPeriod,
+                    #[codec(compact)]
                     pub last_period: create::LastPeriod,
+                    #[codec(compact)]
                     pub end: create::End,
                     pub verifier: create::Verifier,
                 }
@@ -44114,7 +44658,9 @@ pub mod api {
                 #[doc = "Contribute to a crowd sale. This will transfer some balance over to fund a parachain"]
                 #[doc = "slot. It will be withdrawable when the crowdloan has ended and the funds are unused."]
                 pub struct Contribute {
+                    #[codec(compact)]
                     pub index: contribute::Index,
+                    #[codec(compact)]
                     pub value: contribute::Value,
                     pub signature: contribute::Signature,
                 }
@@ -44159,6 +44705,7 @@ pub mod api {
                 #[doc = "- `index`: The parachain to whose crowdloan the contribution was made."]
                 pub struct Withdraw {
                     pub who: withdraw::Who,
+                    #[codec(compact)]
                     pub index: withdraw::Index,
                 }
                 pub mod withdraw {
@@ -44187,6 +44734,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Origin must be signed, but can come from anyone."]
                 pub struct Refund {
+                    #[codec(compact)]
                     pub index: refund::Index,
                 }
                 pub mod refund {
@@ -44210,6 +44758,7 @@ pub mod api {
                 )]
                 #[doc = "Remove a fund after the retirement period has ended and all funds have been returned."]
                 pub struct Dissolve {
+                    #[codec(compact)]
                     pub index: dissolve::Index,
                 }
                 pub mod dissolve {
@@ -44235,10 +44784,15 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Can only be called by Root origin."]
                 pub struct Edit {
+                    #[codec(compact)]
                     pub index: edit::Index,
+                    #[codec(compact)]
                     pub cap: edit::Cap,
+                    #[codec(compact)]
                     pub first_period: edit::FirstPeriod,
+                    #[codec(compact)]
                     pub last_period: edit::LastPeriod,
+                    #[codec(compact)]
                     pub end: edit::End,
                     pub verifier: edit::Verifier,
                 }
@@ -44324,6 +44878,7 @@ pub mod api {
                 #[doc = "a user over to fund a parachain slot. It will be withdrawable when the crowdloan has"]
                 #[doc = "ended and the funds are unused."]
                 pub struct ContributeAll {
+                    #[codec(compact)]
                     pub index: contribute_all::Index,
                     pub signature: contribute_all::Signature,
                 }
@@ -48678,6 +49233,30 @@ pub mod api {
                 }
             }
         }
+        pub mod constants {
+            use super::runtime_types;
+            pub struct ConstantsApi;
+            impl ConstantsApi {
+                #[doc = " The latest supported version that we advertise. Generally just set it to"]
+                #[doc = " `pallet_xcm::CurrentXcmVersion`."]
+                pub fn advertised_xcm_version(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+                        "XcmPallet",
+                        "AdvertisedXcmVersion",
+                        [
+                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+                            145u8,
+                        ],
+                    )
+                }
+            }
+        }
     }
     pub mod beefy {
         use super::root_mod;
@@ -51736,9 +52315,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            88u8, 179u8, 207u8, 98u8, 7u8, 26u8, 66u8, 57u8, 224u8, 225u8, 15u8,
-                            213u8, 95u8, 51u8, 201u8, 24u8, 73u8, 123u8, 54u8, 72u8, 156u8, 107u8,
-                            202u8, 185u8, 150u8, 137u8, 2u8, 221u8, 125u8, 163u8, 220u8, 123u8,
+                            142u8, 6u8, 237u8, 75u8, 9u8, 157u8, 134u8, 173u8, 13u8, 91u8, 16u8,
+                            214u8, 125u8, 89u8, 162u8, 242u8, 85u8, 58u8, 152u8, 18u8, 117u8,
+                            140u8, 1u8, 37u8, 116u8, 215u8, 224u8, 115u8, 37u8, 212u8, 51u8, 154u8,
                         ],
                     )
                 }
@@ -51761,10 +52340,10 @@ pub mod api {
                             weight,
                         },
                         [
-                            209u8, 40u8, 11u8, 125u8, 177u8, 142u8, 236u8, 115u8, 236u8, 69u8,
-                            213u8, 35u8, 55u8, 120u8, 186u8, 117u8, 33u8, 74u8, 226u8, 26u8, 146u8,
-                            241u8, 153u8, 251u8, 8u8, 215u8, 64u8, 117u8, 166u8, 155u8, 96u8,
-                            211u8,
+                            21u8, 106u8, 255u8, 109u8, 83u8, 78u8, 79u8, 233u8, 36u8, 237u8, 76u8,
+                            100u8, 27u8, 180u8, 32u8, 181u8, 250u8, 208u8, 192u8, 104u8, 128u8,
+                            80u8, 148u8, 88u8, 230u8, 109u8, 102u8, 255u8, 184u8, 100u8, 194u8,
+                            65u8,
                         ],
                     )
                 }
@@ -51804,9 +52383,9 @@ pub mod api {
                             call: ::subxt::ext::subxt_core::alloc::boxed::Box::new(call),
                         },
                         [
-                            181u8, 199u8, 53u8, 7u8, 172u8, 130u8, 39u8, 31u8, 214u8, 17u8, 29u8,
-                            196u8, 97u8, 253u8, 244u8, 48u8, 121u8, 2u8, 94u8, 155u8, 248u8, 60u8,
-                            255u8, 98u8, 243u8, 103u8, 214u8, 104u8, 86u8, 169u8, 31u8, 195u8,
+                            140u8, 221u8, 91u8, 39u8, 108u8, 238u8, 199u8, 29u8, 54u8, 6u8, 203u8,
+                            45u8, 172u8, 0u8, 67u8, 64u8, 198u8, 58u8, 84u8, 42u8, 159u8, 36u8,
+                            109u8, 22u8, 134u8, 31u8, 41u8, 115u8, 252u8, 14u8, 232u8, 180u8,
                         ],
                     )
                 }
@@ -52038,7 +52617,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum Mode {
+                #[codec(index = 0)]
                 Disabled,
+                #[codec(index = 1)]
                 Enabled,
             }
         }
@@ -52058,8 +52639,11 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum DispatchClass {
+                    #[codec(index = 0)]
                     Normal,
+                    #[codec(index = 1)]
                     Operational,
+                    #[codec(index = 2)]
                     Mandatory,
                 }
                 #[derive(
@@ -52074,7 +52658,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Pays {
+                    #[codec(index = 0)]
                     Yes,
+                    #[codec(index = 1)]
                     No,
                 }
                 #[derive(
@@ -52121,9 +52707,14 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum RawOrigin<_0> {
+                    #[codec(index = 0)]
                     Root,
+                    #[codec(index = 1)]
                     Signed(_0),
+                    #[codec(index = 2)]
                     None,
+                    #[codec(index = 3)]
+                    Authorized,
                 }
             }
             pub mod traits {
@@ -52142,11 +52733,17 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum ProcessMessageError {
+                        #[codec(index = 0)]
                         BadFormat,
+                        #[codec(index = 1)]
                         Corrupt,
+                        #[codec(index = 2)]
                         Unsupported,
+                        #[codec(index = 3)]
                         Overweight(runtime_types::sp_weights::weight_v2::Weight),
+                        #[codec(index = 4)]
                         Yield,
+                        #[codec(index = 5)]
                         StackLimitReached,
                     }
                 }
@@ -52164,14 +52761,17 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Bounded<_0, _1> {
+                        #[codec(index = 0)]
                         Legacy {
                             hash: ::subxt::ext::subxt_core::utils::H256,
                         },
+                        #[codec(index = 1)]
                         Inline(
                             runtime_types::bounded_collections::bounded_vec::BoundedVec<
                                 ::core::primitive::u8,
                             >,
                         ),
+                        #[codec(index = 2)]
                         Lookup {
                             hash: ::subxt::ext::subxt_core::utils::H256,
                             len: ::core::primitive::u32,
@@ -52193,7 +52793,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum DispatchTime<_0> {
+                        #[codec(index = 0)]
                         At(_0),
+                        #[codec(index = 1)]
                         After(_0),
                     }
                 }
@@ -52243,7 +52845,9 @@ pub mod api {
                             crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                         )]
                         pub enum BalanceStatus {
+                            #[codec(index = 0)]
                             Free,
+                            #[codec(index = 1)]
                             Reserved,
                         }
                         #[derive(
@@ -52277,6 +52881,21 @@ pub mod api {
             use super::runtime_types;
             pub mod extensions {
                 use super::runtime_types;
+                pub mod authorize_call {
+                    use super::runtime_types;
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    pub struct AuthorizeCall;
+                }
                 pub mod check_genesis {
                     use super::runtime_types;
                     #[derive(
@@ -52335,7 +52954,7 @@ pub mod api {
                     #[encode_as_type(
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
-                    pub struct CheckNonce(pub ::core::primitive::u32);
+                    pub struct CheckNonce(#[codec(compact)] pub ::core::primitive::u32);
                 }
                 pub mod check_spec_version {
                     use super::runtime_types;
@@ -52470,18 +53089,22 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Make some on-chain remark."]
                     #[doc = ""]
                     #[doc = "Can be executed by every `origin`."]
                     remark {
                         remark: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Set the number of pages in the WebAssembly environment's heap."]
                     set_heap_pages { pages: ::core::primitive::u64 },
+                    #[codec(index = 2)]
                     #[doc = "Set the new runtime code."]
                     set_code {
                         code: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Set the new runtime code without doing any checks of the given `code`."]
                     #[doc = ""]
                     #[doc = "Note that runtime upgrades will not run if this is called with a not-increasing spec"]
@@ -52489,6 +53112,7 @@ pub mod api {
                     set_code_without_checks {
                         code: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Set some items of storage."]
                     set_storage {
                         items: ::subxt::ext::subxt_core::alloc::vec::Vec<(
@@ -52496,12 +53120,14 @@ pub mod api {
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         )>,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Kill some items from storage."]
                     kill_storage {
                         keys: ::subxt::ext::subxt_core::alloc::vec::Vec<
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         >,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Kill all storage items with a key that starts with the given prefix."]
                     #[doc = ""]
                     #[doc = "**NOTE:** We rely on the Root origin to provide us the number of subkeys under"]
@@ -52510,10 +53136,12 @@ pub mod api {
                         prefix: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         subkeys: ::core::primitive::u32,
                     },
+                    #[codec(index = 7)]
                     #[doc = "Make some on-chain remark and emit event."]
                     remark_with_event {
                         remark: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
+                    #[codec(index = 9)]
                     #[doc = "Authorize an upgrade to a given `code_hash` for the runtime. The runtime can be supplied"]
                     #[doc = "later."]
                     #[doc = ""]
@@ -52521,6 +53149,7 @@ pub mod api {
                     authorize_upgrade {
                         code_hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 10)]
                     #[doc = "Authorize an upgrade to a given `code_hash` for the runtime. The runtime can be supplied"]
                     #[doc = "later."]
                     #[doc = ""]
@@ -52532,6 +53161,7 @@ pub mod api {
                     authorize_upgrade_without_checks {
                         code_hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 11)]
                     #[doc = "Provide the preimage (runtime binary) `code` for an upgrade that has been authorized."]
                     #[doc = ""]
                     #[doc = "If the authorization required a version check, this call will ensure the spec name"]
@@ -52558,26 +53188,35 @@ pub mod api {
                 )]
                 #[doc = "Error for the System pallet"]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "The name of specification does not match between the current runtime"]
                     #[doc = "and the new runtime."]
                     InvalidSpecName,
+                    #[codec(index = 1)]
                     #[doc = "The specification version is not allowed to decrease between the current runtime"]
                     #[doc = "and the new runtime."]
                     SpecVersionNeedsToIncrease,
+                    #[codec(index = 2)]
                     #[doc = "Failed to extract the runtime version from the new runtime."]
                     #[doc = ""]
                     #[doc = "Either calling `Core_version` or decoding `RuntimeVersion` failed."]
                     FailedToExtractRuntimeVersion,
+                    #[codec(index = 3)]
                     #[doc = "Suicide called when the account has non-default composite data."]
                     NonDefaultComposite,
+                    #[codec(index = 4)]
                     #[doc = "There is a non-zero reference count preventing the account from being purged."]
                     NonZeroRefCount,
+                    #[codec(index = 5)]
                     #[doc = "The origin filter prevent the call to be dispatched."]
                     CallFiltered,
+                    #[codec(index = 6)]
                     #[doc = "A multi-block migration is ongoing and prevents the current code from being replaced."]
                     MultiBlockMigrationsOngoing,
+                    #[codec(index = 7)]
                     #[doc = "No upgrade authorized."]
                     NothingAuthorized,
+                    #[codec(index = 8)]
                     #[doc = "The submitted code is not authorized."]
                     Unauthorized,
                 }
@@ -52594,35 +53233,43 @@ pub mod api {
                 )]
                 #[doc = "Event for the System pallet."]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "An extrinsic completed successfully."]
                     ExtrinsicSuccess {
                         dispatch_info: runtime_types::frame_system::DispatchEventInfo,
                     },
+                    #[codec(index = 1)]
                     #[doc = "An extrinsic failed."]
                     ExtrinsicFailed {
                         dispatch_error: runtime_types::sp_runtime::DispatchError,
                         dispatch_info: runtime_types::frame_system::DispatchEventInfo,
                     },
+                    #[codec(index = 2)]
                     #[doc = "`:code` was updated."]
                     CodeUpdated,
+                    #[codec(index = 3)]
                     #[doc = "A new account was created."]
                     NewAccount {
                         account: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 4)]
                     #[doc = "An account was reaped."]
                     KilledAccount {
                         account: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 5)]
                     #[doc = "On on-chain remark happened."]
                     Remarked {
                         sender: ::subxt::ext::subxt_core::utils::AccountId32,
                         hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 6)]
                     #[doc = "An upgrade was authorized."]
                     UpgradeAuthorized {
                         code_hash: ::subxt::ext::subxt_core::utils::H256,
                         check_version: ::core::primitive::bool,
                     },
+                    #[codec(index = 7)]
                     #[doc = "An invalid authorized upgrade was rejected while trying to apply it."]
                     RejectedInvalidAuthorizedUpgrade {
                         code_hash: ::subxt::ext::subxt_core::utils::H256,
@@ -52687,6 +53334,7 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub struct LastRuntimeUpgradeInfo {
+                #[codec(compact)]
                 pub spec_version: ::core::primitive::u32,
                 pub spec_name: ::subxt::ext::subxt_core::alloc::string::String,
             }
@@ -52698,8 +53346,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum Phase {
+                #[codec(index = 0)]
                 ApplyExtrinsic(::core::primitive::u32),
+                #[codec(index = 1)]
                 Finalization,
+                #[codec(index = 2)]
                 Initialization,
             }
         }
@@ -52720,6 +53371,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Initialize a conversion rate to native balance for the given asset."]
                     #[doc = ""]
                     #[doc = "## Complexity"]
@@ -52730,6 +53382,7 @@ pub mod api {
                         >,
                         rate: runtime_types::sp_arithmetic::fixed_point::FixedU128,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Update the conversion rate to native balance for the given asset."]
                     #[doc = ""]
                     #[doc = "## Complexity"]
@@ -52740,6 +53393,7 @@ pub mod api {
                         >,
                         rate: runtime_types::sp_arithmetic::fixed_point::FixedU128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Remove an existing conversion rate to native balance for the given asset."]
                     #[doc = ""]
                     #[doc = "## Complexity"]
@@ -52763,10 +53417,13 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "The given asset ID is unknown."]
                     UnknownAssetKind,
+                    #[codec(index = 1)]
                     #[doc = "The given asset ID already has an assigned conversion rate and cannot be re-created."]
                     AlreadyExists,
+                    #[codec(index = 2)]
                     #[doc = "Overflow ocurred when calculating the inverse rate."]
                     Overflow,
                 }
@@ -52783,15 +53440,18 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     AssetRateCreated {
                         asset_kind:
                             runtime_types::polkadot_runtime_common::impls::VersionedLocatableAsset,
                         rate: runtime_types::sp_arithmetic::fixed_point::FixedU128,
                     },
+                    #[codec(index = 1)]
                     AssetRateRemoved {
                         asset_kind:
                             runtime_types::polkadot_runtime_common::impls::VersionedLocatableAsset,
                     },
+                    #[codec(index = 2)]
                     AssetRateUpdated {
                         asset_kind:
                             runtime_types::polkadot_runtime_common::impls::VersionedLocatableAsset,
@@ -52818,6 +53478,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Report authority equivocation/misbehavior. This method will verify"]
                     #[doc = "the equivocation proof and validate the given key ownership proof"]
                     #[doc = "against the extracted offender. If both are valid, the offence will"]
@@ -52833,6 +53494,7 @@ pub mod api {
                         >,
                         key_owner_proof: runtime_types::sp_session::MembershipProof,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Report authority equivocation/misbehavior. This method will verify"]
                     #[doc = "the equivocation proof and validate the given key ownership proof"]
                     #[doc = "against the extracted offender. If both are valid, the offence will"]
@@ -52852,6 +53514,7 @@ pub mod api {
                         >,
                         key_owner_proof: runtime_types::sp_session::MembershipProof,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Plan an epoch config change. The epoch config change is recorded and will be enacted on"]
                     #[doc = "the next call to `enact_epoch_change`. The config will be activated one epoch after."]
                     #[doc = "Multiple calls to this method will replace any existing planned config change that had"]
@@ -52873,12 +53536,16 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "An equivocation proof provided as part of an equivocation report is invalid."]
                     InvalidEquivocationProof,
+                    #[codec(index = 1)]
                     #[doc = "A key ownership proof provided as part of an equivocation report is invalid."]
                     InvalidKeyOwnershipProof,
+                    #[codec(index = 2)]
                     #[doc = "A given equivocation report is valid but already previously reported."]
                     DuplicateOffenceReport,
+                    #[codec(index = 3)]
                     #[doc = "Submitted configuration is invalid."]
                     InvalidConfiguration,
                 }
@@ -52901,6 +53568,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Transfer some liquid free balance to another account."]
                     #[doc = ""]
                     #[doc = "`transfer_allow_death` will set the `FreeBalance` of the sender and receiver."]
@@ -52913,8 +53581,10 @@ pub mod api {
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
                         >,
+                        #[codec(compact)]
                         value: ::core::primitive::u128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Exactly as `transfer_allow_death`, except the origin must be root and the source account"]
                     #[doc = "may be specified."]
                     force_transfer {
@@ -52926,8 +53596,10 @@ pub mod api {
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
                         >,
+                        #[codec(compact)]
                         value: ::core::primitive::u128,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Same as the [`transfer_allow_death`] call, but with a check that the transfer will not"]
                     #[doc = "kill the origin account."]
                     #[doc = ""]
@@ -52939,8 +53611,10 @@ pub mod api {
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
                         >,
+                        #[codec(compact)]
                         value: ::core::primitive::u128,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Transfer the entire transferable balance from the caller account."]
                     #[doc = ""]
                     #[doc = "NOTE: This function only attempts to transfer _transferable_ balances. This means that"]
@@ -52963,6 +53637,7 @@ pub mod api {
                         >,
                         keep_alive: ::core::primitive::bool,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Unreserve some balance from a user by force."]
                     #[doc = ""]
                     #[doc = "Can only be called by ROOT."]
@@ -52973,6 +53648,7 @@ pub mod api {
                         >,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Upgrade a specified account."]
                     #[doc = ""]
                     #[doc = "- `origin`: Must be `Signed`."]
@@ -52986,6 +53662,7 @@ pub mod api {
                             ::subxt::ext::subxt_core::utils::AccountId32,
                         >,
                     },
+                    #[codec(index = 8)]
                     #[doc = "Set the regular balance of a given account."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call is `root`."]
@@ -52994,8 +53671,10 @@ pub mod api {
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
                         >,
+                        #[codec(compact)]
                         new_free: ::core::primitive::u128,
                     },
+                    #[codec(index = 9)]
                     #[doc = "Adjust the total issuance in a saturating way."]
                     #[doc = ""]
                     #[doc = "Can only be called by root and always needs a positive `delta`."]
@@ -53003,8 +53682,10 @@ pub mod api {
                     #[doc = "# Example"]
                     force_adjust_total_issuance {
                         direction: runtime_types::pallet_balances::types::AdjustmentDirection,
+                        #[codec(compact)]
                         delta: ::core::primitive::u128,
                     },
+                    #[codec(index = 10)]
                     #[doc = "Burn the specified liquid free balance from the origin account."]
                     #[doc = ""]
                     #[doc = "If the origin's account ends up below the existential deposit as a result"]
@@ -53013,6 +53694,7 @@ pub mod api {
                     #[doc = "Unlike sending funds to a _burn_ address, which merely makes the funds inaccessible,"]
                     #[doc = "this `burn` operation will reduce total issuance by the amount _burned_."]
                     burn {
+                        #[codec(compact)]
                         value: ::core::primitive::u128,
                         keep_alive: ::core::primitive::bool,
                     },
@@ -53030,28 +53712,40 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Vesting balance too high to send value."]
                     VestingBalance,
+                    #[codec(index = 1)]
                     #[doc = "Account liquidity restrictions prevent withdrawal."]
                     LiquidityRestrictions,
+                    #[codec(index = 2)]
                     #[doc = "Balance too low to send value."]
                     InsufficientBalance,
+                    #[codec(index = 3)]
                     #[doc = "Value too low to create account due to existential deposit."]
                     ExistentialDeposit,
+                    #[codec(index = 4)]
                     #[doc = "Transfer/payment would kill account."]
                     Expendability,
+                    #[codec(index = 5)]
                     #[doc = "A vesting schedule already exists for this account."]
                     ExistingVestingSchedule,
+                    #[codec(index = 6)]
                     #[doc = "Beneficiary account must pre-exist."]
                     DeadAccount,
+                    #[codec(index = 7)]
                     #[doc = "Number of named reserves exceed `MaxReserves`."]
                     TooManyReserves,
+                    #[codec(index = 8)]
                     #[doc = "Number of holds exceed `VariantCountOf<T::RuntimeHoldReason>`."]
                     TooManyHolds,
+                    #[codec(index = 9)]
                     #[doc = "Number of freezes exceed `MaxFreezes`."]
                     TooManyFreezes,
+                    #[codec(index = 10)]
                     #[doc = "The issuance cannot be modified since it is already deactivated."]
                     IssuanceDeactivated,
+                    #[codec(index = 11)]
                     #[doc = "The delta cannot be zero."]
                     DeltaZero,
                 }
@@ -53068,38 +53762,45 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "An account was created with some free balance."]
                     Endowed {
                         account: ::subxt::ext::subxt_core::utils::AccountId32,
                         free_balance: ::core::primitive::u128,
                     },
+                    #[codec(index = 1)]
                     #[doc = "An account was removed whose balance was non-zero but below ExistentialDeposit,"]
                     #[doc = "resulting in an outright loss."]
                     DustLost {
                         account: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Transfer succeeded."]
                     Transfer {
                         from: ::subxt::ext::subxt_core::utils::AccountId32,
                         to: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 3)]
                     #[doc = "A balance was set by root."]
                     BalanceSet {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         free: ::core::primitive::u128,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Some balance was reserved (moved from free to reserved)."]
                     Reserved {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Some balance was unreserved (moved from reserved to free)."]
                     Unreserved {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Some balance was moved from the reserve of the first account to the second account."]
                     #[doc = "Final argument indicates the destination balance type."]
                     ReserveRepatriated {
@@ -53109,69 +53810,84 @@ pub mod api {
                         destination_status:
                             runtime_types::frame_support::traits::tokens::misc::BalanceStatus,
                     },
+                    #[codec(index = 7)]
                     #[doc = "Some amount was deposited (e.g. for transaction fees)."]
                     Deposit {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 8)]
                     #[doc = "Some amount was withdrawn from the account (e.g. for transaction fees)."]
                     Withdraw {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 9)]
                     #[doc = "Some amount was removed from the account (e.g. for misbehavior)."]
                     Slashed {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 10)]
                     #[doc = "Some amount was minted into an account."]
                     Minted {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 11)]
                     #[doc = "Some amount was burned from an account."]
                     Burned {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 12)]
                     #[doc = "Some amount was suspended from an account (it can be restored later)."]
                     Suspended {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 13)]
                     #[doc = "Some amount was restored into an account."]
                     Restored {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 14)]
                     #[doc = "An account was upgraded."]
                     Upgraded {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 15)]
                     #[doc = "Total issuance was increased by `amount`, creating a credit to be balanced."]
                     Issued { amount: ::core::primitive::u128 },
+                    #[codec(index = 16)]
                     #[doc = "Total issuance was decreased by `amount`, creating a debt to be balanced."]
                     Rescinded { amount: ::core::primitive::u128 },
+                    #[codec(index = 17)]
                     #[doc = "Some balance was locked."]
                     Locked {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 18)]
                     #[doc = "Some balance was unlocked."]
                     Unlocked {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 19)]
                     #[doc = "Some balance was frozen."]
                     Frozen {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 20)]
                     #[doc = "Some balance was thawed."]
                     Thawed {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 21)]
                     #[doc = "The `TotalIssuance` was forcefully changed."]
                     TotalIssuanceForced {
                         old: ::core::primitive::u128,
@@ -53210,7 +53926,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum AdjustmentDirection {
+                    #[codec(index = 0)]
                     Increase,
+                    #[codec(index = 1)]
                     Decrease,
                 }
                 #[derive(
@@ -53253,8 +53971,11 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Reasons {
+                    #[codec(index = 0)]
                     Fee,
+                    #[codec(index = 1)]
                     Misc,
+                    #[codec(index = 2)]
                     All,
                 }
                 #[derive(
@@ -53291,6 +54012,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Report voter equivocation/misbehavior. This method will verify the"]
                     #[doc = "equivocation proof and validate the given key ownership proof"]
                     #[doc = "against the extracted offender. If both are valid, the offence"]
@@ -53305,6 +54027,7 @@ pub mod api {
                         >,
                         key_owner_proof: runtime_types::sp_session::MembershipProof,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Report voter equivocation/misbehavior. This method will verify the"]
                     #[doc = "equivocation proof and validate the given key ownership proof"]
                     #[doc = "against the extracted offender. If both are valid, the offence"]
@@ -53324,6 +54047,7 @@ pub mod api {
                         >,
                         key_owner_proof: runtime_types::sp_session::MembershipProof,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Reset BEEFY consensus by setting a new BEEFY genesis at `delay_in_blocks` blocks in the"]
                     #[doc = "future."]
                     #[doc = ""]
@@ -53331,6 +54055,7 @@ pub mod api {
                     set_new_genesis {
                         delay_in_blocks: ::core::primitive::u32,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Report fork voting equivocation. This method will verify the equivocation proof"]
                     #[doc = "and validate the given key ownership proof against the extracted offender."]
                     #[doc = "If both are valid, the offence will be reported."]
@@ -53348,6 +54073,7 @@ pub mod api {
                         >,
                         key_owner_proof: runtime_types::sp_session::MembershipProof,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Report fork voting equivocation. This method will verify the equivocation proof"]
                     #[doc = "and validate the given key ownership proof against the extracted offender."]
                     #[doc = "If both are valid, the offence will be reported."]
@@ -53370,6 +54096,7 @@ pub mod api {
                         >,
                         key_owner_proof: runtime_types::sp_session::MembershipProof,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Report future block voting equivocation. This method will verify the equivocation proof"]
                     #[doc = "and validate the given key ownership proof against the extracted offender."]
                     #[doc = "If both are valid, the offence will be reported."]
@@ -53382,6 +54109,7 @@ pub mod api {
                         >,
                         key_owner_proof: runtime_types::sp_session::MembershipProof,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Report future block voting equivocation. This method will verify the equivocation proof"]
                     #[doc = "and validate the given key ownership proof against the extracted offender."]
                     #[doc = "If both are valid, the offence will be reported."]
@@ -53413,18 +54141,25 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "A key ownership proof provided as part of an equivocation report is invalid."]
                     InvalidKeyOwnershipProof,
+                    #[codec(index = 1)]
                     #[doc = "A double voting proof provided as part of an equivocation report is invalid."]
                     InvalidDoubleVotingProof,
+                    #[codec(index = 2)]
                     #[doc = "A fork voting proof provided as part of an equivocation report is invalid."]
                     InvalidForkVotingProof,
+                    #[codec(index = 3)]
                     #[doc = "A future block voting proof provided as part of an equivocation report is invalid."]
                     InvalidFutureBlockVotingProof,
+                    #[codec(index = 4)]
                     #[doc = "The session of the equivocation proof is invalid"]
                     InvalidEquivocationProofSession,
+                    #[codec(index = 5)]
                     #[doc = "A given equivocation report is valid but already previously reported."]
                     DuplicateOffenceReport,
+                    #[codec(index = 6)]
                     #[doc = "Submitted configuration is invalid."]
                     InvalidConfiguration,
                 }
@@ -53447,6 +54182,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Propose a new bounty."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_."]
@@ -53460,10 +54196,12 @@ pub mod api {
                     #[doc = "- `value`: The total payment amount of this bounty, curator fee included."]
                     #[doc = "- `description`: The description of this bounty."]
                     propose_bounty {
+                        #[codec(compact)]
                         value: ::core::primitive::u128,
                         description:
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Approve a bounty proposal. At a later time, the bounty will be funded and become active"]
                     #[doc = "and the original deposit will be returned."]
                     #[doc = ""]
@@ -53471,7 +54209,11 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "## Complexity"]
                     #[doc = "- O(1)."]
-                    approve_bounty { bounty_id: ::core::primitive::u32 },
+                    approve_bounty {
+                        #[codec(compact)]
+                        bounty_id: ::core::primitive::u32,
+                    },
+                    #[codec(index = 2)]
                     #[doc = "Propose a curator to a funded bounty."]
                     #[doc = ""]
                     #[doc = "May only be called from `T::SpendOrigin`."]
@@ -53479,13 +54221,16 @@ pub mod api {
                     #[doc = "## Complexity"]
                     #[doc = "- O(1)."]
                     propose_curator {
+                        #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
                         curator: ::subxt::ext::subxt_core::utils::MultiAddress<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
                         >,
+                        #[codec(compact)]
                         fee: ::core::primitive::u128,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Unassign curator from a bounty."]
                     #[doc = ""]
                     #[doc = "This function can only be called by the `RejectOrigin` a signed origin."]
@@ -53503,7 +54248,11 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "## Complexity"]
                     #[doc = "- O(1)."]
-                    unassign_curator { bounty_id: ::core::primitive::u32 },
+                    unassign_curator {
+                        #[codec(compact)]
+                        bounty_id: ::core::primitive::u32,
+                    },
+                    #[codec(index = 4)]
                     #[doc = "Accept the curator role for a bounty."]
                     #[doc = "A deposit will be reserved from curator and refund upon successful payout."]
                     #[doc = ""]
@@ -53511,7 +54260,11 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "## Complexity"]
                     #[doc = "- O(1)."]
-                    accept_curator { bounty_id: ::core::primitive::u32 },
+                    accept_curator {
+                        #[codec(compact)]
+                        bounty_id: ::core::primitive::u32,
+                    },
+                    #[codec(index = 5)]
                     #[doc = "Award bounty to a beneficiary account. The beneficiary will be able to claim the funds"]
                     #[doc = "after a delay."]
                     #[doc = ""]
@@ -53523,12 +54276,14 @@ pub mod api {
                     #[doc = "## Complexity"]
                     #[doc = "- O(1)."]
                     award_bounty {
+                        #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
                         beneficiary: ::subxt::ext::subxt_core::utils::MultiAddress<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
                         >,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Claim the payout from an awarded bounty after payout delay."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be the beneficiary of this bounty."]
@@ -53537,7 +54292,11 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "## Complexity"]
                     #[doc = "- O(1)."]
-                    claim_bounty { bounty_id: ::core::primitive::u32 },
+                    claim_bounty {
+                        #[codec(compact)]
+                        bounty_id: ::core::primitive::u32,
+                    },
+                    #[codec(index = 7)]
                     #[doc = "Cancel a proposed or active bounty. All the funds will be sent to treasury and"]
                     #[doc = "the curator deposit will be unreserved if possible."]
                     #[doc = ""]
@@ -53547,7 +54306,11 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "## Complexity"]
                     #[doc = "- O(1)."]
-                    close_bounty { bounty_id: ::core::primitive::u32 },
+                    close_bounty {
+                        #[codec(compact)]
+                        bounty_id: ::core::primitive::u32,
+                    },
+                    #[codec(index = 8)]
                     #[doc = "Extend the expiry time of an active bounty."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be the curator of this bounty."]
@@ -53558,9 +54321,11 @@ pub mod api {
                     #[doc = "## Complexity"]
                     #[doc = "- O(1)."]
                     extend_bounty_expiry {
+                        #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
                         remark: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
+                    #[codec(index = 9)]
                     #[doc = "Approve bountry and propose a curator simultaneously."]
                     #[doc = "This call is a shortcut to calling `approve_bounty` and `propose_curator` separately."]
                     #[doc = ""]
@@ -53573,12 +54338,34 @@ pub mod api {
                     #[doc = "## Complexity"]
                     #[doc = "- O(1)."]
                     approve_bounty_with_curator {
+                        #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
                         curator: ::subxt::ext::subxt_core::utils::MultiAddress<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
                         >,
+                        #[codec(compact)]
                         fee: ::core::primitive::u128,
+                    },
+                    #[codec(index = 10)]
+                    #[doc = "Poke the deposit reserved for creating a bounty proposal."]
+                    #[doc = ""]
+                    #[doc = "This can be used by accounts to update their reserved amount."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "Parameters:"]
+                    #[doc = "- `bounty_id`: The bounty id for which to adjust the deposit."]
+                    #[doc = ""]
+                    #[doc = "If the deposit is updated, the difference will be reserved/unreserved from the"]
+                    #[doc = "proposer's account."]
+                    #[doc = ""]
+                    #[doc = "The transaction is made free if the deposit is updated and paid otherwise."]
+                    #[doc = ""]
+                    #[doc = "Emits `DepositPoked` if the deposit is updated."]
+                    poke_deposit {
+                        #[codec(compact)]
+                        bounty_id: ::core::primitive::u32,
                     },
                 }
                 #[derive(
@@ -53594,29 +54381,43 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Proposer's balance is too low."]
                     InsufficientProposersBalance,
+                    #[codec(index = 1)]
                     #[doc = "No proposal or bounty at that index."]
                     InvalidIndex,
+                    #[codec(index = 2)]
                     #[doc = "The reason given is just too big."]
                     ReasonTooBig,
+                    #[codec(index = 3)]
                     #[doc = "The bounty status is unexpected."]
                     UnexpectedStatus,
+                    #[codec(index = 4)]
                     #[doc = "Require bounty curator."]
                     RequireCurator,
+                    #[codec(index = 5)]
                     #[doc = "Invalid bounty value."]
                     InvalidValue,
+                    #[codec(index = 6)]
                     #[doc = "Invalid bounty fee."]
                     InvalidFee,
+                    #[codec(index = 7)]
                     #[doc = "A bounty payout is pending."]
                     #[doc = "To cancel the bounty, you must unassign and slash the curator."]
                     PendingPayout,
+                    #[codec(index = 8)]
                     #[doc = "The bounties cannot be claimed/closed because it's still in the countdown period."]
                     Premature,
+                    #[codec(index = 9)]
                     #[doc = "The bounty cannot be closed because it has active child bounties."]
                     HasActiveChildBounty,
+                    #[codec(index = 10)]
                     #[doc = "Too many approvals are already queued."]
                     TooManyQueued,
+                    #[codec(index = 11)]
+                    #[doc = "User is not the proposer of the bounty."]
+                    NotProposer,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -53631,43 +54432,62 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "New bounty proposal."]
                     BountyProposed { index: ::core::primitive::u32 },
+                    #[codec(index = 1)]
                     #[doc = "A bounty proposal was rejected; funds were slashed."]
                     BountyRejected {
                         index: ::core::primitive::u32,
                         bond: ::core::primitive::u128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "A bounty proposal is funded and became active."]
                     BountyBecameActive { index: ::core::primitive::u32 },
+                    #[codec(index = 3)]
                     #[doc = "A bounty is awarded to a beneficiary."]
                     BountyAwarded {
                         index: ::core::primitive::u32,
                         beneficiary: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 4)]
                     #[doc = "A bounty is claimed by beneficiary."]
                     BountyClaimed {
                         index: ::core::primitive::u32,
                         payout: ::core::primitive::u128,
                         beneficiary: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 5)]
                     #[doc = "A bounty is cancelled."]
                     BountyCanceled { index: ::core::primitive::u32 },
+                    #[codec(index = 6)]
                     #[doc = "A bounty expiry is extended."]
                     BountyExtended { index: ::core::primitive::u32 },
+                    #[codec(index = 7)]
                     #[doc = "A bounty is approved."]
                     BountyApproved { index: ::core::primitive::u32 },
+                    #[codec(index = 8)]
                     #[doc = "A bounty curator is proposed."]
                     CuratorProposed {
                         bounty_id: ::core::primitive::u32,
                         curator: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 9)]
                     #[doc = "A bounty curator is unassigned."]
                     CuratorUnassigned { bounty_id: ::core::primitive::u32 },
+                    #[codec(index = 10)]
                     #[doc = "A bounty curator is accepted."]
                     CuratorAccepted {
                         bounty_id: ::core::primitive::u32,
                         curator: ::subxt::ext::subxt_core::utils::AccountId32,
+                    },
+                    #[codec(index = 11)]
+                    #[doc = "A bounty deposit has been poked."]
+                    DepositPoked {
+                        bounty_id: ::core::primitive::u32,
+                        proposer: ::subxt::ext::subxt_core::utils::AccountId32,
+                        old_deposit: ::core::primitive::u128,
+                        new_deposit: ::core::primitive::u128,
                     },
                 }
             }
@@ -53694,24 +54514,24 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum BountyStatus<_0, _1> {
+                #[codec(index = 0)]
                 Proposed,
+                #[codec(index = 1)]
                 Approved,
+                #[codec(index = 2)]
                 Funded,
-                CuratorProposed {
-                    curator: _0,
-                },
-                Active {
-                    curator: _0,
-                    update_due: _1,
-                },
+                #[codec(index = 3)]
+                CuratorProposed { curator: _0 },
+                #[codec(index = 4)]
+                Active { curator: _0, update_due: _1 },
+                #[codec(index = 5)]
                 PendingPayout {
                     curator: _0,
                     beneficiary: _0,
                     unlock_at: _1,
                 },
-                ApprovedWithCurator {
-                    curator: _0,
-                },
+                #[codec(index = 6)]
+                ApprovedWithCurator { curator: _0 },
             }
         }
         pub mod pallet_broker {
@@ -53730,8 +54550,11 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum CoreAssignment {
+                    #[codec(index = 0)]
                     Idle,
+                    #[codec(index = 1)]
                     Pool,
+                    #[codec(index = 2)]
                     Task(::core::primitive::u32),
                 }
             }
@@ -53753,6 +54576,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Add a new child-bounty."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be the curator of parent"]
@@ -53773,11 +54597,14 @@ pub mod api {
                     #[doc = "- `value`: Value for executing the proposal."]
                     #[doc = "- `description`: Text description for the child-bounty."]
                     add_child_bounty {
+                        #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
+                        #[codec(compact)]
                         value: ::core::primitive::u128,
                         description:
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Propose curator for funded child-bounty."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be curator of parent bounty."]
@@ -53794,14 +54621,18 @@ pub mod api {
                     #[doc = "- `curator`: Address of child-bounty curator."]
                     #[doc = "- `fee`: payment fee to child-bounty curator for execution."]
                     propose_curator {
+                        #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
+                        #[codec(compact)]
                         child_bounty_id: ::core::primitive::u32,
                         curator: ::subxt::ext::subxt_core::utils::MultiAddress<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
                         >,
+                        #[codec(compact)]
                         fee: ::core::primitive::u128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Accept the curator role for the child-bounty."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be the curator of this"]
@@ -53822,9 +54653,12 @@ pub mod api {
                     #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                     #[doc = "- `child_bounty_id`: Index of child bounty."]
                     accept_curator {
+                        #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
+                        #[codec(compact)]
                         child_bounty_id: ::core::primitive::u32,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Unassign curator from a child-bounty."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call can be either `RejectOrigin`, or"]
@@ -53860,9 +54694,12 @@ pub mod api {
                     #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                     #[doc = "- `child_bounty_id`: Index of child bounty."]
                     unassign_curator {
+                        #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
+                        #[codec(compact)]
                         child_bounty_id: ::core::primitive::u32,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Award child-bounty to a beneficiary."]
                     #[doc = ""]
                     #[doc = "The beneficiary will be able to claim the funds after a delay."]
@@ -53881,13 +54718,16 @@ pub mod api {
                     #[doc = "- `child_bounty_id`: Index of child bounty."]
                     #[doc = "- `beneficiary`: Beneficiary account."]
                     award_child_bounty {
+                        #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
+                        #[codec(compact)]
                         child_bounty_id: ::core::primitive::u32,
                         beneficiary: ::subxt::ext::subxt_core::utils::MultiAddress<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
                         >,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Claim the payout from an awarded child-bounty after payout delay."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call may be any signed origin."]
@@ -53905,9 +54745,12 @@ pub mod api {
                     #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                     #[doc = "- `child_bounty_id`: Index of child bounty."]
                     claim_child_bounty {
+                        #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
+                        #[codec(compact)]
                         child_bounty_id: ::core::primitive::u32,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Cancel a proposed or active child-bounty. Child-bounty account funds"]
                     #[doc = "are transferred to parent bounty account. The child-bounty curator"]
                     #[doc = "deposit may be unreserved if possible."]
@@ -53931,7 +54774,9 @@ pub mod api {
                     #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                     #[doc = "- `child_bounty_id`: Index of child bounty."]
                     close_child_bounty {
+                        #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
+                        #[codec(compact)]
                         child_bounty_id: ::core::primitive::u32,
                     },
                 }
@@ -53948,10 +54793,13 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "The parent bounty is not in active state."]
                     ParentBountyNotActive,
+                    #[codec(index = 1)]
                     #[doc = "The bounty balance is not enough to add new child-bounty."]
                     InsufficientBountyBalance,
+                    #[codec(index = 2)]
                     #[doc = "Number of child bounties exceeds limit `MaxActiveChildBountyCount`."]
                     TooManyChildBounties,
                 }
@@ -53968,17 +54816,20 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A child-bounty is added."]
                     Added {
                         index: ::core::primitive::u32,
                         child_index: ::core::primitive::u32,
                     },
+                    #[codec(index = 1)]
                     #[doc = "A child-bounty is awarded to a beneficiary."]
                     Awarded {
                         index: ::core::primitive::u32,
                         child_index: ::core::primitive::u32,
                         beneficiary: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 2)]
                     #[doc = "A child-bounty is claimed by beneficiary."]
                     Claimed {
                         index: ::core::primitive::u32,
@@ -53986,6 +54837,7 @@ pub mod api {
                         payout: ::core::primitive::u128,
                         beneficiary: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 3)]
                     #[doc = "A child-bounty is cancelled."]
                     Canceled {
                         index: ::core::primitive::u32,
@@ -54015,13 +54867,13 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum ChildBountyStatus<_0, _1> {
+                #[codec(index = 0)]
                 Added,
-                CuratorProposed {
-                    curator: _0,
-                },
-                Active {
-                    curator: _0,
-                },
+                #[codec(index = 1)]
+                CuratorProposed { curator: _0 },
+                #[codec(index = 2)]
+                Active { curator: _0 },
+                #[codec(index = 3)]
                 PendingPayout {
                     curator: _0,
                     beneficiary: _0,
@@ -54045,12 +54897,19 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Conviction {
+                    #[codec(index = 0)]
                     None,
+                    #[codec(index = 1)]
                     Locked1x,
+                    #[codec(index = 2)]
                     Locked2x,
+                    #[codec(index = 3)]
                     Locked3x,
+                    #[codec(index = 4)]
                     Locked4x,
+                    #[codec(index = 5)]
                     Locked5x,
+                    #[codec(index = 6)]
                     Locked6x,
                 }
             }
@@ -54069,6 +54928,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Vote in a poll. If `vote.is_aye()`, the vote is to enact the proposal;"]
                     #[doc = "otherwise it is a vote to keep the status quo."]
                     #[doc = ""]
@@ -54079,11 +54939,13 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Weight: `O(R)` where R is the number of polls the voter has voted on."]
                     vote {
+                        #[codec(compact)]
                         poll_index: ::core::primitive::u32,
                         vote: runtime_types::pallet_conviction_voting::vote::AccountVote<
                             ::core::primitive::u128,
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Delegate the voting power (with some given conviction) of the sending account for a"]
                     #[doc = "particular class of polls."]
                     #[doc = ""]
@@ -54116,6 +54978,7 @@ pub mod api {
                         conviction: runtime_types::pallet_conviction_voting::conviction::Conviction,
                         balance: ::core::primitive::u128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Undelegate the voting power of the sending account for a particular class of polls."]
                     #[doc = ""]
                     #[doc = "Tokens may be unlocked following once an amount of time consistent with the lock period"]
@@ -54131,6 +54994,7 @@ pub mod api {
                     #[doc = "Weight: `O(R)` where R is the number of polls the voter delegating to has"]
                     #[doc = "  voted on. Weight is initially charged as if maximum votes, but is refunded later."]
                     undelegate { class: ::core::primitive::u16 },
+                    #[codec(index = 3)]
                     #[doc = "Remove the lock caused by prior voting/delegating which has expired within a particular"]
                     #[doc = "class."]
                     #[doc = ""]
@@ -54147,6 +55011,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Remove a vote for a poll."]
                     #[doc = ""]
                     #[doc = "If:"]
@@ -54180,6 +55045,7 @@ pub mod api {
                         class: ::core::option::Option<::core::primitive::u16>,
                         index: ::core::primitive::u32,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Remove a vote for a poll."]
                     #[doc = ""]
                     #[doc = "If the `target` is equal to the signer, then this function is exactly equivalent to"]
@@ -54218,29 +55084,41 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Poll is not ongoing."]
                     NotOngoing,
+                    #[codec(index = 1)]
                     #[doc = "The given account did not vote on the poll."]
                     NotVoter,
+                    #[codec(index = 2)]
                     #[doc = "The actor has no permission to conduct the action."]
                     NoPermission,
+                    #[codec(index = 3)]
                     #[doc = "The actor has no permission to conduct the action right now but will do in the future."]
                     NoPermissionYet,
+                    #[codec(index = 4)]
                     #[doc = "The account is already delegating."]
                     AlreadyDelegating,
+                    #[codec(index = 5)]
                     #[doc = "The account currently has votes attached to it and the operation cannot succeed until"]
                     #[doc = "these are removed through `remove_vote`."]
                     AlreadyVoting,
+                    #[codec(index = 6)]
                     #[doc = "Too high a balance was provided that the account cannot afford."]
                     InsufficientFunds,
+                    #[codec(index = 7)]
                     #[doc = "The account is not currently delegating."]
                     NotDelegating,
+                    #[codec(index = 8)]
                     #[doc = "Delegation to oneself makes no sense."]
                     Nonsense,
+                    #[codec(index = 9)]
                     #[doc = "Maximum number of votes reached."]
                     MaxVotesReached,
+                    #[codec(index = 10)]
                     #[doc = "The class must be supplied since it is not easily determinable from the state."]
                     ClassNeeded,
+                    #[codec(index = 11)]
                     #[doc = "The class ID supplied is invalid."]
                     BadClass,
                 }
@@ -54257,13 +55135,16 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "An account has delegated their vote to another account. \\[who, target\\]"]
                     Delegated(
                         ::subxt::ext::subxt_core::utils::AccountId32,
                         ::subxt::ext::subxt_core::utils::AccountId32,
                     ),
+                    #[codec(index = 1)]
                     #[doc = "An \\[account\\] has cancelled a previous delegation operation."]
                     Undelegated(::subxt::ext::subxt_core::utils::AccountId32),
+                    #[codec(index = 2)]
                     #[doc = "An account has voted"]
                     Voted {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -54271,6 +55152,7 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     },
+                    #[codec(index = 3)]
                     #[doc = "A vote has been removed"]
                     VoteRemoved {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -54278,6 +55160,7 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     },
+                    #[codec(index = 4)]
                     #[doc = "The lockup period of a conviction vote expired, and the funds have been unlocked."]
                     VoteUnlocked {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -54333,19 +55216,15 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum AccountVote<_0> {
+                    #[codec(index = 0)]
                     Standard {
                         vote: runtime_types::pallet_conviction_voting::vote::Vote,
                         balance: _0,
                     },
-                    Split {
-                        aye: _0,
-                        nay: _0,
-                    },
-                    SplitAbstain {
-                        aye: _0,
-                        nay: _0,
-                        abstain: _0,
-                    },
+                    #[codec(index = 1)]
+                    Split { aye: _0, nay: _0 },
+                    #[codec(index = 2)]
+                    SplitAbstain { aye: _0, nay: _0, abstain: _0 },
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -54366,6 +55245,7 @@ pub mod api {
                     pub delegations:
                         runtime_types::pallet_conviction_voting::types::Delegations<_0>,
                     pub prior: runtime_types::pallet_conviction_voting::vote::PriorLock<_1, _0>,
+                    #[codec(skip)]
                     pub __ignore: ::core::marker::PhantomData<_2>,
                 }
                 #[derive(
@@ -54423,7 +55303,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Voting<_0, _1, _2, _3> {
+                    #[codec(index = 0)]
                     Casting(runtime_types::pallet_conviction_voting::vote::Casting<_0, _2, _2>),
+                    #[codec(index = 1)]
                     Delegating(
                         runtime_types::pallet_conviction_voting::vote::Delegating<_0, _1, _2>,
                     ),
@@ -54448,6 +55330,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Report voter equivocation/misbehavior. This method will verify the"]
                     #[doc = "equivocation proof and validate the given key ownership proof"]
                     #[doc = "against the extracted offender. If both are valid, the offence"]
@@ -54461,6 +55344,7 @@ pub mod api {
                         >,
                         key_owner_proof: runtime_types::sp_session::MembershipProof,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Report voter equivocation/misbehavior. This method will verify the"]
                     #[doc = "equivocation proof and validate the given key ownership proof"]
                     #[doc = "against the extracted offender. If both are valid, the offence"]
@@ -54479,6 +55363,7 @@ pub mod api {
                         >,
                         key_owner_proof: runtime_types::sp_session::MembershipProof,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Note that the current authority set of the GRANDPA finality gadget has stalled."]
                     #[doc = ""]
                     #[doc = "This will trigger a forced authority set change at the beginning of the next session, to"]
@@ -54509,20 +55394,27 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Attempt to signal GRANDPA pause when the authority set isn't live"]
                     #[doc = "(either paused or already pending pause)."]
                     PauseFailed,
+                    #[codec(index = 1)]
                     #[doc = "Attempt to signal GRANDPA resume when the authority set isn't paused"]
                     #[doc = "(either live or already pending resume)."]
                     ResumeFailed,
+                    #[codec(index = 2)]
                     #[doc = "Attempt to signal GRANDPA change with one already pending."]
                     ChangePending,
+                    #[codec(index = 3)]
                     #[doc = "Cannot signal forced change so soon after last."]
                     TooSoon,
+                    #[codec(index = 4)]
                     #[doc = "A key ownership proof provided as part of an equivocation report is invalid."]
                     InvalidKeyOwnershipProof,
+                    #[codec(index = 5)]
                     #[doc = "An equivocation proof provided as part of an equivocation report is invalid."]
                     InvalidEquivocationProof,
+                    #[codec(index = 6)]
                     #[doc = "A given equivocation report is valid but already previously reported."]
                     DuplicateOffenceReport,
                 }
@@ -54539,6 +55431,7 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "New authority set has been applied."]
                     NewAuthorities {
                         authority_set: ::subxt::ext::subxt_core::alloc::vec::Vec<(
@@ -54546,8 +55439,10 @@ pub mod api {
                             ::core::primitive::u64,
                         )>,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Current authority set has been paused."]
                     Paused,
+                    #[codec(index = 2)]
                     #[doc = "Current authority set has been resumed."]
                     Resumed,
                 }
@@ -54577,9 +55472,13 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum StoredState<_0> {
+                #[codec(index = 0)]
                 Live,
+                #[codec(index = 1)]
                 PendingPause { scheduled_at: _0, delay: _0 },
+                #[codec(index = 2)]
                 Paused,
+                #[codec(index = 3)]
                 PendingResume { scheduled_at: _0, delay: _0 },
             }
         }
@@ -54628,6 +55527,7 @@ pub mod api {
                 )]
                 #[doc = "Identity pallet declaration."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Add a registrar to the system."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be `T::RegistrarOrigin`."]
@@ -54641,6 +55541,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Set an account's identity information and reserve the appropriate deposit."]
                     #[doc = ""]
                     #[doc = "If the account already has identity information, the deposit is taken as part payment"]
@@ -54656,6 +55557,7 @@ pub mod api {
                             runtime_types::pallet_identity::legacy::IdentityInfo,
                         >,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Set the sub-accounts of the sender."]
                     #[doc = ""]
                     #[doc = "Payment: Any aggregate balance reserved by previous `set_subs` calls will be returned"]
@@ -54671,6 +55573,7 @@ pub mod api {
                             runtime_types::pallet_identity::types::Data,
                         )>,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Clear an account's identity info and all sub-accounts and return all deposits."]
                     #[doc = ""]
                     #[doc = "Payment: All reserved balances on the account are returned."]
@@ -54680,6 +55583,7 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Emits `IdentityCleared` if successful."]
                     clear_identity,
+                    #[codec(index = 4)]
                     #[doc = "Request a judgement from a registrar."]
                     #[doc = ""]
                     #[doc = "Payment: At most `max_fee` will be reserved for payment to the registrar if judgement"]
@@ -54697,9 +55601,12 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Emits `JudgementRequested` if successful."]
                     request_judgement {
+                        #[codec(compact)]
                         reg_index: ::core::primitive::u32,
+                        #[codec(compact)]
                         max_fee: ::core::primitive::u128,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Cancel a previous request."]
                     #[doc = ""]
                     #[doc = "Payment: A previously reserved deposit is returned on success."]
@@ -54711,6 +55618,7 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Emits `JudgementUnrequested` if successful."]
                     cancel_request { reg_index: ::core::primitive::u32 },
+                    #[codec(index = 6)]
                     #[doc = "Set the fee required for a judgement to be requested from a registrar."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and the sender must be the account"]
@@ -54719,9 +55627,12 @@ pub mod api {
                     #[doc = "- `index`: the index of the registrar whose fee is to be set."]
                     #[doc = "- `fee`: the new fee."]
                     set_fee {
+                        #[codec(compact)]
                         index: ::core::primitive::u32,
+                        #[codec(compact)]
                         fee: ::core::primitive::u128,
                     },
+                    #[codec(index = 7)]
                     #[doc = "Change the account associated with a registrar."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and the sender must be the account"]
@@ -54730,12 +55641,14 @@ pub mod api {
                     #[doc = "- `index`: the index of the registrar whose fee is to be set."]
                     #[doc = "- `new`: the new account ID."]
                     set_account_id {
+                        #[codec(compact)]
                         index: ::core::primitive::u32,
                         new: ::subxt::ext::subxt_core::utils::MultiAddress<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
                         >,
                     },
+                    #[codec(index = 8)]
                     #[doc = "Set the field information for a registrar."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and the sender must be the account"]
@@ -54744,9 +55657,11 @@ pub mod api {
                     #[doc = "- `index`: the index of the registrar whose fee is to be set."]
                     #[doc = "- `fields`: the fields that the registrar concerns themselves with."]
                     set_fields {
+                        #[codec(compact)]
                         index: ::core::primitive::u32,
                         fields: ::core::primitive::u64,
                     },
+                    #[codec(index = 9)]
                     #[doc = "Provide a judgement for an account's identity."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and the sender must be the account"]
@@ -54763,6 +55678,7 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Emits `JudgementGiven` if successful."]
                     provide_judgement {
+                        #[codec(compact)]
                         reg_index: ::core::primitive::u32,
                         target: ::subxt::ext::subxt_core::utils::MultiAddress<
                             ::subxt::ext::subxt_core::utils::AccountId32,
@@ -54773,6 +55689,7 @@ pub mod api {
                         >,
                         identity: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 10)]
                     #[doc = "Remove an account's identity and sub-account information and slash the deposits."]
                     #[doc = ""]
                     #[doc = "Payment: Reserved balances from `set_subs` and `set_identity` are slashed and handled by"]
@@ -54791,6 +55708,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 11)]
                     #[doc = "Add the given account to the sender's subs."]
                     #[doc = ""]
                     #[doc = "Payment: Balance reserved by a previous `set_subs` call for one sub will be repatriated"]
@@ -54805,6 +55723,7 @@ pub mod api {
                         >,
                         data: runtime_types::pallet_identity::types::Data,
                     },
+                    #[codec(index = 12)]
                     #[doc = "Alter the associated name of the given sub-account."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a registered"]
@@ -54816,6 +55735,7 @@ pub mod api {
                         >,
                         data: runtime_types::pallet_identity::types::Data,
                     },
+                    #[codec(index = 13)]
                     #[doc = "Remove the given account from the sender's subs."]
                     #[doc = ""]
                     #[doc = "Payment: Balance reserved by a previous `set_subs` call for one sub will be repatriated"]
@@ -54829,6 +55749,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 14)]
                     #[doc = "Remove the sender as a sub-account."]
                     #[doc = ""]
                     #[doc = "Payment: Balance reserved by a previous `set_subs` call for one sub will be repatriated"]
@@ -54840,6 +55761,7 @@ pub mod api {
                     #[doc = "NOTE: This should not normally be used, but is provided in the case that the non-"]
                     #[doc = "controller of an account is maliciously registered as a sub-account."]
                     quit_sub,
+                    #[codec(index = 15)]
                     #[doc = "Add an `AccountId` with permission to grant usernames with a given `suffix` appended."]
                     #[doc = ""]
                     #[doc = "The authority can grant up to `allocation` usernames. To top up the allocation or"]
@@ -54853,6 +55775,7 @@ pub mod api {
                         suffix: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         allocation: ::core::primitive::u32,
                     },
+                    #[codec(index = 16)]
                     #[doc = "Remove `authority` from the username authorities."]
                     remove_username_authority {
                         suffix: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
@@ -54861,6 +55784,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 17)]
                     #[doc = "Set the username for `who`. Must be called by a username authority."]
                     #[doc = ""]
                     #[doc = "If `use_allocation` is set, the authority must have a username allocation available to"]
@@ -54884,6 +55808,7 @@ pub mod api {
                             ::core::option::Option<runtime_types::sp_runtime::MultiSignature>,
                         use_allocation: ::core::primitive::bool,
                     },
+                    #[codec(index = 18)]
                     #[doc = "Accept a given username that an `authority` granted. The call must include the full"]
                     #[doc = "username, as in `username.suffix`."]
                     accept_username {
@@ -54891,6 +55816,7 @@ pub mod api {
                             ::core::primitive::u8,
                         >,
                     },
+                    #[codec(index = 19)]
                     #[doc = "Remove an expired username approval. The username was approved by an authority but never"]
                     #[doc = "accepted by the user and must now be beyond its expiration. The call must include the"]
                     #[doc = "full username, as in `username.suffix`."]
@@ -54899,12 +55825,14 @@ pub mod api {
                             ::core::primitive::u8,
                         >,
                     },
+                    #[codec(index = 20)]
                     #[doc = "Set a given username as the primary. The username should include the suffix."]
                     set_primary_username {
                         username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
+                    #[codec(index = 21)]
                     #[doc = "Start the process of removing a username by placing it in the unbinding usernames map."]
                     #[doc = "Once the grace period has passed, the username can be deleted by calling"]
                     #[doc = "[remove_username](crate::Call::remove_username)."]
@@ -54913,6 +55841,7 @@ pub mod api {
                             ::core::primitive::u8,
                         >,
                     },
+                    #[codec(index = 22)]
                     #[doc = "Permanently delete a username which has been unbinding for longer than the grace period."]
                     #[doc = "Caller is refunded the fee if the username expired and the removal was successful."]
                     remove_username {
@@ -54920,6 +55849,7 @@ pub mod api {
                             ::core::primitive::u8,
                         >,
                     },
+                    #[codec(index = 23)]
                     #[doc = "Call with [ForceOrigin](crate::Config::ForceOrigin) privileges which deletes a username"]
                     #[doc = "and slashes any deposit associated with it."]
                     kill_username {
@@ -54941,64 +55871,94 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Too many subs-accounts."]
                     TooManySubAccounts,
+                    #[codec(index = 1)]
                     #[doc = "Account isn't found."]
                     NotFound,
+                    #[codec(index = 2)]
                     #[doc = "Account isn't named."]
                     NotNamed,
+                    #[codec(index = 3)]
                     #[doc = "Empty index."]
                     EmptyIndex,
+                    #[codec(index = 4)]
                     #[doc = "Fee is changed."]
                     FeeChanged,
+                    #[codec(index = 5)]
                     #[doc = "No identity found."]
                     NoIdentity,
+                    #[codec(index = 6)]
                     #[doc = "Sticky judgement."]
                     StickyJudgement,
+                    #[codec(index = 7)]
                     #[doc = "Judgement given."]
                     JudgementGiven,
+                    #[codec(index = 8)]
                     #[doc = "Invalid judgement."]
                     InvalidJudgement,
+                    #[codec(index = 9)]
                     #[doc = "The index is invalid."]
                     InvalidIndex,
+                    #[codec(index = 10)]
                     #[doc = "The target is invalid."]
                     InvalidTarget,
+                    #[codec(index = 11)]
                     #[doc = "Maximum amount of registrars reached. Cannot add any more."]
                     TooManyRegistrars,
+                    #[codec(index = 12)]
                     #[doc = "Account ID is already named."]
                     AlreadyClaimed,
+                    #[codec(index = 13)]
                     #[doc = "Sender is not a sub-account."]
                     NotSub,
+                    #[codec(index = 14)]
                     #[doc = "Sub-account isn't owned by sender."]
                     NotOwned,
+                    #[codec(index = 15)]
                     #[doc = "The provided judgement was for a different identity."]
                     JudgementForDifferentIdentity,
+                    #[codec(index = 16)]
                     #[doc = "Error that occurs when there is an issue paying for judgement."]
                     JudgementPaymentFailed,
+                    #[codec(index = 17)]
                     #[doc = "The provided suffix is too long."]
                     InvalidSuffix,
+                    #[codec(index = 18)]
                     #[doc = "The sender does not have permission to issue a username."]
                     NotUsernameAuthority,
+                    #[codec(index = 19)]
                     #[doc = "The authority cannot allocate any more usernames."]
                     NoAllocation,
+                    #[codec(index = 20)]
                     #[doc = "The signature on a username was not valid."]
                     InvalidSignature,
+                    #[codec(index = 21)]
                     #[doc = "Setting this username requires a signature, but none was provided."]
                     RequiresSignature,
+                    #[codec(index = 22)]
                     #[doc = "The username does not meet the requirements."]
                     InvalidUsername,
+                    #[codec(index = 23)]
                     #[doc = "The username is already taken."]
                     UsernameTaken,
+                    #[codec(index = 24)]
                     #[doc = "The requested username does not exist."]
                     NoUsername,
+                    #[codec(index = 25)]
                     #[doc = "The username cannot be forcefully removed because it can still be accepted."]
                     NotExpired,
+                    #[codec(index = 26)]
                     #[doc = "The username cannot be removed because it's still in the grace period."]
                     TooEarly,
+                    #[codec(index = 27)]
                     #[doc = "The username cannot be removed because it is not unbinding."]
                     NotUnbinding,
+                    #[codec(index = 28)]
                     #[doc = "The username cannot be unbound because it is already unbinding."]
                     AlreadyUnbinding,
+                    #[codec(index = 29)]
                     #[doc = "The action cannot be performed because of insufficient privileges (e.g. authority"]
                     #[doc = "trying to unbind a username provided by the system)."]
                     InsufficientPrivileges,
@@ -55016,62 +55976,74 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A name was set or reset (which will remove all judgements)."]
                     IdentitySet {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 1)]
                     #[doc = "A name was cleared, and the given balance returned."]
                     IdentityCleared {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "A name was removed and the given balance slashed."]
                     IdentityKilled {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
+                    #[codec(index = 3)]
                     #[doc = "A judgement was asked from a registrar."]
                     JudgementRequested {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         registrar_index: ::core::primitive::u32,
                     },
+                    #[codec(index = 4)]
                     #[doc = "A judgement request was retracted."]
                     JudgementUnrequested {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         registrar_index: ::core::primitive::u32,
                     },
+                    #[codec(index = 5)]
                     #[doc = "A judgement was given by a registrar."]
                     JudgementGiven {
                         target: ::subxt::ext::subxt_core::utils::AccountId32,
                         registrar_index: ::core::primitive::u32,
                     },
+                    #[codec(index = 6)]
                     #[doc = "A registrar was added."]
                     RegistrarAdded {
                         registrar_index: ::core::primitive::u32,
                     },
+                    #[codec(index = 7)]
                     #[doc = "A sub-identity was added to an identity and the deposit paid."]
                     SubIdentityAdded {
                         sub: ::subxt::ext::subxt_core::utils::AccountId32,
                         main: ::subxt::ext::subxt_core::utils::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
+                    #[codec(index = 8)]
                     #[doc = "An account's sub-identities were set (in bulk)."]
                     SubIdentitiesSet {
                         main: ::subxt::ext::subxt_core::utils::AccountId32,
                         number_of_subs: ::core::primitive::u32,
                         new_deposit: ::core::primitive::u128,
                     },
+                    #[codec(index = 9)]
                     #[doc = "A given sub-account's associated name was changed by its super-identity."]
                     SubIdentityRenamed {
                         sub: ::subxt::ext::subxt_core::utils::AccountId32,
                         main: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 10)]
                     #[doc = "A sub-identity was removed from an identity and the deposit freed."]
                     SubIdentityRemoved {
                         sub: ::subxt::ext::subxt_core::utils::AccountId32,
                         main: ::subxt::ext::subxt_core::utils::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
+                    #[codec(index = 11)]
                     #[doc = "A sub-identity was cleared, and the given deposit repatriated from the"]
                     #[doc = "main identity account to the sub-identity account."]
                     SubIdentityRevoked {
@@ -55079,14 +56051,17 @@ pub mod api {
                         main: ::subxt::ext::subxt_core::utils::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
+                    #[codec(index = 12)]
                     #[doc = "A username authority was added."]
                     AuthorityAdded {
                         authority: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 13)]
                     #[doc = "A username authority was removed."]
                     AuthorityRemoved {
                         authority: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 14)]
                     #[doc = "A username was set for `who`."]
                     UsernameSet {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -55094,6 +56069,7 @@ pub mod api {
                             ::core::primitive::u8,
                         >,
                     },
+                    #[codec(index = 15)]
                     #[doc = "A username was queued, but `who` must accept it prior to `expiration`."]
                     UsernameQueued {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -55102,10 +56078,12 @@ pub mod api {
                         >,
                         expiration: ::core::primitive::u32,
                     },
+                    #[codec(index = 16)]
                     #[doc = "A queued username passed its expiration without being claimed and was removed."]
                     PreapprovalExpired {
                         whose: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 17)]
                     #[doc = "A username was set as a primary and can be looked up from `who`."]
                     PrimaryUsernameSet {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -55113,6 +56091,7 @@ pub mod api {
                             ::core::primitive::u8,
                         >,
                     },
+                    #[codec(index = 18)]
                     #[doc = "A dangling username (as in, a username corresponding to an account that has removed its"]
                     #[doc = "identity) has been removed."]
                     DanglingUsernameRemoved {
@@ -55121,18 +56100,21 @@ pub mod api {
                             ::core::primitive::u8,
                         >,
                     },
+                    #[codec(index = 19)]
                     #[doc = "A username has been unbound."]
                     UsernameUnbound {
                         username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
+                    #[codec(index = 20)]
                     #[doc = "A username has been removed."]
                     UsernameRemoved {
                         username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
+                    #[codec(index = 21)]
                     #[doc = "A username has been killed."]
                     UsernameKilled {
                         username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
@@ -55170,43 +56152,81 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Data {
+                    #[codec(index = 0)]
                     None,
+                    #[codec(index = 1)]
                     Raw0([::core::primitive::u8; 0usize]),
+                    #[codec(index = 2)]
                     Raw1([::core::primitive::u8; 1usize]),
+                    #[codec(index = 3)]
                     Raw2([::core::primitive::u8; 2usize]),
+                    #[codec(index = 4)]
                     Raw3([::core::primitive::u8; 3usize]),
+                    #[codec(index = 5)]
                     Raw4([::core::primitive::u8; 4usize]),
+                    #[codec(index = 6)]
                     Raw5([::core::primitive::u8; 5usize]),
+                    #[codec(index = 7)]
                     Raw6([::core::primitive::u8; 6usize]),
+                    #[codec(index = 8)]
                     Raw7([::core::primitive::u8; 7usize]),
+                    #[codec(index = 9)]
                     Raw8([::core::primitive::u8; 8usize]),
+                    #[codec(index = 10)]
                     Raw9([::core::primitive::u8; 9usize]),
+                    #[codec(index = 11)]
                     Raw10([::core::primitive::u8; 10usize]),
+                    #[codec(index = 12)]
                     Raw11([::core::primitive::u8; 11usize]),
+                    #[codec(index = 13)]
                     Raw12([::core::primitive::u8; 12usize]),
+                    #[codec(index = 14)]
                     Raw13([::core::primitive::u8; 13usize]),
+                    #[codec(index = 15)]
                     Raw14([::core::primitive::u8; 14usize]),
+                    #[codec(index = 16)]
                     Raw15([::core::primitive::u8; 15usize]),
+                    #[codec(index = 17)]
                     Raw16([::core::primitive::u8; 16usize]),
+                    #[codec(index = 18)]
                     Raw17([::core::primitive::u8; 17usize]),
+                    #[codec(index = 19)]
                     Raw18([::core::primitive::u8; 18usize]),
+                    #[codec(index = 20)]
                     Raw19([::core::primitive::u8; 19usize]),
+                    #[codec(index = 21)]
                     Raw20([::core::primitive::u8; 20usize]),
+                    #[codec(index = 22)]
                     Raw21([::core::primitive::u8; 21usize]),
+                    #[codec(index = 23)]
                     Raw22([::core::primitive::u8; 22usize]),
+                    #[codec(index = 24)]
                     Raw23([::core::primitive::u8; 23usize]),
+                    #[codec(index = 25)]
                     Raw24([::core::primitive::u8; 24usize]),
+                    #[codec(index = 26)]
                     Raw25([::core::primitive::u8; 25usize]),
+                    #[codec(index = 27)]
                     Raw26([::core::primitive::u8; 26usize]),
+                    #[codec(index = 28)]
                     Raw27([::core::primitive::u8; 27usize]),
+                    #[codec(index = 29)]
                     Raw28([::core::primitive::u8; 28usize]),
+                    #[codec(index = 30)]
                     Raw29([::core::primitive::u8; 29usize]),
+                    #[codec(index = 31)]
                     Raw30([::core::primitive::u8; 30usize]),
+                    #[codec(index = 32)]
                     Raw31([::core::primitive::u8; 31usize]),
+                    #[codec(index = 33)]
                     Raw32([::core::primitive::u8; 32usize]),
+                    #[codec(index = 34)]
                     BlakeTwo256([::core::primitive::u8; 32usize]),
+                    #[codec(index = 35)]
                     Sha256([::core::primitive::u8; 32usize]),
+                    #[codec(index = 36)]
                     Keccak256([::core::primitive::u8; 32usize]),
+                    #[codec(index = 37)]
                     ShaThree256([::core::primitive::u8; 32usize]),
                 }
                 #[derive(
@@ -55221,12 +56241,19 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Judgement<_0> {
+                    #[codec(index = 0)]
                     Unknown,
+                    #[codec(index = 1)]
                     FeePaid(_0),
+                    #[codec(index = 2)]
                     Reasonable,
+                    #[codec(index = 3)]
                     KnownGood,
+                    #[codec(index = 4)]
                     OutOfDate,
+                    #[codec(index = 5)]
                     LowQuality,
+                    #[codec(index = 6)]
                     Erroneous,
                 }
                 #[derive(
@@ -55241,8 +56268,11 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Provider<_0> {
+                    #[codec(index = 0)]
                     Allocation,
+                    #[codec(index = 1)]
                     AuthorityDeposit(_0),
+                    #[codec(index = 2)]
                     System,
                 }
                 #[derive(
@@ -55314,6 +56344,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Assign an previously unassigned index."]
                     #[doc = ""]
                     #[doc = "Payment: `Deposit` is reserved from the sender account."]
@@ -55327,6 +56358,7 @@ pub mod api {
                     #[doc = "## Complexity"]
                     #[doc = "- `O(1)`."]
                     claim { index: ::core::primitive::u32 },
+                    #[codec(index = 1)]
                     #[doc = "Assign an index already owned by the sender to another account. The balance reservation"]
                     #[doc = "is effectively transferred to the new account."]
                     #[doc = ""]
@@ -55346,6 +56378,7 @@ pub mod api {
                         >,
                         index: ::core::primitive::u32,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Free up an index owned by the sender."]
                     #[doc = ""]
                     #[doc = "Payment: Any previous deposit placed for the index is unreserved in the sender account."]
@@ -55359,6 +56392,7 @@ pub mod api {
                     #[doc = "## Complexity"]
                     #[doc = "- `O(1)`."]
                     free { index: ::core::primitive::u32 },
+                    #[codec(index = 3)]
                     #[doc = "Force an index to an account. This doesn't require a deposit. If the index is already"]
                     #[doc = "held, then any deposit is reimbursed to its current owner."]
                     #[doc = ""]
@@ -55380,6 +56414,7 @@ pub mod api {
                         index: ::core::primitive::u32,
                         freeze: ::core::primitive::bool,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Freeze an index so it will always point to the sender account. This consumes the"]
                     #[doc = "deposit."]
                     #[doc = ""]
@@ -55393,6 +56428,7 @@ pub mod api {
                     #[doc = "## Complexity"]
                     #[doc = "- `O(1)`."]
                     freeze { index: ::core::primitive::u32 },
+                    #[codec(index = 5)]
                     #[doc = "Poke the deposit reserved for an index."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and the signing account must have a"]
@@ -55418,14 +56454,19 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "The index was not already assigned."]
                     NotAssigned,
+                    #[codec(index = 1)]
                     #[doc = "The index is assigned to another account."]
                     NotOwner,
+                    #[codec(index = 2)]
                     #[doc = "The index was not available."]
                     InUse,
+                    #[codec(index = 3)]
                     #[doc = "The source and destination accounts are identical."]
                     NotTransfer,
+                    #[codec(index = 4)]
                     #[doc = "The index is permanent and may not be freed/changed."]
                     Permanent,
                 }
@@ -55442,18 +56483,22 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A account index was assigned."]
                     IndexAssigned {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         index: ::core::primitive::u32,
                     },
+                    #[codec(index = 1)]
                     #[doc = "A account index has been freed up (unassigned)."]
                     IndexFreed { index: ::core::primitive::u32 },
+                    #[codec(index = 2)]
                     #[doc = "A account index has been frozen to its current account ID."]
                     IndexFrozen {
                         index: ::core::primitive::u32,
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 3)]
                     #[doc = "A deposit to reserve an index has been poked/reconsidered."]
                     DepositPoked {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -55481,7 +56526,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
-                    # [doc = "Remove a page which has no more messages remaining to be processed or is stale."] reap_page { message_origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , page_index : :: core :: primitive :: u32 , } , # [doc = "Execute an overweight message."] # [doc = ""] # [doc = "Temporary processing errors will be propagated whereas permanent errors are treated"] # [doc = "as success condition."] # [doc = ""] # [doc = "- `origin`: Must be `Signed`."] # [doc = "- `message_origin`: The origin from which the message to be executed arrived."] # [doc = "- `page`: The page in the queue in which the message to be executed is sitting."] # [doc = "- `index`: The index into the queue of the message to be executed."] # [doc = "- `weight_limit`: The maximum amount of weight allowed to be consumed in the execution"] # [doc = "  of the message."] # [doc = ""] # [doc = "Benchmark complexity considerations: O(index + weight_limit)."] execute_overweight { message_origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , page : :: core :: primitive :: u32 , index : :: core :: primitive :: u32 , weight_limit : runtime_types :: sp_weights :: weight_v2 :: Weight , } , }
+                    # [codec (index = 0)] # [doc = "Remove a page which has no more messages remaining to be processed or is stale."] reap_page { message_origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , page_index : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Execute an overweight message."] # [doc = ""] # [doc = "Temporary processing errors will be propagated whereas permanent errors are treated"] # [doc = "as success condition."] # [doc = ""] # [doc = "- `origin`: Must be `Signed`."] # [doc = "- `message_origin`: The origin from which the message to be executed arrived."] # [doc = "- `page`: The page in the queue in which the message to be executed is sitting."] # [doc = "- `index`: The index into the queue of the message to be executed."] # [doc = "- `weight_limit`: The maximum amount of weight allowed to be consumed in the execution"] # [doc = "  of the message."] # [doc = ""] # [doc = "Benchmark complexity considerations: O(index + weight_limit)."] execute_overweight { message_origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , page : :: core :: primitive :: u32 , index : :: core :: primitive :: u32 , weight_limit : runtime_types :: sp_weights :: weight_v2 :: Weight , } , }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                     :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -55495,28 +56540,37 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Page is not reapable because it has items remaining to be processed and is not old"]
                     #[doc = "enough."]
                     NotReapable,
+                    #[codec(index = 1)]
                     #[doc = "Page to be reaped does not exist."]
                     NoPage,
+                    #[codec(index = 2)]
                     #[doc = "The referenced message could not be found."]
                     NoMessage,
+                    #[codec(index = 3)]
                     #[doc = "The message was already processed and cannot be processed again."]
                     AlreadyProcessed,
+                    #[codec(index = 4)]
                     #[doc = "The message is queued for future execution."]
                     Queued,
+                    #[codec(index = 5)]
                     #[doc = "There is temporarily not enough weight to continue servicing messages."]
                     InsufficientWeight,
+                    #[codec(index = 6)]
                     #[doc = "This message is temporarily unprocessable."]
                     #[doc = ""]
                     #[doc = "Such errors are expected, but not guaranteed, to resolve themselves eventually through"]
                     #[doc = "retrying."]
                     TemporarilyUnprocessable,
+                    #[codec(index = 7)]
                     #[doc = "The queue is paused and no message can be executed from it."]
                     #[doc = ""]
                     #[doc = "This can change at any time and may resolve in the future by re-trying."]
                     QueuePaused,
+                    #[codec(index = 8)]
                     #[doc = "Another call is in progress and needs to finish before this call can happen."]
                     RecursiveDisallowed,
                 }
@@ -55533,7 +56587,7 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
-                    # [doc = "Message discarded due to an error in the `MessageProcessor` (usually a format error)."] ProcessingFailed { id : :: subxt :: ext :: subxt_core :: utils :: H256 , origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , error : runtime_types :: frame_support :: traits :: messages :: ProcessMessageError , } , # [doc = "Message is processed."] Processed { id : :: subxt :: ext :: subxt_core :: utils :: H256 , origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , weight_used : runtime_types :: sp_weights :: weight_v2 :: Weight , success : :: core :: primitive :: bool , } , # [doc = "Message placed in overweight queue."] OverweightEnqueued { id : [:: core :: primitive :: u8 ; 32usize] , origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , page_index : :: core :: primitive :: u32 , message_index : :: core :: primitive :: u32 , } , # [doc = "This page was reaped."] PageReaped { origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , index : :: core :: primitive :: u32 , } , }
+                    # [codec (index = 0)] # [doc = "Message discarded due to an error in the `MessageProcessor` (usually a format error)."] ProcessingFailed { id : :: subxt :: ext :: subxt_core :: utils :: H256 , origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , error : runtime_types :: frame_support :: traits :: messages :: ProcessMessageError , } , # [codec (index = 1)] # [doc = "Message is processed."] Processed { id : :: subxt :: ext :: subxt_core :: utils :: H256 , origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , weight_used : runtime_types :: sp_weights :: weight_v2 :: Weight , success : :: core :: primitive :: bool , } , # [codec (index = 2)] # [doc = "Message placed in overweight queue."] OverweightEnqueued { id : [:: core :: primitive :: u8 ; 32usize] , origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , page_index : :: core :: primitive :: u32 , message_index : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "This page was reaped."] PageReaped { origin : runtime_types :: polkadot_runtime_parachains :: inclusion :: AggregateMessageOrigin , index : :: core :: primitive :: u32 , } , }
             }
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -55597,6 +56651,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Allows root to set a cursor to forcefully start, stop or forward the migration process."]
                     #[doc = ""]
                     #[doc = "Should normally not be needed and is only in place as emergency measure. Note that"]
@@ -55612,6 +56667,7 @@ pub mod api {
                             >,
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Allows root to set an active cursor to forcefully start/forward the migration process."]
                     #[doc = ""]
                     #[doc = "This is an edge-case version of [`Self::force_set_cursor`] that allows to set the"]
@@ -55627,11 +56683,13 @@ pub mod api {
                         >,
                         started_at: ::core::option::Option<::core::primitive::u32>,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Forces the onboarding of the migrations."]
                     #[doc = ""]
                     #[doc = "This process happens automatically on a runtime upgrade. It is in place as an emergency"]
                     #[doc = "measurement. The cursor needs to be `None` for this to succeed."]
                     force_onboard_mbms,
+                    #[codec(index = 3)]
                     #[doc = "Clears the `Historic` set."]
                     #[doc = ""]
                     #[doc = "`map_cursor` must be set to the last value that was returned by the"]
@@ -55658,6 +56716,7 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "The operation cannot complete since some MBMs are ongoing."]
                     Ongoing,
                 }
@@ -55674,30 +56733,37 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A Runtime upgrade started."]
                     #[doc = ""]
                     #[doc = "Its end is indicated by `UpgradeCompleted` or `UpgradeFailed`."]
                     UpgradeStarted { migrations: ::core::primitive::u32 },
+                    #[codec(index = 1)]
                     #[doc = "The current runtime upgrade completed."]
                     #[doc = ""]
                     #[doc = "This implies that all of its migrations completed successfully as well."]
                     UpgradeCompleted,
+                    #[codec(index = 2)]
                     #[doc = "Runtime upgrade failed."]
                     #[doc = ""]
                     #[doc = "This is very bad and will require governance intervention."]
                     UpgradeFailed,
+                    #[codec(index = 3)]
                     #[doc = "A migration was skipped since it was already executed in the past."]
                     MigrationSkipped { index: ::core::primitive::u32 },
+                    #[codec(index = 4)]
                     #[doc = "A migration progressed."]
                     MigrationAdvanced {
                         index: ::core::primitive::u32,
                         took: ::core::primitive::u32,
                     },
+                    #[codec(index = 5)]
                     #[doc = "A Migration completed."]
                     MigrationCompleted {
                         index: ::core::primitive::u32,
                         took: ::core::primitive::u32,
                     },
+                    #[codec(index = 6)]
                     #[doc = "A Migration failed."]
                     #[doc = ""]
                     #[doc = "This implies that the whole upgrade failed and governance intervention is required."]
@@ -55705,6 +56771,7 @@ pub mod api {
                         index: ::core::primitive::u32,
                         took: ::core::primitive::u32,
                     },
+                    #[codec(index = 7)]
                     #[doc = "The set of historical migrations has been cleared."]
                     HistoricCleared {
                         next_cursor: ::core::option::Option<
@@ -55733,7 +56800,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum HistoricCleanupSelector<_0> {
+                #[codec(index = 0)]
                 Specific(::subxt::ext::subxt_core::alloc::vec::Vec<_0>),
+                #[codec(index = 1)]
                 Wildcard {
                     limit: ::core::option::Option<::core::primitive::u32>,
                     previous_cursor: ::core::option::Option<
@@ -55749,7 +56818,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum MigrationCursor<_0, _1> {
+                #[codec(index = 0)]
                 Active(runtime_types::pallet_migrations::ActiveCursor<_0, _1>),
+                #[codec(index = 1)]
                 Stuck,
             }
         }
@@ -55770,6 +56841,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Immediately dispatch a multi-signature call using a single approval from the caller."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_."]
@@ -55790,6 +56862,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
                     #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
                     #[doc = ""]
@@ -55842,6 +56915,7 @@ pub mod api {
                         >,
                         max_weight: runtime_types::sp_weights::weight_v2::Weight,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
                     #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
                     #[doc = ""]
@@ -55883,6 +56957,7 @@ pub mod api {
                         call_hash: [::core::primitive::u8; 32usize],
                         max_weight: runtime_types::sp_weights::weight_v2::Weight,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Cancel a pre-existing, on-going multisig transaction. Any deposit reserved previously"]
                     #[doc = "for this operation will be unreserved on success."]
                     #[doc = ""]
@@ -55913,6 +56988,7 @@ pub mod api {
                             runtime_types::pallet_multisig::Timepoint<::core::primitive::u32>,
                         call_hash: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 4)]
                     #[doc = "Poke the deposit reserved for an existing multisig operation."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and must be the original depositor of"]
@@ -55947,33 +57023,47 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Threshold must be 2 or greater."]
                     MinimumThreshold,
+                    #[codec(index = 1)]
                     #[doc = "Call is already approved by this signatory."]
                     AlreadyApproved,
+                    #[codec(index = 2)]
                     #[doc = "Call doesn't need any (more) approvals."]
                     NoApprovalsNeeded,
+                    #[codec(index = 3)]
                     #[doc = "There are too few signatories in the list."]
                     TooFewSignatories,
+                    #[codec(index = 4)]
                     #[doc = "There are too many signatories in the list."]
                     TooManySignatories,
+                    #[codec(index = 5)]
                     #[doc = "The signatories were provided out of order; they should be ordered."]
                     SignatoriesOutOfOrder,
+                    #[codec(index = 6)]
                     #[doc = "The sender was contained in the other signatories; it shouldn't be."]
                     SenderInSignatories,
+                    #[codec(index = 7)]
                     #[doc = "Multisig operation not found in storage."]
                     NotFound,
+                    #[codec(index = 8)]
                     #[doc = "Only the account that originally created the multisig is able to cancel it or update"]
                     #[doc = "its deposits."]
                     NotOwner,
+                    #[codec(index = 9)]
                     #[doc = "No timepoint was given, yet the multisig operation is already underway."]
                     NoTimepoint,
+                    #[codec(index = 10)]
                     #[doc = "A different timepoint was given to the multisig operation that is underway."]
                     WrongTimepoint,
+                    #[codec(index = 11)]
                     #[doc = "A timepoint was given, yet no multisig operation is underway."]
                     UnexpectedTimepoint,
+                    #[codec(index = 12)]
                     #[doc = "The maximum weight information provided was too low."]
                     MaxWeightTooLow,
+                    #[codec(index = 13)]
                     #[doc = "The data to be stored is already stored."]
                     AlreadyStored,
                 }
@@ -55990,12 +57080,14 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A new multisig operation has begun."]
                     NewMultisig {
                         approving: ::subxt::ext::subxt_core::utils::AccountId32,
                         multisig: ::subxt::ext::subxt_core::utils::AccountId32,
                         call_hash: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 1)]
                     #[doc = "A multisig operation has been approved by someone."]
                     MultisigApproval {
                         approving: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -56004,6 +57096,7 @@ pub mod api {
                         multisig: ::subxt::ext::subxt_core::utils::AccountId32,
                         call_hash: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 2)]
                     #[doc = "A multisig operation has been executed."]
                     MultisigExecuted {
                         approving: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -56014,6 +57107,7 @@ pub mod api {
                         result:
                             ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
                     },
+                    #[codec(index = 3)]
                     #[doc = "A multisig operation has been cancelled."]
                     MultisigCancelled {
                         cancelling: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -56022,6 +57116,7 @@ pub mod api {
                         multisig: ::subxt::ext::subxt_core::utils::AccountId32,
                         call_hash: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 4)]
                     #[doc = "The deposit for a multisig operation has been updated/poked."]
                     DepositPoked {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -56088,6 +57183,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Place a bid."]
                     #[doc = ""]
                     #[doc = "Origin must be Signed, and account must have at least `amount` in free balance."]
@@ -56100,9 +57196,11 @@ pub mod api {
                     #[doc = "Complexities:"]
                     #[doc = "- `Queues[duration].len()` (just take max)."]
                     place_bid {
+                        #[codec(compact)]
                         amount: ::core::primitive::u128,
                         duration: ::core::primitive::u32,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Retract a previously placed bid."]
                     #[doc = ""]
                     #[doc = "Origin must be Signed, and the account should have previously issued a still-active bid"]
@@ -56111,13 +57209,16 @@ pub mod api {
                     #[doc = "- `amount`: The amount of the previous bid."]
                     #[doc = "- `duration`: The duration of the previous bid."]
                     retract_bid {
+                        #[codec(compact)]
                         amount: ::core::primitive::u128,
                         duration: ::core::primitive::u32,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Ensure we have sufficient funding for all potential payouts."]
                     #[doc = ""]
                     #[doc = "- `origin`: Must be accepted by `FundOrigin`."]
                     fund_deficit,
+                    #[codec(index = 3)]
                     #[doc = "Reduce or remove an outstanding receipt, placing the according proportion of funds into"]
                     #[doc = "the account of the owner."]
                     #[doc = ""]
@@ -56127,22 +57228,35 @@ pub mod api {
                     #[doc = "- `portion`: If `Some`, then only the given portion of the receipt should be thawed. If"]
                     #[doc = "  `None`, then all of it should be."]
                     thaw_private {
+                        #[codec(compact)]
                         index: ::core::primitive::u32,
                         maybe_proportion: ::core::option::Option<
                             runtime_types::sp_arithmetic::per_things::Perquintill,
                         >,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Reduce or remove an outstanding receipt, placing the according proportion of funds into"]
                     #[doc = "the account of the owner."]
                     #[doc = ""]
                     #[doc = "- `origin`: Must be Signed and the account must be the owner of the fungible counterpart"]
                     #[doc = "  for receipt `index`."]
                     #[doc = "- `index`: The index of the receipt."]
-                    thaw_communal { index: ::core::primitive::u32 },
+                    thaw_communal {
+                        #[codec(compact)]
+                        index: ::core::primitive::u32,
+                    },
+                    #[codec(index = 5)]
                     #[doc = "Make a private receipt communal and create fungible counterparts for its owner."]
-                    communify { index: ::core::primitive::u32 },
+                    communify {
+                        #[codec(compact)]
+                        index: ::core::primitive::u32,
+                    },
+                    #[codec(index = 6)]
                     #[doc = "Make a communal receipt private and burn fungible counterparts from its owner."]
-                    privatize { index: ::core::primitive::u32 },
+                    privatize {
+                        #[codec(compact)]
+                        index: ::core::primitive::u32,
+                    },
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -56157,35 +57271,50 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "The duration of the bid is less than one."]
                     DurationTooSmall,
+                    #[codec(index = 1)]
                     #[doc = "The duration is the bid is greater than the number of queues."]
                     DurationTooBig,
+                    #[codec(index = 2)]
                     #[doc = "The amount of the bid is less than the minimum allowed."]
                     AmountTooSmall,
+                    #[codec(index = 3)]
                     #[doc = "The queue for the bid's duration is full and the amount bid is too low to get in"]
                     #[doc = "through replacing an existing bid."]
                     BidTooLow,
+                    #[codec(index = 4)]
                     #[doc = "Receipt index is unknown."]
                     UnknownReceipt,
+                    #[codec(index = 5)]
                     #[doc = "Not the owner of the receipt."]
                     NotOwner,
+                    #[codec(index = 6)]
                     #[doc = "Bond not yet at expiry date."]
                     NotExpired,
+                    #[codec(index = 7)]
                     #[doc = "The given bid for retraction is not found."]
                     UnknownBid,
+                    #[codec(index = 8)]
                     #[doc = "The portion supplied is beyond the value of the receipt."]
                     PortionTooBig,
+                    #[codec(index = 9)]
                     #[doc = "Not enough funds are held to pay out."]
                     Unfunded,
+                    #[codec(index = 10)]
                     #[doc = "There are enough funds for what is required."]
                     AlreadyFunded,
+                    #[codec(index = 11)]
                     #[doc = "The thaw throttle has been reached for this period."]
                     Throttled,
+                    #[codec(index = 12)]
                     #[doc = "The operation would result in a receipt worth an insignificant value."]
                     MakesDust,
+                    #[codec(index = 13)]
                     #[doc = "The receipt is already communal."]
                     AlreadyCommunal,
+                    #[codec(index = 14)]
                     #[doc = "The receipt is already private."]
                     AlreadyPrivate,
                 }
@@ -56202,24 +57331,28 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A bid was successfully placed."]
                     BidPlaced {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                         duration: ::core::primitive::u32,
                     },
+                    #[codec(index = 1)]
                     #[doc = "A bid was successfully removed (before being accepted)."]
                     BidRetracted {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                         duration: ::core::primitive::u32,
                     },
+                    #[codec(index = 2)]
                     #[doc = "A bid was dropped from a queue because of another, more substantial, bid was present."]
                     BidDropped {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                         duration: ::core::primitive::u32,
                     },
+                    #[codec(index = 3)]
                     #[doc = "A bid was accepted. The balance may not be released until expiry."]
                     Issued {
                         index: ::core::primitive::u32,
@@ -56228,6 +57361,7 @@ pub mod api {
                         proportion: runtime_types::sp_arithmetic::per_things::Perquintill,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 4)]
                     #[doc = "An receipt has been (at least partially) thawed."]
                     Thawed {
                         index: ::core::primitive::u32,
@@ -56236,8 +57370,10 @@ pub mod api {
                         amount: ::core::primitive::u128,
                         dropped: ::core::primitive::bool,
                     },
+                    #[codec(index = 5)]
                     #[doc = "An automatic funding of the deficit was made."]
                     Funded { deficit: ::core::primitive::u128 },
+                    #[codec(index = 6)]
                     #[doc = "A receipt was transferred."]
                     Transferred {
                         from: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -56257,6 +57393,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum HoldReason {
+                    #[codec(index = 0)]
                     NftReceipt,
                 }
                 #[derive(
@@ -56312,6 +57449,7 @@ pub mod api {
                 )]
                 #[doc = "Events type."]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "There is an offence reported of the given `kind` happened at the `session_index` and"]
                     #[doc = "(kind-specific) time slot. This event is not deposited for duplicate slashes."]
                     #[doc = "\\[kind, timeslot\\]."]
@@ -56339,6 +57477,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Set the value of a parameter."]
                     #[doc = ""]
                     #[doc = "The dispatch origin of this call must be `AdminOrigin` for the given `key`. Values be"]
@@ -56360,6 +57499,7 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A Parameter was set."]
                     #[doc = ""]
                     #[doc = "Is also emitted when the value was not changed."]
@@ -56392,6 +57532,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Register a preimage on-chain."]
                     #[doc = ""]
                     #[doc = "If the preimage was previously requested, no fees or deposits are taken for providing"]
@@ -56399,6 +57540,7 @@ pub mod api {
                     note_preimage {
                         bytes: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Clear an unrequested preimage from the runtime storage."]
                     #[doc = ""]
                     #[doc = "If `len` is provided, then it will be a much cheaper operation."]
@@ -56408,6 +57550,7 @@ pub mod api {
                     unnote_preimage {
                         hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Request a preimage be uploaded to the chain without paying any fees or deposits."]
                     #[doc = ""]
                     #[doc = "If the preimage requests has already been provided on-chain, we unreserve any deposit"]
@@ -56415,12 +57558,14 @@ pub mod api {
                     request_preimage {
                         hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Clear a previously made request for a preimage."]
                     #[doc = ""]
                     #[doc = "NOTE: THIS MUST NOT BE CALLED ON `hash` MORE TIMES THAN `request_preimage`."]
                     unrequest_preimage {
                         hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Ensure that the bulk of pre-images is upgraded."]
                     #[doc = ""]
                     #[doc = "The caller pays no fee if at least 90% of pre-images were successfully updated."]
@@ -56443,20 +57588,28 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Preimage is too large to store on-chain."]
                     TooBig,
+                    #[codec(index = 1)]
                     #[doc = "Preimage has already been noted on-chain."]
                     AlreadyNoted,
+                    #[codec(index = 2)]
                     #[doc = "The user is not authorized to perform this action."]
                     NotAuthorized,
+                    #[codec(index = 3)]
                     #[doc = "The preimage cannot be removed since it has not yet been noted."]
                     NotNoted,
+                    #[codec(index = 4)]
                     #[doc = "A preimage may not be removed when there are outstanding requests."]
                     Requested,
+                    #[codec(index = 5)]
                     #[doc = "The preimage request cannot be removed since no outstanding requests exist."]
                     NotRequested,
+                    #[codec(index = 6)]
                     #[doc = "More than `MAX_HASH_UPGRADE_BULK_COUNT` hashes were requested to be upgraded at once."]
                     TooMany,
+                    #[codec(index = 7)]
                     #[doc = "Too few hashes were requested to be upgraded (i.e. zero)."]
                     TooFew,
                 }
@@ -56473,14 +57626,17 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A preimage has been noted."]
                     Noted {
                         hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 1)]
                     #[doc = "A preimage has been requested."]
                     Requested {
                         hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 2)]
                     #[doc = "A preimage has ben cleared."]
                     Cleared {
                         hash: ::subxt::ext::subxt_core::utils::H256,
@@ -56498,6 +57654,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum HoldReason {
+                    #[codec(index = 0)]
                     Preimage,
                 }
             }
@@ -56509,10 +57666,12 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum OldRequestStatus<_0, _1> {
+                #[codec(index = 0)]
                 Unrequested {
                     deposit: (_0, _1),
                     len: ::core::primitive::u32,
                 },
+                #[codec(index = 1)]
                 Requested {
                     deposit: ::core::option::Option<(_0, _1)>,
                     count: ::core::primitive::u32,
@@ -56527,10 +57686,12 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum RequestStatus<_0, _1> {
+                #[codec(index = 0)]
                 Unrequested {
                     ticket: (_0, _1),
                     len: ::core::primitive::u32,
                 },
+                #[codec(index = 1)]
                 Requested {
                     maybe_ticket: ::core::option::Option<(_0, _1)>,
                     count: ::core::primitive::u32,
@@ -56555,6 +57716,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Dispatch the given `call` from an account that the sender is authorised for through"]
                     #[doc = "`add_proxy`."]
                     #[doc = ""]
@@ -56575,6 +57737,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Register a proxy account for the sender that is able to make calls on its behalf."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_."]
@@ -56592,6 +57755,7 @@ pub mod api {
                         proxy_type: runtime_types::rococo_runtime::ProxyType,
                         delay: ::core::primitive::u32,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Unregister a proxy account for the sender."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_."]
@@ -56607,13 +57771,15 @@ pub mod api {
                         proxy_type: runtime_types::rococo_runtime::ProxyType,
                         delay: ::core::primitive::u32,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Unregister all proxy accounts for the sender."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_."]
                     #[doc = ""]
-                    #[doc = "WARNING: This may be called on accounts created by `pure`, however if done, then"]
+                    #[doc = "WARNING: This may be called on accounts created by `create_pure`, however if done, then"]
                     #[doc = "the unreserved fees will be inaccessible. **All access to this account will be lost.**"]
                     remove_proxies,
+                    #[codec(index = 4)]
                     #[doc = "Spawn a fresh new account that is guaranteed to be otherwise inaccessible, and"]
                     #[doc = "initialize it with a proxy of `proxy_type` for `origin` sender."]
                     #[doc = ""]
@@ -56637,22 +57803,23 @@ pub mod api {
                         delay: ::core::primitive::u32,
                         index: ::core::primitive::u16,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Removes a previously spawned pure proxy."]
                     #[doc = ""]
                     #[doc = "WARNING: **All access to this account will be lost.** Any funds held in it will be"]
                     #[doc = "inaccessible."]
                     #[doc = ""]
                     #[doc = "Requires a `Signed` origin, and the sender account must have been created by a call to"]
-                    #[doc = "`pure` with corresponding parameters."]
+                    #[doc = "`create_pure` with corresponding parameters."]
                     #[doc = ""]
-                    #[doc = "- `spawner`: The account that originally called `pure` to create this account."]
-                    #[doc = "- `index`: The disambiguation index originally passed to `pure`. Probably `0`."]
-                    #[doc = "- `proxy_type`: The proxy type originally passed to `pure`."]
-                    #[doc = "- `height`: The height of the chain when the call to `pure` was processed."]
-                    #[doc = "- `ext_index`: The extrinsic index in which the call to `pure` was processed."]
+                    #[doc = "- `spawner`: The account that originally called `create_pure` to create this account."]
+                    #[doc = "- `index`: The disambiguation index originally passed to `create_pure`. Probably `0`."]
+                    #[doc = "- `proxy_type`: The proxy type originally passed to `create_pure`."]
+                    #[doc = "- `height`: The height of the chain when the call to `create_pure` was processed."]
+                    #[doc = "- `ext_index`: The extrinsic index in which the call to `create_pure` was processed."]
                     #[doc = ""]
                     #[doc = "Fails with `NoPermission` in case the caller is not a previously created pure"]
-                    #[doc = "account whose `pure` call has corresponding parameters."]
+                    #[doc = "account whose `create_pure` call has corresponding parameters."]
                     kill_pure {
                         spawner: ::subxt::ext::subxt_core::utils::MultiAddress<
                             ::subxt::ext::subxt_core::utils::AccountId32,
@@ -56660,9 +57827,12 @@ pub mod api {
                         >,
                         proxy_type: runtime_types::rococo_runtime::ProxyType,
                         index: ::core::primitive::u16,
+                        #[codec(compact)]
                         height: ::core::primitive::u32,
+                        #[codec(compact)]
                         ext_index: ::core::primitive::u32,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Publish the hash of a proxy-call that will be made in the future."]
                     #[doc = ""]
                     #[doc = "This must be called some number of blocks before the corresponding `proxy` is attempted"]
@@ -56685,6 +57855,7 @@ pub mod api {
                         >,
                         call_hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 7)]
                     #[doc = "Remove a given announcement."]
                     #[doc = ""]
                     #[doc = "May be called by a proxy account to remove a call they previously announced and return"]
@@ -56702,6 +57873,7 @@ pub mod api {
                         >,
                         call_hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 8)]
                     #[doc = "Remove the given announcement of a delegate."]
                     #[doc = ""]
                     #[doc = "May be called by a target (proxied) account to remove a call that one of their delegates"]
@@ -56719,6 +57891,7 @@ pub mod api {
                         >,
                         call_hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 9)]
                     #[doc = "Dispatch the given `call` from an account that the sender is authorized for through"]
                     #[doc = "`add_proxy`."]
                     #[doc = ""]
@@ -56745,6 +57918,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 10)]
                     #[doc = "Poke / Adjust deposits made for proxies and announcements based on current values."]
                     #[doc = "This can be used by accounts to possibly lower their locked amount."]
                     #[doc = ""]
@@ -56768,20 +57942,28 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "There are too many proxies registered or too many announcements pending."]
                     TooMany,
+                    #[codec(index = 1)]
                     #[doc = "Proxy registration not found."]
                     NotFound,
+                    #[codec(index = 2)]
                     #[doc = "Sender is not a proxy of the account to be proxied."]
                     NotProxy,
+                    #[codec(index = 3)]
                     #[doc = "A call which is incompatible with the proxy type's filter was attempted."]
                     Unproxyable,
+                    #[codec(index = 4)]
                     #[doc = "Account is already a proxy."]
                     Duplicate,
+                    #[codec(index = 5)]
                     #[doc = "Call may not be made by proxy because it may escalate its privileges."]
                     NoPermission,
+                    #[codec(index = 6)]
                     #[doc = "Announcement, if made at all, was made too recently."]
                     Unannounced,
+                    #[codec(index = 7)]
                     #[doc = "Cannot add self as proxy."]
                     NoSelfProxy,
                 }
@@ -56798,11 +57980,13 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A proxy was executed correctly, with the given."]
                     ProxyExecuted {
                         result:
                             ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
                     },
+                    #[codec(index = 1)]
                     #[doc = "A pure account has been created by new proxy with given"]
                     #[doc = "disambiguation index and proxy type."]
                     PureCreated {
@@ -56811,12 +57995,22 @@ pub mod api {
                         proxy_type: runtime_types::rococo_runtime::ProxyType,
                         disambiguation_index: ::core::primitive::u16,
                     },
+                    #[codec(index = 2)]
+                    #[doc = "A pure proxy was killed by its spawner."]
+                    PureKilled {
+                        pure: ::subxt::ext::subxt_core::utils::AccountId32,
+                        spawner: ::subxt::ext::subxt_core::utils::AccountId32,
+                        proxy_type: runtime_types::rococo_runtime::ProxyType,
+                        disambiguation_index: ::core::primitive::u16,
+                    },
+                    #[codec(index = 3)]
                     #[doc = "An announcement was placed to make a call in the future."]
                     Announced {
                         real: ::subxt::ext::subxt_core::utils::AccountId32,
                         proxy: ::subxt::ext::subxt_core::utils::AccountId32,
                         call_hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 4)]
                     #[doc = "A proxy was added."]
                     ProxyAdded {
                         delegator: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -56824,6 +58018,7 @@ pub mod api {
                         proxy_type: runtime_types::rococo_runtime::ProxyType,
                         delay: ::core::primitive::u32,
                     },
+                    #[codec(index = 5)]
                     #[doc = "A proxy was removed."]
                     ProxyRemoved {
                         delegator: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -56831,6 +58026,7 @@ pub mod api {
                         proxy_type: runtime_types::rococo_runtime::ProxyType,
                         delay: ::core::primitive::u32,
                     },
+                    #[codec(index = 6)]
                     #[doc = "A deposit stored for proxies or announcements was poked / updated."]
                     DepositPoked {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -56860,7 +58056,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum DepositKind {
+                #[codec(index = 0)]
                 Proxies,
+                #[codec(index = 1)]
                 Announcements,
             }
             #[derive(
@@ -56893,6 +58091,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Introduce a new member."]
                     #[doc = ""]
                     #[doc = "- `origin`: Must be the `AddOrigin`."]
@@ -56905,6 +58104,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Increment the rank of an existing member by one."]
                     #[doc = ""]
                     #[doc = "- `origin`: Must be the `PromoteOrigin`."]
@@ -56917,6 +58117,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Decrement the rank of an existing member by one. If the member is already at rank zero,"]
                     #[doc = "then they are removed entirely."]
                     #[doc = ""]
@@ -56930,6 +58131,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Remove the member entirely."]
                     #[doc = ""]
                     #[doc = "- `origin`: Must be the `RemoveOrigin`."]
@@ -56944,6 +58146,7 @@ pub mod api {
                         >,
                         min_rank: ::core::primitive::u16,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Add an aye or nay vote for the sender to the given proposal."]
                     #[doc = ""]
                     #[doc = "- `origin`: Must be `Signed` by a member account."]
@@ -56959,6 +58162,7 @@ pub mod api {
                         poll: ::core::primitive::u32,
                         aye: ::core::primitive::bool,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Remove votes from the given poll. It must have ended."]
                     #[doc = ""]
                     #[doc = "- `origin`: Must be `Signed` by any account."]
@@ -56973,6 +58177,7 @@ pub mod api {
                         poll_index: ::core::primitive::u32,
                         max: ::core::primitive::u32,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Exchanges a member with a new account and the same existing rank."]
                     #[doc = ""]
                     #[doc = "- `origin`: Must be the `ExchangeOrigin`."]
@@ -57002,26 +58207,37 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Account is already a member."]
                     AlreadyMember,
+                    #[codec(index = 1)]
                     #[doc = "Account is not a member."]
                     NotMember,
+                    #[codec(index = 2)]
                     #[doc = "The given poll index is unknown or has closed."]
                     NotPolling,
+                    #[codec(index = 3)]
                     #[doc = "The given poll is still ongoing."]
                     Ongoing,
+                    #[codec(index = 4)]
                     #[doc = "There are no further records to be removed."]
                     NoneRemaining,
+                    #[codec(index = 5)]
                     #[doc = "Unexpected error in state."]
                     Corruption,
+                    #[codec(index = 6)]
                     #[doc = "The member's rank is too low to vote."]
                     RankTooLow,
+                    #[codec(index = 7)]
                     #[doc = "The information provided is incorrect."]
                     InvalidWitness,
+                    #[codec(index = 8)]
                     #[doc = "The origin is not sufficiently privileged to do the operation."]
                     NoPermission,
+                    #[codec(index = 9)]
                     #[doc = "The new member to exchange is the same as the old member"]
                     SameMember,
+                    #[codec(index = 10)]
                     #[doc = "The max member count for the rank has been reached."]
                     TooManyMembers,
                 }
@@ -57038,20 +58254,24 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A member `who` has been added."]
                     MemberAdded {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 1)]
                     #[doc = "The member `who`se rank has been changed to the given `rank`."]
                     RankChanged {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         rank: ::core::primitive::u16,
                     },
+                    #[codec(index = 2)]
                     #[doc = "The member `who` of given `rank` has been removed from the collective."]
                     MemberRemoved {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         rank: ::core::primitive::u16,
                     },
+                    #[codec(index = 3)]
                     #[doc = "The member `who` has voted for the `poll` with the given `vote` leading to an updated"]
                     #[doc = "`tally`."]
                     Voted {
@@ -57060,6 +58280,7 @@ pub mod api {
                         vote: runtime_types::pallet_ranked_collective::VoteRecord,
                         tally: runtime_types::pallet_ranked_collective::Tally,
                     },
+                    #[codec(index = 4)]
                     #[doc = "The member `who` had their `AccountId` changed to `new_who`."]
                     MemberExchanged {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -57097,7 +58318,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum VoteRecord {
+                #[codec(index = 0)]
                 Aye(::core::primitive::u32),
+                #[codec(index = 1)]
                 Nay(::core::primitive::u32),
             }
         }
@@ -57118,6 +58341,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Send a call through a recovered account."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and registered to"]
@@ -57135,6 +58359,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Allow ROOT to bypass the recovery process and set a rescuer account"]
                     #[doc = "for a lost account directly."]
                     #[doc = ""]
@@ -57153,6 +58378,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Create a recovery configuration for your account. This makes your account recoverable."]
                     #[doc = ""]
                     #[doc = "Payment: `ConfigDepositBase` + `FriendDepositFactor` * #_of_friends balance"]
@@ -57176,6 +58402,7 @@ pub mod api {
                         threshold: ::core::primitive::u16,
                         delay_period: ::core::primitive::u32,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Initiate the process for recovering a recoverable account."]
                     #[doc = ""]
                     #[doc = "Payment: `RecoveryDeposit` balance will be reserved for initiating the"]
@@ -57193,6 +58420,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Allow a \"friend\" of a recoverable account to vouch for an active recovery"]
                     #[doc = "process for that account."]
                     #[doc = ""]
@@ -57215,6 +58443,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Allow a successful rescuer to claim their recovered account."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and must be a \"rescuer\""]
@@ -57230,6 +58459,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 6)]
                     #[doc = "As the controller of a recoverable account, close an active recovery"]
                     #[doc = "process for your account."]
                     #[doc = ""]
@@ -57247,6 +58477,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 7)]
                     #[doc = "Remove the recovery process for your account. Recovered accounts are still accessible."]
                     #[doc = ""]
                     #[doc = "NOTE: The user must make sure to call `close_recovery` on all active"]
@@ -57259,6 +58490,7 @@ pub mod api {
                     #[doc = "The dispatch origin for this call must be _Signed_ and must be a"]
                     #[doc = "recoverable account (i.e. has a recovery configuration)."]
                     remove_recovery,
+                    #[codec(index = 8)]
                     #[doc = "Cancel the ability to use `as_recovered` for `account`."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and registered to"]
@@ -57270,6 +58502,38 @@ pub mod api {
                         account: ::subxt::ext::subxt_core::utils::MultiAddress<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
+                        >,
+                    },
+                    #[codec(index = 9)]
+                    #[doc = "Poke deposits for recovery configurations and / or active recoveries."]
+                    #[doc = ""]
+                    #[doc = "This can be used by accounts to possibly lower their locked amount."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "Parameters:"]
+                    #[doc = "- `maybe_account`: Optional recoverable account for which you have an active recovery"]
+                    #[doc = "and want to adjust the deposit for the active recovery."]
+                    #[doc = ""]
+                    #[doc = "This function checks both recovery configuration deposit and active recovery deposits"]
+                    #[doc = "of the caller:"]
+                    #[doc = "- If the caller has created a recovery configuration, checks and adjusts its deposit"]
+                    #[doc = "- If the caller has initiated any active recoveries, and provides the account in"]
+                    #[doc = "`maybe_account`, checks and adjusts those deposits"]
+                    #[doc = ""]
+                    #[doc = "If any deposit is updated, the difference will be reserved/unreserved from the caller's"]
+                    #[doc = "account."]
+                    #[doc = ""]
+                    #[doc = "The transaction is made free if any deposit is updated and paid otherwise."]
+                    #[doc = ""]
+                    #[doc = "Emits `DepositPoked` if any deposit is updated."]
+                    #[doc = "Multiple events may be emitted in case both types of deposits are updated."]
+                    poke_deposit {
+                        maybe_account: ::core::option::Option<
+                            ::subxt::ext::subxt_core::utils::MultiAddress<
+                                ::subxt::ext::subxt_core::utils::AccountId32,
+                                (),
+                            >,
                         >,
                     },
                 }
@@ -57286,36 +58550,52 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "User is not allowed to make a call on behalf of this account"]
                     NotAllowed,
+                    #[codec(index = 1)]
                     #[doc = "Threshold must be greater than zero"]
                     ZeroThreshold,
+                    #[codec(index = 2)]
                     #[doc = "Friends list must be greater than zero and threshold"]
                     NotEnoughFriends,
+                    #[codec(index = 3)]
                     #[doc = "Friends list must be less than max friends"]
                     MaxFriends,
+                    #[codec(index = 4)]
                     #[doc = "Friends list must be sorted and free of duplicates"]
                     NotSorted,
+                    #[codec(index = 5)]
                     #[doc = "This account is not set up for recovery"]
                     NotRecoverable,
+                    #[codec(index = 6)]
                     #[doc = "This account is already set up for recovery"]
                     AlreadyRecoverable,
+                    #[codec(index = 7)]
                     #[doc = "A recovery process has already started for this account"]
                     AlreadyStarted,
+                    #[codec(index = 8)]
                     #[doc = "A recovery process has not started for this rescuer"]
                     NotStarted,
+                    #[codec(index = 9)]
                     #[doc = "This account is not a friend who can vouch"]
                     NotFriend,
+                    #[codec(index = 10)]
                     #[doc = "The friend must wait until the delay period to vouch for this recovery"]
                     DelayPeriod,
+                    #[codec(index = 11)]
                     #[doc = "This user has already vouched for this recovery"]
                     AlreadyVouched,
+                    #[codec(index = 12)]
                     #[doc = "The threshold for recovering this account has not been met"]
                     Threshold,
+                    #[codec(index = 13)]
                     #[doc = "There are still active recovery attempts that need to be closed"]
                     StillActive,
+                    #[codec(index = 14)]
                     #[doc = "This account is already set up for recovery"]
                     AlreadyProxy,
+                    #[codec(index = 15)]
                     #[doc = "Some internal state is broken."]
                     BadState,
                 }
@@ -57332,34 +58612,50 @@ pub mod api {
                 )]
                 #[doc = "Events type."]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A recovery process has been set up for an account."]
                     RecoveryCreated {
                         account: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 1)]
                     #[doc = "A recovery process has been initiated for lost account by rescuer account."]
                     RecoveryInitiated {
                         lost_account: ::subxt::ext::subxt_core::utils::AccountId32,
                         rescuer_account: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 2)]
                     #[doc = "A recovery process for lost account by rescuer account has been vouched for by sender."]
                     RecoveryVouched {
                         lost_account: ::subxt::ext::subxt_core::utils::AccountId32,
                         rescuer_account: ::subxt::ext::subxt_core::utils::AccountId32,
                         sender: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 3)]
                     #[doc = "A recovery process for lost account by rescuer account has been closed."]
                     RecoveryClosed {
                         lost_account: ::subxt::ext::subxt_core::utils::AccountId32,
                         rescuer_account: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Lost account has been successfully recovered by rescuer account."]
                     AccountRecovered {
                         lost_account: ::subxt::ext::subxt_core::utils::AccountId32,
                         rescuer_account: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 5)]
                     #[doc = "A recovery process has been removed for an account."]
                     RecoveryRemoved {
                         lost_account: ::subxt::ext::subxt_core::utils::AccountId32,
+                    },
+                    #[codec(index = 6)]
+                    #[doc = "A deposit has been updated."]
+                    DepositPoked {
+                        who: ::subxt::ext::subxt_core::utils::AccountId32,
+                        kind: runtime_types::pallet_recovery::DepositKind<
+                            runtime_types::rococo_runtime::Runtime,
+                        >,
+                        old_deposit: ::core::primitive::u128,
+                        new_deposit: ::core::primitive::u128,
                     },
                 }
             }
@@ -57374,6 +58670,20 @@ pub mod api {
                 pub created: _0,
                 pub deposit: _1,
                 pub friends: _2,
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            pub enum DepositKind<_0> {
+                #[codec(index = 0)]
+                RecoveryConfig,
+                #[codec(index = 1)]
+                ActiveRecoveryFor(::subxt::ext::subxt_core::utils::AccountId32),
+                __Ignore(::core::marker::PhantomData<_0>),
             }
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -57406,6 +58716,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Propose a referendum on a privileged action."]
                     #[doc = ""]
                     #[doc = "- `origin`: must be `SubmitOrigin` and the account must have `SubmissionDeposit` funds"]
@@ -57428,6 +58739,7 @@ pub mod api {
                                 ::core::primitive::u32,
                             >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Post the Decision Deposit for a referendum."]
                     #[doc = ""]
                     #[doc = "- `origin`: must be `Signed` and the account must have funds available for the"]
@@ -57437,6 +58749,7 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Emits `DecisionDepositPlaced`."]
                     place_decision_deposit { index: ::core::primitive::u32 },
+                    #[codec(index = 2)]
                     #[doc = "Refund the Decision Deposit for a closed referendum back to the depositor."]
                     #[doc = ""]
                     #[doc = "- `origin`: must be `Signed` or `Root`."]
@@ -57445,6 +58758,7 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Emits `DecisionDepositRefunded`."]
                     refund_decision_deposit { index: ::core::primitive::u32 },
+                    #[codec(index = 3)]
                     #[doc = "Cancel an ongoing referendum."]
                     #[doc = ""]
                     #[doc = "- `origin`: must be the `CancelOrigin`."]
@@ -57452,6 +58766,7 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Emits `Cancelled`."]
                     cancel { index: ::core::primitive::u32 },
+                    #[codec(index = 4)]
                     #[doc = "Cancel an ongoing referendum and slash the deposits."]
                     #[doc = ""]
                     #[doc = "- `origin`: must be the `KillOrigin`."]
@@ -57459,11 +58774,13 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Emits `Killed` and `DepositSlashed`."]
                     kill { index: ::core::primitive::u32 },
+                    #[codec(index = 5)]
                     #[doc = "Advance a referendum onto its next logical state. Only used internally."]
                     #[doc = ""]
                     #[doc = "- `origin`: must be `Root`."]
                     #[doc = "- `index`: the referendum to be advanced."]
                     nudge_referendum { index: ::core::primitive::u32 },
+                    #[codec(index = 6)]
                     #[doc = "Advance a track onto its next logical state. Only used internally."]
                     #[doc = ""]
                     #[doc = "- `origin`: must be `Root`."]
@@ -57474,6 +58791,7 @@ pub mod api {
                     #[doc = "- begin deciding another referendum (and leave `DecidingCount` alone); or"]
                     #[doc = "- decrement `DecidingCount`."]
                     one_fewer_deciding { track: ::core::primitive::u16 },
+                    #[codec(index = 7)]
                     #[doc = "Refund the Submission Deposit for a closed referendum back to the depositor."]
                     #[doc = ""]
                     #[doc = "- `origin`: must be `Signed` or `Root`."]
@@ -57482,6 +58800,7 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Emits `SubmissionDepositRefunded`."]
                     refund_submission_deposit { index: ::core::primitive::u32 },
+                    #[codec(index = 8)]
                     #[doc = "Set or clear metadata of a referendum."]
                     #[doc = ""]
                     #[doc = "Parameters:"]
@@ -57507,32 +58826,46 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Referendum is not ongoing."]
                     NotOngoing,
+                    #[codec(index = 1)]
                     #[doc = "Referendum's decision deposit is already paid."]
                     HasDeposit,
+                    #[codec(index = 2)]
                     #[doc = "The track identifier given was invalid."]
                     BadTrack,
+                    #[codec(index = 3)]
                     #[doc = "There are already a full complement of referenda in progress for this track."]
                     Full,
+                    #[codec(index = 4)]
                     #[doc = "The queue of the track is empty."]
                     QueueEmpty,
+                    #[codec(index = 5)]
                     #[doc = "The referendum index provided is invalid in this context."]
                     BadReferendum,
+                    #[codec(index = 6)]
                     #[doc = "There was nothing to do in the advancement."]
                     NothingToDo,
+                    #[codec(index = 7)]
                     #[doc = "No track exists for the proposal origin."]
                     NoTrack,
+                    #[codec(index = 8)]
                     #[doc = "Any deposit cannot be refunded until after the decision is over."]
                     Unfinished,
+                    #[codec(index = 9)]
                     #[doc = "The deposit refunder is not the depositor."]
                     NoPermission,
+                    #[codec(index = 10)]
                     #[doc = "The deposit cannot be refunded since none was made."]
                     NoDeposit,
+                    #[codec(index = 11)]
                     #[doc = "The referendum status is invalid for this operation."]
                     BadStatus,
+                    #[codec(index = 12)]
                     #[doc = "The preimage does not exist."]
                     PreimageNotExist,
+                    #[codec(index = 13)]
                     #[doc = "The preimage is stored with a different length than the one provided."]
                     PreimageStoredWithDifferentLength,
                 }
@@ -57549,6 +58882,7 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event1 {
+                    #[codec(index = 0)]
                     #[doc = "A referendum has been submitted."]
                     Submitted {
                         index: ::core::primitive::u32,
@@ -57558,23 +58892,27 @@ pub mod api {
                             runtime_types::sp_runtime::traits::BlakeTwo256,
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "The decision deposit has been placed."]
                     DecisionDepositPlaced {
                         index: ::core::primitive::u32,
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "The decision deposit has been refunded."]
                     DecisionDepositRefunded {
                         index: ::core::primitive::u32,
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 3)]
                     #[doc = "A deposit has been slashed."]
                     DepositSlashed {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 4)]
                     #[doc = "A referendum has moved into the deciding phase."]
                     DecisionStarted {
                         index: ::core::primitive::u32,
@@ -57587,12 +58925,11 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     },
-                    ConfirmStarted {
-                        index: ::core::primitive::u32,
-                    },
-                    ConfirmAborted {
-                        index: ::core::primitive::u32,
-                    },
+                    #[codec(index = 5)]
+                    ConfirmStarted { index: ::core::primitive::u32 },
+                    #[codec(index = 6)]
+                    ConfirmAborted { index: ::core::primitive::u32 },
+                    #[codec(index = 7)]
                     #[doc = "A referendum has ended its confirmation phase and is ready for approval."]
                     Confirmed {
                         index: ::core::primitive::u32,
@@ -57600,10 +58937,10 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     },
+                    #[codec(index = 8)]
                     #[doc = "A referendum has been approved and its proposal has been scheduled."]
-                    Approved {
-                        index: ::core::primitive::u32,
-                    },
+                    Approved { index: ::core::primitive::u32 },
+                    #[codec(index = 9)]
                     #[doc = "A proposal has been rejected by referendum."]
                     Rejected {
                         index: ::core::primitive::u32,
@@ -57611,6 +58948,7 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     },
+                    #[codec(index = 10)]
                     #[doc = "A referendum has been timed out without being decided."]
                     TimedOut {
                         index: ::core::primitive::u32,
@@ -57618,6 +58956,7 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     },
+                    #[codec(index = 11)]
                     #[doc = "A referendum has been cancelled."]
                     Cancelled {
                         index: ::core::primitive::u32,
@@ -57625,6 +58964,7 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     },
+                    #[codec(index = 12)]
                     #[doc = "A referendum has been killed."]
                     Killed {
                         index: ::core::primitive::u32,
@@ -57632,17 +58972,20 @@ pub mod api {
                             ::core::primitive::u128,
                         >,
                     },
+                    #[codec(index = 13)]
                     #[doc = "The submission deposit has been refunded."]
                     SubmissionDepositRefunded {
                         index: ::core::primitive::u32,
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 14)]
                     #[doc = "Metadata for a referendum has been set."]
                     MetadataSet {
                         index: ::core::primitive::u32,
                         hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 15)]
                     #[doc = "Metadata for a referendum has been cleared."]
                     MetadataCleared {
                         index: ::core::primitive::u32,
@@ -57662,6 +59005,7 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event2 {
+                    #[codec(index = 0)]
                     #[doc = "A referendum has been submitted."]
                     Submitted {
                         index: ::core::primitive::u32,
@@ -57671,23 +59015,27 @@ pub mod api {
                             runtime_types::sp_runtime::traits::BlakeTwo256,
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "The decision deposit has been placed."]
                     DecisionDepositPlaced {
                         index: ::core::primitive::u32,
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "The decision deposit has been refunded."]
                     DecisionDepositRefunded {
                         index: ::core::primitive::u32,
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 3)]
                     #[doc = "A deposit has been slashed."]
                     DepositSlashed {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 4)]
                     #[doc = "A referendum has moved into the deciding phase."]
                     DecisionStarted {
                         index: ::core::primitive::u32,
@@ -57698,52 +59046,57 @@ pub mod api {
                         >,
                         tally: runtime_types::pallet_ranked_collective::Tally,
                     },
-                    ConfirmStarted {
-                        index: ::core::primitive::u32,
-                    },
-                    ConfirmAborted {
-                        index: ::core::primitive::u32,
-                    },
+                    #[codec(index = 5)]
+                    ConfirmStarted { index: ::core::primitive::u32 },
+                    #[codec(index = 6)]
+                    ConfirmAborted { index: ::core::primitive::u32 },
+                    #[codec(index = 7)]
                     #[doc = "A referendum has ended its confirmation phase and is ready for approval."]
                     Confirmed {
                         index: ::core::primitive::u32,
                         tally: runtime_types::pallet_ranked_collective::Tally,
                     },
+                    #[codec(index = 8)]
                     #[doc = "A referendum has been approved and its proposal has been scheduled."]
-                    Approved {
-                        index: ::core::primitive::u32,
-                    },
+                    Approved { index: ::core::primitive::u32 },
+                    #[codec(index = 9)]
                     #[doc = "A proposal has been rejected by referendum."]
                     Rejected {
                         index: ::core::primitive::u32,
                         tally: runtime_types::pallet_ranked_collective::Tally,
                     },
+                    #[codec(index = 10)]
                     #[doc = "A referendum has been timed out without being decided."]
                     TimedOut {
                         index: ::core::primitive::u32,
                         tally: runtime_types::pallet_ranked_collective::Tally,
                     },
+                    #[codec(index = 11)]
                     #[doc = "A referendum has been cancelled."]
                     Cancelled {
                         index: ::core::primitive::u32,
                         tally: runtime_types::pallet_ranked_collective::Tally,
                     },
+                    #[codec(index = 12)]
                     #[doc = "A referendum has been killed."]
                     Killed {
                         index: ::core::primitive::u32,
                         tally: runtime_types::pallet_ranked_collective::Tally,
                     },
+                    #[codec(index = 13)]
                     #[doc = "The submission deposit has been refunded."]
                     SubmissionDepositRefunded {
                         index: ::core::primitive::u32,
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 14)]
                     #[doc = "Metadata for a referendum has been set."]
                     MetadataSet {
                         index: ::core::primitive::u32,
                         hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 15)]
                     #[doc = "Metadata for a referendum has been cleared."]
                     MetadataCleared {
                         index: ::core::primitive::u32,
@@ -57765,17 +59118,20 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Curve {
+                    #[codec(index = 0)]
                     LinearDecreasing {
                         length: runtime_types::sp_arithmetic::per_things::Perbill,
                         floor: runtime_types::sp_arithmetic::per_things::Perbill,
                         ceil: runtime_types::sp_arithmetic::per_things::Perbill,
                     },
+                    #[codec(index = 1)]
                     SteppedDecreasing {
                         begin: runtime_types::sp_arithmetic::per_things::Perbill,
                         end: runtime_types::sp_arithmetic::per_things::Perbill,
                         step: runtime_types::sp_arithmetic::per_things::Perbill,
                         period: runtime_types::sp_arithmetic::per_things::Perbill,
                     },
+                    #[codec(index = 2)]
                     Reciprocal {
                         factor: runtime_types::sp_arithmetic::fixed_point::FixedI64,
                         x_offset: runtime_types::sp_arithmetic::fixed_point::FixedI64,
@@ -57824,6 +59180,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum ReferendumInfo<_0, _1, _2, _3, _4, _5, _6, _7> {
+                    #[codec(index = 0)]
                     Ongoing(
                         runtime_types::pallet_referenda::types::ReferendumStatus<
                             _0,
@@ -57836,6 +59193,7 @@ pub mod api {
                             _7,
                         >,
                     ),
+                    #[codec(index = 1)]
                     Approved(
                         _2,
                         ::core::option::Option<
@@ -57845,6 +59203,7 @@ pub mod api {
                             runtime_types::pallet_referenda::types::Deposit<_6, _4>,
                         >,
                     ),
+                    #[codec(index = 2)]
                     Rejected(
                         _2,
                         ::core::option::Option<
@@ -57854,6 +59213,7 @@ pub mod api {
                             runtime_types::pallet_referenda::types::Deposit<_6, _4>,
                         >,
                     ),
+                    #[codec(index = 3)]
                     Cancelled(
                         _2,
                         ::core::option::Option<
@@ -57863,6 +59223,7 @@ pub mod api {
                             runtime_types::pallet_referenda::types::Deposit<_6, _4>,
                         >,
                     ),
+                    #[codec(index = 4)]
                     TimedOut(
                         _2,
                         ::core::option::Option<
@@ -57872,6 +59233,7 @@ pub mod api {
                             runtime_types::pallet_referenda::types::Deposit<_6, _4>,
                         >,
                     ),
+                    #[codec(index = 5)]
                     Killed(_2),
                 }
                 #[derive(
@@ -57943,10 +59305,12 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "A dispatch that will fill the block weight up to the given ratio."]
                     fill_block {
                         ratio: runtime_types::sp_arithmetic::per_things::Perbill,
                     },
+                    #[codec(index = 1)]
                     trigger_defensive,
                 }
                 #[derive(
@@ -57962,6 +59326,7 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "Event dispatched when the trigger_defensive extrinsic is called."]
                     DefensiveTestCall,
                 }
@@ -57984,6 +59349,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Anonymously schedule a task."]
                     schedule {
                         when: ::core::primitive::u32,
@@ -57996,11 +59362,13 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Cancel an anonymously scheduled task."]
                     cancel {
                         when: ::core::primitive::u32,
                         index: ::core::primitive::u32,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Schedule a named task."]
                     schedule_named {
                         id: [::core::primitive::u8; 32usize],
@@ -58014,10 +59382,12 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Cancel a named scheduled task."]
                     cancel_named {
                         id: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 4)]
                     #[doc = "Anonymously schedule a task after a delay."]
                     schedule_after {
                         after: ::core::primitive::u32,
@@ -58030,6 +59400,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Schedule a named task after a delay."]
                     schedule_named_after {
                         id: [::core::primitive::u8; 32usize],
@@ -58043,6 +59414,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Set a retry configuration for a task so that, in case its scheduled run fails, it will"]
                     #[doc = "be retried after `period` blocks, for a total amount of `retries` retries or until it"]
                     #[doc = "succeeds."]
@@ -58060,6 +59432,7 @@ pub mod api {
                         retries: ::core::primitive::u8,
                         period: ::core::primitive::u32,
                     },
+                    #[codec(index = 7)]
                     #[doc = "Set a retry configuration for a named task so that, in case its scheduled run fails, it"]
                     #[doc = "will be retried after `period` blocks, for a total amount of `retries` retries or until"]
                     #[doc = "it succeeds."]
@@ -58077,10 +59450,12 @@ pub mod api {
                         retries: ::core::primitive::u8,
                         period: ::core::primitive::u32,
                     },
+                    #[codec(index = 8)]
                     #[doc = "Removes the retry configuration of a task."]
                     cancel_retry {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                     },
+                    #[codec(index = 9)]
                     #[doc = "Cancel the retry configuration of a named task."]
                     cancel_retry_named {
                         id: [::core::primitive::u8; 32usize],
@@ -58099,14 +59474,19 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Failed to schedule a call"]
                     FailedToSchedule,
+                    #[codec(index = 1)]
                     #[doc = "Cannot find the scheduled call."]
                     NotFound,
+                    #[codec(index = 2)]
                     #[doc = "Given target block number is in the past."]
                     TargetBlockNumberInPast,
+                    #[codec(index = 3)]
                     #[doc = "Reschedule failed because it does not change scheduled time."]
                     RescheduleNoChange,
+                    #[codec(index = 4)]
                     #[doc = "Attempt to use a non-named function on a named task."]
                     Named,
                 }
@@ -58123,16 +59503,19 @@ pub mod api {
                 )]
                 #[doc = "Events type."]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "Scheduled some task."]
                     Scheduled {
                         when: ::core::primitive::u32,
                         index: ::core::primitive::u32,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Canceled some task."]
                     Canceled {
                         when: ::core::primitive::u32,
                         index: ::core::primitive::u32,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Dispatched some task."]
                     Dispatched {
                         task: (::core::primitive::u32, ::core::primitive::u32),
@@ -58140,6 +59523,7 @@ pub mod api {
                         result:
                             ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Set a retry configuration for some task."]
                     RetrySet {
                         task: (::core::primitive::u32, ::core::primitive::u32),
@@ -58147,32 +59531,38 @@ pub mod api {
                         period: ::core::primitive::u32,
                         retries: ::core::primitive::u8,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Cancel a retry configuration for some task."]
                     RetryCancelled {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                         id: ::core::option::Option<[::core::primitive::u8; 32usize]>,
                     },
+                    #[codec(index = 5)]
                     #[doc = "The call for the provided hash was not found so the task has been aborted."]
                     CallUnavailable {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                         id: ::core::option::Option<[::core::primitive::u8; 32usize]>,
                     },
+                    #[codec(index = 6)]
                     #[doc = "The given task was unable to be renewed since the agenda is full at that block."]
                     PeriodicFailed {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                         id: ::core::option::Option<[::core::primitive::u8; 32usize]>,
                     },
+                    #[codec(index = 7)]
                     #[doc = "The given task was unable to be retried since the agenda is full at that block or there"]
                     #[doc = "was not enough weight to reschedule it."]
                     RetryFailed {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                         id: ::core::option::Option<[::core::primitive::u8; 32usize]>,
                     },
+                    #[codec(index = 8)]
                     #[doc = "The given task can never be executed since it is overweight."]
                     PermanentlyOverweight {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                         id: ::core::option::Option<[::core::primitive::u8; 32usize]>,
                     },
+                    #[codec(index = 9)]
                     #[doc = "Agenda is incomplete from `when`."]
                     AgendaIncomplete { when: ::core::primitive::u32 },
                 }
@@ -58202,11 +59592,38 @@ pub mod api {
                 pub call: _1,
                 pub maybe_periodic: ::core::option::Option<(_2, _2)>,
                 pub origin: _3,
+                #[codec(skip)]
                 pub __ignore: ::core::marker::PhantomData<_4>,
             }
         }
         pub mod pallet_session {
             use super::runtime_types;
+            pub mod historical {
+                use super::runtime_types;
+                pub mod pallet {
+                    use super::runtime_types;
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
+                    #[doc = "The `Event` enum of this pallet"]
+                    pub enum Event {
+                        #[codec(index = 0)]
+                        #[doc = "The merkle root of the validators of the said session were stored"]
+                        RootStored { index: ::core::primitive::u32 },
+                        #[codec(index = 1)]
+                        #[doc = "The merkle roots of up to this session index were pruned"]
+                        RootsPruned { up_to: ::core::primitive::u32 },
+                    }
+                }
+            }
             pub mod pallet {
                 use super::runtime_types;
                 #[derive(
@@ -58222,6 +59639,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Sets the session key(s) of the function caller to `keys`."]
                     #[doc = "Allows an account to set its session key prior to becoming a validator."]
                     #[doc = "This doesn't take effect until the next session."]
@@ -58235,6 +59653,7 @@ pub mod api {
                         keys: runtime_types::rococo_runtime::SessionKeys,
                         proof: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Removes any session key(s) of the function caller."]
                     #[doc = ""]
                     #[doc = "This doesn't take effect until the next session."]
@@ -58262,14 +59681,19 @@ pub mod api {
                 )]
                 #[doc = "Error for the session pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Invalid ownership proof."]
                     InvalidProof,
+                    #[codec(index = 1)]
                     #[doc = "No associated validator ID for account."]
                     NoAssociatedValidatorId,
+                    #[codec(index = 2)]
                     #[doc = "Registered duplicate key."]
                     DuplicatedKey,
+                    #[codec(index = 3)]
                     #[doc = "No keys are associated with this account."]
                     NoKeys,
+                    #[codec(index = 4)]
                     #[doc = "Key setting account is not live, so it's impossible to associate keys."]
                     NoAccount,
                 }
@@ -58286,19 +59710,41 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "New session has happened. Note that the argument is the session index, not the"]
                     #[doc = "block number as the type might suggest."]
                     NewSession {
                         session_index: ::core::primitive::u32,
                     },
+                    #[codec(index = 1)]
+                    #[doc = "The `NewSession` event in the current block also implies a new validator set to be"]
+                    #[doc = "queued."]
+                    NewQueued,
+                    #[codec(index = 2)]
                     #[doc = "Validator has been disabled."]
                     ValidatorDisabled {
                         validator: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Validator has been re-enabled."]
                     ValidatorReenabled {
                         validator: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub enum HoldReason {
+                    #[codec(index = 0)]
+                    Keys,
                 }
             }
         }
@@ -58319,6 +59765,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "A user outside of the society can make a bid for entry."]
                     #[doc = ""]
                     #[doc = "Payment: The group's Candidate Deposit will be reserved for making a bid. It is returned"]
@@ -58329,6 +59776,7 @@ pub mod api {
                     #[doc = "Parameters:"]
                     #[doc = "- `value`: A one time payment the bid would like to receive when joining the society."]
                     bid { value: ::core::primitive::u128 },
+                    #[codec(index = 1)]
                     #[doc = "A bidder can remove their bid for entry into society."]
                     #[doc = "By doing so, they will have their candidate deposit returned or"]
                     #[doc = "they will unvouch their voucher."]
@@ -58337,6 +59785,7 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and a bidder."]
                     unbid,
+                    #[codec(index = 2)]
                     #[doc = "As a member, vouch for someone to join society by placing a bid on their behalf."]
                     #[doc = ""]
                     #[doc = "There is no deposit required to vouch for a new bid, but a member can only vouch for"]
@@ -58362,6 +59811,7 @@ pub mod api {
                         value: ::core::primitive::u128,
                         tip: ::core::primitive::u128,
                     },
+                    #[codec(index = 3)]
                     #[doc = "As a vouching member, unvouch a bid. This only works while vouched user is"]
                     #[doc = "only a bidder (and not a candidate)."]
                     #[doc = ""]
@@ -58370,6 +59820,7 @@ pub mod api {
                     #[doc = "Parameters:"]
                     #[doc = "- `pos`: Position in the `Bids` vector of the bid who should be unvouched."]
                     unvouch,
+                    #[codec(index = 4)]
                     #[doc = "As a member, vote on a candidate."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and a member."]
@@ -58385,6 +59836,7 @@ pub mod api {
                         >,
                         approve: ::core::primitive::bool,
                     },
+                    #[codec(index = 5)]
                     #[doc = "As a member, vote on the defender."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and a member."]
@@ -58393,6 +59845,7 @@ pub mod api {
                     #[doc = "- `approve`: A boolean which says if the candidate should be"]
                     #[doc = "approved (`true`) or rejected (`false`)."]
                     defender_vote { approve: ::core::primitive::bool },
+                    #[codec(index = 6)]
                     #[doc = "Transfer the first matured payout for the sender and remove it from the records."]
                     #[doc = ""]
                     #[doc = "NOTE: This extrinsic needs to be called multiple times to claim multiple matured"]
@@ -58404,9 +59857,11 @@ pub mod api {
                     #[doc = "The dispatch origin for this call must be _Signed_ and a member with"]
                     #[doc = "payouts remaining."]
                     payout,
+                    #[codec(index = 7)]
                     #[doc = "Repay the payment previously given to the member with the signed origin, remove any"]
                     #[doc = "pending payments, and elevate them from rank 0 to rank 1."]
                     waive_repay { amount: ::core::primitive::u128 },
+                    #[codec(index = 8)]
                     #[doc = "Found the society."]
                     #[doc = ""]
                     #[doc = "This is done as a discrete action in order to allow for the"]
@@ -58435,12 +59890,14 @@ pub mod api {
                         candidate_deposit: ::core::primitive::u128,
                         rules: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
+                    #[codec(index = 9)]
                     #[doc = "Dissolve the society and remove all members."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be Signed, and the signing account must be both"]
                     #[doc = "the `Founder` and the `Head`. This implies that it may only be done when there is one"]
                     #[doc = "member."]
                     dissolve,
+                    #[codec(index = 10)]
                     #[doc = "Allow suspension judgement origin to make judgement on a suspended member."]
                     #[doc = ""]
                     #[doc = "If a suspended member is forgiven, we simply add them back as a member, not affecting"]
@@ -58462,6 +59919,7 @@ pub mod api {
                         >,
                         forgive: ::core::primitive::bool,
                     },
+                    #[codec(index = 11)]
                     #[doc = "Change the maximum number of members in society and the maximum number of new candidates"]
                     #[doc = "in a single intake period."]
                     #[doc = ""]
@@ -58480,18 +59938,22 @@ pub mod api {
                         max_strikes: ::core::primitive::u32,
                         candidate_deposit: ::core::primitive::u128,
                     },
+                    #[codec(index = 12)]
                     #[doc = "Punish the skeptic with a strike if they did not vote on a candidate. Callable by the"]
                     #[doc = "candidate."]
                     punish_skeptic,
+                    #[codec(index = 13)]
                     #[doc = "Transform an approved candidate into a member. Callable only by the"]
                     #[doc = "the candidate, and only after the period for voting has ended."]
                     claim_membership,
+                    #[codec(index = 14)]
                     #[doc = "Transform an approved candidate into a member. Callable only by the Signed origin of the"]
                     #[doc = "Founder, only after the period for voting has ended and only when the candidate is not"]
                     #[doc = "clearly rejected."]
                     bestow_membership {
                         candidate: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 15)]
                     #[doc = "Remove the candidate's application from the society. Callable only by the Signed origin"]
                     #[doc = "of the Founder, only after the period for voting has ended, and only when they do not"]
                     #[doc = "have a clear approval."]
@@ -58500,10 +59962,12 @@ pub mod api {
                     kick_candidate {
                         candidate: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 16)]
                     #[doc = "Remove the candidate's application from the society. Callable only by the candidate."]
                     #[doc = ""]
                     #[doc = "Any bid deposit is lost and voucher is banned."]
                     resign_candidacy,
+                    #[codec(index = 17)]
                     #[doc = "Remove a `candidate`'s failed application from the society. Callable by any"]
                     #[doc = "signed origin but only at the end of the subsequent round and only for"]
                     #[doc = "a candidate with more rejections than approvals."]
@@ -58512,6 +59976,7 @@ pub mod api {
                     drop_candidate {
                         candidate: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 18)]
                     #[doc = "Remove up to `max` stale votes for the given `candidate`."]
                     #[doc = ""]
                     #[doc = "May be called by any Signed origin, but only after the candidate's candidacy is ended."]
@@ -58519,6 +59984,7 @@ pub mod api {
                         candidate: ::subxt::ext::subxt_core::utils::AccountId32,
                         max: ::core::primitive::u32,
                     },
+                    #[codec(index = 19)]
                     #[doc = "Remove up to `max` stale votes for the defender in the given `challenge_round`."]
                     #[doc = ""]
                     #[doc = "May be called by any Signed origin, but only after the challenge round is ended."]
@@ -58526,6 +59992,15 @@ pub mod api {
                         challenge_round: ::core::primitive::u32,
                         max: ::core::primitive::u32,
                     },
+                    #[codec(index = 20)]
+                    #[doc = "Poke the deposit reserved when bidding."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and must be the bidder."]
+                    #[doc = ""]
+                    #[doc = "The transaction fee is waived if the deposit is changed after poking/reconsideration."]
+                    #[doc = ""]
+                    #[doc = "Emits `DepositPoked` if successful."]
+                    poke_deposit,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -58540,70 +60015,105 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "User is not a member."]
                     NotMember,
+                    #[codec(index = 1)]
                     #[doc = "User is already a member."]
                     AlreadyMember,
+                    #[codec(index = 2)]
                     #[doc = "User is suspended."]
                     Suspended,
+                    #[codec(index = 3)]
                     #[doc = "User is not suspended."]
                     NotSuspended,
+                    #[codec(index = 4)]
                     #[doc = "Nothing to payout."]
                     NoPayout,
+                    #[codec(index = 5)]
                     #[doc = "Society already founded."]
                     AlreadyFounded,
+                    #[codec(index = 6)]
                     #[doc = "Not enough in pot to accept candidate."]
                     InsufficientPot,
+                    #[codec(index = 7)]
                     #[doc = "Member is already vouching or banned from vouching again."]
                     AlreadyVouching,
+                    #[codec(index = 8)]
                     #[doc = "Member is not vouching."]
                     NotVouchingOnBidder,
+                    #[codec(index = 9)]
                     #[doc = "Cannot remove the head of the chain."]
                     Head,
+                    #[codec(index = 10)]
                     #[doc = "Cannot remove the founder."]
                     Founder,
+                    #[codec(index = 11)]
                     #[doc = "User has already made a bid."]
                     AlreadyBid,
+                    #[codec(index = 12)]
                     #[doc = "User is already a candidate."]
                     AlreadyCandidate,
+                    #[codec(index = 13)]
                     #[doc = "User is not a candidate."]
                     NotCandidate,
+                    #[codec(index = 14)]
                     #[doc = "Too many members in the society."]
                     MaxMembers,
+                    #[codec(index = 15)]
                     #[doc = "The caller is not the founder."]
                     NotFounder,
+                    #[codec(index = 16)]
                     #[doc = "The caller is not the head."]
                     NotHead,
+                    #[codec(index = 17)]
                     #[doc = "The membership cannot be claimed as the candidate was not clearly approved."]
                     NotApproved,
+                    #[codec(index = 18)]
                     #[doc = "The candidate cannot be kicked as the candidate was not clearly rejected."]
                     NotRejected,
+                    #[codec(index = 19)]
                     #[doc = "The candidacy cannot be dropped as the candidate was clearly approved."]
                     Approved,
+                    #[codec(index = 20)]
                     #[doc = "The candidacy cannot be bestowed as the candidate was clearly rejected."]
                     Rejected,
+                    #[codec(index = 21)]
                     #[doc = "The candidacy cannot be concluded as the voting is still in progress."]
                     InProgress,
+                    #[codec(index = 22)]
                     #[doc = "The candidacy cannot be pruned until a full additional intake period has passed."]
                     TooEarly,
+                    #[codec(index = 23)]
                     #[doc = "The skeptic already voted."]
                     Voted,
+                    #[codec(index = 24)]
                     #[doc = "The skeptic need not vote on candidates from expired rounds."]
                     Expired,
+                    #[codec(index = 25)]
                     #[doc = "User is not a bidder."]
                     NotBidder,
+                    #[codec(index = 26)]
                     #[doc = "There is no defender currently."]
                     NoDefender,
+                    #[codec(index = 27)]
                     #[doc = "Group doesn't exist."]
                     NotGroup,
+                    #[codec(index = 28)]
                     #[doc = "The member is already elevated to this rank."]
                     AlreadyElevated,
+                    #[codec(index = 29)]
                     #[doc = "The skeptic has already been punished for this offence."]
                     AlreadyPunished,
+                    #[codec(index = 30)]
                     #[doc = "Funds are insufficient to pay off society debts."]
                     InsufficientFunds,
+                    #[codec(index = 31)]
                     #[doc = "The candidate/defender has no stale votes to remove."]
                     NoVotes,
+                    #[codec(index = 32)]
+                    #[doc = "There is no deposit associated with a bid."]
+                    NoDeposit,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -58618,16 +60128,19 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "The society is founded by the given identity."]
                     Founded {
                         founder: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 1)]
                     #[doc = "A membership bid just happened. The given account is the candidate's ID and their offer"]
                     #[doc = "is the second."]
                     Bid {
                         candidate_id: ::subxt::ext::subxt_core::utils::AccountId32,
                         offer: ::core::primitive::u128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "A membership bid just happened by vouching. The given account is the candidate's ID and"]
                     #[doc = "their offer is the second. The vouching party is the third."]
                     Vouch {
@@ -58635,18 +60148,22 @@ pub mod api {
                         offer: ::core::primitive::u128,
                         vouching: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 3)]
                     #[doc = "A candidate was dropped (due to an excess of bids in the system)."]
                     AutoUnbid {
                         candidate: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 4)]
                     #[doc = "A candidate was dropped (by their request)."]
                     Unbid {
                         candidate: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 5)]
                     #[doc = "A candidate was dropped (by request of who vouched for them)."]
                     Unvouch {
                         candidate: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 6)]
                     #[doc = "A group of candidates have been inducted. The batch's primary is the first value, the"]
                     #[doc = "batch in full is the second."]
                     Inducted {
@@ -58655,48 +60172,65 @@ pub mod api {
                             ::subxt::ext::subxt_core::utils::AccountId32,
                         >,
                     },
+                    #[codec(index = 7)]
                     #[doc = "A suspended member has been judged."]
                     SuspendedMemberJudgement {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         judged: ::core::primitive::bool,
                     },
+                    #[codec(index = 8)]
                     #[doc = "A candidate has been suspended"]
                     CandidateSuspended {
                         candidate: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 9)]
                     #[doc = "A member has been suspended"]
                     MemberSuspended {
                         member: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 10)]
                     #[doc = "A member has been challenged"]
                     Challenged {
                         member: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 11)]
                     #[doc = "A vote has been placed"]
                     Vote {
                         candidate: ::subxt::ext::subxt_core::utils::AccountId32,
                         voter: ::subxt::ext::subxt_core::utils::AccountId32,
                         vote: ::core::primitive::bool,
                     },
+                    #[codec(index = 12)]
                     #[doc = "A vote has been placed for a defending member"]
                     DefenderVote {
                         voter: ::subxt::ext::subxt_core::utils::AccountId32,
                         vote: ::core::primitive::bool,
                     },
+                    #[codec(index = 13)]
                     #[doc = "A new set of \\[params\\] has been set for the group."]
                     NewParams {
                         params: runtime_types::pallet_society::GroupParams<::core::primitive::u128>,
                     },
+                    #[codec(index = 14)]
                     #[doc = "Society is unfounded."]
                     Unfounded {
                         founder: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 15)]
                     #[doc = "Some funds were deposited into the society account."]
                     Deposit { value: ::core::primitive::u128 },
+                    #[codec(index = 16)]
                     #[doc = "A \\[member\\] got elevated to \\[rank\\]."]
                     Elevated {
                         member: ::subxt::ext::subxt_core::utils::AccountId32,
                         rank: ::core::primitive::u32,
+                    },
+                    #[codec(index = 17)]
+                    #[doc = "A deposit was poked / adjusted."]
+                    DepositPoked {
+                        who: ::subxt::ext::subxt_core::utils::AccountId32,
+                        old_deposit: ::core::primitive::u128,
+                        new_deposit: ::core::primitive::u128,
                     },
                 }
             }
@@ -58720,7 +60254,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum BidKind<_0, _1> {
+                #[codec(index = 0)]
                 Deposit(_1),
+                #[codec(index = 1)]
                 Vouch(_0, _1),
             }
             #[derive(
@@ -58816,7 +60352,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum VouchingStatus {
+                #[codec(index = 0)]
                 Vouching,
+                #[codec(index = 1)]
                 Banned,
             }
         }
@@ -58837,6 +60375,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Control the automatic migration."]
                     #[doc = ""]
                     #[doc = "The dispatch origin of this call must be [`Config::ControlOrigin`]."]
@@ -58845,6 +60384,7 @@ pub mod api {
                             runtime_types::pallet_state_trie_migration::pallet::MigrationLimits,
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Continue the migration for the given `limits`."]
                     #[doc = ""]
                     #[doc = "The dispatch origin of this call can be any signed account."]
@@ -58872,6 +60412,7 @@ pub mod api {
                         witness_task:
                             runtime_types::pallet_state_trie_migration::pallet::MigrationTask,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Migrate the list of top keys by iterating each of them one by one."]
                     #[doc = ""]
                     #[doc = "This does not affect the global migration process tracker ([`MigrationProcess`]), and"]
@@ -58882,6 +60423,7 @@ pub mod api {
                         >,
                         witness_size: ::core::primitive::u32,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Migrate the list of child keys by iterating each of them one by one."]
                     #[doc = ""]
                     #[doc = "All of the given child keys must be present under one `child_root`."]
@@ -58895,10 +60437,12 @@ pub mod api {
                         >,
                         total_size: ::core::primitive::u32,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Set the maximum limit of the signed migration."]
                     set_signed_max_limits {
                         limits: runtime_types::pallet_state_trie_migration::pallet::MigrationLimits,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Forcefully set the progress the running migration."]
                     #[doc = ""]
                     #[doc = "This is only useful in one case: the next key to migrate is too big to be migrated with"]
@@ -58927,8 +60471,10 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Max signed limits not respected."]
                     MaxSignedLimits,
+                    #[codec(index = 1)]
                     #[doc = "A key was longer than the configured maximum."]
                     #[doc = ""]
                     #[doc = "This means that the migration halted at the current [`Progress`] and"]
@@ -58937,12 +60483,16 @@ pub mod api {
                     #[doc = "The value should only be increased to avoid a storage migration for the currently"]
                     #[doc = "stored [`crate::Progress::LastKey`]."]
                     KeyTooLong,
+                    #[codec(index = 2)]
                     #[doc = "submitter does not have enough funds."]
                     NotEnoughFunds,
+                    #[codec(index = 3)]
                     #[doc = "Bad witness data provided."]
                     BadWitness,
+                    #[codec(index = 4)]
                     #[doc = "Signed migration is not allowed because the maximum limit is not set yet."]
                     SignedMigrationNotAllowed,
+                    #[codec(index = 5)]
                     #[doc = "Bad child root provided."]
                     BadChildRoot,
                 }
@@ -58959,6 +60509,7 @@ pub mod api {
                 )]
                 #[doc = "Inner events of this pallet."]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "Given number of `(top, child)` keys were migrated respectively, with the given"]
                     #[doc = "`compute`."]
                     Migrated {
@@ -58967,13 +60518,16 @@ pub mod api {
                         compute:
                             runtime_types::pallet_state_trie_migration::pallet::MigrationCompute,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Some account got slashed by the given amount."]
                     Slashed {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "The auto migration task finished."]
                     AutoMigrationFinished,
+                    #[codec(index = 3)]
                     #[doc = "Migration got halted due to an error or miss-configuration."]
                     Halted {
                         error: runtime_types::pallet_state_trie_migration::pallet::Error,
@@ -58991,6 +60545,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum HoldReason {
+                    #[codec(index = 0)]
                     SlashForMigrate,
                 }
                 #[derive(
@@ -59005,7 +60560,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum MigrationCompute {
+                    #[codec(index = 0)]
                     Signed,
+                    #[codec(index = 1)]
                     Auto,
                 }
                 #[derive(
@@ -59054,12 +60611,15 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Progress {
+                    #[codec(index = 0)]
                     ToStart,
+                    #[codec(index = 1)]
                     LastKey(
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     ),
+                    #[codec(index = 2)]
                     Complete,
                 }
             }
@@ -59081,12 +60641,14 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Authenticates the sudo key and dispatches a function call with `Root` origin."]
                     sudo {
                         call: ::subxt::ext::subxt_core::alloc::boxed::Box<
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Authenticates the sudo key and dispatches a function call with `Root` origin."]
                     #[doc = "This function does not check the weight of the call, and instead allows the"]
                     #[doc = "Sudo user to specify the weight of the call."]
@@ -59098,6 +60660,7 @@ pub mod api {
                         >,
                         weight: runtime_types::sp_weights::weight_v2::Weight,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Authenticates the current sudo key and sets the given AccountId (`new`) as the new sudo"]
                     #[doc = "key."]
                     set_key {
@@ -59106,6 +60669,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Authenticates the sudo key and dispatches a function call with `Signed` origin from"]
                     #[doc = "a given account."]
                     #[doc = ""]
@@ -59119,6 +60683,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Permanently removes the sudo key."]
                     #[doc = ""]
                     #[doc = "**This cannot be un-done.**"]
@@ -59137,6 +60702,7 @@ pub mod api {
                 )]
                 #[doc = "Error for the Sudo pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Sender must be the Sudo account."]
                     RequireSudo,
                 }
@@ -59153,18 +60719,22 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A sudo call just took place."]
                     Sudid {
                         sudo_result:
                             ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
                     },
+                    #[codec(index = 1)]
                     #[doc = "The sudo key has been updated."]
                     KeyChanged {
                         old: ::core::option::Option<::subxt::ext::subxt_core::utils::AccountId32>,
                         new: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 2)]
                     #[doc = "The key was permanently removed."]
                     KeyRemoved,
+                    #[codec(index = 3)]
                     #[doc = "A [sudo_as](Pallet::sudo_as) call just took place."]
                     SudoAsDone {
                         sudo_result:
@@ -59190,6 +60760,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Set the current time."]
                     #[doc = ""]
                     #[doc = "This call should be invoked exactly once per block. It will panic at the finalization"]
@@ -59209,7 +60780,10 @@ pub mod api {
                     #[doc = "- 1 storage read and 1 storage mutation (codec `O(1)` because of `DidUpdate::take` in"]
                     #[doc = "  `on_finalize`)"]
                     #[doc = "- 1 event handler `on_timestamp_set`. Must be `O(1)`."]
-                    set { now: ::core::primitive::u64 },
+                    set {
+                        #[codec(compact)]
+                        now: ::core::primitive::u64,
+                    },
                 }
             }
         }
@@ -59230,6 +60804,7 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,"]
                     #[doc = "has been paid by `who`."]
                     TransactionFeePaid {
@@ -59298,7 +60873,7 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            pub struct ChargeTransactionPayment(pub ::core::primitive::u128);
+            pub struct ChargeTransactionPayment(#[codec(compact)] pub ::core::primitive::u128);
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                 :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -59307,7 +60882,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum Releases {
+                #[codec(index = 0)]
                 V1Ancient,
+                #[codec(index = 1)]
                 V2,
             }
         }
@@ -59328,6 +60905,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 3)]
                     #[doc = "Propose and approve a spend of treasury funds."]
                     #[doc = ""]
                     #[doc = "## Dispatch Origin"]
@@ -59346,12 +60924,14 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Emits [`Event::SpendApproved`] if successful."]
                     spend_local {
+                        #[codec(compact)]
                         amount: ::core::primitive::u128,
                         beneficiary: ::subxt::ext::subxt_core::utils::MultiAddress<
                             ::subxt::ext::subxt_core::utils::AccountId32,
                             (),
                         >,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Force a previously approved proposal to be removed from the approval queue."]
                     #[doc = ""]
                     #[doc = "## Dispatch Origin"]
@@ -59373,7 +60953,11 @@ pub mod api {
                     #[doc = "  approval queue, i.e., the proposal has not been approved. This could also mean the"]
                     #[doc = "  proposal does not exist altogether, thus there is no way it would have been approved"]
                     #[doc = "  in the first place."]
-                    remove_approval { proposal_id: ::core::primitive::u32 },
+                    remove_approval {
+                        #[codec(compact)]
+                        proposal_id: ::core::primitive::u32,
+                    },
+                    #[codec(index = 5)]
                     #[doc = "Propose and approve a spend of treasury funds."]
                     #[doc = ""]
                     #[doc = "## Dispatch Origin"]
@@ -59404,12 +60988,14 @@ pub mod api {
                         asset_kind: ::subxt::ext::subxt_core::alloc::boxed::Box<
                             runtime_types::polkadot_runtime_common::impls::VersionedLocatableAsset,
                         >,
+                        #[codec(compact)]
                         amount: ::core::primitive::u128,
                         beneficiary: ::subxt::ext::subxt_core::alloc::boxed::Box<
                             runtime_types::xcm::VersionedLocation,
                         >,
                         valid_from: ::core::option::Option<::core::primitive::u32>,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Claim a spend."]
                     #[doc = ""]
                     #[doc = "## Dispatch Origin"]
@@ -59430,6 +61016,7 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "Emits [`Event::Paid`] if successful."]
                     payout { index: ::core::primitive::u32 },
+                    #[codec(index = 7)]
                     #[doc = "Check the status of the spend and remove it from the storage if processed."]
                     #[doc = ""]
                     #[doc = "## Dispatch Origin"]
@@ -59450,6 +61037,7 @@ pub mod api {
                     #[doc = "Emits [`Event::PaymentFailed`] if the spend payout has failed."]
                     #[doc = "Emits [`Event::SpendProcessed`] if the spend payout has succeed."]
                     check_status { index: ::core::primitive::u32 },
+                    #[codec(index = 8)]
                     #[doc = "Void previously approved spend."]
                     #[doc = ""]
                     #[doc = "## Dispatch Origin"]
@@ -59481,27 +61069,38 @@ pub mod api {
                 )]
                 #[doc = "Error for the treasury pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "No proposal, bounty or spend at that index."]
                     InvalidIndex,
+                    #[codec(index = 1)]
                     #[doc = "Too many approvals in the queue."]
                     TooManyApprovals,
+                    #[codec(index = 2)]
                     #[doc = "The spend origin is valid but the amount it is allowed to spend is lower than the"]
                     #[doc = "amount to be spent."]
                     InsufficientPermission,
+                    #[codec(index = 3)]
                     #[doc = "Proposal has not been approved."]
                     ProposalNotApproved,
+                    #[codec(index = 4)]
                     #[doc = "The balance of the asset kind is not convertible to the balance of the native asset."]
                     FailedToConvertBalance,
+                    #[codec(index = 5)]
                     #[doc = "The spend has expired and cannot be claimed."]
                     SpendExpired,
+                    #[codec(index = 6)]
                     #[doc = "The spend is not yet eligible for payout."]
                     EarlyPayout,
+                    #[codec(index = 7)]
                     #[doc = "The payment has already been attempted."]
                     AlreadyAttempted,
+                    #[codec(index = 8)]
                     #[doc = "There was some issue with the mechanism of payment."]
                     PayoutError,
+                    #[codec(index = 9)]
                     #[doc = "The payout was not yet attempted/claimed."]
                     NotAttempted,
+                    #[codec(index = 10)]
                     #[doc = "The payment has neither failed nor succeeded yet."]
                     Inconclusive,
                 }
@@ -59518,37 +61117,45 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "We have ended a spend period and will now allocate funds."]
                     Spending {
                         budget_remaining: ::core::primitive::u128,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Some funds have been allocated."]
                     Awarded {
                         proposal_index: ::core::primitive::u32,
                         award: ::core::primitive::u128,
                         account: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Some of our funds have been burnt."]
                     Burnt {
                         burnt_funds: ::core::primitive::u128,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Spending has finished; this is the amount that rolls over until next spend."]
                     Rollover {
                         rollover_balance: ::core::primitive::u128,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Some funds have been deposited."]
                     Deposit { value: ::core::primitive::u128 },
+                    #[codec(index = 5)]
                     #[doc = "A new spend proposal has been approved."]
                     SpendApproved {
                         proposal_index: ::core::primitive::u32,
                         amount: ::core::primitive::u128,
                         beneficiary: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
+                    #[codec(index = 6)]
                     #[doc = "The inactive funds of the pallet have been updated."]
                     UpdatedInactive {
                         reactivated: ::core::primitive::u128,
                         deactivated: ::core::primitive::u128,
                     },
+                    #[codec(index = 7)]
                     #[doc = "A new asset spend proposal has been approved."]
                     AssetSpendApproved {
                         index: ::core::primitive::u32,
@@ -59559,18 +61166,22 @@ pub mod api {
                         valid_from: ::core::primitive::u32,
                         expire_at: ::core::primitive::u32,
                     },
+                    #[codec(index = 8)]
                     #[doc = "An approved spend was voided."]
                     AssetSpendVoided { index: ::core::primitive::u32 },
+                    #[codec(index = 9)]
                     #[doc = "A payment happened."]
                     Paid {
                         index: ::core::primitive::u32,
                         payment_id: ::core::primitive::u64,
                     },
+                    #[codec(index = 10)]
                     #[doc = "A payment failed and can be retried."]
                     PaymentFailed {
                         index: ::core::primitive::u32,
                         payment_id: ::core::primitive::u64,
                     },
+                    #[codec(index = 11)]
                     #[doc = "A spend was processed and removed from the storage. It might have been successfully"]
                     #[doc = "paid or it may have expired."]
                     SpendProcessed { index: ::core::primitive::u32 },
@@ -59584,8 +61195,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum PaymentState<_0> {
+                #[codec(index = 0)]
                 Pending,
+                #[codec(index = 1)]
                 Attempted { id: _0 },
+                #[codec(index = 2)]
                 Failed,
             }
             #[derive(
@@ -59634,6 +61248,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Send a batch of dispatch calls."]
                     #[doc = ""]
                     #[doc = "May be called from any origin except `None`."]
@@ -59657,6 +61272,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Send a call through an indexed pseudonym of the sender."]
                     #[doc = ""]
                     #[doc = "Filter from origin are passed along. The call will be dispatched with an origin which"]
@@ -59676,6 +61292,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Send a batch of dispatch calls and atomically execute them."]
                     #[doc = "The whole transaction will rollback and fail if any of the calls failed."]
                     #[doc = ""]
@@ -59694,6 +61311,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Dispatches a function call with a provided origin."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Root_."]
@@ -59708,6 +61326,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Send a batch of dispatch calls."]
                     #[doc = "Unlike `batch`, it allows errors and won't interrupt."]
                     #[doc = ""]
@@ -59726,6 +61345,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Dispatch a function call with a specified weight."]
                     #[doc = ""]
                     #[doc = "This function does not check the weight of the call, and instead allows the"]
@@ -59738,6 +61358,7 @@ pub mod api {
                         >,
                         weight: runtime_types::sp_weights::weight_v2::Weight,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Dispatch a fallback call in the event the main call fails to execute."]
                     #[doc = "May be called from any origin except `None`."]
                     #[doc = ""]
@@ -59769,6 +61390,7 @@ pub mod api {
                             runtime_types::rococo_runtime::RuntimeCall,
                         >,
                     },
+                    #[codec(index = 7)]
                     #[doc = "Dispatches a function call with a provided origin."]
                     #[doc = ""]
                     #[doc = "Almost the same as [`Pallet::dispatch_as`] but forwards any error of the inner call."]
@@ -59796,6 +61418,7 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "Too many calls batched."]
                     TooManyCalls,
                 }
@@ -59812,29 +61435,37 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "Batch of dispatches did not complete fully. Index of first failing dispatch given, as"]
                     #[doc = "well as the error."]
                     BatchInterrupted {
                         index: ::core::primitive::u32,
                         error: runtime_types::sp_runtime::DispatchError,
                     },
+                    #[codec(index = 1)]
                     #[doc = "Batch of dispatches completed fully with no error."]
                     BatchCompleted,
+                    #[codec(index = 2)]
                     #[doc = "Batch of dispatches completed but has errors."]
                     BatchCompletedWithErrors,
+                    #[codec(index = 3)]
                     #[doc = "A single item within a Batch of dispatches has completed with no error."]
                     ItemCompleted,
+                    #[codec(index = 4)]
                     #[doc = "A single item within a Batch of dispatches has completed with error."]
                     ItemFailed {
                         error: runtime_types::sp_runtime::DispatchError,
                     },
+                    #[codec(index = 5)]
                     #[doc = "A call was dispatched."]
                     DispatchedAs {
                         result:
                             ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Main call was dispatched."]
                     IfElseMainSuccess,
+                    #[codec(index = 7)]
                     #[doc = "The fallback call was dispatched."]
                     IfElseFallbackCalled {
                         main_error: runtime_types::sp_runtime::DispatchError,
@@ -59859,6 +61490,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     #[doc = "Unlock any vested funds of the sender account."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have funds still"]
@@ -59869,6 +61501,7 @@ pub mod api {
                     #[doc = "## Complexity"]
                     #[doc = "- `O(1)`."]
                     vest,
+                    #[codec(index = 1)]
                     #[doc = "Unlock any vested funds of a `target` account."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_."]
@@ -59886,6 +61519,7 @@ pub mod api {
                             (),
                         >,
                     },
+                    #[codec(index = 2)]
                     #[doc = "Create a vested transfer."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Signed_."]
@@ -59909,6 +61543,7 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     },
+                    #[codec(index = 3)]
                     #[doc = "Force a vested transfer."]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Root_."]
@@ -59937,6 +61572,7 @@ pub mod api {
                             ::core::primitive::u32,
                         >,
                     },
+                    #[codec(index = 4)]
                     #[doc = "Merge two vesting schedules together, creating a new vesting schedule that unlocks over"]
                     #[doc = "the highest possible start and end blocks. If both schedules have already started the"]
                     #[doc = "current block will be used as the schedule start; with the caveat that if one schedule"]
@@ -59962,6 +61598,7 @@ pub mod api {
                         schedule1_index: ::core::primitive::u32,
                         schedule2_index: ::core::primitive::u32,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Force remove a vesting schedule"]
                     #[doc = ""]
                     #[doc = "The dispatch origin for this call must be _Root_."]
@@ -59989,15 +61626,20 @@ pub mod api {
                 )]
                 #[doc = "Error for the vesting pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "The account given is not vesting."]
                     NotVesting,
+                    #[codec(index = 1)]
                     #[doc = "The account already has `MaxVestingSchedules` count of schedules and thus"]
                     #[doc = "cannot add another one. Consider merging existing schedules in order to add another."]
                     AtMaxVestingSchedules,
+                    #[codec(index = 2)]
                     #[doc = "Amount being transferred is too low to create a vesting schedule."]
                     AmountLow,
+                    #[codec(index = 3)]
                     #[doc = "An index was out of bounds of the vesting schedules."]
                     ScheduleIndexOutOfBounds,
+                    #[codec(index = 4)]
                     #[doc = "Failed to create a new schedule because some parameter was invalid."]
                     InvalidScheduleParams,
                 }
@@ -60014,12 +61656,20 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
+                    #[doc = "A vesting schedule has been created."]
+                    VestingCreated {
+                        account: ::subxt::ext::subxt_core::utils::AccountId32,
+                        schedule_index: ::core::primitive::u32,
+                    },
+                    #[codec(index = 1)]
                     #[doc = "The amount vested has been updated. This could indicate a change in funds available."]
                     #[doc = "The balance given is the amount which is left unvested (and thus locked)."]
                     VestingUpdated {
                         account: ::subxt::ext::subxt_core::utils::AccountId32,
                         unvested: ::core::primitive::u128,
                     },
+                    #[codec(index = 2)]
                     #[doc = "An \\[account\\] has become fully vested."]
                     VestingCompleted {
                         account: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -60053,7 +61703,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum Releases {
+                #[codec(index = 0)]
                 V0,
+                #[codec(index = 1)]
                 V1,
             }
         }
@@ -60074,17 +61726,21 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
+                    #[codec(index = 0)]
                     whitelist_call {
                         call_hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 1)]
                     remove_whitelisted_call {
                         call_hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 2)]
                     dispatch_whitelisted_call {
                         call_hash: ::subxt::ext::subxt_core::utils::H256,
                         call_encoded_len: ::core::primitive::u32,
                         call_weight_witness: runtime_types::sp_weights::weight_v2::Weight,
                     },
+                    #[codec(index = 3)]
                     dispatch_whitelisted_call_with_preimage {
                         call: ::subxt::ext::subxt_core::alloc::boxed::Box<
                             runtime_types::rococo_runtime::RuntimeCall,
@@ -60104,14 +61760,19 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "The preimage of the call hash could not be loaded."]
                     UnavailablePreImage,
+                    #[codec(index = 1)]
                     #[doc = "The call could not be decoded."]
                     UndecodableCall,
+                    #[codec(index = 2)]
                     #[doc = "The weight of the decoded call was higher than the witness."]
                     InvalidCallWeightWitness,
+                    #[codec(index = 3)]
                     #[doc = "The call was not whitelisted."]
                     CallIsNotWhitelisted,
+                    #[codec(index = 4)]
                     #[doc = "The call was already whitelisted; No-Op."]
                     CallAlreadyWhitelisted,
                 }
@@ -60128,12 +61789,15 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     CallWhitelisted {
                         call_hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 1)]
                     WhitelistedCallRemoved {
                         call_hash: ::subxt::ext::subxt_core::utils::H256,
                     },
+                    #[codec(index = 2)]
                     WhitelistedCallDispatched {
                         call_hash: ::subxt::ext::subxt_core::utils::H256,
                         result: ::core::result::Result<
@@ -60148,6 +61812,104 @@ pub mod api {
         }
         pub mod pallet_xcm {
             use super::runtime_types;
+            pub mod errors {
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub enum ExecutionError {
+                    #[codec(index = 0)]
+                    Overflow,
+                    #[codec(index = 1)]
+                    Unimplemented,
+                    #[codec(index = 2)]
+                    UntrustedReserveLocation,
+                    #[codec(index = 3)]
+                    UntrustedTeleportLocation,
+                    #[codec(index = 4)]
+                    LocationFull,
+                    #[codec(index = 5)]
+                    LocationNotInvertible,
+                    #[codec(index = 6)]
+                    BadOrigin,
+                    #[codec(index = 7)]
+                    InvalidLocation,
+                    #[codec(index = 8)]
+                    AssetNotFound,
+                    #[codec(index = 9)]
+                    FailedToTransactAsset,
+                    #[codec(index = 10)]
+                    NotWithdrawable,
+                    #[codec(index = 11)]
+                    LocationCannotHold,
+                    #[codec(index = 12)]
+                    ExceedsMaxMessageSize,
+                    #[codec(index = 13)]
+                    DestinationUnsupported,
+                    #[codec(index = 14)]
+                    Transport,
+                    #[codec(index = 15)]
+                    Unroutable,
+                    #[codec(index = 16)]
+                    UnknownClaim,
+                    #[codec(index = 17)]
+                    FailedToDecode,
+                    #[codec(index = 18)]
+                    MaxWeightInvalid,
+                    #[codec(index = 19)]
+                    NotHoldingFees,
+                    #[codec(index = 20)]
+                    TooExpensive,
+                    #[codec(index = 21)]
+                    Trap,
+                    #[codec(index = 22)]
+                    ExpectationFalse,
+                    #[codec(index = 23)]
+                    PalletNotFound,
+                    #[codec(index = 24)]
+                    NameMismatch,
+                    #[codec(index = 25)]
+                    VersionIncompatible,
+                    #[codec(index = 26)]
+                    HoldingWouldOverflow,
+                    #[codec(index = 27)]
+                    ExportError,
+                    #[codec(index = 28)]
+                    ReanchorFailed,
+                    #[codec(index = 29)]
+                    NoDeal,
+                    #[codec(index = 30)]
+                    FeesNotMet,
+                    #[codec(index = 31)]
+                    LockError,
+                    #[codec(index = 32)]
+                    NoPermission,
+                    #[codec(index = 33)]
+                    Unanchored,
+                    #[codec(index = 34)]
+                    NotDepositable,
+                    #[codec(index = 35)]
+                    TooManyAssets,
+                    #[codec(index = 36)]
+                    UnhandledXcmVersion,
+                    #[codec(index = 37)]
+                    WeightLimitReached,
+                    #[codec(index = 38)]
+                    Barrier,
+                    #[codec(index = 39)]
+                    WeightNotComputable,
+                    #[codec(index = 40)]
+                    ExceedsStackLimit,
+                }
+            }
             pub mod pallet {
                 use super::runtime_types;
                 #[derive(
@@ -60163,7 +61925,7 @@ pub mod api {
                 )]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
-                    send { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , message : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , } , # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_teleport_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] teleport_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_reserve_transfer_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] reserve_transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [doc = "Execute an XCM message from a local, signed, origin."] # [doc = ""] # [doc = "An event is deposited indicating whether `msg` could be executed completely or only"] # [doc = "partially."] # [doc = ""] # [doc = "No more than `max_weight` will be used in its attempted execution. If this is less than"] # [doc = "the maximum amount of weight that the message could take to be executed, then no"] # [doc = "execution attempt will be made."] execute { message : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , max_weight : runtime_types :: sp_weights :: weight_v2 :: Weight , } , # [doc = "Extoll that a particular destination can be communicated with through a particular"] # [doc = "version of XCM."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The destination that is being described."] # [doc = "- `xcm_version`: The latest version of XCM that `location` supports."] force_xcm_version { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm :: v5 :: location :: Location > , version : :: core :: primitive :: u32 , } , # [doc = "Set a safe XCM version (the version that XCM should be encoded with if the most recent"] # [doc = "version a destination can accept is unknown)."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `maybe_xcm_version`: The default XCM encoding version, or `None` to disable."] force_default_xcm_version { maybe_xcm_version : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [doc = "Ask a location to notify us regarding their XCM version and any changes to it."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we should subscribe for XCM version notifications."] force_subscribe_version_notify { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [doc = "Require that a particular destination should no longer notify us regarding any XCM"] # [doc = "version changes."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we are currently subscribed for XCM version"] # [doc = "  notifications which we no longer desire."] force_unsubscribe_version_notify { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_reserve_transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_teleport_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [doc = "Set or unset the global suspension state of the XCM executor."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `suspended`: `true` to suspend, `false` to resume."] force_suspension { suspended : :: core :: primitive :: bool , } , # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve, or through teleports."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item` (hence referred to as `fees`), up to enough to pay for"] # [doc = "`weight_limit` of weight. If more weight is needed than `weight_limit`, then the"] # [doc = "operation will fail and the sent assets may be at risk."] # [doc = ""] # [doc = "`assets` (excluding `fees`) must have same reserve location or otherwise be teleportable"] # [doc = "to `dest`, no limitations imposed on `fees`."] # [doc = " - for local reserve: transfer assets to sovereign account of destination chain and"] # [doc = "   forward a notification XCM to `dest` to mint and deposit reserve-based assets to"] # [doc = "   `beneficiary`."] # [doc = " - for destination reserve: burn local assets and forward a notification to `dest` chain"] # [doc = "   to withdraw the reserve assets from this chain's sovereign account and deposit them"] # [doc = "   to `beneficiary`."] # [doc = " - for remote reserve: burn local assets, forward XCM to reserve chain to move reserves"] # [doc = "   from this chain's SA to `dest` chain's SA, and forward another XCM to `dest` to mint"] # [doc = "   and deposit reserve-based assets to `beneficiary`."] # [doc = " - for teleports: burn local assets and forward XCM to `dest` chain to mint/teleport"] # [doc = "   assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `X2(Parent,"] # [doc = "  Parachain(..))` to send from parachain to parachain, or `X1(Parachain(..))` to send"] # [doc = "  from relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [doc = "Claims assets trapped on this pallet because of leftover assets during XCM execution."] # [doc = ""] # [doc = "- `origin`: Anyone can call this extrinsic."] # [doc = "- `assets`: The exact assets that were trapped. Use the version to specify what version"] # [doc = "was the latest when they were trapped."] # [doc = "- `beneficiary`: The location/account where the claimed assets will be deposited."] claim_assets { assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [doc = "Transfer assets from the local chain to the destination chain using explicit transfer"] # [doc = "types for assets and fees."] # [doc = ""] # [doc = "`assets` must have same reserve location or may be teleportable to `dest`. Caller must"] # [doc = "provide the `assets_transfer_type` to be used for `assets`:"] # [doc = " - `TransferType::LocalReserve`: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `TransferType::DestinationReserve`: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `TransferType::RemoteReserve(reserve)`: burn local assets, forward XCM to `reserve`"] # [doc = "   chain to move reserves from this chain's SA to `dest` chain's SA, and forward another"] # [doc = "   XCM to `dest` to mint and deposit reserve-based assets to `beneficiary`. Typically"] # [doc = "   the remote `reserve` is Asset Hub."] # [doc = " - `TransferType::Teleport`: burn local assets and forward XCM to `dest` chain to"] # [doc = "   mint/teleport assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "On the destination chain, as well as any intermediary hops, `BuyExecution` is used to"] # [doc = "buy execution using transferred `assets` identified by `remote_fees_id`."] # [doc = "Make sure enough of the specified `remote_fees_id` asset is included in the given list"] # [doc = "of `assets`. `remote_fees_id` should be enough to pay for `weight_limit`. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "`remote_fees_id` may use different transfer type than rest of `assets` and can be"] # [doc = "specified through `fees_transfer_type`."] # [doc = ""] # [doc = "The caller needs to specify what should happen to the transferred assets once they reach"] # [doc = "the `dest` chain. This is done through the `custom_xcm_on_dest` parameter, which"] # [doc = "contains the instructions to execute on `dest` as a final step."] # [doc = "  This is usually as simple as:"] # [doc = "  `Xcm(vec![DepositAsset { assets: Wild(AllCounted(assets.len())), beneficiary }])`,"] # [doc = "  but could be something more exotic like sending the `assets` even further."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain, or `(parents: 2, (GlobalConsensus(..), ..))` to send from"] # [doc = "  parachain across a bridge to another ecosystem destination."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `assets_transfer_type`: The XCM `TransferType` used to transfer the `assets`."] # [doc = "- `remote_fees_id`: One of the included `assets` to be used to pay fees."] # [doc = "- `fees_transfer_type`: The XCM `TransferType` used to transfer the `fees` assets."] # [doc = "- `custom_xcm_on_dest`: The XCM to be executed on `dest` chain as the last step of the"] # [doc = "  transfer, which also determines what happens to the assets on the destination chain."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets_using_type_and_then { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , assets_transfer_type : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , remote_fees_id : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssetId > , fees_transfer_type : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , custom_xcm_on_dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [doc = "Authorize another `aliaser` location to alias into the local `origin` making this call."] # [doc = "The `aliaser` is only authorized until the provided `expiry` block number."] # [doc = "The call can also be used for a previously authorized alias in order to update its"] # [doc = "`expiry` block number."] # [doc = ""] # [doc = "Usually useful to allow your local account to be aliased into from a remote location"] # [doc = "also under your control (like your account on another chain)."] # [doc = ""] # [doc = "WARNING: make sure the caller `origin` (you) trusts the `aliaser` location to act in"] # [doc = "their/your name. Once authorized using this call, the `aliaser` can freely impersonate"] # [doc = "`origin` in XCM programs executed on the local chain."] add_authorized_alias { aliaser : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , expires : :: core :: option :: Option < :: core :: primitive :: u64 > , } , # [doc = "Remove a previously authorized `aliaser` from the list of locations that can alias into"] # [doc = "the local `origin` making this call."] remove_authorized_alias { aliaser : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [doc = "Remove all previously authorized `aliaser`s that can alias into the local `origin`"] # [doc = "making this call."] remove_all_authorized_aliases , }
+                    # [codec (index = 0)] send { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , message : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , } , # [codec (index = 1)] # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_teleport_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] teleport_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [codec (index = 2)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_reserve_transfer_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] reserve_transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Execute an XCM message from a local, signed, origin."] # [doc = ""] # [doc = "An event is deposited indicating whether `msg` could be executed completely or only"] # [doc = "partially."] # [doc = ""] # [doc = "No more than `max_weight` will be used in its attempted execution. If this is less than"] # [doc = "the maximum amount of weight that the message could take to be executed, then no"] # [doc = "execution attempt will be made."] execute { message : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , max_weight : runtime_types :: sp_weights :: weight_v2 :: Weight , } , # [codec (index = 4)] # [doc = "Extoll that a particular destination can be communicated with through a particular"] # [doc = "version of XCM."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The destination that is being described."] # [doc = "- `xcm_version`: The latest version of XCM that `location` supports."] force_xcm_version { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm :: v5 :: location :: Location > , version : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Set a safe XCM version (the version that XCM should be encoded with if the most recent"] # [doc = "version a destination can accept is unknown)."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `maybe_xcm_version`: The default XCM encoding version, or `None` to disable."] force_default_xcm_version { maybe_xcm_version : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 6)] # [doc = "Ask a location to notify us regarding their XCM version and any changes to it."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we should subscribe for XCM version notifications."] force_subscribe_version_notify { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 7)] # [doc = "Require that a particular destination should no longer notify us regarding any XCM"] # [doc = "version changes."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we are currently subscribed for XCM version"] # [doc = "  notifications which we no longer desire."] force_unsubscribe_version_notify { location : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 8)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_reserve_transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 9)] # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_teleport_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 10)] # [doc = "Set or unset the global suspension state of the XCM executor."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `suspended`: `true` to suspend, `false` to resume."] force_suspension { suspended : :: core :: primitive :: bool , } , # [codec (index = 11)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve, or through teleports."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item` (hence referred to as `fees`), up to enough to pay for"] # [doc = "`weight_limit` of weight. If more weight is needed than `weight_limit`, then the"] # [doc = "operation will fail and the sent assets may be at risk."] # [doc = ""] # [doc = "`assets` (excluding `fees`) must have same reserve location or otherwise be teleportable"] # [doc = "to `dest`, no limitations imposed on `fees`."] # [doc = " - for local reserve: transfer assets to sovereign account of destination chain and"] # [doc = "   forward a notification XCM to `dest` to mint and deposit reserve-based assets to"] # [doc = "   `beneficiary`."] # [doc = " - for destination reserve: burn local assets and forward a notification to `dest` chain"] # [doc = "   to withdraw the reserve assets from this chain's sovereign account and deposit them"] # [doc = "   to `beneficiary`."] # [doc = " - for remote reserve: burn local assets, forward XCM to reserve chain to move reserves"] # [doc = "   from this chain's SA to `dest` chain's SA, and forward another XCM to `dest` to mint"] # [doc = "   and deposit reserve-based assets to `beneficiary`."] # [doc = " - for teleports: burn local assets and forward XCM to `dest` chain to mint/teleport"] # [doc = "   assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `X2(Parent,"] # [doc = "  Parachain(..))` to send from parachain to parachain, or `X1(Parachain(..))` to send"] # [doc = "  from relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 12)] # [doc = "Claims assets trapped on this pallet because of leftover assets during XCM execution."] # [doc = ""] # [doc = "- `origin`: Anyone can call this extrinsic."] # [doc = "- `assets`: The exact assets that were trapped. Use the version to specify what version"] # [doc = "was the latest when they were trapped."] # [doc = "- `beneficiary`: The location/account where the claimed assets will be deposited."] claim_assets { assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , beneficiary : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 13)] # [doc = "Transfer assets from the local chain to the destination chain using explicit transfer"] # [doc = "types for assets and fees."] # [doc = ""] # [doc = "`assets` must have same reserve location or may be teleportable to `dest`. Caller must"] # [doc = "provide the `assets_transfer_type` to be used for `assets`:"] # [doc = " - `TransferType::LocalReserve`: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `TransferType::DestinationReserve`: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `TransferType::RemoteReserve(reserve)`: burn local assets, forward XCM to `reserve`"] # [doc = "   chain to move reserves from this chain's SA to `dest` chain's SA, and forward another"] # [doc = "   XCM to `dest` to mint and deposit reserve-based assets to `beneficiary`. Typically"] # [doc = "   the remote `reserve` is Asset Hub."] # [doc = " - `TransferType::Teleport`: burn local assets and forward XCM to `dest` chain to"] # [doc = "   mint/teleport assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "On the destination chain, as well as any intermediary hops, `BuyExecution` is used to"] # [doc = "buy execution using transferred `assets` identified by `remote_fees_id`."] # [doc = "Make sure enough of the specified `remote_fees_id` asset is included in the given list"] # [doc = "of `assets`. `remote_fees_id` should be enough to pay for `weight_limit`. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "`remote_fees_id` may use different transfer type than rest of `assets` and can be"] # [doc = "specified through `fees_transfer_type`."] # [doc = ""] # [doc = "The caller needs to specify what should happen to the transferred assets once they reach"] # [doc = "the `dest` chain. This is done through the `custom_xcm_on_dest` parameter, which"] # [doc = "contains the instructions to execute on `dest` as a final step."] # [doc = "  This is usually as simple as:"] # [doc = "  `Xcm(vec![DepositAsset { assets: Wild(AllCounted(assets.len())), beneficiary }])`,"] # [doc = "  but could be something more exotic like sending the `assets` even further."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain, or `(parents: 2, (GlobalConsensus(..), ..))` to send from"] # [doc = "  parachain across a bridge to another ecosystem destination."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `assets_transfer_type`: The XCM `TransferType` used to transfer the `assets`."] # [doc = "- `remote_fees_id`: One of the included `assets` to be used to pay fees."] # [doc = "- `fees_transfer_type`: The XCM `TransferType` used to transfer the `fees` assets."] # [doc = "- `custom_xcm_on_dest`: The XCM to be executed on `dest` chain as the last step of the"] # [doc = "  transfer, which also determines what happens to the assets on the destination chain."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets_using_type_and_then { dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , assets_transfer_type : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , remote_fees_id : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssetId > , fees_transfer_type : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , custom_xcm_on_dest : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 14)] # [doc = "Authorize another `aliaser` location to alias into the local `origin` making this call."] # [doc = "The `aliaser` is only authorized until the provided `expiry` block number."] # [doc = "The call can also be used for a previously authorized alias in order to update its"] # [doc = "`expiry` block number."] # [doc = ""] # [doc = "Usually useful to allow your local account to be aliased into from a remote location"] # [doc = "also under your control (like your account on another chain)."] # [doc = ""] # [doc = "WARNING: make sure the caller `origin` (you) trusts the `aliaser` location to act in"] # [doc = "their/your name. Once authorized using this call, the `aliaser` can freely impersonate"] # [doc = "`origin` in XCM programs executed on the local chain."] add_authorized_alias { aliaser : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , expires : :: core :: option :: Option < :: core :: primitive :: u64 > , } , # [codec (index = 15)] # [doc = "Remove a previously authorized `aliaser` from the list of locations that can alias into"] # [doc = "the local `origin` making this call."] remove_authorized_alias { aliaser : :: subxt :: ext :: subxt_core :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 16)] # [doc = "Remove all previously authorized `aliaser`s that can alias into the local `origin`"] # [doc = "making this call."] remove_all_authorized_aliases , }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                     :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -60177,63 +61939,97 @@ pub mod api {
                 )]
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
+                    #[codec(index = 0)]
                     #[doc = "The desired destination was unreachable, generally because there is a no way of routing"]
                     #[doc = "to it."]
                     Unreachable,
+                    #[codec(index = 1)]
                     #[doc = "There was some other issue (i.e. not to do with routing) in sending the message."]
                     #[doc = "Perhaps a lack of space for buffering the message."]
                     SendFailure,
+                    #[codec(index = 2)]
                     #[doc = "The message execution fails the filter."]
                     Filtered,
+                    #[codec(index = 3)]
                     #[doc = "The message's weight could not be determined."]
                     UnweighableMessage,
+                    #[codec(index = 4)]
                     #[doc = "The destination `Location` provided cannot be inverted."]
                     DestinationNotInvertible,
+                    #[codec(index = 5)]
                     #[doc = "The assets to be sent are empty."]
                     Empty,
+                    #[codec(index = 6)]
                     #[doc = "Could not re-anchor the assets to declare the fees for the destination chain."]
                     CannotReanchor,
+                    #[codec(index = 7)]
                     #[doc = "Too many assets have been attempted for transfer."]
                     TooManyAssets,
+                    #[codec(index = 8)]
                     #[doc = "Origin is invalid for sending."]
                     InvalidOrigin,
+                    #[codec(index = 9)]
                     #[doc = "The version of the `Versioned` value used is not able to be interpreted."]
                     BadVersion,
+                    #[codec(index = 10)]
                     #[doc = "The given location could not be used (e.g. because it cannot be expressed in the"]
                     #[doc = "desired version of XCM)."]
                     BadLocation,
+                    #[codec(index = 11)]
                     #[doc = "The referenced subscription could not be found."]
                     NoSubscription,
+                    #[codec(index = 12)]
                     #[doc = "The location is invalid since it already has a subscription from us."]
                     AlreadySubscribed,
+                    #[codec(index = 13)]
                     #[doc = "Could not check-out the assets for teleportation to the destination chain."]
                     CannotCheckOutTeleport,
+                    #[codec(index = 14)]
                     #[doc = "The owner does not own (all) of the asset that they wish to do the operation on."]
                     LowBalance,
+                    #[codec(index = 15)]
                     #[doc = "The asset owner has too many locks on the asset."]
                     TooManyLocks,
+                    #[codec(index = 16)]
                     #[doc = "The given account is not an identifiable sovereign account for any location."]
                     AccountNotSovereign,
+                    #[codec(index = 17)]
                     #[doc = "The operation required fees to be paid which the initiator could not meet."]
                     FeesNotMet,
+                    #[codec(index = 18)]
                     #[doc = "A remote lock with the corresponding data could not be found."]
                     LockNotFound,
+                    #[codec(index = 19)]
                     #[doc = "The unlock operation cannot succeed because there are still consumers of the lock."]
                     InUse,
+                    #[codec(index = 21)]
                     #[doc = "Invalid asset, reserve chain could not be determined for it."]
                     InvalidAssetUnknownReserve,
+                    #[codec(index = 22)]
                     #[doc = "Invalid asset, do not support remote asset reserves with different fees reserves."]
                     InvalidAssetUnsupportedReserve,
+                    #[codec(index = 23)]
                     #[doc = "Too many assets with different reserve locations have been attempted for transfer."]
                     TooManyReserves,
+                    #[codec(index = 24)]
                     #[doc = "Local XCM execution incomplete."]
                     LocalExecutionIncomplete,
+                    #[codec(index = 25)]
                     #[doc = "Too many locations authorized to alias origin."]
                     TooManyAuthorizedAliases,
+                    #[codec(index = 26)]
                     #[doc = "Expiry block number is in the past."]
                     ExpiresInPast,
+                    #[codec(index = 27)]
                     #[doc = "The alias to remove authorization for was not found."]
                     AliasNotFound,
+                    #[codec(index = 28)]
+                    #[doc = "Local XCM execution incomplete with the actual XCM error and the index of the"]
+                    #[doc = "instruction that caused the error."]
+                    LocalExecutionIncompleteWithError {
+                        index: ::core::primitive::u8,
+                        error: runtime_types::pallet_xcm::errors::ExecutionError,
+                    },
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -60248,10 +62044,12 @@ pub mod api {
                 )]
                 #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
+                    #[codec(index = 0)]
                     #[doc = "Execution of an XCM message was attempted."]
                     Attempted {
                         outcome: runtime_types::staging_xcm::v5::traits::Outcome,
                     },
+                    #[codec(index = 1)]
                     #[doc = "An XCM message was sent."]
                     Sent {
                         origin: runtime_types::staging_xcm::v5::location::Location,
@@ -60259,6 +62057,7 @@ pub mod api {
                         message: runtime_types::staging_xcm::v5::Xcm,
                         message_id: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 2)]
                     #[doc = "An XCM message failed to send."]
                     SendFailed {
                         origin: runtime_types::staging_xcm::v5::location::Location,
@@ -60266,12 +62065,14 @@ pub mod api {
                         error: runtime_types::xcm::v3::traits::SendError,
                         message_id: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 3)]
                     #[doc = "An XCM message failed to process."]
                     ProcessXcmError {
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         error: runtime_types::xcm::v5::traits::Error,
                         message_id: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 4)]
                     #[doc = "Query response received which does not match a registered query. This may be because a"]
                     #[doc = "matching query was never registered, it may be because it is a duplicate response, or"]
                     #[doc = "because the query timed out."]
@@ -60279,12 +62080,14 @@ pub mod api {
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         query_id: ::core::primitive::u64,
                     },
+                    #[codec(index = 5)]
                     #[doc = "Query response has been received and is ready for taking with `take_response`. There is"]
                     #[doc = "no registered notification call."]
                     ResponseReady {
                         query_id: ::core::primitive::u64,
                         response: runtime_types::staging_xcm::v5::Response,
                     },
+                    #[codec(index = 6)]
                     #[doc = "Query response has been received and query is removed. The registered notification has"]
                     #[doc = "been dispatched and executed successfully."]
                     Notified {
@@ -60292,6 +62095,7 @@ pub mod api {
                         pallet_index: ::core::primitive::u8,
                         call_index: ::core::primitive::u8,
                     },
+                    #[codec(index = 7)]
                     #[doc = "Query response has been received and query is removed. The registered notification"]
                     #[doc = "could not be dispatched because the dispatch weight is greater than the maximum weight"]
                     #[doc = "originally budgeted by this runtime for the query result."]
@@ -60302,6 +62106,7 @@ pub mod api {
                         actual_weight: runtime_types::sp_weights::weight_v2::Weight,
                         max_budgeted_weight: runtime_types::sp_weights::weight_v2::Weight,
                     },
+                    #[codec(index = 8)]
                     #[doc = "Query response has been received and query is removed. There was a general error with"]
                     #[doc = "dispatching the notification call."]
                     NotifyDispatchError {
@@ -60309,6 +62114,7 @@ pub mod api {
                         pallet_index: ::core::primitive::u8,
                         call_index: ::core::primitive::u8,
                     },
+                    #[codec(index = 9)]
                     #[doc = "Query response has been received and query is removed. The dispatch was unable to be"]
                     #[doc = "decoded into a `Call`; this might be due to dispatch function having a signature which"]
                     #[doc = "is not `(origin, QueryId, Response)`."]
@@ -60317,6 +62123,7 @@ pub mod api {
                         pallet_index: ::core::primitive::u8,
                         call_index: ::core::primitive::u8,
                     },
+                    #[codec(index = 10)]
                     #[doc = "Expected query response has been received but the origin location of the response does"]
                     #[doc = "not match that expected. The query remains registered for a later, valid, response to"]
                     #[doc = "be received and acted upon."]
@@ -60327,6 +62134,7 @@ pub mod api {
                             runtime_types::staging_xcm::v5::location::Location,
                         >,
                     },
+                    #[codec(index = 11)]
                     #[doc = "Expected query response has been received but the expected origin location placed in"]
                     #[doc = "storage by this runtime previously cannot be decoded. The query remains registered."]
                     #[doc = ""]
@@ -60338,14 +62146,17 @@ pub mod api {
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         query_id: ::core::primitive::u64,
                     },
+                    #[codec(index = 12)]
                     #[doc = "Received query response has been read and removed."]
                     ResponseTaken { query_id: ::core::primitive::u64 },
+                    #[codec(index = 13)]
                     #[doc = "Some assets have been placed in an asset trap."]
                     AssetsTrapped {
                         hash: ::subxt::ext::subxt_core::utils::H256,
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         assets: runtime_types::xcm::VersionedAssets,
                     },
+                    #[codec(index = 14)]
                     #[doc = "An XCM version change notification message has been attempted to be sent."]
                     #[doc = ""]
                     #[doc = "The cost of sending it (borne by the chain) is included."]
@@ -60355,12 +62166,14 @@ pub mod api {
                         cost: runtime_types::staging_xcm::v5::asset::Assets,
                         message_id: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 15)]
                     #[doc = "The supported version of a location has been changed. This might be through an"]
                     #[doc = "automatic notification or a manual intervention."]
                     SupportedVersionChanged {
                         location: runtime_types::staging_xcm::v5::location::Location,
                         version: ::core::primitive::u32,
                     },
+                    #[codec(index = 16)]
                     #[doc = "A given location which had a version change subscription was dropped owing to an error"]
                     #[doc = "sending the notification to it."]
                     NotifyTargetSendFail {
@@ -60368,12 +62181,14 @@ pub mod api {
                         query_id: ::core::primitive::u64,
                         error: runtime_types::xcm::v5::traits::Error,
                     },
+                    #[codec(index = 17)]
                     #[doc = "A given location which had a version change subscription was dropped owing to an error"]
                     #[doc = "migrating the location to our new XCM format."]
                     NotifyTargetMigrationFail {
                         location: runtime_types::xcm::VersionedLocation,
                         query_id: ::core::primitive::u64,
                     },
+                    #[codec(index = 18)]
                     #[doc = "Expected query response has been received but the expected querier location placed in"]
                     #[doc = "storage by this runtime previously cannot be decoded. The query remains registered."]
                     #[doc = ""]
@@ -60385,6 +62200,7 @@ pub mod api {
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         query_id: ::core::primitive::u64,
                     },
+                    #[codec(index = 19)]
                     #[doc = "Expected query response has been received but the querier location of the response does"]
                     #[doc = "not match the expected. The query remains registered for a later, valid, response to"]
                     #[doc = "be received and acted upon."]
@@ -60396,6 +62212,7 @@ pub mod api {
                             runtime_types::staging_xcm::v5::location::Location,
                         >,
                     },
+                    #[codec(index = 20)]
                     #[doc = "A remote has requested XCM version change notification from us and we have honored it."]
                     #[doc = "A version information message is sent to them and its cost is included."]
                     VersionNotifyStarted {
@@ -60403,12 +62220,14 @@ pub mod api {
                         cost: runtime_types::staging_xcm::v5::asset::Assets,
                         message_id: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 21)]
                     #[doc = "We have requested that a remote chain send us XCM version change notifications."]
                     VersionNotifyRequested {
                         destination: runtime_types::staging_xcm::v5::location::Location,
                         cost: runtime_types::staging_xcm::v5::asset::Assets,
                         message_id: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 22)]
                     #[doc = "We have requested that a remote chain stops sending us XCM version change"]
                     #[doc = "notifications."]
                     VersionNotifyUnrequested {
@@ -60416,19 +62235,23 @@ pub mod api {
                         cost: runtime_types::staging_xcm::v5::asset::Assets,
                         message_id: [::core::primitive::u8; 32usize],
                     },
+                    #[codec(index = 23)]
                     #[doc = "Fees were paid from a location for an operation (often for using `SendXcm`)."]
                     FeesPaid {
                         paying: runtime_types::staging_xcm::v5::location::Location,
                         fees: runtime_types::staging_xcm::v5::asset::Assets,
                     },
+                    #[codec(index = 24)]
                     #[doc = "Some assets have been claimed from an asset trap"]
                     AssetsClaimed {
                         hash: ::subxt::ext::subxt_core::utils::H256,
                         origin: runtime_types::staging_xcm::v5::location::Location,
                         assets: runtime_types::xcm::VersionedAssets,
                     },
+                    #[codec(index = 25)]
                     #[doc = "A XCM version migration finished."]
                     VersionMigrationFinished { version: ::core::primitive::u32 },
+                    #[codec(index = 26)]
                     #[doc = "An `aliaser` location was authorized by `target` to alias it, authorization valid until"]
                     #[doc = "`expiry` block number."]
                     AliasAuthorized {
@@ -60436,11 +62259,13 @@ pub mod api {
                         target: runtime_types::staging_xcm::v5::location::Location,
                         expiry: ::core::option::Option<::core::primitive::u64>,
                     },
+                    #[codec(index = 27)]
                     #[doc = "`target` removed alias authorization for `aliaser`."]
                     AliasAuthorizationRemoved {
                         aliaser: runtime_types::staging_xcm::v5::location::Location,
                         target: runtime_types::staging_xcm::v5::location::Location,
                     },
+                    #[codec(index = 28)]
                     #[doc = "`target` removed all alias authorizations."]
                     AliasesAuthorizationsRemoved {
                         target: runtime_types::staging_xcm::v5::location::Location,
@@ -60458,6 +62283,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum HoldReason {
+                    #[codec(index = 0)]
                     AuthorizeAlias,
                 }
                 #[derive(
@@ -60484,7 +62310,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Origin {
+                    #[codec(index = 0)]
                     Xcm(runtime_types::staging_xcm::v5::location::Location),
+                    #[codec(index = 1)]
                     Response(runtime_types::staging_xcm::v5::location::Location),
                 }
                 #[derive(
@@ -60499,6 +62327,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum QueryStatus<_0> {
+                    #[codec(index = 0)]
                     Pending {
                         responder: runtime_types::xcm::VersionedLocation,
                         maybe_match_querier:
@@ -60507,10 +62336,12 @@ pub mod api {
                             ::core::option::Option<(::core::primitive::u8, ::core::primitive::u8)>,
                         timeout: _0,
                     },
+                    #[codec(index = 1)]
                     VersionNotifier {
                         origin: runtime_types::xcm::VersionedLocation,
                         is_active: ::core::primitive::bool,
                     },
+                    #[codec(index = 2)]
                     Ready {
                         response: runtime_types::xcm::VersionedResponse,
                         at: _0,
@@ -60548,13 +62379,17 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum VersionMigrationStage {
+                    #[codec(index = 0)]
                     MigrateSupportedVersion,
+                    #[codec(index = 1)]
                     MigrateVersionNotifiers,
+                    #[codec(index = 2)]
                     NotifyCurrentTargets(
                         ::core::option::Option<
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         >,
                     ),
+                    #[codec(index = 3)]
                     MigrateAndNotifyOldTargets,
                 }
             }
@@ -60570,6 +62405,7 @@ pub mod api {
                     runtime_types::xcm_runtime_apis::authorized_aliases::OriginAliaser,
                 >,
                 pub ticket: _0,
+                #[codec(skip)]
                 pub __ignore: ::core::marker::PhantomData<_1>,
             }
         }
@@ -60797,18 +62633,25 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum ExecutorParam {
+                        #[codec(index = 1)]
                         MaxMemoryPages(::core::primitive::u32),
+                        #[codec(index = 2)]
                         StackLogicalMax(::core::primitive::u32),
+                        #[codec(index = 3)]
                         StackNativeMax(::core::primitive::u32),
+                        #[codec(index = 4)]
                         PrecheckingMaxMemory(::core::primitive::u64),
+                        #[codec(index = 5)]
                         PvfPrepTimeout(
                             runtime_types::polkadot_primitives::v8::PvfPrepKind,
                             ::core::primitive::u64,
                         ),
+                        #[codec(index = 6)]
                         PvfExecTimeout(
                             runtime_types::polkadot_primitives::v8::PvfExecKind,
                             ::core::primitive::u64,
                         ),
+                        #[codec(index = 7)]
                         WasmExtBulkMemory,
                     }
                     #[derive(
@@ -60846,6 +62689,7 @@ pub mod api {
                         pub validator_index: runtime_types::polkadot_primitives::v8::ValidatorIndex,
                         pub signature:
                             runtime_types::polkadot_primitives::v8::validator_app::Signature,
+                        #[codec(skip)]
                         pub __ignore: ::core::marker::PhantomData<_1>,
                     }
                 }
@@ -60931,7 +62775,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum SlashingOffenceKind {
+                        #[codec(index = 0)]
                         ForInvalid,
+                        #[codec(index = 1)]
                         AgainstValid,
                     }
                 }
@@ -61070,7 +62916,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum DisputeStatement {
+                    #[codec(index = 0)]
                     Valid(runtime_types::polkadot_primitives::v8::ValidDisputeStatementKind),
+                    #[codec(index = 1)]
                     Invalid(runtime_types::polkadot_primitives::v8::InvalidDisputeStatementKind),
                 }
                 #[derive(
@@ -61134,7 +62982,7 @@ pub mod api {
                 )]
                 pub struct IndexedVec<_0, _1>(
                     pub ::subxt::ext::subxt_core::alloc::vec::Vec<_1>,
-                    pub ::core::marker::PhantomData<_0>,
+                    #[codec(skip)] pub ::core::marker::PhantomData<_0>,
                 );
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -61148,6 +62996,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum InvalidDisputeStatementKind {
+                    #[codec(index = 0)]
                     Explicit,
                 }
                 #[derive(
@@ -61162,8 +63011,11 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum OccupiedCoreAssumption {
+                    #[codec(index = 0)]
                     Included,
+                    #[codec(index = 1)]
                     TimedOut,
+                    #[codec(index = 2)]
                     Free,
                 }
                 #[derive(
@@ -61208,7 +63060,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum PvfExecKind {
+                    #[codec(index = 0)]
                     Backing,
+                    #[codec(index = 1)]
                     Approval,
                 }
                 #[derive(
@@ -61223,7 +63077,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum PvfPrepKind {
+                    #[codec(index = 0)]
                     Precheck,
+                    #[codec(index = 1)]
                     Prepare,
                 }
                 #[derive(
@@ -61321,7 +63177,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum UpgradeGoAhead {
+                    #[codec(index = 0)]
                     Abort,
+                    #[codec(index = 1)]
                     GoAhead,
                 }
                 #[derive(
@@ -61336,6 +63194,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum UpgradeRestriction {
+                    #[codec(index = 0)]
                     Present,
                 }
                 #[derive(
@@ -61350,10 +63209,15 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum ValidDisputeStatementKind {
+                    #[codec(index = 0)]
                     Explicit,
+                    #[codec(index = 1)]
                     BackingSeconded(::subxt::ext::subxt_core::utils::H256),
+                    #[codec(index = 2)]
                     BackingValid(::subxt::ext::subxt_core::utils::H256),
+                    #[codec(index = 3)]
                     ApprovalChecking,
+                    #[codec(index = 4)]
                     ApprovalCheckingMultipleCandidates(
                         ::subxt::ext::subxt_core::alloc::vec::Vec<
                             runtime_types::polkadot_core_primitives::CandidateHash,
@@ -61384,7 +63248,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum ValidityAttestation {
+                    #[codec(index = 1)]
                     Implicit(runtime_types::polkadot_primitives::v8::validator_app::Signature),
+                    #[codec(index = 2)]
                     Explicit(runtime_types::polkadot_primitives::v8::validator_app::Signature),
                 }
             }
@@ -61485,18 +63351,21 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum CandidateEvent<_0> {
+                    #[codec(index = 0)]
                     CandidateBacked(
                         runtime_types::polkadot_primitives::vstaging::CandidateReceiptV2<_0>,
                         runtime_types::polkadot_parachain_primitives::primitives::HeadData,
                         runtime_types::polkadot_primitives::v8::CoreIndex,
                         runtime_types::polkadot_primitives::v8::GroupIndex,
                     ),
+                    #[codec(index = 1)]
                     CandidateIncluded(
                         runtime_types::polkadot_primitives::vstaging::CandidateReceiptV2<_0>,
                         runtime_types::polkadot_parachain_primitives::primitives::HeadData,
                         runtime_types::polkadot_primitives::v8::CoreIndex,
                         runtime_types::polkadot_primitives::v8::GroupIndex,
                     ),
+                    #[codec(index = 2)]
                     CandidateTimedOut(
                         runtime_types::polkadot_primitives::vstaging::CandidateReceiptV2<_0>,
                         runtime_types::polkadot_parachain_primitives::primitives::HeadData,
@@ -61549,9 +63418,49 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum CoreState<_0, _1> {
+                    #[codec(index = 0)]
                     Occupied(runtime_types::polkadot_primitives::vstaging::OccupiedCore<_0, _1>),
+                    #[codec(index = 1)]
                     Scheduled(runtime_types::polkadot_primitives::v8::ScheduledCore),
+                    #[codec(index = 2)]
                     Free,
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub enum DisputeOffenceKind {
+                    #[codec(index = 0)]
+                    ForInvalidBacked,
+                    #[codec(index = 1)]
+                    AgainstValid,
+                    #[codec(index = 2)]
+                    ForInvalidApproved,
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct DisputeProof {
+                    pub time_slot:
+                        runtime_types::polkadot_primitives::v8::slashing::DisputesTimeSlot,
+                    pub kind: runtime_types::polkadot_primitives::vstaging::DisputeOffenceKind,
+                    pub validator_index: runtime_types::polkadot_primitives::v8::ValidatorIndex,
+                    pub validator_id: runtime_types::polkadot_primitives::v8::validator_app::Public,
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -61633,6 +63542,24 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
+                pub struct PendingSlashes {
+                    pub keys: ::subxt::ext::subxt_core::utils::KeyedVec<
+                        runtime_types::polkadot_primitives::v8::ValidatorIndex,
+                        runtime_types::polkadot_primitives::v8::validator_app::Public,
+                    >,
+                    pub kind: runtime_types::polkadot_primitives::vstaging::DisputeOffenceKind,
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
                 pub struct ScrapedOnChainVotes<_0> {
                     pub session: ::core::primitive::u32,
                     pub backing_validators_per_candidate:
@@ -61668,7 +63595,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
-                        # [doc = "Assign a permanent parachain slot and immediately create a lease for it."] assign_perm_parachain_slot { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [doc = "Assign a temporary parachain slot. The function tries to create a lease for it"] # [doc = "immediately if `SlotLeasePeriodStart::Current` is specified, and if the number"] # [doc = "of currently active temporary slots is below `MaxTemporarySlotPerLeasePeriod`."] assign_temp_parachain_slot { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , lease_period_start : runtime_types :: polkadot_runtime_common :: assigned_slots :: SlotLeasePeriodStart , } , # [doc = "Unassign a permanent or temporary parachain slot"] unassign_parachain_slot { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [doc = "Sets the storage value [`MaxPermanentSlots`]."] set_max_permanent_slots { slots : :: core :: primitive :: u32 , } , # [doc = "Sets the storage value [`MaxTemporarySlots`]."] set_max_temporary_slots { slots : :: core :: primitive :: u32 , } , }
+                        # [codec (index = 0)] # [doc = "Assign a permanent parachain slot and immediately create a lease for it."] assign_perm_parachain_slot { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 1)] # [doc = "Assign a temporary parachain slot. The function tries to create a lease for it"] # [doc = "immediately if `SlotLeasePeriodStart::Current` is specified, and if the number"] # [doc = "of currently active temporary slots is below `MaxTemporarySlotPerLeasePeriod`."] assign_temp_parachain_slot { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , lease_period_start : runtime_types :: polkadot_runtime_common :: assigned_slots :: SlotLeasePeriodStart , } , # [codec (index = 2)] # [doc = "Unassign a permanent or temporary parachain slot"] unassign_parachain_slot { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 3)] # [doc = "Sets the storage value [`MaxPermanentSlots`]."] set_max_permanent_slots { slots : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "Sets the storage value [`MaxTemporarySlots`]."] set_max_temporary_slots { slots : :: core :: primitive :: u32 , } , }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                         :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -61682,23 +63609,32 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "The specified parachain is not registered."]
                         ParaDoesntExist,
+                        #[codec(index = 1)]
                         #[doc = "Not a parathread (on-demand parachain)."]
                         NotParathread,
+                        #[codec(index = 2)]
                         #[doc = "Cannot upgrade on-demand parachain to lease holding"]
                         #[doc = "parachain."]
                         CannotUpgrade,
+                        #[codec(index = 3)]
                         #[doc = "Cannot downgrade lease holding parachain to"]
                         #[doc = "on-demand."]
                         CannotDowngrade,
+                        #[codec(index = 4)]
                         #[doc = "Permanent or Temporary slot already assigned."]
                         SlotAlreadyAssigned,
+                        #[codec(index = 5)]
                         #[doc = "Permanent or Temporary slot has not been assigned."]
                         SlotNotAssigned,
+                        #[codec(index = 6)]
                         #[doc = "An ongoing lease already exists."]
                         OngoingLeaseExists,
+                        #[codec(index = 7)]
                         MaxPermanentSlotsExceeded,
+                        #[codec(index = 8)]
                         MaxTemporarySlotsExceeded,
                     }
                     #[derive(
@@ -61714,16 +63650,20 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         #[doc = "A parachain was assigned a permanent parachain slot"]
                         PermanentSlotAssigned(
                             runtime_types::polkadot_parachain_primitives::primitives::Id,
                         ),
+                        #[codec(index = 1)]
                         #[doc = "A parachain was assigned a temporary parachain slot"]
                         TemporarySlotAssigned(
                             runtime_types::polkadot_parachain_primitives::primitives::Id,
                         ),
+                        #[codec(index = 2)]
                         #[doc = "The maximum number of permanent slots has been changed"]
                         MaxPermanentSlotsChanged { slots: ::core::primitive::u32 },
+                        #[codec(index = 3)]
                         #[doc = "The maximum number of temporary slots has been changed"]
                         MaxTemporarySlotsChanged { slots: ::core::primitive::u32 },
                     }
@@ -61758,7 +63698,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum SlotLeasePeriodStart {
+                    #[codec(index = 0)]
                     Current,
+                    #[codec(index = 1)]
                     Next,
                 }
             }
@@ -61779,15 +63721,19 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
+                        #[codec(index = 0)]
                         #[doc = "Create a new auction."]
                         #[doc = ""]
                         #[doc = "This can only happen when there isn't already an auction in progress and may only be"]
                         #[doc = "called by the root origin. Accepts the `duration` of this auction and the"]
                         #[doc = "`lease_period_index` of the initial lease period of the four that are to be auctioned."]
                         new_auction {
+                            #[codec(compact)]
                             duration: ::core::primitive::u32,
+                            #[codec(compact)]
                             lease_period_index: ::core::primitive::u32,
                         },
+                        #[codec(index = 1)]
                         #[doc = "Make a new bid from an account (including a parachain account) for deploying a new"]
                         #[doc = "parachain."]
                         #[doc = ""]
@@ -61805,12 +63751,18 @@ pub mod api {
                         #[doc = "- `amount` is the amount to bid to be held as deposit for the parachain should the"]
                         #[doc = "bid win. This amount is held throughout the range."]
                         bid {
+                            #[codec(compact)]
                             para: runtime_types::polkadot_parachain_primitives::primitives::Id,
+                            #[codec(compact)]
                             auction_index: ::core::primitive::u32,
+                            #[codec(compact)]
                             first_slot: ::core::primitive::u32,
+                            #[codec(compact)]
                             last_slot: ::core::primitive::u32,
+                            #[codec(compact)]
                             amount: ::core::primitive::u128,
                         },
+                        #[codec(index = 2)]
                         #[doc = "Cancel an in-progress auction."]
                         #[doc = ""]
                         #[doc = "Can only be called by Root origin."]
@@ -61829,18 +63781,25 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "This auction is already in progress."]
                         AuctionInProgress,
+                        #[codec(index = 1)]
                         #[doc = "The lease period is in the past."]
                         LeasePeriodInPast,
+                        #[codec(index = 2)]
                         #[doc = "Para is not registered"]
                         ParaNotRegistered,
+                        #[codec(index = 3)]
                         #[doc = "Not a current auction."]
                         NotCurrentAuction,
+                        #[codec(index = 4)]
                         #[doc = "Not an auction."]
                         NotAuction,
+                        #[codec(index = 5)]
                         #[doc = "Auction has already ended."]
                         AuctionEnded,
+                        #[codec(index = 6)]
                         #[doc = "The para is already leased out for part of this range."]
                         AlreadyLeasedOut,
                     }
@@ -61857,6 +63816,7 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         #[doc = "An auction started. Provides its index and the block number where it will begin to"]
                         #[doc = "close and the first lease period of the quadruplet that is auctioned."]
                         AuctionStarted {
@@ -61864,10 +63824,12 @@ pub mod api {
                             lease_period: ::core::primitive::u32,
                             ending: ::core::primitive::u32,
                         },
+                        #[codec(index = 1)]
                         #[doc = "An auction ended. All funds become unreserved."]
                         AuctionClosed {
                             auction_index: ::core::primitive::u32,
                         },
+                        #[codec(index = 2)]
                         #[doc = "Funds were reserved for a winning bid. First balance is the extra amount reserved."]
                         #[doc = "Second is the total."]
                         Reserved {
@@ -61875,11 +63837,13 @@ pub mod api {
                             extra_reserved: ::core::primitive::u128,
                             total_amount: ::core::primitive::u128,
                         },
+                        #[codec(index = 3)]
                         #[doc = "Funds were unreserved since bidder is no longer active. `[bidder, amount]`"]
                         Unreserved {
                             bidder: ::subxt::ext::subxt_core::utils::AccountId32,
                             amount: ::core::primitive::u128,
                         },
+                        #[codec(index = 4)]
                         #[doc = "Someone attempted to lease the same slot twice for a parachain. The amount is held in"]
                         #[doc = "reserve but no parachain slot has been leased."]
                         ReserveConfiscated {
@@ -61887,6 +63851,7 @@ pub mod api {
                             leaser: ::subxt::ext::subxt_core::utils::AccountId32,
                             amount: ::core::primitive::u128,
                         },
+                        #[codec(index = 5)]
                         #[doc = "A new bid has been accepted as the current winner."]
                         BidAccepted {
                             bidder: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -61895,6 +63860,7 @@ pub mod api {
                             first_slot: ::core::primitive::u32,
                             last_slot: ::core::primitive::u32,
                         },
+                        #[codec(index = 6)]
                         #[doc = "The winning offset was chosen for an auction. This will map into the `Winning` storage"]
                         #[doc = "map."]
                         WinningOffset {
@@ -61921,6 +63887,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
+                        #[codec(index = 0)]
                         #[doc = "Make a claim to collect your DOTs."]
                         #[doc = ""]
                         #[doc = "The dispatch origin for this call must be _None_."]
@@ -61950,6 +63917,7 @@ pub mod api {
                             ethereum_signature:
                                 runtime_types::polkadot_runtime_common::claims::EcdsaSignature,
                         },
+                        #[codec(index = 1)]
                         #[doc = "Mint a new claim to collect DOTs."]
                         #[doc = ""]
                         #[doc = "The dispatch origin for this call must be _Root_."]
@@ -61977,6 +63945,7 @@ pub mod api {
                                 runtime_types::polkadot_runtime_common::claims::StatementKind,
                             >,
                         },
+                        #[codec(index = 2)]
                         #[doc = "Make a claim to collect your DOTs by signing a statement."]
                         #[doc = ""]
                         #[doc = "The dispatch origin for this call must be _None_."]
@@ -62011,6 +63980,7 @@ pub mod api {
                             statement:
                                 ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         },
+                        #[codec(index = 3)]
                         #[doc = "Attest to a statement, needed to finalize the claims process."]
                         #[doc = ""]
                         #[doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a"]
@@ -62034,6 +64004,7 @@ pub mod api {
                             statement:
                                 ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         },
+                        #[codec(index = 4)]
                         move_claim {
                             old: runtime_types::polkadot_runtime_common::claims::EthereumAddress,
                             new: runtime_types::polkadot_runtime_common::claims::EthereumAddress,
@@ -62055,17 +64026,23 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "Invalid Ethereum signature."]
                         InvalidEthereumSignature,
+                        #[codec(index = 1)]
                         #[doc = "Ethereum address has no claim."]
                         SignerHasNoClaim,
+                        #[codec(index = 2)]
                         #[doc = "Account ID sending transaction has no claim."]
                         SenderHasNoClaim,
+                        #[codec(index = 3)]
                         #[doc = "There's not enough in the pot to pay out some unvested amount. Generally implies a"]
                         #[doc = "logic error."]
                         PotUnderflow,
+                        #[codec(index = 4)]
                         #[doc = "A needed statement was not included."]
                         InvalidStatement,
+                        #[codec(index = 5)]
                         #[doc = "The account already has a vested balance."]
                         VestedBalanceExists,
                     }
@@ -62082,6 +64059,7 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         #[doc = "Someone claimed some DOTs."]
                         Claimed {
                             who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -62127,7 +64105,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum StatementKind {
+                    #[codec(index = 0)]
                     Regular,
+                    #[codec(index = 1)]
                     Saft,
                 }
             }
@@ -62148,28 +64128,38 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
+                        #[codec(index = 0)]
                         #[doc = "Create a new crowdloaning campaign for a parachain slot with the given lease period"]
                         #[doc = "range."]
                         #[doc = ""]
                         #[doc = "This applies a lock to your parachain configuration, ensuring that it cannot be changed"]
                         #[doc = "by the parachain manager."]
                         create {
+                            #[codec(compact)]
                             index: runtime_types::polkadot_parachain_primitives::primitives::Id,
+                            #[codec(compact)]
                             cap: ::core::primitive::u128,
+                            #[codec(compact)]
                             first_period: ::core::primitive::u32,
+                            #[codec(compact)]
                             last_period: ::core::primitive::u32,
+                            #[codec(compact)]
                             end: ::core::primitive::u32,
                             verifier:
                                 ::core::option::Option<runtime_types::sp_runtime::MultiSigner>,
                         },
+                        #[codec(index = 1)]
                         #[doc = "Contribute to a crowd sale. This will transfer some balance over to fund a parachain"]
                         #[doc = "slot. It will be withdrawable when the crowdloan has ended and the funds are unused."]
                         contribute {
+                            #[codec(compact)]
                             index: runtime_types::polkadot_parachain_primitives::primitives::Id,
+                            #[codec(compact)]
                             value: ::core::primitive::u128,
                             signature:
                                 ::core::option::Option<runtime_types::sp_runtime::MultiSignature>,
                         },
+                        #[codec(index = 2)]
                         #[doc = "Withdraw full balance of a specific contributor."]
                         #[doc = ""]
                         #[doc = "Origin must be signed, but can come from anyone."]
@@ -62189,32 +64179,44 @@ pub mod api {
                         #[doc = "- `index`: The parachain to whose crowdloan the contribution was made."]
                         withdraw {
                             who: ::subxt::ext::subxt_core::utils::AccountId32,
+                            #[codec(compact)]
                             index: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 3)]
                         #[doc = "Automatically refund contributors of an ended crowdloan."]
                         #[doc = "Due to weight restrictions, this function may need to be called multiple"]
                         #[doc = "times to fully refund all users. We will refund `RemoveKeysLimit` users at a time."]
                         #[doc = ""]
                         #[doc = "Origin must be signed, but can come from anyone."]
                         refund {
+                            #[codec(compact)]
                             index: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 4)]
                         #[doc = "Remove a fund after the retirement period has ended and all funds have been returned."]
                         dissolve {
+                            #[codec(compact)]
                             index: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 5)]
                         #[doc = "Edit the configuration for an in-progress crowdloan."]
                         #[doc = ""]
                         #[doc = "Can only be called by Root origin."]
                         edit {
+                            #[codec(compact)]
                             index: runtime_types::polkadot_parachain_primitives::primitives::Id,
+                            #[codec(compact)]
                             cap: ::core::primitive::u128,
+                            #[codec(compact)]
                             first_period: ::core::primitive::u32,
+                            #[codec(compact)]
                             last_period: ::core::primitive::u32,
+                            #[codec(compact)]
                             end: ::core::primitive::u32,
                             verifier:
                                 ::core::option::Option<runtime_types::sp_runtime::MultiSigner>,
                         },
+                        #[codec(index = 6)]
                         #[doc = "Add an optional memo to an existing crowdloan contribution."]
                         #[doc = ""]
                         #[doc = "Origin must be Signed, and the user must have contributed to the crowdloan."]
@@ -62222,16 +64224,19 @@ pub mod api {
                             index: runtime_types::polkadot_parachain_primitives::primitives::Id,
                             memo: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         },
+                        #[codec(index = 7)]
                         #[doc = "Poke the fund into `NewRaise`"]
                         #[doc = ""]
                         #[doc = "Origin must be Signed, and the fund has non-zero raise."]
                         poke {
                             index: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 8)]
                         #[doc = "Contribute your entire balance to a crowd sale. This will transfer the entire balance of"]
                         #[doc = "a user over to fund a parachain slot. It will be withdrawable when the crowdloan has"]
                         #[doc = "ended and the funds are unused."]
                         contribute_all {
+                            #[codec(compact)]
                             index: runtime_types::polkadot_parachain_primitives::primitives::Id,
                             signature:
                                 ::core::option::Option<runtime_types::sp_runtime::MultiSignature>,
@@ -62250,51 +64255,74 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "The current lease period is more than the first lease period."]
                         FirstPeriodInPast,
+                        #[codec(index = 1)]
                         #[doc = "The first lease period needs to at least be less than 3 `max_value`."]
                         FirstPeriodTooFarInFuture,
+                        #[codec(index = 2)]
                         #[doc = "Last lease period must be greater than first lease period."]
                         LastPeriodBeforeFirstPeriod,
+                        #[codec(index = 3)]
                         #[doc = "The last lease period cannot be more than 3 periods after the first period."]
                         LastPeriodTooFarInFuture,
+                        #[codec(index = 4)]
                         #[doc = "The campaign ends before the current block number. The end must be in the future."]
                         CannotEndInPast,
+                        #[codec(index = 5)]
                         #[doc = "The end date for this crowdloan is not sensible."]
                         EndTooFarInFuture,
+                        #[codec(index = 6)]
                         #[doc = "There was an overflow."]
                         Overflow,
+                        #[codec(index = 7)]
                         #[doc = "The contribution was below the minimum, `MinContribution`."]
                         ContributionTooSmall,
+                        #[codec(index = 8)]
                         #[doc = "Invalid fund index."]
                         InvalidParaId,
+                        #[codec(index = 9)]
                         #[doc = "Contributions exceed maximum amount."]
                         CapExceeded,
+                        #[codec(index = 10)]
                         #[doc = "The contribution period has already ended."]
                         ContributionPeriodOver,
+                        #[codec(index = 11)]
                         #[doc = "The origin of this call is invalid."]
                         InvalidOrigin,
+                        #[codec(index = 12)]
                         #[doc = "This crowdloan does not correspond to a parachain."]
                         NotParachain,
+                        #[codec(index = 13)]
                         #[doc = "This parachain lease is still active and retirement cannot yet begin."]
                         LeaseActive,
+                        #[codec(index = 14)]
                         #[doc = "This parachain's bid or lease is still active and withdraw cannot yet begin."]
                         BidOrLeaseActive,
+                        #[codec(index = 15)]
                         #[doc = "The crowdloan has not yet ended."]
                         FundNotEnded,
+                        #[codec(index = 16)]
                         #[doc = "There are no contributions stored in this crowdloan."]
                         NoContributions,
+                        #[codec(index = 17)]
                         #[doc = "The crowdloan is not ready to dissolve. Potentially still has a slot or in retirement"]
                         #[doc = "period."]
                         NotReadyToDissolve,
+                        #[codec(index = 18)]
                         #[doc = "Invalid signature."]
                         InvalidSignature,
+                        #[codec(index = 19)]
                         #[doc = "The provided memo is too large."]
                         MemoTooLarge,
+                        #[codec(index = 20)]
                         #[doc = "The fund is already in `NewRaise`"]
                         AlreadyInNewRaise,
+                        #[codec(index = 21)]
                         #[doc = "No contributions allowed during the VRF delay"]
                         VrfDelayInProgress,
+                        #[codec(index = 22)]
                         #[doc = "A lease period has not started yet, due to an offset in the starting block."]
                         NoLeasePeriod,
                     }
@@ -62311,10 +64339,12 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         #[doc = "Create a new crowdloaning campaign."]
                         Created {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 1)]
                         #[doc = "Contributed to a crowd sale."]
                         Contributed {
                             who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -62322,6 +64352,7 @@ pub mod api {
                                 runtime_types::polkadot_parachain_primitives::primitives::Id,
                             amount: ::core::primitive::u128,
                         },
+                        #[codec(index = 2)]
                         #[doc = "Withdrew full balance of a contributor."]
                         Withdrew {
                             who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -62329,19 +64360,23 @@ pub mod api {
                                 runtime_types::polkadot_parachain_primitives::primitives::Id,
                             amount: ::core::primitive::u128,
                         },
+                        #[codec(index = 3)]
                         #[doc = "The loans in a fund have been partially dissolved, i.e. there are some left"]
                         #[doc = "over child keys that still need to be killed."]
                         PartiallyRefunded {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 4)]
                         #[doc = "All loans in a fund have been refunded."]
                         AllRefunded {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 5)]
                         #[doc = "Fund is dissolved."]
                         Dissolved {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 6)]
                         #[doc = "The result of trying to submit a new bid to the Slots pallet."]
                         HandleBidResult {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
@@ -62350,16 +64385,19 @@ pub mod api {
                                 runtime_types::sp_runtime::DispatchError,
                             >,
                         },
+                        #[codec(index = 7)]
                         #[doc = "The configuration to a crowdloan has been edited."]
                         Edited {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 8)]
                         #[doc = "A memo has been updated."]
                         MemoUpdated {
                             who: ::subxt::ext::subxt_core::utils::AccountId32,
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                             memo: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         },
+                        #[codec(index = 9)]
                         #[doc = "A parachain has been moved to `NewRaise`"]
                         AddedToNewRaise {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
@@ -62402,8 +64440,11 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum LastContribution<_0> {
+                    #[codec(index = 0)]
                     Never,
+                    #[codec(index = 1)]
                     PreEnding(::core::primitive::u32),
+                    #[codec(index = 2)]
                     Ending(_0),
                 }
             }
@@ -62424,11 +64465,13 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
+                        #[codec(index = 0)]
                         #[doc = "Reap the `IdentityInfo` of `who` from the Identity pallet of `T`, unreserving any"]
                         #[doc = "deposits held and removing storage items associated with `who`."]
                         reap_identity {
                             who: ::subxt::ext::subxt_core::utils::AccountId32,
                         },
+                        #[codec(index = 1)]
                         #[doc = "Update the deposit of `who`. Meant to be called by the system with an XCM `Transact`"]
                         #[doc = "Instruction."]
                         poke_deposit {
@@ -62448,10 +64491,12 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         #[doc = "The identity and all sub accounts were reaped for `who`."]
                         IdentityReaped {
                             who: ::subxt::ext::subxt_core::utils::AccountId32,
                         },
+                        #[codec(index = 1)]
                         #[doc = "The deposits held for `who` were updated. `identity` is the new deposit held for"]
                         #[doc = "identity info, and `subs` is the new deposit held for the sub-accounts."]
                         DepositUpdated {
@@ -62476,14 +64521,17 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum VersionedLocatableAsset {
+                    #[codec(index = 3)]
                     V3 {
                         location: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                         asset_id: runtime_types::xcm::v3::multiasset::AssetId,
                     },
+                    #[codec(index = 4)]
                     V4 {
                         location: runtime_types::staging_xcm::v4::location::Location,
                         asset_id: runtime_types::staging_xcm::v4::asset::AssetId,
                     },
+                    #[codec(index = 5)]
                     V5 {
                         location: runtime_types::staging_xcm::v5::location::Location,
                         asset_id: runtime_types::staging_xcm::v5::asset::AssetId,
@@ -62507,7 +64555,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
-                        # [doc = "Register head data and validation code for a reserved Para Id."] # [doc = ""] # [doc = "## Arguments"] # [doc = "- `origin`: Must be called by a `Signed` origin."] # [doc = "- `id`: The para ID. Must be owned/managed by the `origin` signing account."] # [doc = "- `genesis_head`: The genesis head data of the parachain/thread."] # [doc = "- `validation_code`: The initial validation code of the parachain/thread."] # [doc = ""] # [doc = "## Deposits/Fees"] # [doc = "The account with the originating signature must reserve a deposit."] # [doc = ""] # [doc = "The deposit is required to cover the costs associated with storing the genesis head"] # [doc = "data and the validation code."] # [doc = "This accounts for the potential to store validation code of a size up to the"] # [doc = "`max_code_size`, as defined in the configuration pallet"] # [doc = ""] # [doc = "Anything already reserved previously for this para ID is accounted for."] # [doc = ""] # [doc = "## Events"] # [doc = "The `Registered` event is emitted in case of success."] register { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , genesis_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , validation_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [doc = "Force the registration of a Para Id on the relay chain."] # [doc = ""] # [doc = "This function must be called by a Root origin."] # [doc = ""] # [doc = "The deposit taken can be specified for this registration. Any `ParaId`"] # [doc = "can be registered, including sub-1000 IDs which are System Parachains."] force_register { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , deposit : :: core :: primitive :: u128 , id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , genesis_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , validation_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [doc = "Deregister a Para Id, freeing all data and returning any deposit."] # [doc = ""] # [doc = "The caller must be Root, the `para` owner, or the `para` itself. The para must be an"] # [doc = "on-demand parachain."] deregister { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [doc = "Swap a lease holding parachain with another parachain, either on-demand or lease"] # [doc = "holding."] # [doc = ""] # [doc = "The origin must be Root, the `para` owner, or the `para` itself."] # [doc = ""] # [doc = "The swap will happen only if there is already an opposite swap pending. If there is not,"] # [doc = "the swap will be stored in the pending swaps map, ready for a later confirmatory swap."] # [doc = ""] # [doc = "The `ParaId`s remain mapped to the same head data and code so external code can rely on"] # [doc = "`ParaId` to be a long-term identifier of a notional \"parachain\". However, their"] # [doc = "scheduling info (i.e. whether they're an on-demand parachain or lease holding"] # [doc = "parachain), auction information and the auction deposit are switched."] swap { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , other : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [doc = "Remove a manager lock from a para. This will allow the manager of a"] # [doc = "previously locked para to deregister or swap a para without using governance."] # [doc = ""] # [doc = "Can only be called by the Root origin or the parachain."] remove_lock { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [doc = "Reserve a Para Id on the relay chain."] # [doc = ""] # [doc = "This function will reserve a new Para Id to be owned/managed by the origin account."] # [doc = "The origin account is able to register head data and validation code using `register` to"] # [doc = "create an on-demand parachain. Using the Slots pallet, an on-demand parachain can then"] # [doc = "be upgraded to a lease holding parachain."] # [doc = ""] # [doc = "## Arguments"] # [doc = "- `origin`: Must be called by a `Signed` origin. Becomes the manager/owner of the new"] # [doc = "  para ID."] # [doc = ""] # [doc = "## Deposits/Fees"] # [doc = "The origin must reserve a deposit of `ParaDeposit` for the registration."] # [doc = ""] # [doc = "## Events"] # [doc = "The `Reserved` event is emitted in case of success, which provides the ID reserved for"] # [doc = "use."] reserve , # [doc = "Add a manager lock from a para. This will prevent the manager of a"] # [doc = "para to deregister or swap a para."] # [doc = ""] # [doc = "Can be called by Root, the parachain, or the parachain manager if the parachain is"] # [doc = "unlocked."] add_lock { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [doc = "Schedule a parachain upgrade."] # [doc = ""] # [doc = "This will kick off a check of `new_code` by all validators. After the majority of the"] # [doc = "validators have reported on the validity of the code, the code will either be enacted"] # [doc = "or the upgrade will be rejected. If the code will be enacted, the current code of the"] # [doc = "parachain will be overwritten directly. This means that any PoV will be checked by this"] # [doc = "new code. The parachain itself will not be informed explicitly that the validation code"] # [doc = "has changed."] # [doc = ""] # [doc = "Can be called by Root, the parachain, or the parachain manager if the parachain is"] # [doc = "unlocked."] schedule_code_upgrade { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [doc = "Set the parachain's current head."] # [doc = ""] # [doc = "Can be called by Root, the parachain, or the parachain manager if the parachain is"] # [doc = "unlocked."] set_current_head { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , } , }
+                        # [codec (index = 0)] # [doc = "Register head data and validation code for a reserved Para Id."] # [doc = ""] # [doc = "## Arguments"] # [doc = "- `origin`: Must be called by a `Signed` origin."] # [doc = "- `id`: The para ID. Must be owned/managed by the `origin` signing account."] # [doc = "- `genesis_head`: The genesis head data of the parachain/thread."] # [doc = "- `validation_code`: The initial validation code of the parachain/thread."] # [doc = ""] # [doc = "## Deposits/Fees"] # [doc = "The account with the originating signature must reserve a deposit."] # [doc = ""] # [doc = "The deposit is required to cover the costs associated with storing the genesis head"] # [doc = "data and the validation code."] # [doc = "This accounts for the potential to store validation code of a size up to the"] # [doc = "`max_code_size`, as defined in the configuration pallet"] # [doc = ""] # [doc = "Anything already reserved previously for this para ID is accounted for."] # [doc = ""] # [doc = "## Events"] # [doc = "The `Registered` event is emitted in case of success."] register { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , genesis_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , validation_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [codec (index = 1)] # [doc = "Force the registration of a Para Id on the relay chain."] # [doc = ""] # [doc = "This function must be called by a Root origin."] # [doc = ""] # [doc = "The deposit taken can be specified for this registration. Any `ParaId`"] # [doc = "can be registered, including sub-1000 IDs which are System Parachains."] force_register { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , deposit : :: core :: primitive :: u128 , id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , genesis_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , validation_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [codec (index = 2)] # [doc = "Deregister a Para Id, freeing all data and returning any deposit."] # [doc = ""] # [doc = "The caller must be Root, the `para` owner, or the `para` itself. The para must be an"] # [doc = "on-demand parachain."] deregister { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 3)] # [doc = "Swap a lease holding parachain with another parachain, either on-demand or lease"] # [doc = "holding."] # [doc = ""] # [doc = "The origin must be Root, the `para` owner, or the `para` itself."] # [doc = ""] # [doc = "The swap will happen only if there is already an opposite swap pending. If there is not,"] # [doc = "the swap will be stored in the pending swaps map, ready for a later confirmatory swap."] # [doc = ""] # [doc = "The `ParaId`s remain mapped to the same head data and code so external code can rely on"] # [doc = "`ParaId` to be a long-term identifier of a notional \"parachain\". However, their"] # [doc = "scheduling info (i.e. whether they're an on-demand parachain or lease holding"] # [doc = "parachain), auction information and the auction deposit are switched."] swap { id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , other : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 4)] # [doc = "Remove a manager lock from a para. This will allow the manager of a"] # [doc = "previously locked para to deregister or swap a para without using governance."] # [doc = ""] # [doc = "Can only be called by the Root origin or the parachain."] remove_lock { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 5)] # [doc = "Reserve a Para Id on the relay chain."] # [doc = ""] # [doc = "This function will reserve a new Para Id to be owned/managed by the origin account."] # [doc = "The origin account is able to register head data and validation code using `register` to"] # [doc = "create an on-demand parachain. Using the Slots pallet, an on-demand parachain can then"] # [doc = "be upgraded to a lease holding parachain."] # [doc = ""] # [doc = "## Arguments"] # [doc = "- `origin`: Must be called by a `Signed` origin. Becomes the manager/owner of the new"] # [doc = "  para ID."] # [doc = ""] # [doc = "## Deposits/Fees"] # [doc = "The origin must reserve a deposit of `ParaDeposit` for the registration."] # [doc = ""] # [doc = "## Events"] # [doc = "The `Reserved` event is emitted in case of success, which provides the ID reserved for"] # [doc = "use."] reserve , # [codec (index = 6)] # [doc = "Add a manager lock from a para. This will prevent the manager of a"] # [doc = "para to deregister or swap a para."] # [doc = ""] # [doc = "Can be called by Root, the parachain, or the parachain manager if the parachain is"] # [doc = "unlocked."] add_lock { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 7)] # [doc = "Schedule a parachain upgrade."] # [doc = ""] # [doc = "This will kick off a check of `new_code` by all validators. After the majority of the"] # [doc = "validators have reported on the validity of the code, the code will either be enacted"] # [doc = "or the upgrade will be rejected. If the code will be enacted, the current code of the"] # [doc = "parachain will be overwritten directly. This means that any PoV will be checked by this"] # [doc = "new code. The parachain itself will not be informed explicitly that the validation code"] # [doc = "has changed."] # [doc = ""] # [doc = "Can be called by Root, the parachain, or the parachain manager if the parachain is"] # [doc = "unlocked."] schedule_code_upgrade { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [codec (index = 8)] # [doc = "Set the parachain's current head."] # [doc = ""] # [doc = "Can be called by Root, the parachain, or the parachain manager if the parachain is"] # [doc = "unlocked."] set_current_head { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , } , }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                         :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -62521,33 +64569,47 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "The ID is not registered."]
                         NotRegistered,
+                        #[codec(index = 1)]
                         #[doc = "The ID is already registered."]
                         AlreadyRegistered,
+                        #[codec(index = 2)]
                         #[doc = "The caller is not the owner of this Id."]
                         NotOwner,
+                        #[codec(index = 3)]
                         #[doc = "Invalid para code size."]
                         CodeTooLarge,
+                        #[codec(index = 4)]
                         #[doc = "Invalid para head data size."]
                         HeadDataTooLarge,
+                        #[codec(index = 5)]
                         #[doc = "Para is not a Parachain."]
                         NotParachain,
+                        #[codec(index = 6)]
                         #[doc = "Para is not a Parathread (on-demand parachain)."]
                         NotParathread,
+                        #[codec(index = 7)]
                         #[doc = "Cannot deregister para"]
                         CannotDeregister,
+                        #[codec(index = 8)]
                         #[doc = "Cannot schedule downgrade of lease holding parachain to on-demand parachain"]
                         CannotDowngrade,
+                        #[codec(index = 9)]
                         #[doc = "Cannot schedule upgrade of on-demand parachain to lease holding parachain"]
                         CannotUpgrade,
+                        #[codec(index = 10)]
                         #[doc = "Para is locked from manipulation by the manager. Must use parachain or relay chain"]
                         #[doc = "governance."]
                         ParaLocked,
+                        #[codec(index = 11)]
                         #[doc = "The ID given for registration has not been reserved."]
                         NotReserved,
+                        #[codec(index = 12)]
                         #[doc = "The validation code is invalid."]
                         InvalidCode,
+                        #[codec(index = 13)]
                         #[doc = "Cannot perform a parachain slot / lifecycle swap. Check that the state of both paras"]
                         #[doc = "are correct for the swap to work."]
                         CannotSwap,
@@ -62565,17 +64627,21 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         Registered {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                             manager: ::subxt::ext::subxt_core::utils::AccountId32,
                         },
+                        #[codec(index = 1)]
                         Deregistered {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 2)]
                         Reserved {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                             who: ::subxt::ext::subxt_core::utils::AccountId32,
                         },
+                        #[codec(index = 3)]
                         Swapped {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                             other_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
@@ -62616,6 +64682,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
+                        #[codec(index = 0)]
                         #[doc = "Schedule a para to be initialized at the start of the next session."]
                         #[doc = ""]
                         #[doc = "This should only be used for TESTING and not on PRODUCTION chains. It automatically"]
@@ -62626,18 +64693,22 @@ pub mod api {
                             genesis:
                                 runtime_types::polkadot_runtime_parachains::paras::ParaGenesisArgs,
                         },
+                        #[codec(index = 1)]
                         #[doc = "Schedule a para to be cleaned up at the start of the next session."]
                         sudo_schedule_para_cleanup {
                             id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 2)]
                         #[doc = "Upgrade a parathread (on-demand parachain) to a lease holding parachain"]
                         sudo_schedule_parathread_upgrade {
                             id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 3)]
                         #[doc = "Downgrade a lease holding parachain to an on-demand parachain"]
                         sudo_schedule_parachain_downgrade {
                             id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 4)]
                         #[doc = "Send a downward XCM to the given para."]
                         #[doc = ""]
                         #[doc = "The given parachain should exist and the payload should not exceed the preconfigured"]
@@ -62648,6 +64719,7 @@ pub mod api {
                                 runtime_types::xcm::VersionedXcm,
                             >,
                         },
+                        #[codec(index = 5)]
                         #[doc = "Forcefully establish a channel from the sender to the recipient."]
                         #[doc = ""]
                         #[doc = "This is equivalent to sending an `Hrmp::hrmp_init_open_channel` extrinsic followed by"]
@@ -62672,25 +64744,35 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "The specified parachain is not registered."]
                         ParaDoesntExist,
+                        #[codec(index = 1)]
                         #[doc = "The specified parachain is already registered."]
                         ParaAlreadyExists,
+                        #[codec(index = 2)]
                         #[doc = "A DMP message couldn't be sent because it exceeds the maximum size allowed for a"]
                         #[doc = "downward message."]
                         ExceedsMaxMessageSize,
+                        #[codec(index = 3)]
                         #[doc = "A DMP message couldn't be sent because the destination is unreachable."]
                         Unroutable,
+                        #[codec(index = 4)]
                         #[doc = "Could not schedule para cleanup."]
                         CouldntCleanup,
+                        #[codec(index = 5)]
                         #[doc = "Not a parathread (on-demand parachain)."]
                         NotParathread,
+                        #[codec(index = 6)]
                         #[doc = "Not a lease holding parachain."]
                         NotParachain,
+                        #[codec(index = 7)]
                         #[doc = "Cannot upgrade on-demand parachain to lease holding parachain."]
                         CannotUpgrade,
+                        #[codec(index = 8)]
                         #[doc = "Cannot downgrade lease holding parachain to on-demand."]
                         CannotDowngrade,
+                        #[codec(index = 9)]
                         #[doc = "There are more cores than supported by the runtime."]
                         TooManyCores,
                     }
@@ -62713,6 +64795,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
+                        #[codec(index = 0)]
                         #[doc = "Just a connect into the `lease_out` call, in case Root wants to force some lease to"]
                         #[doc = "happen independently of any other on-chain mechanism to use it."]
                         #[doc = ""]
@@ -62724,12 +64807,14 @@ pub mod api {
                             period_begin: ::core::primitive::u32,
                             period_count: ::core::primitive::u32,
                         },
+                        #[codec(index = 1)]
                         #[doc = "Clear all leases for a Para Id, refunding any deposits back to the original owners."]
                         #[doc = ""]
                         #[doc = "The dispatch origin for this call must match `T::ForceOrigin`."]
                         clear_all_leases {
                             para: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 2)]
                         #[doc = "Try to onboard a parachain that has a lease for the current lease period."]
                         #[doc = ""]
                         #[doc = "This function can be useful if there was some state issue with a para that should"]
@@ -62754,8 +64839,10 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "The parachain ID is not onboarding."]
                         ParaNotOnboarding,
+                        #[codec(index = 1)]
                         #[doc = "There was an error with the lease."]
                         LeaseError,
                     }
@@ -62772,10 +64859,12 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         #[doc = "A new `[lease_period]` is beginning."]
                         NewLeasePeriod {
                             lease_period: ::core::primitive::u32,
                         },
+                        #[codec(index = 1)]
                         #[doc = "A para has won the right to a continuous set of lease periods as a parachain."]
                         #[doc = "First balance is any extra amount reserved on top of the para's existing deposit."]
                         #[doc = "Second balance is the total amount reserved."]
@@ -62810,7 +64899,9 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         AssignmentsEmpty,
+                        #[codec(index = 1)]
                         #[doc = "assign_core is only allowed to append new assignments at the end of already existing"]
                         #[doc = "ones or update the last entry."]
                         DisallowedInsert,
@@ -62921,7 +65012,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
-                        # [doc = "Set the validation upgrade cooldown."] set_validation_upgrade_cooldown { new : :: core :: primitive :: u32 , } , # [doc = "Set the validation upgrade delay."] set_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [doc = "Set the acceptance period for an included candidate."] set_code_retention_period { new : :: core :: primitive :: u32 , } , # [doc = "Set the max validation code size for incoming upgrades."] set_max_code_size { new : :: core :: primitive :: u32 , } , # [doc = "Set the max POV block size for incoming upgrades."] set_max_pov_size { new : :: core :: primitive :: u32 , } , # [doc = "Set the max head data size for paras."] set_max_head_data_size { new : :: core :: primitive :: u32 , } , # [doc = "Set the number of coretime execution cores."] # [doc = ""] # [doc = "NOTE: that this configuration is managed by the coretime chain. Only manually change"] # [doc = "this, if you really know what you are doing!"] set_coretime_cores { new : :: core :: primitive :: u32 , } , # [doc = "Set the parachain validator-group rotation frequency"] set_group_rotation_frequency { new : :: core :: primitive :: u32 , } , # [doc = "Set the availability period for paras."] set_paras_availability_period { new : :: core :: primitive :: u32 , } , # [doc = "Set the scheduling lookahead, in expected number of blocks at peak throughput."] set_scheduling_lookahead { new : :: core :: primitive :: u32 , } , # [doc = "Set the maximum number of validators to assign to any core."] set_max_validators_per_core { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [doc = "Set the maximum number of validators to use in parachain consensus."] set_max_validators { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [doc = "Set the dispute period, in number of sessions to keep for disputes."] set_dispute_period { new : :: core :: primitive :: u32 , } , # [doc = "Set the dispute post conclusion acceptance period."] set_dispute_post_conclusion_acceptance_period { new : :: core :: primitive :: u32 , } , # [doc = "Set the no show slots, in number of number of consensus slots."] # [doc = "Must be at least 1."] set_no_show_slots { new : :: core :: primitive :: u32 , } , # [doc = "Set the total number of delay tranches."] set_n_delay_tranches { new : :: core :: primitive :: u32 , } , # [doc = "Set the zeroth delay tranche width."] set_zeroth_delay_tranche_width { new : :: core :: primitive :: u32 , } , # [doc = "Set the number of validators needed to approve a block."] set_needed_approvals { new : :: core :: primitive :: u32 , } , # [doc = "Set the number of samples to do of the `RelayVRFModulo` approval assignment criterion."] set_relay_vrf_modulo_samples { new : :: core :: primitive :: u32 , } , # [doc = "Sets the maximum items that can present in a upward dispatch queue at once."] set_max_upward_queue_count { new : :: core :: primitive :: u32 , } , # [doc = "Sets the maximum total size of items that can present in a upward dispatch queue at"] # [doc = "once."] set_max_upward_queue_size { new : :: core :: primitive :: u32 , } , # [doc = "Set the critical downward message size."] set_max_downward_message_size { new : :: core :: primitive :: u32 , } , # [doc = "Sets the maximum size of an upward message that can be sent by a candidate."] set_max_upward_message_size { new : :: core :: primitive :: u32 , } , # [doc = "Sets the maximum number of messages that a candidate can contain."] set_max_upward_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [doc = "Sets the number of sessions after which an HRMP open channel request expires."] set_hrmp_open_request_ttl { new : :: core :: primitive :: u32 , } , # [doc = "Sets the amount of funds that the sender should provide for opening an HRMP channel."] set_hrmp_sender_deposit { new : :: core :: primitive :: u128 , } , # [doc = "Sets the amount of funds that the recipient should provide for accepting opening an HRMP"] # [doc = "channel."] set_hrmp_recipient_deposit { new : :: core :: primitive :: u128 , } , # [doc = "Sets the maximum number of messages allowed in an HRMP channel at once."] set_hrmp_channel_max_capacity { new : :: core :: primitive :: u32 , } , # [doc = "Sets the maximum total size of messages in bytes allowed in an HRMP channel at once."] set_hrmp_channel_max_total_size { new : :: core :: primitive :: u32 , } , # [doc = "Sets the maximum number of inbound HRMP channels a parachain is allowed to accept."] set_hrmp_max_parachain_inbound_channels { new : :: core :: primitive :: u32 , } , # [doc = "Sets the maximum size of a message that could ever be put into an HRMP channel."] set_hrmp_channel_max_message_size { new : :: core :: primitive :: u32 , } , # [doc = "Sets the maximum number of outbound HRMP channels a parachain is allowed to open."] set_hrmp_max_parachain_outbound_channels { new : :: core :: primitive :: u32 , } , # [doc = "Sets the maximum number of outbound HRMP messages can be sent by a candidate."] set_hrmp_max_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [doc = "Set the number of session changes after which a PVF pre-checking voting is rejected."] set_pvf_voting_ttl { new : :: core :: primitive :: u32 , } , # [doc = "Sets the minimum delay between announcing the upgrade block for a parachain until the"] # [doc = "upgrade taking place."] # [doc = ""] # [doc = "See the field documentation for information and constraints for the new value."] set_minimum_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [doc = "Setting this to true will disable consistency checks for the configuration setters."] # [doc = "Use with caution."] set_bypass_consistency_check { new : :: core :: primitive :: bool , } , # [doc = "Set the asynchronous backing parameters."] set_async_backing_params { new : runtime_types :: polkadot_primitives :: v8 :: async_backing :: AsyncBackingParams , } , # [doc = "Set PVF executor parameters."] set_executor_params { new : runtime_types :: polkadot_primitives :: v8 :: executor_params :: ExecutorParams , } , # [doc = "Set the on demand (parathreads) base fee."] set_on_demand_base_fee { new : :: core :: primitive :: u128 , } , # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_fee_variability { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [doc = "Set the on demand (parathreads) queue max size."] set_on_demand_queue_max_size { new : :: core :: primitive :: u32 , } , # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_target_queue_utilization { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [doc = "Set the minimum backing votes threshold."] set_minimum_backing_votes { new : :: core :: primitive :: u32 , } , # [doc = "Set/Unset a node feature."] set_node_feature { index : :: core :: primitive :: u8 , value : :: core :: primitive :: bool , } , # [doc = "Set approval-voting-params."] set_approval_voting_params { new : runtime_types :: polkadot_primitives :: v8 :: ApprovalVotingParams , } , # [doc = "Set scheduler-params."] set_scheduler_params { new : runtime_types :: polkadot_primitives :: v8 :: SchedulerParams < :: core :: primitive :: u32 > , } , }
+                        # [codec (index = 0)] # [doc = "Set the validation upgrade cooldown."] set_validation_upgrade_cooldown { new : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Set the validation upgrade delay."] set_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [codec (index = 2)] # [doc = "Set the acceptance period for an included candidate."] set_code_retention_period { new : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Set the max validation code size for incoming upgrades."] set_max_code_size { new : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "Set the max POV block size for incoming upgrades."] set_max_pov_size { new : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Set the max head data size for paras."] set_max_head_data_size { new : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "Set the number of coretime execution cores."] # [doc = ""] # [doc = "NOTE: that this configuration is managed by the coretime chain. Only manually change"] # [doc = "this, if you really know what you are doing!"] set_coretime_cores { new : :: core :: primitive :: u32 , } , # [codec (index = 8)] # [doc = "Set the parachain validator-group rotation frequency"] set_group_rotation_frequency { new : :: core :: primitive :: u32 , } , # [codec (index = 9)] # [doc = "Set the availability period for paras."] set_paras_availability_period { new : :: core :: primitive :: u32 , } , # [codec (index = 11)] # [doc = "Set the scheduling lookahead, in expected number of blocks at peak throughput."] set_scheduling_lookahead { new : :: core :: primitive :: u32 , } , # [codec (index = 12)] # [doc = "Set the maximum number of validators to assign to any core."] set_max_validators_per_core { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 13)] # [doc = "Set the maximum number of validators to use in parachain consensus."] set_max_validators { new : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 14)] # [doc = "Set the dispute period, in number of sessions to keep for disputes."] set_dispute_period { new : :: core :: primitive :: u32 , } , # [codec (index = 15)] # [doc = "Set the dispute post conclusion acceptance period."] set_dispute_post_conclusion_acceptance_period { new : :: core :: primitive :: u32 , } , # [codec (index = 18)] # [doc = "Set the no show slots, in number of number of consensus slots."] # [doc = "Must be at least 1."] set_no_show_slots { new : :: core :: primitive :: u32 , } , # [codec (index = 19)] # [doc = "Set the total number of delay tranches."] set_n_delay_tranches { new : :: core :: primitive :: u32 , } , # [codec (index = 20)] # [doc = "Set the zeroth delay tranche width."] set_zeroth_delay_tranche_width { new : :: core :: primitive :: u32 , } , # [codec (index = 21)] # [doc = "Set the number of validators needed to approve a block."] set_needed_approvals { new : :: core :: primitive :: u32 , } , # [codec (index = 22)] # [doc = "Set the number of samples to do of the `RelayVRFModulo` approval assignment criterion."] set_relay_vrf_modulo_samples { new : :: core :: primitive :: u32 , } , # [codec (index = 23)] # [doc = "Sets the maximum items that can present in a upward dispatch queue at once."] set_max_upward_queue_count { new : :: core :: primitive :: u32 , } , # [codec (index = 24)] # [doc = "Sets the maximum total size of items that can present in a upward dispatch queue at"] # [doc = "once."] set_max_upward_queue_size { new : :: core :: primitive :: u32 , } , # [codec (index = 25)] # [doc = "Set the critical downward message size."] set_max_downward_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 27)] # [doc = "Sets the maximum size of an upward message that can be sent by a candidate."] set_max_upward_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 28)] # [doc = "Sets the maximum number of messages that a candidate can contain."] set_max_upward_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [codec (index = 29)] # [doc = "Sets the number of sessions after which an HRMP open channel request expires."] set_hrmp_open_request_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 30)] # [doc = "Sets the amount of funds that the sender should provide for opening an HRMP channel."] set_hrmp_sender_deposit { new : :: core :: primitive :: u128 , } , # [codec (index = 31)] # [doc = "Sets the amount of funds that the recipient should provide for accepting opening an HRMP"] # [doc = "channel."] set_hrmp_recipient_deposit { new : :: core :: primitive :: u128 , } , # [codec (index = 32)] # [doc = "Sets the maximum number of messages allowed in an HRMP channel at once."] set_hrmp_channel_max_capacity { new : :: core :: primitive :: u32 , } , # [codec (index = 33)] # [doc = "Sets the maximum total size of messages in bytes allowed in an HRMP channel at once."] set_hrmp_channel_max_total_size { new : :: core :: primitive :: u32 , } , # [codec (index = 34)] # [doc = "Sets the maximum number of inbound HRMP channels a parachain is allowed to accept."] set_hrmp_max_parachain_inbound_channels { new : :: core :: primitive :: u32 , } , # [codec (index = 36)] # [doc = "Sets the maximum size of a message that could ever be put into an HRMP channel."] set_hrmp_channel_max_message_size { new : :: core :: primitive :: u32 , } , # [codec (index = 37)] # [doc = "Sets the maximum number of outbound HRMP channels a parachain is allowed to open."] set_hrmp_max_parachain_outbound_channels { new : :: core :: primitive :: u32 , } , # [codec (index = 39)] # [doc = "Sets the maximum number of outbound HRMP messages can be sent by a candidate."] set_hrmp_max_message_num_per_candidate { new : :: core :: primitive :: u32 , } , # [codec (index = 42)] # [doc = "Set the number of session changes after which a PVF pre-checking voting is rejected."] set_pvf_voting_ttl { new : :: core :: primitive :: u32 , } , # [codec (index = 43)] # [doc = "Sets the minimum delay between announcing the upgrade block for a parachain until the"] # [doc = "upgrade taking place."] # [doc = ""] # [doc = "See the field documentation for information and constraints for the new value."] set_minimum_validation_upgrade_delay { new : :: core :: primitive :: u32 , } , # [codec (index = 44)] # [doc = "Setting this to true will disable consistency checks for the configuration setters."] # [doc = "Use with caution."] set_bypass_consistency_check { new : :: core :: primitive :: bool , } , # [codec (index = 45)] # [doc = "Set the asynchronous backing parameters."] set_async_backing_params { new : runtime_types :: polkadot_primitives :: v8 :: async_backing :: AsyncBackingParams , } , # [codec (index = 46)] # [doc = "Set PVF executor parameters."] set_executor_params { new : runtime_types :: polkadot_primitives :: v8 :: executor_params :: ExecutorParams , } , # [codec (index = 47)] # [doc = "Set the on demand (parathreads) base fee."] set_on_demand_base_fee { new : :: core :: primitive :: u128 , } , # [codec (index = 48)] # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_fee_variability { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 49)] # [doc = "Set the on demand (parathreads) queue max size."] set_on_demand_queue_max_size { new : :: core :: primitive :: u32 , } , # [codec (index = 50)] # [doc = "Set the on demand (parathreads) fee variability."] set_on_demand_target_queue_utilization { new : runtime_types :: sp_arithmetic :: per_things :: Perbill , } , # [codec (index = 52)] # [doc = "Set the minimum backing votes threshold."] set_minimum_backing_votes { new : :: core :: primitive :: u32 , } , # [codec (index = 53)] # [doc = "Set/Unset a node feature."] set_node_feature { index : :: core :: primitive :: u8 , value : :: core :: primitive :: bool , } , # [codec (index = 54)] # [doc = "Set approval-voting-params."] set_approval_voting_params { new : runtime_types :: polkadot_primitives :: v8 :: ApprovalVotingParams , } , # [codec (index = 55)] # [doc = "Set scheduler-params."] set_scheduler_params { new : runtime_types :: polkadot_primitives :: v8 :: SchedulerParams < :: core :: primitive :: u32 > , } , }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                         :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -62935,6 +65026,7 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "The new value for a configuration parameter is invalid."]
                         InvalidNewValue,
                     }
@@ -63012,7 +65104,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
-                        # [doc = "Request the configuration to be updated with the specified number of cores. Warning:"] # [doc = "Since this only schedules a configuration update, it takes two sessions to come into"] # [doc = "effect."] # [doc = ""] # [doc = "- `origin`: Root or the Coretime Chain"] # [doc = "- `count`: total number of cores"] request_core_count { count : :: core :: primitive :: u16 , } , # [doc = "Request to claim the instantaneous coretime sales revenue starting from the block it was"] # [doc = "last claimed until and up to the block specified. The claimed amount value is sent back"] # [doc = "to the Coretime chain in a `notify_revenue` message. At the same time, the amount is"] # [doc = "teleported to the Coretime chain."] request_revenue_at { when : :: core :: primitive :: u32 , } , credit_account { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [doc = "Receive instructions from the `ExternalBrokerOrigin`, detailing how a specific core is"] # [doc = "to be used."] # [doc = ""] # [doc = "Parameters:"] # [doc = "-`origin`: The `ExternalBrokerOrigin`, assumed to be the coretime chain."] # [doc = "-`core`: The core that should be scheduled."] # [doc = "-`begin`: The starting blockheight of the instruction."] # [doc = "-`assignment`: How the blockspace should be utilised."] # [doc = "-`end_hint`: An optional hint as to when this particular set of instructions will end."] assign_core { core : :: core :: primitive :: u16 , begin : :: core :: primitive :: u32 , assignment : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < (runtime_types :: pallet_broker :: coretime_interface :: CoreAssignment , runtime_types :: polkadot_runtime_parachains :: assigner_coretime :: PartsOf57600 ,) > , end_hint : :: core :: option :: Option < :: core :: primitive :: u32 > , } , }
+                        # [codec (index = 1)] # [doc = "Request the configuration to be updated with the specified number of cores. Warning:"] # [doc = "Since this only schedules a configuration update, it takes two sessions to come into"] # [doc = "effect."] # [doc = ""] # [doc = "- `origin`: Root or the Coretime Chain"] # [doc = "- `count`: total number of cores"] request_core_count { count : :: core :: primitive :: u16 , } , # [codec (index = 2)] # [doc = "Request to claim the instantaneous coretime sales revenue starting from the block it was"] # [doc = "last claimed until and up to the block specified. The claimed amount value is sent back"] # [doc = "to the Coretime chain in a `notify_revenue` message. At the same time, the amount is"] # [doc = "teleported to the Coretime chain."] request_revenue_at { when : :: core :: primitive :: u32 , } , # [codec (index = 3)] credit_account { who : :: subxt :: ext :: subxt_core :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Receive instructions from the `ExternalBrokerOrigin`, detailing how a specific core is"] # [doc = "to be used."] # [doc = ""] # [doc = "Parameters:"] # [doc = "-`origin`: The `ExternalBrokerOrigin`, assumed to be the coretime chain."] # [doc = "-`core`: The core that should be scheduled."] # [doc = "-`begin`: The starting blockheight of the instruction."] # [doc = "-`assignment`: How the blockspace should be utilised."] # [doc = "-`end_hint`: An optional hint as to when this particular set of instructions will end."] assign_core { core : :: core :: primitive :: u16 , begin : :: core :: primitive :: u32 , assignment : :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < (runtime_types :: pallet_broker :: coretime_interface :: CoreAssignment , runtime_types :: polkadot_runtime_parachains :: assigner_coretime :: PartsOf57600 ,) > , end_hint : :: core :: option :: Option < :: core :: primitive :: u32 > , } , }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                         :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -63026,11 +65118,14 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "The paraid making the call is not the coretime brokerage system parachain."]
                         NotBroker,
+                        #[codec(index = 1)]
                         #[doc = "Requested revenue information `when` parameter was in the future from the current"]
                         #[doc = "block height."]
                         RequestedFutureRevenue,
+                        #[codec(index = 2)]
                         #[doc = "Failed to transfer assets to the coretime chain"]
                         AssetTransferFailed,
                     }
@@ -63047,8 +65142,10 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         #[doc = "The broker chain has asked for revenue information for a specific block."]
                         RevenueInfoRequested { when: ::core::primitive::u32 },
+                        #[codec(index = 1)]
                         #[doc = "A core has received a new assignment from the broker chain."]
                         CoreAssigned {
                             core: runtime_types::polkadot_primitives::v8::CoreIndex,
@@ -63073,6 +65170,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
+                        #[codec(index = 0)]
                         force_unfreeze,
                     }
                     #[derive(
@@ -63088,22 +65186,31 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "Duplicate dispute statement sets provided."]
                         DuplicateDisputeStatementSets,
+                        #[codec(index = 1)]
                         #[doc = "Ancient dispute statement provided."]
                         AncientDisputeStatement,
+                        #[codec(index = 2)]
                         #[doc = "Validator index on statement is out of bounds for session."]
                         ValidatorIndexOutOfBounds,
+                        #[codec(index = 3)]
                         #[doc = "Invalid signature on statement."]
                         InvalidSignature,
+                        #[codec(index = 4)]
                         #[doc = "Validator vote submitted more than once to dispute."]
                         DuplicateStatement,
+                        #[codec(index = 5)]
                         #[doc = "A dispute where there are only votes on one side."]
                         SingleSidedDispute,
+                        #[codec(index = 6)]
                         #[doc = "A dispute vote from a malicious backer."]
                         MaliciousBacker,
+                        #[codec(index = 7)]
                         #[doc = "No backing votes were provides along dispute statements."]
                         MissingBackingVotes,
+                        #[codec(index = 8)]
                         #[doc = "Unconfirmed dispute statement sets provided."]
                         UnconfirmedDispute,
                     }
@@ -63120,17 +65227,20 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         #[doc = "A dispute has been initiated. \\[candidate hash, dispute location\\]"]
                         DisputeInitiated(
                             runtime_types::polkadot_core_primitives::CandidateHash,
                             runtime_types::polkadot_runtime_parachains::disputes::DisputeLocation,
                         ),
+                        #[codec(index = 1)]
                         #[doc = "A dispute has concluded for or against a candidate."]
                         #[doc = "`\\[para id, candidate hash, dispute result\\]`"]
                         DisputeConcluded(
                             runtime_types::polkadot_core_primitives::CandidateHash,
                             runtime_types::polkadot_runtime_parachains::disputes::DisputeResult,
                         ),
+                        #[codec(index = 2)]
                         #[doc = "A dispute has concluded with supermajority against a candidate."]
                         #[doc = "Block authors should no longer build on top of this head and should"]
                         #[doc = "instead revert the block at the given height. This should be the"]
@@ -63155,9 +65265,10 @@ pub mod api {
                         )]
                         #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                         pub enum Call {
+                            #[codec(index = 0)]
                             report_dispute_lost_unsigned {
                                 dispute_proof: ::subxt::ext::subxt_core::alloc::boxed::Box<
-                                    runtime_types::polkadot_primitives::v8::slashing::DisputeProof,
+                                    runtime_types::polkadot_primitives::vstaging::DisputeProof,
                                 >,
                                 key_owner_proof: runtime_types::sp_session::MembershipProof,
                             },
@@ -63175,17 +65286,23 @@ pub mod api {
                         )]
                         #[doc = "The `Error` enum of this pallet."]
                         pub enum Error {
+                            #[codec(index = 0)]
                             #[doc = "The key ownership proof is invalid."]
                             InvalidKeyOwnershipProof,
+                            #[codec(index = 1)]
                             #[doc = "The session index is too old or invalid."]
                             InvalidSessionIndex,
+                            #[codec(index = 2)]
                             #[doc = "The candidate hash is invalid."]
                             InvalidCandidateHash,
+                            #[codec(index = 3)]
                             #[doc = "There is no pending slash for the given validator index and time"]
                             #[doc = "slot."]
                             InvalidValidatorIndex,
+                            #[codec(index = 4)]
                             #[doc = "The validator index does not match the validator id."]
                             ValidatorIndexIdMismatch,
+                            #[codec(index = 5)]
                             #[doc = "The given slashing report is valid but already previously reported."]
                             DuplicateSlashingReport,
                         }
@@ -63203,7 +65320,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum DisputeLocation {
+                    #[codec(index = 0)]
                     Local,
+                    #[codec(index = 1)]
                     Remote,
                 }
                 #[derive(
@@ -63218,7 +65337,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum DisputeResult {
+                    #[codec(index = 0)]
                     Valid,
+                    #[codec(index = 1)]
                     Invalid,
                 }
             }
@@ -63239,7 +65360,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
-                        # [doc = "Initiate opening a channel from a parachain to a given recipient with given channel"] # [doc = "parameters."] # [doc = ""] # [doc = "- `proposed_max_capacity` - specifies how many messages can be in the channel at once."] # [doc = "- `proposed_max_message_size` - specifies the maximum size of the messages."] # [doc = ""] # [doc = "These numbers are a subject to the relay-chain configuration limits."] # [doc = ""] # [doc = "The channel can be opened only after the recipient confirms it and only on a session"] # [doc = "change."] hrmp_init_open_channel { recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , proposed_max_capacity : :: core :: primitive :: u32 , proposed_max_message_size : :: core :: primitive :: u32 , } , # [doc = "Accept a pending open channel request from the given sender."] # [doc = ""] # [doc = "The channel will be opened only on the next session boundary."] hrmp_accept_open_channel { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [doc = "Initiate unilateral closing of a channel. The origin must be either the sender or the"] # [doc = "recipient in the channel being closed."] # [doc = ""] # [doc = "The closure can only happen on a session change."] hrmp_close_channel { channel_id : runtime_types :: polkadot_parachain_primitives :: primitives :: HrmpChannelId , } , # [doc = "This extrinsic triggers the cleanup of all the HRMP storage items that a para may have."] # [doc = "Normally this happens once per session, but this allows you to trigger the cleanup"] # [doc = "immediately for a specific parachain."] # [doc = ""] # [doc = "Number of inbound and outbound channels for `para` must be provided as witness data."] # [doc = ""] # [doc = "Origin must be the `ChannelManager`."] force_clean_hrmp { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , num_inbound : :: core :: primitive :: u32 , num_outbound : :: core :: primitive :: u32 , } , # [doc = "Force process HRMP open channel requests."] # [doc = ""] # [doc = "If there are pending HRMP open channel requests, you can use this function to process"] # [doc = "all of those requests immediately."] # [doc = ""] # [doc = "Total number of opening channels must be provided as witness data."] # [doc = ""] # [doc = "Origin must be the `ChannelManager`."] force_process_hrmp_open { channels : :: core :: primitive :: u32 , } , # [doc = "Force process HRMP close channel requests."] # [doc = ""] # [doc = "If there are pending HRMP close channel requests, you can use this function to process"] # [doc = "all of those requests immediately."] # [doc = ""] # [doc = "Total number of closing channels must be provided as witness data."] # [doc = ""] # [doc = "Origin must be the `ChannelManager`."] force_process_hrmp_close { channels : :: core :: primitive :: u32 , } , # [doc = "This cancels a pending open channel request. It can be canceled by either of the sender"] # [doc = "or the recipient for that request. The origin must be either of those."] # [doc = ""] # [doc = "The cancellation happens immediately. It is not possible to cancel the request if it is"] # [doc = "already accepted."] # [doc = ""] # [doc = "Total number of open requests (i.e. `HrmpOpenChannelRequestsList`) must be provided as"] # [doc = "witness data."] hrmp_cancel_open_request { channel_id : runtime_types :: polkadot_parachain_primitives :: primitives :: HrmpChannelId , open_requests : :: core :: primitive :: u32 , } , # [doc = "Open a channel from a `sender` to a `recipient` `ParaId`. Although opened by governance,"] # [doc = "the `max_capacity` and `max_message_size` are still subject to the Relay Chain's"] # [doc = "configured limits."] # [doc = ""] # [doc = "Expected use is when one (and only one) of the `ParaId`s involved in the channel is"] # [doc = "governed by the system, e.g. a system parachain."] # [doc = ""] # [doc = "Origin must be the `ChannelManager`."] force_open_hrmp_channel { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , max_capacity : :: core :: primitive :: u32 , max_message_size : :: core :: primitive :: u32 , } , # [doc = "Establish an HRMP channel between two system chains. If the channel does not already"] # [doc = "exist, the transaction fees will be refunded to the caller. The system does not take"] # [doc = "deposits for channels between system chains, and automatically sets the message number"] # [doc = "and size limits to the maximum allowed by the network's configuration."] # [doc = ""] # [doc = "Arguments:"] # [doc = ""] # [doc = "- `sender`: A system chain, `ParaId`."] # [doc = "- `recipient`: A system chain, `ParaId`."] # [doc = ""] # [doc = "Any signed origin can call this function, but _both_ inputs MUST be system chains. If"] # [doc = "the channel does not exist yet, there is no fee."] establish_system_channel { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [doc = "Update the deposits held for an HRMP channel to the latest `Configuration`. Channels"] # [doc = "with system chains do not require a deposit."] # [doc = ""] # [doc = "Arguments:"] # [doc = ""] # [doc = "- `sender`: A chain, `ParaId`."] # [doc = "- `recipient`: A chain, `ParaId`."] # [doc = ""] # [doc = "Any signed origin can call this function."] poke_channel_deposits { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [doc = "Establish a bidirectional HRMP channel between a parachain and a system chain."] # [doc = ""] # [doc = "Arguments:"] # [doc = ""] # [doc = "- `target_system_chain`: A system chain, `ParaId`."] # [doc = ""] # [doc = "The origin needs to be the parachain origin."] establish_channel_with_system { target_system_chain : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , }
+                        # [codec (index = 0)] # [doc = "Initiate opening a channel from a parachain to a given recipient with given channel"] # [doc = "parameters."] # [doc = ""] # [doc = "- `proposed_max_capacity` - specifies how many messages can be in the channel at once."] # [doc = "- `proposed_max_message_size` - specifies the maximum size of the messages."] # [doc = ""] # [doc = "These numbers are a subject to the relay-chain configuration limits."] # [doc = ""] # [doc = "The channel can be opened only after the recipient confirms it and only on a session"] # [doc = "change."] hrmp_init_open_channel { recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , proposed_max_capacity : :: core :: primitive :: u32 , proposed_max_message_size : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Accept a pending open channel request from the given sender."] # [doc = ""] # [doc = "The channel will be opened only on the next session boundary."] hrmp_accept_open_channel { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 2)] # [doc = "Initiate unilateral closing of a channel. The origin must be either the sender or the"] # [doc = "recipient in the channel being closed."] # [doc = ""] # [doc = "The closure can only happen on a session change."] hrmp_close_channel { channel_id : runtime_types :: polkadot_parachain_primitives :: primitives :: HrmpChannelId , } , # [codec (index = 3)] # [doc = "This extrinsic triggers the cleanup of all the HRMP storage items that a para may have."] # [doc = "Normally this happens once per session, but this allows you to trigger the cleanup"] # [doc = "immediately for a specific parachain."] # [doc = ""] # [doc = "Number of inbound and outbound channels for `para` must be provided as witness data."] # [doc = ""] # [doc = "Origin must be the `ChannelManager`."] force_clean_hrmp { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , num_inbound : :: core :: primitive :: u32 , num_outbound : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "Force process HRMP open channel requests."] # [doc = ""] # [doc = "If there are pending HRMP open channel requests, you can use this function to process"] # [doc = "all of those requests immediately."] # [doc = ""] # [doc = "Total number of opening channels must be provided as witness data."] # [doc = ""] # [doc = "Origin must be the `ChannelManager`."] force_process_hrmp_open { channels : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Force process HRMP close channel requests."] # [doc = ""] # [doc = "If there are pending HRMP close channel requests, you can use this function to process"] # [doc = "all of those requests immediately."] # [doc = ""] # [doc = "Total number of closing channels must be provided as witness data."] # [doc = ""] # [doc = "Origin must be the `ChannelManager`."] force_process_hrmp_close { channels : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "This cancels a pending open channel request. It can be canceled by either of the sender"] # [doc = "or the recipient for that request. The origin must be either of those."] # [doc = ""] # [doc = "The cancellation happens immediately. It is not possible to cancel the request if it is"] # [doc = "already accepted."] # [doc = ""] # [doc = "Total number of open requests (i.e. `HrmpOpenChannelRequestsList`) must be provided as"] # [doc = "witness data."] hrmp_cancel_open_request { channel_id : runtime_types :: polkadot_parachain_primitives :: primitives :: HrmpChannelId , open_requests : :: core :: primitive :: u32 , } , # [codec (index = 7)] # [doc = "Open a channel from a `sender` to a `recipient` `ParaId`. Although opened by governance,"] # [doc = "the `max_capacity` and `max_message_size` are still subject to the Relay Chain's"] # [doc = "configured limits."] # [doc = ""] # [doc = "Expected use is when one (and only one) of the `ParaId`s involved in the channel is"] # [doc = "governed by the system, e.g. a system parachain."] # [doc = ""] # [doc = "Origin must be the `ChannelManager`."] force_open_hrmp_channel { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , max_capacity : :: core :: primitive :: u32 , max_message_size : :: core :: primitive :: u32 , } , # [codec (index = 8)] # [doc = "Establish an HRMP channel between two system chains. If the channel does not already"] # [doc = "exist, the transaction fees will be refunded to the caller. The system does not take"] # [doc = "deposits for channels between system chains, and automatically sets the message number"] # [doc = "and size limits to the maximum allowed by the network's configuration."] # [doc = ""] # [doc = "Arguments:"] # [doc = ""] # [doc = "- `sender`: A system chain, `ParaId`."] # [doc = "- `recipient`: A system chain, `ParaId`."] # [doc = ""] # [doc = "Any signed origin can call this function, but _both_ inputs MUST be system chains. If"] # [doc = "the channel does not exist yet, there is no fee."] establish_system_channel { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 9)] # [doc = "Update the deposits held for an HRMP channel to the latest `Configuration`. Channels"] # [doc = "with system chains do not require a deposit."] # [doc = ""] # [doc = "Arguments:"] # [doc = ""] # [doc = "- `sender`: A chain, `ParaId`."] # [doc = "- `recipient`: A chain, `ParaId`."] # [doc = ""] # [doc = "Any signed origin can call this function."] poke_channel_deposits { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 10)] # [doc = "Establish a bidirectional HRMP channel between a parachain and a system chain."] # [doc = ""] # [doc = "Arguments:"] # [doc = ""] # [doc = "- `target_system_chain`: A system chain, `ParaId`."] # [doc = ""] # [doc = "The origin needs to be the parachain origin."] establish_channel_with_system { target_system_chain : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                         :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -63253,44 +65374,64 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "The sender tried to open a channel to themselves."]
                         OpenHrmpChannelToSelf,
+                        #[codec(index = 1)]
                         #[doc = "The recipient is not a valid para."]
                         OpenHrmpChannelInvalidRecipient,
+                        #[codec(index = 2)]
                         #[doc = "The requested capacity is zero."]
                         OpenHrmpChannelZeroCapacity,
+                        #[codec(index = 3)]
                         #[doc = "The requested capacity exceeds the global limit."]
                         OpenHrmpChannelCapacityExceedsLimit,
+                        #[codec(index = 4)]
                         #[doc = "The requested maximum message size is 0."]
                         OpenHrmpChannelZeroMessageSize,
+                        #[codec(index = 5)]
                         #[doc = "The open request requested the message size that exceeds the global limit."]
                         OpenHrmpChannelMessageSizeExceedsLimit,
+                        #[codec(index = 6)]
                         #[doc = "The channel already exists"]
                         OpenHrmpChannelAlreadyExists,
+                        #[codec(index = 7)]
                         #[doc = "There is already a request to open the same channel."]
                         OpenHrmpChannelAlreadyRequested,
+                        #[codec(index = 8)]
                         #[doc = "The sender already has the maximum number of allowed outbound channels."]
                         OpenHrmpChannelLimitExceeded,
+                        #[codec(index = 9)]
                         #[doc = "The channel from the sender to the origin doesn't exist."]
                         AcceptHrmpChannelDoesntExist,
+                        #[codec(index = 10)]
                         #[doc = "The channel is already confirmed."]
                         AcceptHrmpChannelAlreadyConfirmed,
+                        #[codec(index = 11)]
                         #[doc = "The recipient already has the maximum number of allowed inbound channels."]
                         AcceptHrmpChannelLimitExceeded,
+                        #[codec(index = 12)]
                         #[doc = "The origin tries to close a channel where it is neither the sender nor the recipient."]
                         CloseHrmpChannelUnauthorized,
+                        #[codec(index = 13)]
                         #[doc = "The channel to be closed doesn't exist."]
                         CloseHrmpChannelDoesntExist,
+                        #[codec(index = 14)]
                         #[doc = "The channel close request is already requested."]
                         CloseHrmpChannelAlreadyUnderway,
+                        #[codec(index = 15)]
                         #[doc = "Canceling is requested by neither the sender nor recipient of the open channel request."]
                         CancelHrmpOpenChannelUnauthorized,
+                        #[codec(index = 16)]
                         #[doc = "The open request doesn't exist."]
                         OpenHrmpChannelDoesntExist,
+                        #[codec(index = 17)]
                         #[doc = "Cannot cancel an HRMP open channel request because it is already confirmed."]
                         OpenHrmpChannelAlreadyConfirmed,
+                        #[codec(index = 18)]
                         #[doc = "The provided witness data is wrong."]
                         WrongWitness,
+                        #[codec(index = 19)]
                         #[doc = "The channel between these two chains cannot be authorized."]
                         ChannelCreationNotAuthorized,
                     }
@@ -63307,7 +65448,7 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
-                        # [doc = "Open HRMP channel requested."] OpenChannelRequested { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , proposed_max_capacity : :: core :: primitive :: u32 , proposed_max_message_size : :: core :: primitive :: u32 , } , # [doc = "An HRMP channel request sent by the receiver was canceled by either party."] OpenChannelCanceled { by_parachain : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , channel_id : runtime_types :: polkadot_parachain_primitives :: primitives :: HrmpChannelId , } , # [doc = "Open HRMP channel accepted."] OpenChannelAccepted { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [doc = "HRMP channel closed."] ChannelClosed { by_parachain : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , channel_id : runtime_types :: polkadot_parachain_primitives :: primitives :: HrmpChannelId , } , # [doc = "An HRMP channel was opened via Root origin."] HrmpChannelForceOpened { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , proposed_max_capacity : :: core :: primitive :: u32 , proposed_max_message_size : :: core :: primitive :: u32 , } , # [doc = "An HRMP channel was opened with a system chain."] HrmpSystemChannelOpened { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , proposed_max_capacity : :: core :: primitive :: u32 , proposed_max_message_size : :: core :: primitive :: u32 , } , # [doc = "An HRMP channel's deposits were updated."] OpenChannelDepositsUpdated { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , }
+                        # [codec (index = 0)] # [doc = "Open HRMP channel requested."] OpenChannelRequested { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , proposed_max_capacity : :: core :: primitive :: u32 , proposed_max_message_size : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "An HRMP channel request sent by the receiver was canceled by either party."] OpenChannelCanceled { by_parachain : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , channel_id : runtime_types :: polkadot_parachain_primitives :: primitives :: HrmpChannelId , } , # [codec (index = 2)] # [doc = "Open HRMP channel accepted."] OpenChannelAccepted { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 3)] # [doc = "HRMP channel closed."] ChannelClosed { by_parachain : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , channel_id : runtime_types :: polkadot_parachain_primitives :: primitives :: HrmpChannelId , } , # [codec (index = 4)] # [doc = "An HRMP channel was opened via Root origin."] HrmpChannelForceOpened { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , proposed_max_capacity : :: core :: primitive :: u32 , proposed_max_message_size : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "An HRMP channel was opened with a system chain."] HrmpSystemChannelOpened { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , proposed_max_capacity : :: core :: primitive :: u32 , proposed_max_message_size : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "An HRMP channel's deposits were updated."] OpenChannelDepositsUpdated { sender : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , recipient : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , }
                 }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -63380,40 +65521,57 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "Validator index out of bounds."]
                         ValidatorIndexOutOfBounds,
+                        #[codec(index = 1)]
                         #[doc = "Candidate submitted but para not scheduled."]
                         UnscheduledCandidate,
+                        #[codec(index = 2)]
                         #[doc = "Head data exceeds the configured maximum."]
                         HeadDataTooLarge,
+                        #[codec(index = 3)]
                         #[doc = "Code upgrade prematurely."]
                         PrematureCodeUpgrade,
+                        #[codec(index = 4)]
                         #[doc = "Output code is too large"]
                         NewCodeTooLarge,
+                        #[codec(index = 5)]
                         #[doc = "The candidate's relay-parent was not allowed. Either it was"]
                         #[doc = "not recent enough or it didn't advance based on the last parachain block."]
                         DisallowedRelayParent,
+                        #[codec(index = 6)]
                         #[doc = "Failed to compute group index for the core: either it's out of bounds"]
                         #[doc = "or the relay parent doesn't belong to the current session."]
                         InvalidAssignment,
+                        #[codec(index = 7)]
                         #[doc = "Invalid group index in core assignment."]
                         InvalidGroupIndex,
+                        #[codec(index = 8)]
                         #[doc = "Insufficient (non-majority) backing."]
                         InsufficientBacking,
+                        #[codec(index = 9)]
                         #[doc = "Invalid (bad signature, unknown validator, etc.) backing."]
                         InvalidBacking,
+                        #[codec(index = 10)]
                         #[doc = "The validation data hash does not match expected."]
                         ValidationDataHashMismatch,
+                        #[codec(index = 11)]
                         #[doc = "The downward message queue is not processed correctly."]
                         IncorrectDownwardMessageHandling,
+                        #[codec(index = 12)]
                         #[doc = "At least one upward message sent does not pass the acceptance criteria."]
                         InvalidUpwardMessages,
+                        #[codec(index = 13)]
                         #[doc = "The candidate didn't follow the rules of HRMP watermark advancement."]
                         HrmpWatermarkMishandling,
+                        #[codec(index = 14)]
                         #[doc = "The HRMP messages sent by the candidate is not valid."]
                         InvalidOutboundHrmp,
+                        #[codec(index = 15)]
                         #[doc = "The validation code hash of the candidate is not valid."]
                         InvalidValidationCodeHash,
+                        #[codec(index = 16)]
                         #[doc = "The `para_head` hash in the candidate descriptor doesn't match the hash of the actual"]
                         #[doc = "para head in the commitments."]
                         ParaHeadMismatch,
@@ -63431,6 +65589,7 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         #[doc = "A candidate was backed. `[candidate, head_data]`"]
                         CandidateBacked(
                             runtime_types::polkadot_primitives::vstaging::CandidateReceiptV2<
@@ -63440,6 +65599,7 @@ pub mod api {
                             runtime_types::polkadot_primitives::v8::CoreIndex,
                             runtime_types::polkadot_primitives::v8::GroupIndex,
                         ),
+                        #[codec(index = 1)]
                         #[doc = "A candidate was included. `[candidate, head_data]`"]
                         CandidateIncluded(
                             runtime_types::polkadot_primitives::vstaging::CandidateReceiptV2<
@@ -63449,6 +65609,7 @@ pub mod api {
                             runtime_types::polkadot_primitives::v8::CoreIndex,
                             runtime_types::polkadot_primitives::v8::GroupIndex,
                         ),
+                        #[codec(index = 2)]
                         #[doc = "A candidate timed out. `[candidate, head_data]`"]
                         CandidateTimedOut(
                             runtime_types::polkadot_primitives::vstaging::CandidateReceiptV2<
@@ -63457,6 +65618,7 @@ pub mod api {
                             runtime_types::polkadot_parachain_primitives::primitives::HeadData,
                             runtime_types::polkadot_primitives::v8::CoreIndex,
                         ),
+                        #[codec(index = 3)]
                         #[doc = "Some upward messages have been received and will be processed."]
                         UpwardMessagesReceived {
                             from: runtime_types::polkadot_parachain_primitives::primitives::Id,
@@ -63476,6 +65638,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum AggregateMessageOrigin {
+                    #[codec(index = 0)]
                     Ump(runtime_types::polkadot_runtime_parachains::inclusion::UmpQueueId),
                 }
                 #[derive(
@@ -63520,6 +65683,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum UmpQueueId {
+                    #[codec(index = 0)]
                     Para(runtime_types::polkadot_parachain_primitives::primitives::Id),
                 }
             }
@@ -63540,6 +65704,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
+                        #[codec(index = 0)]
                         #[doc = "Issue a signal to the consensus engine to forcibly act as though all parachain"]
                         #[doc = "blocks in all relay chain blocks up to and including the given number in the current"]
                         #[doc = "chain are valid and should be finalized."]
@@ -63584,6 +65749,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
+                        #[codec(index = 0)]
                         #[doc = "Create a single on demand core order."]
                         #[doc = "Will use the spot price for the current block and will reap the account if needed."]
                         #[doc = ""]
@@ -63603,6 +65769,7 @@ pub mod api {
                             max_amount: ::core::primitive::u128,
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 1)]
                         #[doc = "Same as the [`place_order_allow_death`](Self::place_order_allow_death) call , but with a"]
                         #[doc = "check that placing the order will not reap the account."]
                         #[doc = ""]
@@ -63622,6 +65789,7 @@ pub mod api {
                             max_amount: ::core::primitive::u128,
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         },
+                        #[codec(index = 2)]
                         #[doc = "Create a single on demand core order with credits."]
                         #[doc = "Will charge the owner's on-demand credit account the spot price for the current block."]
                         #[doc = ""]
@@ -63657,11 +65825,14 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "The order queue is full, `place_order` will not continue."]
                         QueueFull,
+                        #[codec(index = 1)]
                         #[doc = "The current spot price is higher than the max amount specified in the `place_order`"]
                         #[doc = "call, making it invalid."]
                         SpotPriceHigherThanMaxAmount,
+                        #[codec(index = 2)]
                         #[doc = "The account doesn't have enough credits to purchase on-demand coretime."]
                         InsufficientCredits,
                     }
@@ -63678,14 +65849,17 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         #[doc = "An order was placed at some spot price amount by orderer ordered_by"]
                         OnDemandOrderPlaced {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                             spot_price: ::core::primitive::u128,
                             ordered_by: ::subxt::ext::subxt_core::utils::AccountId32,
                         },
+                        #[codec(index = 1)]
                         #[doc = "The value of the spot price has likely changed"]
                         SpotPriceSet { spot_price: ::core::primitive::u128 },
+                        #[codec(index = 2)]
                         #[doc = "An account was given credits."]
                         AccountCredited {
                             who: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -63776,6 +65950,7 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Origin {
+                        #[codec(index = 0)]
                         Parachain(runtime_types::polkadot_parachain_primitives::primitives::Id),
                     }
                 }
@@ -63797,7 +65972,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
-                        # [doc = "Set the storage for the parachain validation code immediately."] force_set_current_code { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [doc = "Set the storage for the current parachain head data immediately."] force_set_current_head { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , } , # [doc = "Schedule an upgrade as if it was scheduled in the given relay parent block."] force_schedule_code_upgrade { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , relay_parent_number : :: core :: primitive :: u32 , } , # [doc = "Note a new block head for para within the context of the current block."] force_note_new_head { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , } , # [doc = "Put a parachain directly into the next session's action queue."] # [doc = "We can't queue it any sooner than this without going into the"] # [doc = "initializer..."] force_queue_action { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [doc = "Adds the validation code to the storage."] # [doc = ""] # [doc = "The code will not be added if it is already present. Additionally, if PVF pre-checking"] # [doc = "is running for that code, it will be instantly accepted."] # [doc = ""] # [doc = "Otherwise, the code will be added into the storage. Note that the code will be added"] # [doc = "into storage with reference count 0. This is to account the fact that there are no users"] # [doc = "for this code yet. The caller will have to make sure that this code eventually gets"] # [doc = "used by some parachain or removed from the storage to avoid storage leaks. For the"] # [doc = "latter prefer to use the `poke_unused_validation_code` dispatchable to raw storage"] # [doc = "manipulation."] # [doc = ""] # [doc = "This function is mainly meant to be used for upgrading parachains that do not follow"] # [doc = "the go-ahead signal while the PVF pre-checking feature is enabled."] add_trusted_validation_code { validation_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [doc = "Remove the validation code from the storage iff the reference count is 0."] # [doc = ""] # [doc = "This is better than removing the storage directly, because it will not remove the code"] # [doc = "that was suddenly got used by some parachain while this dispatchable was pending"] # [doc = "dispatching."] poke_unused_validation_code { validation_code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , } , # [doc = "Includes a statement for a PVF pre-checking vote. Potentially, finalizes the vote and"] # [doc = "enacts the results if that was the last vote before achieving the supermajority."] include_pvf_check_statement { stmt : runtime_types :: polkadot_primitives :: v8 :: PvfCheckStatement , signature : runtime_types :: polkadot_primitives :: v8 :: validator_app :: Signature , } , # [doc = "Set the storage for the current parachain head data immediately."] force_set_most_recent_context { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , context : :: core :: primitive :: u32 , } , }
+                        # [codec (index = 0)] # [doc = "Set the storage for the parachain validation code immediately."] force_set_current_code { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [codec (index = 1)] # [doc = "Set the storage for the current parachain head data immediately."] force_set_current_head { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , } , # [codec (index = 2)] # [doc = "Schedule an upgrade as if it was scheduled in the given relay parent block."] force_schedule_code_upgrade { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , relay_parent_number : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Note a new block head for para within the context of the current block."] force_note_new_head { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_head : runtime_types :: polkadot_parachain_primitives :: primitives :: HeadData , } , # [codec (index = 4)] # [doc = "Put a parachain directly into the next session's action queue."] # [doc = "We can't queue it any sooner than this without going into the"] # [doc = "initializer..."] force_queue_action { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 5)] # [doc = "Adds the validation code to the storage."] # [doc = ""] # [doc = "The code will not be added if it is already present. Additionally, if PVF pre-checking"] # [doc = "is running for that code, it will be instantly accepted."] # [doc = ""] # [doc = "Otherwise, the code will be added into the storage. Note that the code will be added"] # [doc = "into storage with reference count 0. This is to account the fact that there are no users"] # [doc = "for this code yet. The caller will have to make sure that this code eventually gets"] # [doc = "used by some parachain or removed from the storage to avoid storage leaks. For the"] # [doc = "latter prefer to use the `poke_unused_validation_code` dispatchable to raw storage"] # [doc = "manipulation."] # [doc = ""] # [doc = "This function is mainly meant to be used for upgrading parachains that do not follow"] # [doc = "the go-ahead signal while the PVF pre-checking feature is enabled."] add_trusted_validation_code { validation_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , # [codec (index = 6)] # [doc = "Remove the validation code from the storage iff the reference count is 0."] # [doc = ""] # [doc = "This is better than removing the storage directly, because it will not remove the code"] # [doc = "that was suddenly got used by some parachain while this dispatchable was pending"] # [doc = "dispatching."] poke_unused_validation_code { validation_code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , } , # [codec (index = 7)] # [doc = "Includes a statement for a PVF pre-checking vote. Potentially, finalizes the vote and"] # [doc = "enacts the results if that was the last vote before achieving the supermajority."] include_pvf_check_statement { stmt : runtime_types :: polkadot_primitives :: v8 :: PvfCheckStatement , signature : runtime_types :: polkadot_primitives :: v8 :: validator_app :: Signature , } , # [codec (index = 8)] # [doc = "Set the storage for the current parachain head data immediately."] force_set_most_recent_context { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , context : :: core :: primitive :: u32 , } , # [codec (index = 9)] # [doc = "Remove an upgrade cooldown for a parachain."] # [doc = ""] # [doc = "The cost for removing the cooldown earlier depends on the time left for the cooldown"] # [doc = "multiplied by [`Config::CooldownRemovalMultiplier`]. The paid tokens are burned."] remove_upgrade_cooldown { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 10)] # [doc = "Sets the storage for the authorized current code hash of the parachain."] # [doc = "If not applied, it will be removed at the `System::block_number() + valid_period` block."] # [doc = ""] # [doc = "This can be useful, when triggering `Paras::force_set_current_code(para, code)`"] # [doc = "from a different chain than the one where the `Paras` pallet is deployed."] # [doc = ""] # [doc = "The main purpose is to avoid transferring the entire `code` Wasm blob between chains."] # [doc = "Instead, we authorize `code_hash` with `root`, which can later be applied by"] # [doc = "`Paras::apply_authorized_force_set_current_code(para, code)` by anyone."] # [doc = ""] # [doc = "Authorizations are stored in an **overwriting manner**."] authorize_force_set_current_code_hash { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , valid_period : :: core :: primitive :: u32 , } , # [codec (index = 11)] # [doc = "Applies the already authorized current code for the parachain,"] # [doc = "triggering the same functionality as `force_set_current_code`."] apply_authorized_force_set_current_code { para : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , new_code : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCode , } , }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                         :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -63811,32 +65986,54 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "Para is not registered in our system."]
                         NotRegistered,
+                        #[codec(index = 1)]
                         #[doc = "Para cannot be onboarded because it is already tracked by our system."]
                         CannotOnboard,
+                        #[codec(index = 2)]
                         #[doc = "Para cannot be offboarded at this time."]
                         CannotOffboard,
+                        #[codec(index = 3)]
                         #[doc = "Para cannot be upgraded to a lease holding parachain."]
                         CannotUpgrade,
+                        #[codec(index = 4)]
                         #[doc = "Para cannot be downgraded to an on-demand parachain."]
                         CannotDowngrade,
+                        #[codec(index = 5)]
                         #[doc = "The statement for PVF pre-checking is stale."]
                         PvfCheckStatementStale,
+                        #[codec(index = 6)]
                         #[doc = "The statement for PVF pre-checking is for a future session."]
                         PvfCheckStatementFuture,
+                        #[codec(index = 7)]
                         #[doc = "Claimed validator index is out of bounds."]
                         PvfCheckValidatorIndexOutOfBounds,
+                        #[codec(index = 8)]
                         #[doc = "The signature for the PVF pre-checking is invalid."]
                         PvfCheckInvalidSignature,
+                        #[codec(index = 9)]
                         #[doc = "The given validator already has cast a vote."]
                         PvfCheckDoubleVote,
+                        #[codec(index = 10)]
                         #[doc = "The given PVF does not exist at the moment of process a vote."]
                         PvfCheckSubjectInvalid,
+                        #[codec(index = 11)]
                         #[doc = "Parachain cannot currently schedule a code upgrade."]
                         CannotUpgradeCode,
+                        #[codec(index = 12)]
                         #[doc = "Invalid validation code size."]
                         InvalidCode,
+                        #[codec(index = 13)]
+                        #[doc = "No upgrade authorized."]
+                        NothingAuthorized,
+                        #[codec(index = 14)]
+                        #[doc = "The submitted code is not authorized."]
+                        Unauthorized,
+                        #[codec(index = 15)]
+                        #[doc = "Invalid block number."]
+                        InvalidBlockNumber,
                     }
                     #[derive(
                         :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -63851,8 +66048,20 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
-                        # [doc = "Current code has been updated for a Para. `para_id`"] CurrentCodeUpdated (runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [doc = "Current head has been updated for a Para. `para_id`"] CurrentHeadUpdated (runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [doc = "A code upgrade has been scheduled for a Para. `para_id`"] CodeUpgradeScheduled (runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [doc = "A new head has been noted for a Para. `para_id`"] NewHeadNoted (runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [doc = "A para has been queued to execute pending actions. `para_id`"] ActionQueued (runtime_types :: polkadot_parachain_primitives :: primitives :: Id , :: core :: primitive :: u32 ,) , # [doc = "The given para either initiated or subscribed to a PVF check for the given validation"] # [doc = "code. `code_hash` `para_id`"] PvfCheckStarted (runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [doc = "The given validation code was accepted by the PVF pre-checking vote."] # [doc = "`code_hash` `para_id`"] PvfCheckAccepted (runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [doc = "The given validation code was rejected by the PVF pre-checking vote."] # [doc = "`code_hash` `para_id`"] PvfCheckRejected (runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , }
+                        # [codec (index = 0)] # [doc = "Current code has been updated for a Para. `para_id`"] CurrentCodeUpdated (runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [codec (index = 1)] # [doc = "Current head has been updated for a Para. `para_id`"] CurrentHeadUpdated (runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [codec (index = 2)] # [doc = "A code upgrade has been scheduled for a Para. `para_id`"] CodeUpgradeScheduled (runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [codec (index = 3)] # [doc = "A new head has been noted for a Para. `para_id`"] NewHeadNoted (runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [codec (index = 4)] # [doc = "A para has been queued to execute pending actions. `para_id`"] ActionQueued (runtime_types :: polkadot_parachain_primitives :: primitives :: Id , :: core :: primitive :: u32 ,) , # [codec (index = 5)] # [doc = "The given para either initiated or subscribed to a PVF check for the given validation"] # [doc = "code. `code_hash` `para_id`"] PvfCheckStarted (runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [codec (index = 6)] # [doc = "The given validation code was accepted by the PVF pre-checking vote."] # [doc = "`code_hash` `para_id`"] PvfCheckAccepted (runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [codec (index = 7)] # [doc = "The given validation code was rejected by the PVF pre-checking vote."] # [doc = "`code_hash` `para_id`"] PvfCheckRejected (runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain_primitives :: primitives :: Id ,) , # [codec (index = 8)] # [doc = "The upgrade cooldown was removed."] UpgradeCooldownRemoved { para_id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , } , # [codec (index = 9)] # [doc = "A new code hash has been authorized for a Para."] CodeAuthorized { para_id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , expire_at : :: core :: primitive :: u32 , } , }
                 }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct AuthorizedCodeHashAndExpiry < _0 > { pub code_hash : runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash , pub expire_at : _0 , }
                 #[derive(
                     :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                     :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -63883,12 +66092,19 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum ParaLifecycle {
+                    #[codec(index = 0)]
                     Onboarding,
+                    #[codec(index = 1)]
                     Parathread,
+                    #[codec(index = 2)]
                     Parachain,
+                    #[codec(index = 3)]
                     UpgradingParathread,
+                    #[codec(index = 4)]
                     DowngradingParachain,
+                    #[codec(index = 5)]
                     OffboardingParathread,
+                    #[codec(index = 6)]
                     OffboardingParachain,
                 }
                 #[derive(
@@ -63946,7 +66162,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum PvfCheckCause<_0> {
+                    #[codec(index = 0)]
                     Onboarding(runtime_types::polkadot_parachain_primitives::primitives::Id),
+                    #[codec(index = 1)]
                     Upgrade {
                         id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                         included_at: _0,
@@ -63981,7 +66199,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum UpgradeStrategy {
+                    #[codec(index = 0)]
                     SetGoAheadSignal,
+                    #[codec(index = 1)]
                     ApplyAtExpectedBlock,
                 }
             }
@@ -64002,6 +66222,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
+                        #[codec(index = 0)]
                         #[doc = "Enter the paras inherent. This will process bitfields and backed candidates."]
                         enter {
                             data: runtime_types::polkadot_primitives::vstaging::InherentData<
@@ -64024,14 +66245,18 @@ pub mod api {
                     )]
                     #[doc = "The `Error` enum of this pallet."]
                     pub enum Error {
+                        #[codec(index = 0)]
                         #[doc = "Inclusion inherent called more than once per block."]
                         TooManyInclusionInherents,
+                        #[codec(index = 1)]
                         #[doc = "The hash of the submitted parent header doesn't correspond to the saved block hash of"]
                         #[doc = "the parent."]
                         InvalidParentHeader,
+                        #[codec(index = 2)]
                         #[doc = "Inherent data was filtered during execution. This should have only been done"]
                         #[doc = "during creation."]
                         InherentDataFilteredDuringExecution,
+                        #[codec(index = 3)]
                         #[doc = "Too many candidates supplied."]
                         UnscheduledCandidate,
                     }
@@ -64053,10 +66278,12 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Assignment {
+                        #[codec(index = 0)]
                         Pool {
                             para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
                             core_index: runtime_types::polkadot_primitives::v8::CoreIndex,
                         },
+                        #[codec(index = 1)]
                         Bulk(runtime_types::polkadot_parachain_primitives::primitives::Id),
                     }
                 }
@@ -64152,12 +66379,14 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Parameters {
+                        #[codec(index = 0)]
                         Target(
                             runtime_types::rococo_runtime::dynamic_params::nis::Target,
                             ::core::option::Option<
                                 runtime_types::sp_arithmetic::per_things::Perquintill,
                             >,
                         ),
+                        #[codec(index = 1)]
                         MinBid(
                             runtime_types::rococo_runtime::dynamic_params::nis::MinBid,
                             ::core::option::Option<::core::primitive::u128>,
@@ -64175,7 +66404,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum ParametersKey {
+                        #[codec(index = 0)]
                         Target(runtime_types::rococo_runtime::dynamic_params::nis::Target),
+                        #[codec(index = 1)]
                         MinBid(runtime_types::rococo_runtime::dynamic_params::nis::MinBid),
                     }
                     #[derive(
@@ -64190,7 +66421,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum ParametersValue {
+                        #[codec(index = 0)]
                         Target(runtime_types::sp_arithmetic::per_things::Perquintill),
+                        #[codec(index = 1)]
                         MinBid(::core::primitive::u128),
                     }
                     #[derive(
@@ -64244,10 +66477,12 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Parameters {
+                        #[codec(index = 0)]
                         BaseDeposit(
                             runtime_types::rococo_runtime::dynamic_params::preimage::BaseDeposit,
                             ::core::option::Option<::core::primitive::u128>,
                         ),
+                        #[codec(index = 1)]
                         ByteDeposit(
                             runtime_types::rococo_runtime::dynamic_params::preimage::ByteDeposit,
                             ::core::option::Option<::core::primitive::u128>,
@@ -64265,9 +66500,11 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum ParametersKey {
+                        #[codec(index = 0)]
                         BaseDeposit(
                             runtime_types::rococo_runtime::dynamic_params::preimage::BaseDeposit,
                         ),
+                        #[codec(index = 1)]
                         ByteDeposit(
                             runtime_types::rococo_runtime::dynamic_params::preimage::ByteDeposit,
                         ),
@@ -64284,7 +66521,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum ParametersValue {
+                        #[codec(index = 0)]
                         BaseDeposit(::core::primitive::u128),
+                        #[codec(index = 1)]
                         ByteDeposit(::core::primitive::u128),
                     }
                 }
@@ -64307,32 +66546,59 @@ pub mod api {
                             crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                         )]
                         pub enum Origin {
+                            #[codec(index = 0)]
                             StakingAdmin,
+                            #[codec(index = 1)]
                             Treasurer,
+                            #[codec(index = 2)]
                             FellowshipAdmin,
+                            #[codec(index = 3)]
                             GeneralAdmin,
+                            #[codec(index = 4)]
                             AuctionAdmin,
+                            #[codec(index = 5)]
                             LeaseAdmin,
+                            #[codec(index = 6)]
                             ReferendumCanceller,
+                            #[codec(index = 7)]
                             ReferendumKiller,
+                            #[codec(index = 8)]
                             SmallTipper,
+                            #[codec(index = 9)]
                             BigTipper,
+                            #[codec(index = 10)]
                             SmallSpender,
+                            #[codec(index = 11)]
                             MediumSpender,
+                            #[codec(index = 12)]
                             BigSpender,
+                            #[codec(index = 13)]
                             WhitelistedCaller,
+                            #[codec(index = 14)]
                             FellowshipInitiates,
+                            #[codec(index = 15)]
                             Fellows,
+                            #[codec(index = 16)]
                             FellowshipExperts,
+                            #[codec(index = 17)]
                             FellowshipMasters,
+                            #[codec(index = 18)]
                             Fellowship1Dan,
+                            #[codec(index = 19)]
                             Fellowship2Dan,
+                            #[codec(index = 20)]
                             Fellowship3Dan,
+                            #[codec(index = 21)]
                             Fellowship4Dan,
+                            #[codec(index = 22)]
                             Fellowship5Dan,
+                            #[codec(index = 23)]
                             Fellowship6Dan,
+                            #[codec(index = 24)]
                             Fellowship7Dan,
+                            #[codec(index = 25)]
                             Fellowship8Dan,
+                            #[codec(index = 26)]
                             Fellowship9Dan,
                         }
                     }
@@ -64355,6 +66621,7 @@ pub mod api {
                     )]
                     #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                     pub enum Call {
+                        #[codec(index = 0)]
                         #[doc = "Add new validators to the set."]
                         #[doc = ""]
                         #[doc = "The new validators will be active from current session + 2."]
@@ -64363,6 +66630,7 @@ pub mod api {
                                 ::subxt::ext::subxt_core::utils::AccountId32,
                             >,
                         },
+                        #[codec(index = 1)]
                         #[doc = "Remove validators from the set."]
                         #[doc = ""]
                         #[doc = "The removed validators will be deactivated from current session + 2."]
@@ -64385,12 +66653,14 @@ pub mod api {
                     )]
                     #[doc = "The `Event` enum of this pallet"]
                     pub enum Event {
+                        #[codec(index = 0)]
                         #[doc = "New validators were added to the set."]
                         ValidatorsRegistered(
                             ::subxt::ext::subxt_core::alloc::vec::Vec<
                                 ::subxt::ext::subxt_core::utils::AccountId32,
                             >,
                         ),
+                        #[codec(index = 1)]
                         #[doc = "Validators were removed from the set."]
                         ValidatorsDeregistered(
                             ::subxt::ext::subxt_core::alloc::vec::Vec<
@@ -64408,7 +66678,7 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum OriginCaller {
-                system (runtime_types :: frame_support :: dispatch :: RawOrigin < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > ,) , Origins (runtime_types :: rococo_runtime :: governance :: origins :: pallet_custom_origins :: Origin ,) , ParachainsOrigin (runtime_types :: polkadot_runtime_parachains :: origin :: pallet :: Origin ,) , XcmPallet (runtime_types :: pallet_xcm :: pallet :: Origin ,) , }
+                # [codec (index = 0)] system (runtime_types :: frame_support :: dispatch :: RawOrigin < :: subxt :: ext :: subxt_core :: utils :: AccountId32 > ,) , # [codec (index = 43)] Origins (runtime_types :: rococo_runtime :: governance :: origins :: pallet_custom_origins :: Origin ,) , # [codec (index = 50)] ParachainsOrigin (runtime_types :: polkadot_runtime_parachains :: origin :: pallet :: Origin ,) , # [codec (index = 99)] XcmPallet (runtime_types :: pallet_xcm :: pallet :: Origin ,) , }
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                 :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
@@ -64417,13 +66687,21 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum ProxyType {
+                #[codec(index = 0)]
                 Any,
+                #[codec(index = 1)]
                 NonTransfer,
+                #[codec(index = 2)]
                 Governance,
+                #[codec(index = 3)]
                 IdentityJudgement,
+                #[codec(index = 4)]
                 CancelProxy,
+                #[codec(index = 5)]
                 Auction,
+                #[codec(index = 6)]
                 Society,
+                #[codec(index = 7)]
                 OnDemandOrdering,
             }
             #[derive(
@@ -64442,72 +66720,127 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum RuntimeCall {
+                #[codec(index = 0)]
                 System(runtime_types::frame_system::pallet::Call),
+                #[codec(index = 1)]
                 Babe(runtime_types::pallet_babe::pallet::Call),
+                #[codec(index = 2)]
                 Timestamp(runtime_types::pallet_timestamp::pallet::Call),
+                #[codec(index = 3)]
                 Indices(runtime_types::pallet_indices::pallet::Call),
+                #[codec(index = 4)]
                 Balances(runtime_types::pallet_balances::pallet::Call),
+                #[codec(index = 6)]
                 Parameters(runtime_types::pallet_parameters::pallet::Call),
+                #[codec(index = 8)]
                 Session(runtime_types::pallet_session::pallet::Call),
+                #[codec(index = 10)]
                 Grandpa(runtime_types::pallet_grandpa::pallet::Call),
+                #[codec(index = 18)]
                 Treasury(runtime_types::pallet_treasury::pallet::Call),
+                #[codec(index = 20)]
                 ConvictionVoting(runtime_types::pallet_conviction_voting::pallet::Call),
+                #[codec(index = 21)]
                 Referenda(runtime_types::pallet_referenda::pallet::Call),
+                #[codec(index = 22)]
                 FellowshipCollective(runtime_types::pallet_ranked_collective::pallet::Call),
+                #[codec(index = 23)]
                 FellowshipReferenda(runtime_types::pallet_referenda::pallet::Call),
+                #[codec(index = 44)]
                 Whitelist(runtime_types::pallet_whitelist::pallet::Call),
+                #[codec(index = 19)]
                 Claims(runtime_types::polkadot_runtime_common::claims::pallet::Call),
+                #[codec(index = 24)]
                 Utility(runtime_types::pallet_utility::pallet::Call),
+                #[codec(index = 25)]
                 Identity(runtime_types::pallet_identity::pallet::Call),
+                #[codec(index = 26)]
                 Society(runtime_types::pallet_society::pallet::Call),
+                #[codec(index = 27)]
                 Recovery(runtime_types::pallet_recovery::pallet::Call),
+                #[codec(index = 28)]
                 Vesting(runtime_types::pallet_vesting::pallet::Call),
+                #[codec(index = 29)]
                 Scheduler(runtime_types::pallet_scheduler::pallet::Call),
+                #[codec(index = 30)]
                 Proxy(runtime_types::pallet_proxy::pallet::Call),
+                #[codec(index = 31)]
                 Multisig(runtime_types::pallet_multisig::pallet::Call),
+                #[codec(index = 32)]
                 Preimage(runtime_types::pallet_preimage::pallet::Call),
+                #[codec(index = 39)]
                 AssetRate(runtime_types::pallet_asset_rate::pallet::Call),
+                #[codec(index = 35)]
                 Bounties(runtime_types::pallet_bounties::pallet::Call),
+                #[codec(index = 40)]
                 ChildBounties(runtime_types::pallet_child_bounties::pallet::Call),
+                #[codec(index = 38)]
                 Nis(runtime_types::pallet_nis::pallet::Call),
+                #[codec(index = 45)]
                 NisCounterpartBalances(runtime_types::pallet_balances::pallet::Call),
+                #[codec(index = 51)]
                 Configuration(
                     runtime_types::polkadot_runtime_parachains::configuration::pallet::Call,
                 ),
+                #[codec(index = 52)]
                 ParasShared(runtime_types::polkadot_runtime_parachains::shared::pallet::Call),
+                #[codec(index = 53)]
                 ParaInclusion(runtime_types::polkadot_runtime_parachains::inclusion::pallet::Call),
+                #[codec(index = 54)]
                 ParaInherent(
                     runtime_types::polkadot_runtime_parachains::paras_inherent::pallet::Call,
                 ),
+                #[codec(index = 56)]
                 Paras(runtime_types::polkadot_runtime_parachains::paras::pallet::Call),
+                #[codec(index = 57)]
                 Initializer(runtime_types::polkadot_runtime_parachains::initializer::pallet::Call),
+                #[codec(index = 60)]
                 Hrmp(runtime_types::polkadot_runtime_parachains::hrmp::pallet::Call),
+                #[codec(index = 62)]
                 ParasDisputes(runtime_types::polkadot_runtime_parachains::disputes::pallet::Call),
+                #[codec(index = 63)]
                 ParasSlashing(
                     runtime_types::polkadot_runtime_parachains::disputes::slashing::pallet::Call,
                 ),
+                #[codec(index = 64)]
                 MessageQueue(runtime_types::pallet_message_queue::pallet::Call),
+                #[codec(index = 66)]
                 OnDemandAssignmentProvider(
                     runtime_types::polkadot_runtime_parachains::on_demand::pallet::Call,
                 ),
+                #[codec(index = 70)]
                 Registrar(runtime_types::polkadot_runtime_common::paras_registrar::pallet::Call),
+                #[codec(index = 71)]
                 Slots(runtime_types::polkadot_runtime_common::slots::pallet::Call),
+                #[codec(index = 72)]
                 Auctions(runtime_types::polkadot_runtime_common::auctions::pallet::Call),
+                #[codec(index = 73)]
                 Crowdloan(runtime_types::polkadot_runtime_common::crowdloan::pallet::Call),
+                #[codec(index = 74)]
                 Coretime(runtime_types::polkadot_runtime_parachains::coretime::pallet::Call),
+                #[codec(index = 98)]
                 MultiBlockMigrations(runtime_types::pallet_migrations::pallet::Call),
+                #[codec(index = 99)]
                 XcmPallet(runtime_types::pallet_xcm::pallet::Call),
+                #[codec(index = 240)]
                 Beefy(runtime_types::pallet_beefy::pallet::Call),
+                #[codec(index = 248)]
                 IdentityMigrator(
                     runtime_types::polkadot_runtime_common::identity_migrator::pallet::Call,
                 ),
+                #[codec(index = 250)]
                 ParasSudoWrapper(
                     runtime_types::polkadot_runtime_common::paras_sudo_wrapper::pallet::Call,
                 ),
+                #[codec(index = 251)]
                 AssignedSlots(runtime_types::polkadot_runtime_common::assigned_slots::pallet::Call),
+                #[codec(index = 252)]
                 ValidatorManager(runtime_types::rococo_runtime::validator_manager::pallet::Call),
+                #[codec(index = 254)]
                 StateTrieMigration(runtime_types::pallet_state_trie_migration::pallet::Call),
+                #[codec(index = 249)]
                 RootTesting(runtime_types::pallet_root_testing::pallet::Call),
+                #[codec(index = 255)]
                 Sudo(runtime_types::pallet_sudo::pallet::Call),
             }
             #[derive(
@@ -64518,68 +66851,117 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum RuntimeError {
+                #[codec(index = 0)]
                 System(runtime_types::frame_system::pallet::Error),
+                #[codec(index = 1)]
                 Babe(runtime_types::pallet_babe::pallet::Error),
+                #[codec(index = 3)]
                 Indices(runtime_types::pallet_indices::pallet::Error),
+                #[codec(index = 4)]
                 Balances(runtime_types::pallet_balances::pallet::Error),
+                #[codec(index = 8)]
                 Session(runtime_types::pallet_session::pallet::Error),
+                #[codec(index = 10)]
                 Grandpa(runtime_types::pallet_grandpa::pallet::Error),
+                #[codec(index = 18)]
                 Treasury(runtime_types::pallet_treasury::pallet::Error),
+                #[codec(index = 20)]
                 ConvictionVoting(runtime_types::pallet_conviction_voting::pallet::Error),
+                #[codec(index = 21)]
                 Referenda(runtime_types::pallet_referenda::pallet::Error),
+                #[codec(index = 22)]
                 FellowshipCollective(runtime_types::pallet_ranked_collective::pallet::Error),
+                #[codec(index = 23)]
                 FellowshipReferenda(runtime_types::pallet_referenda::pallet::Error),
+                #[codec(index = 44)]
                 Whitelist(runtime_types::pallet_whitelist::pallet::Error),
+                #[codec(index = 19)]
                 Claims(runtime_types::polkadot_runtime_common::claims::pallet::Error),
+                #[codec(index = 24)]
                 Utility(runtime_types::pallet_utility::pallet::Error),
+                #[codec(index = 25)]
                 Identity(runtime_types::pallet_identity::pallet::Error),
+                #[codec(index = 26)]
                 Society(runtime_types::pallet_society::pallet::Error),
+                #[codec(index = 27)]
                 Recovery(runtime_types::pallet_recovery::pallet::Error),
+                #[codec(index = 28)]
                 Vesting(runtime_types::pallet_vesting::pallet::Error),
+                #[codec(index = 29)]
                 Scheduler(runtime_types::pallet_scheduler::pallet::Error),
+                #[codec(index = 30)]
                 Proxy(runtime_types::pallet_proxy::pallet::Error),
+                #[codec(index = 31)]
                 Multisig(runtime_types::pallet_multisig::pallet::Error),
+                #[codec(index = 32)]
                 Preimage(runtime_types::pallet_preimage::pallet::Error),
+                #[codec(index = 39)]
                 AssetRate(runtime_types::pallet_asset_rate::pallet::Error),
+                #[codec(index = 35)]
                 Bounties(runtime_types::pallet_bounties::pallet::Error),
+                #[codec(index = 40)]
                 ChildBounties(runtime_types::pallet_child_bounties::pallet::Error),
+                #[codec(index = 38)]
                 Nis(runtime_types::pallet_nis::pallet::Error),
+                #[codec(index = 45)]
                 NisCounterpartBalances(runtime_types::pallet_balances::pallet::Error),
+                #[codec(index = 51)]
                 Configuration(
                     runtime_types::polkadot_runtime_parachains::configuration::pallet::Error,
                 ),
+                #[codec(index = 53)]
                 ParaInclusion(runtime_types::polkadot_runtime_parachains::inclusion::pallet::Error),
+                #[codec(index = 54)]
                 ParaInherent(
                     runtime_types::polkadot_runtime_parachains::paras_inherent::pallet::Error,
                 ),
+                #[codec(index = 56)]
                 Paras(runtime_types::polkadot_runtime_parachains::paras::pallet::Error),
+                #[codec(index = 60)]
                 Hrmp(runtime_types::polkadot_runtime_parachains::hrmp::pallet::Error),
+                #[codec(index = 62)]
                 ParasDisputes(runtime_types::polkadot_runtime_parachains::disputes::pallet::Error),
+                #[codec(index = 63)]
                 ParasSlashing(
                     runtime_types::polkadot_runtime_parachains::disputes::slashing::pallet::Error,
                 ),
+                #[codec(index = 64)]
                 MessageQueue(runtime_types::pallet_message_queue::pallet::Error),
+                #[codec(index = 66)]
                 OnDemandAssignmentProvider(
                     runtime_types::polkadot_runtime_parachains::on_demand::pallet::Error,
                 ),
+                #[codec(index = 68)]
                 CoretimeAssignmentProvider(
                     runtime_types::polkadot_runtime_parachains::assigner_coretime::pallet::Error,
                 ),
+                #[codec(index = 70)]
                 Registrar(runtime_types::polkadot_runtime_common::paras_registrar::pallet::Error),
+                #[codec(index = 71)]
                 Slots(runtime_types::polkadot_runtime_common::slots::pallet::Error),
+                #[codec(index = 72)]
                 Auctions(runtime_types::polkadot_runtime_common::auctions::pallet::Error),
+                #[codec(index = 73)]
                 Crowdloan(runtime_types::polkadot_runtime_common::crowdloan::pallet::Error),
+                #[codec(index = 74)]
                 Coretime(runtime_types::polkadot_runtime_parachains::coretime::pallet::Error),
+                #[codec(index = 98)]
                 MultiBlockMigrations(runtime_types::pallet_migrations::pallet::Error),
+                #[codec(index = 99)]
                 XcmPallet(runtime_types::pallet_xcm::pallet::Error),
+                #[codec(index = 240)]
                 Beefy(runtime_types::pallet_beefy::pallet::Error),
+                #[codec(index = 250)]
                 ParasSudoWrapper(
                     runtime_types::polkadot_runtime_common::paras_sudo_wrapper::pallet::Error,
                 ),
+                #[codec(index = 251)]
                 AssignedSlots(
                     runtime_types::polkadot_runtime_common::assigned_slots::pallet::Error,
                 ),
+                #[codec(index = 254)]
                 StateTrieMigration(runtime_types::pallet_state_trie_migration::pallet::Error),
+                #[codec(index = 255)]
                 Sudo(runtime_types::pallet_sudo::pallet::Error),
             }
             #[derive(
@@ -64590,59 +66972,109 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum RuntimeEvent {
+                #[codec(index = 0)]
                 System(runtime_types::frame_system::pallet::Event),
+                #[codec(index = 3)]
                 Indices(runtime_types::pallet_indices::pallet::Event),
+                #[codec(index = 4)]
                 Balances(runtime_types::pallet_balances::pallet::Event),
+                #[codec(index = 6)]
                 Parameters(runtime_types::pallet_parameters::pallet::Event),
+                #[codec(index = 33)]
                 TransactionPayment(runtime_types::pallet_transaction_payment::pallet::Event),
+                #[codec(index = 7)]
                 Offences(runtime_types::pallet_offences::pallet::Event),
+                #[codec(index = 34)]
+                Historical(runtime_types::pallet_session::historical::pallet::Event),
+                #[codec(index = 8)]
                 Session(runtime_types::pallet_session::pallet::Event),
+                #[codec(index = 10)]
                 Grandpa(runtime_types::pallet_grandpa::pallet::Event),
+                #[codec(index = 18)]
                 Treasury(runtime_types::pallet_treasury::pallet::Event),
+                #[codec(index = 20)]
                 ConvictionVoting(runtime_types::pallet_conviction_voting::pallet::Event),
+                #[codec(index = 21)]
                 Referenda(runtime_types::pallet_referenda::pallet::Event1),
+                #[codec(index = 22)]
                 FellowshipCollective(runtime_types::pallet_ranked_collective::pallet::Event),
+                #[codec(index = 23)]
                 FellowshipReferenda(runtime_types::pallet_referenda::pallet::Event2),
+                #[codec(index = 44)]
                 Whitelist(runtime_types::pallet_whitelist::pallet::Event),
+                #[codec(index = 19)]
                 Claims(runtime_types::polkadot_runtime_common::claims::pallet::Event),
+                #[codec(index = 24)]
                 Utility(runtime_types::pallet_utility::pallet::Event),
+                #[codec(index = 25)]
                 Identity(runtime_types::pallet_identity::pallet::Event),
+                #[codec(index = 26)]
                 Society(runtime_types::pallet_society::pallet::Event),
+                #[codec(index = 27)]
                 Recovery(runtime_types::pallet_recovery::pallet::Event),
+                #[codec(index = 28)]
                 Vesting(runtime_types::pallet_vesting::pallet::Event),
+                #[codec(index = 29)]
                 Scheduler(runtime_types::pallet_scheduler::pallet::Event),
+                #[codec(index = 30)]
                 Proxy(runtime_types::pallet_proxy::pallet::Event),
+                #[codec(index = 31)]
                 Multisig(runtime_types::pallet_multisig::pallet::Event),
+                #[codec(index = 32)]
                 Preimage(runtime_types::pallet_preimage::pallet::Event),
+                #[codec(index = 39)]
                 AssetRate(runtime_types::pallet_asset_rate::pallet::Event),
+                #[codec(index = 35)]
                 Bounties(runtime_types::pallet_bounties::pallet::Event),
+                #[codec(index = 40)]
                 ChildBounties(runtime_types::pallet_child_bounties::pallet::Event),
+                #[codec(index = 38)]
                 Nis(runtime_types::pallet_nis::pallet::Event),
+                #[codec(index = 45)]
                 NisCounterpartBalances(runtime_types::pallet_balances::pallet::Event),
+                #[codec(index = 53)]
                 ParaInclusion(runtime_types::polkadot_runtime_parachains::inclusion::pallet::Event),
+                #[codec(index = 56)]
                 Paras(runtime_types::polkadot_runtime_parachains::paras::pallet::Event),
+                #[codec(index = 60)]
                 Hrmp(runtime_types::polkadot_runtime_parachains::hrmp::pallet::Event),
+                #[codec(index = 62)]
                 ParasDisputes(runtime_types::polkadot_runtime_parachains::disputes::pallet::Event),
+                #[codec(index = 64)]
                 MessageQueue(runtime_types::pallet_message_queue::pallet::Event),
+                #[codec(index = 66)]
                 OnDemandAssignmentProvider(
                     runtime_types::polkadot_runtime_parachains::on_demand::pallet::Event,
                 ),
+                #[codec(index = 70)]
                 Registrar(runtime_types::polkadot_runtime_common::paras_registrar::pallet::Event),
+                #[codec(index = 71)]
                 Slots(runtime_types::polkadot_runtime_common::slots::pallet::Event),
+                #[codec(index = 72)]
                 Auctions(runtime_types::polkadot_runtime_common::auctions::pallet::Event),
+                #[codec(index = 73)]
                 Crowdloan(runtime_types::polkadot_runtime_common::crowdloan::pallet::Event),
+                #[codec(index = 74)]
                 Coretime(runtime_types::polkadot_runtime_parachains::coretime::pallet::Event),
+                #[codec(index = 98)]
                 MultiBlockMigrations(runtime_types::pallet_migrations::pallet::Event),
+                #[codec(index = 99)]
                 XcmPallet(runtime_types::pallet_xcm::pallet::Event),
+                #[codec(index = 248)]
                 IdentityMigrator(
                     runtime_types::polkadot_runtime_common::identity_migrator::pallet::Event,
                 ),
+                #[codec(index = 251)]
                 AssignedSlots(
                     runtime_types::polkadot_runtime_common::assigned_slots::pallet::Event,
                 ),
+                #[codec(index = 252)]
                 ValidatorManager(runtime_types::rococo_runtime::validator_manager::pallet::Event),
+                #[codec(index = 254)]
                 StateTrieMigration(runtime_types::pallet_state_trie_migration::pallet::Event),
+                #[codec(index = 249)]
                 RootTesting(runtime_types::pallet_root_testing::pallet::Event),
+                #[codec(index = 255)]
                 Sudo(runtime_types::pallet_sudo::pallet::Event),
             }
             #[derive(
@@ -64653,9 +67085,15 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum RuntimeHoldReason {
+                #[codec(index = 8)]
+                Session(runtime_types::pallet_session::pallet::HoldReason),
+                #[codec(index = 32)]
                 Preimage(runtime_types::pallet_preimage::pallet::HoldReason),
+                #[codec(index = 38)]
                 Nis(runtime_types::pallet_nis::pallet::HoldReason),
+                #[codec(index = 99)]
                 XcmPallet(runtime_types::pallet_xcm::pallet::HoldReason),
+                #[codec(index = 254)]
                 StateTrieMigration(runtime_types::pallet_state_trie_migration::pallet::HoldReason),
             }
             #[derive(
@@ -64666,7 +67104,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum RuntimeParameters {
+                #[codec(index = 0)]
                 Nis(runtime_types::rococo_runtime::dynamic_params::nis::Parameters),
+                #[codec(index = 1)]
                 Preimage(runtime_types::rococo_runtime::dynamic_params::preimage::Parameters),
             }
             #[derive(
@@ -64677,7 +67117,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum RuntimeParametersKey {
+                #[codec(index = 0)]
                 Nis(runtime_types::rococo_runtime::dynamic_params::nis::ParametersKey),
+                #[codec(index = 1)]
                 Preimage(runtime_types::rococo_runtime::dynamic_params::preimage::ParametersKey),
             }
             #[derive(
@@ -64688,7 +67130,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum RuntimeParametersValue {
+                #[codec(index = 0)]
                 Nis(runtime_types::rococo_runtime::dynamic_params::nis::ParametersValue),
+                #[codec(index = 1)]
                 Preimage(runtime_types::rococo_runtime::dynamic_params::preimage::ParametersValue),
             }
             #[derive(
@@ -64783,8 +67227,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum ArithmeticError {
+                #[codec(index = 0)]
                 Underflow,
+                #[codec(index = 1)]
                 Overflow,
+                #[codec(index = 2)]
                 DivisionByZero,
             }
         }
@@ -64837,6 +67284,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum NextConfigDescriptor {
+                    #[codec(index = 1)]
                     V1 {
                         c: (::core::primitive::u64, ::core::primitive::u64),
                         allowed_slots: runtime_types::sp_consensus_babe::AllowedSlots,
@@ -64854,10 +67302,13 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum PreDigest {
+                    #[codec(index = 1)]
                     Primary(runtime_types::sp_consensus_babe::digests::PrimaryPreDigest),
+                    #[codec(index = 2)]
                     SecondaryPlain(
                         runtime_types::sp_consensus_babe::digests::SecondaryPlainPreDigest,
                     ),
+                    #[codec(index = 3)]
                     SecondaryVRF(runtime_types::sp_consensus_babe::digests::SecondaryVRFPreDigest),
                 }
                 #[derive(
@@ -64916,8 +67367,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum AllowedSlots {
+                #[codec(index = 0)]
                 PrimarySlots,
+                #[codec(index = 1)]
                 PrimaryAndSecondaryPlainSlots,
+                #[codec(index = 2)]
                 PrimaryAndSecondaryVRFSlots,
             }
             #[derive(
@@ -65167,6 +67621,7 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum Equivocation<_0, _1> {
+                #[codec(index = 0)]
                 Prevote(
                     runtime_types::finality_grandpa::Equivocation<
                         runtime_types::sp_consensus_grandpa::app::Public,
@@ -65174,6 +67629,7 @@ pub mod api {
                         runtime_types::sp_consensus_grandpa::app::Signature,
                     >,
                 ),
+                #[codec(index = 1)]
                 Precommit(
                     runtime_types::finality_grandpa::Equivocation<
                         runtime_types::sp_consensus_grandpa::app::Public,
@@ -65328,15 +67784,25 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum Error {
+                #[codec(index = 0)]
                 InvalidNumericOp,
+                #[codec(index = 1)]
                 Push,
+                #[codec(index = 2)]
                 GetRoot,
+                #[codec(index = 3)]
                 Commit,
+                #[codec(index = 4)]
                 GenerateProof,
+                #[codec(index = 5)]
                 Verify,
+                #[codec(index = 6)]
                 LeafNotFound,
+                #[codec(index = 7)]
                 PalletNotIncluded,
+                #[codec(index = 8)]
                 InvalidLeafIndex,
+                #[codec(index = 9)]
                 InvalidBestKnownBlock,
             }
             #[derive(
@@ -65404,19 +67870,24 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum DigestItem {
+                        #[codec(index = 6)]
                         PreRuntime(
                             [::core::primitive::u8; 4usize],
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         ),
+                        #[codec(index = 4)]
                         Consensus(
                             [::core::primitive::u8; 4usize],
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         ),
+                        #[codec(index = 5)]
                         Seal(
                             [::core::primitive::u8; 4usize],
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         ),
+                        #[codec(index = 0)]
                         Other(::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>),
+                        #[codec(index = 8)]
                         RuntimeEnvironmentUpdated,
                     }
                 }
@@ -65434,261 +67905,517 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Era {
+                        #[codec(index = 0)]
                         Immortal,
+                        #[codec(index = 1)]
                         Mortal1(::core::primitive::u8),
+                        #[codec(index = 2)]
                         Mortal2(::core::primitive::u8),
+                        #[codec(index = 3)]
                         Mortal3(::core::primitive::u8),
+                        #[codec(index = 4)]
                         Mortal4(::core::primitive::u8),
+                        #[codec(index = 5)]
                         Mortal5(::core::primitive::u8),
+                        #[codec(index = 6)]
                         Mortal6(::core::primitive::u8),
+                        #[codec(index = 7)]
                         Mortal7(::core::primitive::u8),
+                        #[codec(index = 8)]
                         Mortal8(::core::primitive::u8),
+                        #[codec(index = 9)]
                         Mortal9(::core::primitive::u8),
+                        #[codec(index = 10)]
                         Mortal10(::core::primitive::u8),
+                        #[codec(index = 11)]
                         Mortal11(::core::primitive::u8),
+                        #[codec(index = 12)]
                         Mortal12(::core::primitive::u8),
+                        #[codec(index = 13)]
                         Mortal13(::core::primitive::u8),
+                        #[codec(index = 14)]
                         Mortal14(::core::primitive::u8),
+                        #[codec(index = 15)]
                         Mortal15(::core::primitive::u8),
+                        #[codec(index = 16)]
                         Mortal16(::core::primitive::u8),
+                        #[codec(index = 17)]
                         Mortal17(::core::primitive::u8),
+                        #[codec(index = 18)]
                         Mortal18(::core::primitive::u8),
+                        #[codec(index = 19)]
                         Mortal19(::core::primitive::u8),
+                        #[codec(index = 20)]
                         Mortal20(::core::primitive::u8),
+                        #[codec(index = 21)]
                         Mortal21(::core::primitive::u8),
+                        #[codec(index = 22)]
                         Mortal22(::core::primitive::u8),
+                        #[codec(index = 23)]
                         Mortal23(::core::primitive::u8),
+                        #[codec(index = 24)]
                         Mortal24(::core::primitive::u8),
+                        #[codec(index = 25)]
                         Mortal25(::core::primitive::u8),
+                        #[codec(index = 26)]
                         Mortal26(::core::primitive::u8),
+                        #[codec(index = 27)]
                         Mortal27(::core::primitive::u8),
+                        #[codec(index = 28)]
                         Mortal28(::core::primitive::u8),
+                        #[codec(index = 29)]
                         Mortal29(::core::primitive::u8),
+                        #[codec(index = 30)]
                         Mortal30(::core::primitive::u8),
+                        #[codec(index = 31)]
                         Mortal31(::core::primitive::u8),
+                        #[codec(index = 32)]
                         Mortal32(::core::primitive::u8),
+                        #[codec(index = 33)]
                         Mortal33(::core::primitive::u8),
+                        #[codec(index = 34)]
                         Mortal34(::core::primitive::u8),
+                        #[codec(index = 35)]
                         Mortal35(::core::primitive::u8),
+                        #[codec(index = 36)]
                         Mortal36(::core::primitive::u8),
+                        #[codec(index = 37)]
                         Mortal37(::core::primitive::u8),
+                        #[codec(index = 38)]
                         Mortal38(::core::primitive::u8),
+                        #[codec(index = 39)]
                         Mortal39(::core::primitive::u8),
+                        #[codec(index = 40)]
                         Mortal40(::core::primitive::u8),
+                        #[codec(index = 41)]
                         Mortal41(::core::primitive::u8),
+                        #[codec(index = 42)]
                         Mortal42(::core::primitive::u8),
+                        #[codec(index = 43)]
                         Mortal43(::core::primitive::u8),
+                        #[codec(index = 44)]
                         Mortal44(::core::primitive::u8),
+                        #[codec(index = 45)]
                         Mortal45(::core::primitive::u8),
+                        #[codec(index = 46)]
                         Mortal46(::core::primitive::u8),
+                        #[codec(index = 47)]
                         Mortal47(::core::primitive::u8),
+                        #[codec(index = 48)]
                         Mortal48(::core::primitive::u8),
+                        #[codec(index = 49)]
                         Mortal49(::core::primitive::u8),
+                        #[codec(index = 50)]
                         Mortal50(::core::primitive::u8),
+                        #[codec(index = 51)]
                         Mortal51(::core::primitive::u8),
+                        #[codec(index = 52)]
                         Mortal52(::core::primitive::u8),
+                        #[codec(index = 53)]
                         Mortal53(::core::primitive::u8),
+                        #[codec(index = 54)]
                         Mortal54(::core::primitive::u8),
+                        #[codec(index = 55)]
                         Mortal55(::core::primitive::u8),
+                        #[codec(index = 56)]
                         Mortal56(::core::primitive::u8),
+                        #[codec(index = 57)]
                         Mortal57(::core::primitive::u8),
+                        #[codec(index = 58)]
                         Mortal58(::core::primitive::u8),
+                        #[codec(index = 59)]
                         Mortal59(::core::primitive::u8),
+                        #[codec(index = 60)]
                         Mortal60(::core::primitive::u8),
+                        #[codec(index = 61)]
                         Mortal61(::core::primitive::u8),
+                        #[codec(index = 62)]
                         Mortal62(::core::primitive::u8),
+                        #[codec(index = 63)]
                         Mortal63(::core::primitive::u8),
+                        #[codec(index = 64)]
                         Mortal64(::core::primitive::u8),
+                        #[codec(index = 65)]
                         Mortal65(::core::primitive::u8),
+                        #[codec(index = 66)]
                         Mortal66(::core::primitive::u8),
+                        #[codec(index = 67)]
                         Mortal67(::core::primitive::u8),
+                        #[codec(index = 68)]
                         Mortal68(::core::primitive::u8),
+                        #[codec(index = 69)]
                         Mortal69(::core::primitive::u8),
+                        #[codec(index = 70)]
                         Mortal70(::core::primitive::u8),
+                        #[codec(index = 71)]
                         Mortal71(::core::primitive::u8),
+                        #[codec(index = 72)]
                         Mortal72(::core::primitive::u8),
+                        #[codec(index = 73)]
                         Mortal73(::core::primitive::u8),
+                        #[codec(index = 74)]
                         Mortal74(::core::primitive::u8),
+                        #[codec(index = 75)]
                         Mortal75(::core::primitive::u8),
+                        #[codec(index = 76)]
                         Mortal76(::core::primitive::u8),
+                        #[codec(index = 77)]
                         Mortal77(::core::primitive::u8),
+                        #[codec(index = 78)]
                         Mortal78(::core::primitive::u8),
+                        #[codec(index = 79)]
                         Mortal79(::core::primitive::u8),
+                        #[codec(index = 80)]
                         Mortal80(::core::primitive::u8),
+                        #[codec(index = 81)]
                         Mortal81(::core::primitive::u8),
+                        #[codec(index = 82)]
                         Mortal82(::core::primitive::u8),
+                        #[codec(index = 83)]
                         Mortal83(::core::primitive::u8),
+                        #[codec(index = 84)]
                         Mortal84(::core::primitive::u8),
+                        #[codec(index = 85)]
                         Mortal85(::core::primitive::u8),
+                        #[codec(index = 86)]
                         Mortal86(::core::primitive::u8),
+                        #[codec(index = 87)]
                         Mortal87(::core::primitive::u8),
+                        #[codec(index = 88)]
                         Mortal88(::core::primitive::u8),
+                        #[codec(index = 89)]
                         Mortal89(::core::primitive::u8),
+                        #[codec(index = 90)]
                         Mortal90(::core::primitive::u8),
+                        #[codec(index = 91)]
                         Mortal91(::core::primitive::u8),
+                        #[codec(index = 92)]
                         Mortal92(::core::primitive::u8),
+                        #[codec(index = 93)]
                         Mortal93(::core::primitive::u8),
+                        #[codec(index = 94)]
                         Mortal94(::core::primitive::u8),
+                        #[codec(index = 95)]
                         Mortal95(::core::primitive::u8),
+                        #[codec(index = 96)]
                         Mortal96(::core::primitive::u8),
+                        #[codec(index = 97)]
                         Mortal97(::core::primitive::u8),
+                        #[codec(index = 98)]
                         Mortal98(::core::primitive::u8),
+                        #[codec(index = 99)]
                         Mortal99(::core::primitive::u8),
+                        #[codec(index = 100)]
                         Mortal100(::core::primitive::u8),
+                        #[codec(index = 101)]
                         Mortal101(::core::primitive::u8),
+                        #[codec(index = 102)]
                         Mortal102(::core::primitive::u8),
+                        #[codec(index = 103)]
                         Mortal103(::core::primitive::u8),
+                        #[codec(index = 104)]
                         Mortal104(::core::primitive::u8),
+                        #[codec(index = 105)]
                         Mortal105(::core::primitive::u8),
+                        #[codec(index = 106)]
                         Mortal106(::core::primitive::u8),
+                        #[codec(index = 107)]
                         Mortal107(::core::primitive::u8),
+                        #[codec(index = 108)]
                         Mortal108(::core::primitive::u8),
+                        #[codec(index = 109)]
                         Mortal109(::core::primitive::u8),
+                        #[codec(index = 110)]
                         Mortal110(::core::primitive::u8),
+                        #[codec(index = 111)]
                         Mortal111(::core::primitive::u8),
+                        #[codec(index = 112)]
                         Mortal112(::core::primitive::u8),
+                        #[codec(index = 113)]
                         Mortal113(::core::primitive::u8),
+                        #[codec(index = 114)]
                         Mortal114(::core::primitive::u8),
+                        #[codec(index = 115)]
                         Mortal115(::core::primitive::u8),
+                        #[codec(index = 116)]
                         Mortal116(::core::primitive::u8),
+                        #[codec(index = 117)]
                         Mortal117(::core::primitive::u8),
+                        #[codec(index = 118)]
                         Mortal118(::core::primitive::u8),
+                        #[codec(index = 119)]
                         Mortal119(::core::primitive::u8),
+                        #[codec(index = 120)]
                         Mortal120(::core::primitive::u8),
+                        #[codec(index = 121)]
                         Mortal121(::core::primitive::u8),
+                        #[codec(index = 122)]
                         Mortal122(::core::primitive::u8),
+                        #[codec(index = 123)]
                         Mortal123(::core::primitive::u8),
+                        #[codec(index = 124)]
                         Mortal124(::core::primitive::u8),
+                        #[codec(index = 125)]
                         Mortal125(::core::primitive::u8),
+                        #[codec(index = 126)]
                         Mortal126(::core::primitive::u8),
+                        #[codec(index = 127)]
                         Mortal127(::core::primitive::u8),
+                        #[codec(index = 128)]
                         Mortal128(::core::primitive::u8),
+                        #[codec(index = 129)]
                         Mortal129(::core::primitive::u8),
+                        #[codec(index = 130)]
                         Mortal130(::core::primitive::u8),
+                        #[codec(index = 131)]
                         Mortal131(::core::primitive::u8),
+                        #[codec(index = 132)]
                         Mortal132(::core::primitive::u8),
+                        #[codec(index = 133)]
                         Mortal133(::core::primitive::u8),
+                        #[codec(index = 134)]
                         Mortal134(::core::primitive::u8),
+                        #[codec(index = 135)]
                         Mortal135(::core::primitive::u8),
+                        #[codec(index = 136)]
                         Mortal136(::core::primitive::u8),
+                        #[codec(index = 137)]
                         Mortal137(::core::primitive::u8),
+                        #[codec(index = 138)]
                         Mortal138(::core::primitive::u8),
+                        #[codec(index = 139)]
                         Mortal139(::core::primitive::u8),
+                        #[codec(index = 140)]
                         Mortal140(::core::primitive::u8),
+                        #[codec(index = 141)]
                         Mortal141(::core::primitive::u8),
+                        #[codec(index = 142)]
                         Mortal142(::core::primitive::u8),
+                        #[codec(index = 143)]
                         Mortal143(::core::primitive::u8),
+                        #[codec(index = 144)]
                         Mortal144(::core::primitive::u8),
+                        #[codec(index = 145)]
                         Mortal145(::core::primitive::u8),
+                        #[codec(index = 146)]
                         Mortal146(::core::primitive::u8),
+                        #[codec(index = 147)]
                         Mortal147(::core::primitive::u8),
+                        #[codec(index = 148)]
                         Mortal148(::core::primitive::u8),
+                        #[codec(index = 149)]
                         Mortal149(::core::primitive::u8),
+                        #[codec(index = 150)]
                         Mortal150(::core::primitive::u8),
+                        #[codec(index = 151)]
                         Mortal151(::core::primitive::u8),
+                        #[codec(index = 152)]
                         Mortal152(::core::primitive::u8),
+                        #[codec(index = 153)]
                         Mortal153(::core::primitive::u8),
+                        #[codec(index = 154)]
                         Mortal154(::core::primitive::u8),
+                        #[codec(index = 155)]
                         Mortal155(::core::primitive::u8),
+                        #[codec(index = 156)]
                         Mortal156(::core::primitive::u8),
+                        #[codec(index = 157)]
                         Mortal157(::core::primitive::u8),
+                        #[codec(index = 158)]
                         Mortal158(::core::primitive::u8),
+                        #[codec(index = 159)]
                         Mortal159(::core::primitive::u8),
+                        #[codec(index = 160)]
                         Mortal160(::core::primitive::u8),
+                        #[codec(index = 161)]
                         Mortal161(::core::primitive::u8),
+                        #[codec(index = 162)]
                         Mortal162(::core::primitive::u8),
+                        #[codec(index = 163)]
                         Mortal163(::core::primitive::u8),
+                        #[codec(index = 164)]
                         Mortal164(::core::primitive::u8),
+                        #[codec(index = 165)]
                         Mortal165(::core::primitive::u8),
+                        #[codec(index = 166)]
                         Mortal166(::core::primitive::u8),
+                        #[codec(index = 167)]
                         Mortal167(::core::primitive::u8),
+                        #[codec(index = 168)]
                         Mortal168(::core::primitive::u8),
+                        #[codec(index = 169)]
                         Mortal169(::core::primitive::u8),
+                        #[codec(index = 170)]
                         Mortal170(::core::primitive::u8),
+                        #[codec(index = 171)]
                         Mortal171(::core::primitive::u8),
+                        #[codec(index = 172)]
                         Mortal172(::core::primitive::u8),
+                        #[codec(index = 173)]
                         Mortal173(::core::primitive::u8),
+                        #[codec(index = 174)]
                         Mortal174(::core::primitive::u8),
+                        #[codec(index = 175)]
                         Mortal175(::core::primitive::u8),
+                        #[codec(index = 176)]
                         Mortal176(::core::primitive::u8),
+                        #[codec(index = 177)]
                         Mortal177(::core::primitive::u8),
+                        #[codec(index = 178)]
                         Mortal178(::core::primitive::u8),
+                        #[codec(index = 179)]
                         Mortal179(::core::primitive::u8),
+                        #[codec(index = 180)]
                         Mortal180(::core::primitive::u8),
+                        #[codec(index = 181)]
                         Mortal181(::core::primitive::u8),
+                        #[codec(index = 182)]
                         Mortal182(::core::primitive::u8),
+                        #[codec(index = 183)]
                         Mortal183(::core::primitive::u8),
+                        #[codec(index = 184)]
                         Mortal184(::core::primitive::u8),
+                        #[codec(index = 185)]
                         Mortal185(::core::primitive::u8),
+                        #[codec(index = 186)]
                         Mortal186(::core::primitive::u8),
+                        #[codec(index = 187)]
                         Mortal187(::core::primitive::u8),
+                        #[codec(index = 188)]
                         Mortal188(::core::primitive::u8),
+                        #[codec(index = 189)]
                         Mortal189(::core::primitive::u8),
+                        #[codec(index = 190)]
                         Mortal190(::core::primitive::u8),
+                        #[codec(index = 191)]
                         Mortal191(::core::primitive::u8),
+                        #[codec(index = 192)]
                         Mortal192(::core::primitive::u8),
+                        #[codec(index = 193)]
                         Mortal193(::core::primitive::u8),
+                        #[codec(index = 194)]
                         Mortal194(::core::primitive::u8),
+                        #[codec(index = 195)]
                         Mortal195(::core::primitive::u8),
+                        #[codec(index = 196)]
                         Mortal196(::core::primitive::u8),
+                        #[codec(index = 197)]
                         Mortal197(::core::primitive::u8),
+                        #[codec(index = 198)]
                         Mortal198(::core::primitive::u8),
+                        #[codec(index = 199)]
                         Mortal199(::core::primitive::u8),
+                        #[codec(index = 200)]
                         Mortal200(::core::primitive::u8),
+                        #[codec(index = 201)]
                         Mortal201(::core::primitive::u8),
+                        #[codec(index = 202)]
                         Mortal202(::core::primitive::u8),
+                        #[codec(index = 203)]
                         Mortal203(::core::primitive::u8),
+                        #[codec(index = 204)]
                         Mortal204(::core::primitive::u8),
+                        #[codec(index = 205)]
                         Mortal205(::core::primitive::u8),
+                        #[codec(index = 206)]
                         Mortal206(::core::primitive::u8),
+                        #[codec(index = 207)]
                         Mortal207(::core::primitive::u8),
+                        #[codec(index = 208)]
                         Mortal208(::core::primitive::u8),
+                        #[codec(index = 209)]
                         Mortal209(::core::primitive::u8),
+                        #[codec(index = 210)]
                         Mortal210(::core::primitive::u8),
+                        #[codec(index = 211)]
                         Mortal211(::core::primitive::u8),
+                        #[codec(index = 212)]
                         Mortal212(::core::primitive::u8),
+                        #[codec(index = 213)]
                         Mortal213(::core::primitive::u8),
+                        #[codec(index = 214)]
                         Mortal214(::core::primitive::u8),
+                        #[codec(index = 215)]
                         Mortal215(::core::primitive::u8),
+                        #[codec(index = 216)]
                         Mortal216(::core::primitive::u8),
+                        #[codec(index = 217)]
                         Mortal217(::core::primitive::u8),
+                        #[codec(index = 218)]
                         Mortal218(::core::primitive::u8),
+                        #[codec(index = 219)]
                         Mortal219(::core::primitive::u8),
+                        #[codec(index = 220)]
                         Mortal220(::core::primitive::u8),
+                        #[codec(index = 221)]
                         Mortal221(::core::primitive::u8),
+                        #[codec(index = 222)]
                         Mortal222(::core::primitive::u8),
+                        #[codec(index = 223)]
                         Mortal223(::core::primitive::u8),
+                        #[codec(index = 224)]
                         Mortal224(::core::primitive::u8),
+                        #[codec(index = 225)]
                         Mortal225(::core::primitive::u8),
+                        #[codec(index = 226)]
                         Mortal226(::core::primitive::u8),
+                        #[codec(index = 227)]
                         Mortal227(::core::primitive::u8),
+                        #[codec(index = 228)]
                         Mortal228(::core::primitive::u8),
+                        #[codec(index = 229)]
                         Mortal229(::core::primitive::u8),
+                        #[codec(index = 230)]
                         Mortal230(::core::primitive::u8),
+                        #[codec(index = 231)]
                         Mortal231(::core::primitive::u8),
+                        #[codec(index = 232)]
                         Mortal232(::core::primitive::u8),
+                        #[codec(index = 233)]
                         Mortal233(::core::primitive::u8),
+                        #[codec(index = 234)]
                         Mortal234(::core::primitive::u8),
+                        #[codec(index = 235)]
                         Mortal235(::core::primitive::u8),
+                        #[codec(index = 236)]
                         Mortal236(::core::primitive::u8),
+                        #[codec(index = 237)]
                         Mortal237(::core::primitive::u8),
+                        #[codec(index = 238)]
                         Mortal238(::core::primitive::u8),
+                        #[codec(index = 239)]
                         Mortal239(::core::primitive::u8),
+                        #[codec(index = 240)]
                         Mortal240(::core::primitive::u8),
+                        #[codec(index = 241)]
                         Mortal241(::core::primitive::u8),
+                        #[codec(index = 242)]
                         Mortal242(::core::primitive::u8),
+                        #[codec(index = 243)]
                         Mortal243(::core::primitive::u8),
+                        #[codec(index = 244)]
                         Mortal244(::core::primitive::u8),
+                        #[codec(index = 245)]
                         Mortal245(::core::primitive::u8),
+                        #[codec(index = 246)]
                         Mortal246(::core::primitive::u8),
+                        #[codec(index = 247)]
                         Mortal247(::core::primitive::u8),
+                        #[codec(index = 248)]
                         Mortal248(::core::primitive::u8),
+                        #[codec(index = 249)]
                         Mortal249(::core::primitive::u8),
+                        #[codec(index = 250)]
                         Mortal250(::core::primitive::u8),
+                        #[codec(index = 251)]
                         Mortal251(::core::primitive::u8),
+                        #[codec(index = 252)]
                         Mortal252(::core::primitive::u8),
+                        #[codec(index = 253)]
                         Mortal253(::core::primitive::u8),
+                        #[codec(index = 254)]
                         Mortal254(::core::primitive::u8),
+                        #[codec(index = 255)]
                         Mortal255(::core::primitive::u8),
                     }
                 }
@@ -65707,6 +68434,7 @@ pub mod api {
                     )]
                     pub struct Header<_0> {
                         pub parent_hash: ::subxt::ext::subxt_core::utils::H256,
+                        #[codec(compact)]
                         pub number: _0,
                         pub state_root: ::subxt::ext::subxt_core::utils::H256,
                         pub extrinsics_root: ::subxt::ext::subxt_core::utils::H256,
@@ -65728,19 +68456,33 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum TrieError {
+                    #[codec(index = 0)]
                     InvalidStateRoot,
+                    #[codec(index = 1)]
                     IncompleteDatabase,
+                    #[codec(index = 2)]
                     ValueAtIncompleteKey,
+                    #[codec(index = 3)]
                     DecoderError,
+                    #[codec(index = 4)]
                     InvalidHash,
+                    #[codec(index = 5)]
                     DuplicateKey,
+                    #[codec(index = 6)]
                     ExtraneousNode,
+                    #[codec(index = 7)]
                     ExtraneousValue,
+                    #[codec(index = 8)]
                     ExtraneousHashReference,
+                    #[codec(index = 9)]
                     InvalidChildReference,
+                    #[codec(index = 10)]
                     ValueMismatch,
+                    #[codec(index = 11)]
                     IncompleteProof,
+                    #[codec(index = 12)]
                     RootMismatch,
+                    #[codec(index = 13)]
                     DecodeError,
                 }
             }
@@ -65773,18 +68515,31 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum InvalidTransaction {
+                    #[codec(index = 0)]
                     Call,
+                    #[codec(index = 1)]
                     Payment,
+                    #[codec(index = 2)]
                     Future,
+                    #[codec(index = 3)]
                     Stale,
+                    #[codec(index = 4)]
                     BadProof,
+                    #[codec(index = 5)]
                     AncientBirthBlock,
+                    #[codec(index = 6)]
                     ExhaustsResources,
+                    #[codec(index = 7)]
                     Custom(::core::primitive::u8),
+                    #[codec(index = 8)]
                     BadMandatory,
+                    #[codec(index = 9)]
                     MandatoryValidation,
+                    #[codec(index = 10)]
                     BadSigner,
+                    #[codec(index = 11)]
                     IndeterminateImplicit,
+                    #[codec(index = 12)]
                     UnknownOrigin,
                 }
                 #[derive(
@@ -65799,8 +68554,11 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum TransactionSource {
+                    #[codec(index = 0)]
                     InBlock,
+                    #[codec(index = 1)]
                     Local,
+                    #[codec(index = 2)]
                     External,
                 }
                 #[derive(
@@ -65815,7 +68573,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum TransactionValidityError {
+                    #[codec(index = 0)]
                     Invalid(runtime_types::sp_runtime::transaction_validity::InvalidTransaction),
+                    #[codec(index = 1)]
                     Unknown(runtime_types::sp_runtime::transaction_validity::UnknownTransaction),
                 }
                 #[derive(
@@ -65830,8 +68590,11 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum UnknownTransaction {
+                    #[codec(index = 0)]
                     CannotLookup,
+                    #[codec(index = 1)]
                     NoUnsignedValidator,
+                    #[codec(index = 2)]
                     Custom(::core::primitive::u8),
                 }
                 #[derive(
@@ -65865,20 +68628,35 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum DispatchError {
+                #[codec(index = 0)]
                 Other,
+                #[codec(index = 1)]
                 CannotLookup,
+                #[codec(index = 2)]
                 BadOrigin,
+                #[codec(index = 3)]
                 Module(runtime_types::sp_runtime::ModuleError),
+                #[codec(index = 4)]
                 ConsumerRemaining,
+                #[codec(index = 5)]
                 NoProviders,
+                #[codec(index = 6)]
                 TooManyConsumers,
+                #[codec(index = 7)]
                 Token(runtime_types::sp_runtime::TokenError),
+                #[codec(index = 8)]
                 Arithmetic(runtime_types::sp_arithmetic::ArithmeticError),
+                #[codec(index = 9)]
                 Transactional(runtime_types::sp_runtime::TransactionalError),
+                #[codec(index = 10)]
                 Exhausted,
+                #[codec(index = 11)]
                 Corruption,
+                #[codec(index = 12)]
                 Unavailable,
+                #[codec(index = 13)]
                 RootNotAllowed,
+                #[codec(index = 14)]
                 Trie(runtime_types::sp_runtime::proving_trie::TrieError),
             }
             #[derive(
@@ -65900,7 +68678,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum ExtrinsicInclusionMode {
+                #[codec(index = 0)]
                 AllExtrinsics,
+                #[codec(index = 1)]
                 OnlyInherents,
             }
             #[derive(
@@ -65922,8 +68702,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum MultiSignature {
+                #[codec(index = 0)]
                 Ed25519([::core::primitive::u8; 64usize]),
+                #[codec(index = 1)]
                 Sr25519([::core::primitive::u8; 64usize]),
+                #[codec(index = 2)]
                 Ecdsa([::core::primitive::u8; 65usize]),
             }
             #[derive(
@@ -65934,8 +68717,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum MultiSigner {
+                #[codec(index = 0)]
                 Ed25519([::core::primitive::u8; 32usize]),
+                #[codec(index = 1)]
                 Sr25519([::core::primitive::u8; 32usize]),
+                #[codec(index = 2)]
                 Ecdsa([::core::primitive::u8; 33usize]),
             }
             #[derive(
@@ -65956,15 +68742,25 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum TokenError {
+                #[codec(index = 0)]
                 FundsUnavailable,
+                #[codec(index = 1)]
                 OnlyProvider,
+                #[codec(index = 2)]
                 BelowMinimum,
+                #[codec(index = 3)]
                 CannotCreate,
+                #[codec(index = 4)]
                 UnknownAsset,
+                #[codec(index = 5)]
                 Frozen,
+                #[codec(index = 6)]
                 Unsupported,
+                #[codec(index = 7)]
                 CannotCreateHold,
+                #[codec(index = 8)]
                 NotExpendable,
+                #[codec(index = 9)]
                 Blocked,
             }
             #[derive(
@@ -65975,7 +68771,9 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum TransactionalError {
+                #[codec(index = 0)]
                 LimitReached,
+                #[codec(index = 1)]
                 NoLayer,
             }
         }
@@ -66068,7 +68866,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct Weight {
+                    #[codec(compact)]
                     pub ref_time: ::core::primitive::u64,
+                    #[codec(compact)]
                     pub proof_size: ::core::primitive::u64,
                 }
             }
@@ -66138,7 +68938,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum AssetFilter {
+                        #[codec(index = 0)]
                         Definite(runtime_types::staging_xcm::v4::asset::Assets),
+                        #[codec(index = 1)]
                         Wild(runtime_types::staging_xcm::v4::asset::WildAsset),
                     }
                     #[derive(
@@ -66165,11 +68967,17 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum AssetInstance {
+                        #[codec(index = 0)]
                         Undefined,
-                        Index(::core::primitive::u128),
+                        #[codec(index = 1)]
+                        Index(#[codec(compact)] ::core::primitive::u128),
+                        #[codec(index = 2)]
                         Array4([::core::primitive::u8; 4usize]),
+                        #[codec(index = 3)]
                         Array8([::core::primitive::u8; 8usize]),
+                        #[codec(index = 4)]
                         Array16([::core::primitive::u8; 16usize]),
+                        #[codec(index = 5)]
                         Array32([::core::primitive::u8; 32usize]),
                     }
                     #[derive(
@@ -66200,7 +69008,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Fungibility {
-                        Fungible(::core::primitive::u128),
+                        #[codec(index = 0)]
+                        Fungible(#[codec(compact)] ::core::primitive::u128),
+                        #[codec(index = 1)]
                         NonFungible(runtime_types::staging_xcm::v4::asset::AssetInstance),
                     }
                     #[derive(
@@ -66215,15 +69025,20 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum WildAsset {
+                        #[codec(index = 0)]
                         All,
+                        #[codec(index = 1)]
                         AllOf {
                             id: runtime_types::staging_xcm::v4::asset::AssetId,
                             fun: runtime_types::staging_xcm::v4::asset::WildFungibility,
                         },
-                        AllCounted(::core::primitive::u32),
+                        #[codec(index = 2)]
+                        AllCounted(#[codec(compact)] ::core::primitive::u32),
+                        #[codec(index = 3)]
                         AllOfCounted {
                             id: runtime_types::staging_xcm::v4::asset::AssetId,
                             fun: runtime_types::staging_xcm::v4::asset::WildFungibility,
+                            #[codec(compact)]
                             count: ::core::primitive::u32,
                         },
                     }
@@ -66239,7 +69054,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum WildFungibility {
+                        #[codec(index = 0)]
                         Fungible,
+                        #[codec(index = 1)]
                         NonFungible,
                     }
                 }
@@ -66257,36 +69074,47 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Junction {
-                        Parachain(::core::primitive::u32),
+                        #[codec(index = 0)]
+                        Parachain(#[codec(compact)] ::core::primitive::u32),
+                        #[codec(index = 1)]
                         AccountId32 {
                             network: ::core::option::Option<
                                 runtime_types::staging_xcm::v4::junction::NetworkId,
                             >,
                             id: [::core::primitive::u8; 32usize],
                         },
+                        #[codec(index = 2)]
                         AccountIndex64 {
                             network: ::core::option::Option<
                                 runtime_types::staging_xcm::v4::junction::NetworkId,
                             >,
+                            #[codec(compact)]
                             index: ::core::primitive::u64,
                         },
+                        #[codec(index = 3)]
                         AccountKey20 {
                             network: ::core::option::Option<
                                 runtime_types::staging_xcm::v4::junction::NetworkId,
                             >,
                             key: [::core::primitive::u8; 20usize],
                         },
+                        #[codec(index = 4)]
                         PalletInstance(::core::primitive::u8),
-                        GeneralIndex(::core::primitive::u128),
+                        #[codec(index = 5)]
+                        GeneralIndex(#[codec(compact)] ::core::primitive::u128),
+                        #[codec(index = 6)]
                         GeneralKey {
                             length: ::core::primitive::u8,
                             data: [::core::primitive::u8; 32usize],
                         },
+                        #[codec(index = 7)]
                         OnlyChild,
+                        #[codec(index = 8)]
                         Plurality {
                             id: runtime_types::xcm::v3::junction::BodyId,
                             part: runtime_types::xcm::v3::junction::BodyPart,
                         },
+                        #[codec(index = 9)]
                         GlobalConsensus(runtime_types::staging_xcm::v4::junction::NetworkId),
                     }
                     #[derive(
@@ -66301,21 +69129,33 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum NetworkId {
+                        #[codec(index = 0)]
                         ByGenesis([::core::primitive::u8; 32usize]),
+                        #[codec(index = 1)]
                         ByFork {
                             block_number: ::core::primitive::u64,
                             block_hash: [::core::primitive::u8; 32usize],
                         },
+                        #[codec(index = 2)]
                         Polkadot,
+                        #[codec(index = 3)]
                         Kusama,
+                        #[codec(index = 4)]
                         Westend,
+                        #[codec(index = 5)]
                         Rococo,
+                        #[codec(index = 6)]
                         Wococo,
+                        #[codec(index = 7)]
                         Ethereum {
+                            #[codec(compact)]
                             chain_id: ::core::primitive::u64,
                         },
+                        #[codec(index = 8)]
                         BitcoinCore,
+                        #[codec(index = 9)]
                         BitcoinCash,
+                        #[codec(index = 10)]
                         PolkadotBulletin,
                     }
                 }
@@ -66333,14 +69173,23 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Junctions {
+                        #[codec(index = 0)]
                         Here,
+                        #[codec(index = 1)]
                         X1([runtime_types::staging_xcm::v4::junction::Junction; 1usize]),
+                        #[codec(index = 2)]
                         X2([runtime_types::staging_xcm::v4::junction::Junction; 2usize]),
+                        #[codec(index = 3)]
                         X3([runtime_types::staging_xcm::v4::junction::Junction; 3usize]),
+                        #[codec(index = 4)]
                         X4([runtime_types::staging_xcm::v4::junction::Junction; 4usize]),
+                        #[codec(index = 5)]
                         X5([runtime_types::staging_xcm::v4::junction::Junction; 5usize]),
+                        #[codec(index = 6)]
                         X6([runtime_types::staging_xcm::v4::junction::Junction; 6usize]),
+                        #[codec(index = 7)]
                         X7([runtime_types::staging_xcm::v4::junction::Junction; 7usize]),
+                        #[codec(index = 8)]
                         X8([runtime_types::staging_xcm::v4::junction::Junction; 8usize]),
                     }
                 }
@@ -66374,10 +69223,15 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Instruction {
+                    #[codec(index = 0)]
                     WithdrawAsset(runtime_types::staging_xcm::v4::asset::Assets),
+                    #[codec(index = 1)]
                     ReserveAssetDeposited(runtime_types::staging_xcm::v4::asset::Assets),
+                    #[codec(index = 2)]
                     ReceiveTeleportedAsset(runtime_types::staging_xcm::v4::asset::Assets),
+                    #[codec(index = 3)]
                     QueryResponse {
+                        #[codec(compact)]
                         query_id: ::core::primitive::u64,
                         response: runtime_types::staging_xcm::v4::Response,
                         max_weight: runtime_types::sp_weights::weight_v2::Weight,
@@ -66385,137 +69239,192 @@ pub mod api {
                             runtime_types::staging_xcm::v4::location::Location,
                         >,
                     },
+                    #[codec(index = 4)]
                     TransferAsset {
                         assets: runtime_types::staging_xcm::v4::asset::Assets,
                         beneficiary: runtime_types::staging_xcm::v4::location::Location,
                     },
+                    #[codec(index = 5)]
                     TransferReserveAsset {
                         assets: runtime_types::staging_xcm::v4::asset::Assets,
                         dest: runtime_types::staging_xcm::v4::location::Location,
                         xcm: runtime_types::staging_xcm::v4::Xcm,
                     },
+                    #[codec(index = 6)]
                     Transact {
                         origin_kind: runtime_types::xcm::v3::OriginKind,
                         require_weight_at_most: runtime_types::sp_weights::weight_v2::Weight,
                         call: runtime_types::xcm::double_encoded::DoubleEncoded,
                     },
+                    #[codec(index = 7)]
                     HrmpNewChannelOpenRequest {
+                        #[codec(compact)]
                         sender: ::core::primitive::u32,
+                        #[codec(compact)]
                         max_message_size: ::core::primitive::u32,
+                        #[codec(compact)]
                         max_capacity: ::core::primitive::u32,
                     },
+                    #[codec(index = 8)]
                     HrmpChannelAccepted {
+                        #[codec(compact)]
                         recipient: ::core::primitive::u32,
                     },
+                    #[codec(index = 9)]
                     HrmpChannelClosing {
+                        #[codec(compact)]
                         initiator: ::core::primitive::u32,
+                        #[codec(compact)]
                         sender: ::core::primitive::u32,
+                        #[codec(compact)]
                         recipient: ::core::primitive::u32,
                     },
+                    #[codec(index = 10)]
                     ClearOrigin,
+                    #[codec(index = 11)]
                     DescendOrigin(runtime_types::staging_xcm::v4::junctions::Junctions),
+                    #[codec(index = 12)]
                     ReportError(runtime_types::staging_xcm::v4::QueryResponseInfo),
+                    #[codec(index = 13)]
                     DepositAsset {
                         assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
                         beneficiary: runtime_types::staging_xcm::v4::location::Location,
                     },
+                    #[codec(index = 14)]
                     DepositReserveAsset {
                         assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
                         dest: runtime_types::staging_xcm::v4::location::Location,
                         xcm: runtime_types::staging_xcm::v4::Xcm,
                     },
+                    #[codec(index = 15)]
                     ExchangeAsset {
                         give: runtime_types::staging_xcm::v4::asset::AssetFilter,
                         want: runtime_types::staging_xcm::v4::asset::Assets,
                         maximal: ::core::primitive::bool,
                     },
+                    #[codec(index = 16)]
                     InitiateReserveWithdraw {
                         assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
                         reserve: runtime_types::staging_xcm::v4::location::Location,
                         xcm: runtime_types::staging_xcm::v4::Xcm,
                     },
+                    #[codec(index = 17)]
                     InitiateTeleport {
                         assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
                         dest: runtime_types::staging_xcm::v4::location::Location,
                         xcm: runtime_types::staging_xcm::v4::Xcm,
                     },
+                    #[codec(index = 18)]
                     ReportHolding {
                         response_info: runtime_types::staging_xcm::v4::QueryResponseInfo,
                         assets: runtime_types::staging_xcm::v4::asset::AssetFilter,
                     },
+                    #[codec(index = 19)]
                     BuyExecution {
                         fees: runtime_types::staging_xcm::v4::asset::Asset,
                         weight_limit: runtime_types::xcm::v3::WeightLimit,
                     },
+                    #[codec(index = 20)]
                     RefundSurplus,
+                    #[codec(index = 21)]
                     SetErrorHandler(runtime_types::staging_xcm::v4::Xcm),
+                    #[codec(index = 22)]
                     SetAppendix(runtime_types::staging_xcm::v4::Xcm),
+                    #[codec(index = 23)]
                     ClearError,
+                    #[codec(index = 24)]
                     ClaimAsset {
                         assets: runtime_types::staging_xcm::v4::asset::Assets,
                         ticket: runtime_types::staging_xcm::v4::location::Location,
                     },
-                    Trap(::core::primitive::u64),
+                    #[codec(index = 25)]
+                    Trap(#[codec(compact)] ::core::primitive::u64),
+                    #[codec(index = 26)]
                     SubscribeVersion {
+                        #[codec(compact)]
                         query_id: ::core::primitive::u64,
                         max_response_weight: runtime_types::sp_weights::weight_v2::Weight,
                     },
+                    #[codec(index = 27)]
                     UnsubscribeVersion,
+                    #[codec(index = 28)]
                     BurnAsset(runtime_types::staging_xcm::v4::asset::Assets),
+                    #[codec(index = 29)]
                     ExpectAsset(runtime_types::staging_xcm::v4::asset::Assets),
+                    #[codec(index = 30)]
                     ExpectOrigin(
                         ::core::option::Option<runtime_types::staging_xcm::v4::location::Location>,
                     ),
+                    #[codec(index = 31)]
                     ExpectError(
                         ::core::option::Option<(
                             ::core::primitive::u32,
                             runtime_types::xcm::v3::traits::Error,
                         )>,
                     ),
+                    #[codec(index = 32)]
                     ExpectTransactStatus(runtime_types::xcm::v3::MaybeErrorCode),
+                    #[codec(index = 33)]
                     QueryPallet {
                         module_name:
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         response_info: runtime_types::staging_xcm::v4::QueryResponseInfo,
                     },
+                    #[codec(index = 34)]
                     ExpectPallet {
+                        #[codec(compact)]
                         index: ::core::primitive::u32,
                         name: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         module_name:
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+                        #[codec(compact)]
                         crate_major: ::core::primitive::u32,
+                        #[codec(compact)]
                         min_crate_minor: ::core::primitive::u32,
                     },
+                    #[codec(index = 35)]
                     ReportTransactStatus(runtime_types::staging_xcm::v4::QueryResponseInfo),
+                    #[codec(index = 36)]
                     ClearTransactStatus,
+                    #[codec(index = 37)]
                     UniversalOrigin(runtime_types::staging_xcm::v4::junction::Junction),
+                    #[codec(index = 38)]
                     ExportMessage {
                         network: runtime_types::staging_xcm::v4::junction::NetworkId,
                         destination: runtime_types::staging_xcm::v4::junctions::Junctions,
                         xcm: runtime_types::staging_xcm::v4::Xcm,
                     },
+                    #[codec(index = 39)]
                     LockAsset {
                         asset: runtime_types::staging_xcm::v4::asset::Asset,
                         unlocker: runtime_types::staging_xcm::v4::location::Location,
                     },
+                    #[codec(index = 40)]
                     UnlockAsset {
                         asset: runtime_types::staging_xcm::v4::asset::Asset,
                         target: runtime_types::staging_xcm::v4::location::Location,
                     },
+                    #[codec(index = 41)]
                     NoteUnlockable {
                         asset: runtime_types::staging_xcm::v4::asset::Asset,
                         owner: runtime_types::staging_xcm::v4::location::Location,
                     },
+                    #[codec(index = 42)]
                     RequestUnlock {
                         asset: runtime_types::staging_xcm::v4::asset::Asset,
                         locker: runtime_types::staging_xcm::v4::location::Location,
                     },
+                    #[codec(index = 43)]
                     SetFeesMode {
                         jit_withdraw: ::core::primitive::bool,
                     },
+                    #[codec(index = 44)]
                     SetTopic([::core::primitive::u8; 32usize]),
+                    #[codec(index = 45)]
                     ClearTopic,
+                    #[codec(index = 46)]
                     AliasOrigin(runtime_types::staging_xcm::v4::location::Location),
+                    #[codec(index = 47)]
                     UnpaidExecution {
                         weight_limit: runtime_types::xcm::v3::WeightLimit,
                         check_origin: ::core::option::Option<
@@ -66535,6 +69444,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct PalletInfo {
+                    #[codec(compact)]
                     pub index: ::core::primitive::u32,
                     pub name: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
@@ -66542,8 +69452,11 @@ pub mod api {
                     pub module_name: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
+                    #[codec(compact)]
                     pub major: ::core::primitive::u32,
+                    #[codec(compact)]
                     pub minor: ::core::primitive::u32,
+                    #[codec(compact)]
                     pub patch: ::core::primitive::u32,
                 }
                 #[derive(
@@ -66559,6 +69472,7 @@ pub mod api {
                 )]
                 pub struct QueryResponseInfo {
                     pub destination: runtime_types::staging_xcm::v4::location::Location,
+                    #[codec(compact)]
                     pub query_id: ::core::primitive::u64,
                     pub max_weight: runtime_types::sp_weights::weight_v2::Weight,
                 }
@@ -66574,20 +69488,26 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Response {
+                    #[codec(index = 0)]
                     Null,
+                    #[codec(index = 1)]
                     Assets(runtime_types::staging_xcm::v4::asset::Assets),
+                    #[codec(index = 2)]
                     ExecutionResult(
                         ::core::option::Option<(
                             ::core::primitive::u32,
                             runtime_types::xcm::v3::traits::Error,
                         )>,
                     ),
+                    #[codec(index = 3)]
                     Version(::core::primitive::u32),
+                    #[codec(index = 4)]
                     PalletsInfo(
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::staging_xcm::v4::PalletInfo,
                         >,
                     ),
+                    #[codec(index = 5)]
                     DispatchResult(runtime_types::xcm::v3::MaybeErrorCode),
                 }
                 #[derive(
@@ -66638,7 +69558,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum AssetFilter {
+                        #[codec(index = 0)]
                         Definite(runtime_types::staging_xcm::v5::asset::Assets),
+                        #[codec(index = 1)]
                         Wild(runtime_types::staging_xcm::v5::asset::WildAsset),
                     }
                     #[derive(
@@ -66665,11 +69587,17 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum AssetInstance {
+                        #[codec(index = 0)]
                         Undefined,
-                        Index(::core::primitive::u128),
+                        #[codec(index = 1)]
+                        Index(#[codec(compact)] ::core::primitive::u128),
+                        #[codec(index = 2)]
                         Array4([::core::primitive::u8; 4usize]),
+                        #[codec(index = 3)]
                         Array8([::core::primitive::u8; 8usize]),
+                        #[codec(index = 4)]
                         Array16([::core::primitive::u8; 16usize]),
+                        #[codec(index = 5)]
                         Array32([::core::primitive::u8; 32usize]),
                     }
                     #[derive(
@@ -66684,8 +69612,11 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum AssetTransferFilter {
+                        #[codec(index = 0)]
                         Teleport(runtime_types::staging_xcm::v5::asset::AssetFilter),
+                        #[codec(index = 1)]
                         ReserveDeposit(runtime_types::staging_xcm::v5::asset::AssetFilter),
+                        #[codec(index = 2)]
                         ReserveWithdraw(runtime_types::staging_xcm::v5::asset::AssetFilter),
                     }
                     #[derive(
@@ -66716,7 +69647,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Fungibility {
-                        Fungible(::core::primitive::u128),
+                        #[codec(index = 0)]
+                        Fungible(#[codec(compact)] ::core::primitive::u128),
+                        #[codec(index = 1)]
                         NonFungible(runtime_types::staging_xcm::v5::asset::AssetInstance),
                     }
                     #[derive(
@@ -66731,15 +69664,20 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum WildAsset {
+                        #[codec(index = 0)]
                         All,
+                        #[codec(index = 1)]
                         AllOf {
                             id: runtime_types::staging_xcm::v5::asset::AssetId,
                             fun: runtime_types::staging_xcm::v5::asset::WildFungibility,
                         },
-                        AllCounted(::core::primitive::u32),
+                        #[codec(index = 2)]
+                        AllCounted(#[codec(compact)] ::core::primitive::u32),
+                        #[codec(index = 3)]
                         AllOfCounted {
                             id: runtime_types::staging_xcm::v5::asset::AssetId,
                             fun: runtime_types::staging_xcm::v5::asset::WildFungibility,
+                            #[codec(compact)]
                             count: ::core::primitive::u32,
                         },
                     }
@@ -66755,7 +69693,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum WildFungibility {
+                        #[codec(index = 0)]
                         Fungible,
+                        #[codec(index = 1)]
                         NonFungible,
                     }
                 }
@@ -66773,36 +69713,47 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Junction {
-                        Parachain(::core::primitive::u32),
+                        #[codec(index = 0)]
+                        Parachain(#[codec(compact)] ::core::primitive::u32),
+                        #[codec(index = 1)]
                         AccountId32 {
                             network: ::core::option::Option<
                                 runtime_types::staging_xcm::v5::junction::NetworkId,
                             >,
                             id: [::core::primitive::u8; 32usize],
                         },
+                        #[codec(index = 2)]
                         AccountIndex64 {
                             network: ::core::option::Option<
                                 runtime_types::staging_xcm::v5::junction::NetworkId,
                             >,
+                            #[codec(compact)]
                             index: ::core::primitive::u64,
                         },
+                        #[codec(index = 3)]
                         AccountKey20 {
                             network: ::core::option::Option<
                                 runtime_types::staging_xcm::v5::junction::NetworkId,
                             >,
                             key: [::core::primitive::u8; 20usize],
                         },
+                        #[codec(index = 4)]
                         PalletInstance(::core::primitive::u8),
-                        GeneralIndex(::core::primitive::u128),
+                        #[codec(index = 5)]
+                        GeneralIndex(#[codec(compact)] ::core::primitive::u128),
+                        #[codec(index = 6)]
                         GeneralKey {
                             length: ::core::primitive::u8,
                             data: [::core::primitive::u8; 32usize],
                         },
+                        #[codec(index = 7)]
                         OnlyChild,
+                        #[codec(index = 8)]
                         Plurality {
                             id: runtime_types::xcm::v3::junction::BodyId,
                             part: runtime_types::xcm::v3::junction::BodyPart,
                         },
+                        #[codec(index = 9)]
                         GlobalConsensus(runtime_types::staging_xcm::v5::junction::NetworkId),
                     }
                     #[derive(
@@ -66817,18 +69768,27 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum NetworkId {
+                        #[codec(index = 0)]
                         ByGenesis([::core::primitive::u8; 32usize]),
+                        #[codec(index = 1)]
                         ByFork {
                             block_number: ::core::primitive::u64,
                             block_hash: [::core::primitive::u8; 32usize],
                         },
+                        #[codec(index = 2)]
                         Polkadot,
+                        #[codec(index = 3)]
                         Kusama,
+                        #[codec(index = 7)]
                         Ethereum {
+                            #[codec(compact)]
                             chain_id: ::core::primitive::u64,
                         },
+                        #[codec(index = 8)]
                         BitcoinCore,
+                        #[codec(index = 9)]
                         BitcoinCash,
+                        #[codec(index = 10)]
                         PolkadotBulletin,
                     }
                 }
@@ -66846,14 +69806,23 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Junctions {
+                        #[codec(index = 0)]
                         Here,
+                        #[codec(index = 1)]
                         X1([runtime_types::staging_xcm::v5::junction::Junction; 1usize]),
+                        #[codec(index = 2)]
                         X2([runtime_types::staging_xcm::v5::junction::Junction; 2usize]),
+                        #[codec(index = 3)]
                         X3([runtime_types::staging_xcm::v5::junction::Junction; 3usize]),
+                        #[codec(index = 4)]
                         X4([runtime_types::staging_xcm::v5::junction::Junction; 4usize]),
+                        #[codec(index = 5)]
                         X5([runtime_types::staging_xcm::v5::junction::Junction; 5usize]),
+                        #[codec(index = 6)]
                         X6([runtime_types::staging_xcm::v5::junction::Junction; 6usize]),
+                        #[codec(index = 7)]
                         X7([runtime_types::staging_xcm::v5::junction::Junction; 7usize]),
+                        #[codec(index = 8)]
                         X8([runtime_types::staging_xcm::v5::junction::Junction; 8usize]),
                     }
                 }
@@ -66888,17 +69857,33 @@ pub mod api {
                     #[encode_as_type(
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
+                    pub struct InstructionError {
+                        pub index: ::core::primitive::u8,
+                        pub error: runtime_types::xcm::v5::traits::Error,
+                    }
+                    #[derive(
+                        :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    #[decode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                    )]
+                    #[encode_as_type(
+                        crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                    )]
                     pub enum Outcome {
+                        #[codec(index = 0)]
                         Complete {
                             used: runtime_types::sp_weights::weight_v2::Weight,
                         },
+                        #[codec(index = 1)]
                         Incomplete {
                             used: runtime_types::sp_weights::weight_v2::Weight,
-                            error: runtime_types::xcm::v5::traits::Error,
+                            error: runtime_types::staging_xcm::v5::traits::InstructionError,
                         },
-                        Error {
-                            error: runtime_types::xcm::v5::traits::Error,
-                        },
+                        #[codec(index = 2)]
+                        Error(runtime_types::staging_xcm::v5::traits::InstructionError),
                     }
                 }
                 #[derive(
@@ -66913,6 +69898,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Hint {
+                    #[codec(index = 0)]
                     AssetClaimer {
                         location: runtime_types::staging_xcm::v5::location::Location,
                     },
@@ -66929,10 +69915,15 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Instruction {
+                    #[codec(index = 0)]
                     WithdrawAsset(runtime_types::staging_xcm::v5::asset::Assets),
+                    #[codec(index = 1)]
                     ReserveAssetDeposited(runtime_types::staging_xcm::v5::asset::Assets),
+                    #[codec(index = 2)]
                     ReceiveTeleportedAsset(runtime_types::staging_xcm::v5::asset::Assets),
+                    #[codec(index = 3)]
                     QueryResponse {
+                        #[codec(compact)]
                         query_id: ::core::primitive::u64,
                         response: runtime_types::staging_xcm::v5::Response,
                         max_weight: runtime_types::sp_weights::weight_v2::Weight,
@@ -66940,147 +69931,204 @@ pub mod api {
                             runtime_types::staging_xcm::v5::location::Location,
                         >,
                     },
+                    #[codec(index = 4)]
                     TransferAsset {
                         assets: runtime_types::staging_xcm::v5::asset::Assets,
                         beneficiary: runtime_types::staging_xcm::v5::location::Location,
                     },
+                    #[codec(index = 5)]
                     TransferReserveAsset {
                         assets: runtime_types::staging_xcm::v5::asset::Assets,
                         dest: runtime_types::staging_xcm::v5::location::Location,
                         xcm: runtime_types::staging_xcm::v5::Xcm,
                     },
+                    #[codec(index = 6)]
                     Transact {
                         origin_kind: runtime_types::xcm::v3::OriginKind,
                         fallback_max_weight:
                             ::core::option::Option<runtime_types::sp_weights::weight_v2::Weight>,
                         call: runtime_types::xcm::double_encoded::DoubleEncoded,
                     },
+                    #[codec(index = 7)]
                     HrmpNewChannelOpenRequest {
+                        #[codec(compact)]
                         sender: ::core::primitive::u32,
+                        #[codec(compact)]
                         max_message_size: ::core::primitive::u32,
+                        #[codec(compact)]
                         max_capacity: ::core::primitive::u32,
                     },
+                    #[codec(index = 8)]
                     HrmpChannelAccepted {
+                        #[codec(compact)]
                         recipient: ::core::primitive::u32,
                     },
+                    #[codec(index = 9)]
                     HrmpChannelClosing {
+                        #[codec(compact)]
                         initiator: ::core::primitive::u32,
+                        #[codec(compact)]
                         sender: ::core::primitive::u32,
+                        #[codec(compact)]
                         recipient: ::core::primitive::u32,
                     },
+                    #[codec(index = 10)]
                     ClearOrigin,
+                    #[codec(index = 11)]
                     DescendOrigin(runtime_types::staging_xcm::v5::junctions::Junctions),
+                    #[codec(index = 12)]
                     ReportError(runtime_types::staging_xcm::v5::QueryResponseInfo),
+                    #[codec(index = 13)]
                     DepositAsset {
                         assets: runtime_types::staging_xcm::v5::asset::AssetFilter,
                         beneficiary: runtime_types::staging_xcm::v5::location::Location,
                     },
+                    #[codec(index = 14)]
                     DepositReserveAsset {
                         assets: runtime_types::staging_xcm::v5::asset::AssetFilter,
                         dest: runtime_types::staging_xcm::v5::location::Location,
                         xcm: runtime_types::staging_xcm::v5::Xcm,
                     },
+                    #[codec(index = 15)]
                     ExchangeAsset {
                         give: runtime_types::staging_xcm::v5::asset::AssetFilter,
                         want: runtime_types::staging_xcm::v5::asset::Assets,
                         maximal: ::core::primitive::bool,
                     },
+                    #[codec(index = 16)]
                     InitiateReserveWithdraw {
                         assets: runtime_types::staging_xcm::v5::asset::AssetFilter,
                         reserve: runtime_types::staging_xcm::v5::location::Location,
                         xcm: runtime_types::staging_xcm::v5::Xcm,
                     },
+                    #[codec(index = 17)]
                     InitiateTeleport {
                         assets: runtime_types::staging_xcm::v5::asset::AssetFilter,
                         dest: runtime_types::staging_xcm::v5::location::Location,
                         xcm: runtime_types::staging_xcm::v5::Xcm,
                     },
+                    #[codec(index = 18)]
                     ReportHolding {
                         response_info: runtime_types::staging_xcm::v5::QueryResponseInfo,
                         assets: runtime_types::staging_xcm::v5::asset::AssetFilter,
                     },
+                    #[codec(index = 19)]
                     BuyExecution {
                         fees: runtime_types::staging_xcm::v5::asset::Asset,
                         weight_limit: runtime_types::xcm::v3::WeightLimit,
                     },
+                    #[codec(index = 20)]
                     RefundSurplus,
+                    #[codec(index = 21)]
                     SetErrorHandler(runtime_types::staging_xcm::v5::Xcm),
+                    #[codec(index = 22)]
                     SetAppendix(runtime_types::staging_xcm::v5::Xcm),
+                    #[codec(index = 23)]
                     ClearError,
+                    #[codec(index = 24)]
                     ClaimAsset {
                         assets: runtime_types::staging_xcm::v5::asset::Assets,
                         ticket: runtime_types::staging_xcm::v5::location::Location,
                     },
-                    Trap(::core::primitive::u64),
+                    #[codec(index = 25)]
+                    Trap(#[codec(compact)] ::core::primitive::u64),
+                    #[codec(index = 26)]
                     SubscribeVersion {
+                        #[codec(compact)]
                         query_id: ::core::primitive::u64,
                         max_response_weight: runtime_types::sp_weights::weight_v2::Weight,
                     },
+                    #[codec(index = 27)]
                     UnsubscribeVersion,
+                    #[codec(index = 28)]
                     BurnAsset(runtime_types::staging_xcm::v5::asset::Assets),
+                    #[codec(index = 29)]
                     ExpectAsset(runtime_types::staging_xcm::v5::asset::Assets),
+                    #[codec(index = 30)]
                     ExpectOrigin(
                         ::core::option::Option<runtime_types::staging_xcm::v5::location::Location>,
                     ),
+                    #[codec(index = 31)]
                     ExpectError(
                         ::core::option::Option<(
                             ::core::primitive::u32,
                             runtime_types::xcm::v5::traits::Error,
                         )>,
                     ),
+                    #[codec(index = 32)]
                     ExpectTransactStatus(runtime_types::xcm::v3::MaybeErrorCode),
+                    #[codec(index = 33)]
                     QueryPallet {
                         module_name:
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         response_info: runtime_types::staging_xcm::v5::QueryResponseInfo,
                     },
+                    #[codec(index = 34)]
                     ExpectPallet {
+                        #[codec(compact)]
                         index: ::core::primitive::u32,
                         name: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         module_name:
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+                        #[codec(compact)]
                         crate_major: ::core::primitive::u32,
+                        #[codec(compact)]
                         min_crate_minor: ::core::primitive::u32,
                     },
+                    #[codec(index = 35)]
                     ReportTransactStatus(runtime_types::staging_xcm::v5::QueryResponseInfo),
+                    #[codec(index = 36)]
                     ClearTransactStatus,
+                    #[codec(index = 37)]
                     UniversalOrigin(runtime_types::staging_xcm::v5::junction::Junction),
+                    #[codec(index = 38)]
                     ExportMessage {
                         network: runtime_types::staging_xcm::v5::junction::NetworkId,
                         destination: runtime_types::staging_xcm::v5::junctions::Junctions,
                         xcm: runtime_types::staging_xcm::v5::Xcm,
                     },
+                    #[codec(index = 39)]
                     LockAsset {
                         asset: runtime_types::staging_xcm::v5::asset::Asset,
                         unlocker: runtime_types::staging_xcm::v5::location::Location,
                     },
+                    #[codec(index = 40)]
                     UnlockAsset {
                         asset: runtime_types::staging_xcm::v5::asset::Asset,
                         target: runtime_types::staging_xcm::v5::location::Location,
                     },
+                    #[codec(index = 41)]
                     NoteUnlockable {
                         asset: runtime_types::staging_xcm::v5::asset::Asset,
                         owner: runtime_types::staging_xcm::v5::location::Location,
                     },
+                    #[codec(index = 42)]
                     RequestUnlock {
                         asset: runtime_types::staging_xcm::v5::asset::Asset,
                         locker: runtime_types::staging_xcm::v5::location::Location,
                     },
+                    #[codec(index = 43)]
                     SetFeesMode {
                         jit_withdraw: ::core::primitive::bool,
                     },
+                    #[codec(index = 44)]
                     SetTopic([::core::primitive::u8; 32usize]),
+                    #[codec(index = 45)]
                     ClearTopic,
+                    #[codec(index = 46)]
                     AliasOrigin(runtime_types::staging_xcm::v5::location::Location),
+                    #[codec(index = 47)]
                     UnpaidExecution {
                         weight_limit: runtime_types::xcm::v3::WeightLimit,
                         check_origin: ::core::option::Option<
                             runtime_types::staging_xcm::v5::location::Location,
                         >,
                     },
+                    #[codec(index = 48)]
                     PayFees {
                         asset: runtime_types::staging_xcm::v5::asset::Asset,
                     },
+                    #[codec(index = 49)]
                     InitiateTransfer {
                         destination: runtime_types::staging_xcm::v5::location::Location,
                         remote_fees: ::core::option::Option<
@@ -67092,12 +70140,14 @@ pub mod api {
                         >,
                         remote_xcm: runtime_types::staging_xcm::v5::Xcm,
                     },
+                    #[codec(index = 50)]
                     ExecuteWithOrigin {
                         descendant_origin: ::core::option::Option<
                             runtime_types::staging_xcm::v5::junctions::Junctions,
                         >,
                         xcm: runtime_types::staging_xcm::v5::Xcm,
                     },
+                    #[codec(index = 51)]
                     SetHints {
                         hints: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::staging_xcm::v5::Hint,
@@ -67116,6 +70166,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct PalletInfo {
+                    #[codec(compact)]
                     pub index: ::core::primitive::u32,
                     pub name: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
@@ -67123,8 +70174,11 @@ pub mod api {
                     pub module_name: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
+                    #[codec(compact)]
                     pub major: ::core::primitive::u32,
+                    #[codec(compact)]
                     pub minor: ::core::primitive::u32,
+                    #[codec(compact)]
                     pub patch: ::core::primitive::u32,
                 }
                 #[derive(
@@ -67140,6 +70194,7 @@ pub mod api {
                 )]
                 pub struct QueryResponseInfo {
                     pub destination: runtime_types::staging_xcm::v5::location::Location,
+                    #[codec(compact)]
                     pub query_id: ::core::primitive::u64,
                     pub max_weight: runtime_types::sp_weights::weight_v2::Weight,
                 }
@@ -67155,20 +70210,26 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Response {
+                    #[codec(index = 0)]
                     Null,
+                    #[codec(index = 1)]
                     Assets(runtime_types::staging_xcm::v5::asset::Assets),
+                    #[codec(index = 2)]
                     ExecutionResult(
                         ::core::option::Option<(
                             ::core::primitive::u32,
                             runtime_types::xcm::v5::traits::Error,
                         )>,
                     ),
+                    #[codec(index = 3)]
                     Version(::core::primitive::u32),
+                    #[codec(index = 4)]
                     PalletsInfo(
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::staging_xcm::v5::PalletInfo,
                         >,
                     ),
+                    #[codec(index = 5)]
                     DispatchResult(runtime_types::xcm::v3::MaybeErrorCode),
                 }
                 #[derive(
@@ -67207,9 +70268,13 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum TransferType {
+                        #[codec(index = 0)]
                         Teleport,
+                        #[codec(index = 1)]
                         LocalReserve,
+                        #[codec(index = 2)]
                         DestinationReserve,
+                        #[codec(index = 3)]
                         RemoteReserve(runtime_types::xcm::VersionedLocation),
                     }
                 }
@@ -67250,15 +70315,25 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum BodyId {
+                        #[codec(index = 0)]
                         Unit,
+                        #[codec(index = 1)]
                         Moniker([::core::primitive::u8; 4usize]),
-                        Index(::core::primitive::u32),
+                        #[codec(index = 2)]
+                        Index(#[codec(compact)] ::core::primitive::u32),
+                        #[codec(index = 3)]
                         Executive,
+                        #[codec(index = 4)]
                         Technical,
+                        #[codec(index = 5)]
                         Legislative,
+                        #[codec(index = 6)]
                         Judicial,
+                        #[codec(index = 7)]
                         Defense,
+                        #[codec(index = 8)]
                         Administration,
+                        #[codec(index = 9)]
                         Treasury,
                     }
                     #[derive(
@@ -67273,20 +70348,32 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum BodyPart {
+                        #[codec(index = 0)]
                         Voice,
+                        #[codec(index = 1)]
                         Members {
+                            #[codec(compact)]
                             count: ::core::primitive::u32,
                         },
+                        #[codec(index = 2)]
                         Fraction {
+                            #[codec(compact)]
                             nom: ::core::primitive::u32,
+                            #[codec(compact)]
                             denom: ::core::primitive::u32,
                         },
+                        #[codec(index = 3)]
                         AtLeastProportion {
+                            #[codec(compact)]
                             nom: ::core::primitive::u32,
+                            #[codec(compact)]
                             denom: ::core::primitive::u32,
                         },
+                        #[codec(index = 4)]
                         MoreThanProportion {
+                            #[codec(compact)]
                             nom: ::core::primitive::u32,
+                            #[codec(compact)]
                             denom: ::core::primitive::u32,
                         },
                     }
@@ -67302,33 +70389,44 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Junction {
-                        Parachain(::core::primitive::u32),
+                        #[codec(index = 0)]
+                        Parachain(#[codec(compact)] ::core::primitive::u32),
+                        #[codec(index = 1)]
                         AccountId32 {
                             network:
                                 ::core::option::Option<runtime_types::xcm::v3::junction::NetworkId>,
                             id: [::core::primitive::u8; 32usize],
                         },
+                        #[codec(index = 2)]
                         AccountIndex64 {
                             network:
                                 ::core::option::Option<runtime_types::xcm::v3::junction::NetworkId>,
+                            #[codec(compact)]
                             index: ::core::primitive::u64,
                         },
+                        #[codec(index = 3)]
                         AccountKey20 {
                             network:
                                 ::core::option::Option<runtime_types::xcm::v3::junction::NetworkId>,
                             key: [::core::primitive::u8; 20usize],
                         },
+                        #[codec(index = 4)]
                         PalletInstance(::core::primitive::u8),
-                        GeneralIndex(::core::primitive::u128),
+                        #[codec(index = 5)]
+                        GeneralIndex(#[codec(compact)] ::core::primitive::u128),
+                        #[codec(index = 6)]
                         GeneralKey {
                             length: ::core::primitive::u8,
                             data: [::core::primitive::u8; 32usize],
                         },
+                        #[codec(index = 7)]
                         OnlyChild,
+                        #[codec(index = 8)]
                         Plurality {
                             id: runtime_types::xcm::v3::junction::BodyId,
                             part: runtime_types::xcm::v3::junction::BodyPart,
                         },
+                        #[codec(index = 9)]
                         GlobalConsensus(runtime_types::xcm::v3::junction::NetworkId),
                     }
                     #[derive(
@@ -67343,21 +70441,33 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum NetworkId {
+                        #[codec(index = 0)]
                         ByGenesis([::core::primitive::u8; 32usize]),
+                        #[codec(index = 1)]
                         ByFork {
                             block_number: ::core::primitive::u64,
                             block_hash: [::core::primitive::u8; 32usize],
                         },
+                        #[codec(index = 2)]
                         Polkadot,
+                        #[codec(index = 3)]
                         Kusama,
+                        #[codec(index = 4)]
                         Westend,
+                        #[codec(index = 5)]
                         Rococo,
+                        #[codec(index = 6)]
                         Wococo,
+                        #[codec(index = 7)]
                         Ethereum {
+                            #[codec(compact)]
                             chain_id: ::core::primitive::u64,
                         },
+                        #[codec(index = 8)]
                         BitcoinCore,
+                        #[codec(index = 9)]
                         BitcoinCash,
+                        #[codec(index = 10)]
                         PolkadotBulletin,
                     }
                 }
@@ -67375,23 +70485,29 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Junctions {
+                        #[codec(index = 0)]
                         Here,
+                        #[codec(index = 1)]
                         X1(runtime_types::xcm::v3::junction::Junction),
+                        #[codec(index = 2)]
                         X2(
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
                         ),
+                        #[codec(index = 3)]
                         X3(
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
                         ),
+                        #[codec(index = 4)]
                         X4(
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
                         ),
+                        #[codec(index = 5)]
                         X5(
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
@@ -67399,6 +70515,7 @@ pub mod api {
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
                         ),
+                        #[codec(index = 6)]
                         X6(
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
@@ -67407,6 +70524,7 @@ pub mod api {
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
                         ),
+                        #[codec(index = 7)]
                         X7(
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
@@ -67416,6 +70534,7 @@ pub mod api {
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
                         ),
+                        #[codec(index = 8)]
                         X8(
                             runtime_types::xcm::v3::junction::Junction,
                             runtime_types::xcm::v3::junction::Junction,
@@ -67442,7 +70561,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum AssetId {
+                        #[codec(index = 0)]
                         Concrete(runtime_types::staging_xcm::v3::multilocation::MultiLocation),
+                        #[codec(index = 1)]
                         Abstract([::core::primitive::u8; 32usize]),
                     }
                     #[derive(
@@ -67457,11 +70578,17 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum AssetInstance {
+                        #[codec(index = 0)]
                         Undefined,
-                        Index(::core::primitive::u128),
+                        #[codec(index = 1)]
+                        Index(#[codec(compact)] ::core::primitive::u128),
+                        #[codec(index = 2)]
                         Array4([::core::primitive::u8; 4usize]),
+                        #[codec(index = 3)]
                         Array8([::core::primitive::u8; 8usize]),
+                        #[codec(index = 4)]
                         Array16([::core::primitive::u8; 16usize]),
+                        #[codec(index = 5)]
                         Array32([::core::primitive::u8; 32usize]),
                     }
                     #[derive(
@@ -67476,7 +70603,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Fungibility {
-                        Fungible(::core::primitive::u128),
+                        #[codec(index = 0)]
+                        Fungible(#[codec(compact)] ::core::primitive::u128),
+                        #[codec(index = 1)]
                         NonFungible(runtime_types::xcm::v3::multiasset::AssetInstance),
                     }
                     #[derive(
@@ -67506,7 +70635,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum MultiAssetFilter {
+                        #[codec(index = 0)]
                         Definite(runtime_types::xcm::v3::multiasset::MultiAssets),
+                        #[codec(index = 1)]
                         Wild(runtime_types::xcm::v3::multiasset::WildMultiAsset),
                     }
                     #[derive(
@@ -67537,7 +70668,9 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum WildFungibility {
+                        #[codec(index = 0)]
                         Fungible,
+                        #[codec(index = 1)]
                         NonFungible,
                     }
                     #[derive(
@@ -67552,15 +70685,20 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum WildMultiAsset {
+                        #[codec(index = 0)]
                         All,
+                        #[codec(index = 1)]
                         AllOf {
                             id: runtime_types::xcm::v3::multiasset::AssetId,
                             fun: runtime_types::xcm::v3::multiasset::WildFungibility,
                         },
-                        AllCounted(::core::primitive::u32),
+                        #[codec(index = 2)]
+                        AllCounted(#[codec(compact)] ::core::primitive::u32),
+                        #[codec(index = 3)]
                         AllOfCounted {
                             id: runtime_types::xcm::v3::multiasset::AssetId,
                             fun: runtime_types::xcm::v3::multiasset::WildFungibility,
+                            #[codec(compact)]
                             count: ::core::primitive::u32,
                         },
                     }
@@ -67579,45 +70717,85 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Error {
+                        #[codec(index = 0)]
                         Overflow,
+                        #[codec(index = 1)]
                         Unimplemented,
+                        #[codec(index = 2)]
                         UntrustedReserveLocation,
+                        #[codec(index = 3)]
                         UntrustedTeleportLocation,
+                        #[codec(index = 4)]
                         LocationFull,
+                        #[codec(index = 5)]
                         LocationNotInvertible,
+                        #[codec(index = 6)]
                         BadOrigin,
+                        #[codec(index = 7)]
                         InvalidLocation,
+                        #[codec(index = 8)]
                         AssetNotFound,
+                        #[codec(index = 9)]
                         FailedToTransactAsset,
+                        #[codec(index = 10)]
                         NotWithdrawable,
+                        #[codec(index = 11)]
                         LocationCannotHold,
+                        #[codec(index = 12)]
                         ExceedsMaxMessageSize,
+                        #[codec(index = 13)]
                         DestinationUnsupported,
+                        #[codec(index = 14)]
                         Transport,
+                        #[codec(index = 15)]
                         Unroutable,
+                        #[codec(index = 16)]
                         UnknownClaim,
+                        #[codec(index = 17)]
                         FailedToDecode,
+                        #[codec(index = 18)]
                         MaxWeightInvalid,
+                        #[codec(index = 19)]
                         NotHoldingFees,
+                        #[codec(index = 20)]
                         TooExpensive,
+                        #[codec(index = 21)]
                         Trap(::core::primitive::u64),
+                        #[codec(index = 22)]
                         ExpectationFalse,
+                        #[codec(index = 23)]
                         PalletNotFound,
+                        #[codec(index = 24)]
                         NameMismatch,
+                        #[codec(index = 25)]
                         VersionIncompatible,
+                        #[codec(index = 26)]
                         HoldingWouldOverflow,
+                        #[codec(index = 27)]
                         ExportError,
+                        #[codec(index = 28)]
                         ReanchorFailed,
+                        #[codec(index = 29)]
                         NoDeal,
+                        #[codec(index = 30)]
                         FeesNotMet,
+                        #[codec(index = 31)]
                         LockError,
+                        #[codec(index = 32)]
                         NoPermission,
+                        #[codec(index = 33)]
                         Unanchored,
+                        #[codec(index = 34)]
                         NotDepositable,
+                        #[codec(index = 35)]
                         UnhandledXcmVersion,
+                        #[codec(index = 36)]
                         WeightLimitReached(runtime_types::sp_weights::weight_v2::Weight),
+                        #[codec(index = 37)]
                         Barrier,
+                        #[codec(index = 38)]
                         WeightNotComputable,
+                        #[codec(index = 39)]
                         ExceedsStackLimit,
                     }
                     #[derive(
@@ -67632,12 +70810,19 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum SendError {
+                        #[codec(index = 0)]
                         NotApplicable,
+                        #[codec(index = 1)]
                         Transport,
+                        #[codec(index = 2)]
                         Unroutable,
+                        #[codec(index = 3)]
                         DestinationUnsupported,
+                        #[codec(index = 4)]
                         ExceedsMaxMessageSize,
+                        #[codec(index = 5)]
                         MissingArgument,
+                        #[codec(index = 6)]
                         Fees,
                     }
                 }
@@ -67653,10 +70838,15 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Instruction {
+                    #[codec(index = 0)]
                     WithdrawAsset(runtime_types::xcm::v3::multiasset::MultiAssets),
+                    #[codec(index = 1)]
                     ReserveAssetDeposited(runtime_types::xcm::v3::multiasset::MultiAssets),
+                    #[codec(index = 2)]
                     ReceiveTeleportedAsset(runtime_types::xcm::v3::multiasset::MultiAssets),
+                    #[codec(index = 3)]
                     QueryResponse {
+                        #[codec(compact)]
                         query_id: ::core::primitive::u64,
                         response: runtime_types::xcm::v3::Response,
                         max_weight: runtime_types::sp_weights::weight_v2::Weight,
@@ -67664,139 +70854,194 @@ pub mod api {
                             runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                         >,
                     },
+                    #[codec(index = 4)]
                     TransferAsset {
                         assets: runtime_types::xcm::v3::multiasset::MultiAssets,
                         beneficiary: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                     },
+                    #[codec(index = 5)]
                     TransferReserveAsset {
                         assets: runtime_types::xcm::v3::multiasset::MultiAssets,
                         dest: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                         xcm: runtime_types::xcm::v3::Xcm,
                     },
+                    #[codec(index = 6)]
                     Transact {
                         origin_kind: runtime_types::xcm::v3::OriginKind,
                         require_weight_at_most: runtime_types::sp_weights::weight_v2::Weight,
                         call: runtime_types::xcm::double_encoded::DoubleEncoded,
                     },
+                    #[codec(index = 7)]
                     HrmpNewChannelOpenRequest {
+                        #[codec(compact)]
                         sender: ::core::primitive::u32,
+                        #[codec(compact)]
                         max_message_size: ::core::primitive::u32,
+                        #[codec(compact)]
                         max_capacity: ::core::primitive::u32,
                     },
+                    #[codec(index = 8)]
                     HrmpChannelAccepted {
+                        #[codec(compact)]
                         recipient: ::core::primitive::u32,
                     },
+                    #[codec(index = 9)]
                     HrmpChannelClosing {
+                        #[codec(compact)]
                         initiator: ::core::primitive::u32,
+                        #[codec(compact)]
                         sender: ::core::primitive::u32,
+                        #[codec(compact)]
                         recipient: ::core::primitive::u32,
                     },
+                    #[codec(index = 10)]
                     ClearOrigin,
+                    #[codec(index = 11)]
                     DescendOrigin(runtime_types::xcm::v3::junctions::Junctions),
+                    #[codec(index = 12)]
                     ReportError(runtime_types::xcm::v3::QueryResponseInfo),
+                    #[codec(index = 13)]
                     DepositAsset {
                         assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
                         beneficiary: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                     },
+                    #[codec(index = 14)]
                     DepositReserveAsset {
                         assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
                         dest: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                         xcm: runtime_types::xcm::v3::Xcm,
                     },
+                    #[codec(index = 15)]
                     ExchangeAsset {
                         give: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
                         want: runtime_types::xcm::v3::multiasset::MultiAssets,
                         maximal: ::core::primitive::bool,
                     },
+                    #[codec(index = 16)]
                     InitiateReserveWithdraw {
                         assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
                         reserve: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                         xcm: runtime_types::xcm::v3::Xcm,
                     },
+                    #[codec(index = 17)]
                     InitiateTeleport {
                         assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
                         dest: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                         xcm: runtime_types::xcm::v3::Xcm,
                     },
+                    #[codec(index = 18)]
                     ReportHolding {
                         response_info: runtime_types::xcm::v3::QueryResponseInfo,
                         assets: runtime_types::xcm::v3::multiasset::MultiAssetFilter,
                     },
+                    #[codec(index = 19)]
                     BuyExecution {
                         fees: runtime_types::xcm::v3::multiasset::MultiAsset,
                         weight_limit: runtime_types::xcm::v3::WeightLimit,
                     },
+                    #[codec(index = 20)]
                     RefundSurplus,
+                    #[codec(index = 21)]
                     SetErrorHandler(runtime_types::xcm::v3::Xcm),
+                    #[codec(index = 22)]
                     SetAppendix(runtime_types::xcm::v3::Xcm),
+                    #[codec(index = 23)]
                     ClearError,
+                    #[codec(index = 24)]
                     ClaimAsset {
                         assets: runtime_types::xcm::v3::multiasset::MultiAssets,
                         ticket: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                     },
-                    Trap(::core::primitive::u64),
+                    #[codec(index = 25)]
+                    Trap(#[codec(compact)] ::core::primitive::u64),
+                    #[codec(index = 26)]
                     SubscribeVersion {
+                        #[codec(compact)]
                         query_id: ::core::primitive::u64,
                         max_response_weight: runtime_types::sp_weights::weight_v2::Weight,
                     },
+                    #[codec(index = 27)]
                     UnsubscribeVersion,
+                    #[codec(index = 28)]
                     BurnAsset(runtime_types::xcm::v3::multiasset::MultiAssets),
+                    #[codec(index = 29)]
                     ExpectAsset(runtime_types::xcm::v3::multiasset::MultiAssets),
+                    #[codec(index = 30)]
                     ExpectOrigin(
                         ::core::option::Option<
                             runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                         >,
                     ),
+                    #[codec(index = 31)]
                     ExpectError(
                         ::core::option::Option<(
                             ::core::primitive::u32,
                             runtime_types::xcm::v3::traits::Error,
                         )>,
                     ),
+                    #[codec(index = 32)]
                     ExpectTransactStatus(runtime_types::xcm::v3::MaybeErrorCode),
+                    #[codec(index = 33)]
                     QueryPallet {
                         module_name:
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         response_info: runtime_types::xcm::v3::QueryResponseInfo,
                     },
+                    #[codec(index = 34)]
                     ExpectPallet {
+                        #[codec(compact)]
                         index: ::core::primitive::u32,
                         name: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                         module_name:
                             ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+                        #[codec(compact)]
                         crate_major: ::core::primitive::u32,
+                        #[codec(compact)]
                         min_crate_minor: ::core::primitive::u32,
                     },
+                    #[codec(index = 35)]
                     ReportTransactStatus(runtime_types::xcm::v3::QueryResponseInfo),
+                    #[codec(index = 36)]
                     ClearTransactStatus,
+                    #[codec(index = 37)]
                     UniversalOrigin(runtime_types::xcm::v3::junction::Junction),
+                    #[codec(index = 38)]
                     ExportMessage {
                         network: runtime_types::xcm::v3::junction::NetworkId,
                         destination: runtime_types::xcm::v3::junctions::Junctions,
                         xcm: runtime_types::xcm::v3::Xcm,
                     },
+                    #[codec(index = 39)]
                     LockAsset {
                         asset: runtime_types::xcm::v3::multiasset::MultiAsset,
                         unlocker: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                     },
+                    #[codec(index = 40)]
                     UnlockAsset {
                         asset: runtime_types::xcm::v3::multiasset::MultiAsset,
                         target: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                     },
+                    #[codec(index = 41)]
                     NoteUnlockable {
                         asset: runtime_types::xcm::v3::multiasset::MultiAsset,
                         owner: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                     },
+                    #[codec(index = 42)]
                     RequestUnlock {
                         asset: runtime_types::xcm::v3::multiasset::MultiAsset,
                         locker: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
                     },
+                    #[codec(index = 43)]
                     SetFeesMode {
                         jit_withdraw: ::core::primitive::bool,
                     },
+                    #[codec(index = 44)]
                     SetTopic([::core::primitive::u8; 32usize]),
+                    #[codec(index = 45)]
                     ClearTopic,
+                    #[codec(index = 46)]
                     AliasOrigin(runtime_types::staging_xcm::v3::multilocation::MultiLocation),
+                    #[codec(index = 47)]
                     UnpaidExecution {
                         weight_limit: runtime_types::xcm::v3::WeightLimit,
                         check_origin: ::core::option::Option<
@@ -67816,12 +71061,15 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum MaybeErrorCode {
+                    #[codec(index = 0)]
                     Success,
+                    #[codec(index = 1)]
                     Error(
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     ),
+                    #[codec(index = 2)]
                     TruncatedError(
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
@@ -67840,9 +71088,13 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum OriginKind {
+                    #[codec(index = 0)]
                     Native,
+                    #[codec(index = 1)]
                     SovereignAccount,
+                    #[codec(index = 2)]
                     Superuser,
+                    #[codec(index = 3)]
                     Xcm,
                 }
                 #[derive(
@@ -67857,6 +71109,7 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct PalletInfo {
+                    #[codec(compact)]
                     pub index: ::core::primitive::u32,
                     pub name: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
@@ -67864,8 +71117,11 @@ pub mod api {
                     pub module_name: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                         ::core::primitive::u8,
                     >,
+                    #[codec(compact)]
                     pub major: ::core::primitive::u32,
+                    #[codec(compact)]
                     pub minor: ::core::primitive::u32,
+                    #[codec(compact)]
                     pub patch: ::core::primitive::u32,
                 }
                 #[derive(
@@ -67881,6 +71137,7 @@ pub mod api {
                 )]
                 pub struct QueryResponseInfo {
                     pub destination: runtime_types::staging_xcm::v3::multilocation::MultiLocation,
+                    #[codec(compact)]
                     pub query_id: ::core::primitive::u64,
                     pub max_weight: runtime_types::sp_weights::weight_v2::Weight,
                 }
@@ -67896,20 +71153,26 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Response {
+                    #[codec(index = 0)]
                     Null,
+                    #[codec(index = 1)]
                     Assets(runtime_types::xcm::v3::multiasset::MultiAssets),
+                    #[codec(index = 2)]
                     ExecutionResult(
                         ::core::option::Option<(
                             ::core::primitive::u32,
                             runtime_types::xcm::v3::traits::Error,
                         )>,
                     ),
+                    #[codec(index = 3)]
                     Version(::core::primitive::u32),
+                    #[codec(index = 4)]
                     PalletsInfo(
                         runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::xcm::v3::PalletInfo,
                         >,
                     ),
+                    #[codec(index = 5)]
                     DispatchResult(runtime_types::xcm::v3::MaybeErrorCode),
                 }
                 #[derive(
@@ -67924,7 +71187,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum WeightLimit {
+                    #[codec(index = 0)]
                     Unlimited,
+                    #[codec(index = 1)]
                     Limited(runtime_types::sp_weights::weight_v2::Weight),
                 }
                 #[derive(
@@ -67960,46 +71225,87 @@ pub mod api {
                         crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                     )]
                     pub enum Error {
+                        #[codec(index = 0)]
                         Overflow,
+                        #[codec(index = 1)]
                         Unimplemented,
+                        #[codec(index = 2)]
                         UntrustedReserveLocation,
+                        #[codec(index = 3)]
                         UntrustedTeleportLocation,
+                        #[codec(index = 4)]
                         LocationFull,
+                        #[codec(index = 5)]
                         LocationNotInvertible,
+                        #[codec(index = 6)]
                         BadOrigin,
+                        #[codec(index = 7)]
                         InvalidLocation,
+                        #[codec(index = 8)]
                         AssetNotFound,
+                        #[codec(index = 9)]
                         FailedToTransactAsset,
+                        #[codec(index = 10)]
                         NotWithdrawable,
+                        #[codec(index = 11)]
                         LocationCannotHold,
+                        #[codec(index = 12)]
                         ExceedsMaxMessageSize,
+                        #[codec(index = 13)]
                         DestinationUnsupported,
+                        #[codec(index = 14)]
                         Transport,
+                        #[codec(index = 15)]
                         Unroutable,
+                        #[codec(index = 16)]
                         UnknownClaim,
+                        #[codec(index = 17)]
                         FailedToDecode,
+                        #[codec(index = 18)]
                         MaxWeightInvalid,
+                        #[codec(index = 19)]
                         NotHoldingFees,
+                        #[codec(index = 20)]
                         TooExpensive,
+                        #[codec(index = 21)]
                         Trap(::core::primitive::u64),
+                        #[codec(index = 22)]
                         ExpectationFalse,
+                        #[codec(index = 23)]
                         PalletNotFound,
+                        #[codec(index = 24)]
                         NameMismatch,
+                        #[codec(index = 25)]
                         VersionIncompatible,
+                        #[codec(index = 26)]
                         HoldingWouldOverflow,
+                        #[codec(index = 27)]
                         ExportError,
+                        #[codec(index = 28)]
                         ReanchorFailed,
+                        #[codec(index = 29)]
                         NoDeal,
+                        #[codec(index = 30)]
                         FeesNotMet,
+                        #[codec(index = 31)]
                         LockError,
+                        #[codec(index = 32)]
                         NoPermission,
+                        #[codec(index = 33)]
                         Unanchored,
+                        #[codec(index = 34)]
                         NotDepositable,
+                        #[codec(index = 35)]
                         TooManyAssets,
+                        #[codec(index = 36)]
                         UnhandledXcmVersion,
+                        #[codec(index = 37)]
                         WeightLimitReached(runtime_types::sp_weights::weight_v2::Weight),
+                        #[codec(index = 38)]
                         Barrier,
+                        #[codec(index = 39)]
                         WeightNotComputable,
+                        #[codec(index = 40)]
                         ExceedsStackLimit,
                     }
                 }
@@ -68012,8 +71318,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum VersionedAsset {
+                #[codec(index = 3)]
                 V3(runtime_types::xcm::v3::multiasset::MultiAsset),
+                #[codec(index = 4)]
                 V4(runtime_types::staging_xcm::v4::asset::Asset),
+                #[codec(index = 5)]
                 V5(runtime_types::staging_xcm::v5::asset::Asset),
             }
             #[derive(
@@ -68024,8 +71333,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum VersionedAssetId {
+                #[codec(index = 3)]
                 V3(runtime_types::xcm::v3::multiasset::AssetId),
+                #[codec(index = 4)]
                 V4(runtime_types::staging_xcm::v4::asset::AssetId),
+                #[codec(index = 5)]
                 V5(runtime_types::staging_xcm::v5::asset::AssetId),
             }
             #[derive(
@@ -68036,8 +71348,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum VersionedAssets {
+                #[codec(index = 3)]
                 V3(runtime_types::xcm::v3::multiasset::MultiAssets),
+                #[codec(index = 4)]
                 V4(runtime_types::staging_xcm::v4::asset::Assets),
+                #[codec(index = 5)]
                 V5(runtime_types::staging_xcm::v5::asset::Assets),
             }
             #[derive(
@@ -68048,8 +71363,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum VersionedLocation {
+                #[codec(index = 3)]
                 V3(runtime_types::staging_xcm::v3::multilocation::MultiLocation),
+                #[codec(index = 4)]
                 V4(runtime_types::staging_xcm::v4::location::Location),
+                #[codec(index = 5)]
                 V5(runtime_types::staging_xcm::v5::location::Location),
             }
             #[derive(
@@ -68060,8 +71378,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum VersionedResponse {
+                #[codec(index = 3)]
                 V3(runtime_types::xcm::v3::Response),
+                #[codec(index = 4)]
                 V4(runtime_types::staging_xcm::v4::Response),
+                #[codec(index = 5)]
                 V5(runtime_types::staging_xcm::v5::Response),
             }
             #[derive(
@@ -68072,8 +71393,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             pub enum VersionedXcm {
+                #[codec(index = 3)]
                 V3(runtime_types::xcm::v3::Xcm),
+                #[codec(index = 4)]
                 V4(runtime_types::staging_xcm::v4::Xcm),
+                #[codec(index = 5)]
                 V5(runtime_types::staging_xcm::v5::Xcm),
             }
         }
@@ -68111,7 +71435,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Error {
+                    #[codec(index = 0)]
                     Unsupported,
+                    #[codec(index = 1)]
                     VersionedConversionFailed,
                 }
             }
@@ -68154,7 +71480,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Error {
+                    #[codec(index = 0)]
                     Unimplemented,
+                    #[codec(index = 1)]
                     VersionedConversionFailed,
                 }
                 #[derive(
@@ -68191,11 +71519,17 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Error {
+                    #[codec(index = 0)]
                     Unimplemented,
+                    #[codec(index = 1)]
                     VersionedConversionFailed,
+                    #[codec(index = 2)]
                     WeightNotComputable,
+                    #[codec(index = 3)]
                     UnhandledXcmVersion,
+                    #[codec(index = 4)]
                     AssetNotFound,
+                    #[codec(index = 5)]
                     Unroutable,
                 }
             }
@@ -68213,7 +71547,9 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub enum Error {
+                    #[codec(index = 0)]
                     VersionedAssetConversionFailed,
+                    #[codec(index = 1)]
                     VersionedLocationConversionFailed,
                 }
             }
