@@ -1,0 +1,23 @@
+{
+  "name": "subxt-ffi",
+  "version": "1.0.0",
+  "description": "Example of exposing some Subxt functionality to other languages through FFI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wassimans/subxt-ffi.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wassimans/subxt-ffi/issues"
+  },
+  "homepage": "https://github.com/wassimans/subxt-ffi#readme",
+  "dependencies": {
+    "ffi-napi": "^4.0.3"
+  }
+}
