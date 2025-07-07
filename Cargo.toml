@@ -4,6 +4,7 @@ members = [
     "codegen",
     "core",
     "lightclient",
+    "historic",
     "testing/substrate-runner",
     "testing/test-runtime",
     "testing/integration-tests",
@@ -100,6 +101,8 @@ scale-value = { version = "0.18.0", default-features = false }
 scale-bits = { version = "0.7.0", default-features = false }
 scale-decode = { version = "0.16.0", default-features = false }
 scale-encode = { version = "0.10.0", default-features = false }
+scale-type-resolver = { version = "0.2.0" }
+scale-info-legacy = { version = "0.2.2" }
 scale-typegen = "0.11.1"
 scale-typegen-description = "0.11.0"
 serde = { version = "1.0.210", default-features = false, features = ["derive"] }

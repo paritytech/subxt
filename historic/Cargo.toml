@@ -1,0 +1,58 @@
+[package]
+name = "subxt-historic"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = true
+
+license.workspace = true
+readme = "../README.md"
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+description = "Download non head-of-chain blocks and state from Substrate based nodes"
+keywords = ["parity", "substrate", "blockchain"]
+
+[lints]
+workspace = true
+
+[features]
+default = ["jsonrpsee", "native", "scale-info-legacy"]
+
+# Enable this for native (ie non web/wasm builds).
+# Exactly 1 of "web" and "native" is expected.
+native = [
+    "subxt-rpcs/native",
+]
+
+# Enable this for web/wasm builds.
+# Exactly 1 of "web" and "native" is expected.
+web = [
+    "subxt-rpcs/web",
+]
+
+# Enable this to use the reconnecting rpc client
+reconnecting-rpc-client = ["subxt-rpcs/reconnecting-rpc-client"]
+
+# Enable this to use jsonrpsee, which enables the jsonrpsee RPC client, and
+# a couple of util functions which rely on jsonrpsee.
+jsonrpsee = [
+    "subxt-rpcs/jsonrpsee",
+]
+
+# Our default configuration uses scale-info-legacy for historic types,
+# and so requires this feature.
+scale-info-legacy = [
+    "dep:scale-info-legacy"
+]
+
+[dependencies]
+subxt-rpcs = { workspace = true }
+frame-decode = { workspace = true }
+frame-metadata = { workspace = true }
+scale-type-resolver = { workspace = true }
+serde = { workspace = true }
+codec = { workspace = true }
+primitive-types = { workspace = true }
+scale-info-legacy = { workspace = true, optional = true }

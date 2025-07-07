@@ -14,6 +14,11 @@ use jsonrpsee::{
 };
 use serde_json::value::RawValue;
 
+/// Construct a `jsonrpsee` RPC client with some sane defaults.
+pub async fn client(url: &str) -> Result<Client, Error> {
+    jsonrpsee_helpers::client(url).await.map_err(|e| Error::Client(Box::new(e)))
+}
+
 struct Params(Option<Box<RawValue>>);
 
 impl ToRpcParams for Params {
@@ -80,5 +85,53 @@ impl From<JsonrpseeError> for Error {
                 Error::Client(Box::new(e))
             }
         }
+    }
+}
+
+// helpers for a jsonrpsee specific RPC client.
+#[cfg(all(feature = "jsonrpsee", feature = "native"))]
+mod jsonrpsee_helpers {
+    pub use jsonrpsee::{
+        client_transport::ws::{self, EitherStream, Url, WsTransportClientBuilder},
+        core::client::{Client, Error},
+    };
+    use tokio_util::compat::Compat;
+
+    pub type Sender = ws::Sender<Compat<EitherStream>>;
+    pub type Receiver = ws::Receiver<Compat<EitherStream>>;
+
+    /// Build WS RPC client from URL
+    pub async fn client(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = ws_transport(url).await?;
+        Ok(Client::builder()
+            .max_buffer_capacity_per_subscription(4096)
+            .build_with_tokio(sender, receiver))
+    }
+
+    async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
+        let url = Url::parse(url).map_err(|e| Error::Transport(e.into()))?;
+        WsTransportClientBuilder::default()
+            .build(url)
+            .await
+            .map_err(|e| Error::Transport(e.into()))
+    }
+}
+
+// helpers for a jsonrpsee specific RPC client.
+#[cfg(all(feature = "jsonrpsee", feature = "web", target_arch = "wasm32"))]
+mod jsonrpsee_helpers {
+    pub use jsonrpsee::{
+        client_transport::web,
+        core::client::{Client, ClientBuilder, Error},
+    };
+
+    /// Build web RPC client from URL
+    pub async fn client(url: &str) -> Result<Client, Error> {
+        let (sender, receiver) = web::connect(url)
+            .await
+            .map_err(|e| Error::Transport(e.into()))?;
+        Ok(ClientBuilder::default()
+            .max_buffer_capacity_per_subscription(4096)
+            .build_with_wasm(sender, receiver))
     }
 }
