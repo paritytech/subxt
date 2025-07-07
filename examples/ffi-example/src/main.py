@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
-import os, sys, ctypes
+import os, sys, ctypes, platform
 from ctypes import c_char_p, c_uint64, c_int
 
-# Find and load the shared library (adjust name & path as needed)
-#
-# On macOS:
-libname = "libsubxt_ffi.dylib"
-# On Linux:
-# libname = "libsubxt_ffi.so"
-# On Windows:
-# libname = "subxt_ffi.dll"
+# The library name depends on the playform type
+if platform.system() == "Linux":
+    libname = "libsubxt_ffi.so"
+elif platform.system() == "Darwin":
+    libname = "libsubxt_ffi.dylib"
+elif platform.system() == "Windows":
+    libname = "subxt_ffi.dll"
+else:
+    raise RuntimeError(f"Unsupported platform: {platform.system()}")
 
-# If not in a system path, add your build output dir
-sys.path.append("target/debug")  # or "target/release"
-BUILD_DIR = os.path.join(os.path.dirname(__file__), "..", "target", "debug")
-lib_path = os.path.join(BUILD_DIR, libname)
+# Load the library
+lib_path = os.path.join(os.path.dirname(__file__), "..", "target", "debug", libname)
 lib = ctypes.CDLL(lib_path)
 
 # Tell ctypes about our function signature, the one we defined in the Rust library

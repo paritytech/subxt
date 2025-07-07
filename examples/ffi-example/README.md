@@ -45,15 +45,18 @@ which does a single balance transfer and returns 0 on success, –1 on error.
 ## Prerequisites
 - Rust toolchain (with cargo)
 - Python 3
-- Node.js (for the JS example)
-- A running Substrate node (Polkadot) on ws://127.0.0.1:8000. We recommend using Chopsticks for a quick local Polkadot node:
+- Node.js (for the JS example. Version 19 worked on my M2 Mac, but version 22 did not, so YMMY).
+- A running Substrate node (Polkadot) on ws://127.0.0.1:8000. One can use Chopsticks for a quick local Polkadot node:
 
-```shell
-npx @acala-network/chopsticks \
-  --config=https://raw.githubusercontent.com/AcalaNetwork/chopsticks/master/configs/polkadot.yml
+  ```shell
+  npx @acala-network/chopsticks \
+    --config=https://raw.githubusercontent.com/AcalaNetwork/chopsticks/master/configs/polkadot.yml
+  ```
 
-```
+  Or, if you have a `substrate-node` binary, just run `substrate-node --dev  --rpc-port 8000`.
 - In our Python and Javascript files, we introduce a **dest** variable that represents the destination account for the transfer, we gave it a hard coded value (Bob's account public key) from the running Chopsticks node. Feel free to change it to any other account, or better yet, make it generic!
+
+If you run into any issues running the Node version, I found that I needed to run `brew install python-setuptools` too.
 
 ## Building
 
@@ -68,9 +71,6 @@ This will produce a dynamic library in target/debug/ (or target/release/ if you 
 - Linux:  libsubxt_ffi.so
 - Windows: subxt_ffi.dll
 
-To run the example files (main.py and main.js) on **Windows**, just copy the **dll** file to the folder where **main** files are.
-
-
 ## Running
 
 ### Python
@@ -78,7 +78,6 @@ To run the example files (main.py and main.js) on **Windows**, just copy the **d
 #### on macOS / Linux
 
 ```shell
-export LD_LIBRARY_PATH=$PWD/target/debug  # or DYLD_LIBRARY_PATH on macOS
 python3 src/main.py
 ```
 
@@ -98,7 +97,6 @@ npm install
 then:
 
 ``` shell
-export LD_LIBRARY_PATH=$PWD/target/debug   # or DYLD_LIBRARY_PATH on macOS
 node src/main.js
 ```
 
