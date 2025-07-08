@@ -2765,7 +2765,6 @@ name = "subxt-ffi"
 version = "0.1.0"
 dependencies = [
  "hex",
- "once_cell",
  "subxt",
  "subxt-signer",
  "tokio",

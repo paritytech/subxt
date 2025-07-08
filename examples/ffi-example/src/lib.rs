@@ -1,14 +1,10 @@
 use hex::decode;
-use once_cell::sync::OnceCell;
-use std::{ffi::CStr, os::raw::c_char};
-use subxt::{
-    OnlineClient, PolkadotConfig, dynamic::Value, ext::scale_value::Composite,
-    tx::dynamic as dynamic_call,
-};
+use std::{ffi::CStr, os::raw::c_char, sync::OnceLock};
+use subxt::{OnlineClient, PolkadotConfig, dynamic::Value, ext::scale_value::Composite, tx};
 use subxt_signer::sr25519::dev;
 use tokio::runtime::Runtime;
 
-static TOKIO: OnceCell<Runtime> = OnceCell::new();
+static TOKIO: OnceLock<Runtime> = OnceLock::new();
 fn tokio_rt() -> &'static Runtime {
     TOKIO.get_or_init(|| Runtime::new().expect("failed to start tokio"))
 }
@@ -46,7 +42,7 @@ pub extern "C" fn do_transfer(dest_hex: *const c_char, amount: u64) -> i32 {
     let signer = dev::alice();
 
     // Build the dynamic metadata extrinsic:
-    let tx = dynamic_call(
+    let tx = tx::dynamic(
         "Balances",
         "transfer_keep_alive",
         vec![

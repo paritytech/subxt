@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 hex = "0.4.3"
-once_cell = "1.21.3"
 subxt = { path = "../../subxt" }
 subxt-signer = { path = "../../signer" }
 tokio = { version = "1", features = ["full"] }
