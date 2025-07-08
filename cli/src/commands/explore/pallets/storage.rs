@@ -1,6 +1,5 @@
 use clap::Args;
 use color_eyre::{
-    eyre::Context,
     eyre::{bail, eyre},
     owo_colors::OwoColorize,
 };
@@ -9,13 +8,9 @@ use scale_typegen_description::type_description;
 use scale_value::Value;
 use std::fmt::Write;
 use std::write;
-
-use subxt::{
-    ext::scale_encode::EncodeAsType,
-    metadata::{
-        Metadata,
-        types::{PalletMetadata, StorageEntryType, StorageMetadata},
-    },
+use subxt::metadata::{
+    Metadata,
+    types::{PalletMetadata, StorageEntryType, StorageMetadata},
 };
 
 use crate::utils::{
