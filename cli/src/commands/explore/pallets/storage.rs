@@ -1,8 +1,8 @@
 use clap::Args;
 use color_eyre::{
+    eyre::Context,
     eyre::{bail, eyre},
     owo_colors::OwoColorize,
-    eyre::Context
 };
 use indoc::{formatdoc, writedoc};
 use scale_typegen_description::type_description;
@@ -181,7 +181,7 @@ pub async fn explore_storage(
                 .collect::<Vec<_>>()
                 .join("\n");
             let value_str = values_str.indent(4);
-            
+
             writedoc! {output, "
 
             You submitted the following {key_value_placeholder}:
