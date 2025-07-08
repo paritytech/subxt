@@ -1,0 +1,10 @@
+# MSVC Windows builds of rustc generate these, which store debugging information
+*.pdb
+db.sqlite
+db.sqlite-shm
+db.sqlite-wal
+.tool-versions
+
+/target
+/build
+/node_modules

@@ -215,12 +215,65 @@ jobs:
       - name: Cargo hack; check each feature/crate on its own
         run: cargo hack --exclude subxt --exclude subxt-signer --exclude subxt-lightclient --exclude subxt-rpcs --exclude-all-features --each-feature check --workspace
 
-      # Check the parachain-example code, which isn't a part of the workspace so is otherwise ignored.
+      # Check the full examples, which aren't a part of the workspace so are otherwise ignored.
       - name: Cargo check parachain-example
         run: cargo check --manifest-path examples/parachain-example/Cargo.toml
+      - name: Cargo check ffi-example
+        run: cargo check --manifest-path examples/ffi-example/Cargo.toml
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
+
+  ffi_example:
+    name: Run FFI Example
+    runs-on: ubuntu-latest
+    needs: [check]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          target: wasm32-unknown-unknown
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
+
+      - name: Install 
+        uses: actions/setup-node@v4
+        with:
+          # Node version 20 and higher seem to cause an issue with the JS example so stick to 19 for now.
+          node-version: 19.x
+
+      - name: Cargo check/run ffi-example
+        run: |
+          # Start node on port 8000
+          substrate-node --dev --rpc-port 8000 > /dev/null 2>&1 &
+
+          # Build the Rust code (hopefully gives long enough for substrate server to start, too):
+          cd examples/ffi-example
+          cargo build
+
+          # Run the python version of the FFI code:
+          echo "Running Python FFI example..."
+          python3 src/main.py
+          echo "Python FFI example completed with exit code $?"
+          
+          # Run the node version of the FFI code
+          echo "Installing Node.js dependencies..."
+          npm i
+          echo "Running Node FFI example..."
+          node src/main.js
+          echo "Node FFI example completed with exit code $?"
+
+          pkill substrate-node
 
   wasm_check:
     name: Cargo check (WASM)

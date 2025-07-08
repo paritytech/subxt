@@ -1,0 +1,14 @@
+[package]
+name = "subxt-ffi"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+hex = "0.4.3"
+subxt = { path = "../../subxt" }
+subxt-signer = { path = "../../signer" }
+tokio = { version = "1", features = ["full"] }
+
+[lib]
+crate-type = ["cdylib"]
+name = "subxt_ffi"
