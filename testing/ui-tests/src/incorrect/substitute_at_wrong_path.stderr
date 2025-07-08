@@ -7,6 +7,7 @@ error: Type `Event` does not exist at path `sp_runtime::multiaddress::Event`
        pallet_parameters::pallet::Event
        pallet_transaction_payment::pallet::Event
        pallet_offences::pallet::Event
+       pallet_session::historical::pallet::Event
        pallet_session::pallet::Event
        pallet_grandpa::pallet::Event
        pallet_treasury::pallet::Event
