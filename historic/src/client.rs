@@ -4,15 +4,8 @@ mod offline_client;
 use subxt_rpcs::RpcClient;
 use crate::config::Config;
 
-pub use online_client::{ OnlineClientT, OnlineClient };
-pub use offline_client::{ OfflineClientT, OfflineClient };
+pub use online_client::{ OnlineClientAtBlockT, OnlineClient, OnlineClientAtBlock };
+pub use offline_client::{ OfflineClientAtBlockT, OfflineClient, OfflineClientAtBlock };
 
-/// A client which is ready to decode data at a specific block number.
-pub struct ClientAtBlock<'a, T: Config + 'a, Client> {
-    /// The client used to communicate with the node.
-    client: Client,
-    /// Historic types to use at this block number.
-    historic_types: T::LegacyTypes<'a>,
-    /// Metadata to use at this block number.
-    metadata: &'a frame_metadata::RuntimeMetadata
-}
+// Wrap both ClientAtBlock's into a struct like `Client` that exposes the methods?
+// Don't expose the trait methods/traits at all so just internal details?

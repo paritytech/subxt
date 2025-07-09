@@ -132,7 +132,9 @@ What configuration do we need for a client?:
 */
 #![allow(missing_docs)]
 
+mod utils;
+
 pub mod config;
 pub mod client;
-
+pub mod error;
 

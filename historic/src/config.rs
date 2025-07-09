@@ -3,29 +3,26 @@ pub mod substrate;
 
 use subxt_rpcs::RpcConfig;
 use scale_type_resolver::{ TypeResolver, ResolvedTypeVisitor};
-use std::future::Future;
+use std::fmt::Display;
 
 /// This represents the configuration needed for a specific chain. This includes
 /// any hardcoded types we need to know about for that chain, as well as a means to
 /// obtain historic types for that chain.
-pub trait Config {
-    /// The block hash type.
-    type Hash: Hash;
+pub trait Config: RpcConfig {
+    /// The block hash type. This is normally the same as [`RpcConfig::Hash`], and must be convertible
+    /// from and to it, but ensures that some additional traits are implemented on it.
+    type Hash: Clone + Copy + Display + Into<<Self as RpcConfig>::Hash> + From<<Self as RpcConfig>::Hash>;
     /// The shape of our historic type definitions.
     type LegacyTypes<'a>: TypeResolver where Self: 'a;
-
+    
     /// Return legacy types (ie types to use with Runtimes that return pre-V14 metadata) for a given spec version.
-    fn legacy_types_for_spec_version(&'_ self, spec_version: u64) -> Self::LegacyTypes<'_>;
+    fn legacy_types_for_spec_version<'this>(&'this self, spec_version: u32) -> Self::LegacyTypes<'this>;
 }
-
-/// A trait which is applied to any type that is a valid block hash.
-pub trait Hash: serde::de::DeserializeOwned + serde::Serialize {}
-impl<T> Hash for T where T: serde::de::DeserializeOwned + serde::Serialize {}
 
 /// A struct which can be used as [`Config::LegacyTypes`] when no legacy types are available/required for a chain.
 pub struct NoLegacyTypes;
 impl TypeResolver for NoLegacyTypes {
-    type TypeId = ();
+    type TypeId = NoTypeId;
     type Error = NoLegacyTypesError;
 
     fn resolve_type<'this, V: ResolvedTypeVisitor<'this, TypeId = Self::TypeId>>(
@@ -37,14 +34,19 @@ impl TypeResolver for NoLegacyTypes {
     }
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct NoLegacyTypesError;
 impl std::fmt::Display for NoLegacyTypesError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "No legacy types have been provided for this chain")
     }
 }
-impl std::fmt::Debug for NoLegacyTypesError {
+
+#[derive(Default, Clone, Debug, Copy, PartialEq, Eq, Hash)]
+pub struct NoTypeId;
+impl std::fmt::Display for NoTypeId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("NoLegacyTypesError").finish()
+        write!(f, "<No Type ID>")
     }
 }
+

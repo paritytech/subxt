@@ -56,3 +56,4 @@ serde = { workspace = true }
 codec = { workspace = true }
 primitive-types = { workspace = true }
 scale-info-legacy = { workspace = true, optional = true }
+thiserror = { workspace = true }

@@ -5706,6 +5706,7 @@ dependencies = [
  "scale-type-resolver",
  "serde",
  "subxt-rpcs",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
