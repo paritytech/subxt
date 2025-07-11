@@ -12,6 +12,8 @@ pub enum Error {
     OnlineClientAtBlockError(#[from] OnlineClientAtBlockError),
     #[error(transparent)]
     ExtrinsicsError(#[from] ExtrinsicsError),
+    #[error(transparent)]
+    ExtrinsicTransactionExtensionError(#[from] ExtrinsicTransactionExtensionError),
 }
 
 /// Errors constructing an offline client at a specific block number.
@@ -92,5 +94,25 @@ pub enum ExtrinsicsError {
     UnsupportedMetadataVersion {
         /// The metadata version that is not supported.
         version: u32,
+    },
+}
+
+#[allow(missing_docs)]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum ExtrinsicTransactionExtensionError {
+    #[error("Could not decode extrinsic transaction extension {name}: {reason}")]
+    DecodeError {
+        /// The name of the transaction extension that failed to decode.
+        name: String,
+        /// The error that occurred during decoding.
+        reason: scale_decode::Error,
+    },
+    #[error("Could not decode extrinsic transaction extension {name}: there were undecoded bytes at the end, which implies that we did not decode it properly")]
+    LeftoverBytes {
+        /// The name of the transaction extension that had leftover bytes.
+        name: String,
+        /// The bytes that were left over after decoding the transaction extension.
+        leftover_bytes: Vec<u8>,
     },
 }

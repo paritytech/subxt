@@ -5703,6 +5703,7 @@ dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
  "primitive-types",
+ "scale-decode",
  "scale-info",
  "scale-info-legacy",
  "scale-type-resolver",

@@ -44,6 +44,7 @@ pub struct Extrinsics<'atblock> {
 }
 
 impl <'atblock> Extrinsics<'atblock> {
+    // In here we hide the messy logic needed to decode extrinsics into a consistent output given either current or legacy metadata.
     pub (crate) fn new<'client: 'atblock, T, Client>(bytes: Vec<Vec<u8>>, client: &'atblock Client) -> Result<Self, ExtrinsicsError> 
     where
         T: Config + 'client,

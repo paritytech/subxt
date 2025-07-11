@@ -57,6 +57,7 @@ codec = { workspace = true }
 primitive-types = { workspace = true }
 scale-info = { workspace = true }
 scale-info-legacy = { workspace = true, optional = true }
+scale-decode = { workspace = true }
 thiserror = { workspace = true }
 sp-crypto-hashing = { workspace = true }
 
