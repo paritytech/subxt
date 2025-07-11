@@ -1,10 +1,12 @@
 use crate::error::OnlineClientAtBlockError;
 use crate::config::Config;
 use crate::client::OfflineClientAtBlockT;
+use super::ClientAtBlock;
 use codec::{ Compact, Encode, Decode };
 use frame_metadata::{ RuntimeMetadata, RuntimeMetadataPrefixed };
 use subxt_rpcs::methods::chain_head::ArchiveCallResult;
 use subxt_rpcs::ChainHeadRpcMethods;
+use scale_info_legacy::TypeRegistrySet;
 
 /// A client which exposes the means to decode historic data on a chain online.
 pub struct OnlineClient<T: Config> {
@@ -15,7 +17,7 @@ pub struct OnlineClient<T: Config> {
 }
 
 impl <T: Config> OnlineClient<T> {
-    pub async fn at(&'_ self, block_number: u64) -> Result<OnlineClientAtBlock<'_, T>, OnlineClientAtBlockError> {
+    pub async fn at(&'_ self, block_number: u64) -> Result<ClientAtBlock<OnlineClientAtBlock<'_, T>, T>, OnlineClientAtBlockError> {
         let config = &self.config;
         let rpc_methods = &self.rpc_methods;
         let block_hash = rpc_methods
@@ -30,16 +32,18 @@ impl <T: Config> OnlineClient<T> {
 
         let historic_types = self.config.legacy_types_for_spec_version(spec_version);
 
-        Ok(OnlineClientAtBlock {
+        Ok(ClientAtBlock::new(OnlineClientAtBlock {
             config,
             historic_types,
             metadata,
             rpc_methods,
             block_hash,
-        })
+        }))
     }
 }
 
+/// This represents an online client at a specific block.
+#[doc(hidden)]
 pub trait OnlineClientAtBlockT<'client, T: Config + 'client>: OfflineClientAtBlockT<'client, T> {
     /// Return the RPC methods we'll use to interact with the node.
     fn rpc_methods(&self) -> &ChainHeadRpcMethods<T>;
@@ -47,11 +51,16 @@ pub trait OnlineClientAtBlockT<'client, T: Config + 'client>: OfflineClientAtBlo
     fn block_hash(&self) -> <T as Config>::Hash;
 }
 
+
+// Dev note: this shouldn't need to be exposed unless there is some
+// need to explicitly name the ClientAAtBlock type. Rather keep it
+// private to allow changes if possible.
+#[doc(hidden)]
 pub struct OnlineClientAtBlock<'client, T: Config + 'client> {
     /// The configuration for thie chain.
     config: &'client T,
     /// Historic types to use at this block number.
-    historic_types: T::LegacyTypes<'client>,
+    historic_types: TypeRegistrySet<'client>,
     /// Metadata to use at this block number.
     metadata: RuntimeMetadata,
     /// We also need RPC methods for online interactions.
@@ -73,7 +82,7 @@ impl <'client, T: Config + 'client> OfflineClientAtBlockT<'client, T> for Online
     fn config(&self) -> &'client T {
         self.config
     }
-    fn legacy_types(&'_ self) -> &T::LegacyTypes<'client> {
+    fn legacy_types(&'_ self) -> &TypeRegistrySet<'client> {
         &self.historic_types
     }
     fn metadata(&self) -> &RuntimeMetadata {

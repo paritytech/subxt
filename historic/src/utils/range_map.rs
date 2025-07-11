@@ -44,7 +44,7 @@ impl <K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
         &mut self,
         start: K,
         end: K,
-        spec_version: V,
+        val: V,
     ) -> Result<&mut Self, RangeMapError<K>> {
         let (start, end) = if start < end {
             (start, end)
@@ -63,7 +63,7 @@ impl <K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
             });
         }
 
-        self.mapping.push((start, end, spec_version));
+        self.mapping.push((start, end, val));
         Ok(self)
     }
 
@@ -72,8 +72,8 @@ impl <K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
     /// # Panics
     /// 
     /// This method will panic if the range is empty or overlaps with an existing range.
-    pub fn add_range(mut self, start: K, end: K, spec_version: V) -> Self {
-        if let Err(e) = self.try_add_range(start, end, spec_version) {
+    pub fn add_range(mut self, start: K, end: K, val: V) -> Self {
+        if let Err(e) = self.try_add_range(start, end, val) {
             panic!("{e}")
         }
         self

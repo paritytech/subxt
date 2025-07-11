@@ -3,20 +3,21 @@ pub mod substrate;
 
 use subxt_rpcs::RpcConfig;
 use scale_type_resolver::{ TypeResolver, ResolvedTypeVisitor};
+use scale_info_legacy::TypeRegistrySet;
 use std::fmt::Display;
 
 /// This represents the configuration needed for a specific chain. This includes
 /// any hardcoded types we need to know about for that chain, as well as a means to
 /// obtain historic types for that chain.
-pub trait Config: RpcConfig {
-    /// The block hash type. This is normally the same as [`RpcConfig::Hash`], and must be convertible
-    /// from and to it, but ensures that some additional traits are implemented on it.
+pub trait Config: RpcConfig {   
+    /// The type of hashing used by the runtime.
     type Hash: Clone + Copy + Display + Into<<Self as RpcConfig>::Hash> + From<<Self as RpcConfig>::Hash>;
-    /// The shape of our historic type definitions.
-    type LegacyTypes<'a>: TypeResolver where Self: 'a;
-    
+
     /// Return legacy types (ie types to use with Runtimes that return pre-V14 metadata) for a given spec version.
-    fn legacy_types_for_spec_version<'this>(&'this self, spec_version: u32) -> Self::LegacyTypes<'this>;
+    fn legacy_types_for_spec_version<'this>(&'this self, spec_version: u32) -> TypeRegistrySet<'this>;
+
+    /// Hash some bytes, for instance a block header or extrinsic, for this chain.
+    fn hash(s: &[u8]) -> <Self as Config>::Hash;
 }
 
 /// A struct which can be used as [`Config::LegacyTypes`] when no legacy types are available/required for a chain.

@@ -8,10 +8,13 @@ pub struct SubstrateConfig {
 
 impl Config for SubstrateConfig {
     type Hash = H256;
-    type LegacyTypes<'a> = TypeRegistrySet<'a>;
 
-    fn legacy_types_for_spec_version(&'_ self, spec_version: u32) -> Self::LegacyTypes<'_> {
+    fn legacy_types_for_spec_version(&'_ self, spec_version: u32) -> TypeRegistrySet<'_> {
         self.legacy_types.for_spec_version(spec_version as u64)
+    }
+
+    fn hash(s: &[u8]) -> <Self as Config>::Hash {
+        sp_crypto_hashing::blake2_256(s).into()
     }
 }
 

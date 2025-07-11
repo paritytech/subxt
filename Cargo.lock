@@ -1939,6 +1939,7 @@ dependencies = [
  "parity-scale-codec",
  "scale-decode",
  "scale-info",
+ "scale-info-legacy",
  "scale-type-resolver",
  "sp-crypto-hashing",
 ]
@@ -5702,9 +5703,11 @@ dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
  "primitive-types",
+ "scale-info",
  "scale-info-legacy",
  "scale-type-resolver",
  "serde",
+ "sp-crypto-hashing",
  "subxt-rpcs",
  "thiserror 2.0.12",
 ]
