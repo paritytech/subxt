@@ -585,9 +585,10 @@ pub mod api {
                             result_xcms_version,
                         },
                         [
-                            102u8, 87u8, 8u8, 106u8, 72u8, 124u8, 83u8, 137u8, 248u8, 102u8, 30u8,
-                            147u8, 84u8, 96u8, 22u8, 37u8, 113u8, 76u8, 5u8, 126u8, 198u8, 221u8,
-                            42u8, 57u8, 62u8, 95u8, 249u8, 56u8, 11u8, 227u8, 36u8, 199u8,
+                            42u8, 17u8, 98u8, 165u8, 34u8, 220u8, 107u8, 162u8, 157u8, 31u8, 232u8,
+                            191u8, 158u8, 124u8, 129u8, 127u8, 202u8, 2u8, 235u8, 62u8, 229u8,
+                            152u8, 186u8, 105u8, 217u8, 115u8, 242u8, 41u8, 70u8, 123u8, 63u8,
+                            234u8,
                         ],
                     )
                 }
@@ -608,9 +609,9 @@ pub mod api {
                             xcm,
                         },
                         [
-                            207u8, 156u8, 37u8, 92u8, 18u8, 49u8, 3u8, 31u8, 153u8, 59u8, 131u8,
-                            46u8, 75u8, 253u8, 233u8, 51u8, 162u8, 101u8, 86u8, 251u8, 57u8, 194u8,
-                            87u8, 161u8, 167u8, 27u8, 202u8, 71u8, 196u8, 22u8, 191u8, 159u8,
+                            143u8, 121u8, 252u8, 163u8, 9u8, 7u8, 249u8, 172u8, 53u8, 115u8, 249u8,
+                            146u8, 131u8, 220u8, 210u8, 240u8, 248u8, 38u8, 95u8, 203u8, 43u8,
+                            160u8, 59u8, 71u8, 105u8, 70u8, 7u8, 224u8, 40u8, 74u8, 62u8, 214u8,
                         ],
                     )
                 }
@@ -1880,6 +1881,25 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = " Retrieve paraids at relay parent"]
+                pub fn para_ids(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
+                    types::ParaIds,
+                    types::para_ids::output::Output,
+                > {
+                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
+                        "ParachainHost",
+                        "para_ids",
+                        types::ParaIds {},
+                        [
+                            86u8, 10u8, 236u8, 98u8, 133u8, 52u8, 231u8, 83u8, 141u8, 12u8, 226u8,
+                            48u8, 104u8, 239u8, 177u8, 89u8, 202u8, 221u8, 170u8, 127u8, 19u8,
+                            141u8, 18u8, 123u8, 212u8, 117u8, 152u8, 231u8, 47u8, 198u8, 220u8,
+                            141u8,
+                        ],
+                    )
+                }
             }
             pub mod types {
                 use super::runtime_types;
@@ -2674,6 +2694,27 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 pub struct SchedulingLookahead {}
+                pub mod para_ids {
+                    use super::runtime_types;
+                    pub mod output {
+                        use super::runtime_types;
+                        pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
+                            runtime_types::polkadot_parachain_primitives::primitives::Id,
+                        >;
+                    }
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct ParaIds {}
             }
         }
         pub mod beefy_api {
@@ -5099,9 +5140,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                104u8, 101u8, 167u8, 115u8, 106u8, 95u8, 240u8, 114u8, 168u8, 228u8, 119u8, 90u8,
-                219u8, 119u8, 59u8, 204u8, 201u8, 222u8, 27u8, 137u8, 26u8, 177u8, 49u8, 202u8,
-                91u8, 179u8, 50u8, 141u8, 72u8, 211u8, 67u8, 23u8,
+                175u8, 154u8, 247u8, 159u8, 103u8, 74u8, 120u8, 74u8, 254u8, 141u8, 150u8, 108u8,
+                26u8, 97u8, 168u8, 170u8, 110u8, 232u8, 250u8, 105u8, 219u8, 48u8, 236u8, 215u8,
+                225u8, 65u8, 47u8, 23u8, 48u8, 62u8, 45u8, 50u8,
             ]
     }
     pub mod system {
@@ -6208,9 +6249,9 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            94u8, 112u8, 186u8, 225u8, 192u8, 81u8, 168u8, 148u8, 112u8, 241u8,
-                            25u8, 26u8, 173u8, 184u8, 107u8, 32u8, 150u8, 36u8, 99u8, 153u8, 118u8,
-                            176u8, 43u8, 10u8, 193u8, 145u8, 143u8, 192u8, 26u8, 81u8, 71u8, 135u8,
+                            65u8, 10u8, 38u8, 82u8, 235u8, 12u8, 128u8, 212u8, 191u8, 7u8, 41u8,
+                            125u8, 205u8, 213u8, 175u8, 108u8, 186u8, 28u8, 46u8, 200u8, 166u8,
+                            122u8, 96u8, 250u8, 178u8, 113u8, 131u8, 226u8, 88u8, 65u8, 169u8, 5u8,
                         ],
                     )
                 }
@@ -8916,6 +8957,25 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Some credit was balanced and added to the TotalIssuance."]
+            pub struct MintedCredit {
+                pub amount: minted_credit::Amount,
+            }
+            pub mod minted_credit {
+                use super::runtime_types;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for MintedCredit {
+                const PALLET: &'static str = "Balances";
+                const EVENT: &'static str = "MintedCredit";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             #[doc = "Some amount was burned from an account."]
             pub struct Burned {
                 pub who: burned::Who,
@@ -8929,6 +8989,25 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for Burned {
                 const PALLET: &'static str = "Balances";
                 const EVENT: &'static str = "Burned";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Some debt has been dropped from the Total Issuance."]
+            pub struct BurnedDebt {
+                pub amount: burned_debt::Amount,
+            }
+            pub mod burned_debt {
+                use super::runtime_types;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for BurnedDebt {
+                const PALLET: &'static str = "Balances";
+                const EVENT: &'static str = "BurnedDebt";
             }
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -9133,6 +9212,126 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for TotalIssuanceForced {
                 const PALLET: &'static str = "Balances";
                 const EVENT: &'static str = "TotalIssuanceForced";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Some balance was placed on hold."]
+            pub struct Held {
+                pub reason: held::Reason,
+                pub who: held::Who,
+                pub amount: held::Amount,
+            }
+            pub mod held {
+                use super::runtime_types;
+                pub type Reason = runtime_types::rococo_runtime::RuntimeHoldReason;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for Held {
+                const PALLET: &'static str = "Balances";
+                const EVENT: &'static str = "Held";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Held balance was burned from an account."]
+            pub struct BurnedHeld {
+                pub reason: burned_held::Reason,
+                pub who: burned_held::Who,
+                pub amount: burned_held::Amount,
+            }
+            pub mod burned_held {
+                use super::runtime_types;
+                pub type Reason = runtime_types::rococo_runtime::RuntimeHoldReason;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for BurnedHeld {
+                const PALLET: &'static str = "Balances";
+                const EVENT: &'static str = "BurnedHeld";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A transfer of `amount` on hold from `source` to `dest` was initiated."]
+            pub struct TransferOnHold {
+                pub reason: transfer_on_hold::Reason,
+                pub source: transfer_on_hold::Source,
+                pub dest: transfer_on_hold::Dest,
+                pub amount: transfer_on_hold::Amount,
+            }
+            pub mod transfer_on_hold {
+                use super::runtime_types;
+                pub type Reason = runtime_types::rococo_runtime::RuntimeHoldReason;
+                pub type Source = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Dest = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for TransferOnHold {
+                const PALLET: &'static str = "Balances";
+                const EVENT: &'static str = "TransferOnHold";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "The `transferred` balance is placed on hold"]
+            #[doc = "at the `dest` account."]
+            pub struct TransferAndHold {
+                pub reason: transfer_and_hold::Reason,
+                pub source: transfer_and_hold::Source,
+                pub dest: transfer_and_hold::Dest,
+                pub transferred: transfer_and_hold::Transferred,
+            }
+            pub mod transfer_and_hold {
+                use super::runtime_types;
+                pub type Reason = runtime_types::rococo_runtime::RuntimeHoldReason;
+                pub type Source = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Dest = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Transferred = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for TransferAndHold {
+                const PALLET: &'static str = "Balances";
+                const EVENT: &'static str = "TransferAndHold";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Some balance was released from hold."]
+            pub struct Released {
+                pub reason: released::Reason,
+                pub who: released::Who,
+                pub amount: released::Amount,
+            }
+            pub mod released {
+                use super::runtime_types;
+                pub type Reason = runtime_types::rococo_runtime::RuntimeHoldReason;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for Released {
+                const PALLET: &'static str = "Balances";
+                const EVENT: &'static str = "Released";
             }
         }
         pub mod storage {
@@ -27279,6 +27478,8 @@ pub mod api {
                 pub who: pure_created::Who,
                 pub proxy_type: pure_created::ProxyType,
                 pub disambiguation_index: pure_created::DisambiguationIndex,
+                pub at: pure_created::At,
+                pub extrinsic_index: pure_created::ExtrinsicIndex,
             }
             pub mod pure_created {
                 use super::runtime_types;
@@ -27286,6 +27487,8 @@ pub mod api {
                 pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
                 pub type ProxyType = runtime_types::rococo_runtime::ProxyType;
                 pub type DisambiguationIndex = ::core::primitive::u16;
+                pub type At = ::core::primitive::u32;
+                pub type ExtrinsicIndex = ::core::primitive::u32;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for PureCreated {
                 const PALLET: &'static str = "Proxy";
@@ -33520,6 +33723,25 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Some credit was balanced and added to the TotalIssuance."]
+            pub struct MintedCredit {
+                pub amount: minted_credit::Amount,
+            }
+            pub mod minted_credit {
+                use super::runtime_types;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for MintedCredit {
+                const PALLET: &'static str = "NisCounterpartBalances";
+                const EVENT: &'static str = "MintedCredit";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             #[doc = "Some amount was burned from an account."]
             pub struct Burned {
                 pub who: burned::Who,
@@ -33533,6 +33755,25 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for Burned {
                 const PALLET: &'static str = "NisCounterpartBalances";
                 const EVENT: &'static str = "Burned";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Some debt has been dropped from the Total Issuance."]
+            pub struct BurnedDebt {
+                pub amount: burned_debt::Amount,
+            }
+            pub mod burned_debt {
+                use super::runtime_types;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for BurnedDebt {
+                const PALLET: &'static str = "NisCounterpartBalances";
+                const EVENT: &'static str = "BurnedDebt";
             }
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
@@ -33737,6 +33978,126 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for TotalIssuanceForced {
                 const PALLET: &'static str = "NisCounterpartBalances";
                 const EVENT: &'static str = "TotalIssuanceForced";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Some balance was placed on hold."]
+            pub struct Held {
+                pub reason: held::Reason,
+                pub who: held::Who,
+                pub amount: held::Amount,
+            }
+            pub mod held {
+                use super::runtime_types;
+                pub type Reason = runtime_types::rococo_runtime::RuntimeHoldReason;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for Held {
+                const PALLET: &'static str = "NisCounterpartBalances";
+                const EVENT: &'static str = "Held";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Held balance was burned from an account."]
+            pub struct BurnedHeld {
+                pub reason: burned_held::Reason,
+                pub who: burned_held::Who,
+                pub amount: burned_held::Amount,
+            }
+            pub mod burned_held {
+                use super::runtime_types;
+                pub type Reason = runtime_types::rococo_runtime::RuntimeHoldReason;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for BurnedHeld {
+                const PALLET: &'static str = "NisCounterpartBalances";
+                const EVENT: &'static str = "BurnedHeld";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "A transfer of `amount` on hold from `source` to `dest` was initiated."]
+            pub struct TransferOnHold {
+                pub reason: transfer_on_hold::Reason,
+                pub source: transfer_on_hold::Source,
+                pub dest: transfer_on_hold::Dest,
+                pub amount: transfer_on_hold::Amount,
+            }
+            pub mod transfer_on_hold {
+                use super::runtime_types;
+                pub type Reason = runtime_types::rococo_runtime::RuntimeHoldReason;
+                pub type Source = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Dest = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for TransferOnHold {
+                const PALLET: &'static str = "NisCounterpartBalances";
+                const EVENT: &'static str = "TransferOnHold";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "The `transferred` balance is placed on hold"]
+            #[doc = "at the `dest` account."]
+            pub struct TransferAndHold {
+                pub reason: transfer_and_hold::Reason,
+                pub source: transfer_and_hold::Source,
+                pub dest: transfer_and_hold::Dest,
+                pub transferred: transfer_and_hold::Transferred,
+            }
+            pub mod transfer_and_hold {
+                use super::runtime_types;
+                pub type Reason = runtime_types::rococo_runtime::RuntimeHoldReason;
+                pub type Source = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Dest = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Transferred = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for TransferAndHold {
+                const PALLET: &'static str = "NisCounterpartBalances";
+                const EVENT: &'static str = "TransferAndHold";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "Some balance was released from hold."]
+            pub struct Released {
+                pub reason: released::Reason,
+                pub who: released::Who,
+                pub amount: released::Amount,
+            }
+            pub mod released {
+                use super::runtime_types;
+                pub type Reason = runtime_types::rococo_runtime::RuntimeHoldReason;
+                pub type Who = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Amount = ::core::primitive::u128;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for Released {
+                const PALLET: &'static str = "NisCounterpartBalances";
+                const EVENT: &'static str = "Released";
             }
         }
         pub mod storage {
@@ -49237,6 +49598,23 @@ pub mod api {
             use super::runtime_types;
             pub struct ConstantsApi;
             impl ConstantsApi {
+                #[doc = " This chain's Universal Location."]
+                pub fn universal_location(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    runtime_types::staging_xcm::v5::junctions::Junctions,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+                        "XcmPallet",
+                        "UniversalLocation",
+                        [
+                            241u8, 114u8, 225u8, 116u8, 227u8, 77u8, 161u8, 134u8, 134u8, 121u8,
+                            72u8, 16u8, 209u8, 208u8, 114u8, 110u8, 163u8, 156u8, 92u8, 109u8,
+                            134u8, 194u8, 160u8, 228u8, 126u8, 244u8, 254u8, 171u8, 162u8, 58u8,
+                            216u8, 63u8,
+                        ],
+                    )
+                }
                 #[doc = " The latest supported version that we advertise. Generally just set it to"]
                 #[doc = " `pallet_xcm::CurrentXcmVersion`."]
                 pub fn advertised_xcm_version(
@@ -49247,6 +49625,40 @@ pub mod api {
                     ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
                         "XcmPallet",
                         "AdvertisedXcmVersion",
+                        [
+                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+                            145u8,
+                        ],
+                    )
+                }
+                #[doc = " The maximum number of local XCM locks that a single account may have."]
+                pub fn max_lockers(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+                        "XcmPallet",
+                        "MaxLockers",
+                        [
+                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
+                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
+                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
+                            145u8,
+                        ],
+                    )
+                }
+                #[doc = " The maximum number of consumers a single remote lock may have."]
+                pub fn max_remote_lock_consumers(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
+                    ::core::primitive::u32,
+                > {
+                    ::subxt::ext::subxt_core::constants::address::StaticAddress::new_static(
+                        "XcmPallet",
+                        "MaxRemoteLockConsumers",
                         [
                             98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
                             125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
@@ -53835,63 +54247,107 @@ pub mod api {
                         amount: ::core::primitive::u128,
                     },
                     #[codec(index = 11)]
+                    #[doc = "Some credit was balanced and added to the TotalIssuance."]
+                    MintedCredit { amount: ::core::primitive::u128 },
+                    #[codec(index = 12)]
                     #[doc = "Some amount was burned from an account."]
                     Burned {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
-                    #[codec(index = 12)]
+                    #[codec(index = 13)]
+                    #[doc = "Some debt has been dropped from the Total Issuance."]
+                    BurnedDebt { amount: ::core::primitive::u128 },
+                    #[codec(index = 14)]
                     #[doc = "Some amount was suspended from an account (it can be restored later)."]
                     Suspended {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
-                    #[codec(index = 13)]
+                    #[codec(index = 15)]
                     #[doc = "Some amount was restored into an account."]
                     Restored {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
-                    #[codec(index = 14)]
+                    #[codec(index = 16)]
                     #[doc = "An account was upgraded."]
                     Upgraded {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                     },
-                    #[codec(index = 15)]
+                    #[codec(index = 17)]
                     #[doc = "Total issuance was increased by `amount`, creating a credit to be balanced."]
                     Issued { amount: ::core::primitive::u128 },
-                    #[codec(index = 16)]
+                    #[codec(index = 18)]
                     #[doc = "Total issuance was decreased by `amount`, creating a debt to be balanced."]
                     Rescinded { amount: ::core::primitive::u128 },
-                    #[codec(index = 17)]
+                    #[codec(index = 19)]
                     #[doc = "Some balance was locked."]
                     Locked {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
-                    #[codec(index = 18)]
+                    #[codec(index = 20)]
                     #[doc = "Some balance was unlocked."]
                     Unlocked {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
-                    #[codec(index = 19)]
+                    #[codec(index = 21)]
                     #[doc = "Some balance was frozen."]
                     Frozen {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
-                    #[codec(index = 20)]
+                    #[codec(index = 22)]
                     #[doc = "Some balance was thawed."]
                     Thawed {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
-                    #[codec(index = 21)]
+                    #[codec(index = 23)]
                     #[doc = "The `TotalIssuance` was forcefully changed."]
                     TotalIssuanceForced {
                         old: ::core::primitive::u128,
                         new: ::core::primitive::u128,
+                    },
+                    #[codec(index = 24)]
+                    #[doc = "Some balance was placed on hold."]
+                    Held {
+                        reason: runtime_types::rococo_runtime::RuntimeHoldReason,
+                        who: ::subxt::ext::subxt_core::utils::AccountId32,
+                        amount: ::core::primitive::u128,
+                    },
+                    #[codec(index = 25)]
+                    #[doc = "Held balance was burned from an account."]
+                    BurnedHeld {
+                        reason: runtime_types::rococo_runtime::RuntimeHoldReason,
+                        who: ::subxt::ext::subxt_core::utils::AccountId32,
+                        amount: ::core::primitive::u128,
+                    },
+                    #[codec(index = 26)]
+                    #[doc = "A transfer of `amount` on hold from `source` to `dest` was initiated."]
+                    TransferOnHold {
+                        reason: runtime_types::rococo_runtime::RuntimeHoldReason,
+                        source: ::subxt::ext::subxt_core::utils::AccountId32,
+                        dest: ::subxt::ext::subxt_core::utils::AccountId32,
+                        amount: ::core::primitive::u128,
+                    },
+                    #[codec(index = 27)]
+                    #[doc = "The `transferred` balance is placed on hold"]
+                    #[doc = "at the `dest` account."]
+                    TransferAndHold {
+                        reason: runtime_types::rococo_runtime::RuntimeHoldReason,
+                        source: ::subxt::ext::subxt_core::utils::AccountId32,
+                        dest: ::subxt::ext::subxt_core::utils::AccountId32,
+                        transferred: ::core::primitive::u128,
+                    },
+                    #[codec(index = 28)]
+                    #[doc = "Some balance was released from hold."]
+                    Released {
+                        reason: runtime_types::rococo_runtime::RuntimeHoldReason,
+                        who: ::subxt::ext::subxt_core::utils::AccountId32,
+                        amount: ::core::primitive::u128,
                     },
                 }
             }
@@ -57994,6 +58450,8 @@ pub mod api {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         proxy_type: runtime_types::rococo_runtime::ProxyType,
                         disambiguation_index: ::core::primitive::u16,
+                        at: ::core::primitive::u32,
+                        extrinsic_index: ::core::primitive::u32,
                     },
                     #[codec(index = 2)]
                     #[doc = "A pure proxy was killed by its spawner."]
