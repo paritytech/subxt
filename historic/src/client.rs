@@ -4,6 +4,7 @@ mod offline_client;
 use std::marker::PhantomData;
 use crate::config::Config;
 use crate::extrinsics::ExtrinsicsClient;
+use crate::storage::StorageClient;
 
 // We keep these traits internal, so that we can mess with them later if needed,
 // and instead only the concrete types are public which wrap these trait impls.
@@ -37,5 +38,10 @@ where
     /// Work with extrinsics.
     pub fn extrinsics(&'_ self) -> ExtrinsicsClient<'_, Client, T> {
         ExtrinsicsClient::new(&self.client)
+    }
+
+    /// Work with storage.
+    pub fn storage(&'_ self) -> StorageClient<'_, Client, T> {
+        StorageClient::new(&self.client)    
     }
 }

@@ -9,3 +9,4 @@ pub mod config;
 pub mod client;
 pub mod error;
 pub mod extrinsics;
+pub mod storage;
