@@ -53,6 +53,7 @@ frame-decode = { workspace = true, features = ["legacy"] }
 frame-metadata = { workspace = true, features = ["legacy"] }
 scale-type-resolver = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 codec = { workspace = true }
 primitive-types = { workspace = true }
 scale-info = { workspace = true }
@@ -60,4 +61,4 @@ scale-info-legacy = { workspace = true, optional = true }
 scale-decode = { workspace = true }
 thiserror = { workspace = true }
 sp-crypto-hashing = { workspace = true }
-
+url = { workspace = true }

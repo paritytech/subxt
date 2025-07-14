@@ -7,6 +7,8 @@
 #[non_exhaustive]
 pub enum Error {
     #[error(transparent)]
+    OnlineClientError(#[from] OnlineClientError),
+    #[error(transparent)]
     OfflineClientAtBlockError(#[from] OfflineClientAtBlockError),
     #[error(transparent)]
     OnlineClientAtBlockError(#[from] OnlineClientAtBlockError),
@@ -14,6 +16,20 @@ pub enum Error {
     ExtrinsicsError(#[from] ExtrinsicsError),
     #[error(transparent)]
     ExtrinsicTransactionExtensionError(#[from] ExtrinsicTransactionExtensionError),
+}
+
+/// Errors consctructing an online client.
+#[allow(missing_docs)]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum OnlineClientError {
+    #[error("Cannot construct OnlineClient: The URL provided is invalid: {url}")]
+    InvalidUrl {
+        /// The URL that was invalid.
+        url: String
+    },
+    #[error("Cannot construct OnlineClient owing to an RPC client error: {0}")]
+    RpcClientError(#[from] subxt_rpcs::Error),
 }
 
 /// Errors constructing an offline client at a specific block number.

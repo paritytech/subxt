@@ -5708,9 +5708,11 @@ dependencies = [
  "scale-info-legacy",
  "scale-type-resolver",
  "serde",
+ "serde_json",
  "sp-crypto-hashing",
  "subxt-rpcs",
  "thiserror 2.0.12",
+ "url",
 ]
 
 [[package]]

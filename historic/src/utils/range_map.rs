@@ -9,6 +9,11 @@ pub struct RangeMap<K, V> {
 }
 
 impl <K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMap<K, V> {
+    /// Build an empty [`RangeMap`] as a placeholder.
+    pub fn empty() -> Self {
+        RangeMap { mapping: Vec::new() }
+    }
+
     /// Build a [`RangeMap`].
     pub fn builder() -> RangeMapBuilder<K, V> {
         RangeMapBuilder {

@@ -1,25 +1,81 @@
-use crate::error::OnlineClientAtBlockError;
+use std::sync::Arc;
+use crate::error::{ OnlineClientError, OnlineClientAtBlockError };
 use crate::config::Config;
 use crate::client::OfflineClientAtBlockT;
 use super::ClientAtBlock;
 use codec::{ Compact, Encode, Decode };
 use frame_metadata::{ RuntimeMetadata, RuntimeMetadataPrefixed };
 use subxt_rpcs::methods::chain_head::ArchiveCallResult;
-use subxt_rpcs::ChainHeadRpcMethods;
+use subxt_rpcs::{ ChainHeadRpcMethods, RpcClient, Error as RpcError };
 use scale_info_legacy::TypeRegistrySet;
+use url::Url;
 
 /// A client which exposes the means to decode historic data on a chain online.
+#[derive(Clone, Debug)]
 pub struct OnlineClient<T: Config> {
+    inner: Arc<OnlineClientInner<T>>,
+}
+
+#[derive(Debug)]
+struct OnlineClientInner<T: Config> {
     /// The configuration for this client.
     config: T,
     /// The RPC methods used to communicate with the node.
     rpc_methods: ChainHeadRpcMethods<T>,
 }
 
+// The default constructors assume Jsonrpsee.
+#[cfg(feature = "jsonrpsee")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
 impl <T: Config> OnlineClient<T> {
+    /// Construct a new [`OnlineClient`] using default settings which
+    /// point to a locally running node on `ws://127.0.0.1:9944`.
+    /// 
+    /// **Note:** This will only work if the local node is an archive node.
+    pub async fn new(config: T) -> Result<OnlineClient<T>, OnlineClientError> {
+        let url = "ws://127.0.0.1:9944";
+        OnlineClient::from_url(config, url).await
+    }
+
+    /// Construct a new [`OnlineClient`], providing a URL to connect to.
+    pub async fn from_url(config: T, url: impl AsRef<str>) -> Result<OnlineClient<T>, OnlineClientError> {
+        let url_str = url.as_ref();
+        let url = Url::parse(url_str).map_err(|_| OnlineClientError::InvalidUrl {
+            url: url_str.to_string(),
+        })?;
+        if !is_url_secure(&url) {
+            return Err(OnlineClientError::RpcClientError(RpcError::InsecureUrl(url_str.to_string())));
+        }
+        OnlineClient::from_insecure_url(config, url).await
+    }
+
+    /// Construct a new [`OnlineClient`], providing a URL to connect to.
+    ///
+    /// Allows insecure URLs without SSL encryption, e.g. (http:// and ws:// URLs).
+    pub async fn from_insecure_url(config: T, url: impl AsRef<str>) -> Result<OnlineClient<T>, OnlineClientError> {
+        let rpc_client = RpcClient::from_insecure_url(url).await?;
+        Ok(OnlineClient::from_rpc_client(config, rpc_client))
+    }
+}
+
+impl <T: Config> OnlineClient<T> {
+    /// Construct a new [`OnlineClient`] by providing an [`RpcClient`] to drive the connection,
+    /// and some configuration for the chain we're connecting to.
+    pub fn from_rpc_client(
+        config: T,
+        rpc_client: impl Into<RpcClient>,
+    ) -> OnlineClient<T> {
+        let rpc_client = rpc_client.into();
+        let rpc_methods = ChainHeadRpcMethods::new(rpc_client);
+        OnlineClient { inner: Arc::new(OnlineClientInner { config, rpc_methods }) }
+    }
+
+    /// Pick the block height at which to operate. This references data from the
+    /// [`OnlineClient`] it's called on, and so cannot outlive it.
     pub async fn at(&'_ self, block_number: u64) -> Result<ClientAtBlock<OnlineClientAtBlock<'_, T>, T>, OnlineClientAtBlockError> {
-        let config = &self.config;
-        let rpc_methods = &self.rpc_methods;
+        let config = &self.inner.config;
+        let rpc_methods = &self.inner.rpc_methods;
+
         let block_hash = rpc_methods
             .archive_v1_hash_by_height(block_number as usize)
             .await
@@ -27,10 +83,24 @@ impl <T: Config> OnlineClient<T> {
             .pop()
             .ok_or_else(|| OnlineClientAtBlockError::BlockNotFound { block_number })?
             .into();
-        let spec_version = get_spec_version(&rpc_methods, block_hash).await?;
-        let metadata = get_metadata(&rpc_methods, block_hash).await?;
 
-        let historic_types = self.config.legacy_types_for_spec_version(spec_version);
+        // Get our configuration, or fetch from the node if not available.
+        let spec_version = if let Some(spec_version) = config.spec_version_for_block_number(block_number) {
+            spec_version
+        } else {
+            // Fetch spec version. Caching this doesn't really make sense, so either
+            // details are provided offline or we fetch them every time.
+            get_spec_version(rpc_methods, block_hash).await?
+        };
+        let metadata = if let Some(metadata) = config.metadata_for_spec_version(spec_version) {
+            metadata
+        } else {
+            // Fetch and then give our config the opportunity to cache this metadata.
+            let metadata = get_metadata(rpc_methods, block_hash).await?;
+            config.set_metadata_for_spec_version(spec_version, metadata)
+        };
+
+        let historic_types = config.legacy_types_for_spec_version(spec_version);
 
         Ok(ClientAtBlock::new(OnlineClientAtBlock {
             config,
@@ -57,12 +127,12 @@ pub trait OnlineClientAtBlockT<'client, T: Config + 'client>: OfflineClientAtBlo
 // private to allow changes if possible.
 #[doc(hidden)]
 pub struct OnlineClientAtBlock<'client, T: Config + 'client> {
-    /// The configuration for thie chain.
+    /// The configuration for this chain.
     config: &'client T,
     /// Historic types to use at this block number.
     historic_types: TypeRegistrySet<'client>,
     /// Metadata to use at this block number.
-    metadata: RuntimeMetadata,
+    metadata: Arc<RuntimeMetadata>,
     /// We also need RPC methods for online interactions.
     rpc_methods: &'client ChainHeadRpcMethods<T>,
     /// The block hash at which this client is operating.
@@ -207,4 +277,15 @@ async fn get_metadata<T: Config>(rpc_methods: &ChainHeadRpcMethods<T>, block_has
         })?;
 
     Ok(metadata.1)
+}
+
+
+fn is_url_secure(url: &Url) -> bool {
+    let secure_scheme = url.scheme() == "https" || url.scheme() == "wss";
+    let is_localhost = url.host().is_some_and(|e| match e {
+        url::Host::Domain(e) => e == "localhost",
+        url::Host::Ipv4(e) => e.is_loopback(),
+        url::Host::Ipv6(e) => e.is_loopback(),
+    });
+    secure_scheme || is_localhost
 }
