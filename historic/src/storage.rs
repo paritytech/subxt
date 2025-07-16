@@ -1,5 +1,5 @@
+use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::Config;
-use crate::client::{ OfflineClientAtBlockT, OnlineClientAtBlockT };
 // use crate::error::StorageError;
 
 /// Work with storage.
@@ -8,7 +8,7 @@ pub struct StorageClient<'atblock, Client, T> {
     marker: std::marker::PhantomData<T>,
 }
 
-impl <'atblock, Client, T> StorageClient<'atblock, Client, T> {
+impl<'atblock, Client, T> StorageClient<'atblock, Client, T> {
     /// Work with storage.
     pub(crate) fn new(client: &'atblock Client) -> Self {
         Self {
@@ -19,21 +19,19 @@ impl <'atblock, Client, T> StorageClient<'atblock, Client, T> {
 }
 
 // Things that we can do online with storage.
-impl <'atblock, 'client: 'atblock, Client, T> StorageClient<'atblock, Client, T>
+impl<'atblock, 'client: 'atblock, Client, T> StorageClient<'atblock, Client, T>
 where
     T: Config + 'client,
-    Client: OnlineClientAtBlockT<'client, T>
+    Client: OnlineClientAtBlockT<'client, T>,
 {
-    
 }
 
 // Things that we can do offline with storage.
-impl <'atblock, 'client: 'atblock, Client, T> StorageClient<'atblock, Client, T>
+impl<'atblock, 'client: 'atblock, Client, T> StorageClient<'atblock, Client, T>
 where
     T: Config + 'client,
-    Client: OfflineClientAtBlockT<'client, T>
+    Client: OfflineClientAtBlockT<'client, T>,
 {
-
 }
 
 /*

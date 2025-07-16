@@ -8,10 +8,12 @@ pub struct RangeMap<K, V> {
     mapping: Vec<(K, K, V)>,
 }
 
-impl <K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMap<K, V> {
+impl<K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMap<K, V> {
     /// Build an empty [`RangeMap`] as a placeholder.
     pub fn empty() -> Self {
-        RangeMap { mapping: Vec::new() }
+        RangeMap {
+            mapping: Vec::new(),
+        }
     }
 
     /// Build a [`RangeMap`].
@@ -23,13 +25,16 @@ impl <K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMap<K, V> {
 
     /// Return the value whose key is within the range, or None if not found.
     pub fn get(&self, key: K) -> Option<&V> {
-        let idx = self.mapping.binary_search_by_key(&key, |&(start, end, _)| {
-            if key >= start && key < end {
-                key
-            } else {
-                start
-            }
-        }).ok()?;
+        let idx = self
+            .mapping
+            .binary_search_by_key(&key, |&(start, end, _)| {
+                if key >= start && key < end {
+                    key
+                } else {
+                    start
+                }
+            })
+            .ok()?;
 
         self.mapping.get(idx).map(|(_, _, val)| val)
     }
@@ -41,9 +46,9 @@ pub struct RangeMapBuilder<K, V> {
     mapping: Vec<(K, K, V)>,
 }
 
-impl <K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
+impl<K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
     /// Try to add a range, mapping block numbers to a spec version.
-    /// 
+    ///
     /// Returns an error if the range is empty or overlaps with an existing range.
     pub fn try_add_range(
         &mut self,
@@ -61,10 +66,14 @@ impl <K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
             return Err(RangeMapError::EmptyRange(start));
         }
 
-        if let Some(&(s, e, _)) = self.mapping.iter().find(|&&(s, e, _)| (start < e && end > s)) {
+        if let Some(&(s, e, _)) = self
+            .mapping
+            .iter()
+            .find(|&&(s, e, _)| (start < e && end > s))
+        {
             return Err(RangeMapError::OverlappingRanges {
                 proposed: (start, end),
-                existing: (s, e)
+                existing: (s, e),
             });
         }
 
@@ -73,9 +82,9 @@ impl <K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
     }
 
     /// Add a range of blocks with the given spec version.
-    /// 
+    ///
     /// # Panics
-    /// 
+    ///
     /// This method will panic if the range is empty or overlaps with an existing range.
     pub fn add_range(mut self, start: K, end: K, val: V) -> Self {
         if let Err(e) = self.try_add_range(start, end, val) {
@@ -87,7 +96,9 @@ impl <K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
     /// Finish adding ranges and build the [`SpecVersionForBlockNumber`].
     pub fn build(mut self) -> RangeMap<K, V> {
         self.mapping.sort_by_key(|&(start, _, _)| start);
-        RangeMap { mapping: self.mapping }
+        RangeMap {
+            mapping: self.mapping,
+        }
     }
 }
 
@@ -99,10 +110,7 @@ pub enum RangeMapError<K: Display> {
     EmptyRange(K),
     /// An error indicating that the proposed block range overlaps with an existing one.
     #[error("Overlapping block ranges are not allowed: proposed range is {}..{}, but we already have {}..{}", proposed.0, proposed.1, existing.0, existing.1)]
-    OverlappingRanges {
-        proposed: (K, K),
-        existing: (K, K),
-    },
+    OverlappingRanges { proposed: (K, K), existing: (K, K) },
 }
 
 #[cfg(test)]
@@ -132,14 +140,19 @@ mod test {
             .add_range(0, 100, 1)
             .add_range(200, 300, 3);
 
-        assert_eq!(spec_version.try_add_range(99, 130, 2).unwrap_err(), RangeMapError::OverlappingRanges {
-            proposed: (99, 130),
-            existing: (0, 100),
-        });
-        assert_eq!(spec_version.try_add_range(170, 201, 2).unwrap_err(), RangeMapError::OverlappingRanges {
-            proposed: (170, 201),
-            existing: (200, 300),
-        });
+        assert_eq!(
+            spec_version.try_add_range(99, 130, 2).unwrap_err(),
+            RangeMapError::OverlappingRanges {
+                proposed: (99, 130),
+                existing: (0, 100),
+            }
+        );
+        assert_eq!(
+            spec_version.try_add_range(170, 201, 2).unwrap_err(),
+            RangeMapError::OverlappingRanges {
+                proposed: (170, 201),
+                existing: (200, 300),
+            }
+        );
     }
-
 }

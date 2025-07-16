@@ -80,8 +80,8 @@ darling = "0.20.10"
 derive-where = "1.2.7"
 either = { version = "1.13.0", default-features = false }
 finito = { version = "0.1.0", default-features = false }
-frame-decode = { version = "0.8.0", default-features = false }
-frame-metadata = { version = "23.0.0", default-features = false, features = ["unstable"] }
+frame-decode = { version = "0.8.2", default-features = false }
+frame-metadata = { version = "23.0.0", default-features = false }
 futures = { version = "0.3.31", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
 hashbrown = "0.14.5"
@@ -102,7 +102,7 @@ scale-bits = { version = "0.7.0", default-features = false }
 scale-decode = { version = "0.16.0", default-features = false }
 scale-encode = { version = "0.10.0", default-features = false }
 scale-type-resolver = { version = "0.2.0" }
-scale-info-legacy = { version = "0.2.2" }
+scale-info-legacy = { version = "0.2.3" }
 scale-typegen = "0.11.1"
 scale-typegen-description = "0.11.0"
 serde = { version = "1.0.210", default-features = false, features = ["derive"] }
@@ -191,3 +191,6 @@ opt-level = 2
 opt-level = 2
 [profile.test.package.smoldot]
 opt-level = 2
+
+[patch.crates-io]
+frame-decode = { path = "../frame-decode" }

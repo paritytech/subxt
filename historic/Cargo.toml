@@ -18,7 +18,7 @@ keywords = ["parity", "substrate", "blockchain"]
 workspace = true
 
 [features]
-default = ["jsonrpsee", "native", "scale-info-legacy"]
+default = ["jsonrpsee", "native"]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
@@ -41,24 +41,23 @@ jsonrpsee = [
     "subxt-rpcs/jsonrpsee",
 ]
 
-# Our default configuration uses scale-info-legacy for historic types,
-# and so requires this feature.
-scale-info-legacy = [
-    "dep:scale-info-legacy"
-]
-
 [dependencies]
 subxt-rpcs = { workspace = true }
-frame-decode = { workspace = true, features = ["legacy"] }
-frame-metadata = { workspace = true, features = ["legacy"] }
+frame-decode = { workspace = true, features = ["legacy", "legacy-types"] }
+frame-metadata = { workspace = true, features = ["std", "legacy"] }
 scale-type-resolver = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 codec = { workspace = true }
 primitive-types = { workspace = true }
 scale-info = { workspace = true }
-scale-info-legacy = { workspace = true, optional = true }
+scale-info-legacy = { workspace = true }
 scale-decode = { workspace = true }
 thiserror = { workspace = true }
 sp-crypto-hashing = { workspace = true }
 url = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }
+scale-value = { workspace = true }
+hex = { workspace = true }

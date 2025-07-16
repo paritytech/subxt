@@ -1,9 +1,8 @@
-
+use super::ClientAtBlock;
 use crate::config::Config;
 use crate::error::OfflineClientAtBlockError;
 use frame_metadata::RuntimeMetadata;
 use scale_info_legacy::TypeRegistrySet;
-use super::ClientAtBlock;
 use std::sync::Arc;
 
 /// A client which exposes the means to decode historic data on a chain offline.
@@ -13,24 +12,31 @@ pub struct OfflineClient<T: Config> {
     config: Arc<T>,
 }
 
-impl <T: Config> OfflineClient<T> {
+impl<T: Config> OfflineClient<T> {
     /// Create a new [`OfflineClient`] with the given configuration.
     pub fn new(config: T) -> Self {
-        OfflineClient { config: Arc::new(config) }
+        OfflineClient {
+            config: Arc::new(config),
+        }
     }
 
     /// Pick the block height at which to operate. This references data from the
     /// [`OfflineClient`] it's called on, and so cannot outlive it.
-    pub fn at<'this>(&'this self, block_number: u64) -> Result<ClientAtBlock<OfflineClientAtBlock<'this, T>, T>, OfflineClientAtBlockError> {
+    pub fn at<'this>(
+        &'this self,
+        block_number: u64,
+    ) -> Result<ClientAtBlock<OfflineClientAtBlock<'this, T>, T>, OfflineClientAtBlockError> {
         let config = &self.config;
-        let spec_version = self.config
+        let spec_version = self
+            .config
             .spec_version_for_block_number(block_number)
-            .ok_or_else(|| OfflineClientAtBlockError::SpecVersionNotFound { block_number })?;
+            .ok_or(OfflineClientAtBlockError::SpecVersionNotFound { block_number })?;
 
         let legacy_types = self.config.legacy_types_for_spec_version(spec_version);
-        let metadata = self.config
+        let metadata = self
+            .config
             .metadata_for_spec_version(spec_version)
-            .ok_or_else(|| OfflineClientAtBlockError::MetadataNotFound { spec_version })?;
+            .ok_or(OfflineClientAtBlockError::MetadataNotFound { spec_version })?;
 
         Ok(ClientAtBlock::new(OfflineClientAtBlock {
             config,
@@ -64,7 +70,9 @@ pub struct OfflineClientAtBlock<'client, T: Config + 'client> {
     metadata: Arc<RuntimeMetadata>,
 }
 
-impl <'client, T: Config + 'client> OfflineClientAtBlockT<'client, T> for OfflineClientAtBlock<'client, T> {
+impl<'client, T: Config + 'client> OfflineClientAtBlockT<'client, T>
+    for OfflineClientAtBlock<'client, T>
+{
     fn config(&self) -> &'client T {
         self.config
     }

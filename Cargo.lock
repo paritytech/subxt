@@ -1931,9 +1931,7 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1276c23a1fb234d9f81b5f71c526437f2a55ab4419f29bfe1196ac4ee2f706c"
+version = "0.8.2"
 dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
@@ -1941,6 +1939,7 @@ dependencies = [
  "scale-info",
  "scale-info-legacy",
  "scale-type-resolver",
+ "serde_yaml",
  "sp-crypto-hashing",
 ]
 
@@ -4450,16 +4449,16 @@ dependencies = [
 
 [[package]]
 name = "scale-info-legacy"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe4c781c622e7c19fa3dd5442cad73da9946a370facc07d9d30743ac7fecd110"
+checksum = "f5da3f59983b08a37d8d979d2326bdc00e8cca57b3d28fb05bdc0f6d7c28600c"
 dependencies = [
- "derive_more",
  "hashbrown 0.15.3",
  "scale-type-resolver",
  "serde",
  "smallstr",
  "smallvec",
+ "thiserror 2.0.12",
  "yap",
 ]
 
@@ -4758,6 +4757,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "87607cb1398ed59d48732e575a4c28a7a8ebf2454b964fe3f224f2afc07909e1"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "serde_yaml"
+version = "0.9.34+deprecated"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
+dependencies = [
+ "indexmap 2.9.0",
+ "itoa",
+ "ryu",
+ "serde",
+ "unsafe-libyaml",
 ]
 
 [[package]]
@@ -5701,17 +5713,20 @@ version = "0.42.1"
 dependencies = [
  "frame-decode",
  "frame-metadata 23.0.0",
+ "hex",
  "parity-scale-codec",
  "primitive-types",
  "scale-decode",
  "scale-info",
  "scale-info-legacy",
  "scale-type-resolver",
+ "scale-value",
  "serde",
  "serde_json",
  "sp-crypto-hashing",
  "subxt-rpcs",
  "thiserror 2.0.12",
+ "tokio",
  "url",
 ]
 
@@ -6093,7 +6108,9 @@ dependencies = [
  "bytes",
  "libc",
  "mio",
+ "parking_lot",
  "pin-project-lite",
+ "signal-hook-registry",
  "socket2",
  "tokio-macros",
  "windows-sys 0.52.0",
@@ -6443,6 +6460,12 @@ dependencies = [
  "crypto-common",
  "subtle",
 ]
+
+[[package]]
+name = "unsafe-libyaml"
+version = "0.2.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "673aac59facbab8a9007c7f6108d11f63b603f7cabff99fabf650fea5c32b861"
 
 [[package]]
 name = "untrusted"

@@ -3,10 +3,10 @@ pub enum Either<A, B> {
     /// The first possibility.
     A(A),
     /// The second possibility.
-    B(B)
+    B(B),
 }
 
-impl <A, B> Iterator for Either<A, B>
+impl<A, B> Iterator for Either<A, B>
 where
     A: Iterator,
     B: Iterator<Item = A::Item>,
