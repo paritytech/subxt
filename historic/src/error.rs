@@ -18,6 +18,8 @@ pub enum Error {
     ExtrinsicTransactionExtensionError(#[from] ExtrinsicTransactionExtensionError),
     #[error(transparent)]
     ExtrinsicCallError(#[from] ExtrinsicCallError),
+    #[error(transparent)]
+    StorageError(#[from] StorageError),
 }
 
 /// Errors consctructing an online client.
@@ -192,5 +194,16 @@ pub enum ExtrinsicCallError {
         name: String,
         /// The bytes that were left over after decoding the extrinsic call.
         leftover_bytes: Vec<u8>,
+    },
+}
+
+#[allow(missing_docs)]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum StorageError {
+    #[error("Could not fetch storage entry: {reason}")]
+    FetchError {
+        /// The error that occurred while fetching the storage entry.
+        reason: subxt_rpcs::Error,
     },
 }
