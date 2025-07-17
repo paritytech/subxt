@@ -4,30 +4,33 @@
 
 //! This module exposes a [`RoundRobinRpcClient`], which is useful for load balancing
 //! requests across multiple RPC clients.
-//! 
+//!
 //! # Example
-//! 
+//!
 //! ```rust,no_run
 //! # async fn foo() -> Result<(), Box<dyn std::error::Error>> {
 //! use subxt_rpcs::client::{RpcClient, RoundRobinRpcClient, jsonrpsee_client};
-//! 
+//!
 //! // Construct some RpcClients (we'll make some jsonrpsee clients here, but
 //! // you could use anything which implements `RpcClientT`).
 //! let client1 = jsonrpsee_client("http://localhost:8080").await.unwrap();
 //! let client2 = jsonrpsee_client("http://localhost:8081").await.unwrap();
 //! let client3 = jsonrpsee_client("http://localhost:8082").await.unwrap();
-//! 
+//!
 //! let round_robin_client = RoundRobinRpcClient::new(vec![client1, client2, client3]);
-//! 
+//!
 //! // Build an RPC Client that can be used in Subxt or in conjunction with
-//! // the RPC methods provided in this crate. 
+//! // the RPC methods provided in this crate.
 //! let rpc_client = RpcClient::new(round_robin_client);
 //! # Ok(())
 //! # }
 //! ```
 
-use super::{ RpcClientT, RawRpcFuture, RawRpcSubscription };
-use std::sync::{ Arc, atomic::{ AtomicUsize, Ordering } };
+use super::{RawRpcFuture, RawRpcSubscription, RpcClientT};
+use std::sync::{
+    Arc,
+    atomic::{AtomicUsize, Ordering},
+};
 
 /// A simple RPC client which is provided a set of clients on initialization and
 /// will round-robin through them for each request.
@@ -42,11 +45,11 @@ struct RoundRobinRpcClientInner<Client> {
     next_index: AtomicUsize,
 }
 
-impl <Client: RpcClientT> RoundRobinRpcClient<Client> {
+impl<Client: RpcClientT> RoundRobinRpcClient<Client> {
     /// Create a new `RoundRobinRpcClient` with the given clients.
-    /// 
+    ///
     /// # Panics
-    /// 
+    ///
     /// Panics if the `clients` vector is empty.
     pub fn new(clients: Vec<Client>) -> Self {
         assert!(!clients.is_empty(), "At least one client must be provided");
@@ -69,7 +72,7 @@ impl <Client: RpcClientT> RoundRobinRpcClient<Client> {
     }
 }
 
-impl <Client: RpcClientT> RpcClientT for RoundRobinRpcClient<Client> {
+impl<Client: RpcClientT> RpcClientT for RoundRobinRpcClient<Client> {
     fn request_raw<'a>(
         &'a self,
         method: &'a str,
