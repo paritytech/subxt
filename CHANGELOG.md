@@ -4,6 +4,103 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.43.0] - 2025-07-17
+
+This is a reasonably small release which is mainly bug fixing, but has a couple of changes I'd like to elaborate on:
+
+### Remove `codec::Encode` and `codec::Decode` derives from generated APIs by default ([#2008](https://github.com/paritytech/subxt/pull/2008))
+
+When generating an API using the `#[subxt::subxt(...)]` macro (or programatically via `subxt-codegen`), we had always previously added `parity_scale_codec::Encode` and `parity_scale_codec::Decode` derives to all of the generated types. Most places in Subxt have not made use of these for a long time (relying instead on `scale_encode::EncodeAsType` and `scale_decode::DecodeAsType`, since they allow encoding and encoding which takes the type information into account and can more gracefully handle incompatibilities).
+
+We eventually [hit an issue](https://github.com/paritytech/subxt/issues/2006) to which the most appropriate fix was just to remove these derives.
+
+If you still need the `parity_scale_codec::Encode` or `parity_scale_codec::Decode` derives on certain types, you have two options:
+
+1. Use the [`derive_for_type`](https://docs.rs/subxt/latest/subxt/attr.subxt.html#derive_for_typepath---derive--) attr to add them back where needed, eg:
+   ```rust
+   #[subxt::subxt(
+     ...
+     derive_for_type(
+       path = "staging_xcm::v3::multilocation::MultiLocation",
+       derive = "parity_scale_codec::Encode, parity_scale_codec::Decode",
+       recursive
+     )
+   )]
+   ```
+2. Use the [`derive_for_all_types`](https://docs.rs/subxt/latest/subxt/attr.subxt.html#derive_for_all_types--) attr to add them back everywhere, eg:
+   ```
+   #[subxt::subxt(
+     ...
+     derive_for_all_types = "parity_scale_codec::Encode, parity_scale_codec::Decode"
+   )]
+   ```
+
+Prefer (1) where possible to reduce the amount of generated code, and reduce the likelihood of running into [issues](https://github.com/paritytech/subxt/issues/2006) around those derives in certain edge cases.
+
+This PR changes some things around storage keys to remove one last requirement for `Encode` and `Decode` derives, and also as a side effect changes `api.storage().call_raw()` slightly to no longer also try to decode the resulting type via `Decode`, leaving this to the user (and also meaning it's much easier now for the user to obtain the raw bytes for some storage entry).
+
+In other words, instead of doing something like:
+
+```rust
+let (compact_len, metadata) = rt
+        .call_raw::<(Compact<u32>, frame_metadata::RuntimeMetadataPrefixed)>(
+            "Metadata_metadata",
+            None,
+        )
+        .await?;
+```
+
+You would now do:
+
+```rust
+let meta_bytes = rt.call_raw("Metadata_metadata", None).await?;
+let (compact_len, metadata): (Compact<u32>, frame_metadata::RuntimeMetadataPrefixed) =
+    Decode::decode(&mut &*meta_bytes)?;
+```
+
+### Address some issues around tx mortality ([#2025](https://github.com/paritytech/subxt/pull/2025))
+
+Prior to this change, the intended behavior was that any transaction submitted via an `OnlineClient` would have a mortality of 32 blocks by default, and any transaction submitted via an `OfflineClient` would be immortal by default. A couple of issues were present or cropped up however:
+- If you explicitly configure the mortality via setting params like `PolkadotExtrinsicParamsBuilder::new().mortal(32).build()`, the `OfflineClient` transaction would _still_ be immortal, because it didn't have enough information to properly configure the mortality as asked for (by virtue of being offline and unable to fetch it).
+- The intended behaviour turned out to have been broken, and transactions were being submitted as immortal even via the `OnlineClient` by default, unless mortality was explicitly configured.
+- There was no easy way to actually set the mortality for an `OfflineClient` transaction; you'd have to do something like this:
+  ```rust
+  let params = DefaultExtrinsicParamsBuilder::new();
+  params.5 = CheckMortalityParams::mortal_from_unchecked(for_n_blocks, from_block_n, from_block_hash);
+  ```
+
+With this PR, transactions _are_ now mortal by default using the `OnlineClient`, we now return an error if you try to construct a transaction with the `OfflineClient` and try to use `params.mortal(..)` when configuring it, and we expose `params.mortal_from_unchecked(..)` to allow configuration for offline transactions without the ugly code above.
+
+In this PR, we also discovered an issue decoding `Eras` and fixed this, so that decoding the mortality of a transaction when it is mortal should now work. 
+
+### Add FFI example ([#2037](https://github.com/paritytech/subxt/pull/2037))
+
+I'd like to do a quick shoutout to @wassimans, who submitted an excellent example for how to interact with Subxt via the C FFI in Python and Node.JS. This is something I've wanted to add for a while, so it's lovely to see this new example which highlights one of the strengths of Subxt over Javascript based compatitors in the space.
+
+All of the non-trivial changes in this release are listed below:
+
+### Added
+
+- Add FFI example ([#2037](https://github.com/paritytech/subxt/pull/2037))
+
+### Changed
+
+- Remove `codec::Encode` and `codec::Decode` derives from generated APIs by default ([#2008](https://github.com/paritytech/subxt/pull/2008))
+- Address some issues around tx mortality ([#2025](https://github.com/paritytech/subxt/pull/2025))
+
+### Fixed
+
+- Fix 'subxt explore storage': don't turn keys to bytes ([#2038](https://github.com/paritytech/subxt/pull/2038))
+- Refactor: improve nonce and block injection in extrinsic params ([#2032](https://github.com/paritytech/subxt/pull/2032))
+- Improve docs for `at_latest` ([#2035](https://github.com/paritytech/subxt/pull/2035))
+- Clippy fixes for latest Rustc ([#2033](https://github.com/paritytech/subxt/pull/2033))
+- docs: fix minor comment typos ([#2027](https://github.com/paritytech/subxt/pull/2027))
+- chore: remove redundant backtick in comment ([#2020](https://github.com/paritytech/subxt/pull/2020))
+- Keep codec attrs even when Encode/Decode not used ([#2023](https://github.com/paritytech/subxt/pull/2023))
+- Run CI on v0.N.x branches or PRs to them for ease of backporting ([#2017](https://github.com/paritytech/subxt/pull/2017))
+- De-dup types early in CLI/macro so that derives/substitutes work for de-duped types ([#2015](https://github.com/paritytech/subxt/pull/2015))
+- If only one hasher, always treat any key as a single and not NMap key, even if it's a tuple. ([#2010](https://github.com/paritytech/subxt/pull/2010))
+
 ## [0.42.1] - 2025-05-12
 
 This patch release reduces the rust-version to 1.85.0, given that we don't use any features newer than this at the moment.
