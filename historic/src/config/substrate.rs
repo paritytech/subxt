@@ -107,14 +107,12 @@ impl Config for SubstrateConfig {
     fn set_metadata_for_spec_version(
         &self,
         spec_version: u32,
-        metadata: frame_metadata::RuntimeMetadata,
-    ) -> Arc<frame_metadata::RuntimeMetadata> {
+        metadata: Arc<frame_metadata::RuntimeMetadata>,
+    ) {
         self.metadata_for_spec_version
             .lock()
             .unwrap()
-            .insert(spec_version, Arc::new(metadata));
-        self.metadata_for_spec_version(spec_version)
-            .expect("We just inserted this metadata, so it should be available")
+            .insert(spec_version, metadata);
     }
 
     fn hash(s: &[u8]) -> <Self as Config>::Hash {

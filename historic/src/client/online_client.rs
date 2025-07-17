@@ -114,7 +114,9 @@ impl<T: Config> OnlineClient<T> {
         } else {
             // Fetch and then give our config the opportunity to cache this metadata.
             let metadata = get_metadata(rpc_methods, block_hash).await?;
-            config.set_metadata_for_spec_version(spec_version, metadata)
+            let metadata = Arc::new(metadata);
+            config.set_metadata_for_spec_version(spec_version, metadata.clone());
+            metadata
         };
 
         let historic_types = config.legacy_types_for_spec_version(spec_version);

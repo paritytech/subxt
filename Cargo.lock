@@ -1931,7 +1931,9 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.8.2"
+version = "0.8.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e56c0e51972d7b26ff76966c4d0f2307030df9daa5ce0885149ece1ab7ca5ad"
 dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
@@ -5709,7 +5711,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-historic"
-version = "0.42.1"
+version = "0.0.1"
 dependencies = [
  "frame-decode",
  "frame-metadata 23.0.0",

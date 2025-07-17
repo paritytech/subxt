@@ -37,13 +37,13 @@ pub trait Config: RpcConfig {
     ) -> Option<Arc<frame_metadata::RuntimeMetadata>>;
 
     /// Set some metadata for a given spec version. the [`crate::client::OnlineClient`] will call this if it has
-    /// to retrieve metadata from the chain, to give this the opportunity to cache it. This should then return
-    /// either a reference to the metadata that was cached, or the metadata that was passed in if it was not cached.
+    /// to retrieve metadata from the chain, to give this the opportunity to cache it. The configuration can
+    /// do nothing if it prefers.
     fn set_metadata_for_spec_version(
         &self,
         spec_version: u32,
-        metadata: frame_metadata::RuntimeMetadata,
-    ) -> Arc<frame_metadata::RuntimeMetadata>;
+        metadata: Arc<frame_metadata::RuntimeMetadata>,
+    );
 
     /// Return legacy types (ie types to use with Runtimes that return pre-V14 metadata) for a given spec version.
     fn legacy_types_for_spec_version<'this>(

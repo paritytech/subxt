@@ -71,8 +71,8 @@ impl Config for PolkadotConfig {
     fn set_metadata_for_spec_version(
         &self,
         spec_version: u32,
-        metadata: frame_metadata::RuntimeMetadata,
-    ) -> Arc<frame_metadata::RuntimeMetadata> {
+        metadata: Arc<frame_metadata::RuntimeMetadata>,
+    ) {
         self.0.set_metadata_for_spec_version(spec_version, metadata)
     }
 

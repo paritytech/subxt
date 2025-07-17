@@ -9,6 +9,7 @@ async fn main() -> Result<(), Error> {
     // Create an online client for the Polkadot relay chain, pointed at a Polkadot archive node.
     let client = OnlineClient::from_url(config, "wss://rpc.polkadot.io").await?;
 
+    // Iterate through some randomly selected old blocks to show how to fetch and decode extrinsics.
     for block_number in 123456.. {
         println!("=== Block {block_number} ===");
 
