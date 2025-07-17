@@ -50,20 +50,20 @@ fn generate_pallet_view_function(
                 // just be an underscore, so fix any such names we find to work in structs.
                 let mut name = input.name.trim_start_matches('_').to_string();
                 if name.is_empty() {
-                    name = format!("_{}", idx);
+                    name = format!("_{idx}");
                 }
                 while !unique_names.insert(name.clone()) {
-                    name = format!("{}_param{}", name, idx);
+                    name = format!("{name}_param{idx}");
                 }
 
                 // The alias type name is based on the name, above.
                 let mut alias = name.to_upper_camel_case();
                 // Note: name is not empty.
                 if alias.as_bytes()[0].is_ascii_digit() {
-                    alias = format!("Param{}", alias);
+                    alias = format!("Param{alias}");
                 }
                 while !unique_aliases.insert(alias.clone()) {
-                    alias = format!("{}Param{}", alias, idx);
+                    alias = format!("{alias}Param{idx}");
                 }
 
                 // Path to the actual type we'll have generated for this input.

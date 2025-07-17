@@ -40,7 +40,7 @@ where
         RuntimeApi::new(self.client.clone(), block_ref.into())
     }
 
-    /// Obtain a runtime API interface at the latest block hash.
+    /// Obtain a runtime API interface at the latest finalized block.
     pub fn at_latest(
         &self,
     ) -> impl Future<Output = Result<RuntimeApi<T, Client>, Error>> + Send + 'static {

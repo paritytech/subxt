@@ -239,7 +239,7 @@ fn pallets_as_string(metadata: &Metadata) -> String {
         let mut strings: Vec<_> = metadata.pallets().map(|p| p.name()).collect();
         strings.sort();
         for pallet in strings {
-            write!(output, "\n    {}", pallet).unwrap();
+            write!(output, "\n    {pallet}").unwrap();
         }
         output
     }
@@ -254,7 +254,7 @@ pub fn runtime_apis_as_string(metadata: &Metadata) -> String {
         let mut strings: Vec<_> = metadata.runtime_api_traits().map(|p| p.name()).collect();
         strings.sort();
         for api in strings {
-            write!(output, "\n    {}", api).unwrap();
+            write!(output, "\n    {api}").unwrap();
         }
         output
     }

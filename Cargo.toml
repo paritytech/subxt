@@ -31,6 +31,7 @@ exclude = [
     "signer/wasm-tests",
     "examples/wasm-example",
     "examples/parachain-example",
+    "examples/ffi-example",
 ]
 resolver = "2"
 

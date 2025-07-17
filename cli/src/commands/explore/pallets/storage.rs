@@ -8,13 +8,9 @@ use scale_typegen_description::type_description;
 use scale_value::Value;
 use std::fmt::Write;
 use std::write;
-
-use subxt::{
-    ext::scale_encode::EncodeAsType,
-    metadata::{
-        Metadata,
-        types::{PalletMetadata, StorageEntryType, StorageMetadata},
-    },
+use subxt::metadata::{
+    Metadata,
+    types::{PalletMetadata, StorageEntryType, StorageMetadata},
 };
 
 use crate::utils::{
@@ -39,8 +35,7 @@ pub async fn explore_storage(
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();
-    let trailing_args = command.trailing_args.join(" ");
-    let trailing_args = trailing_args.trim();
+    let trailing_args = command.trailing_args;
 
     let Some(storage_metadata) = pallet_metadata.storage() else {
         writeln!(
@@ -149,31 +144,46 @@ pub async fn explore_storage(
         return Ok(());
     }
 
-    let storage_entry_keys: Vec<Value> = match (trailing_args.is_empty(), key_ty_id) {
-        (false, None) => {
+    let storage_entry_keys: Vec<Value> = match (!trailing_args.is_empty(), key_ty_id.is_some()) {
+        // keys provided, keys not needed.
+        (true, false) => {
+            let trailing_args_str = trailing_args.join(" ");
             let warning = format!(
-                "Warning: You submitted a key, but no key is needed: \"{trailing_args}\". To access the storage value, please do not provide any key."
+                "Warning: You submitted one or more keys \"{trailing_args_str}\", but no key is needed. To access the storage value, please do not provide any keys."
             );
             writeln!(output, "{}", warning.yellow())?;
             return Ok(());
         }
-        (true, Some(_)) => {
+        // Keys not provided, keys needed.
+        (false, true) => {
             // just return. The user was instructed above how to provide a value if they want to.
             return Ok(());
         }
-        (true, None) => vec![],
-        (false, Some(type_id)) => {
-            let value = parse_string_into_scale_value(trailing_args)?;
-            let value_str = value.indent(4);
+        // Keys not provided, keys not needed.
+        (false, false) => vec![],
+        // Keys provided, keys needed.
+        (true, true) => {
+            // Each trailing arg is parsed into its own value, to be provided as a separate storage key.
+            let values = trailing_args
+                .iter()
+                .map(|arg| parse_string_into_scale_value(arg))
+                .collect::<color_eyre::Result<Vec<_>>>()?;
+
+            // We do this just to print them out.
+            let values_str = values
+                .iter()
+                .map(|v| v.to_string().highlight())
+                .collect::<Vec<_>>()
+                .join("\n");
+            let value_str = values_str.indent(4);
+
             writedoc! {output, "
 
             You submitted the following {key_value_placeholder}:
             {value_str}
             "}?;
 
-            let key_bytes = value.encode_as_type(type_id, metadata.types())?;
-            let bytes_composite = Value::from_bytes(key_bytes);
-            vec![bytes_composite]
+            values
         }
     };
 
@@ -206,10 +216,8 @@ fn storage_entries_string(storage_metadata: &StorageMetadata, pallet_name: &str)
     if storage_metadata.entries().is_empty() {
         format!("No {storage_entry_placeholder}'s available in the \"{pallet_name}\" pallet.")
     } else {
-        let mut output = format!(
-            "Available {storage_entry_placeholder}'s in the \"{}\" pallet:",
-            pallet_name
-        );
+        let mut output =
+            format!("Available {storage_entry_placeholder}'s in the \"{pallet_name}\" pallet:");
         let mut strings: Vec<_> = storage_metadata
             .entries()
             .iter()
@@ -217,7 +225,7 @@ fn storage_entries_string(storage_metadata: &StorageMetadata, pallet_name: &str)
             .collect();
         strings.sort();
         for entry in strings {
-            write!(output, "\n    {}", entry).unwrap();
+            write!(output, "\n    {entry}").unwrap();
         }
         output
     }

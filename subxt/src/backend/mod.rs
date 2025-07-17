@@ -945,7 +945,7 @@ mod test {
                     Err::<Infallible, _>(disconnected_will_reconnect())
                 })
                 .method_handler_once("chainHead_v1_continue", async move |_params| {
-                    // Next call; acknowledge the "continue" and return reamining storage items.
+                    // Next call; acknowledge the "continue" and return remaining storage items.
                     tokio::spawn(async move {
                         tx2.send(storage_items("Id1", &[storage_result("ID2", "Data2")]))
                             .unwrap();
@@ -959,7 +959,7 @@ mod test {
 
             let backend = build_backend_spawn_background(rpc_client);
 
-            // We should succees, transparently handling `continue`s and `DisconnectWillReconnects`.
+            // We should success, transparently handling `continue`s and `DisconnectWillReconnects`.
             let response = backend
                 .storage_fetch_values(
                     ["ID1".into(), "ID2".into(), "ID3".into()].into(),
