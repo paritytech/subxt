@@ -97,7 +97,6 @@ pub struct ExtrinsicInfo<'atblock, TypeId, Resolver> {
     pub resolver: &'atblock Resolver,
 }
 
-#[macro_export]
 macro_rules! with_info {
     (&$self:ident.$info:ident => $fn:expr) => {
         #[allow(clippy::clone_on_copy)]
@@ -107,4 +106,4 @@ macro_rules! with_info {
         }
     };
 }
-pub use with_info;
+pub (crate) use with_info;

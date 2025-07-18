@@ -86,3 +86,14 @@ pub struct StorageInfo<'atblock, TypeId, Resolver> {
     pub info: frame_decode::storage::StorageInfo<TypeId>,
     pub resolver: &'atblock Resolver,
 }
+
+macro_rules! with_info {
+    (&$self:ident.$info:ident => $fn:expr) => {
+        #[allow(clippy::clone_on_copy)]
+        match &$self.$info {
+            AnyStorageInfo::Legacy($info) => $fn,
+            AnyStorageInfo::Current($info) => $fn,
+        }
+    };
+}
+pub (crate) use with_info;

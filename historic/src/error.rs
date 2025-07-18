@@ -206,6 +206,11 @@ pub enum StorageError {
         /// The error that occurred while fetching the storage entry.
         reason: subxt_rpcs::Error,
     },
+    #[error("Could not fetch next entry from storage subscription: {reason}")]
+    FetchStreamError {
+        /// The error that occurred while fetching the next storage entry.
+        reason: String,
+    },
     #[error("Could not extract storage information from metadata: {reason}")]
     InfoError {
         /// The error that occurred while extracting storage information from the metadata.
@@ -215,5 +220,29 @@ pub enum StorageError {
     UnsupportedMetadataVersion {
         /// The metadata version that is not supported.
         version: u32,
+    },
+    #[error("Plain storage entry not found: pallet {pallet_name}, storage {storage_name}")]
+    PlainValueNotFound {
+        /// The pallet containing the storage entry that was not found.
+        pallet_name: String,
+        /// The storage entry that was not found.
+        storage_name: String,
+    },
+    #[error("Could not decode storage value: {reason}")]
+    DecodeError {
+        /// The error that occurred while decoding the storage value.
+        reason: scale_decode::Error,
+    },
+    #[error(
+        "Could not decode storage value: there were undecoded bytes at the end, which implies that we did not decode it properly"
+    )]
+    ValueLeftoverBytes {
+        /// The bytes that were left over after decoding the storage value.
+        leftover_bytes: Vec<u8>,
+    },
+    #[error("The storage API isn't following the spec: {error}")]
+    ApiMisbehaving {
+        /// The error that occurred while interacting with the API.
+        error: String,
     },
 }
