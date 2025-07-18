@@ -2,6 +2,7 @@ use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::Config;
 use crate::error::ExtrinsicsError;
 
+mod extrinsic_info;
 mod extrinsic_call;
 mod extrinsic_transaction_extensions;
 mod extrinsics_type;

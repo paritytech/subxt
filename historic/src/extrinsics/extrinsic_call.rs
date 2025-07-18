@@ -1,4 +1,4 @@
-use super::extrinsics_type::{AnyExtrinsicInfo, with_info};
+use super::extrinsic_info::{AnyExtrinsicInfo, with_info};
 use crate::error::ExtrinsicCallError;
 use crate::utils::Either;
 use scale_info_legacy::{LookupName, TypeRegistrySet};

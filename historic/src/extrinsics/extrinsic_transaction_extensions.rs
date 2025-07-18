@@ -1,4 +1,4 @@
-use super::extrinsics_type::AnyExtrinsicInfo;
+use super::extrinsic_info::AnyExtrinsicInfo;
 use crate::error::ExtrinsicTransactionExtensionError;
 use crate::utils::Either;
 use frame_decode::helpers::scale_decode;

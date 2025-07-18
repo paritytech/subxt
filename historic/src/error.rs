@@ -206,4 +206,14 @@ pub enum StorageError {
         /// The error that occurred while fetching the storage entry.
         reason: subxt_rpcs::Error,
     },
+    #[error("Could not extract storage information from metadata: {reason}")]
+    InfoError {
+        /// The error that occurred while extracting storage information from the metadata.
+        reason: frame_decode::storage::StorageInfoError<'static>,
+    },
+    #[error("Could not extract storage information from metadata: Unsupported metadata version ({version})")]
+    UnsupportedMetadataVersion {
+        /// The metadata version that is not supported.
+        version: u32,
+    },
 }
