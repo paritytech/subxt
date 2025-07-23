@@ -5,7 +5,7 @@ use super::storage_info::with_info;
 
 /// This represents a storage value.
 pub struct StorageValue<'entry, 'atblock> {
-    info: &'entry AnyStorageInfo<'atblock>,
+    pub(crate) info: &'entry AnyStorageInfo<'atblock>,
     bytes: Vec<u8>,
 }
 

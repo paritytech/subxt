@@ -216,6 +216,11 @@ pub enum StorageError {
         /// The error that occurred while extracting storage information from the metadata.
         reason: frame_decode::storage::StorageInfoError<'static>,
     },
+    #[error("Could not construct storage key: {reason}")]
+    KeyError {
+        /// The error that occurred while constructing the storage key.
+        reason: frame_decode::storage::StorageKeyEncodeError,
+    },
     #[error("Could not extract storage information from metadata: Unsupported metadata version ({version})")]
     UnsupportedMetadataVersion {
         /// The metadata version that is not supported.
@@ -240,9 +245,11 @@ pub enum StorageError {
         /// The bytes that were left over after decoding the storage value.
         leftover_bytes: Vec<u8>,
     },
-    #[error("The storage API isn't following the spec: {error}")]
-    ApiMisbehaving {
-        /// The error that occurred while interacting with the API.
-        error: String,
+    #[error("Too many keys provided: expected {num_keys_expected} keys, but got {num_keys_provided}")]
+    WrongNumberOfKeysProvided {
+        /// The number of keys that were provided.
+        num_keys_provided: usize,
+        /// The number of keys expected.
+        num_keys_expected: usize,
     },
 }

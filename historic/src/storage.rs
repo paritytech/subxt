@@ -1,12 +1,17 @@
 mod storage_info;
 mod storage_value;
+mod storage_entry;
 
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::Config;
 use crate::error::StorageError;
+use crate::storage::storage_info::with_info;
 use storage_info::AnyStorageInfo;
 
+pub use storage_entry::StorageEntry;
 pub use storage_value::StorageValue;
+// We take how storage keys can be passed in from `frame-decode`, so re-export here.
+pub use frame_decode::storage::{ IntoStorageKeys, StorageKeys };
 
 /// Work with storage.
 pub struct StorageClient<'atblock, Client, T> {
@@ -43,9 +48,21 @@ where
         )?;
 
         if storage_info.is_map() {
-            todo!()
+            Ok(StorageEntryClient::Map(StorageEntryMapClient { 
+                client: self.client,
+                pallet_name,
+                storage_name,
+                info: storage_info,
+                marker: std::marker::PhantomData
+            }))
         } else {
-            todo!()
+            Ok(StorageEntryClient::Plain(StorageEntryPlainClient { 
+                client: self.client,
+                pallet_name,
+                storage_name,
+                info: storage_info,
+                marker: std::marker::PhantomData
+            }))
         }
     }
 
@@ -179,64 +196,22 @@ where
     Client: OnlineClientAtBlockT<'atblock, T>,
 {
     /// Fetch the value for this storage entry.
-    pub async fn fetch(&self) -> Result<StorageValue<'_, 'atblock>, StorageError> {
-        use subxt_rpcs::methods::chain_head::{ StorageQuery, StorageQueryType, ArchiveStorageEvent };
+    pub async fn fetch(&self) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
+        let key_bytes = self.key();
+        fetch(self.client, &key_bytes)
+            .await
+            .map(|v|  v.map(|bytes| StorageValue::new(&self.info, bytes)))
+    }
 
+    /// The key for this storage entry.
+    pub fn key(&self) -> [u8; 32] {
         let pallet_name = &*self.pallet_name;
         let storage_name = &*self.storage_name;
 
-        let key = frame_decode::storage::prefix(
+        frame_decode::storage::encode_prefix(
             pallet_name,
             storage_name,
-        );
-
-        let query = StorageQuery { 
-            key: &key[..], 
-            query_type: StorageQueryType::Value
-        };
-
-        let mut response_stream = self.client.rpc_methods().archive_v1_storage(
-            self.client.block_hash().into(),
-            std::iter::once(query),
-            None,
-        ).await.map_err(|e| StorageError::FetchError { reason: e })?;
-
-        let value = response_stream
-            .next()
-            .await
-            .ok_or_else(|| StorageError::PlainValueNotFound { 
-                pallet_name: pallet_name.to_string(), 
-                storage_name: storage_name.to_string() 
-            })?
-            .map_err(|e| StorageError::FetchError { reason: e })?;
-
-        let item = match value {
-            ArchiveStorageEvent::Item(item) => item,
-            // if it errors, return the error:
-            ArchiveStorageEvent::Error(err) => return Err(StorageError::FetchStreamError { 
-                reason: err.error 
-            }),
-            // if it's done, it means no value was returned:
-            ArchiveStorageEvent::Done => return Err(StorageError::PlainValueNotFound {
-                pallet_name: pallet_name.to_string(),
-                storage_name: storage_name.to_string(),
-            }),
-        };
-
-        // If the API does what it's supposed to, this shouldn't happen.
-        if item.key.0 != key {
-            return Err(StorageError::ApiMisbehaving {
-                error: format!("Fetching entry {pallet_name}.{storage_name}: Expected value for key {key:?}, got key {:?}", item.key.0),
-            });
-        }
-
-        // The bytes for the storage value. Again, if the API does what
-        // it's supposed to, this shouldn't happen.
-        let value_bytes = item.value.ok_or_else(|| StorageError::ApiMisbehaving {
-            error: format!("Fetching entry {pallet_name}.{storage_name}: Expected a value to be returned in the response item"),
-        })?.0;
-
-        Ok(StorageValue::new(&self.info, value_bytes))
+        )
     }
 }
 
@@ -263,6 +238,143 @@ where
     pub fn storage_name(&self) -> &str {
         &self.storage_name
     }
+}
 
-    // TODO: iter function which returns structs containing value and key and fns to decode.
+impl <'atblock, Client, T> StorageEntryMapClient<'atblock, Client, T>
+where
+    T: Config + 'atblock,
+    Client: OnlineClientAtBlockT<'atblock, T>,
+{
+    /// Fetch a specific key in this map. If the number of keys provided is not equal
+    /// to the number of keys required to fetch a single value from the map, then an error
+    /// will be emitted.
+    pub async fn fetch<Keys: IntoStorageKeys>(&self, keys: Keys) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
+        let expected_num_keys = with_info!(&self.info => {
+            info.info.keys.len()
+        });
+
+        if expected_num_keys != keys.num_keys() {
+            return Err(StorageError::WrongNumberOfKeysProvided {
+                num_keys_provided: keys.num_keys(),
+                num_keys_expected: expected_num_keys,
+            });
+        }
+
+        let key_bytes = self.key(keys)?;
+        fetch(self.client, &key_bytes)
+            .await
+            .map(|v|  v.map(|bytes| StorageValue::new(&self.info, bytes)))
+    }
+
+    /// Iterate over the values underneath the provided keys.
+    pub async fn iter<Keys: IntoStorageKeys>(&self, keys: Keys) -> impl futures::Stream<Item = Result<StorageEntry<'_, 'atblock>, StorageError>> {
+        use subxt_rpcs::methods::chain_head::{ StorageQuery, StorageQueryType, ArchiveStorageEvent };
+        use crate::utils::Either3;
+        use futures::stream::StreamExt;
+
+        let block_hash = self.client.block_hash();
+        let key_bytes = match self.key(keys) {
+            Ok(bytes) => bytes,
+            Err(e) => return Either3::A(futures::stream::once(async { Err(e) })),
+        };
+
+        let items = std::iter::once(StorageQuery {
+            key: &*key_bytes,
+            query_type: StorageQueryType::DescendantsValues
+        });
+
+        let res = self.client.rpc_methods().archive_v1_storage(
+            block_hash.into(), 
+            items, 
+            None
+        ).await;
+
+        let sub = match res {
+            Ok(res) => res,
+            Err(e) => return Either3::B(futures::stream::once(async { Err(StorageError::FetchError { reason: e }) })),
+        };
+
+        let sub = sub.filter_map(async |item| {
+            let item = match item {
+                Ok(ArchiveStorageEvent::Item(item)) => item,
+                Ok(ArchiveStorageEvent::Error(err)) => return Some(Err(StorageError::FetchStreamError { reason: err.error })),
+                Ok(ArchiveStorageEvent::Done) => return None,
+                Err(e) => return Some(Err(StorageError::FetchStreamError { reason: e.to_string() })),
+            };
+
+            item.value.map(|value| Ok(StorageEntry::new(&self.info, item.key.0, value.0)))
+        });
+
+        Either3::C(sub)
+    }
+
+    // Encode a storage key.
+    fn key<Keys: IntoStorageKeys>(&self, keys: Keys) -> Result<Vec<u8>, StorageError> {
+        with_info!(&self.info => {
+            let mut key_bytes = Vec::new();
+            frame_decode::storage::encode_storage_key_with_info_to(
+                &self.pallet_name,
+                &self.storage_name,
+                keys,
+                &info.info,
+                info.resolver,
+                &mut key_bytes,
+            ).map_err(|e| StorageError::KeyError { reason: e })?;
+            Ok(key_bytes)
+        })
+    }
+}
+
+// Fetch a single storage value by its key.
+async fn fetch<'atblock, Client, T>(client: &Client, key_bytes: &[u8]) -> Result<Option<Vec<u8>>, StorageError>
+where
+    T: Config + 'atblock,
+    Client: OnlineClientAtBlockT<'atblock, T>,
+{
+    use subxt_rpcs::methods::chain_head::{ StorageQuery, StorageQueryType, ArchiveStorageEvent };
+
+    let query = StorageQuery { 
+        key: key_bytes, 
+        query_type: StorageQueryType::Value
+    };
+
+    let mut response_stream = client.rpc_methods().archive_v1_storage(
+        client.block_hash().into(),
+        std::iter::once(query),
+        None,
+    ).await.map_err(|e| StorageError::FetchError { reason: e })?;
+
+    let value = response_stream
+        .next()
+        .await
+        .transpose()
+        .map_err(|e| StorageError::FetchError { reason: e })?;
+
+    // No value found.
+    let Some(value) = value else {
+        return Ok(None);
+    };
+
+    let item = match value {
+        ArchiveStorageEvent::Item(item) => item,
+        // if it errors, return the error:
+        ArchiveStorageEvent::Error(err) => return Err(StorageError::FetchStreamError { 
+            reason: err.error 
+        }),
+        // if it's done, it means no value was returned:
+        ArchiveStorageEvent::Done => return Ok(None),
+    };
+
+    // This shouldn't happen, but if it does, the value we wanted wasn't found.
+    if item.key.0 != key_bytes {
+        return Ok(None)
+    }
+
+    // The bytes for the storage value. If this is None, then the API is misbehaving,
+    // ot no matching value was found.
+    let Some(value_bytes) = item.value else {
+        return Ok(None)
+    };
+
+    Ok(Some(value_bytes.0))
 }

@@ -1936,11 +1936,13 @@ dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
  "scale-decode",
+ "scale-encode",
  "scale-info",
  "scale-info-legacy",
  "scale-type-resolver",
  "serde_yaml",
  "sp-crypto-hashing",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
@@ -5713,6 +5715,7 @@ version = "0.0.2"
 dependencies = [
  "frame-decode",
  "frame-metadata 23.0.0",
+ "futures",
  "hex",
  "parity-scale-codec",
  "primitive-types",
