@@ -1,6 +1,7 @@
 use super::storage_info::AnyStorageInfo;
 use super::storage_value::StorageValue;
-use crate::error::StorageError;
+use super::storage_key::StorageKey;
+use crate::error::{ StorageValueError, StorageKeyError };
 use scale_decode::DecodeAsType;
 
 /// This represents a storage entry, which is a key-value pair in the storage.
@@ -31,13 +32,15 @@ impl <'entry, 'atblock> StorageEntry<'entry, 'atblock> {
         (self.key, self.value.into_bytes())
     }
 
-    // TODO: Decode storage key into StorageKey which contains decoded info, and
-    // from there allow decoding each key part into specific types or getting the bytes or whatever.
+    /// Decode the key for this storage entry. This gives back a type from which we can
+    /// decode specific parts of the key hash (where applicable).
+    pub fn decode_key(&'_ self) -> Result<StorageKey<'_, 'atblock>, StorageKeyError> {
+        StorageKey::new(&self.value.info, &self.key)
+    }
 
     /// Decode this storage value.
-    pub fn decode_value<T: DecodeAsType>(&self) -> Result<T, StorageError> {
+    pub fn decode_value<T: DecodeAsType>(&self) -> Result<T, StorageValueError> {
         self.value.decode::<T>()
     }
 }
-
 

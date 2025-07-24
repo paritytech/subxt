@@ -52,7 +52,7 @@ impl <'atblock> AnyStorageInfo<'atblock> {
                     };
                     AnyStorageInfo::from(info)
                 })
-                .map_err(|e| StorageError::InfoError { reason: e.into_owned() })
+                .map_err(|e| StorageError::ExtractStorageInfoError { reason: e.into_owned() })
         }
 
         Ok(info)
@@ -88,10 +88,10 @@ pub struct StorageInfo<'atblock, TypeId, Resolver> {
 }
 
 macro_rules! with_info {
-    (&$self:ident.$info:ident => $fn:expr) => {
+    ($info:ident = $original_info:expr => $fn:expr) => {
         {
             #[allow(clippy::clone_on_copy)]
-            let info = match &$self.$info {
+            let info = match $original_info {
                 AnyStorageInfo::Legacy($info) => $fn,
                 AnyStorageInfo::Current($info) => $fn,
             };

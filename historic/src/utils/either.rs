@@ -46,5 +46,4 @@ macro_rules! either {
 }
 
 either!(Either(A, B));
-either!(Either3(A, B, C));
 

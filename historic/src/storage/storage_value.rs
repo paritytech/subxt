@@ -1,5 +1,5 @@
 use super::storage_info::AnyStorageInfo;
-use crate::error::StorageError;
+use crate::error::StorageValueError;
 use scale_decode::DecodeAsType;
 use super::storage_info::with_info;
 
@@ -26,18 +26,18 @@ impl <'entry, 'atblock> StorageValue<'entry, 'atblock> {
     }
 
     /// Decode this storage value.
-    pub fn decode<T: DecodeAsType>(&self) -> Result<T, StorageError> {
-        with_info!(&self.info => {
+    pub fn decode<T: DecodeAsType>(&self) -> Result<T, StorageValueError> {
+        with_info!(info = &self.info => {
             let cursor = &mut &*self.bytes;
 
             let value = T::decode_as_type(
                 cursor,
                 info.info.value_id.clone(),
                 info.resolver,
-            ).map_err(|e| StorageError::DecodeError { reason: e })?;
+            ).map_err(|e| StorageValueError::DecodeError { reason: e })?;
 
             if !cursor.is_empty() {
-                return Err(StorageError::ValueLeftoverBytes {
+                return Err(StorageValueError::LeftoverBytes {
                     leftover_bytes: cursor.to_vec(),
                 });
             }

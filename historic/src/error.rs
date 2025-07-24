@@ -20,6 +20,14 @@ pub enum Error {
     ExtrinsicCallError(#[from] ExtrinsicCallError),
     #[error(transparent)]
     StorageError(#[from] StorageError),
+    #[error(transparent)]
+    StorageEntryIsNotAMap(#[from] StorageEntryIsNotAMap),
+    #[error(transparent)]
+    StorageEntryIsNotAPlainValue(#[from] StorageEntryIsNotAPlainValue),
+    #[error(transparent)]
+    StorageKeyError(#[from] StorageKeyError),
+    #[error(transparent)]
+    StorageValueError(#[from] StorageValueError),
 }
 
 /// Errors consctructing an online client.
@@ -199,40 +207,87 @@ pub enum ExtrinsicCallError {
 
 #[allow(missing_docs)]
 #[derive(Debug, thiserror::Error)]
+#[error("Storage entry is not a map: pallet {pallet_name}, storage {storage_name}")]
+pub struct StorageEntryIsNotAMap {
+    /// The pallet containing the storage entry that was not found.
+    pub pallet_name: String,
+    /// The storage entry that was not found.
+    pub storage_name: String,
+}
+
+#[allow(missing_docs)]
+#[derive(Debug, thiserror::Error)]
+#[error("Storage entry is not a plain value: pallet {pallet_name}, storage {storage_name}")]
+pub struct StorageEntryIsNotAPlainValue {
+    /// The pallet containing the storage entry that was not found.
+    pub pallet_name: String,
+    /// The storage entry that was not found.
+    pub storage_name: String,
+}
+
+#[allow(missing_docs)]
+#[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum StorageError {
-    #[error("Could not fetch storage entry: {reason}")]
-    FetchError {
+    #[error("RPC error interacting with storage APIs: {reason}")]
+    RpcError {
         /// The error that occurred while fetching the storage entry.
         reason: subxt_rpcs::Error,
     },
     #[error("Could not fetch next entry from storage subscription: {reason}")]
-    FetchStreamError {
+    StorageEventError {
         /// The error that occurred while fetching the next storage entry.
         reason: String,
     },
-    #[error("Could not extract storage information from metadata: {reason}")]
-    InfoError {
-        /// The error that occurred while extracting storage information from the metadata.
-        reason: frame_decode::storage::StorageInfoError<'static>,
-    },
     #[error("Could not construct storage key: {reason}")]
-    KeyError {
+    KeyEncodeError {
         /// The error that occurred while constructing the storage key.
         reason: frame_decode::storage::StorageKeyEncodeError,
+    },
+    #[error("Too many keys provided: expected {num_keys_expected} keys, but got {num_keys_provided}")]
+    WrongNumberOfKeysProvided {
+        /// The number of keys that were provided.
+        num_keys_provided: usize,
+        /// The number of keys expected.
+        num_keys_expected: usize,
     },
     #[error("Could not extract storage information from metadata: Unsupported metadata version ({version})")]
     UnsupportedMetadataVersion {
         /// The metadata version that is not supported.
         version: u32,
     },
-    #[error("Plain storage entry not found: pallet {pallet_name}, storage {storage_name}")]
-    PlainValueNotFound {
-        /// The pallet containing the storage entry that was not found.
-        pallet_name: String,
-        /// The storage entry that was not found.
-        storage_name: String,
+        #[error("Could not extract storage information from metadata: {reason}")]
+    ExtractStorageInfoError {
+        /// The error that occurred while extracting storage information from the metadata.
+        reason: frame_decode::storage::StorageInfoError<'static>,
     },
+}
+
+#[allow(missing_docs)]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum StorageKeyError {
+    #[error("Could not decode the storage key: {reason}")]
+    DecodeError {
+        /// The error that occurred while decoding the storage key information.
+        reason: frame_decode::storage::StorageKeyDecodeError<String>,
+    },
+    #[error("Could not decode the storage key: there were undecoded bytes at the end, which implies that we did not decode it properly")]
+    LeftoverBytes {
+        /// The bytes that were left over after decoding the storage key.
+        leftover_bytes: Vec<u8>,
+    },
+    #[error("Could not decode the part of the storage key at index {index}: {reason}")]
+    DecodePartError {
+        index: usize,
+        reason: scale_decode::Error,
+    }
+}
+
+#[allow(missing_docs)]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum StorageValueError {
     #[error("Could not decode storage value: {reason}")]
     DecodeError {
         /// The error that occurred while decoding the storage value.
@@ -241,15 +296,8 @@ pub enum StorageError {
     #[error(
         "Could not decode storage value: there were undecoded bytes at the end, which implies that we did not decode it properly"
     )]
-    ValueLeftoverBytes {
+    LeftoverBytes {
         /// The bytes that were left over after decoding the storage value.
         leftover_bytes: Vec<u8>,
-    },
-    #[error("Too many keys provided: expected {num_keys_expected} keys, but got {num_keys_provided}")]
-    WrongNumberOfKeysProvided {
-        /// The number of keys that were provided.
-        num_keys_provided: usize,
-        /// The number of keys expected.
-        num_keys_expected: usize,
     },
 }
