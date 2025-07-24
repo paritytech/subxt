@@ -10,7 +10,7 @@ use crate::storage::storage_info::with_info;
 use storage_info::AnyStorageInfo;
 
 pub use storage_entry::StorageEntry;
-pub use storage_key::StorageKey;
+pub use storage_key::{StorageHasher, StorageKey, StorageKeyPart};
 pub use storage_value::StorageValue;
 // We take how storage keys can be passed in from `frame-decode`, so re-export here.
 pub use frame_decode::storage::{IntoStorageKeys, StorageKeys};
@@ -291,7 +291,7 @@ where
         &self,
         keys: Keys,
     ) -> Result<
-        impl futures::Stream<Item = Result<StorageEntry<'_, 'atblock>, StorageError>>,
+        impl futures::Stream<Item = Result<StorageEntry<'_, 'atblock>, StorageError>> + Unpin,
         StorageError,
     > {
         use futures::stream::StreamExt;
@@ -328,7 +328,7 @@ where
                 .map(|value| Ok(StorageEntry::new(&self.info, item.key.0, value.0)))
         });
 
-        Ok(sub)
+        Ok(Box::pin(sub))
     }
 
     // Encode a storage key for this storage entry to bytes. The key can be a partial key

@@ -61,4 +61,5 @@ futures = { workspace = true }
 [dev-dependencies]
 tokio = { workspace = true, features = ["full"] }
 scale-value = { workspace = true }
+scale-decode = { workspace = true, features = ["derive"] }
 hex = { workspace = true }

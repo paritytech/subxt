@@ -15,3 +15,8 @@ pub use client::{OfflineClient, OnlineClient};
 pub use config::polkadot::PolkadotConfig;
 pub use config::substrate::SubstrateConfig;
 pub use error::Error;
+
+/// External types and crates that may be useful.
+pub mod ext {
+    pub use futures::stream::{Stream, StreamExt};
+}
