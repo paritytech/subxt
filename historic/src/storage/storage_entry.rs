@@ -1,7 +1,7 @@
 use super::storage_info::AnyStorageInfo;
-use super::storage_value::StorageValue;
 use super::storage_key::StorageKey;
-use crate::error::{ StorageValueError, StorageKeyError };
+use super::storage_value::StorageValue;
+use crate::error::{StorageKeyError, StorageValueError};
 use scale_decode::DecodeAsType;
 
 /// This represents a storage entry, which is a key-value pair in the storage.
@@ -11,10 +11,13 @@ pub struct StorageEntry<'entry, 'atblock> {
     value: StorageValue<'entry, 'atblock>,
 }
 
-impl <'entry, 'atblock> StorageEntry<'entry, 'atblock> {
+impl<'entry, 'atblock> StorageEntry<'entry, 'atblock> {
     /// Create a new storage entry.
     pub fn new(info: &'entry AnyStorageInfo<'atblock>, key: Vec<u8>, value: Vec<u8>) -> Self {
-        Self { key, value: StorageValue::new(info, value) }
+        Self {
+            key,
+            value: StorageValue::new(info, value),
+        }
     }
 
     /// Get the raw bytes for this storage entry's key.
@@ -35,7 +38,7 @@ impl <'entry, 'atblock> StorageEntry<'entry, 'atblock> {
     /// Decode the key for this storage entry. This gives back a type from which we can
     /// decode specific parts of the key hash (where applicable).
     pub fn decode_key(&'_ self) -> Result<StorageKey<'_, 'atblock>, StorageKeyError> {
-        StorageKey::new(&self.value.info, &self.key)
+        StorageKey::new(self.value.info, &self.key)
     }
 
     /// Decode this storage value.
@@ -43,4 +46,3 @@ impl <'entry, 'atblock> StorageEntry<'entry, 'atblock> {
         self.value.decode::<T>()
     }
 }
-

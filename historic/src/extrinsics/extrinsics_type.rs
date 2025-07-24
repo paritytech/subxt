@@ -1,9 +1,9 @@
 use super::extrinsic_call::ExtrinsicCall;
+use super::extrinsic_info::{AnyExtrinsicInfo, with_info};
 use super::extrinsic_transaction_extensions::ExtrinsicTransactionExtensions;
 use crate::client::OfflineClientAtBlockT;
 use crate::config::Config;
 use crate::error::ExtrinsicsError;
-use super::extrinsic_info::{ with_info, AnyExtrinsicInfo };
 
 /// This represents some extrinsics in a block, and carries everything that we need to decode information out of them.
 pub struct Extrinsics<'atblock> {

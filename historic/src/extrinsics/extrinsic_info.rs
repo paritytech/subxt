@@ -9,7 +9,7 @@ pub enum AnyExtrinsicInfo<'atblock> {
     Current(ExtrinsicInfo<'atblock, u32, scale_info::PortableRegistry>),
 }
 
-impl <'atblock> AnyExtrinsicInfo<'atblock> {
+impl<'atblock> AnyExtrinsicInfo<'atblock> {
     /// For a slice of extrinsics, return a vec of information about each one.
     pub fn new(
         bytes: &[Vec<u8>],
@@ -106,4 +106,4 @@ macro_rules! with_info {
         }
     };
 }
-pub (crate) use with_info;
+pub(crate) use with_info;

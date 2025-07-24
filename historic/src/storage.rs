@@ -1,19 +1,19 @@
-mod storage_info;
-mod storage_value;
 mod storage_entry;
+mod storage_info;
 mod storage_key;
+mod storage_value;
 
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::Config;
-use crate::error::{ StorageError, StorageEntryIsNotAMap, StorageEntryIsNotAPlainValue };
+use crate::error::{StorageEntryIsNotAMap, StorageEntryIsNotAPlainValue, StorageError};
 use crate::storage::storage_info::with_info;
 use storage_info::AnyStorageInfo;
 
 pub use storage_entry::StorageEntry;
-pub use storage_value::StorageValue;
 pub use storage_key::StorageKey;
+pub use storage_value::StorageValue;
 // We take how storage keys can be passed in from `frame-decode`, so re-export here.
-pub use frame_decode::storage::{ IntoStorageKeys, StorageKeys };
+pub use frame_decode::storage::{IntoStorageKeys, StorageKeys};
 
 /// Work with storage.
 pub struct StorageClient<'atblock, Client, T> {
@@ -38,10 +38,14 @@ where
     Client: OfflineClientAtBlockT<'client, T>,
 {
     /// Select the storage entry you'd like to work with.
-    pub fn entry(&self, pallet_name: impl Into<String>, storage_name: impl Into<String>) -> Result<StorageEntryClient<'atblock, Client, T>, StorageError> {
+    pub fn entry(
+        &self,
+        pallet_name: impl Into<String>,
+        storage_name: impl Into<String>,
+    ) -> Result<StorageEntryClient<'atblock, Client, T>, StorageError> {
         let pallet_name = pallet_name.into();
         let storage_name = storage_name.into();
-        
+
         let storage_info = AnyStorageInfo::new(
             &pallet_name,
             &storage_name,
@@ -50,20 +54,20 @@ where
         )?;
 
         if storage_info.is_map() {
-            Ok(StorageEntryClient::Map(StorageEntryMapClient { 
+            Ok(StorageEntryClient::Map(StorageEntryMapClient {
                 client: self.client,
                 pallet_name,
                 storage_name,
                 info: storage_info,
-                marker: std::marker::PhantomData
+                marker: std::marker::PhantomData,
             }))
         } else {
-            Ok(StorageEntryClient::Plain(StorageEntryPlainClient { 
+            Ok(StorageEntryClient::Plain(StorageEntryPlainClient {
                 client: self.client,
                 pallet_name,
                 storage_name,
                 info: storage_info,
-                marker: std::marker::PhantomData
+                marker: std::marker::PhantomData,
             }))
         }
     }
@@ -73,12 +77,10 @@ where
     pub fn entries(&self) -> impl Iterator<Item = StorageEntriesItem<'atblock, Client, T>> {
         let client = self.client;
         let metadata = client.metadata();
-        frame_decode::helpers::list_storage_entries_any(metadata).map(|entry| {
-            StorageEntriesItem {
-                entry,
-                client: self.client,
-                marker: std::marker::PhantomData,
-            }
+        frame_decode::helpers::list_storage_entries_any(metadata).map(|entry| StorageEntriesItem {
+            entry,
+            client: self.client,
+            marker: std::marker::PhantomData,
         })
     }
 }
@@ -107,8 +109,14 @@ where
 
     /// Extract the relevant storage information so that we can work with this entry.
     pub fn entry(&self) -> Result<StorageEntryClient<'atblock, Client, T>, StorageError> {
-        StorageClient { client: self.client, marker: std::marker::PhantomData }
-            .entry(self.entry.pallet().to_owned(), self.entry.entry().to_owned())
+        StorageClient {
+            client: self.client,
+            marker: std::marker::PhantomData,
+        }
+        .entry(
+            self.entry.pallet().to_owned(),
+            self.entry.entry().to_owned(),
+        )
     }
 }
 
@@ -119,7 +127,7 @@ pub enum StorageEntryClient<'atblock, Client, T> {
     Map(StorageEntryMapClient<'atblock, Client, T>),
 }
 
-impl <'atblock, Client, T> StorageEntryClient<'atblock, Client, T>
+impl<'atblock, Client, T> StorageEntryClient<'atblock, Client, T>
 where
     T: Config + 'atblock,
     Client: OfflineClientAtBlockT<'atblock, T>,
@@ -151,7 +159,9 @@ where
     }
 
     /// If this storage entry is a plain value, return the client for working with it. Else return an error.
-    pub fn into_plain(self) -> Result<StorageEntryPlainClient<'atblock, Client, T>, StorageEntryIsNotAPlainValue> {
+    pub fn into_plain(
+        self,
+    ) -> Result<StorageEntryPlainClient<'atblock, Client, T>, StorageEntryIsNotAPlainValue> {
         match self {
             StorageEntryClient::Plain(client) => Ok(client),
             StorageEntryClient::Map(_) => Err(StorageEntryIsNotAPlainValue {
@@ -162,7 +172,9 @@ where
     }
 
     /// If this storage entry is a map, return the client for working with it. Else return an error.
-    pub fn into_map(self) -> Result<StorageEntryMapClient<'atblock, Client, T>, StorageEntryIsNotAMap> {
+    pub fn into_map(
+        self,
+    ) -> Result<StorageEntryMapClient<'atblock, Client, T>, StorageEntryIsNotAMap> {
         match self {
             StorageEntryClient::Plain(_) => Err(StorageEntryIsNotAMap {
                 pallet_name: self.pallet_name().into(),
@@ -198,7 +210,7 @@ where
     }
 }
 
-impl <'atblock, Client, T> StorageEntryPlainClient<'atblock, Client, T>
+impl<'atblock, Client, T> StorageEntryPlainClient<'atblock, Client, T>
 where
     T: Config + 'atblock,
     Client: OnlineClientAtBlockT<'atblock, T>,
@@ -208,7 +220,7 @@ where
         let key_bytes = self.key();
         fetch(self.client, &key_bytes)
             .await
-            .map(|v|  v.map(|bytes| StorageValue::new(&self.info, bytes)))
+            .map(|v| v.map(|bytes| StorageValue::new(&self.info, bytes)))
     }
 
     /// The key for this storage entry.
@@ -216,10 +228,7 @@ where
         let pallet_name = &*self.pallet_name;
         let storage_name = &*self.storage_name;
 
-        frame_decode::storage::encode_prefix(
-            pallet_name,
-            storage_name,
-        )
+        frame_decode::storage::encode_prefix(pallet_name, storage_name)
     }
 }
 
@@ -232,7 +241,7 @@ pub struct StorageEntryMapClient<'atblock, Client, T> {
     marker: std::marker::PhantomData<T>,
 }
 
-impl <'atblock, Client, T> StorageEntryMapClient<'atblock, Client, T>
+impl<'atblock, Client, T> StorageEntryMapClient<'atblock, Client, T>
 where
     T: Config + 'atblock,
     Client: OfflineClientAtBlockT<'atblock, T>,
@@ -248,7 +257,7 @@ where
     }
 }
 
-impl <'atblock, Client, T> StorageEntryMapClient<'atblock, Client, T>
+impl<'atblock, Client, T> StorageEntryMapClient<'atblock, Client, T>
 where
     T: Config + 'atblock,
     Client: OnlineClientAtBlockT<'atblock, T>,
@@ -256,7 +265,10 @@ where
     /// Fetch a specific key in this map. If the number of keys provided is not equal
     /// to the number of keys required to fetch a single value from the map, then an error
     /// will be emitted.
-    pub async fn fetch<Keys: IntoStorageKeys>(&self, keys: Keys) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
+    pub async fn fetch<Keys: IntoStorageKeys>(
+        &self,
+        keys: Keys,
+    ) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
         let expected_num_keys = with_info!(info = &self.info => {
             info.info.keys.len()
         });
@@ -271,37 +283,49 @@ where
         let key_bytes = self.key(keys)?;
         fetch(self.client, &key_bytes)
             .await
-            .map(|v|  v.map(|bytes| StorageValue::new(&self.info, bytes)))
+            .map(|v| v.map(|bytes| StorageValue::new(&self.info, bytes)))
     }
 
     /// Iterate over the values underneath the provided keys.
-    pub async fn iter<Keys: IntoStorageKeys>(&self, keys: Keys) -> Result<impl futures::Stream<Item = Result<StorageEntry<'_, 'atblock>, StorageError>>, StorageError> {
-        use subxt_rpcs::methods::chain_head::{ StorageQuery, StorageQueryType, ArchiveStorageEvent };
+    pub async fn iter<Keys: IntoStorageKeys>(
+        &self,
+        keys: Keys,
+    ) -> Result<
+        impl futures::Stream<Item = Result<StorageEntry<'_, 'atblock>, StorageError>>,
+        StorageError,
+    > {
         use futures::stream::StreamExt;
+        use subxt_rpcs::methods::chain_head::{
+            ArchiveStorageEvent, StorageQuery, StorageQueryType,
+        };
 
         let block_hash = self.client.block_hash();
         let key_bytes = self.key(keys)?;
 
         let items = std::iter::once(StorageQuery {
             key: &*key_bytes,
-            query_type: StorageQueryType::DescendantsValues
+            query_type: StorageQueryType::DescendantsValues,
         });
 
-        let sub = self.client.rpc_methods().archive_v1_storage(
-            block_hash.into(), 
-            items, 
-            None
-        ).await.map_err(|e| StorageError::RpcError { reason: e })?;
+        let sub = self
+            .client
+            .rpc_methods()
+            .archive_v1_storage(block_hash.into(), items, None)
+            .await
+            .map_err(|e| StorageError::RpcError { reason: e })?;
 
         let sub = sub.filter_map(async |item| {
             let item = match item {
                 Ok(ArchiveStorageEvent::Item(item)) => item,
-                Ok(ArchiveStorageEvent::Error(err)) => return Some(Err(StorageError::StorageEventError { reason: err.error })),
+                Ok(ArchiveStorageEvent::Error(err)) => {
+                    return Some(Err(StorageError::StorageEventError { reason: err.error }));
+                }
                 Ok(ArchiveStorageEvent::Done) => return None,
                 Err(e) => return Some(Err(StorageError::RpcError { reason: e })),
             };
 
-            item.value.map(|value| Ok(StorageEntry::new(&self.info, item.key.0, value.0)))
+            item.value
+                .map(|value| Ok(StorageEntry::new(&self.info, item.key.0, value.0)))
         });
 
         Ok(sub)
@@ -330,23 +354,26 @@ where
 }
 
 // Fetch a single storage value by its key.
-async fn fetch<'atblock, Client, T>(client: &Client, key_bytes: &[u8]) -> Result<Option<Vec<u8>>, StorageError>
+async fn fetch<'atblock, Client, T>(
+    client: &Client,
+    key_bytes: &[u8],
+) -> Result<Option<Vec<u8>>, StorageError>
 where
     T: Config + 'atblock,
     Client: OnlineClientAtBlockT<'atblock, T>,
 {
-    use subxt_rpcs::methods::chain_head::{ StorageQuery, StorageQueryType, ArchiveStorageEvent };
+    use subxt_rpcs::methods::chain_head::{ArchiveStorageEvent, StorageQuery, StorageQueryType};
 
-    let query = StorageQuery { 
-        key: key_bytes, 
-        query_type: StorageQueryType::Value
+    let query = StorageQuery {
+        key: key_bytes,
+        query_type: StorageQueryType::Value,
     };
 
-    let mut response_stream = client.rpc_methods().archive_v1_storage(
-        client.block_hash().into(),
-        std::iter::once(query),
-        None,
-    ).await.map_err(|e| StorageError::RpcError { reason: e })?;
+    let mut response_stream = client
+        .rpc_methods()
+        .archive_v1_storage(client.block_hash().into(), std::iter::once(query), None)
+        .await
+        .map_err(|e| StorageError::RpcError { reason: e })?;
 
     let value = response_stream
         .next()
@@ -362,22 +389,22 @@ where
     let item = match value {
         ArchiveStorageEvent::Item(item) => item,
         // if it errors, return the error:
-        ArchiveStorageEvent::Error(err) => return Err(StorageError::StorageEventError { 
-            reason: err.error 
-        }),
+        ArchiveStorageEvent::Error(err) => {
+            return Err(StorageError::StorageEventError { reason: err.error });
+        }
         // if it's done, it means no value was returned:
         ArchiveStorageEvent::Done => return Ok(None),
     };
 
     // This shouldn't happen, but if it does, the value we wanted wasn't found.
     if item.key.0 != key_bytes {
-        return Ok(None)
+        return Ok(None);
     }
 
     // The bytes for the storage value. If this is None, then the API is misbehaving,
     // ot no matching value was found.
     let Some(value_bytes) = item.value else {
-        return Ok(None)
+        return Ok(None);
     };
 
     Ok(Some(value_bytes.0))

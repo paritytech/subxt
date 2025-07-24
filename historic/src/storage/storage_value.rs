@@ -1,7 +1,7 @@
 use super::storage_info::AnyStorageInfo;
+use super::storage_info::with_info;
 use crate::error::StorageValueError;
 use scale_decode::DecodeAsType;
-use super::storage_info::with_info;
 
 /// This represents a storage value.
 pub struct StorageValue<'entry, 'atblock> {
@@ -9,7 +9,7 @@ pub struct StorageValue<'entry, 'atblock> {
     bytes: Vec<u8>,
 }
 
-impl <'entry, 'atblock> StorageValue<'entry, 'atblock> {
+impl<'entry, 'atblock> StorageValue<'entry, 'atblock> {
     /// Create a new storage value.
     pub fn new(info: &'entry AnyStorageInfo<'atblock>, bytes: Vec<u8>) -> Self {
         Self { info, bytes }
@@ -46,5 +46,3 @@ impl <'entry, 'atblock> StorageValue<'entry, 'atblock> {
         })
     }
 }
-
-

@@ -244,19 +244,23 @@ pub enum StorageError {
         /// The error that occurred while constructing the storage key.
         reason: frame_decode::storage::StorageKeyEncodeError,
     },
-    #[error("Too many keys provided: expected {num_keys_expected} keys, but got {num_keys_provided}")]
+    #[error(
+        "Too many keys provided: expected {num_keys_expected} keys, but got {num_keys_provided}"
+    )]
     WrongNumberOfKeysProvided {
         /// The number of keys that were provided.
         num_keys_provided: usize,
         /// The number of keys expected.
         num_keys_expected: usize,
     },
-    #[error("Could not extract storage information from metadata: Unsupported metadata version ({version})")]
+    #[error(
+        "Could not extract storage information from metadata: Unsupported metadata version ({version})"
+    )]
     UnsupportedMetadataVersion {
         /// The metadata version that is not supported.
         version: u32,
     },
-        #[error("Could not extract storage information from metadata: {reason}")]
+    #[error("Could not extract storage information from metadata: {reason}")]
     ExtractStorageInfoError {
         /// The error that occurred while extracting storage information from the metadata.
         reason: frame_decode::storage::StorageInfoError<'static>,
@@ -272,7 +276,9 @@ pub enum StorageKeyError {
         /// The error that occurred while decoding the storage key information.
         reason: frame_decode::storage::StorageKeyDecodeError<String>,
     },
-    #[error("Could not decode the storage key: there were undecoded bytes at the end, which implies that we did not decode it properly")]
+    #[error(
+        "Could not decode the storage key: there were undecoded bytes at the end, which implies that we did not decode it properly"
+    )]
     LeftoverBytes {
         /// The bytes that were left over after decoding the storage key.
         leftover_bytes: Vec<u8>,
@@ -281,7 +287,7 @@ pub enum StorageKeyError {
     DecodePartError {
         index: usize,
         reason: scale_decode::Error,
-    }
+    },
 }
 
 #[allow(missing_docs)]

@@ -1,14 +1,14 @@
 use crate::error::StorageError;
+use frame_decode::storage::StorageTypeInfo;
 use frame_metadata::RuntimeMetadata;
 use scale_info_legacy::{LookupName, TypeRegistrySet};
-use frame_decode::storage::StorageTypeInfo;
 
 pub enum AnyStorageInfo<'atblock> {
     Legacy(StorageInfo<'atblock, LookupName, TypeRegistrySet<'atblock>>),
     Current(StorageInfo<'atblock, u32, scale_info::PortableRegistry>),
 }
 
-impl <'atblock> AnyStorageInfo<'atblock> {
+impl<'atblock> AnyStorageInfo<'atblock> {
     /// For a slice of storage entries, return a vec of information about each one.
     pub fn new(
         pallet_name: &str,
@@ -38,7 +38,7 @@ impl <'atblock> AnyStorageInfo<'atblock> {
             entry_name: &str,
             m: &'atblock Info,
             type_resolver: &'atblock Resolver,
-        ) -> Result<AnyStorageInfo<'atblock>, StorageError> 
+        ) -> Result<AnyStorageInfo<'atblock>, StorageError>
         where
             Info: StorageTypeInfo,
             Resolver: scale_type_resolver::TypeResolver<TypeId = Info::TypeId>,
@@ -52,7 +52,9 @@ impl <'atblock> AnyStorageInfo<'atblock> {
                     };
                     AnyStorageInfo::from(info)
                 })
-                .map_err(|e| StorageError::ExtractStorageInfoError { reason: e.into_owned() })
+                .map_err(|e| StorageError::ExtractStorageInfoError {
+                    reason: e.into_owned(),
+                })
         }
 
         Ok(info)
@@ -88,15 +90,13 @@ pub struct StorageInfo<'atblock, TypeId, Resolver> {
 }
 
 macro_rules! with_info {
-    ($info:ident = $original_info:expr => $fn:expr) => {
-        {
-            #[allow(clippy::clone_on_copy)]
-            let info = match $original_info {
-                AnyStorageInfo::Legacy($info) => $fn,
-                AnyStorageInfo::Current($info) => $fn,
-            };
-            info
-        }
-    };
+    ($info:ident = $original_info:expr => $fn:expr) => {{
+        #[allow(clippy::clone_on_copy)]
+        let info = match $original_info {
+            AnyStorageInfo::Legacy($info) => $fn,
+            AnyStorageInfo::Current($info) => $fn,
+        };
+        info
+    }};
 }
-pub (crate) use with_info;
+pub(crate) use with_info;

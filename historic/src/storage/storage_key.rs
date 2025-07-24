@@ -1,6 +1,6 @@
-use scale_info_legacy::{ LookupName, TypeRegistrySet };
-use crate::{error::StorageKeyError, storage::storage_info::with_info};
 use super::AnyStorageInfo;
+use crate::{error::StorageKeyError, storage::storage_info::with_info};
+use scale_info_legacy::{LookupName, TypeRegistrySet};
 
 // This is part of our public interface.
 pub use frame_decode::storage::StorageHasher;
@@ -10,14 +10,14 @@ enum AnyStorageKeyInfo<'atblock> {
     Current(StorageKeyInfo<'atblock, u32, scale_info::PortableRegistry>),
 }
 
-impl <'atblock> From<StorageKeyInfo<'atblock, LookupName, TypeRegistrySet<'atblock>>>
+impl<'atblock> From<StorageKeyInfo<'atblock, LookupName, TypeRegistrySet<'atblock>>>
     for AnyStorageKeyInfo<'atblock>
 {
     fn from(info: StorageKeyInfo<'atblock, LookupName, TypeRegistrySet<'atblock>>) -> Self {
         AnyStorageKeyInfo::Legacy(info)
     }
 }
-impl <'atblock> From<StorageKeyInfo<'atblock, u32, scale_info::PortableRegistry>>
+impl<'atblock> From<StorageKeyInfo<'atblock, u32, scale_info::PortableRegistry>>
     for AnyStorageKeyInfo<'atblock>
 {
     fn from(info: StorageKeyInfo<'atblock, u32, scale_info::PortableRegistry>) -> Self {
@@ -31,16 +31,14 @@ struct StorageKeyInfo<'atblock, TypeId, Resolver> {
 }
 
 macro_rules! with_key_info {
-    ($info:ident = $original_info:expr => $fn:expr) => {
-        {
-            #[allow(clippy::clone_on_copy)]
-            let info = match $original_info {
-                AnyStorageKeyInfo::Legacy($info) => $fn,
-                AnyStorageKeyInfo::Current($info) => $fn,
-            };
-            info
-        }
-    };
+    ($info:ident = $original_info:expr => $fn:expr) => {{
+        #[allow(clippy::clone_on_copy)]
+        let info = match $original_info {
+            AnyStorageKeyInfo::Legacy($info) => $fn,
+            AnyStorageKeyInfo::Current($info) => $fn,
+        };
+        info
+    }};
 }
 
 /// This represents the different parts of a storage key.
@@ -49,8 +47,11 @@ pub struct StorageKey<'entry, 'atblock> {
     bytes: &'entry [u8],
 }
 
-impl <'entry, 'atblock> StorageKey<'entry, 'atblock> {
-    pub (crate) fn new(info: &AnyStorageInfo<'atblock>, bytes: &'entry [u8]) -> Result<Self, StorageKeyError> {
+impl<'entry, 'atblock> StorageKey<'entry, 'atblock> {
+    pub(crate) fn new(
+        info: &AnyStorageInfo<'atblock>,
+        bytes: &'entry [u8],
+    ) -> Result<Self, StorageKeyError> {
         with_info!(info = info => {
             let cursor = &mut &*bytes;
             let storage_key_info = frame_decode::storage::decode_storage_key_with_info(
@@ -81,12 +82,10 @@ impl <'entry, 'atblock> StorageKey<'entry, 'atblock> {
     /// single value that has been hashed.
     pub fn parts(&'_ self) -> impl ExactSizeIterator<Item = StorageKeyPart<'_, 'entry, 'atblock>> {
         let parts_len = with_key_info!(info = &self.info => info.info.parts().len());
-        (0..parts_len).map(move |index| {
-            StorageKeyPart {
-                index,
-                info: &self.info,
-                bytes: self.bytes,
-            }
+        (0..parts_len).map(move |index| StorageKeyPart {
+            index,
+            info: &self.info,
+            bytes: self.bytes,
         })
     }
 
@@ -111,7 +110,7 @@ pub struct StorageKeyPart<'key, 'entry, 'atblock> {
     bytes: &'entry [u8],
 }
 
-impl <'key, 'entry, 'atblock> StorageKeyPart<'key, 'entry, 'atblock> {
+impl<'key, 'entry, 'atblock> StorageKeyPart<'key, 'entry, 'atblock> {
     /// Get the raw bytes for this part of the storage key.
     pub fn bytes(&self) -> &'entry [u8] {
         with_key_info!(info = &self.info => {
@@ -136,7 +135,7 @@ impl <'key, 'entry, 'atblock> StorageKeyPart<'key, 'entry, 'atblock> {
 
     /// For keys that were produced using "concat" or "identity" hashers, the value
     /// is available as a part of the key hash, allowing us to decode it into anything
-    /// implementing [`scale_decode::DecodeAsType`]. If the key was produced using a 
+    /// implementing [`scale_decode::DecodeAsType`]. If the key was produced using a
     /// different hasher, this will return `None`.
     pub fn decode<T: scale_decode::DecodeAsType>(&self) -> Result<Option<T>, StorageKeyError> {
         with_key_info!(info = &self.info => {
