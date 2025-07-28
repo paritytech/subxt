@@ -585,10 +585,9 @@ pub mod api {
                             result_xcms_version,
                         },
                         [
-                            42u8, 17u8, 98u8, 165u8, 34u8, 220u8, 107u8, 162u8, 157u8, 31u8, 232u8,
-                            191u8, 158u8, 124u8, 129u8, 127u8, 202u8, 2u8, 235u8, 62u8, 229u8,
-                            152u8, 186u8, 105u8, 217u8, 115u8, 242u8, 41u8, 70u8, 123u8, 63u8,
-                            234u8,
+                            252u8, 62u8, 30u8, 84u8, 44u8, 6u8, 108u8, 82u8, 174u8, 94u8, 108u8,
+                            60u8, 238u8, 72u8, 195u8, 69u8, 147u8, 174u8, 2u8, 85u8, 38u8, 159u8,
+                            181u8, 150u8, 37u8, 47u8, 226u8, 75u8, 10u8, 179u8, 121u8, 176u8,
                         ],
                     )
                 }
@@ -609,9 +608,9 @@ pub mod api {
                             xcm,
                         },
                         [
-                            143u8, 121u8, 252u8, 163u8, 9u8, 7u8, 249u8, 172u8, 53u8, 115u8, 249u8,
-                            146u8, 131u8, 220u8, 210u8, 240u8, 248u8, 38u8, 95u8, 203u8, 43u8,
-                            160u8, 59u8, 71u8, 105u8, 70u8, 7u8, 224u8, 40u8, 74u8, 62u8, 214u8,
+                            23u8, 150u8, 213u8, 113u8, 189u8, 110u8, 131u8, 90u8, 107u8, 135u8,
+                            184u8, 182u8, 55u8, 55u8, 228u8, 127u8, 72u8, 154u8, 10u8, 243u8, 76u8,
+                            72u8, 73u8, 13u8, 36u8, 211u8, 19u8, 75u8, 207u8, 176u8, 153u8, 114u8,
                         ],
                     )
                 }
@@ -5140,9 +5139,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                175u8, 154u8, 247u8, 159u8, 103u8, 74u8, 120u8, 74u8, 254u8, 141u8, 150u8, 108u8,
-                26u8, 97u8, 168u8, 170u8, 110u8, 232u8, 250u8, 105u8, 219u8, 48u8, 236u8, 215u8,
-                225u8, 65u8, 47u8, 23u8, 48u8, 62u8, 45u8, 50u8,
+                97u8, 169u8, 184u8, 101u8, 186u8, 202u8, 199u8, 119u8, 227u8, 156u8, 45u8, 50u8,
+                103u8, 83u8, 229u8, 96u8, 23u8, 169u8, 181u8, 190u8, 142u8, 41u8, 204u8, 227u8,
+                186u8, 57u8, 240u8, 247u8, 81u8, 225u8, 147u8, 215u8,
             ]
     }
     pub mod system {
@@ -6249,9 +6248,10 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            65u8, 10u8, 38u8, 82u8, 235u8, 12u8, 128u8, 212u8, 191u8, 7u8, 41u8,
-                            125u8, 205u8, 213u8, 175u8, 108u8, 186u8, 28u8, 46u8, 200u8, 166u8,
-                            122u8, 96u8, 250u8, 178u8, 113u8, 131u8, 226u8, 88u8, 65u8, 169u8, 5u8,
+                            221u8, 132u8, 84u8, 146u8, 84u8, 174u8, 143u8, 114u8, 217u8, 248u8,
+                            112u8, 208u8, 213u8, 43u8, 168u8, 242u8, 172u8, 133u8, 210u8, 120u8,
+                            27u8, 68u8, 97u8, 61u8, 3u8, 28u8, 223u8, 124u8, 5u8, 10u8, 236u8,
+                            30u8,
                         ],
                     )
                 }
@@ -9291,8 +9291,7 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            #[doc = "The `transferred` balance is placed on hold"]
-            #[doc = "at the `dest` account."]
+            #[doc = "The `transferred` balance is placed on hold at the `dest` account."]
             pub struct TransferAndHold {
                 pub reason: transfer_and_hold::Reason,
                 pub source: transfer_and_hold::Source,
@@ -9332,6 +9331,23 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for Released {
                 const PALLET: &'static str = "Balances";
                 const EVENT: &'static str = "Released";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "An unexpected/defensive event was triggered."]
+            pub struct Unexpected(pub unexpected::Field0);
+            pub mod unexpected {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::pallet_balances::pallet::UnexpectedKind;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for Unexpected {
+                const PALLET: &'static str = "Balances";
+                const EVENT: &'static str = "Unexpected";
             }
         }
         pub mod storage {
@@ -34057,8 +34073,7 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            #[doc = "The `transferred` balance is placed on hold"]
-            #[doc = "at the `dest` account."]
+            #[doc = "The `transferred` balance is placed on hold at the `dest` account."]
             pub struct TransferAndHold {
                 pub reason: transfer_and_hold::Reason,
                 pub source: transfer_and_hold::Source,
@@ -34098,6 +34113,23 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for Released {
                 const PALLET: &'static str = "NisCounterpartBalances";
                 const EVENT: &'static str = "Released";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "An unexpected/defensive event was triggered."]
+            pub struct Unexpected(pub unexpected::Field0);
+            pub mod unexpected {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::pallet_balances::pallet::UnexpectedKind;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for Unexpected {
+                const PALLET: &'static str = "NisCounterpartBalances";
+                const EVENT: &'static str = "Unexpected";
             }
         }
         pub mod storage {
@@ -54334,8 +54366,7 @@ pub mod api {
                         amount: ::core::primitive::u128,
                     },
                     #[codec(index = 27)]
-                    #[doc = "The `transferred` balance is placed on hold"]
-                    #[doc = "at the `dest` account."]
+                    #[doc = "The `transferred` balance is placed on hold at the `dest` account."]
                     TransferAndHold {
                         reason: runtime_types::rococo_runtime::RuntimeHoldReason,
                         source: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -54349,6 +54380,26 @@ pub mod api {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 29)]
+                    #[doc = "An unexpected/defensive event was triggered."]
+                    Unexpected(runtime_types::pallet_balances::pallet::UnexpectedKind),
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub enum UnexpectedKind {
+                    #[codec(index = 0)]
+                    BalanceUpdated,
+                    #[codec(index = 1)]
+                    FailedToMutateAccount,
                 }
             }
             pub mod types {
