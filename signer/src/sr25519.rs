@@ -104,6 +104,33 @@ impl Keypair {
     /// keypair.sign(b"Hello world!");
     /// ```
     pub fn from_phrase(mnemonic: &bip39::Mnemonic, password: Option<&str>) -> Result<Self, Error> {
+        let seed = Self::secret_key_from_phrase(mnemonic, password)?;
+        Self::from_secret_key(seed)
+    }
+
+    /// Create a 32 byte secret key from a BIP-39 mnemonic phrase and optional password.
+    /// This can then be used to create a keypair via [`Keypair::from_secret_key`].
+    ///
+    /// Prefer [`Keypair::from_phrase`] to create a keypair directly from a phrase. Use this
+    /// when you need to store the secret key that we turn the phrase into.
+    ///
+    /// # Example
+    ///
+    /// ```rust,standalone_crate
+    /// use subxt_signer::{ bip39::Mnemonic, sr25519::Keypair };
+    ///
+    /// let phrase = "bottom drive obey lake curtain smoke basket hold race lonely fit walk";
+    /// let mnemonic = Mnemonic::parse(phrase).unwrap();
+    ///
+    /// let secret_key = Keypair::secret_key_from_phrase(&mnemonic, None).unwrap();
+    /// let keypair = Keypair::from_secret_key(secret_key).unwrap();
+    ///
+    /// keypair.sign(b"Hello world!");
+    /// ```
+    pub fn secret_key_from_phrase(
+        mnemonic: &bip39::Mnemonic,
+        password: Option<&str>,
+    ) -> Result<SecretKeyBytes, Error> {
         let (arr, len) = mnemonic.to_entropy_array();
         let big_seed =
             seed_from_entropy(&arr[0..len], password.unwrap_or("")).ok_or(Error::InvalidSeed)?;
@@ -112,7 +139,7 @@ impl Keypair {
             .try_into()
             .expect("should be valid Seed");
 
-        Self::from_secret_key(seed)
+        Ok(seed)
     }
 
     /// Turn a 32 byte secret key into a keypair.
