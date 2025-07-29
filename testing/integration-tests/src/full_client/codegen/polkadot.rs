@@ -61872,7 +61872,7 @@ pub mod api {
                     #[doc = "May be called from any origin except `None`."]
                     #[doc = ""]
                     #[doc = "This function first attempts to dispatch the `main` call."]
-                    #[doc = "If the `main` call fails, the `fallback` is attempted."]
+                    #[doc = "If the `main` call fails, the `fallback` is attemted."]
                     #[doc = "if the fallback is successfully dispatched, the weights of both calls"]
                     #[doc = "are accumulated and an event containing the main call error is deposited."]
                     #[doc = ""]
