@@ -182,8 +182,8 @@ pub struct RpcClientBuilder<P> {
 impl Default for RpcClientBuilder<ExponentialBackoff> {
     fn default() -> Self {
         Self {
-            max_request_size: 10 * 1024 * 1024,
-            max_response_size: 10 * 1024 * 1024,
+            max_request_size: 50 * 1024 * 1024,
+            max_response_size: 50 * 1024 * 1024,
             retry_policy: ExponentialBackoff::from_millis(10).max_delay(Duration::from_secs(60)),
             #[cfg(feature = "native")]
             ping_config: Some(PingConfig::new()),
@@ -210,9 +210,9 @@ impl<P> RpcClientBuilder<P>
 where
     P: Iterator<Item = Duration> + Send + Sync + 'static + Clone,
 {
-    /// Configure the min response size a for websocket message.
+    /// Configure the max request size a for websocket message.
     ///
-    /// Default: 10MB
+    /// Default: 50MB
     pub fn max_request_size(mut self, max: u32) -> Self {
         self.max_request_size = max;
         self
@@ -220,7 +220,7 @@ where
 
     /// Configure the max response size a for websocket message.
     ///
-    /// Default: 10MB
+    /// Default: 50MB
     pub fn max_response_size(mut self, max: u32) -> Self {
         self.max_response_size = max;
         self
