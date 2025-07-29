@@ -6,7 +6,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    // A dynamic query to obtain some contant:
+    // A dynamic query to obtain some constant:
     let constant_query = subxt::dynamic::constant("System", "BlockLength");
 
     // Obtain the value:

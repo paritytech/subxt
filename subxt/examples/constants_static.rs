@@ -9,7 +9,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    // A query to obtain some contant:
+    // A query to obtain some constant:
     let constant_query = polkadot::constants().system().block_length();
 
     // Obtain the value:
