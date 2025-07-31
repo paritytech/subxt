@@ -47,7 +47,7 @@ pub trait Config: Sized + Send + Sync + 'static {
     type Hasher: Debug + Clone + Copy + Hasher + Send + Sync;
 
     /// The block header.
-    type Header: Debug + Header<Hasher = Self::Hasher> + Sync + Send + DeserializeOwned;
+    type Header: Debug + Header<Hasher = Self::Hasher> + Sync + Send + DeserializeOwned + Clone;
 
     /// This type defines the extrinsic extra and additional parameters.
     type ExtrinsicParams: ExtrinsicParams<Self>;
