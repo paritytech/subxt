@@ -27,6 +27,17 @@ pub struct Block<T: Config, C> {
     cached_events: CachedEvents<T>,
 }
 
+impl<T: Config, C: Clone> Clone for Block<T, C> {
+    fn clone(&self) -> Self {
+        Self {
+            header: self.header.clone(),
+            block_ref: self.block_ref.clone(),
+            client: self.client.clone(),
+            cached_events: self.cached_events.clone(),
+        }
+    }
+}
+
 // A cache for our events so we don't fetch them more than once when
 // iterating over events for extrinsics.
 pub(crate) type CachedEvents<T> = Arc<AsyncMutex<Option<events::Events<T>>>>;
