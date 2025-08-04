@@ -585,9 +585,9 @@ pub mod api {
                             result_xcms_version,
                         },
                         [
-                            252u8, 62u8, 30u8, 84u8, 44u8, 6u8, 108u8, 82u8, 174u8, 94u8, 108u8,
-                            60u8, 238u8, 72u8, 195u8, 69u8, 147u8, 174u8, 2u8, 85u8, 38u8, 159u8,
-                            181u8, 150u8, 37u8, 47u8, 226u8, 75u8, 10u8, 179u8, 121u8, 176u8,
+                            110u8, 238u8, 95u8, 99u8, 108u8, 123u8, 202u8, 31u8, 13u8, 136u8,
+                            121u8, 81u8, 251u8, 59u8, 133u8, 39u8, 179u8, 75u8, 237u8, 31u8, 15u8,
+                            64u8, 188u8, 246u8, 100u8, 66u8, 34u8, 177u8, 13u8, 63u8, 150u8, 140u8,
                         ],
                     )
                 }
@@ -608,9 +608,9 @@ pub mod api {
                             xcm,
                         },
                         [
-                            23u8, 150u8, 213u8, 113u8, 189u8, 110u8, 131u8, 90u8, 107u8, 135u8,
-                            184u8, 182u8, 55u8, 55u8, 228u8, 127u8, 72u8, 154u8, 10u8, 243u8, 76u8,
-                            72u8, 73u8, 13u8, 36u8, 211u8, 19u8, 75u8, 207u8, 176u8, 153u8, 114u8,
+                            118u8, 151u8, 164u8, 99u8, 186u8, 178u8, 47u8, 236u8, 70u8, 95u8,
+                            145u8, 237u8, 26u8, 142u8, 56u8, 139u8, 136u8, 84u8, 40u8, 218u8, 46u8,
+                            97u8, 80u8, 19u8, 66u8, 65u8, 172u8, 247u8, 50u8, 242u8, 240u8, 185u8,
                         ],
                     )
                 }
@@ -5139,9 +5139,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                97u8, 169u8, 184u8, 101u8, 186u8, 202u8, 199u8, 119u8, 227u8, 156u8, 45u8, 50u8,
-                103u8, 83u8, 229u8, 96u8, 23u8, 169u8, 181u8, 190u8, 142u8, 41u8, 204u8, 227u8,
-                186u8, 57u8, 240u8, 247u8, 81u8, 225u8, 147u8, 215u8,
+                60u8, 30u8, 114u8, 255u8, 67u8, 250u8, 242u8, 169u8, 114u8, 243u8, 99u8, 143u8,
+                73u8, 209u8, 120u8, 127u8, 245u8, 170u8, 122u8, 5u8, 31u8, 39u8, 51u8, 72u8, 23u8,
+                243u8, 37u8, 211u8, 19u8, 57u8, 130u8, 128u8,
             ]
     }
     pub mod system {
@@ -6248,10 +6248,10 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            221u8, 132u8, 84u8, 146u8, 84u8, 174u8, 143u8, 114u8, 217u8, 248u8,
-                            112u8, 208u8, 213u8, 43u8, 168u8, 242u8, 172u8, 133u8, 210u8, 120u8,
-                            27u8, 68u8, 97u8, 61u8, 3u8, 28u8, 223u8, 124u8, 5u8, 10u8, 236u8,
-                            30u8,
+                            227u8, 154u8, 253u8, 34u8, 14u8, 17u8, 224u8, 168u8, 194u8, 239u8,
+                            139u8, 48u8, 192u8, 250u8, 255u8, 195u8, 112u8, 45u8, 69u8, 133u8,
+                            232u8, 33u8, 96u8, 177u8, 116u8, 196u8, 172u8, 65u8, 211u8, 199u8,
+                            103u8, 130u8,
                         ],
                     )
                 }
@@ -13267,11 +13267,16 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             #[doc = "An account has delegated their vote to another account. \\[who, target\\]"]
-            pub struct Delegated(pub delegated::Field0, pub delegated::Field1);
+            pub struct Delegated(
+                pub delegated::Field0,
+                pub delegated::Field1,
+                pub delegated::Field2,
+            );
             pub mod delegated {
                 use super::runtime_types;
                 pub type Field0 = ::subxt::ext::subxt_core::utils::AccountId32;
                 pub type Field1 = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Field2 = ::core::primitive::u16;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for Delegated {
                 const PALLET: &'static str = "ConvictionVoting";
@@ -13285,10 +13290,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             #[doc = "An \\[account\\] has cancelled a previous delegation operation."]
-            pub struct Undelegated(pub undelegated::Field0);
+            pub struct Undelegated(pub undelegated::Field0, pub undelegated::Field1);
             pub mod undelegated {
                 use super::runtime_types;
                 pub type Field0 = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Field1 = ::core::primitive::u16;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for Undelegated {
                 const PALLET: &'static str = "ConvictionVoting";
@@ -13305,6 +13311,7 @@ pub mod api {
             pub struct Voted {
                 pub who: voted::Who,
                 pub vote: voted::Vote,
+                pub poll_index: voted::PollIndex,
             }
             pub mod voted {
                 use super::runtime_types;
@@ -13312,6 +13319,7 @@ pub mod api {
                 pub type Vote = runtime_types::pallet_conviction_voting::vote::AccountVote<
                     ::core::primitive::u128,
                 >;
+                pub type PollIndex = ::core::primitive::u32;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for Voted {
                 const PALLET: &'static str = "ConvictionVoting";
@@ -13328,6 +13336,7 @@ pub mod api {
             pub struct VoteRemoved {
                 pub who: vote_removed::Who,
                 pub vote: vote_removed::Vote,
+                pub poll_index: vote_removed::PollIndex,
             }
             pub mod vote_removed {
                 use super::runtime_types;
@@ -13335,6 +13344,7 @@ pub mod api {
                 pub type Vote = runtime_types::pallet_conviction_voting::vote::AccountVote<
                     ::core::primitive::u128,
                 >;
+                pub type PollIndex = ::core::primitive::u32;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for VoteRemoved {
                 const PALLET: &'static str = "ConvictionVoting";
@@ -55647,10 +55657,14 @@ pub mod api {
                     Delegated(
                         ::subxt::ext::subxt_core::utils::AccountId32,
                         ::subxt::ext::subxt_core::utils::AccountId32,
+                        ::core::primitive::u16,
                     ),
                     #[codec(index = 1)]
                     #[doc = "An \\[account\\] has cancelled a previous delegation operation."]
-                    Undelegated(::subxt::ext::subxt_core::utils::AccountId32),
+                    Undelegated(
+                        ::subxt::ext::subxt_core::utils::AccountId32,
+                        ::core::primitive::u16,
+                    ),
                     #[codec(index = 2)]
                     #[doc = "An account has voted"]
                     Voted {
@@ -55658,6 +55672,7 @@ pub mod api {
                         vote: runtime_types::pallet_conviction_voting::vote::AccountVote<
                             ::core::primitive::u128,
                         >,
+                        poll_index: ::core::primitive::u32,
                     },
                     #[codec(index = 3)]
                     #[doc = "A vote has been removed"]
@@ -55666,6 +55681,7 @@ pub mod api {
                         vote: runtime_types::pallet_conviction_voting::vote::AccountVote<
                             ::core::primitive::u128,
                         >,
+                        poll_index: ::core::primitive::u32,
                     },
                     #[codec(index = 4)]
                     #[doc = "The lockup period of a conviction vote expired, and the funds have been unlocked."]
