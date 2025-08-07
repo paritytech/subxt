@@ -93,6 +93,8 @@ wasm-bindgen-futures = { workspace = true, optional = true }
 tower = { workspace = true }
 hyper = { workspace = true }
 http-body = { workspace = true }
+jsonrpsee = { workspace = true, features = ["server"] }
+
 
 [package.metadata.docs.rs]
 default-features = true
