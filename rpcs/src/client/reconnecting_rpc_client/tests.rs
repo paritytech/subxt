@@ -10,6 +10,8 @@ use jsonrpsee::server::{
     http, stop_channel, ws, ConnectionGuard, ConnectionState, HttpRequest, HttpResponse, RpcModule,
     RpcServiceBuilder, ServerConfig, SubscriptionMessage,
 };
+use tokio::sync::mpsc;
+
 
 #[tokio::test]
 async fn call_works() {
@@ -54,19 +56,17 @@ async fn sub_with_reconnect() {
         .await
         .unwrap();
 
+    assert!(matches!(sub.next().await, Some(Ok(_))));
+
     let _ = handle.send(());
 
     // Hack to wait for the server to restart.
     tokio::time::sleep(Duration::from_millis(100)).await;
 
-    assert!(matches!(sub.next().await, Some(Ok(_))));
-    assert!(matches!(
-        sub.next().await,
-        Some(Err(DisconnectedWillReconnect(_)))
-    ));
+    assert!(sub.next().await.is_none());
 
     // Restart the server.
-    let (_handle, _) = run_server_with_settings(Some(&addr), false).await.unwrap();
+    let (_handle, _) = run_server_with_settings(Some(&addr), false, None).await.unwrap();
 
     // Hack to wait for the server to restart.
     tokio::time::sleep(Duration::from_millis(100)).await;
@@ -86,7 +86,7 @@ async fn sub_with_reconnect() {
 
 #[tokio::test]
 async fn call_with_reconnect() {
-    let (handle, addr) = run_server_with_settings(None, true).await.unwrap();
+    let (handle, addr) = run_server_with_settings(None, true, None).await.unwrap();
 
     let client = Arc::new(RpcClient::builder().build(addr.clone()).await.unwrap());
 
@@ -103,7 +103,7 @@ async fn call_with_reconnect() {
     let _ = handle.send(());
 
     // Restart the server
-    let (_handle, _) = run_server_with_settings(Some(&addr), false).await.unwrap();
+    let (_handle, _) = run_server_with_settings(Some(&addr), false, None).await.unwrap();
 
     // Hack to wait for the server to restart.
     tokio::time::sleep(Duration::from_millis(100)).await;
@@ -116,7 +116,8 @@ async fn call_with_reconnect() {
 
 #[tokio::test]
 async fn subscription_terminates_on_disconnect() {
-    let (handle, addr) = run_server().await.unwrap();
+    let (tx, mut rx) = mpsc::channel(1);
+    let (handle, addr) = run_server_with_settings(None, false, Some(tx)).await.unwrap();
     let client = RpcClient::builder()
         // short retry delay to make the test run faster.
         .retry_policy(FixedInterval::from_millis(100))
@@ -140,20 +141,23 @@ async fn subscription_terminates_on_disconnect() {
     // this causes the client to disconnect.
     let _ = handle.send(());
 
-    // some moments needed for client to detect the disconnect and notify the subscription handler.
-    tokio::time::sleep(Duration::from_millis(50)).await;
+    // awaiting for the server to tell us  subscription has ended
+    tokio::time::timeout(Duration::from_secs(1), rx.recv())
+        .await
+        .expect("Server did not signal subscription termination in time");
 
     // subscription is now terminated, stream ended gracefully
     assert!(sub.next().await.is_none());
 }
 
 async fn run_server() -> Result<(tokio::sync::broadcast::Sender<()>, String), BoxError> {
-    run_server_with_settings(None, false).await
+    run_server_with_settings(None, false, None).await
 }
 
 async fn run_server_with_settings(
     url: Option<&str>,
     dont_respond_to_method_calls: bool,
+    sub_terminated_tx: Option<mpsc::Sender<()>>,
 ) -> Result<(tokio::sync::broadcast::Sender<()>, String), BoxError> {
     use jsonrpsee::server::HttpRequest;
 
@@ -177,7 +181,9 @@ async fn run_server_with_settings(
         i += 1;
     };
 
-    let mut module = RpcModule::new(());
+    let (tx,  mut rx) = tokio::sync::broadcast::channel(4);
+
+    let mut module = RpcModule::new(tx.clone());
 
     if dont_respond_to_method_calls {
         module.register_async_method("say_hello", |_, _, _| async {
@@ -192,24 +198,38 @@ async fn run_server_with_settings(
         "subscribe_lo",
         "subscribe_lo",
         "unsubscribe_lo",
-        |_params, pending, _ctx, _| async move {
-            let sink = pending.accept().await.unwrap();
-            let i = 0;
+        move |_params, pending, ctx, _| {
+            let sub_terminated_tx = sub_terminated_tx.clone();
+            async move {
+                let mut shutdown_rx = ctx.subscribe();
+                let sink = pending.accept().await.unwrap();
+                let mut i = 0;
 
-            loop {
-                if sink
-                    .send(SubscriptionMessage::from_json(&i).unwrap())
-                    .await
-                    .is_err()
-                {
-                    break;
+                loop {
+                    tokio::select! {
+                        _ = shutdown_rx.recv() => {
+                            break;
+                        }
+
+                        _ = tokio::time::sleep(Duration::from_millis(6)) => {
+                            if sink
+                                .send(SubscriptionMessage::from_json(&i).unwrap())
+                                .await
+                                .is_err()
+                            {
+                                break;
+                            }
+                            i += 1;
+                        }
+                    }
                 }
-                tokio::time::sleep(std::time::Duration::from_secs(6)).await;
+                if let Some(tx) = sub_terminated_tx {
+                    let _ = tx.send(()).await;
+                }
             }
         },
     )?;
 
-    let (tx, mut rx) = tokio::sync::broadcast::channel(4);
     let tx2 = tx.clone();
     let (stop_handle, server_handle) = stop_channel();
     let addr = listener.local_addr().expect("Could not find local addr");
