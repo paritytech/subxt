@@ -15,7 +15,7 @@ description = "Make RPC calls to Substrate based nodes"
 keywords = ["parity", "subxt", "rpcs"]
 
 [features]
-default = ["jsonrpsee", "native"]
+default = ["jsonrpsee", "native", "jsonrpsee/server"]
 
 subxt = ["dep:subxt-core"]
 jsonrpsee = ["dep:jsonrpsee", "dep:tokio-util"]
@@ -93,6 +93,8 @@ wasm-bindgen-futures = { workspace = true, optional = true }
 tower = { workspace = true }
 hyper = { workspace = true }
 http-body = { workspace = true }
+jsonrpsee = { workspace = true, features = ["server"] }
+
 
 [package.metadata.docs.rs]
 default-features = true
