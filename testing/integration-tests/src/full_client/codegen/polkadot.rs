@@ -29847,7 +29847,7 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                #[doc = "Approve bountry and propose a curator simultaneously."]
+                #[doc = "Approve boundary and propose a curator simultaneously."]
                 #[doc = "This call is a shortcut to calling `approve_bounty` and `propose_curator` separately."]
                 #[doc = ""]
                 #[doc = "May only be called from `T::SpendOrigin`."]
@@ -30165,7 +30165,7 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = "Approve bountry and propose a curator simultaneously."]
+                #[doc = "Approve boundary and propose a curator simultaneously."]
                 #[doc = "This call is a shortcut to calling `approve_bounty` and `propose_curator` separately."]
                 #[doc = ""]
                 #[doc = "May only be called from `T::SpendOrigin`."]
@@ -54843,7 +54843,7 @@ pub mod api {
                         remark: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 9)]
-                    #[doc = "Approve bountry and propose a curator simultaneously."]
+                    #[doc = "Approve boundary and propose a curator simultaneously."]
                     #[doc = "This call is a shortcut to calling `approve_bounty` and `propose_curator` separately."]
                     #[doc = ""]
                     #[doc = "May only be called from `T::SpendOrigin`."]
