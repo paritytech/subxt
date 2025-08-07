@@ -137,7 +137,10 @@ impl Stream for Subscription {
         cx: &mut task::Context<'_>,
     ) -> task::Poll<Option<Self::Item>> {
         match self.stream.poll_recv(cx) {
-            Poll::Ready(Some(msg)) => Poll::Ready(Some(msg)),
+            Poll::Ready(Some(msg)) => match msg {
+                Ok(_) => Poll::Ready(Some(msg)),
+                Err(DisconnectedWillReconnect(_)) => Poll::Ready(None),
+            },
             Poll::Ready(None) => Poll::Ready(None),
             Poll::Pending => Poll::Pending,
         }
@@ -459,7 +462,8 @@ async fn background_task<P>(
 ) where
     P: Iterator<Item = Duration> + Send + 'static + Clone,
 {
-    let disconnect = Arc::new(tokio::sync::Notify::new());
+    let disconnect = Arc::new(Notify::new());
+    let mut reconnect_notifier = Arc::new(Notify::new());
 
     loop {
         tokio::select! {
@@ -468,12 +472,14 @@ async fn background_task<P>(
                 match next_message {
                     None => break,
                     Some(op) => {
-                       spawn(dispatch_call(client.clone(), op, disconnect.clone()));
+                       spawn(dispatch_call(client.clone(), op, disconnect.clone(), reconnect_notifier.clone()));
                     }
                 };
             }
             // The connection was terminated and try to reconnect.
             _ = client.on_disconnect() => {
+                // notify that reconnection is being attempted
+                reconnect_notifier.notify_waiters();
                 let params = ReconnectParams {
                     url: &url,
                     client_builder: &client_builder,
@@ -481,7 +487,10 @@ async fn background_task<P>(
                 };
 
                 client = match reconnect(params).await {
-                    Ok(client) => client,
+                    Ok(client) => {
+                        reconnect_notifier = Arc::new(Notify::new());
+                        client
+                    },
                     Err(e) => {
                         tracing::debug!(target: LOG_TARGET, "Failed to reconnect: {e}; terminating the connection");
                         break;
@@ -494,7 +503,8 @@ async fn background_task<P>(
     disconnect.notify_waiters();
 }
 
-async fn dispatch_call(client: Arc<WsClient>, op: Op, on_disconnect: Arc<tokio::sync::Notify>) {
+async fn dispatch_call(client: Arc<WsClient>, op: Op, on_disconnect: Arc<tokio::sync::Notify>,
+                       reconnect: Arc<Notify>) {
     match op {
         Op::Call {
             method,
@@ -542,6 +552,7 @@ async fn dispatch_call(client: Arc<WsClient>, op: Op, on_disconnect: Arc<tokio::
                         sub,
                         on_disconnect.clone(),
                         client.clone(),
+                        reconnect
                     ));
 
                     let stream = Subscription {
@@ -571,6 +582,7 @@ async fn subscription_handler(
     mut rpc_sub: RpcSubscription<Box<RawValue>>,
     client_closed: Arc<Notify>,
     client: Arc<WsClient>,
+    reconnect: Arc<Notify>
 ) {
     loop {
         tokio::select! {
@@ -595,6 +607,11 @@ async fn subscription_handler(
             // This channel indicates whether the main task has been closed.
             // at this point no further messages are processed.
             _ = client_closed.notified() => {
+                break;
+            }
+            _ = reconnect.notified() => {
+                let close_reason = format!("client is reconnecting");
+                _ =  sub_tx.send(Err(DisconnectedWillReconnect(close_reason)));
                 break;
             }
         }
