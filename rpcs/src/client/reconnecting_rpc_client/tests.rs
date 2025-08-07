@@ -114,6 +114,39 @@ async fn call_with_reconnect() {
     assert!(client.request("say_hello".to_string(), None).await.is_ok());
 }
 
+#[tokio::test]
+async fn subscription_terminates_on_disconnect() {
+    let (handle, addr) = run_server().await.unwrap();
+    let client = RpcClient::builder()
+        // short retry delay to make the test run faster.
+        .retry_policy(FixedInterval::from_millis(100))
+        .build(addr)
+        .await
+        .unwrap();
+
+    // a subscription created.
+    let mut sub = client
+        .subscribe(
+            "subscribe_lo".to_string(),
+            None,
+            "unsubscribe_lo".to_string(),
+        )
+        .await
+        .unwrap();
+
+    // first message sent goes through.
+    assert!(matches!(sub.next().await, Some(Ok(_))));
+
+    // this causes the client to disconnect.
+    let _ = handle.send(());
+
+    // some moments needed for client to detect the disconnect and notify the subscription handler.
+    tokio::time::sleep(Duration::from_millis(50)).await;
+
+    // subscription is now terminated, stream ended gracefully
+    assert!(sub.next().await.is_none());
+}
+
 async fn run_server() -> Result<(tokio::sync::broadcast::Sender<()>, String), BoxError> {
     run_server_with_settings(None, false).await
 }
