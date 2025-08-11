@@ -584,6 +584,9 @@ async fn subscription_handler(
     client: Arc<WsClient>,
     reconnect: Arc<Notify>
 ) {
+    let reconnect_notification = reconnect.notified();
+    tokio::pin!(reconnect_notification);
+
     loop {
         tokio::select! {
             next_msg = rpc_sub.next() => {
@@ -609,7 +612,7 @@ async fn subscription_handler(
             _ = client_closed.notified() => {
                 break;
             }
-            _ = reconnect.notified() => {
+            _ = &mut reconnect_notification => {
                 let close_reason = format!("client is reconnecting");
                 _ =  sub_tx.send(Err(DisconnectedWillReconnect(close_reason)));
                 break;
