@@ -72,17 +72,17 @@ impl PlatformRef for SubxtPlatform {
 
     fn spawn_task(
         &self,
-        _task_name: std::borrow::Cow<str>,
+        _task_name: std::borrow::Cow<'_, str>,
         task: impl future::Future<Output = ()> + Send + 'static,
     ) {
         wasm_bindgen_futures::spawn_local(task);
     }
 
-    fn client_name(&self) -> std::borrow::Cow<str> {
+    fn client_name(&self) -> std::borrow::Cow<'_, str> {
         "subxt-light-client".into()
     }
 
-    fn client_version(&self) -> std::borrow::Cow<str> {
+    fn client_version(&self) -> std::borrow::Cow<'_, str> {
         env!("CARGO_PKG_VERSION").into()
     }
 
