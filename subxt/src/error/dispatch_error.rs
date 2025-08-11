@@ -169,7 +169,7 @@ impl std::fmt::Display for ModuleError {
 
 impl ModuleError {
     /// Return more details about this error.
-    pub fn details(&self) -> Result<ModuleErrorDetails, MetadataError> {
+    pub fn details(&self) -> Result<ModuleErrorDetails<'_>, MetadataError> {
         let pallet = self.metadata.pallet_by_index_err(self.pallet_index())?;
         let variant = pallet
             .error_variant_by_index(self.error_index())

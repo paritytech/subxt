@@ -25,7 +25,7 @@ impl Metadata {
     pub fn pallet_by_name_err(
         &self,
         name: &str,
-    ) -> Result<subxt_metadata::PalletMetadata, MetadataError> {
+    ) -> Result<subxt_metadata::PalletMetadata<'_>, MetadataError> {
         self.pallet_by_name(name)
             .ok_or_else(|| MetadataError::PalletNameNotFound(name.to_owned()))
     }
@@ -34,7 +34,7 @@ impl Metadata {
     pub fn pallet_by_index_err(
         &self,
         index: u8,
-    ) -> Result<subxt_metadata::PalletMetadata, MetadataError> {
+    ) -> Result<subxt_metadata::PalletMetadata<'_>, MetadataError> {
         self.pallet_by_index(index)
             .ok_or(MetadataError::PalletIndexNotFound(index))
     }
@@ -43,7 +43,7 @@ impl Metadata {
     pub fn runtime_api_trait_by_name_err(
         &self,
         name: &str,
-    ) -> Result<subxt_metadata::RuntimeApiMetadata, MetadataError> {
+    ) -> Result<subxt_metadata::RuntimeApiMetadata<'_>, MetadataError> {
         self.runtime_api_trait_by_name(name)
             .ok_or_else(|| MetadataError::RuntimeTraitNotFound(name.to_owned()))
     }
@@ -52,7 +52,7 @@ impl Metadata {
     pub fn custom_value_by_name_err(
         &self,
         name: &str,
-    ) -> Result<subxt_metadata::CustomValueMetadata, MetadataError> {
+    ) -> Result<subxt_metadata::CustomValueMetadata<'_>, MetadataError> {
         self.custom()
             .get(name)
             .ok_or_else(|| MetadataError::CustomValueNameNotFound(name.to_owned()))
