@@ -339,7 +339,7 @@ impl<T: Config> EventDetails<T> {
     }
 
     /// Fetch details from the metadata for this event.
-    pub fn event_metadata(&self) -> EventMetadataDetails {
+    pub fn event_metadata(&self) -> EventMetadataDetails<'_> {
         let pallet = self
             .metadata
             .pallet_by_index(self.pallet_index())
