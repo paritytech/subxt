@@ -613,7 +613,7 @@ async fn subscription_handler(
                 break;
             }
             _ = &mut reconnect_notification => {
-                let close_reason = format!("client is reconnecting");
+                let close_reason = "client is reconnecting".to_string();
                 _ =  sub_tx.send(Err(DisconnectedWillReconnect(close_reason)));
                 break;
             }
