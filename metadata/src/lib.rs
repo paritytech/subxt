@@ -240,7 +240,7 @@ impl Metadata {
     }
 
     /// Obtain a unique hash representing this metadata or specific parts of it.
-    pub fn hasher(&self) -> MetadataHasher {
+    pub fn hasher(&self) -> MetadataHasher<'_> {
         MetadataHasher::new(self)
     }
 

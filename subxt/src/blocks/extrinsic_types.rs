@@ -223,7 +223,7 @@ where
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::extrinsic_metadata()`].
-    pub fn extrinsic_metadata(&self) -> Result<ExtrinsicMetadataDetails, Error> {
+    pub fn extrinsic_metadata(&self) -> Result<ExtrinsicMetadataDetails<'_>, Error> {
         self.inner.extrinsic_metadata().map_err(Into::into)
     }
 
