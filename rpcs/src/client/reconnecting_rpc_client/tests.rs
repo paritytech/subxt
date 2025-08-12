@@ -44,8 +44,9 @@ async fn sub_works() {
 
 #[tokio::test]
 async fn sub_with_reconnect() {
+    let (event_tx, mut event_rx) = mpsc::unbounded_channel();
     let (handle, addr) = run_server().await.unwrap();
-    let client = RpcClient::builder().build(addr.clone()).await.unwrap();
+    let client = RpcClient::builder().with_test_event_sender(event_tx).build(addr.clone()).await.unwrap();
 
     let mut sub = client
         .subscribe(
@@ -61,7 +62,12 @@ async fn sub_with_reconnect() {
     let _ = handle.send(());
 
     // Hack to wait for the server to restart.
-    tokio::time::sleep(Duration::from_secs(2)).await;
+    assert_eq!(
+        tokio::time::timeout(Duration::from_secs(5), event_rx.recv())
+            .await
+            .expect("Client did not signal disconnect in time"),
+        Some(ClientEvent::Disconnected)
+    );
 
     assert!(sub.next().await.is_none());
 
@@ -69,7 +75,12 @@ async fn sub_with_reconnect() {
     let (_handle, _) = run_server_with_settings(Some(&addr), false, None).await.unwrap();
 
     // Hack to wait for the server to restart.
-    tokio::time::sleep(Duration::from_secs(2)).await;
+    assert_eq!(
+        tokio::time::timeout(Duration::from_secs(5), event_rx.recv())
+            .await
+            .expect("Client did not signal reconnect in time"),
+        Some(ClientEvent::Reconnected)
+    );
 
     // Subscription should work after reconnect.
     let mut sub = client
@@ -116,11 +127,10 @@ async fn call_with_reconnect() {
 
 #[tokio::test]
 async fn subscription_terminates_on_disconnect() {
-    let (tx, mut rx) = mpsc::channel(1);
-    let (handle, addr) = run_server_with_settings(None, false, Some(tx)).await.unwrap();
+    let (event_tx, mut event_rx) = mpsc::unbounded_channel();
+    let (handle, addr) = run_server().await.unwrap();
     let client = RpcClient::builder()
-        // short retry delay to make the test run faster.
-        .retry_policy(FixedInterval::from_millis(100))
+        .with_test_event_sender(event_tx)
         .build(addr)
         .await
         .unwrap();
@@ -142,11 +152,12 @@ async fn subscription_terminates_on_disconnect() {
     let _ = handle.send(());
 
     // awaiting for the server to tell us  subscription has ended
-    tokio::time::timeout(Duration::from_secs(1), rx.recv())
-        .await
-        .expect("Server did not signal subscription termination in time");
-
-    tokio::time::sleep(Duration::from_secs(2)).await;
+    assert_eq!(
+        tokio::time::timeout(Duration::from_secs(5), event_rx.recv())
+            .await
+            .expect("Client did not signal disconnect in time"),
+        Some(ClientEvent::Disconnected)
+    );
 
     // subscription is now terminated, stream ended gracefully
     assert!(sub.next().await.is_none());
