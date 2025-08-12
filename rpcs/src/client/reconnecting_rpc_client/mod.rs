@@ -162,6 +162,17 @@ pub struct RpcClient {
     tx: mpsc::UnboundedSender<Op>,
 }
 
+
+/// Dedicated Event channel for testing purpose
+#[derive(Debug, PartialEq, Eq)]
+#[cfg(test)]
+pub enum ClientEvent {
+    /// Server disconnected
+    Disconnected,
+    /// Server reconnected
+    Reconnected,
+}
+
 /// Builder for [`Client`].
 #[derive(Clone, Debug)]
 pub struct RpcClientBuilder<P> {
@@ -180,6 +191,8 @@ pub struct RpcClientBuilder<P> {
     max_concurrent_requests: u32,
     request_timeout: Duration,
     connection_timeout: Duration,
+    #[cfg(test)]
+    test_event_tx: Option<mpsc::UnboundedSender<ClientEvent>>,
 }
 
 impl Default for RpcClientBuilder<ExponentialBackoff> {
@@ -198,6 +211,8 @@ impl Default for RpcClientBuilder<ExponentialBackoff> {
             max_concurrent_requests: 1024,
             request_timeout: Duration::from_secs(60),
             connection_timeout: Duration::from_secs(10),
+            #[cfg(test)]
+            test_event_tx: None,
         }
     }
 }
@@ -304,6 +319,8 @@ where
             max_concurrent_requests: self.max_concurrent_requests,
             request_timeout: self.request_timeout,
             connection_timeout: self.connection_timeout,
+            #[cfg(test)]
+            test_event_tx: self.test_event_tx,
         }
     }
 
@@ -324,6 +341,18 @@ where
     /// Default: 30 seconds.
     pub fn disable_ws_ping(mut self) -> Self {
         self.ping_config = None;
+        self
+    }
+
+    /// For testing purposes only.
+    ///
+    /// Provides a channel sender that the client's background task will use to
+    /// notify the test suite about key events, such as disconnections and reconnections.
+    /// This allows tests to synchronize with the client's state changes deterministically,
+    /// avoiding the need for flaky `sleep` calls.
+    #[cfg(test)]
+    pub fn with_test_event_sender(mut self, tx: UnboundedSender<ClientEvent>) -> Self {
+        self.test_event_tx = Some(tx);
         self
     }
 
@@ -464,6 +493,8 @@ async fn background_task<P>(
 {
     let disconnect = Arc::new(Notify::new());
     let mut reconnect_notifier = Arc::new(Notify::new());
+    #[cfg(test)]
+    let test_event_tx = client_builder.test_event_tx.clone();
 
     loop {
         tokio::select! {
@@ -480,6 +511,10 @@ async fn background_task<P>(
             _ = client.on_disconnect() => {
                 // notify that reconnection is being attempted
                 reconnect_notifier.notify_waiters();
+                #[cfg(test)]
+                if let Some(tx) = &test_event_tx {
+                    let _ = tx.send(ClientEvent::Disconnected);
+                }
                 let params = ReconnectParams {
                     url: &url,
                     client_builder: &client_builder,
@@ -489,6 +524,10 @@ async fn background_task<P>(
                 client = match reconnect(params).await {
                     Ok(client) => {
                         reconnect_notifier = Arc::new(Notify::new());
+                        #[cfg(test)]
+                        if let Some(tx) = &test_event_tx {
+                           let _ = tx.send(ClientEvent::Reconnected);
+                        }
                         client
                     },
                     Err(e) => {
