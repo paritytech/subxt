@@ -69,6 +69,8 @@ async fn sub_with_reconnect() {
         Some(ClientEvent::Disconnected)
     );
 
+    tokio::task::yield_now().await;
+
     assert!(sub.next().await.is_none());
 
     // Restart the server.
@@ -158,6 +160,8 @@ async fn subscription_terminates_on_disconnect() {
             .expect("Client did not signal disconnect in time"),
         Some(ClientEvent::Disconnected)
     );
+
+    tokio::task::yield_now().await;
 
     // subscription is now terminated, stream ended gracefully
     assert!(sub.next().await.is_none());
