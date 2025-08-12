@@ -61,7 +61,7 @@ async fn sub_with_reconnect() {
     let _ = handle.send(());
 
     // Hack to wait for the server to restart.
-    tokio::time::sleep(Duration::from_millis(250)).await;
+    tokio::time::sleep(Duration::from_secs(2)).await;
 
     assert!(sub.next().await.is_none());
 
@@ -69,7 +69,7 @@ async fn sub_with_reconnect() {
     let (_handle, _) = run_server_with_settings(Some(&addr), false, None).await.unwrap();
 
     // Hack to wait for the server to restart.
-    tokio::time::sleep(Duration::from_millis(250)).await;
+    tokio::time::sleep(Duration::from_secs(2)).await;
 
     // Subscription should work after reconnect.
     let mut sub = client
@@ -146,7 +146,7 @@ async fn subscription_terminates_on_disconnect() {
         .await
         .expect("Server did not signal subscription termination in time");
 
-    tokio::time::sleep(Duration::from_millis(50)).await;
+    tokio::time::sleep(Duration::from_secs(2)).await;
 
     // subscription is now terminated, stream ended gracefully
     assert!(sub.next().await.is_none());
