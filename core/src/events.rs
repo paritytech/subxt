@@ -650,7 +650,7 @@ mod tests {
         let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
-        // construst an Events object to iterate them:
+        // construct an Events object to iterate them:
         let event = Event::A(1, true, vec!["Hi".into()]);
         let events = events::<Event>(
             metadata,
@@ -683,7 +683,7 @@ mod tests {
         let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
-        // construst an Events object to iterate them:
+        // construct an Events object to iterate them:
         let event = Event::A(1, true, vec!["Hi".into()]);
         let events = events::<Event>(
             metadata,
@@ -797,7 +797,7 @@ mod tests {
         event_bytes.extend_from_slice(&[3, 127, 45, 0, 2]);
 
         // Encode our events in the format we expect back from a node, and
-        // construst an Events object to iterate them:
+        // construct an Events object to iterate them:
         let events = events_raw(
             metadata,
             event_bytes,
@@ -848,7 +848,7 @@ mod tests {
         let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
-        // construst an Events object to iterate them:
+        // construct an Events object to iterate them:
         let events = events::<Event>(
             metadata,
             vec![event_record(Phase::Finalization, Event::A(1))],
