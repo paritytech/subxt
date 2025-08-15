@@ -45,7 +45,7 @@ async fn sub_with_reconnect() {
     let (handle, addr) = run_server().await.unwrap();
     let client = RpcClient::builder().build(addr.clone()).await.unwrap();
 
-    let mut sub = client
+    let sub = client
         .subscribe(
             "subscribe_lo".to_string(),
             None,
@@ -54,24 +54,25 @@ async fn sub_with_reconnect() {
         .await
         .unwrap();
 
+    // Tell server to shut down.
     let _ = handle.send(());
 
-    // Hack to wait for the server to restart.
-    tokio::time::sleep(Duration::from_millis(100)).await;
+    // Drain any values from the subscription. We should end with a DisconnectedWillReconnect error,
+    // so that subscriptions have the opportunity to react to the fact that we were disconnected.
+    let sub_ended_with_disconnect_err = sub.fold(false, async |_, next| matches!(next, Err(DisconnectedWillReconnect(_))));
+    let sub_ended_with_disconnect_err = tokio::time::timeout(tokio::time::Duration::from_secs(5), sub_ended_with_disconnect_err)
+        .await
+        .expect("timeout should not be hit");
 
-    assert!(matches!(sub.next().await, Some(Ok(_))));
-    assert!(matches!(
-        sub.next().await,
-        Some(Err(DisconnectedWillReconnect(_)))
-    ));
+    assert!(sub_ended_with_disconnect_err, "DisconnectedWillReconnect err was last message in sub");
 
-    // Restart the server.
+    // Start a new server at the same address as the old one. (This will wait a bit for the addr to be free)
     let (_handle, _) = run_server_with_settings(Some(&addr), false).await.unwrap();
 
     // Hack to wait for the server to restart.
     tokio::time::sleep(Duration::from_millis(100)).await;
 
-    // Subscription should work after reconnect.
+    // We can subscribe again on the same client and it should work.
     let mut sub = client
         .subscribe(
             "subscribe_lo".to_string(),
@@ -137,7 +138,7 @@ async fn run_server_with_settings(
         }
         tokio::time::sleep(Duration::from_millis(100)).await;
 
-        if i >= 10 {
+        if i >= 100 {
             panic!("Addr already in use");
         }
 
