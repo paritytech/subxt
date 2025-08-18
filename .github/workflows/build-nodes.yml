@@ -13,7 +13,7 @@ jobs:
     runs-on: parity-large
     steps:
       - name: checkout polkadot-sdk
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: paritytech/polkadot-sdk
 
