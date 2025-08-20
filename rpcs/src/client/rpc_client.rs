@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{RawRpcSubscription, RpcClientT, jsonrpsee_client};
+use super::{RawRpcSubscription, RpcClientT};
 use crate::Error;
 use futures::{Stream, StreamExt};
 use serde::{Serialize, de::DeserializeOwned};
@@ -32,7 +32,7 @@ impl RpcClient {
     ///
     /// Allows insecure URLs without SSL encryption, e.g. (http:// and ws:// URLs).
     pub async fn from_insecure_url<U: AsRef<str>>(url: U) -> Result<Self, Error> {
-        let client = jsonrpsee_client(url.as_ref())
+        let client = super::jsonrpsee_client(url.as_ref())
             .await
             .map_err(|e| Error::Client(Box::new(e)))?;
         Ok(Self::new(client))
