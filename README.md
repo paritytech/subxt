@@ -1,4 +1,4 @@
-# subxt &middot; ![build](https://github.com/paritytech/subxt/workflows/Rust/badge.svg) [![Latest Version](https://img.shields.io/crates/v/subxt.svg)](https://crates.io/crates/subxt) [![Documentation](https://docs.rs/subxt/badge.svg)](https://docs.rs/subxt)
+# subxt &middot; [![build](https://github.com/paritytech/subxt/actions/workflows/rust.yml/badge.svg)](https://github.com/paritytech/subxt/actions/workflows/rust.yml) [![Latest Version](https://img.shields.io/crates/v/subxt.svg)](https://crates.io/crates/subxt) [![Documentation](https://docs.rs/subxt/badge.svg)](https://docs.rs/subxt)
 
 Subxt is a library for interacting with [Substrate](https://github.com/paritytech/polkadot-sdk) based nodes in Rust and WebAssembly. It can:
 
