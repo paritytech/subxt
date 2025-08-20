@@ -46,8 +46,6 @@ subxt-rpcs = { workspace = true }
 frame-decode = { workspace = true, features = ["legacy", "legacy-types"] }
 frame-metadata = { workspace = true, features = ["std", "legacy"] }
 scale-type-resolver = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
 codec = { workspace = true }
 primitive-types = { workspace = true }
 scale-info = { workspace = true }
