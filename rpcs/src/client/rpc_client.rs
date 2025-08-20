@@ -32,7 +32,7 @@ impl RpcClient {
     ///
     /// Allows insecure URLs without SSL encryption, e.g. (http:// and ws:// URLs).
     pub async fn from_insecure_url<U: AsRef<str>>(url: U) -> Result<Self, Error> {
-        let client = jsonrpsee_helpers::client(url.as_ref())
+        let client = super::jsonrpsee_client(url.as_ref())
             .await
             .map_err(|e| Error::Client(Box::new(e)))?;
         Ok(Self::new(client))
@@ -240,53 +240,5 @@ impl<Res: DeserializeOwned> Stream for RpcSubscription<Res> {
         });
 
         Poll::Ready(res)
-    }
-}
-
-// helpers for a jsonrpsee specific RPC client.
-#[cfg(all(feature = "jsonrpsee", feature = "native"))]
-mod jsonrpsee_helpers {
-    pub use jsonrpsee::{
-        client_transport::ws::{self, EitherStream, Url, WsTransportClientBuilder},
-        core::client::{Client, Error},
-    };
-    use tokio_util::compat::Compat;
-
-    pub type Sender = ws::Sender<Compat<EitherStream>>;
-    pub type Receiver = ws::Receiver<Compat<EitherStream>>;
-
-    /// Build WS RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let (sender, receiver) = ws_transport(url).await?;
-        Ok(Client::builder()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_tokio(sender, receiver))
-    }
-
-    async fn ws_transport(url: &str) -> Result<(Sender, Receiver), Error> {
-        let url = Url::parse(url).map_err(|e| Error::Transport(e.into()))?;
-        WsTransportClientBuilder::default()
-            .build(url)
-            .await
-            .map_err(|e| Error::Transport(e.into()))
-    }
-}
-
-// helpers for a jsonrpsee specific RPC client.
-#[cfg(all(feature = "jsonrpsee", feature = "web", target_arch = "wasm32"))]
-mod jsonrpsee_helpers {
-    pub use jsonrpsee::{
-        client_transport::web,
-        core::client::{Client, ClientBuilder, Error},
-    };
-
-    /// Build web RPC client from URL
-    pub async fn client(url: &str) -> Result<Client, Error> {
-        let (sender, receiver) = web::connect(url)
-            .await
-            .map_err(|e| Error::Transport(e.into()))?;
-        Ok(ClientBuilder::default()
-            .max_buffer_capacity_per_subscription(4096)
-            .build_with_wasm(sender, receiver))
     }
 }
