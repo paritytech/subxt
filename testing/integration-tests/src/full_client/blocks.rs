@@ -205,6 +205,10 @@ async fn fetch_block_and_decode_extrinsic_details() {
     // Now, separately, download that block. Let's see what it contains..
     let block_hash = in_block.block_hash();
     let block = api.blocks().at(block_hash).await.unwrap();
+
+    // Ensure that we can clone the block.
+    block.clone();
+
     let extrinsics = block.extrinsics().await.unwrap();
 
     assert_eq!(extrinsics.block_hash(), block_hash);

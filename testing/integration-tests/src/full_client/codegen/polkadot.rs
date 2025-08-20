@@ -585,10 +585,9 @@ pub mod api {
                             result_xcms_version,
                         },
                         [
-                            42u8, 17u8, 98u8, 165u8, 34u8, 220u8, 107u8, 162u8, 157u8, 31u8, 232u8,
-                            191u8, 158u8, 124u8, 129u8, 127u8, 202u8, 2u8, 235u8, 62u8, 229u8,
-                            152u8, 186u8, 105u8, 217u8, 115u8, 242u8, 41u8, 70u8, 123u8, 63u8,
-                            234u8,
+                            110u8, 238u8, 95u8, 99u8, 108u8, 123u8, 202u8, 31u8, 13u8, 136u8,
+                            121u8, 81u8, 251u8, 59u8, 133u8, 39u8, 179u8, 75u8, 237u8, 31u8, 15u8,
+                            64u8, 188u8, 246u8, 100u8, 66u8, 34u8, 177u8, 13u8, 63u8, 150u8, 140u8,
                         ],
                     )
                 }
@@ -609,9 +608,9 @@ pub mod api {
                             xcm,
                         },
                         [
-                            143u8, 121u8, 252u8, 163u8, 9u8, 7u8, 249u8, 172u8, 53u8, 115u8, 249u8,
-                            146u8, 131u8, 220u8, 210u8, 240u8, 248u8, 38u8, 95u8, 203u8, 43u8,
-                            160u8, 59u8, 71u8, 105u8, 70u8, 7u8, 224u8, 40u8, 74u8, 62u8, 214u8,
+                            118u8, 151u8, 164u8, 99u8, 186u8, 178u8, 47u8, 236u8, 70u8, 95u8,
+                            145u8, 237u8, 26u8, 142u8, 56u8, 139u8, 136u8, 84u8, 40u8, 218u8, 46u8,
+                            97u8, 80u8, 19u8, 66u8, 65u8, 172u8, 247u8, 50u8, 242u8, 240u8, 185u8,
                         ],
                     )
                 }
@@ -5140,9 +5139,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                175u8, 154u8, 247u8, 159u8, 103u8, 74u8, 120u8, 74u8, 254u8, 141u8, 150u8, 108u8,
-                26u8, 97u8, 168u8, 170u8, 110u8, 232u8, 250u8, 105u8, 219u8, 48u8, 236u8, 215u8,
-                225u8, 65u8, 47u8, 23u8, 48u8, 62u8, 45u8, 50u8,
+                60u8, 30u8, 114u8, 255u8, 67u8, 250u8, 242u8, 169u8, 114u8, 243u8, 99u8, 143u8,
+                73u8, 209u8, 120u8, 127u8, 245u8, 170u8, 122u8, 5u8, 31u8, 39u8, 51u8, 72u8, 23u8,
+                243u8, 37u8, 211u8, 19u8, 57u8, 130u8, 128u8,
             ]
     }
     pub mod system {
@@ -6249,9 +6248,10 @@ pub mod api {
                         "Events",
                         (),
                         [
-                            65u8, 10u8, 38u8, 82u8, 235u8, 12u8, 128u8, 212u8, 191u8, 7u8, 41u8,
-                            125u8, 205u8, 213u8, 175u8, 108u8, 186u8, 28u8, 46u8, 200u8, 166u8,
-                            122u8, 96u8, 250u8, 178u8, 113u8, 131u8, 226u8, 88u8, 65u8, 169u8, 5u8,
+                            227u8, 154u8, 253u8, 34u8, 14u8, 17u8, 224u8, 168u8, 194u8, 239u8,
+                            139u8, 48u8, 192u8, 250u8, 255u8, 195u8, 112u8, 45u8, 69u8, 133u8,
+                            232u8, 33u8, 96u8, 177u8, 116u8, 196u8, 172u8, 65u8, 211u8, 199u8,
+                            103u8, 130u8,
                         ],
                     )
                 }
@@ -9291,8 +9291,7 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            #[doc = "The `transferred` balance is placed on hold"]
-            #[doc = "at the `dest` account."]
+            #[doc = "The `transferred` balance is placed on hold at the `dest` account."]
             pub struct TransferAndHold {
                 pub reason: transfer_and_hold::Reason,
                 pub source: transfer_and_hold::Source,
@@ -9332,6 +9331,23 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for Released {
                 const PALLET: &'static str = "Balances";
                 const EVENT: &'static str = "Released";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "An unexpected/defensive event was triggered."]
+            pub struct Unexpected(pub unexpected::Field0);
+            pub mod unexpected {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::pallet_balances::pallet::UnexpectedKind;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for Unexpected {
+                const PALLET: &'static str = "Balances";
+                const EVENT: &'static str = "Unexpected";
             }
         }
         pub mod storage {
@@ -13251,11 +13267,16 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             #[doc = "An account has delegated their vote to another account. \\[who, target\\]"]
-            pub struct Delegated(pub delegated::Field0, pub delegated::Field1);
+            pub struct Delegated(
+                pub delegated::Field0,
+                pub delegated::Field1,
+                pub delegated::Field2,
+            );
             pub mod delegated {
                 use super::runtime_types;
                 pub type Field0 = ::subxt::ext::subxt_core::utils::AccountId32;
                 pub type Field1 = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Field2 = ::core::primitive::u16;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for Delegated {
                 const PALLET: &'static str = "ConvictionVoting";
@@ -13269,10 +13290,11 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
             #[doc = "An \\[account\\] has cancelled a previous delegation operation."]
-            pub struct Undelegated(pub undelegated::Field0);
+            pub struct Undelegated(pub undelegated::Field0, pub undelegated::Field1);
             pub mod undelegated {
                 use super::runtime_types;
                 pub type Field0 = ::subxt::ext::subxt_core::utils::AccountId32;
+                pub type Field1 = ::core::primitive::u16;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for Undelegated {
                 const PALLET: &'static str = "ConvictionVoting";
@@ -13289,6 +13311,7 @@ pub mod api {
             pub struct Voted {
                 pub who: voted::Who,
                 pub vote: voted::Vote,
+                pub poll_index: voted::PollIndex,
             }
             pub mod voted {
                 use super::runtime_types;
@@ -13296,6 +13319,7 @@ pub mod api {
                 pub type Vote = runtime_types::pallet_conviction_voting::vote::AccountVote<
                     ::core::primitive::u128,
                 >;
+                pub type PollIndex = ::core::primitive::u32;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for Voted {
                 const PALLET: &'static str = "ConvictionVoting";
@@ -13312,6 +13336,7 @@ pub mod api {
             pub struct VoteRemoved {
                 pub who: vote_removed::Who,
                 pub vote: vote_removed::Vote,
+                pub poll_index: vote_removed::PollIndex,
             }
             pub mod vote_removed {
                 use super::runtime_types;
@@ -13319,6 +13344,7 @@ pub mod api {
                 pub type Vote = runtime_types::pallet_conviction_voting::vote::AccountVote<
                     ::core::primitive::u128,
                 >;
+                pub type PollIndex = ::core::primitive::u32;
             }
             impl ::subxt::ext::subxt_core::events::StaticEvent for VoteRemoved {
                 const PALLET: &'static str = "ConvictionVoting";
@@ -34057,8 +34083,7 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
-            #[doc = "The `transferred` balance is placed on hold"]
-            #[doc = "at the `dest` account."]
+            #[doc = "The `transferred` balance is placed on hold at the `dest` account."]
             pub struct TransferAndHold {
                 pub reason: transfer_and_hold::Reason,
                 pub source: transfer_and_hold::Source,
@@ -34098,6 +34123,23 @@ pub mod api {
             impl ::subxt::ext::subxt_core::events::StaticEvent for Released {
                 const PALLET: &'static str = "NisCounterpartBalances";
                 const EVENT: &'static str = "Released";
+            }
+            #[derive(
+                :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode")]
+            #[doc = "An unexpected/defensive event was triggered."]
+            pub struct Unexpected(pub unexpected::Field0);
+            pub mod unexpected {
+                use super::runtime_types;
+                pub type Field0 = runtime_types::pallet_balances::pallet::UnexpectedKind;
+            }
+            impl ::subxt::ext::subxt_core::events::StaticEvent for Unexpected {
+                const PALLET: &'static str = "NisCounterpartBalances";
+                const EVENT: &'static str = "Unexpected";
             }
         }
         pub mod storage {
@@ -54334,8 +54376,7 @@ pub mod api {
                         amount: ::core::primitive::u128,
                     },
                     #[codec(index = 27)]
-                    #[doc = "The `transferred` balance is placed on hold"]
-                    #[doc = "at the `dest` account."]
+                    #[doc = "The `transferred` balance is placed on hold at the `dest` account."]
                     TransferAndHold {
                         reason: runtime_types::rococo_runtime::RuntimeHoldReason,
                         source: ::subxt::ext::subxt_core::utils::AccountId32,
@@ -54349,6 +54390,26 @@ pub mod api {
                         who: ::subxt::ext::subxt_core::utils::AccountId32,
                         amount: ::core::primitive::u128,
                     },
+                    #[codec(index = 29)]
+                    #[doc = "An unexpected/defensive event was triggered."]
+                    Unexpected(runtime_types::pallet_balances::pallet::UnexpectedKind),
+                }
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub enum UnexpectedKind {
+                    #[codec(index = 0)]
+                    BalanceUpdated,
+                    #[codec(index = 1)]
+                    FailedToMutateAccount,
                 }
             }
             pub mod types {
@@ -55596,10 +55657,14 @@ pub mod api {
                     Delegated(
                         ::subxt::ext::subxt_core::utils::AccountId32,
                         ::subxt::ext::subxt_core::utils::AccountId32,
+                        ::core::primitive::u16,
                     ),
                     #[codec(index = 1)]
                     #[doc = "An \\[account\\] has cancelled a previous delegation operation."]
-                    Undelegated(::subxt::ext::subxt_core::utils::AccountId32),
+                    Undelegated(
+                        ::subxt::ext::subxt_core::utils::AccountId32,
+                        ::core::primitive::u16,
+                    ),
                     #[codec(index = 2)]
                     #[doc = "An account has voted"]
                     Voted {
@@ -55607,6 +55672,7 @@ pub mod api {
                         vote: runtime_types::pallet_conviction_voting::vote::AccountVote<
                             ::core::primitive::u128,
                         >,
+                        poll_index: ::core::primitive::u32,
                     },
                     #[codec(index = 3)]
                     #[doc = "A vote has been removed"]
@@ -55615,6 +55681,7 @@ pub mod api {
                         vote: runtime_types::pallet_conviction_voting::vote::AccountVote<
                             ::core::primitive::u128,
                         >,
+                        poll_index: ::core::primitive::u32,
                     },
                     #[codec(index = 4)]
                     #[doc = "The lockup period of a conviction vote expired, and the funds have been unlocked."]
