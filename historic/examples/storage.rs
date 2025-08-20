@@ -76,7 +76,7 @@ async fn main() -> Result<(), Error> {
                 .decode::<[u8; 32]>()?
                 .expect("We expect this key to decode into a 32 byte AccountId");
 
-            let account_id_hex = hex::encode(&account_id);
+            let account_id_hex = hex::encode(account_id);
 
             // Decode these values into our generic scale_value::Value type. Less efficient than
             // defining a static type as above, but easier for the sake of the example.
