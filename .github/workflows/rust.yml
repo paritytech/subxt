@@ -187,6 +187,9 @@ jobs:
       - name: Cargo hack; check each subxt feature
         run: cargo hack -p subxt --each-feature check --exclude-no-default-features --exclude-all-features --exclude-features web --features native
 
+      - name: Cargo hack; check each subxt feature
+        run: cargo hack -p subxt-historic --each-feature check --exclude-no-default-features --exclude-all-features --exclude-features web --features native
+
       # Subxt-signer has the "subxt" features enabled in the "check all targets" test. Run it on its own to
       # check it without. We can't enable subxt or web features here, so no cargo hack.
       - name: Cargo check subxt-signer
@@ -213,7 +216,7 @@ jobs:
 
       # Next, check each other package in isolation.
       - name: Cargo hack; check each feature/crate on its own
-        run: cargo hack --exclude subxt --exclude subxt-signer --exclude subxt-lightclient --exclude subxt-rpcs --exclude-all-features --each-feature check --workspace
+        run: cargo hack --exclude subxt --exclude subxt-historic --exclude subxt-signer --exclude subxt-lightclient --exclude subxt-rpcs --exclude-all-features --each-feature check --workspace
 
       # Check the full examples, which aren't a part of the workspace so are otherwise ignored.
       - name: Cargo check parachain-example

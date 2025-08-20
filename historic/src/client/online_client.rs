@@ -1,14 +1,17 @@
 use super::ClientAtBlock;
 use crate::client::OfflineClientAtBlockT;
 use crate::config::Config;
-use crate::error::{OnlineClientAtBlockError, OnlineClientError};
+use crate::error::OnlineClientAtBlockError;
 use codec::{Compact, Decode, Encode};
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use scale_info_legacy::TypeRegistrySet;
 use std::sync::Arc;
 use subxt_rpcs::methods::chain_head::ArchiveCallResult;
-use subxt_rpcs::{ChainHeadRpcMethods, Error as RpcError, RpcClient};
-use url::Url;
+use subxt_rpcs::{ChainHeadRpcMethods, RpcClient};
+
+#[cfg(feature = "jsonrpsee")]
+#[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
+use crate::error::OnlineClientError;
 
 /// A client which exposes the means to decode historic data on a chain online.
 #[derive(Clone, Debug)]
@@ -43,13 +46,13 @@ impl<T: Config> OnlineClient<T> {
         url: impl AsRef<str>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
         let url_str = url.as_ref();
-        let url = Url::parse(url_str).map_err(|_| OnlineClientError::InvalidUrl {
+        let url = url::Url::parse(url_str).map_err(|_| OnlineClientError::InvalidUrl {
             url: url_str.to_string(),
         })?;
-        if !is_url_secure(&url) {
-            return Err(OnlineClientError::RpcClientError(RpcError::InsecureUrl(
-                url_str.to_string(),
-            )));
+        if !Self::is_url_secure(&url) {
+            return Err(OnlineClientError::RpcClientError(
+                subxt_rpcs::Error::InsecureUrl(url_str.to_string()),
+            ));
         }
         OnlineClient::from_insecure_url(config, url).await
     }
@@ -63,6 +66,16 @@ impl<T: Config> OnlineClient<T> {
     ) -> Result<OnlineClient<T>, OnlineClientError> {
         let rpc_client = RpcClient::from_insecure_url(url).await?;
         Ok(OnlineClient::from_rpc_client(config, rpc_client))
+    }
+
+    fn is_url_secure(url: &url::Url) -> bool {
+        let secure_scheme = url.scheme() == "https" || url.scheme() == "wss";
+        let is_localhost = url.host().is_some_and(|e| match e {
+            url::Host::Domain(e) => e == "localhost",
+            url::Host::Ipv4(e) => e.is_loopback(),
+            url::Host::Ipv6(e) => e.is_loopback(),
+        });
+        secure_scheme || is_localhost
     }
 }
 
@@ -311,14 +324,4 @@ async fn get_metadata<T: Config>(
         })?;
 
     Ok(metadata.1)
-}
-
-fn is_url_secure(url: &Url) -> bool {
-    let secure_scheme = url.scheme() == "https" || url.scheme() == "wss";
-    let is_localhost = url.host().is_some_and(|e| match e {
-        url::Host::Domain(e) => e == "localhost",
-        url::Host::Ipv4(e) => e.is_loopback(),
-        url::Host::Ipv6(e) => e.is_loopback(),
-    });
-    secure_scheme || is_localhost
 }
