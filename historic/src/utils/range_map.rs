@@ -93,7 +93,7 @@ impl<K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
         self
     }
 
-    /// Finish adding ranges and build the [`SpecVersionForBlockNumber`].
+    /// Finish adding ranges and build the [`RangeMap`].
     pub fn build(mut self) -> RangeMap<K, V> {
         self.mapping.sort_by_key(|&(start, _, _)| start);
         RangeMap {
@@ -102,7 +102,7 @@ impl<K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
     }
 }
 
-/// An error that can occur when calling [`SpecVersionForBlockNumberBuilder::try_add_range()`].
+/// An error that can occur when calling [`RangeMapBuilder::try_add_range()`].
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum RangeMapError<K: Display> {
     /// An error indicating that the proposed block range is empty.
@@ -118,7 +118,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_spec_version_for_block_number_get() {
+    fn test_rangemap_get() {
         let spec_version = RangeMap::builder()
             .add_range(0, 100, 1)
             .add_range(100, 200, 2)
@@ -135,7 +135,7 @@ mod test {
     }
 
     #[test]
-    fn test_spec_version_for_block_number_set() {
+    fn test_rangemap_set() {
         let mut spec_version = RangeMap::builder()
             .add_range(0, 100, 1)
             .add_range(200, 300, 3);
