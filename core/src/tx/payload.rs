@@ -182,8 +182,7 @@ impl<CallData: EncodeAsFields> Payload for DefaultPayload<CallData> {
             .map(|f| scale_encode::Field::new(f.ty.id, f.name.as_deref()));
 
         self.call_data
-            .encode_as_fields_to(&mut fields, metadata.types(), out)
-            .expect("The fields are valid types from the metadata, qed;");
+            .encode_as_fields_to(&mut fields, metadata.types(), out)?;
         Ok(())
     }
 
