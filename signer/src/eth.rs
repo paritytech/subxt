@@ -246,6 +246,67 @@ pub mod dev {
             Keypair::from_phrase(
                 &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 5)).unwrap()
         }
+         pub fn gareth() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 6)).unwrap()
+        }
+         pub fn heather() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 7)).unwrap()
+        }
+         pub fn ithelia() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 8)).unwrap()
+        }
+         pub fn jethro() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 9)).unwrap()
+        }
+         pub fn keith() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 10)).unwrap()
+        }
+        pub fn luther() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 11)).unwrap()
+        }
+        pub fn martha() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 12)).unwrap()
+        }
+        pub fn nathan() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 13)).unwrap()
+        }
+        pub fn othello() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 14)).unwrap()
+        }
+        pub fn perth() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 15)).unwrap()
+        }
+        pub fn ruth() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 16)).unwrap()
+        }
+        pub fn seth() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 17)).unwrap()
+        }
+        pub fn thomas() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 18)).unwrap()
+        }
+        pub fn uthman() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 19)).unwrap()
+        }
+        pub fn zardoth() -> Keypair {
+            Keypair::from_phrase(
+                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 20)).unwrap()
+        }
+
     }
 }
 
@@ -445,6 +506,81 @@ mod test {
                 dev::faith(),
                 "0xC0F0f4ab324C46e55D02D0033343B4Be8A55532d",
                 "0xb9d2ea9a615f3165812e8d44de0d24da9bbd164b65c4f0573e1ce2c8dbd9c8df",
+            ),
+            (
+                dev::gareth(),
+                "0x7BF369283338E12C90514468aa3868A551AB2929",
+                "0x96b8a38e12e1a31dee1eab2fffdf9d9990045f5b37e44d8cc27766ef294acf18",
+            ),
+            (
+                dev::heather(),
+                "0x931f3600a299fd9B24cEfB3BfF79388D19804BeA",
+                "0x0d6dcaaef49272a5411896be8ad16c01c35d6f8c18873387b71fbc734759b0ab",
+            ),
+            (
+                dev::ithelia(),
+                "0xC41C5F1123ECCd5ce233578B2e7ebd5693869d73",
+                "0x4c42532034540267bf568198ccec4cb822a025da542861fcb146a5fab6433ff8",
+            ),
+            (
+                dev::jethro(),
+                "0x2898FE7a42Be376C8BC7AF536A940F7Fd5aDd423",
+                "0x94c49300a58d576011096bcb006aa06f5a91b34b4383891e8029c21dc39fbb8b",
+            ),
+            (
+                dev::keith(),
+                "0x583E6CFb24Ae212A36Db2766597fF8e6AC796751",
+                "0xff0071dbd1edf21f40baf55718b2c3b032027c202b57afbe10720aa751a9f40c",
+            ),
+            (
+                dev::luther(),
+                "0xbb827670B9dCb162Daa8DbF3dFF63a71c844d17d",
+                "0x194f2d0cfcfecac3a224af9f534a5fe9f49ff4f28d939539e8bd244ce6fa79e4",
+            ),
+            (
+                dev::martha(),
+                "0xD9E8D42eDD3Bc20871fA6662E069E71483fC167A",
+                "0x268896eff609f44f711db60441104f099dccfa5678171a71a61afb14047aefbb",
+            ),
+            (
+                dev::nathan(),
+                "0x9702DF55600140d8E197AAdfffa622F2A80564fd",
+                "0x22bcd7b28c2d741f9b6d1afb84db16f39bdf6e6289b9adedf93ffa3763f62e31",
+            ),
+            (
+                dev::othello(),
+                "0x9FC969aCe16Fe2757E04a8BD32136a9EC258db6D",
+                "0xd711903ccdbcb2e87ac43132a2ffd5f189057d535ddb2802d71fa77767a059ea",
+            ),
+            (
+                dev::perth(),
+                "0xFe25AaD37c57C4b6Bc85d96a4349dac5046A06EE",
+                "0x26914ef14ae113743e48f24344146851036ff2ab663543947a366e36e781d79c",
+            ),
+            (
+                dev::ruth(),
+                "0x11E8697Ef0f4BF2A4076ff46e42a0FdD8C4d6C41",
+                "0xd9ab86105fd3a2c3d7055ff0427564c3c30bb9175780b3bd1842b37f93227778",
+            ),
+            (
+                dev::seth(),
+                "0x001eB6957Eae09433A380504b11f807611686669",
+                "0xd2e4efe30dd3a7aa9ea48efa838244515e74f210a6a3f2a1b4fd45631014502c",
+            ),
+            (
+                dev::thomas(),
+                "0x0A2e55fd44d1cEe5fD482a2062A11C548C492E25",
+                "0xe0a97dde04b09d3c2d3e8959eae318a01ef45a3c8d2f56258bc847a84fb80fe0",
+            ),
+            (
+                dev::uthman(),
+                "0x1B948eD0bbacC2ca68eEcb5A9FC9Ba2755669faF",
+                "0x1073cd4baa42f59545928c7e56bb5e14e31e4f5e911f9f2d99a1e092eab45f74",
+            ),
+            (
+                dev::zardoth(),
+                "0xFc7dada02aA7e895646A06618976e0Eb36b06045",
+                "0x7833c6fc415eeaa19be808df11a1fc816c821bcadcb767ae5b2a49726172231c",
             ),
         ];
 
