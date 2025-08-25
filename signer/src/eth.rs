@@ -302,10 +302,6 @@ pub mod dev {
             Keypair::from_phrase(
                 &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 19)).unwrap()
         }
-        pub fn zardoth() -> Keypair {
-            Keypair::from_phrase(
-                &bip39::Mnemonic::from_str(DEV_PHRASE).unwrap(), None, DerivationPath::eth(0, 20)).unwrap()
-        }
 
     }
 }
@@ -576,11 +572,6 @@ mod test {
                 dev::uthman(),
                 "0x1B948eD0bbacC2ca68eEcb5A9FC9Ba2755669faF",
                 "0x1073cd4baa42f59545928c7e56bb5e14e31e4f5e911f9f2d99a1e092eab45f74",
-            ),
-            (
-                dev::zardoth(),
-                "0xFc7dada02aA7e895646A06618976e0Eb36b06045",
-                "0x7833c6fc415eeaa19be808df11a1fc816c821bcadcb767ae5b2a49726172231c",
             ),
         ];
 
