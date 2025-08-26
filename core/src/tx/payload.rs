@@ -5,9 +5,9 @@
 //! This module contains the trait and types used to represent
 //! transactions that can be submitted.
 
-use crate::Error;
 use crate::error::MetadataError;
 use crate::metadata::Metadata;
+use crate::Error;
 use alloc::borrow::{Cow, ToOwned};
 use alloc::boxed::Box;
 use alloc::string::String;
@@ -203,4 +203,64 @@ pub fn dynamic(
     call_data: impl Into<Composite<()>>,
 ) -> DynamicPayload {
     DefaultPayload::new(pallet_name, call_name, call_data.into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::metadata::Metadata;
+    use codec::Decode;
+    use scale_value::Composite;
+
+    fn test_metadata() -> Metadata {
+        let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
+        Metadata::decode(&mut &metadata_bytes[..]).expect("Valid metadata")
+    }
+
+    #[test]
+    fn encode_call_with_incompatible_types_returns_error() {
+        let metadata = test_metadata();
+
+        let incompatible_data = Composite::named([
+            ("dest", scale_value::Value::bool(true)), // Boolean instead of MultiAddress
+            ("value", scale_value::Value::string("not_a_number")), // String instead of u128
+        ]);
+
+        let payload = DefaultPayload::new("Balances", "transfer_allow_death", incompatible_data);
+
+        let mut out = Vec::new();
+        let result = payload.encode_call_data_to(&metadata, &mut out);
+
+        assert!(
+            result.is_err(),
+            "Expected error when encoding with incompatible types"
+        );
+    }
+
+    #[test]
+    fn encode_call_with_valid_data_succeeds() {
+        let metadata = test_metadata();
+
+        // Create a valid payload to ensure our error handling doesn't break valid cases
+        // For MultiAddress, we'll use the Id variant with a 32-byte account
+        let valid_address =
+            scale_value::Value::unnamed_variant("Id", [scale_value::Value::from_bytes(&[0u8; 32])]);
+
+        let valid_data = Composite::named([
+            ("dest", valid_address),
+            ("value", scale_value::Value::u128(1000)),
+        ]);
+
+        let payload = DefaultPayload::new("Balances", "transfer_allow_death", valid_data);
+
+        // This should succeed
+        let mut out = Vec::new();
+        let result = payload.encode_call_data_to(&metadata, &mut out);
+
+        assert!(
+            result.is_ok(),
+            "Expected success when encoding with valid data"
+        );
+        assert!(!out.is_empty(), "Expected encoded output to be non-empty");
+    }
 }
