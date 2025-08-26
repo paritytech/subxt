@@ -15,7 +15,7 @@ description = "subxt utility to strip metadata"
 
 [dependencies]
 codec = { workspace = true }
-frame-metadata = { workspace = true, features = ["std"] }
+frame-metadata = { workspace = true, features = ["std", "current"] }
 scale-info = { workspace = true, features = ["std"] }
 either = { workspace = true }
 
