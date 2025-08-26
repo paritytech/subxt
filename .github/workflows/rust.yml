@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Rust nightly toolchain
         uses: actions-rs/toolchain@v1
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
@@ -91,7 +91,7 @@ jobs:
     needs: [fmt, machete]
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
@@ -123,7 +123,7 @@ jobs:
     needs: [fmt, machete]
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
@@ -154,7 +154,7 @@ jobs:
     needs: [fmt, machete]
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
@@ -230,7 +230,7 @@ jobs:
     needs: [check]
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
@@ -281,7 +281,7 @@ jobs:
     needs: [fmt, machete]
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
@@ -314,7 +314,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
@@ -348,7 +348,7 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
@@ -388,7 +388,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
@@ -422,7 +422,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
@@ -456,7 +456,7 @@ jobs:
       WASM_BINDGEN_TEST_TIMEOUT: 300
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -509,7 +509,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Note: needs nighly toolchain because otherwise we cannot define custom lang-items.
       - name: Install Rust nightly toolchain
