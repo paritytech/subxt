@@ -5,9 +5,9 @@
 //! This module contains the trait and types used to represent
 //! transactions that can be submitted.
 
-use crate::Error;
 use crate::error::MetadataError;
 use crate::metadata::Metadata;
+use crate::Error;
 use alloc::borrow::{Cow, ToOwned};
 use alloc::boxed::Box;
 use alloc::string::String;
@@ -244,7 +244,7 @@ mod tests {
         // Create a valid payload to ensure our error handling doesn't break valid cases
         // For MultiAddress, we'll use the Id variant with a 32-byte account
         let valid_address =
-            scale_value::Value::unnamed_variant("Id", [scale_value::Value::from_bytes(&[0u8; 32])]);
+            scale_value::Value::unnamed_variant("Id", [scale_value::Value::from_bytes([0u8; 32])]);
 
         let valid_data = Composite::named([
             ("dest", valid_address),
