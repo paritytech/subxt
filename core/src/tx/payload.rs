@@ -5,9 +5,9 @@
 //! This module contains the trait and types used to represent
 //! transactions that can be submitted.
 
+use crate::Error;
 use crate::error::MetadataError;
 use crate::metadata::Metadata;
-use crate::Error;
 use alloc::borrow::{Cow, ToOwned};
 use alloc::boxed::Box;
 use alloc::string::String;
