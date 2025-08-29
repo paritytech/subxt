@@ -3,6 +3,7 @@ use super::storage_key::StorageKey;
 use super::storage_value::StorageValue;
 use crate::error::{StorageKeyError, StorageValueError};
 use scale_decode::DecodeAsType;
+use std::borrow::Cow;
 
 /// This represents a storage entry, which is a key-value pair in the storage.
 pub struct StorageEntry<'entry, 'atblock> {
@@ -13,7 +14,11 @@ pub struct StorageEntry<'entry, 'atblock> {
 
 impl<'entry, 'atblock> StorageEntry<'entry, 'atblock> {
     /// Create a new storage entry.
-    pub fn new(info: &'entry AnyStorageInfo<'atblock>, key: Vec<u8>, value: Vec<u8>) -> Self {
+    pub fn new(
+        info: &'entry AnyStorageInfo<'atblock>,
+        key: Vec<u8>,
+        value: Cow<'atblock, [u8]>,
+    ) -> Self {
         Self {
             key,
             value: StorageValue::new(info, value),

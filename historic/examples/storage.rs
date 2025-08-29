@@ -24,6 +24,12 @@ async fn main() -> Result<(), Error> {
             .entry("System", "Account")?
             .into_map()?;
 
+        // We can see the default value for this entry at this block, if one exists.
+        if let Some(default_value) = account_balances.default() {
+            let default_balance_info = default_value.decode::<scale_value::Value>()?;
+            println!("  Default balance info: {default_balance_info}");
+        }
+
         // We can fetch a specific account balance by its key, like so (here I just picked a random key
         // I knew to exist from iterating over storage entries):
         let account_id_hex = "9a4d0faa2ba8c3cc5711852960940793acf55bf195b6eecf88fa78e961d0ce4a";

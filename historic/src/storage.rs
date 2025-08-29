@@ -7,6 +7,7 @@ use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::Config;
 use crate::error::{StorageEntryIsNotAMap, StorageEntryIsNotAPlainValue, StorageError};
 use crate::storage::storage_info::with_info;
+use std::borrow::Cow;
 use storage_info::AnyStorageInfo;
 
 pub use storage_entry::StorageEntry;
@@ -208,6 +209,16 @@ where
     pub fn storage_name(&self) -> &str {
         &self.storage_name
     }
+
+    /// Return the default value for this storage entry, if there is one. Returns `None` if there
+    /// is no default value.
+    pub fn default(&self) -> Option<StorageValue<'_, 'atblock>> {
+        with_info!(info = &self.info => {
+            info.info.default_value.as_ref().map(|default_value| {
+                StorageValue::new(&self.info, default_value.clone())
+            })
+        })
+    }
 }
 
 impl<'atblock, Client, T> StorageEntryPlainClient<'atblock, Client, T>
@@ -220,7 +231,17 @@ where
         let key_bytes = self.key();
         fetch(self.client, &key_bytes)
             .await
-            .map(|v| v.map(|bytes| StorageValue::new(&self.info, bytes)))
+            .map(|v| v.map(|bytes| StorageValue::new(&self.info, Cow::Owned(bytes))))
+    }
+
+    /// Fetch the value for this storage entry as per [`StorageEntryPlainClient::fetch`], but return the default
+    /// value for the storage entry if one exists and the entry does not exist.
+    pub async fn fetch_or_default(
+        &self,
+    ) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
+        self.fetch()
+            .await
+            .map(|option_val| option_val.or_else(|| self.default()))
     }
 
     /// The key for this storage entry.
@@ -255,6 +276,16 @@ where
     pub fn storage_name(&self) -> &str {
         &self.storage_name
     }
+
+    /// Return the default value for this storage entry, if there is one. Returns `None` if there
+    /// is no default value.
+    pub fn default(&self) -> Option<StorageValue<'_, 'atblock>> {
+        with_info!(info = &self.info => {
+            info.info.default_value.as_ref().map(|default_value| {
+                StorageValue::new(&self.info, default_value.clone())
+            })
+        })
+    }
 }
 
 impl<'atblock, Client, T> StorageEntryMapClient<'atblock, Client, T>
@@ -283,7 +314,18 @@ where
         let key_bytes = self.key(keys)?;
         fetch(self.client, &key_bytes)
             .await
-            .map(|v| v.map(|bytes| StorageValue::new(&self.info, bytes)))
+            .map(|v| v.map(|bytes| StorageValue::new(&self.info, Cow::Owned(bytes))))
+    }
+
+    /// Fetch a specific key in this map as per [`StorageEntryMapClient::fetch`], but return the default
+    /// value for the storage entry if one exists and the entry was not found.
+    pub async fn fetch_or_default<Keys: IntoStorageKeys>(
+        &self,
+        keys: Keys,
+    ) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
+        self.fetch(keys)
+            .await
+            .map(|option_val| option_val.or_else(|| self.default()))
     }
 
     /// Iterate over the values underneath the provided keys.
@@ -324,8 +366,13 @@ where
                 Err(e) => return Some(Err(StorageError::RpcError { reason: e })),
             };
 
-            item.value
-                .map(|value| Ok(StorageEntry::new(&self.info, item.key.0, value.0)))
+            item.value.map(|value| {
+                Ok(StorageEntry::new(
+                    &self.info,
+                    item.key.0,
+                    Cow::Owned(value.0),
+                ))
+            })
         });
 
         Ok(Box::pin(sub))
