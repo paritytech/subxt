@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.44.0] - 2025-08-28
+
+This small release primarily fixes a few issues, but also adds the code for a prelease of `subxt-historic`, a new crate (at the moment) for working with historic blocks and state. Future releases will aim to stabilize this crate to the level of other `subxt` crates or otherwise merge the logic into `subxt` itself.
+
+This is a minor version bump because, in theory at least, adding the `Clone` bound to block headers in ([#2047](https://github.com/paritytech/subxt/pull/2047)) is a breaking change, although I think it is unlikely that this will impact any users.
+
+### Added
+
+- Add prerelease `subxt-historic` crate for accessing historic (non head-of-chain) blocks ([#2040](https://github.com/paritytech/subxt/pull/2040))
+
+### Changed
+
+- Block: Implement clone ([#2047](https://github.com/paritytech/subxt/pull/2047))
+- Increase number of dev accounts ([#2068](https://github.com/paritytech/subxt/pull/2068))
+
+### Fixed
+
+- Do not panic when encoding call data with invalid fields ([#2070](https://github.com/paritytech/subxt/pull/2070))
+- Tweak test to reduce chance of failure, and need jsonrpsee/server for tests ([#2057](https://github.com/paritytech/subxt/pull/2057))
+- Fix 1.89 clippy warnings ([#2055](https://github.com/paritytech/subxt/pull/2055))
+- Increase reconnecting client request/response size ([#2046](https://github.com/paritytech/subxt/pull/2046))
+
 ## [0.43.0] - 2025-07-17
 
 This is a reasonably small release which is mainly bug fixing, but has a couple of changes I'd like to elaborate on:
