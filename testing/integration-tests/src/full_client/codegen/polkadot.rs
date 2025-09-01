@@ -5139,9 +5139,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                60u8, 30u8, 114u8, 255u8, 67u8, 250u8, 242u8, 169u8, 114u8, 243u8, 99u8, 143u8,
-                73u8, 209u8, 120u8, 127u8, 245u8, 170u8, 122u8, 5u8, 31u8, 39u8, 51u8, 72u8, 23u8,
-                243u8, 37u8, 211u8, 19u8, 57u8, 130u8, 128u8,
+                109u8, 81u8, 44u8, 69u8, 138u8, 20u8, 183u8, 214u8, 213u8, 207u8, 44u8, 17u8, 1u8,
+                122u8, 16u8, 63u8, 148u8, 165u8, 86u8, 14u8, 201u8, 125u8, 101u8, 250u8, 130u8,
+                57u8, 108u8, 66u8, 203u8, 216u8, 148u8, 210u8,
             ]
     }
     pub mod system {
@@ -23008,6 +23008,14 @@ pub mod api {
                     pub type Param0 = ::core::primitive::u32;
                     pub type Param1 = ::subxt::ext::subxt_core::utils::AccountId32;
                 }
+                pub mod next_intake_at {
+                    use super::runtime_types;
+                    pub type NextIntakeAt = ::core::primitive::u32;
+                }
+                pub mod next_challenge_at {
+                    use super::runtime_types;
+                    pub type NextChallengeAt = ::core::primitive::u32;
+                }
             }
             pub struct StorageApi;
             impl StorageApi {
@@ -23709,6 +23717,48 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = " Next intake rotation scheduled with [Config::BlockNumberProvider]."]
+                pub fn next_intake_at(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+                    (),
+                    types::next_intake_at::NextIntakeAt,
+                    ::subxt::ext::subxt_core::utils::Yes,
+                    (),
+                    (),
+                > {
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+                        "Society",
+                        "NextIntakeAt",
+                        (),
+                        [
+                            26u8, 30u8, 212u8, 232u8, 53u8, 129u8, 143u8, 142u8, 35u8, 244u8, 99u8,
+                            100u8, 66u8, 249u8, 153u8, 134u8, 160u8, 55u8, 252u8, 28u8, 99u8, 52u8,
+                            209u8, 1u8, 105u8, 146u8, 207u8, 206u8, 37u8, 62u8, 240u8, 100u8,
+                        ],
+                    )
+                }
+                #[doc = " Next challenge rotation scheduled with [Config::BlockNumberProvider]."]
+                pub fn next_challenge_at(
+                    &self,
+                ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
+                    (),
+                    types::next_challenge_at::NextChallengeAt,
+                    ::subxt::ext::subxt_core::utils::Yes,
+                    (),
+                    (),
+                > {
+                    ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
+                        "Society",
+                        "NextChallengeAt",
+                        (),
+                        [
+                            8u8, 207u8, 221u8, 191u8, 189u8, 224u8, 158u8, 60u8, 235u8, 1u8, 233u8,
+                            141u8, 199u8, 19u8, 210u8, 62u8, 200u8, 70u8, 124u8, 154u8, 113u8,
+                            71u8, 82u8, 28u8, 174u8, 206u8, 81u8, 238u8, 76u8, 238u8, 182u8, 245u8,
+                        ],
+                    )
+                }
             }
         }
         pub mod constants {
@@ -23764,7 +23814,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " The number of blocks on which new candidates should be voted on. Together with"]
+                #[doc = " The number of [Config::BlockNumberProvider] blocks on which new candidates should be"]
+                #[doc = " voted on. Together with"]
                 #[doc = " `ClaimPeriod`, this sums to the number of blocks between candidate intake periods."]
                 pub fn voting_period(
                     &self,
@@ -23782,8 +23833,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " The number of blocks on which new candidates can claim their membership and be the"]
-                #[doc = " named head."]
+                #[doc = " The number of [Config::BlockNumberProvider] blocks on which new candidates can claim"]
+                #[doc = " their membership and be the named head."]
                 pub fn claim_period(
                     &self,
                 ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
@@ -23817,7 +23868,7 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " The number of blocks between membership challenges."]
+                #[doc = " The number of [Config::BlockNumberProvider] blocks between membership challenges."]
                 pub fn challenge_period(
                     &self,
                 ) -> ::subxt::ext::subxt_core::constants::address::StaticAddress<
