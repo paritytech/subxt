@@ -92,7 +92,7 @@ async fn fetch_metadata(client: impl ClientT, version: MetadataVersion, at_block
 
     // Ensure always 0x prefix.
     let at_block_hash = at_block_hash
-        .map(|hash| format!("0x{}", hash.strip_prefix("0x").unwrap_or(&hash)));
+        .map(|hash| format!("0x{}", hash.strip_prefix("0x").unwrap_or(hash)));
     let at_block_hash = at_block_hash.as_deref();
 
     // Fetch available metadata versions. If error, revert to legacy metadata code.
