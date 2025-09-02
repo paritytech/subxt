@@ -44,7 +44,7 @@ async fn storage_fetch_raw_keys() {
         .count()
         .await;
 
-    assert_eq!(len, 16)
+    assert_eq!(len, 17)
 }
 
 #[cfg(fullclient)]
@@ -69,7 +69,7 @@ async fn storage_iter() {
         .count()
         .await;
 
-    assert_eq!(len, 16);
+    assert_eq!(len, 17);
 }
 
 #[cfg(fullclient)]
