@@ -81,7 +81,7 @@ darling = "0.20.10"
 derive-where = "1.2.7"
 either = { version = "1.13.0", default-features = false }
 finito = { version = "0.1.0", default-features = false }
-frame-decode = { version = "0.9.0", default-features = false }
+frame-decode = { version = "0.10.0", default-features = false }
 frame-metadata = { version = "23.0.0", default-features = false }
 futures = { version = "0.3.31", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
@@ -113,7 +113,7 @@ thiserror = { version = "2.0.0", default-features = false }
 tokio = { version = "1.44.2", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 trybuild = "1.0.99"
 url = "2.5.2"
 wat = "1.228.0"

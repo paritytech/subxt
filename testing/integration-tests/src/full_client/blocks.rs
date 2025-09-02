@@ -207,7 +207,7 @@ async fn fetch_block_and_decode_extrinsic_details() {
     let block = api.blocks().at(block_hash).await.unwrap();
 
     // Ensure that we can clone the block.
-    block.clone();
+    let _ = block.clone();
 
     let extrinsics = block.extrinsics().await.unwrap();
 
@@ -295,8 +295,7 @@ async fn submit_extrinsic_and_get_it_back(
     let block_hash = in_block.block_hash();
     let block = api.blocks().at(block_hash).await.unwrap();
     let extrinsics = block.extrinsics().await.unwrap();
-    let extrinsic_details = extrinsics.iter().find(|e| e.is_signed()).unwrap();
-    extrinsic_details
+    extrinsics.iter().find(|e| e.is_signed()).unwrap()
 }
 
 #[cfg(fullclient)]

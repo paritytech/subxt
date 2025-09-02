@@ -2,16 +2,17 @@ use super::storage_info::AnyStorageInfo;
 use super::storage_info::with_info;
 use crate::error::StorageValueError;
 use scale_decode::DecodeAsType;
+use std::borrow::Cow;
 
 /// This represents a storage value.
 pub struct StorageValue<'entry, 'atblock> {
     pub(crate) info: &'entry AnyStorageInfo<'atblock>,
-    bytes: Vec<u8>,
+    bytes: Cow<'atblock, [u8]>,
 }
 
 impl<'entry, 'atblock> StorageValue<'entry, 'atblock> {
     /// Create a new storage value.
-    pub fn new(info: &'entry AnyStorageInfo<'atblock>, bytes: Vec<u8>) -> Self {
+    pub fn new(info: &'entry AnyStorageInfo<'atblock>, bytes: Cow<'atblock, [u8]>) -> Self {
         Self { info, bytes }
     }
 
@@ -22,7 +23,7 @@ impl<'entry, 'atblock> StorageValue<'entry, 'atblock> {
 
     /// Consume this storage value and return the raw bytes.
     pub fn into_bytes(self) -> Vec<u8> {
-        self.bytes
+        self.bytes.to_vec()
     }
 
     /// Decode this storage value.

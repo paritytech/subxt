@@ -85,7 +85,7 @@ impl<'atblock> From<StorageInfo<'atblock, u32, scale_info::PortableRegistry>>
 }
 
 pub struct StorageInfo<'atblock, TypeId, Resolver> {
-    pub info: frame_decode::storage::StorageInfo<TypeId>,
+    pub info: frame_decode::storage::StorageInfo<'atblock, TypeId>,
     pub resolver: &'atblock Resolver,
 }
 
