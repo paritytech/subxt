@@ -65,7 +65,7 @@ pub mod rpc {
         pub use subxt_rpcs::client::reconnecting_rpc_client;
     }
 
-    pub use subxt_rpcs::{RpcClient, RpcClientT};
+    pub use subxt_rpcs::{RpcClient, RpcClientT, client::RpcParams, rpc_params};
 }
 
 /// Prevent the backend trait being implemented externally.
