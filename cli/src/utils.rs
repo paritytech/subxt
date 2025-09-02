@@ -34,6 +34,11 @@ pub struct FileOrUrl {
     /// Defaults to asking for the latest stable metadata version.
     #[clap(long)]
     pub version: Option<MetadataVersion>,
+    /// Block hash (hex encoded) to attempt to fetch the metadata from.
+    /// If not provided, we default to the latest finalized block.
+    /// Non-archive nodes will be unable to provide metadata from old blocks.
+    #[clap(long)]
+    pub at_block: Option<String>,
 }
 
 impl FromStr for FileOrUrl {
@@ -45,6 +50,7 @@ impl FromStr for FileOrUrl {
                 url: None,
                 file: Some(path),
                 version: None,
+                at_block: None,
             })
         } else {
             Url::parse(s)
@@ -53,6 +59,7 @@ impl FromStr for FileOrUrl {
                     url: Some(uri),
                     file: None,
                     version: None,
+                    at_block: None,
                 })
         }
     }
@@ -87,19 +94,23 @@ impl FromStr for PathOrStdIn {
 impl FileOrUrl {
     /// Fetch the metadata bytes.
     pub async fn fetch(&self) -> color_eyre::Result<Vec<u8>> {
-        match (&self.file, &self.url, self.version) {
+        match (&self.file, &self.url, self.version, &self.at_block) {
             // Can't provide both --file and --url
-            (Some(_), Some(_), _) => {
+            (Some(_), Some(_), _, _) => {
                 bail!("specify one of `--url` or `--file` but not both")
             }
+            // --at-block must be provided with --url
+            (Some(_path_or_stdin), _, _, Some(_at_block)) => {
+                bail!("`--at-block` can only be used with `--url`")
+            }
             // Load from --file path
-            (Some(PathOrStdIn::Path(path)), None, None) => {
+            (Some(PathOrStdIn::Path(path)), None, None, None) => {
                 let mut file = fs::File::open(path)?;
                 let mut bytes = Vec::new();
                 file.read_to_end(&mut bytes)?;
                 Ok(bytes)
             }
-            (Some(PathOrStdIn::StdIn), None, None) => {
+            (Some(PathOrStdIn::StdIn), None, None, None) => {
                 let reader = std::io::BufReader::new(std::io::stdin());
                 let res = reader.bytes().collect::<Result<Vec<u8>, _>>();
 
@@ -109,7 +120,7 @@ impl FileOrUrl {
                 }
             }
             // Cannot load the metadata from the file and specify a version to fetch.
-            (Some(_), None, Some(_)) => {
+            (Some(_), None, Some(_), None) => {
                 // Note: we could provide the ability to convert between metadata versions
                 // but that would be involved because we'd need to convert
                 // from each metadata to the latest one and from the
@@ -117,13 +128,19 @@ impl FileOrUrl {
                 bail!("`--file` is incompatible with `--version`")
             }
             // Fetch from --url
-            (None, Some(uri), version) => {
-                Ok(fetch_metadata::from_url(uri.clone(), version.unwrap_or_default()).await?)
-            }
+            (None, Some(uri), version, at_block) => Ok(fetch_metadata::from_url(
+                uri.clone(),
+                version.unwrap_or_default(),
+                at_block.as_deref(),
+            )
+            .await?),
             // Default if neither is provided; fetch from local url
-            (None, None, version) => {
+            (None, None, version, at_block) => {
                 let url = Url::parse("ws://localhost:9944").expect("Valid URL; qed");
-                Ok(fetch_metadata::from_url(url, version.unwrap_or_default()).await?)
+                Ok(
+                    fetch_metadata::from_url(url, version.unwrap_or_default(), at_block.as_deref())
+                        .await?,
+                )
             }
         }
     }
@@ -336,7 +353,8 @@ mod tests {
             Ok(FileOrUrl {
                 url: None,
                 file: Some(PathOrStdIn::StdIn),
-                version: None
+                version: None,
+                at_block: None,
             })
         ),);
 
@@ -345,7 +363,8 @@ mod tests {
             Ok(FileOrUrl {
                 url: None,
                 file: Some(PathOrStdIn::StdIn),
-                version: None
+                version: None,
+                at_block: None,
             })
         ),);
 
@@ -354,7 +373,8 @@ mod tests {
             Ok(FileOrUrl {
                 url: None,
                 file: Some(PathOrStdIn::Path(_)),
-                version: None
+                version: None,
+                at_block: None,
             })
         ),);
 
@@ -365,7 +385,8 @@ mod tests {
             Ok(FileOrUrl {
                 url: Some(_),
                 file: None,
-                version: None
+                version: None,
+                at_block: None,
             })
         ));
     }

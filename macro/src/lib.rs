@@ -263,7 +263,7 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 false => MetadataVersion::Latest,
             };
 
-            from_url_blocking(url, version)
+            from_url_blocking(url, version, None)
                 .map_err(|e| CodegenError::Other(e.to_string()))
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .map_err(|e| e.into_compile_error())?
