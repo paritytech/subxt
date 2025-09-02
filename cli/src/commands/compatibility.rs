@@ -137,7 +137,7 @@ async fn fetch_runtime_metadata(
     url: Url,
     version: MetadataVersion,
 ) -> color_eyre::Result<Metadata> {
-    let bytes = subxt_utils_fetchmetadata::from_url(url, version).await?;
+    let bytes = subxt_utils_fetchmetadata::from_url(url, version, None).await?;
     let metadata = Metadata::decode(&mut &bytes[..])?;
     Ok(metadata)
 }
