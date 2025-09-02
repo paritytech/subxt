@@ -113,7 +113,7 @@ thiserror = { version = "2.0.0", default-features = false }
 tokio = { version = "1.44.2", default-features = false }
 tracing = { version = "0.1.40", default-features = false }
 tracing-wasm = "0.2.1"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 trybuild = "1.0.99"
 url = "2.5.2"
 wat = "1.228.0"
