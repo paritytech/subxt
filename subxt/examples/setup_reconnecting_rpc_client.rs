@@ -20,7 +20,7 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    // Create a new client with with a reconnecting RPC client.
+    // Create a new client with a reconnecting RPC client.
     let rpc = RpcClient::builder()
         // Reconnect with exponential backoff
         //
