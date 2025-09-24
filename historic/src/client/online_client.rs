@@ -132,7 +132,13 @@ impl<T: Config> OnlineClient<T> {
             metadata
         };
 
-        let historic_types = config.legacy_types_for_spec_version(spec_version);
+        let mut historic_types = config.legacy_types_for_spec_version(spec_version);
+        // The metadata can be used to construct call and event types instead of us havign to hardcode them all for every spec version:
+        let types_from_metadata = frame_decode::helpers::type_registry_from_metadata_any(&metadata)
+            .map_err(
+                |parse_error| OnlineClientAtBlockError::CannotInjectMetadataTypes { parse_error },
+            )?;
+        historic_types.prepend(types_from_metadata);
 
         Ok(ClientAtBlock::new(OnlineClientAtBlock {
             config,
