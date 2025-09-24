@@ -14,7 +14,7 @@ pub use storage_entry::StorageEntry;
 pub use storage_key::{StorageHasher, StorageKey, StorageKeyPart};
 pub use storage_value::StorageValue;
 // We take how storage keys can be passed in from `frame-decode`, so re-export here.
-pub use frame_decode::storage::{IntoStorageKeys, StorageKeys};
+pub use frame_decode::storage::{IntoEncodableValues, EncodableValues};
 
 /// Work with storage.
 pub struct StorageClient<'atblock, Client, T> {
@@ -78,6 +78,7 @@ where
     pub fn entries(&self) -> impl Iterator<Item = StorageEntriesItem<'atblock, Client, T>> {
         let client = self.client;
         let metadata = client.metadata();
+    
         frame_decode::helpers::list_storage_entries_any(metadata).map(|entry| StorageEntriesItem {
             entry,
             client: self.client,
@@ -88,7 +89,7 @@ where
 
 /// Working with a specific storage entry.
 pub struct StorageEntriesItem<'atblock, Client, T> {
-    entry: frame_decode::helpers::StorageEntry<'atblock>,
+    entry: frame_decode::storage::StorageEntry<'atblock>,
     client: &'atblock Client,
     marker: std::marker::PhantomData<T>,
 }
@@ -100,12 +101,12 @@ where
 {
     /// The pallet name.
     pub fn pallet_name(&self) -> &str {
-        self.entry.pallet()
+        &self.entry.pallet_name
     }
 
     /// The storage entry name.
     pub fn storage_name(&self) -> &str {
-        self.entry.entry()
+        &self.entry.storage_entry
     }
 
     /// Extract the relevant storage information so that we can work with this entry.
@@ -115,8 +116,8 @@ where
             marker: std::marker::PhantomData,
         }
         .entry(
-            self.entry.pallet().to_owned(),
-            self.entry.entry().to_owned(),
+            self.entry.pallet_name.to_owned(),
+            self.entry.storage_entry.to_owned(),
         )
     }
 }
@@ -296,7 +297,7 @@ where
     /// Fetch a specific key in this map. If the number of keys provided is not equal
     /// to the number of keys required to fetch a single value from the map, then an error
     /// will be emitted.
-    pub async fn fetch<Keys: IntoStorageKeys>(
+    pub async fn fetch<Keys: IntoEncodableValues>(
         &self,
         keys: Keys,
     ) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
@@ -304,9 +305,9 @@ where
             info.info.keys.len()
         });
 
-        if expected_num_keys != keys.num_keys() {
+        if expected_num_keys != keys.num_encodable_values() {
             return Err(StorageError::WrongNumberOfKeysProvided {
-                num_keys_provided: keys.num_keys(),
+                num_keys_provided: keys.num_encodable_values(),
                 num_keys_expected: expected_num_keys,
             });
         }
@@ -319,7 +320,7 @@ where
 
     /// Fetch a specific key in this map as per [`StorageEntryMapClient::fetch`], but return the default
     /// value for the storage entry if one exists and the entry was not found.
-    pub async fn fetch_or_default<Keys: IntoStorageKeys>(
+    pub async fn fetch_or_default<Keys: IntoEncodableValues>(
         &self,
         keys: Keys,
     ) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
@@ -329,7 +330,7 @@ where
     }
 
     /// Iterate over the values underneath the provided keys.
-    pub async fn iter<Keys: IntoStorageKeys>(
+    pub async fn iter<Keys: IntoEncodableValues>(
         &self,
         keys: Keys,
     ) -> Result<
@@ -384,7 +385,7 @@ where
     // Dev note: We don't have any functions that can take an already-encoded key and fetch an entry from
     // it yet, so we don't expose this. If we did expose it, we might want to return some struct that wraps
     // the key bytes and some metadata about them. Or maybe just fetch_raw and iter_raw.
-    fn key<Keys: IntoStorageKeys>(&self, keys: Keys) -> Result<Vec<u8>, StorageError> {
+    fn key<Keys: IntoEncodableValues>(&self, keys: Keys) -> Result<Vec<u8>, StorageError> {
         with_info!(info = &self.info => {
             let mut key_bytes = Vec::new();
             frame_decode::storage::encode_storage_key_with_info_to(

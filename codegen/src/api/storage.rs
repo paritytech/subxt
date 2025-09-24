@@ -5,10 +5,9 @@
 use heck::{ToSnakeCase as _, ToUpperCamelCase};
 use proc_macro2::{Ident, TokenStream as TokenStream2, TokenStream};
 use quote::{format_ident, quote};
-use scale_info::TypeDef;
 use scale_typegen::TypeGenerator;
 use subxt_metadata::{
-    PalletMetadata, StorageEntryMetadata, StorageEntryModifier, StorageEntryType, StorageHasher,
+    PalletMetadata, StorageEntryMetadata, StorageHasher,
 };
 
 use super::CodegenError;
@@ -68,7 +67,7 @@ fn generate_storage_entry_fns(
     crate_path: &syn::Path,
 ) -> Result<(TokenStream2, TokenStream2), CodegenError> {
     let snake_case_name = storage_entry.name().to_snake_case();
-    let storage_entry_ty = storage_entry.entry_type().value_ty();
+    let storage_entry_ty = storage_entry.value_ty();
     let storage_entry_value_ty = type_gen
         .resolve_type_path(storage_entry_ty)
         .expect("storage type is in metadata; qed")
@@ -105,57 +104,11 @@ fn generate_storage_entry_fns(
         }
     };
 
-    let keys: Vec<MapEntryKey> = match storage_entry.entry_type() {
-        StorageEntryType::Plain(_) => vec![],
-        StorageEntryType::Map {
-            key_ty, hashers, ..
-        } => {
-            if hashers.len() == 1 {
-                // If there's exactly 1 hasher, then we have a plain StorageMap. We can't
-                // break the key down (even if it's a tuple) because the hasher applies to
-                // the whole key.
-                vec![map_entry_key(0, *key_ty, hashers[0])]
-            } else {
-                // If there are multiple hashers, then we have a StorageDoubleMap or StorageNMap.
-                // We expect the key type to be tuple, and we will return a MapEntryKey for each
-                // key in the tuple.
-                let hasher_count = hashers.len();
-                let tuple = match &type_gen
-                    .resolve_type(*key_ty)
-                    .expect("key type should be present")
-                    .type_def
-                {
-                    TypeDef::Tuple(tuple) => tuple,
-                    _ => {
-                        return Err(CodegenError::InvalidStorageHasherCount {
-                            storage_entry_name: storage_entry.name().to_owned(),
-                            key_count: 1,
-                            hasher_count,
-                        });
-                    }
-                };
-
-                // We should have the same number of hashers and keys.
-                let key_count = tuple.fields.len();
-                if hasher_count != key_count {
-                    return Err(CodegenError::InvalidStorageHasherCount {
-                        storage_entry_name: storage_entry.name().to_owned(),
-                        key_count,
-                        hasher_count,
-                    });
-                }
-
-                // Collect them together.
-                tuple
-                    .fields
-                    .iter()
-                    .zip(hashers)
-                    .enumerate()
-                    .map(|(idx, (field, hasher))| map_entry_key(idx, field.id, *hasher))
-                    .collect()
-            }
-        }
-    };
+    let keys: Vec<MapEntryKey> = storage_entry
+        .keys()
+        .enumerate()
+        .map(|(idx, key)| map_entry_key(idx, key.key_id, key.hasher))
+        .collect();
 
     let pallet_name = pallet.name();
     let storage_name = storage_entry.name();
@@ -173,9 +126,10 @@ fn generate_storage_entry_fns(
         .then_some(quote! { #( #[doc = #docs ] )* })
         .unwrap_or_default();
 
-    let is_defaultable_type = match storage_entry.modifier() {
-        StorageEntryModifier::Default => quote!(#crate_path::utils::Yes),
-        StorageEntryModifier::Optional => quote!(()),
+    let is_defaultable_type = if storage_entry.default_value().is_some() {
+        quote!(#crate_path::utils::Yes)
+    } else {
+        quote!(())
     };
 
     // Note: putting `#crate_path::storage::address::StaticStorageKey` into this variable is necessary

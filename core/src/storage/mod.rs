@@ -112,10 +112,7 @@ pub fn decode_value<Addr: Address>(
 
     let (_, entry_metadata) =
         utils::lookup_storage_entry_details(pallet_name, entry_name, metadata)?;
-    let value_ty_id = match entry_metadata.entry_type() {
-        subxt_metadata::StorageEntryType::Plain(ty) => *ty,
-        subxt_metadata::StorageEntryType::Map { value_ty, .. } => *value_ty,
-    };
+    let value_ty_id = entry_metadata.value_ty();
 
     let val = Addr::Target::decode_with_metadata(bytes, value_ty_id, metadata)?;
     Ok(val)
@@ -131,12 +128,8 @@ pub fn default_value<Addr: Address>(
 
     let (_, entry_metadata) =
         utils::lookup_storage_entry_details(pallet_name, entry_name, metadata)?;
-    let value_ty_id = match entry_metadata.entry_type() {
-        subxt_metadata::StorageEntryType::Plain(ty) => *ty,
-        subxt_metadata::StorageEntryType::Map { value_ty, .. } => *value_ty,
-    };
-
-    let default_bytes = entry_metadata.default_bytes();
+    let value_ty_id = entry_metadata.value_ty();
+    let default_bytes = entry_metadata.default_value();
     let val = Addr::Target::decode_with_metadata(&mut &*default_bytes, value_ty_id, metadata)?;
     Ok(val)
 }

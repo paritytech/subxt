@@ -68,7 +68,7 @@ fn generate_pallet_view_function(
 
                 // Path to the actual type we'll have generated for this input.
                 let type_path = type_gen
-                    .resolve_type_path(input.ty)
+                    .resolve_type_path(input.id)
                     .expect("view function input type is in metadata; qed")
                     .to_token_stream(type_gen.settings());
 

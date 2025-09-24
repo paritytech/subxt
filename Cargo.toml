@@ -192,3 +192,7 @@ opt-level = 2
 opt-level = 2
 [profile.test.package.smoldot]
 opt-level = 2
+
+[patch.crates-io]
+frame-decode = { path = "../frame-decode" }
+scale-info-legacy = { path = "../scale-info-legacy" }

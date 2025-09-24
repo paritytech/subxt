@@ -23,7 +23,7 @@ pub use crate::tx::payload::dynamic as tx;
 pub use crate::constants::address::dynamic as constant;
 
 // Lookup storage values dynamically.
-pub use crate::storage::address::dynamic as storage;
+// pub use crate::storage::address::dynamic as storage; // TODO re-add.
 
 // Execute runtime API function call dynamically.
 pub use crate::runtime_api::payload::dynamic as runtime_api_call;

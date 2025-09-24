@@ -1,20 +1,16 @@
 #![allow(missing_docs)]
 use subxt::{OnlineClient, PolkadotConfig};
 
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_full.scale")]
-pub mod polkadot {}
+#[subxt::subxt(runtime_metadata_path = "../westend_ah.scale")]
+pub mod runtime {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a new API client, configured to talk to Polkadot nodes.
-    let api = OnlineClient::<PolkadotConfig>::new().await?;
+    let api = OnlineClient::<PolkadotConfig>::from_url("wss://westend-asset-hub-rpc.polkadot.io").await?;
 
-    // Build a storage query to iterate over account information.
-    let storage_query = polkadot::storage().system().account_iter();
-
-    // Get back an iterator of results (here, we are fetching 10 items at
-    // a time from the node, but we always iterate over one at a time).
-    let mut results = api.storage().at_latest().await?.iter(storage_query).await?;
+    let query = runtime::storage().staking().era_pruning_state_iter();
+    let mut results = api.storage().at_latest().await?.iter(query).await?;
 
     while let Some(Ok(kv)) = results.next().await {
         println!("Keys decoded: {:?}", kv.keys);

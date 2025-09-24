@@ -91,7 +91,7 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> Payload
             .ok_or(MetadataError::ViewFunctionNotFound(self.query_id))?;
         let mut fields = view_function
             .inputs()
-            .map(|input| scale_encode::Field::named(input.ty, &input.name));
+            .map(|input| scale_encode::Field::named(input.id, &input.name));
 
         self.args_data
             .encode_as_fields_to(&mut fields, metadata.types(), out)?;

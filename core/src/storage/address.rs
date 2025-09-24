@@ -10,49 +10,227 @@ use crate::{
     metadata::{DecodeWithMetadata, Metadata},
     utils::Yes,
 };
+use scale_decode::DecodeAsType;
 use derive_where::derive_where;
-
+use frame_decode::storage::{IntoEncodableValues, IntoDecodableValues};
 use alloc::borrow::{Cow, ToOwned};
 use alloc::string::String;
 use alloc::vec::Vec;
 
-// Re-export types used here:
-pub use super::storage_key::{StaticStorageKey, StorageHashers, StorageHashersIter, StorageKey};
-
-/// This represents a storage address. Anything implementing this trait
-/// can be used to fetch and iterate over storage entries.
+/// A storage address. Concrete addresses are expected to implement either [`FetchableAddress`]
+/// or [`IterableAddress`], which extends this to define fetchable and iterable storage keys.
 pub trait Address {
-    /// The target type of the value that lives at this address.
-    type Target: DecodeWithMetadata;
-    /// The keys type used to construct this address.
-    type Keys: StorageKey;
-    /// Can an entry be fetched from this address?
-    /// Set this type to [`Yes`] to enable the corresponding calls to be made.
-    type IsFetchable;
-    /// Can a default entry be obtained from this address?
-    /// Set this type to [`Yes`] to enable the corresponding calls to be made.
-    type IsDefaultable;
-    /// Can this address be iterated over?
-    /// Set this type to [`Yes`] to enable the corresponding calls to be made.
-    type IsIterable;
+    /// A set of types we'll hash and append to the prefix to build the storage key.
+    type KeyParts: IntoEncodableValues;
+    /// Type of the storage value at this location.
+    type Value: DecodeAsType;
 
-    /// The name of the pallet that the entry lives under.
+    /// The pallet containing this storage entry.
     fn pallet_name(&self) -> &str;
 
-    /// The name of the entry in a given pallet that the item is at.
+    /// The name of the storage entry.
     fn entry_name(&self) -> &str;
 
-    /// Output the non-prefix bytes; that is, any additional bytes that need
-    /// to be appended to the key to dig into maps.
-    fn append_entry_bytes(&self, metadata: &Metadata, bytes: &mut Vec<u8>) -> Result<(), Error>;
+    /// Encode the suffix of the storage key for this address
+    fn encode_key_suffix(&self, metadata: &Metadata, bytes: &mut Vec<u8>) -> Result<(), Error>;
 
-    /// An optional hash which, if present, will be checked against
-    /// the node metadata to confirm that the return type matches what
-    /// we are expecting.
-    fn validation_hash(&self) -> Option<[u8; 32]> {
-        None
+    /// Return a unique hash for this address which can be used to validate it against metadata.
+    fn validation_hash(&self) -> Option<[u8; 32]>;
+}
+
+pub trait FetchableAddress: Address {
+    /// Does the address have a default value defined for it. 
+    /// Set to [`Yes`] to enable APIs which require one.
+    type HasDefaultValue;
+}
+
+pub trait IterableAddress: Address {
+    /// The storage key values that we'll decode for each value
+    type OutputKeys: IntoDecodableValues;
+}
+
+/// An address which points to an individual storage value.
+pub struct StaticFetchableAddress<KeyParts, Value, HasDefaultValue> {
+    pallet_name: Cow<'static, str>,
+    entry_name: Cow<'static, str>,
+    key_parts: KeyParts,
+    validation_hash: Option<[u8; 32]>,
+    marker: core::marker::PhantomData<(Value, HasDefaultValue)>
+}
+
+impl <KeyParts, Value, HasDefaultValue> StaticFetchableAddress<KeyParts, Value, HasDefaultValue> {
+    /// Create a new [`StaticFetchableAddress`] using static strings for the pallet and call name.
+    /// This is only expected to be used from codegen.
+    #[doc(hidden)]
+    pub fn new_static(
+        pallet_name: &'static str,
+        entry_name: &'static str,
+        key_parts: KeyParts,
+        hash: [u8; 32],
+    ) -> Self {
+        Self {
+            pallet_name: Cow::Borrowed(pallet_name),
+            entry_name: Cow::Borrowed(entry_name),
+            key_parts,
+            validation_hash: Some(hash),
+            marker: core::marker::PhantomData,
+        }
+    }
+
+    /// Create a new [`StaticFetchableAddress`].
+    pub fn new(
+        pallet_name: impl Into<Cow<'static, str>>,
+        entry_name: impl Into<Cow<'static, str>>,
+        key_parts: KeyParts,
+    ) -> Self {
+        Self {
+            pallet_name: pallet_name.into(),
+            entry_name: entry_name.into(),
+            key_parts,
+            validation_hash: None,
+            marker: core::marker::PhantomData,
+        }
+    }
+
+    /// Do not validate this storage entry prior to accessing it.
+    pub fn unvalidated(mut self) -> Self {
+        self.validation_hash = None;
+        self
     }
 }
+
+impl <KeyParts, Value, HasDefaultValue> Address for StaticFetchableAddress<KeyParts, Value, HasDefaultValue> 
+where
+    KeyParts: IntoEncodableValues,
+    Value: DecodeAsType
+{
+    type KeyParts = KeyParts;
+    type Value = Value;
+    
+    fn encode_key_suffix(&self, metadata: &Metadata, bytes: &mut Vec<u8>) -> Result<(), Error> {
+        frame_decode::storage::encode_storage_key_suffix(
+            &self.pallet_name, 
+            &self.entry_name, 
+            &self.key_parts,
+            metadata.types(),
+            metadata
+        ).map_err(Into::into)
+    }
+
+    fn pallet_name(&self) -> &str {
+        &self.pallet_name
+    }
+
+    fn entry_name(&self) -> &str {
+        &self.entry_name
+    }
+
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        self.validation_hash
+    }
+}
+
+impl <KeyParts, Value, HasDefaultValue> FetchableAddress for StaticFetchableAddress<KeyParts, Value, HasDefaultValue> 
+where
+    KeyParts: IntoEncodableValues,
+    Value: DecodeAsType
+{
+    type HasDefaultValue = HasDefaultValue;
+}
+
+/// An address which points to a set of storage values.
+pub struct StaticIterableAddress<InputKeyParts, OutputKeyParts, Value> {
+    pallet_name: Cow<'static, str>,
+    entry_name: Cow<'static, str>,
+    input_key_parts: InputKeyParts,
+    validation_hash: Option<[u8; 32]>,
+    marker: core::marker::PhantomData<(OutputKeyParts, Value)>
+}
+
+impl <InputKeyParts, OutputKeyParts, Value> StaticIterableAddress<InputKeyParts, OutputKeyParts, Value> {
+    /// Create a new [`StaticIterableAddress`] using static strings for the pallet and call name.
+    /// This is only expected to be used from codegen.
+    #[doc(hidden)]
+    pub fn new_static(
+        pallet_name: &'static str,
+        entry_name: &'static str,
+        input_key_parts: InputKeyParts,
+        hash: [u8; 32],
+    ) -> Self {
+        Self {
+            pallet_name: Cow::Borrowed(pallet_name),
+            entry_name: Cow::Borrowed(entry_name),
+            input_key_parts,
+            validation_hash: Some(hash),
+            marker: core::marker::PhantomData,
+        }
+    }
+
+    /// Create a new [`StaticIterableAddress`].
+    pub fn new(
+        pallet_name: impl Into<Cow<'static, str>>,
+        entry_name: impl Into<Cow<'static, str>>,
+        input_key_parts: InputKeyParts,
+    ) -> Self {
+        Self {
+            pallet_name: pallet_name.into(),
+            entry_name: entry_name.into(),
+            input_key_parts,
+            validation_hash: None,
+            marker: core::marker::PhantomData,
+        }
+    }
+
+    /// Do not validate this storage entry prior to accessing it.
+    pub fn unvalidated(mut self) -> Self {
+        self.validation_hash = None;
+        self
+    }
+}
+
+impl <InputKeyParts, OutputKeyParts, Value> Address for StaticIterableAddress<InputKeyParts, OutputKeyParts, Value> 
+where
+    InputKeyParts: IntoEncodableValues,
+    Value: DecodeAsType
+{
+    type KeyParts = InputKeyParts;
+    type Value = Value;
+    
+    fn encode_key_suffix(&self, metadata: &Metadata, bytes: &mut Vec<u8>) -> Result<(), Error> {
+        frame_decode::storage::encode_storage_key_suffix(
+            &self.pallet_name, 
+            &self.entry_name, 
+            &self.input_key_parts,
+            metadata.types(),
+            metadata
+        ).map_err(Into::into)
+    }
+
+    fn pallet_name(&self) -> &str {
+        &self.pallet_name
+    }
+
+    fn entry_name(&self) -> &str {
+        &self.entry_name
+    }
+
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        self.validation_hash
+    }
+}
+
+impl <InputKeyParts, OutputKeyParts, Value> IterableAddress for StaticIterableAddress<InputKeyParts, OutputKeyParts, Value> 
+where
+    InputKeyParts: IntoEncodableValues,
+    OutputKeyParts: IntoDecodableValues,
+    Value: DecodeAsType
+{
+    type OutputKeys = OutputKeyParts;
+}
+
+
+
+
 
 /// A concrete storage address. This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].

@@ -33,6 +33,15 @@ pub enum TryFromError {
     /// Invalid type path.
     #[error("Type has an invalid path {0}")]
     InvalidTypePath(String),
+    /// Cannot decode storage entry information.
+    #[error("Error decoding storage entry information: {0}")]
+    StorageInfoError(#[from] frame_decode::storage::StorageInfoError<'static>),
+    /// Cannot decode Runtime API information.
+    #[error("Error decoding Runtime API information: {0}")]
+    RuntimeInfoError(#[from] frame_decode::runtime_apis::RuntimeApiInfoError<'static>),
+    /// Cannot decode View Function information.
+    #[error("Error decoding View Function information: {0}")]
+    ViewFunctionInfoError(#[from] frame_decode::view_functions::ViewFunctionInfoError<'static>),
 }
 
 impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for crate::Metadata {
