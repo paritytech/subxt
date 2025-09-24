@@ -92,7 +92,7 @@ impl LightClient {
     /// ## Web
     ///
     /// If smoldot panics, then the promise created will be leaked. For more details, see
-    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
+    /// <https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html>.
     pub fn relay_chain<'a>(
         chain_config: impl Into<ChainConfig<'a>>,
     ) -> Result<(Self, LightClientRpc), LightClientError> {
@@ -144,7 +144,7 @@ impl LightClient {
     /// ## Web
     ///
     /// If smoldot panics, then the promise created will be leaked. For more details, see
-    /// https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html.
+    /// <https://docs.rs/wasm-bindgen-futures/latest/wasm_bindgen_futures/fn.future_to_promise.html>.
     pub fn parachain<'a>(
         &self,
         chain_config: impl Into<ChainConfig<'a>>,
