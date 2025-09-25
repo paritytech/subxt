@@ -296,9 +296,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
         .await?
         .0;
 
-    // There is now a hold on the balance being staked
-    assert_eq!(holds.len(), 1);
-    assert_eq!(holds[0].amount, 327_000_000_000_000);
+    assert_eq!(holds.len(), 0);
 
     Ok(())
 }

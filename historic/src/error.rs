@@ -102,6 +102,13 @@ pub enum OnlineClientAtBlockError {
         /// The error we encountered.
         reason: String,
     },
+    #[error(
+        "Cannot inject types from metadata: failure to parse a type found in the metadata: {parse_error}"
+    )]
+    CannotInjectMetadataTypes {
+        /// Error parsing a type found in the metadata.
+        parse_error: scale_info_legacy::lookup_name::ParseError,
+    },
 }
 
 /// Errors working with extrinsics.
