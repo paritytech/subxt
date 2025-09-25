@@ -1,5 +1,5 @@
 error: Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or  'runtime_path` can be provided
- --> src/incorrect/url_and_path_provided.rs:1:1
+  --> src/incorrect/url_and_path_provided.rs:1:1
   |
 1 | / #[subxt::subxt(
 2 | |     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_tiny.scale",
@@ -11,12 +11,12 @@ error: Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url'  or 
 
 error: Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' or `runtime_path` must be provided
   --> src/incorrect/url_and_path_provided.rs:7:1
-   |
-7  | / #[subxt::subxt(
-8  | |     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_tiny.scale",
-9  | |     runtime_metadata_insecure_url = "wss://rpc.polkadot.io:443",
+  |
+  7 | / #[subxt::subxt(
+  8 | |     runtime_metadata_path = "../../../../artifacts/polkadot_metadata_tiny.scale",
+  9 | |     runtime_metadata_insecure_url = "wss://rpc.polkadot.io:443",
 10 | |     runtime_path = "../../../../artifacts/westend_runtime.wasm"
 11 | | )]
-   | |__^
-   |
-   = note: this error originates in the attribute macro `subxt::subxt` (in Nightly builds, run with -Z macro-backtrace for more info)
+    | |__^
+    |
+    = note: this error originates in the attribute macro `subxt::subxt` (in Nightly builds, run with -Z macro-backtrace for more info)
