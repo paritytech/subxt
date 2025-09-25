@@ -250,7 +250,7 @@ where
         let pallet_name = &*self.pallet_name;
         let storage_name = &*self.storage_name;
 
-        frame_decode::storage::encode_prefix(pallet_name, storage_name)
+        frame_decode::storage::encode_storage_key_prefix(pallet_name, storage_name)
     }
 }
 

@@ -131,7 +131,7 @@ pub enum MetadataError {
 }
 
 /// Something went wrong trying to encode or decode a storage address.
-#[derive(Clone, Debug, DeriveError)]
+#[derive(Debug, DeriveError)]
 #[non_exhaustive]
 pub enum StorageAddressError {
     /// Storage lookup does not have the expected number of keys.
@@ -169,6 +169,15 @@ pub enum StorageAddressError {
         /// The invalid hasher that caused this error.
         hasher: StorageHasher,
     },
+    /// Cannot obtain storage information from metadata
+    #[error("Cannot obtain storage information from metadata: {0}")]
+    StorageInfoError(frame_decode::storage::StorageInfoError<'static>),
+    /// Cannot decode storage value
+    #[error("Cannot decode storage value: {0}")]
+    StorageValueDecodeError(frame_decode::storage::StorageValueDecodeError<u32>),
+    /// Cannot encode storage key
+    #[error("Cannot encode storage key: {0}")]
+    StorageKeyEncodeError(frame_decode::storage::StorageKeyEncodeError),
 }
 
 /// An error that can be encountered when constructing a transaction.

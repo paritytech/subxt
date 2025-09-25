@@ -41,18 +41,16 @@
 //! println!("Alice's account info: {value:?}");
 //! ```
 
-mod storage_key;
-mod utils;
-
 pub mod address;
 
-use crate::{Error, Metadata, error::MetadataError, metadata::DecodeWithMetadata};
+use crate::{
+    Error, Metadata,
+    error::{MetadataError, StorageAddressError},
+};
 use address::Address;
 use alloc::vec::Vec;
-
-// This isn't a part of the public API, but expose here because it's useful in Subxt.
-#[doc(hidden)]
-pub use utils::lookup_storage_entry_details;
+use frame_decode::storage::StorageTypeInfo;
+use scale_decode::IntoVisitor;
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
 /// that the shape of the storage value is the same as the shape expected by the static address.
@@ -84,19 +82,21 @@ pub fn get_address_bytes<Addr: Address>(
     address: &Addr,
     metadata: &Metadata,
 ) -> Result<Vec<u8>, Error> {
-    let mut bytes = Vec::new();
-    utils::write_storage_address_root_bytes(address, &mut bytes);
-    address.append_entry_bytes(metadata, &mut bytes)?;
-    Ok(bytes)
+    frame_decode::storage::encode_storage_key(
+        address.pallet_name(),
+        address.entry_name(),
+        &address.key_parts(),
+        &**metadata,
+        metadata.types(),
+    )
+    .map_err(|e| StorageAddressError::StorageKeyEncodeError(e).into())
 }
 
 /// Given a storage address and some metadata, this encodes the root of the address (ie the pallet
 /// and storage entry part) into bytes. If the entry being addressed is inside a map, this returns
 /// the bytes needed to iterate over all of the entries within it.
-pub fn get_address_root_bytes<Addr: Address>(address: &Addr) -> Vec<u8> {
-    let mut bytes = Vec::new();
-    utils::write_storage_address_root_bytes(address, &mut bytes);
-    bytes
+pub fn get_address_root_bytes<Addr: Address>(address: &Addr) -> [u8; 32] {
+    frame_decode::storage::encode_storage_key_prefix(address.pallet_name(), address.entry_name())
 }
 
 /// Given some storage value that we've retrieved from a node, the address used to retrieve it, and
@@ -106,30 +106,32 @@ pub fn decode_value<Addr: Address>(
     bytes: &mut &[u8],
     address: &Addr,
     metadata: &Metadata,
-) -> Result<Addr::Target, Error> {
-    let pallet_name = address.pallet_name();
-    let entry_name = address.entry_name();
-
-    let (_, entry_metadata) =
-        utils::lookup_storage_entry_details(pallet_name, entry_name, metadata)?;
-    let value_ty_id = entry_metadata.value_ty();
-
-    let val = Addr::Target::decode_with_metadata(bytes, value_ty_id, metadata)?;
-    Ok(val)
+) -> Result<Addr::Value, Error> {
+    frame_decode::storage::decode_storage_value(
+        address.pallet_name(),
+        address.entry_name(),
+        bytes,
+        &**metadata,
+        metadata.types(),
+        Addr::Value::into_visitor(),
+    )
+    .map_err(|e| StorageAddressError::StorageValueDecodeError(e).into())
 }
 
-/// Return the default value at a given storage address if one is available, or an error otherwise.
+/// Return the default value at a given storage address if one is available, or None otherwise.
 pub fn default_value<Addr: Address>(
     address: &Addr,
     metadata: &Metadata,
-) -> Result<Addr::Target, Error> {
-    let pallet_name = address.pallet_name();
-    let entry_name = address.entry_name();
+) -> Result<Option<Addr::Value>, Error> {
+    let storage_info = metadata
+        .storage_info(address.pallet_name(), address.entry_name())
+        .map_err(|e| StorageAddressError::StorageInfoError(e.into_owned()))?;
+    let value = frame_decode::storage::decode_default_storage_value_with_info(
+        &storage_info,
+        metadata.types(),
+        Addr::Value::into_visitor(),
+    )
+    .map_err(|e| StorageAddressError::StorageValueDecodeError(e))?;
 
-    let (_, entry_metadata) =
-        utils::lookup_storage_entry_details(pallet_name, entry_name, metadata)?;
-    let value_ty_id = entry_metadata.value_ty();
-    let default_bytes = entry_metadata.default_value();
-    let val = Addr::Target::decode_with_metadata(&mut &*default_bytes, value_ty_id, metadata)?;
-    Ok(val)
+    Ok(value)
 }
