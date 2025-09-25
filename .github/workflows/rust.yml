@@ -470,11 +470,18 @@ jobs:
       - name: Install chrome
         uses: browser-actions/setup-chrome@latest
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
-
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
 
       - name: Run subxt WASM tests
         run: |
