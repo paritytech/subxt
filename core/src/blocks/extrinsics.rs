@@ -11,7 +11,6 @@ use crate::{
 };
 use alloc::sync::Arc;
 use alloc::vec::Vec;
-use core::ops::Deref;
 use frame_decode::extrinsics::Extrinsic;
 use scale_decode::DecodeAsType;
 use subxt_metadata::PalletMetadata;

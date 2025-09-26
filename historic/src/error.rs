@@ -295,6 +295,10 @@ pub enum StorageKeyError {
         index: usize,
         reason: scale_decode::Error,
     },
+    #[error("Could not decode values out of the storage key: {reason}")]
+    DecodeKeyValueError {
+        reason: frame_decode::storage::StorageKeyValueDecodeError
+    }
 }
 
 #[allow(missing_docs)]
