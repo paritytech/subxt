@@ -30,7 +30,7 @@ pub enum Error {
     StorageValueError(#[from] StorageValueError),
 }
 
-/// Errors consctructing an online client.
+/// Errors constructing an online client.
 #[allow(missing_docs)]
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
