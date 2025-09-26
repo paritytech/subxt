@@ -13,21 +13,21 @@ use codec::Decode;
 use derive_where::derive_where;
 use futures::StreamExt;
 use std::{future::Future, marker::PhantomData};
-use subxt_core::storage::address::{Address, StorageHashers, StorageKey};
-use subxt_core::utils::Yes;
+use subxt_core::storage::address::Address;
+use subxt_core::utils::{Maybe, Yes, No};
 
 /// This is returned from a couple of storage functions.
 pub use crate::backend::StreamOfResults;
 
 /// Query the runtime storage.
 #[derive_where(Clone; Client)]
-pub struct Storage<T: Config, Client> {
+pub struct StorageClientAt<T: Config, Client> {
     client: Client,
     block_ref: BlockRef<HashFor<T>>,
     _marker: PhantomData<T>,
 }
 
-impl<T: Config, Client> Storage<T, Client> {
+impl<T: Config, Client> StorageClientAt<T, Client> {
     /// Create a new [`Storage`]
     pub(crate) fn new(client: Client, block_ref: BlockRef<HashFor<T>>) -> Self {
         Self {
@@ -38,6 +38,134 @@ impl<T: Config, Client> Storage<T, Client> {
     }
 }
 
+impl<T, Client> StorageClientAt<T, Client>
+where
+    T: Config,
+    Client: OnlineClientT<T>,
+{
+    pub fn entry<Addr: Address>(&self, address: Addr) -> Result<StorageEntryClient<T, Client, Addr, Addr::IsMap>, Error> {
+        subxt_core::storage::validate(&address, &self.client.metadata())?;
+
+        use frame_decode::storage::StorageTypeInfo;
+        let storage_info = self
+            .client
+            .metadata()
+            .storage_info(address.pallet_name(), address.entry_name())?;
+
+        let value = if storage_info.keys.is_empty() {
+            StorageEntryClientValue::Plain(StorageEntryPlainClient { 
+                client: self.client.clone(), 
+                block_ref: self.block_ref.clone(), 
+                address, 
+                _marker: core::marker::PhantomData 
+            })
+        } else {
+            StorageEntryClientValue::Map(StorageEntryMapClient { 
+                client: self.client.clone(), 
+                block_ref: self.block_ref.clone(), 
+                address, 
+                _marker: core::marker::PhantomData 
+            })
+        };
+
+        Ok(StorageEntryClient {
+            value,
+            marker: core::marker::PhantomData
+        })
+    }
+}
+
+pub struct StorageEntryClient<T: Config, Client, Addr, IsMap> {
+    value: StorageEntryClientValue<T, Client, Addr>,
+    marker: core::marker::PhantomData<IsMap>,
+}
+
+enum StorageEntryClientValue<T: Config, Client, Addr> {
+    Plain(StorageEntryPlainClient<T, Client, Addr>),
+    Map(StorageEntryMapClient<T, Client, Addr>),
+}
+
+impl <T: Config, Client, Addr: Address, IsMap> StorageEntryClient<T, Client, Addr, IsMap> {
+    pub fn pallet_name(&self) -> &str {
+        match &self.value {
+            StorageEntryClientValue::Plain(client) => client.address.pallet_name(),
+            StorageEntryClientValue::Map(client) => client.address.pallet_name(),
+        }
+    }
+
+    pub fn storage_name(&self) -> &str {
+        match &self.value {
+            StorageEntryClientValue::Plain(client) => client.address.entry_name(),
+            StorageEntryClientValue::Map(client) => client.address.entry_name(),
+        }
+    }
+}
+
+// When IsMap = Yes, we have statically asserted that the entry is a map. This can only be false
+// if we skip validation of a static call, and the storage entry, while still present, has changed from
+// plain to map.
+impl <T: Config, Client, Addr: Address> StorageEntryClient<T, Client, Addr, Yes> {
+    pub fn into_map(self) -> StorageEntryMapClient<T, Client, Addr> {
+        match self.value {
+            StorageEntryClientValue::Map(this) => this,
+            StorageEntryClientValue::Plain(_) => panic!("When IsMap = Yes, StorageEntryClient should always be a map.")
+        }
+    }
+}
+
+// When IsMap = No, we have statically asserted that the entry is a plain value. This can only be false
+// if we skip validation of a static call, and the storage entry, while still present, has changed from
+// map to plain value.
+impl <T: Config, Client, Addr: Address> StorageEntryClient<T, Client, Addr, No> {
+    pub fn into_plain(self) -> StorageEntryPlainClient<T, Client, Addr> {
+        match self.value {
+            StorageEntryClientValue::Map(_) => panic!("When IsMap = No, StorageEntryClient should always be a plain value."),
+            StorageEntryClientValue::Plain(this) => this,
+        }
+    }
+}
+
+// Regardless, we can do the "safe" thing and try to convert the entry into a map or plain entry.
+impl <T: Config, Client, Addr: Address> StorageEntryClient<T, Client, Addr, Maybe> {
+    pub fn into_map(self) -> Option<StorageEntryMapClient<T, Client, Addr>> {
+        match self.value {
+            StorageEntryClientValue::Map(client) => Some(client),
+            StorageEntryClientValue::Plain(_) => None,
+        }
+    }
+
+    pub fn into_plain(self) -> Option<StorageEntryPlainClient<T, Client, Addr>> {
+        match self.value {
+            StorageEntryClientValue::Plain(client) => Some(client),
+            StorageEntryClientValue::Map(_) => None,
+        }
+    }
+
+    pub fn is_plain(&self) -> bool {
+        matches!(self.value, StorageEntryClientValue::Plain(_))
+    }
+
+    pub fn is_map(&self) -> bool {
+        matches!(self.value, StorageEntryClientValue::Map(_))
+    }
+}
+
+pub struct StorageEntryPlainClient<T: Config, Client, Addr> {
+    client: Client,
+    block_ref: BlockRef<HashFor<T>>,
+    address: Addr,
+    _marker: PhantomData<T>,
+}
+
+pub struct StorageEntryMapClient<T: Config, Client, Addr> {
+    client: Client,
+    block_ref: BlockRef<HashFor<T>>,
+    address: Addr,
+    _marker: PhantomData<T>,
+}
+
+
+/*
 impl<T, Client> Storage<T, Client>
 where
     T: Config,
@@ -321,3 +449,4 @@ pub struct StorageKeyValuePair<T: Address> {
     /// The value of the storage entry.
     pub value: T::Target,
 }
+*/

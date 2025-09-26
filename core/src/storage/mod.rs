@@ -41,6 +41,8 @@
 //! println!("Alice's account info: {value:?}");
 //! ```
 
+mod prefix_of;
+
 pub mod address;
 
 use crate::{
@@ -51,6 +53,8 @@ use address::Address;
 use alloc::vec::Vec;
 use frame_decode::storage::StorageTypeInfo;
 use scale_decode::IntoVisitor;
+
+pub use prefix_of::{ EqualOrPrefixOf, PrefixOf };
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
 /// that the shape of the storage value is the same as the shape expected by the static address.
@@ -78,14 +82,15 @@ pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<()
 
 /// Given a storage address and some metadata, this encodes the address into bytes which can be
 /// handed to a node to retrieve the corresponding value.
-pub fn get_address_bytes<Addr: Address>(
+pub fn get_address_bytes<Addr: Address, Keys: EqualOrPrefixOf<Addr::KeyParts>>(
     address: &Addr,
     metadata: &Metadata,
+    keys: Keys,
 ) -> Result<Vec<u8>, Error> {
     frame_decode::storage::encode_storage_key(
         address.pallet_name(),
         address.entry_name(),
-        &address.key_parts(),
+        &keys,
         &**metadata,
         metadata.types(),
     )

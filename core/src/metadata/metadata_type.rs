@@ -6,6 +6,19 @@ use crate::error::MetadataError;
 
 use alloc::borrow::ToOwned;
 use alloc::sync::Arc;
+use frame_decode::extrinsics::{
+    ExtrinsicCallInfo, ExtrinsicExtensionInfo, ExtrinsicInfoError,
+    ExtrinsicSignatureInfo,
+};
+use frame_decode::storage::{
+    StorageEntry, StorageInfo, StorageInfoError
+};
+use frame_decode::runtime_apis::{
+    RuntimeApi, RuntimeApiInfo, RuntimeApiInfoError
+};
+use frame_decode::view_functions::{
+    ViewFunction, ViewFunctionInfo, ViewFunctionInfoError
+};
 
 /// A cheaply clone-able representation of the runtime metadata received from a node.
 #[derive(Clone, Debug)]
@@ -17,6 +30,79 @@ impl core::ops::Deref for Metadata {
     type Target = subxt_metadata::Metadata;
     fn deref(&self) -> &Self::Target {
         &self.inner
+    }
+}
+
+impl frame_decode::storage::StorageTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn storage_info(
+        &self,
+        pallet_name: &str,
+        storage_entry: &str,
+    ) -> Result<StorageInfo<'_, Self::TypeId>, StorageInfoError<'_>> {
+        self.inner.storage_info(pallet_name, storage_entry)
+    }
+
+    fn storage_entries(&self) -> impl Iterator<Item = StorageEntry<'_>> {
+        self.inner.storage_entries()
+    }
+}
+
+impl frame_decode::runtime_apis::RuntimeApiTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn runtime_api_info(
+        &self,
+        trait_name: &str,
+        method_name: &str,
+    ) -> Result<RuntimeApiInfo<'_, Self::TypeId>, RuntimeApiInfoError<'_>> {
+        self.inner.runtime_api_info(trait_name, method_name)
+    }
+
+    fn runtime_apis(&self) -> impl Iterator<Item = RuntimeApi<'_>> {
+        self.inner.runtime_apis()
+    }
+}
+
+impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn extrinsic_call_info(
+        &self,
+        pallet_index: u8,
+        call_index: u8,
+    ) -> Result<ExtrinsicCallInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
+        self.inner.extrinsic_call_info(pallet_index, call_index)
+    }
+
+    fn extrinsic_signature_info(
+        &self,
+    ) -> Result<ExtrinsicSignatureInfo<Self::TypeId>, ExtrinsicInfoError<'_>> {
+        self.inner.extrinsic_signature_info()
+    }
+
+    fn extrinsic_extension_info(
+        &self,
+        extension_version: Option<u8>,
+    ) -> Result<ExtrinsicExtensionInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
+        self.inner.extrinsic_extension_info(extension_version)
+    }
+}
+
+impl frame_decode::view_functions::ViewFunctionTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn view_function_info(
+        &self,
+        pallet_name: &str,
+        function_name: &str,
+    ) -> Result<ViewFunctionInfo<'_, Self::TypeId>, ViewFunctionInfoError<'_>> {
+        self.inner.view_function_info(pallet_name, function_name)
+    }
+
+    fn view_functions(&self) -> impl Iterator<Item = ViewFunction<'_>> {
+        self.inner.view_functions()
     }
 }
 

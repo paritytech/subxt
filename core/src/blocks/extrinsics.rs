@@ -41,7 +41,7 @@ impl<T: Config> Extrinsics<T> {
                 // Try to decode the extrinsic.
                 let decoded_info = frame_decode::extrinsics::decode_extrinsic(
                     cursor,
-                    metadata.deref(),
+                    &metadata,
                     metadata.types(),
                 )
                 .map_err(|error| BlockError::ExtrinsicDecodeError {

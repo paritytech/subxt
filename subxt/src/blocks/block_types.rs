@@ -10,7 +10,7 @@ use crate::{
     error::{BlockError, DecodeError, Error},
     events,
     runtime_api::RuntimeApi,
-    storage::Storage,
+    storage::StorageClientAt,
 };
 
 use codec::{Decode, Encode};
@@ -104,8 +104,8 @@ where
     }
 
     /// Work with storage.
-    pub fn storage(&self) -> Storage<T, C> {
-        Storage::new(self.client.clone(), self.block_ref.clone())
+    pub fn storage(&self) -> StorageClientAt<T, C> {
+        StorageClientAt::new(self.client.clone(), self.block_ref.clone())
     }
 
     /// Execute a runtime API call at this block.
