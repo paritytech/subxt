@@ -42,14 +42,14 @@ where
     pub fn entry(
         &self,
         pallet_name: impl Into<String>,
-        storage_name: impl Into<String>,
+        entry_name: impl Into<String>,
     ) -> Result<StorageEntryClient<'atblock, Client, T>, StorageError> {
         let pallet_name = pallet_name.into();
-        let storage_name = storage_name.into();
+        let entry_name = entry_name.into();
 
         let storage_info = AnyStorageInfo::new(
             &pallet_name,
-            &storage_name,
+            &entry_name,
             self.client.metadata(),
             self.client.legacy_types(),
         )?;
@@ -58,7 +58,7 @@ where
             Ok(StorageEntryClient::Map(StorageEntryMapClient {
                 client: self.client,
                 pallet_name,
-                storage_name,
+                entry_name,
                 info: storage_info,
                 marker: std::marker::PhantomData,
             }))
@@ -66,7 +66,7 @@ where
             Ok(StorageEntryClient::Plain(StorageEntryPlainClient {
                 client: self.client,
                 pallet_name,
-                storage_name,
+                entry_name,
                 info: storage_info,
                 marker: std::marker::PhantomData,
             }))
@@ -105,7 +105,7 @@ where
     }
 
     /// The storage entry name.
-    pub fn storage_name(&self) -> &str {
+    pub fn entry_name(&self) -> &str {
         &self.entry.storage_entry
     }
 
@@ -143,10 +143,10 @@ where
     }
 
     /// Get the storage entry name.
-    pub fn storage_name(&self) -> &str {
+    pub fn entry_name(&self) -> &str {
         match self {
-            StorageEntryClient::Plain(client) => &client.storage_name,
-            StorageEntryClient::Map(client) => &client.storage_name,
+            StorageEntryClient::Plain(client) => &client.entry_name,
+            StorageEntryClient::Map(client) => &client.entry_name,
         }
     }
 
@@ -168,7 +168,7 @@ where
             StorageEntryClient::Plain(client) => Ok(client),
             StorageEntryClient::Map(_) => Err(StorageEntryIsNotAPlainValue {
                 pallet_name: self.pallet_name().into(),
-                storage_name: self.storage_name().into(),
+                entry_name: self.entry_name().into(),
             }),
         }
     }
@@ -180,9 +180,18 @@ where
         match self {
             StorageEntryClient::Plain(_) => Err(StorageEntryIsNotAMap {
                 pallet_name: self.pallet_name().into(),
-                storage_name: self.storage_name().into(),
+                entry_name: self.entry_name().into(),
             }),
             StorageEntryClient::Map(client) => Ok(client),
+        }
+    }
+
+    /// Return the default value for this storage entry, if there is one. Returns `None` if there
+    /// is no default value.
+    pub fn default_value(&self) -> Option<StorageValue<'_, 'atblock>> {
+        match self {
+            StorageEntryClient::Plain(client) => client.default_value(),
+            StorageEntryClient::Map(client) => client.default_value(),
         }
     }
 }
@@ -191,7 +200,7 @@ where
 pub struct StorageEntryPlainClient<'atblock, Client, T> {
     client: &'atblock Client,
     pallet_name: String,
-    storage_name: String,
+    entry_name: String,
     info: AnyStorageInfo<'atblock>,
     marker: std::marker::PhantomData<T>,
 }
@@ -207,13 +216,13 @@ where
     }
 
     /// Get the storage entry name.
-    pub fn storage_name(&self) -> &str {
-        &self.storage_name
+    pub fn entry_name(&self) -> &str {
+        &self.entry_name
     }
 
     /// Return the default value for this storage entry, if there is one. Returns `None` if there
     /// is no default value.
-    pub fn default(&self) -> Option<StorageValue<'_, 'atblock>> {
+    pub fn default_value(&self) -> Option<StorageValue<'_, 'atblock>> {
         with_info!(info = &self.info => {
             info.info.default_value.as_ref().map(|default_value| {
                 StorageValue::new(&self.info, default_value.clone())
@@ -227,30 +236,24 @@ where
     T: Config + 'atblock,
     Client: OnlineClientAtBlockT<'atblock, T>,
 {
-    /// Fetch the value for this storage entry.
+    /// Fetch the value for this storage entry. If no value exists and no default value is
+    /// set for this storage entry, then `None` will be returned.
     pub async fn fetch(&self) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
         let key_bytes = self.key();
-        fetch(self.client, &key_bytes)
-            .await
-            .map(|v| v.map(|bytes| StorageValue::new(&self.info, Cow::Owned(bytes))))
-    }
+        let value = fetch(self.client, &key_bytes)
+            .await?
+            .map(|bytes| StorageValue::new(&self.info, Cow::Owned(bytes)))
+            .or_else(|| self.default_value());
 
-    /// Fetch the value for this storage entry as per [`StorageEntryPlainClient::fetch`], but return the default
-    /// value for the storage entry if one exists and the entry does not exist.
-    pub async fn fetch_or_default(
-        &self,
-    ) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
-        self.fetch()
-            .await
-            .map(|option_val| option_val.or_else(|| self.default()))
+        Ok(value)
     }
 
     /// The key for this storage entry.
     pub fn key(&self) -> [u8; 32] {
         let pallet_name = &*self.pallet_name;
-        let storage_name = &*self.storage_name;
+        let entry_name = &*self.entry_name;
 
-        frame_decode::storage::encode_storage_key_prefix(pallet_name, storage_name)
+        frame_decode::storage::encode_storage_key_prefix(pallet_name, entry_name)
     }
 }
 
@@ -258,7 +261,7 @@ where
 pub struct StorageEntryMapClient<'atblock, Client, T> {
     client: &'atblock Client,
     pallet_name: String,
-    storage_name: String,
+    entry_name: String,
     info: AnyStorageInfo<'atblock>,
     marker: std::marker::PhantomData<T>,
 }
@@ -274,13 +277,13 @@ where
     }
 
     /// Get the storage entry name.
-    pub fn storage_name(&self) -> &str {
-        &self.storage_name
+    pub fn entry_name(&self) -> &str {
+        &self.entry_name
     }
 
     /// Return the default value for this storage entry, if there is one. Returns `None` if there
     /// is no default value.
-    pub fn default(&self) -> Option<StorageValue<'_, 'atblock>> {
+    pub fn default_value(&self) -> Option<StorageValue<'_, 'atblock>> {
         with_info!(info = &self.info => {
             info.info.default_value.as_ref().map(|default_value| {
                 StorageValue::new(&self.info, default_value.clone())
@@ -296,7 +299,8 @@ where
 {
     /// Fetch a specific key in this map. If the number of keys provided is not equal
     /// to the number of keys required to fetch a single value from the map, then an error
-    /// will be emitted.
+    /// will be emitted. If no value exists but there is a default value for this storage
+    /// entry, then the default value will be returned. Else, `None` will be returned.
     pub async fn fetch<Keys: IntoEncodableValues>(
         &self,
         keys: Keys,
@@ -313,20 +317,12 @@ where
         }
 
         let key_bytes = self.key(keys)?;
-        fetch(self.client, &key_bytes)
-            .await
-            .map(|v| v.map(|bytes| StorageValue::new(&self.info, Cow::Owned(bytes))))
-    }
+        let value = fetch(self.client, &key_bytes)
+            .await?
+            .map(|bytes| StorageValue::new(&self.info, Cow::Owned(bytes)))
+            .or_else(|| self.default_value());
 
-    /// Fetch a specific key in this map as per [`StorageEntryMapClient::fetch`], but return the default
-    /// value for the storage entry if one exists and the entry was not found.
-    pub async fn fetch_or_default<Keys: IntoEncodableValues>(
-        &self,
-        keys: Keys,
-    ) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
-        self.fetch(keys)
-            .await
-            .map(|option_val| option_val.or_else(|| self.default()))
+        Ok(value)
     }
 
     /// Iterate over the values underneath the provided keys.
@@ -387,14 +383,12 @@ where
     // the key bytes and some metadata about them. Or maybe just fetch_raw and iter_raw.
     fn key<Keys: IntoEncodableValues>(&self, keys: Keys) -> Result<Vec<u8>, StorageError> {
         with_info!(info = &self.info => {
-            let mut key_bytes = Vec::new();
-            frame_decode::storage::encode_storage_key_with_info_to(
+            let key_bytes = frame_decode::storage::encode_storage_key_with_info(
                 &self.pallet_name,
-                &self.storage_name,
+                &self.entry_name,
                 keys,
                 &info.info,
                 info.resolver,
-                &mut key_bytes,
             ).map_err(|e| StorageError::KeyEncodeError { reason: e })?;
             Ok(key_bytes)
         })

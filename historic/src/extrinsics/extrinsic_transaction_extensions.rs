@@ -105,7 +105,7 @@ impl<'extrinsics, 'atblock> ExtrinsicTransactionExtensions<'extrinsics, 'atblock
 
     /// Attempt to decode the transaction extensions into a type where each field name is the name of the transaction
     /// extension and the field value is the decoded extension.
-    pub fn decode<T: scale_decode::DecodeAsFields>(
+    pub fn decode_as<T: scale_decode::DecodeAsFields>(
         &self,
     ) -> Result<T, ExtrinsicTransactionExtensionError> {
         with_extensions_info!(&self.info => {
@@ -189,7 +189,7 @@ impl<'extrinsics, 'atblock> ExtrinsicTransactionExtension<'extrinsics, 'atblock>
     }
 
     /// Decode the bytes for this transaction extension into a type that implements `scale_decode::DecodeAsType`.
-    pub fn decode<T: scale_decode::DecodeAsType>(
+    pub fn decode_as<T: scale_decode::DecodeAsType>(
         &self,
     ) -> Result<T, ExtrinsicTransactionExtensionError> {
         with_extension_info!(&self.info => {

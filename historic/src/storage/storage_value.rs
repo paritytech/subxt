@@ -27,7 +27,7 @@ impl<'entry, 'atblock> StorageValue<'entry, 'atblock> {
     }
 
     /// Decode this storage value.
-    pub fn decode<T: DecodeAsType>(&self) -> Result<T, StorageValueError> {
+    pub fn decode_as<T: DecodeAsType>(&self) -> Result<T, StorageValueError> {
         with_info!(info = &self.info => {
             let cursor = &mut &*self.bytes;
 

@@ -214,22 +214,22 @@ pub enum ExtrinsicCallError {
 
 #[allow(missing_docs)]
 #[derive(Debug, thiserror::Error)]
-#[error("Storage entry is not a map: pallet {pallet_name}, storage {storage_name}")]
+#[error("Storage entry is not a map: pallet {pallet_name}, storage {entry_name}")]
 pub struct StorageEntryIsNotAMap {
     /// The pallet containing the storage entry that was not found.
     pub pallet_name: String,
     /// The storage entry that was not found.
-    pub storage_name: String,
+    pub entry_name: String,
 }
 
 #[allow(missing_docs)]
 #[derive(Debug, thiserror::Error)]
-#[error("Storage entry is not a plain value: pallet {pallet_name}, storage {storage_name}")]
+#[error("Storage entry is not a plain value: pallet {pallet_name}, storage {entry_name}")]
 pub struct StorageEntryIsNotAPlainValue {
     /// The pallet containing the storage entry that was not found.
     pub pallet_name: String,
     /// The storage entry that was not found.
-    pub storage_name: String,
+    pub entry_name: String,
 }
 
 #[allow(missing_docs)]

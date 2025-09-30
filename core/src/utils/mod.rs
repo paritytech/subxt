@@ -13,6 +13,7 @@ mod multi_signature;
 mod static_type;
 mod unchecked_extrinsic;
 mod wrapper_opaque;
+mod yesnomaybe;
 
 use alloc::borrow::ToOwned;
 use alloc::format;
@@ -21,6 +22,7 @@ use alloc::vec::Vec;
 use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
 
+pub use yesnomaybe::{Yes, No, Maybe, YesNoMaybe};
 pub use account_id::AccountId32;
 pub use account_id20::AccountId20;
 pub use era::Era;
@@ -72,13 +74,6 @@ unsafe impl<T> Sync for PhantomDataSendSync<T> {}
 /// with collections like BTreeMap. This has the same type params
 /// as `BTreeMap` which allows us to easily swap the two during codegen.
 pub type KeyedVec<K, V> = Vec<(K, V)>;
-
-/// A unit marker enum.
-pub enum Yes {}
-/// A unit marker enum.
-pub enum Maybe {}
-/// A unit marker enum.
-pub enum No {}
 
 /// A quick helper to encode some bytes to hex.
 pub fn to_hex(bytes: impl AsRef<[u8]>) -> String {

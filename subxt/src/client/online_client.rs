@@ -546,25 +546,34 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
             Err(err) => return Some(Err(err)),
         };
 
-        let key: Vec<scale_value::Value> = vec![];
-        let addr = crate::dynamic::storage("System", "LastRuntimeUpgrade", key);
+        let addr = crate::dynamic::storage::<(), scale_value::Value>("System", "LastRuntimeUpgrade");
 
-        let chunk = match client.storage().at(block_ref.hash()).fetch(&addr).await {
-            Ok(Some(v)) => v,
-            Ok(None) => {
-                // The storage `system::lastRuntimeUpgrade` should always exist.
-                // <https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/system/src/lib.rs#L958>
-                unreachable!("The storage item `system::lastRuntimeUpgrade` should always exist")
-            }
-            Err(e) => return Some(Err(e)),
+        let client_at = client.storage().at(block_ref.hash());
+        let Ok(client) = client_at.entry(addr) else {
+            // The storage `system::lastRuntimeUpgrade` should always exist.
+            // <https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/system/src/lib.rs#L958>
+            return Some(Err(Error::Other(
+                "The storage item `system::lastRuntimeUpgrade` should always exist (1)".to_string(),
+            )));
         };
 
-        let scale_val = match chunk.to_value() {
-            Ok(v) => v,
-            Err(e) => return Some(Err(e.into())),
+        let client = client
+            .into_plain()
+            .expect("System.LastRuntimeUpgrade should always be a plain storage entry");
+
+        let value = match client.try_fetch().await {
+            Ok(Some(value)) => value,
+            Ok(None) => return Some(Err(Error::Other(
+                "The storage item `system::lastRuntimeUpgrade` should always exist (2)".to_string(),
+            ))),
+            Err(e) => return Some(Err(e))
         };
 
-        let Some(Ok(spec_version)) = scale_val
+        let value = value
+            .decode_as::<scale_value::Value>()
+            .expect("Should be able to decode anything into scale_value::Value");
+
+        let Some(Ok(spec_version)) = value
             .at("spec_version")
             .and_then(|v| v.as_u128())
             .map(u32::try_from)

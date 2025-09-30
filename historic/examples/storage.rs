@@ -25,8 +25,8 @@ async fn main() -> Result<(), Error> {
             .into_map()?;
 
         // We can see the default value for this entry at this block, if one exists.
-        if let Some(default_value) = account_balances.default() {
-            let default_balance_info = default_value.decode::<scale_value::Value>()?;
+        if let Some(default_value) = account_balances.default_value() {
+            let default_balance_info = default_value.decode_as::<scale_value::Value>()?;
             println!("  Default balance info: {default_balance_info}");
         }
 
@@ -37,7 +37,7 @@ async fn main() -> Result<(), Error> {
         if let Some(entry) = account_balances.fetch((account_id,)).await? {
             // We can decode the value into our generic `scale_value::Value` type, which can
             // represent any SCALE-encoded value, like so:
-            let _balance_info = entry.decode::<scale_value::Value>()?;
+            let _balance_info = entry.decode_as::<scale_value::Value>()?;
 
             // Or, if we know what shape to expect, we can decode the parts of the value that we care
             // about directly into a static type, which is more efficient and allows easy type-safe
@@ -53,7 +53,7 @@ async fn main() -> Result<(), Error> {
                 misc_frozen: u128,
                 fee_frozen: u128,
             }
-            let balance_info = entry.decode::<BalanceInfo>()?;
+            let balance_info = entry.decode_as::<BalanceInfo>()?;
 
             println!(
                 "  Single balance info from {account_id_hex} => free: {} reserved: {} misc_frozen: {} fee_frozen: {}",
@@ -72,21 +72,21 @@ async fn main() -> Result<(), Error> {
         let mut all_balances = account_balances.iter(()).await?.take(10);
         while let Some(entry) = all_balances.next().await {
             let entry = entry?;
-            let key = entry.decode_key()?;
+            let key = entry.key()?;
 
             // Decode the account ID from the key (we know here that we're working
             // with a map which has one value, an account ID, so we just decode that part:
             let account_id = key
                 .part(0)
                 .unwrap()
-                .decode::<[u8; 32]>()?
+                .decode_as::<[u8; 32]>()?
                 .expect("We expect this key to decode into a 32 byte AccountId");
 
             let account_id_hex = hex::encode(account_id);
 
             // Decode these values into our generic scale_value::Value type. Less efficient than
             // defining a static type as above, but easier for the sake of the example.
-            let balance_info = entry.decode_value::<scale_value::Value>()?;
+            let balance_info = entry.value().decode_as::<scale_value::Value>()?;
             println!("  {account_id_hex} => {balance_info}");
         }
     }

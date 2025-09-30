@@ -7,7 +7,7 @@
 use alloc::borrow::Cow;
 use frame_decode::storage::IntoEncodableValues;
 use scale_decode::DecodeAsType;
-use crate::utils::Maybe;
+use crate::utils::{Maybe, YesNoMaybe};
 
 /// A storage address. This allows access to a given storage entry, which can then
 /// be iterated over or fetched from by providing the relevant set of keys, or
@@ -22,7 +22,7 @@ pub trait Address {
     /// Does the address have a default value defined for it.
     /// Set to [`crate::utils::Yes`] to enable APIs which require one,
     /// or [`crate::utils::Maybe`] to enable APIs which allow one
-    type HasDefaultValue;
+    type HasDefaultValue: YesNoMaybe;
     /// Does the address point to a map (as opposed to a plain value)? 
     /// Set to [`crate::utils::Yes`] to enable APIs which require a map,
     /// or [`crate::utils::Maybe`] to enable APIs which allow a map.
@@ -63,6 +63,19 @@ impl<KeyParts, Value, HasDefaultValue, IsMap> StaticAddress<KeyParts, Value, Has
         }
     }
 
+    /// Create a new address.
+    pub fn new(
+        pallet_name: impl Into<Cow<'static, str>>,
+        entry_name: impl Into<Cow<'static, str>>,
+    ) -> Self {
+        Self {
+            pallet_name: pallet_name.into(),
+            entry_name: entry_name.into(),
+            validation_hash: None,
+            marker: core::marker::PhantomData
+        }
+    }
+
     /// Do not validate this storage entry prior to accessing it.
     pub fn unvalidated(mut self) -> Self {
         self.validation_hash = None;
@@ -75,6 +88,7 @@ impl<KeyParts, Value, HasDefaultValue, IsMap> Address
 where
     KeyParts: IntoEncodableValues,
     Value: DecodeAsType,
+    HasDefaultValue: YesNoMaybe,
 {
     type KeyParts = KeyParts;
     type Value = Value;
@@ -95,8 +109,8 @@ where
 }
 
 /// A dynamic address is simply a [`StaticAddress`] which asserts that the
-/// entry could be a map and could have a default value.
-pub type DynamicAddress<KeyParts, Value> = StaticAddress<KeyParts, Value, Maybe, Maybe>;
+/// entry *might* be a map and *might* have a default value.
+pub type DynamicAddress<KeyParts = Vec<scale_value::Value>, Value = scale_value::Value> = StaticAddress<KeyParts, Value, Maybe, Maybe>;
 
 /// Construct a new dynamic storage address. You can define the type of the
 /// storage keys and value yourself here, but have no guarantee that they will
@@ -105,11 +119,6 @@ pub fn dynamic<KeyParts: IntoEncodableValues, Value: DecodeAsType>(
     pallet_name: impl Into<Cow<'static, str>>,
     entry_name: impl Into<Cow<'static, str>>,
 ) -> DynamicAddress<KeyParts, Value> {
-    DynamicAddress::<KeyParts, Value> {
-        pallet_name: pallet_name.into(),
-        entry_name: entry_name.into(),
-        validation_hash: None,
-        marker: core::marker::PhantomData
-    }
+    DynamicAddress::<KeyParts, Value>::new(pallet_name, entry_name)
 }
 

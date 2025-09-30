@@ -111,11 +111,11 @@ fn generate_storage_entry_fns(
         .collect();
 
     let pallet_name = pallet.name();
-    let storage_name = storage_entry.name();
-    let Some(storage_hash) = pallet.storage_hash(storage_name) else {
+    let entry_name = storage_entry.name();
+    let Some(storage_hash) = pallet.storage_hash(entry_name) else {
         return Err(CodegenError::MissingStorageMetadata(
             pallet_name.into(),
-            storage_name.into(),
+            entry_name.into(),
         ));
     };
 
@@ -223,7 +223,7 @@ fn generate_storage_entry_fns(
             > {
                 #crate_path::storage::address::StaticAddress::new_static(
                     #pallet_name,
-                    #storage_name,
+                    #entry_name,
                     #keys,
                     [#(#storage_hash,)*]
                 )
