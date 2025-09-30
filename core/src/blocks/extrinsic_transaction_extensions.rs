@@ -7,7 +7,8 @@ use crate::config::transaction_extensions::{
     ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
 };
 use crate::dynamic::Value;
-use crate::{Metadata, config::Config, error::Error};
+use crate::{Metadata, config::Config};
+use crate::error::ExtrinsicError;
 use frame_decode::extrinsics::ExtrinsicExtensions;
 use scale_decode::DecodeAsType;
 
@@ -50,7 +51,7 @@ impl<'a, T: Config> ExtrinsicTransactionExtensions<'a, T> {
     /// Searches through all signed extensions to find a specific one.
     /// If the Signed Extension is not found `Ok(None)` is returned.
     /// If the Signed Extension is found but decoding failed `Err(_)` is returned.
-    pub fn find<S: TransactionExtension<T>>(&self) -> Result<Option<S::Decoded>, Error> {
+    pub fn find<S: TransactionExtension<T>>(&self) -> Result<Option<S::Decoded>, ExtrinsicError> {
         for ext in self.iter() {
             match ext.as_signed_extension::<S>() {
                 // We found a match; return it:
@@ -117,12 +118,15 @@ impl<'a, T: Config> ExtrinsicTransactionExtension<'a, T> {
     }
 
     /// Signed Extension as a [`scale_value::Value`]
-    pub fn value(&self) -> Result<Value<u32>, Error> {
+    pub fn value(&self) -> Result<Value<u32>, ExtrinsicError> {
         let value = scale_value::scale::decode_as_type(
             &mut &self.bytes[..],
             self.ty_id,
             self.metadata.types(),
-        )?;
+        ).map_err(|e| ExtrinsicError::CouldNotDecodeTransactionExtension {
+            name: self.identifier.to_owned(),
+            error: e.into()
+        })?;
         Ok(value)
     }
 
@@ -131,15 +135,22 @@ impl<'a, T: Config> ExtrinsicTransactionExtension<'a, T> {
     /// decode with.
     pub fn as_signed_extension<S: TransactionExtension<T>>(
         &self,
-    ) -> Result<Option<S::Decoded>, Error> {
+    ) -> Result<Option<S::Decoded>, ExtrinsicError> {
         if !S::matches(self.identifier, self.ty_id, self.metadata.types()) {
             return Ok(None);
         }
         self.as_type::<S::Decoded>().map(Some)
     }
 
-    fn as_type<E: DecodeAsType>(&self) -> Result<E, Error> {
-        let value = E::decode_as_type(&mut &self.bytes[..], self.ty_id, self.metadata.types())?;
+    fn as_type<E: DecodeAsType>(&self) -> Result<E, ExtrinsicError> {
+        let value = E::decode_as_type(
+            &mut &self.bytes[..], 
+            self.ty_id, 
+            self.metadata.types()
+        ).map_err(|e| ExtrinsicError::CouldNotDecodeTransactionExtension {
+            name: self.identifier.to_owned(),
+            error: e.into()
+        })?;
         Ok(value)
     }
 }

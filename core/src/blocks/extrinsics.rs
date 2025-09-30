@@ -2,12 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::BlockError;
 use crate::blocks::extrinsic_transaction_extensions::ExtrinsicTransactionExtensions;
 use crate::{
     Metadata,
     config::{Config, HashFor, Hasher},
-    error::{Error, MetadataError},
+    error::ExtrinsicError,
 };
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -29,7 +28,7 @@ impl<T: Config> Extrinsics<T> {
     /// Instantiate a new [`Extrinsics`] object, given a vector containing
     /// each extrinsic hash (in the form of bytes) and some metadata that
     /// we'll use to decode them.
-    pub fn decode_from(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, Error> {
+    pub fn decode_from(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, ExtrinsicError> {
         let hasher = T::Hasher::new(&metadata);
         let extrinsics = extrinsics
             .into_iter()
@@ -43,7 +42,7 @@ impl<T: Config> Extrinsics<T> {
                     &metadata,
                     metadata.types(),
                 )
-                .map_err(|error| BlockError::ExtrinsicDecodeError {
+                .map_err(|error| ExtrinsicError::ExtrinsicDecodeError {
                     extrinsic_index,
                     error,
                 })?
@@ -51,7 +50,7 @@ impl<T: Config> Extrinsics<T> {
 
                 // We didn't consume all bytes, so decoding probably failed.
                 if !cursor.is_empty() {
-                    return Err(BlockError::LeftoverBytes {
+                    return Err(ExtrinsicError::LeftoverBytes {
                         extrinsic_index,
                         num_leftover_bytes: cursor.len(),
                     }
@@ -60,7 +59,7 @@ impl<T: Config> Extrinsics<T> {
 
                 Ok(Arc::new((decoded_info, bytes)))
             })
-            .collect::<Result<_, Error>>()?;
+            .collect::<Result<_, ExtrinsicError>>()?;
 
         Ok(Self {
             extrinsics,
@@ -105,7 +104,7 @@ impl<T: Config> Extrinsics<T> {
     /// If an error occurs, all subsequent iterations return `None`.
     pub fn find<E: StaticExtrinsic>(
         &self,
-    ) -> impl Iterator<Item = Result<FoundExtrinsic<T, E>, Error>> {
+    ) -> impl Iterator<Item = Result<FoundExtrinsic<T, E>, ExtrinsicError>> {
         self.iter().filter_map(|details| {
             match details.as_extrinsic::<E>() {
                 // Failed to decode extrinsic:
@@ -119,18 +118,18 @@ impl<T: Config> Extrinsics<T> {
 
     /// Iterate through the extrinsics using metadata to dynamically decode and skip
     /// them, and return the first extrinsic found which decodes to the provided `E` type.
-    pub fn find_first<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, E>>, Error> {
+    pub fn find_first<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, E>>, ExtrinsicError> {
         self.find::<E>().next().transpose()
     }
 
     /// Iterate through the extrinsics using metadata to dynamically decode and skip
     /// them, and return the last extrinsic found which decodes to the provided `Ev` type.
-    pub fn find_last<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, E>>, Error> {
+    pub fn find_last<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, E>>, ExtrinsicError> {
         self.find::<E>().last().transpose()
     }
 
     /// Find an extrinsics that decodes to the type provided. Returns true if it was found.
-    pub fn has<E: StaticExtrinsic>(&self) -> Result<bool, Error> {
+    pub fn has<E: StaticExtrinsic>(&self) -> Result<bool, ExtrinsicError> {
         Ok(self.find::<E>().next().transpose()?.is_some())
     }
 }
@@ -268,56 +267,57 @@ where
     }
 
     /// The name of the pallet from whence the extrinsic originated.
-    pub fn pallet_name(&self) -> Result<&str, Error> {
-        Ok(self.extrinsic_metadata()?.pallet.name())
+    pub fn pallet_name(&self) -> &str {
+        self.decoded_info().pallet_name()
     }
 
     /// The name of the call (ie the name of the variant that it corresponds to).
-    pub fn variant_name(&self) -> Result<&str, Error> {
-        Ok(&self.extrinsic_metadata()?.variant.name)
-    }
-
-    /// Fetch the metadata for this extrinsic.
-    pub fn extrinsic_metadata(&self) -> Result<ExtrinsicMetadataDetails<'_>, Error> {
-        let pallet = self.metadata.pallet_by_index_err(self.pallet_index())?;
-        let variant = pallet
-            .call_variant_by_index(self.variant_index())
-            .ok_or_else(|| MetadataError::VariantIndexNotFound(self.variant_index()))?;
-
-        Ok(ExtrinsicMetadataDetails { pallet, variant })
+    pub fn call_name(&self) -> &str {
+        self.decoded_info().call_name()
     }
 
     /// Decode and provide the extrinsic fields back in the form of a [`scale_value::Composite`]
     /// type which represents the named or unnamed fields that were present in the extrinsic.
-    pub fn field_values(&self) -> Result<scale_value::Composite<u32>, Error> {
+    pub fn field_values(&self) -> Result<scale_value::Composite<u32>, ExtrinsicError> {
         let bytes = &mut self.field_bytes();
-        let extrinsic_metadata = self.extrinsic_metadata()?;
-
-        let mut fields = extrinsic_metadata
-            .variant
-            .fields
-            .iter()
-            .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
+        let mut fields = self.decoded_info().call_data().map(|d| {
+            let name = if d.name().is_empty() {
+                None
+            } else {
+                Some(d.name())
+            };
+            scale_decode::Field::new(*d.ty(), name)
+        });
         let decoded =
-            scale_value::scale::decode_as_fields(bytes, &mut fields, self.metadata.types())?;
+            scale_value::scale::decode_as_fields(bytes, &mut fields, self.metadata.types())
+                .map_err(|e| ExtrinsicError::CannotDecodeFields {
+                    extrinsic_index: self.index as usize,
+                    error: e.into()
+                })?;
 
         Ok(decoded)
     }
 
     /// Attempt to decode these [`ExtrinsicDetails`] into a type representing the extrinsic fields.
     /// Such types are exposed in the codegen as `pallet_name::calls::types::CallName` types.
-    pub fn as_extrinsic<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
-        let extrinsic_metadata = self.extrinsic_metadata()?;
-        if extrinsic_metadata.pallet.name() == E::PALLET
-            && extrinsic_metadata.variant.name == E::CALL
+    pub fn as_extrinsic<E: StaticExtrinsic>(&self) -> Result<Option<E>, ExtrinsicError> {
+        if self.decoded_info().pallet_name() == E::PALLET
+            && self.decoded_info().call_name() == E::CALL
         {
-            let mut fields = extrinsic_metadata
-                .variant
-                .fields
-                .iter()
-                .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
+            let mut fields = self.decoded_info().call_data().map(|d| {
+                let name = if d.name().is_empty() {
+                    None
+                } else {
+                    Some(d.name())
+                };
+                scale_decode::Field::new(*d.ty(), name)
+            });
             let decoded =
-                E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())?;
+                E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())
+                    .map_err(|e| ExtrinsicError::CannotDecodeFields {
+                        extrinsic_index: self.index as usize,
+                        error: e.into()
+                    })?;
             Ok(Some(decoded))
         } else {
             Ok(None)
@@ -327,12 +327,15 @@ where
     /// Attempt to decode these [`ExtrinsicDetails`] into an outer call enum type (which includes
     /// the pallet and extrinsic enum variants as well as the extrinsic fields). A compatible
     /// type for this is exposed via static codegen as a root level `Call` type.
-    pub fn as_root_extrinsic<E: DecodeAsType>(&self) -> Result<E, Error> {
+    pub fn as_root_extrinsic<E: DecodeAsType>(&self) -> Result<E, ExtrinsicError> {
         let decoded = E::decode_as_type(
             &mut &self.call_bytes()[..],
             self.metadata.outer_enums().call_enum_ty(),
             self.metadata.types(),
-        )?;
+        ).map_err(|e| ExtrinsicError::CannotDecodeIntoRootExtrinsic {
+            extrinsic_index: self.index as usize,
+            error: e.into()
+        })?;
 
         Ok(decoded)
     }
@@ -620,7 +623,7 @@ mod tests {
         assert_eq!(extrinsic.variant_index(), 2);
         assert_eq!(
             extrinsic
-                .variant_name()
+                .call_name()
                 .expect("Valid metadata contains variant name"),
             "TestCall"
         );

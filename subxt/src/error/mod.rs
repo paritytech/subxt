@@ -21,7 +21,7 @@ pub use dispatch_error::{
 pub use crate::metadata::Metadata;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
-pub use subxt_core::error::{ExtrinsicError, MetadataError, StorageAddressError};
+pub use subxt_core::error::{ExtrinsicError, MetadataError, StorageError};
 pub use subxt_metadata::TryFromError as MetadataTryFromError;
 
 /// The underlying error enum, generic over the type held by the `Runtime`
@@ -68,7 +68,7 @@ pub enum Error {
     Block(#[from] BlockError),
     /// An error encoding a storage address.
     #[error("Error encoding storage address: {0}")]
-    StorageAddress(#[from] StorageAddressError),
+    StorageAddress(#[from] StorageError),
     /// The bytes representing an error that we were unable to decode.
     #[error("An error occurred but it could not be decoded: {0:?}")]
     Unknown(Vec<u8>),
@@ -87,7 +87,7 @@ impl From<CoreError> for Error {
         match value {
             CoreError::Codec(e) => Error::Codec(e),
             CoreError::Metadata(e) => Error::Metadata(e),
-            CoreError::StorageAddress(e) => Error::StorageAddress(e),
+            CoreError::StorageError(e) => Error::StorageAddress(e),
             CoreError::Decode(e) => Error::Decode(e),
             CoreError::Encode(e) => Error::Encode(e),
             CoreError::Extrinsic(e) => Error::Extrinsic(e),

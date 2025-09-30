@@ -6,7 +6,7 @@ use crate::{
     backend::{BackendExt, BlockRef},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor},
-    error::{Error, MetadataError, StorageAddressError},
+    error::{Error, MetadataError, StorageError},
     metadata::DecodeWithMetadata,
     storage::storage_value::StorageValue,
 };
@@ -542,12 +542,12 @@ where
 }
 
 /// Strips the first 32 bytes (16 for the pallet hash, 16 for the entry hash) off some storage address bytes.
-fn strip_storage_address_root_bytes(address_bytes: &mut &[u8]) -> Result<(), StorageAddressError> {
+fn strip_storage_address_root_bytes(address_bytes: &mut &[u8]) -> Result<(), StorageError> {
     if address_bytes.len() >= 32 {
         *address_bytes = &address_bytes[32..];
         Ok(())
     } else {
-        Err(StorageAddressError::UnexpectedAddressBytes)
+        Err(StorageError::UnexpectedAddressBytes)
     }
 }
 

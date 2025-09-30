@@ -42,24 +42,24 @@ pub mod address;
 
 use address::Address;
 use alloc::borrow::ToOwned;
-
-use crate::{Error, Metadata, error::MetadataError, metadata::DecodeWithMetadata};
+use crate::{Metadata, metadata::DecodeWithMetadata};
+use crate::error::ConstantsError;
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
 /// that the shape of the constant value is the same as the shape expected by the static address.
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<(), Error> {
+pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<(), ConstantsError> {
     if let Some(actual_hash) = address.validation_hash() {
         let expected_hash = metadata
             .pallet_by_name_err(address.pallet_name())?
             .constant_hash(address.constant_name())
             .ok_or_else(|| {
-                MetadataError::ConstantNameNotFound(address.constant_name().to_owned())
+                ConstantsError::ConstantNameNotFound(address.constant_name().to_owned())
             })?;
         if actual_hash != expected_hash {
-            return Err(MetadataError::IncompatibleCodegen.into());
+            return Err(ConstantsError::IncompatibleCodegen);
         }
     }
     Ok(())
@@ -67,7 +67,7 @@ pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<()
 
 /// Fetch a constant out of the metadata given a constant address. If the `address` has been
 /// statically generated, this will validate that the constant shape is as expected, too.
-pub fn get<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<Addr::Target, Error> {
+pub fn get<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<Addr::Target, ConstantsError> {
     // 1. Validate constant shape if hash given:
     validate(address, metadata)?;
 
@@ -75,7 +75,7 @@ pub fn get<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<Addr::T
     let constant = metadata
         .pallet_by_name_err(address.pallet_name())?
         .constant_by_name(address.constant_name())
-        .ok_or_else(|| MetadataError::ConstantNameNotFound(address.constant_name().to_owned()))?;
+        .ok_or_else(|| ConstantsError::ConstantNameNotFound(address.constant_name().to_owned()))?;
     let value = <Addr::Target as DecodeWithMetadata>::decode_with_metadata(
         &mut constant.value(),
         constant.ty(),

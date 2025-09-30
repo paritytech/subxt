@@ -7,9 +7,10 @@
 use crate::dynamic::DecodedValueThunk;
 use crate::metadata::DecodeWithMetadata;
 use derive_where::derive_where;
+use crate::utils::YesNo;
 
 /// Use this with [`Address::IsDecodable`].
-pub use crate::utils::Yes;
+pub use crate::utils::{Yes, No};
 
 /// This represents the address of a custom value in the metadata.
 /// Anything that implements it can be used to fetch custom values from the metadata.
@@ -18,8 +19,8 @@ pub trait Address {
     /// The type of the custom value.
     type Target: DecodeWithMetadata;
     /// Should be set to `Yes` for Dynamic values and static values that have a valid type.
-    /// Should be `()` for custom values, that have an invalid type id.
-    type IsDecodable;
+    /// Should be `No` for custom values, that have an invalid type id.
+    type IsDecodable: YesNo;
 
     /// the name (key) by which the custom value can be accessed in the metadata.
     fn name(&self) -> &str;
@@ -68,9 +69,9 @@ impl<ReturnTy, IsDecodable> StaticAddress<ReturnTy, IsDecodable> {
     }
 }
 
-impl<R: DecodeWithMetadata, Y> Address for StaticAddress<R, Y> {
-    type Target = R;
-    type IsDecodable = Y;
+impl<Target: DecodeWithMetadata, IsDecodable: YesNo> Address for StaticAddress<Target, IsDecodable> {
+    type Target = Target;
+    type IsDecodable = IsDecodable;
 
     fn name(&self) -> &str {
         self.name

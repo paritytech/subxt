@@ -47,7 +47,7 @@ pub mod address;
 
 use crate::{
     Error, Metadata,
-    error::{MetadataError, StorageAddressError},
+    error::{MetadataError, StorageError},
 };
 use address::Address;
 use alloc::vec::Vec;
@@ -94,7 +94,7 @@ pub fn get_address_bytes<Addr: Address, Keys: EqualOrPrefixOf<Addr::KeyParts>>(
         &**metadata,
         metadata.types(),
     )
-    .map_err(|e| StorageAddressError::StorageKeyEncodeError(e).into())
+    .map_err(|e| StorageError::StorageKeyEncodeError(e).into())
 }
 
 /// Given a storage address and some metadata, this encodes the root of the address (ie the pallet
@@ -120,7 +120,7 @@ pub fn decode_value<Addr: Address>(
         metadata.types(),
         Addr::Value::into_visitor(),
     )
-    .map_err(|e| StorageAddressError::StorageValueDecodeError(e).into())
+    .map_err(|e| StorageError::StorageValueDecodeError(e).into())
 }
 
 /// Return the default value at a given storage address if one is available, or None otherwise.
@@ -130,13 +130,13 @@ pub fn default_value<Addr: Address>(
 ) -> Result<Option<Addr::Value>, Error> {
     let storage_info = metadata
         .storage_info(address.pallet_name(), address.entry_name())
-        .map_err(|e| StorageAddressError::StorageInfoError(e.into_owned()))?;
+        .map_err(|e| StorageError::StorageInfoError(e.into_owned()))?;
     let value = frame_decode::storage::decode_default_storage_value_with_info(
         &storage_info,
         metadata.types(),
         Addr::Value::into_visitor(),
     )
-    .map_err(|e| StorageAddressError::StorageValueDecodeError(e))?;
+    .map_err(|e| StorageError::StorageValueDecodeError(e))?;
 
     Ok(value)
 }
