@@ -15,8 +15,8 @@ use derive_where::derive_where;
 use futures::StreamExt;
 use scale_info::PortableRegistry;
 use std::{future::Future, marker::PhantomData};
-use subxt_core::storage::{address::Address, PrefixOf};
-use subxt_core::utils::{Maybe, Yes, No, YesNoMaybe};
+use subxt_core::storage::{address::Address, PrefixOf, EqualOrPrefixOf};
+use subxt_core::utils::{Maybe, Yes, YesMaybe};
 use subxt_core::Metadata;
 use frame_decode::storage::{IntoEncodableValues, StorageInfo};
 use std::borrow::Cow;
@@ -61,7 +61,7 @@ where
     T: Config,
     Client: OfflineClientT<T>,
 {
-    pub fn entry<Addr: Address>(&'_ self, address: Addr) -> Result<StorageEntryClient<'_, T, Client, Addr, Addr::IsMap>, Error> {
+    pub fn entry<Addr: Address>(&'_ self, address: Addr) -> Result<StorageEntryClient<'_, T, Client, Addr, Addr::IsPlain>, Error> {
         subxt_core::storage::validate(&address, &self.client.metadata())?;
 
         use frame_decode::storage::StorageTypeInfo;
@@ -71,174 +71,51 @@ where
             .metadata()
             .storage_info(address.pallet_name(), address.entry_name())?;
 
-        let value = if info.keys.is_empty() {
-            StorageEntryClientValue::Plain(StorageEntryPlainClient { 
-                client: self.client.clone(), 
-                block_ref: self.block_ref.clone(), 
-                address,
-                info,
-                types,
-                _marker: core::marker::PhantomData 
-            })
-        } else {
-            StorageEntryClientValue::Map(StorageEntryMapClient { 
-                client: self.client.clone(), 
-                block_ref: self.block_ref.clone(), 
-                address,
-                info,
-                types,
-                _marker: core::marker::PhantomData 
-            })
-        };
-
         Ok(StorageEntryClient {
-            value,
-            marker: core::marker::PhantomData
+            client: self.client.clone(), 
+            block_ref: self.block_ref.clone(), 
+            address,
+            info,
+            types,
+            _marker: core::marker::PhantomData 
         })
     }
 }
 
 /// This represents a single storage entry (be it a plain value or map) 
 /// and the operations that can be performed on it.
-pub struct StorageEntryClient<'atblock, T: Config, Client, Addr: Address, IsMap> {
-    value: StorageEntryClientValue<'atblock, T, Client, Addr>,
-    marker: core::marker::PhantomData<IsMap>,
-}
-
-enum StorageEntryClientValue<'atblock, T: Config, Client, Addr: Address> {
-    Plain(StorageEntryPlainClient<'atblock, T, Client, Addr, Addr::HasDefaultValue>),
-    Map(StorageEntryMapClient<'atblock, T, Client, Addr, Addr::HasDefaultValue>),
-}
-
-impl <'atblock, T: Config, Client, Addr: Address, IsMap> StorageEntryClient<'atblock, T, Client, Addr, IsMap> {
-    pub fn pallet_name(&self) -> &str {
-        match &self.value {
-            StorageEntryClientValue::Plain(client) => client.pallet_name(),
-            StorageEntryClientValue::Map(client) => client.pallet_name(),
-        }
-    }
-
-    pub fn entry_name(&self) -> &str {
-        match &self.value {
-            StorageEntryClientValue::Plain(client) => client.entry_name(),
-            StorageEntryClientValue::Map(client) => client.entry_name(),
-        }
-    }
-
-    /// Is the storage entry a plain value?
-    pub fn is_plain(&self) -> bool {
-        matches!(self.value, StorageEntryClientValue::Plain(_))
-    }
-
-    /// Is the storage entry a map?
-    pub fn is_map(&self) -> bool {
-        matches!(self.value, StorageEntryClientValue::Map(_))
-    }
-
-    /// Return the default value for this storage entry, if there is one. Returns `None` if there
-    /// is no default value.
-    pub fn default_value(&self) -> Option<StorageValue<'_, 'atblock, Addr::Value>> {
-        match &self.value {
-            StorageEntryClientValue::Plain(client) => client.default_value(),
-            StorageEntryClientValue::Map(client) => client.default_value(),
-        }
-    }
-}
-
-// When IsMap = Yes, we have statically asserted that the entry is a map. This can only be false
-// if we skip validation of a static call, and the storage entry, while still present, has changed from
-// plain to map.
-impl <'atblock, T: Config, Client, Addr: Address> StorageEntryClient<'atblock, T, Client, Addr, Yes> {
-    pub fn into_map(self) -> StorageEntryMapClient<'atblock, T, Client, Addr, Addr::HasDefaultValue> {
-        match self.value {
-            StorageEntryClientValue::Map(this) => this,
-            StorageEntryClientValue::Plain(this) => {
-                tracing::warn!("StorageEntryClient::into_map called on a plain storage value");
-                StorageEntryMapClient {
-                    client: this.client,
-                    block_ref: this.block_ref,
-                    address: this.address,
-                    info: this.info,
-                    types: this.types,
-                    _marker: this._marker
-                }
-            }
-        }
-    }
-}
-
-// When IsMap = No, we have statically asserted that the entry is a plain value. This can only be false
-// if we skip validation of a static call, and the storage entry, while still present, has changed from
-// map to plain value.
-impl <'atblock, T: Config, Client, Addr: Address> StorageEntryClient<'atblock, T, Client, Addr, No> {
-    pub fn into_plain(self) -> StorageEntryPlainClient<'atblock, T, Client, Addr, Addr::HasDefaultValue> {
-        match self.value {
-            StorageEntryClientValue::Plain(this) => this,
-            StorageEntryClientValue::Map(this) => {
-                tracing::warn!("StorageEntryClient::into_plain called on a map storage value");
-                StorageEntryPlainClient {
-                    client: this.client,
-                    block_ref: this.block_ref,
-                    address: this.address,
-                    info: this.info,
-                    types: this.types,
-                    _marker: this._marker
-                }
-            }
-        }
-    }
-}
-
-// Regardless, we can do the "safe" thing and try to convert the entry into a map or plain entry.
-impl <'atblock, T: Config, Client, Addr: Address> StorageEntryClient<'atblock, T, Client, Addr, Maybe> {
-    // TODO: In subxt-historic we return Result, not Option, with "StorageEntryIsNotAMapValue" like err.
-    pub fn into_map(self) -> Option<StorageEntryMapClient<'atblock, T, Client, Addr, Addr::HasDefaultValue>> {
-        match self.value {
-            StorageEntryClientValue::Map(client) => Some(client),
-            StorageEntryClientValue::Plain(_) => None,
-        }
-    }
-
-    pub fn into_plain(self) -> Option<StorageEntryPlainClient<'atblock, T, Client, Addr, Addr::HasDefaultValue>> {
-        // TODO: In subxt-historic we return Result, not Option, with "StorageEntryIsNotAPlainValue" like err.
-        match self.value {
-            StorageEntryClientValue::Plain(client) => Some(client),
-            StorageEntryClientValue::Map(_) => None,
-        }
-    }
-}
-
-/// This represents a plain storage value at some location.
-pub struct StorageEntryPlainClient<'atblock, T: Config, Client, Addr, HasDefaultValue> {
+pub struct StorageEntryClient<'atblock, T: Config, Client, Addr, IsPlain> {
     client: Client,
     block_ref: BlockRef<HashFor<T>>,
     address: Addr,
     info: StorageInfo<'atblock, u32>,
     types: &'atblock PortableRegistry,
-    _marker: PhantomData<(T, HasDefaultValue)>,
+    _marker: PhantomData<(T, IsPlain)>,
 }
 
-impl <'atblock, T, Client, Addr, HasDefaultValue> StorageEntryPlainClient<'atblock, T, Client, Addr, HasDefaultValue> 
+impl <'atblock, T, Client, Addr, IsPlain> StorageEntryClient<'atblock, T, Client, Addr, IsPlain> 
 where
     T: Config,
     Addr: Address,
 {
-    /// Get the pallet name.
+    /// Name of the pallet containing this storage entry.
     pub fn pallet_name(&self) -> &str {
         self.address.pallet_name()
     }
 
-    /// Get the storage entry name.
+    /// Name of the storage entry.
     pub fn entry_name(&self) -> &str {
         self.address.entry_name()
     }
 
-    /// Return the key used to retrieve this storage value.
-    pub fn key(&self) -> [u8; 32] {
-        frame_decode::storage::encode_storage_key_prefix(
-            self.address.pallet_name(),
-            self.address.entry_name()
-        )
+    /// Is the storage entry a plain value?
+    pub fn is_plain(&self) -> bool {
+        self.info.keys.is_empty()
+    }
+
+    /// Is the storage entry a map?
+    pub fn is_map(&self) -> bool {
+        !self.is_plain()
     }
 
     /// Return the default value for this storage entry, if there is one. Returns `None` if there
@@ -252,9 +129,8 @@ where
     }
 }
 
-// When HasDefaultValue = Yes, we expect there to exist a valid default value and will use that
-// if we fetch an entry and get nothing back.
-impl <'atblock, T, Client, Addr> StorageEntryPlainClient<'atblock, T, Client, Addr, Yes> 
+// Plain values get a fetch method with no extra arguments.
+impl <'atblock, T, Client, Addr> StorageEntryClient<'atblock, T, Client, Addr, Yes> 
 where
     T: Config,
     Addr: Address,
@@ -275,64 +151,29 @@ where
 
         Ok(value)
     }
-}
 
-impl <'atblock, T, Client, Addr, HasDefaultValue> StorageEntryPlainClient<'atblock, T, Client, Addr, HasDefaultValue> 
-where
-    T: Config,
-    Addr: Address,
-    Client: OnlineClientT<T>
-{
     pub async fn try_fetch(&self) -> Result<Option<StorageValue<'_, 'atblock, Addr::Value>>, Error> {
         let value = self.client
             .backend()
-            .storage_fetch_value(self.key().to_vec(), self.block_ref.hash())
+            .storage_fetch_value(self.key_prefix().to_vec(), self.block_ref.hash())
             .await?
             .map(|bytes| StorageValue::new(&self.info, self.types, bytes));
 
         Ok(value)
     }
-}
 
-/// This represents a map of storage values at some location.
-pub struct StorageEntryMapClient<'atblock, T: Config, Client, Addr, HasDefaultValue> {
-    client: Client,
-    block_ref: BlockRef<HashFor<T>>,
-    address: Addr,
-    info: StorageInfo<'atblock, u32>,
-    types: &'atblock PortableRegistry,
-    _marker: PhantomData<(T, HasDefaultValue)>,
-}
-
-impl <'atblock, T, Client, Addr, HasDefaultValue> StorageEntryMapClient<'atblock, T, Client, Addr, HasDefaultValue> 
-where
-    T: Config,
-    Addr: Address,
-{
-    /// Get the pallet name.
-    pub fn pallet_name(&self) -> &str {
-        self.address.pallet_name()
-    }
-
-    /// Get the storage entry name.
-    pub fn entry_name(&self) -> &str {
-        self.address.entry_name()
-    }
-
-    /// Return the default value for this storage entry, if there is one. Returns `None` if there
-    /// is no default value.
-    pub fn default_value(&self) -> Option<StorageValue<'_, 'atblock, Addr::Value>> {
-        if let Some(default_bytes) = self.info.default_value.as_deref() {
-            Some(StorageValue::new(&self.info, self.types, Cow::Borrowed(default_bytes)))
-        } else {
-            None
-        }
+    /// The keys for plain storage values are always 32 byte hashes. 
+    pub fn key_prefix(&self) -> [u8; 32] {
+        frame_decode::storage::encode_storage_key_prefix(
+            self.address.pallet_name(),
+            self.address.entry_name()
+        )    
     }
 }
 
 // When HasDefaultValue = Yes, we expect there to exist a valid default value and will use that
 // if we fetch an entry and get nothing back.
-impl <'atblock, T, Client, Addr> StorageEntryMapClient<'atblock, T, Client, Addr, Yes> 
+impl <'atblock, T, Client, Addr> StorageEntryClient<'atblock, T, Client, Addr, Maybe> 
 where
     T: Config,
     Addr: Address,
@@ -352,14 +193,7 @@ where
 
         Ok(value)
     }
-}
-
-impl <'atblock, T, Client, Addr, HasDefaultValue> StorageEntryMapClient<'atblock, T, Client, Addr, HasDefaultValue> 
-where
-    T: Config,
-    Addr: Address,
-    Client: OnlineClientT<T>
-{
+    
     pub async fn try_fetch(&self, keys: Addr::KeyParts) -> Result<Option<StorageValue<'_, 'atblock, Addr::Value>>, Error> {    
         if keys.num_encodable_values() != self.info.keys.len() {
             // This shouldn't be possible in static cases but if Vec<Value> is keys then we need to be checking.
@@ -384,14 +218,17 @@ where
         Ok(value)
     }
 
-    pub async fn iter<Keys: PrefixOf<Addr::KeyParts>>(&self, keys: Keys) -> Result<StreamOf<Result<StorageEntry<'_, 'atblock, Addr>, Error>>, Error> {
-        if keys.num_encodable_values() != self.info.keys.len() {
+    pub async fn iter<Keys: PrefixOf<Addr::KeyParts>>(
+        &self, 
+        keys: Keys
+    ) -> Result<impl futures::Stream<Item = Result<StorageEntry<'_, 'atblock, Addr>, Error>>, Error> {
+        if keys.num_encodable_values() >= self.info.keys.len() {
             // This shouldn't be possible in static cases but if Vec<Value> is keys then we need to be checking.
             todo!("Error: wrong number of keys provided.")
         }
 
         let block_hash = self.block_ref.hash();
-        let key_bytes = self.key(keys)?;
+        let key_bytes = self.key_from(keys)?;
         let info = &self.info;
         let types = self.types;
 
@@ -408,10 +245,28 @@ where
                 Ok(StorageEntry::new(info, types, kv.key, Cow::Owned(kv.value)))
             });
 
-        Ok(StreamOf::new(Box::pin(stream)))
+        Ok(Box::pin(stream))
     }
 
-    fn key<Keys: PrefixOf<Addr::KeyParts>>(&self, keys: Keys) -> Result<Vec<u8>, Error> {
+    /// Keys for map values require additional values; you can provide [`Address::KeyParts`]
+    /// values to construct a complete key, or a prefix of these to construct a key that would
+    /// iterate over values.
+    pub fn key<Keys: EqualOrPrefixOf<Addr::KeyParts>>(&self, keys: Keys) -> Result<Vec<u8>, Error> {
+        self.key_from(keys)
+    }
+
+    /// The first 32 bytes of the storage entry key, which points to the entry but not necessarily
+    /// a single storage value (unless the entry is a plain value).
+    pub fn key_prefix(&self) -> [u8; 32] {
+        frame_decode::storage::encode_storage_key_prefix(
+            self.address.pallet_name(),
+            self.address.entry_name()
+        )    
+    }
+
+    // An internal function to generate keys, because owing to lack of specialisation, things that impl
+    // `EqualOrPrefixOf` don't also provably impl `PrefixOf`.
+    fn key_from<Keys: IntoEncodableValues>(&self, keys: Keys) -> Result<Vec<u8>, Error> {
         let key_bytes = frame_decode::storage::encode_storage_key_with_info(
             &self.address.pallet_name(),
             &self.address.entry_name(),

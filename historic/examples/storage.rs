@@ -21,8 +21,7 @@ async fn main() -> Result<(), Error> {
         // We'll work the account balances at the given block, for this example.
         let account_balances = client_at_block
             .storage()
-            .entry("System", "Account")?
-            .into_map()?;
+            .entry("System", "Account")?;
 
         // We can see the default value for this entry at this block, if one exists.
         if let Some(default_value) = account_balances.default_value() {

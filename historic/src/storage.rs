@@ -5,7 +5,7 @@ mod storage_value;
 
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::Config;
-use crate::error::{StorageEntryIsNotAMap, StorageEntryIsNotAPlainValue, StorageError};
+use crate::error::StorageError;
 use crate::storage::storage_info::with_info;
 use std::borrow::Cow;
 use storage_info::AnyStorageInfo;
@@ -54,23 +54,13 @@ where
             self.client.legacy_types(),
         )?;
 
-        if storage_info.is_map() {
-            Ok(StorageEntryClient::Map(StorageEntryMapClient {
-                client: self.client,
-                pallet_name,
-                entry_name,
-                info: storage_info,
-                marker: std::marker::PhantomData,
-            }))
-        } else {
-            Ok(StorageEntryClient::Plain(StorageEntryPlainClient {
-                client: self.client,
-                pallet_name,
-                entry_name,
-                info: storage_info,
-                marker: std::marker::PhantomData,
-            }))
-        }
+        Ok(StorageEntryClient {
+            client: self.client,
+            pallet_name,
+            entry_name,
+            info: storage_info,
+            marker: std::marker::PhantomData,
+        })
     }
 
     /// Iterate over all of the storage entries listed in the metadata for the current block. This does **not** include well known
@@ -122,11 +112,13 @@ where
     }
 }
 
-/// A client for working with a specific storage entry. This is an enum because the storage entry
-/// might be either a map or a plain value, and each has a different interface.
-pub enum StorageEntryClient<'atblock, Client, T> {
-    Plain(StorageEntryPlainClient<'atblock, Client, T>),
-    Map(StorageEntryMapClient<'atblock, Client, T>),
+/// A client for working with a specific storage entry.
+pub struct StorageEntryClient<'atblock, Client, T> {
+    client: &'atblock Client,
+    pallet_name: String,
+    entry_name: String,
+    info: AnyStorageInfo<'atblock>,
+    marker: std::marker::PhantomData<T>,
 }
 
 impl<'atblock, Client, T> StorageEntryClient<'atblock, Client, T>
@@ -136,82 +128,6 @@ where
 {
     /// Get the pallet name.
     pub fn pallet_name(&self) -> &str {
-        match self {
-            StorageEntryClient::Plain(client) => &client.pallet_name,
-            StorageEntryClient::Map(client) => &client.pallet_name,
-        }
-    }
-
-    /// Get the storage entry name.
-    pub fn entry_name(&self) -> &str {
-        match self {
-            StorageEntryClient::Plain(client) => &client.entry_name,
-            StorageEntryClient::Map(client) => &client.entry_name,
-        }
-    }
-
-    /// Is the storage entry a plain value?
-    pub fn is_plain(&self) -> bool {
-        matches!(self, StorageEntryClient::Plain(_))
-    }
-
-    /// Is the storage entry a map?
-    pub fn is_map(&self) -> bool {
-        matches!(self, StorageEntryClient::Map(_))
-    }
-
-    /// If this storage entry is a plain value, return the client for working with it. Else return an error.
-    pub fn into_plain(
-        self,
-    ) -> Result<StorageEntryPlainClient<'atblock, Client, T>, StorageEntryIsNotAPlainValue> {
-        match self {
-            StorageEntryClient::Plain(client) => Ok(client),
-            StorageEntryClient::Map(_) => Err(StorageEntryIsNotAPlainValue {
-                pallet_name: self.pallet_name().into(),
-                entry_name: self.entry_name().into(),
-            }),
-        }
-    }
-
-    /// If this storage entry is a map, return the client for working with it. Else return an error.
-    pub fn into_map(
-        self,
-    ) -> Result<StorageEntryMapClient<'atblock, Client, T>, StorageEntryIsNotAMap> {
-        match self {
-            StorageEntryClient::Plain(_) => Err(StorageEntryIsNotAMap {
-                pallet_name: self.pallet_name().into(),
-                entry_name: self.entry_name().into(),
-            }),
-            StorageEntryClient::Map(client) => Ok(client),
-        }
-    }
-
-    /// Return the default value for this storage entry, if there is one. Returns `None` if there
-    /// is no default value.
-    pub fn default_value(&self) -> Option<StorageValue<'_, 'atblock>> {
-        match self {
-            StorageEntryClient::Plain(client) => client.default_value(),
-            StorageEntryClient::Map(client) => client.default_value(),
-        }
-    }
-}
-
-/// A client for working with a plain storage entry.
-pub struct StorageEntryPlainClient<'atblock, Client, T> {
-    client: &'atblock Client,
-    pallet_name: String,
-    entry_name: String,
-    info: AnyStorageInfo<'atblock>,
-    marker: std::marker::PhantomData<T>,
-}
-
-impl<'atblock, Client, T> StorageEntryPlainClient<'atblock, Client, T>
-where
-    T: Config + 'atblock,
-    Client: OfflineClientAtBlockT<'atblock, T>,
-{
-    /// Get the pallet name.
-    pub fn pallet_name(&self) -> &str {
         &self.pallet_name
     }
 
@@ -220,66 +136,13 @@ where
         &self.entry_name
     }
 
-    /// Return the default value for this storage entry, if there is one. Returns `None` if there
-    /// is no default value.
-    pub fn default_value(&self) -> Option<StorageValue<'_, 'atblock>> {
-        with_info!(info = &self.info => {
-            info.info.default_value.as_ref().map(|default_value| {
-                StorageValue::new(&self.info, default_value.clone())
-            })
-        })
-    }
-}
-
-impl<'atblock, Client, T> StorageEntryPlainClient<'atblock, Client, T>
-where
-    T: Config + 'atblock,
-    Client: OnlineClientAtBlockT<'atblock, T>,
-{
-    /// Fetch the value for this storage entry. If no value exists and no default value is
-    /// set for this storage entry, then `None` will be returned.
-    pub async fn fetch(&self) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
-        let key_bytes = self.key();
-        let value = fetch(self.client, &key_bytes)
-            .await?
-            .map(|bytes| StorageValue::new(&self.info, Cow::Owned(bytes)))
-            .or_else(|| self.default_value());
-
-        Ok(value)
-    }
-
-    /// The key for this storage entry.
-    pub fn key(&self) -> [u8; 32] {
+    /// The key which points to this storage entry (but not necessarily any values within it).
+    pub fn key_prefix(&self) -> [u8; 32] {
         let pallet_name = &*self.pallet_name;
         let entry_name = &*self.entry_name;
 
         frame_decode::storage::encode_storage_key_prefix(pallet_name, entry_name)
     }
-}
-
-/// A client for working with a storage entry that is a map.
-pub struct StorageEntryMapClient<'atblock, Client, T> {
-    client: &'atblock Client,
-    pallet_name: String,
-    entry_name: String,
-    info: AnyStorageInfo<'atblock>,
-    marker: std::marker::PhantomData<T>,
-}
-
-impl<'atblock, Client, T> StorageEntryMapClient<'atblock, Client, T>
-where
-    T: Config + 'atblock,
-    Client: OfflineClientAtBlockT<'atblock, T>,
-{
-    /// Get the pallet name.
-    pub fn pallet_name(&self) -> &str {
-        &self.pallet_name
-    }
-
-    /// Get the storage entry name.
-    pub fn entry_name(&self) -> &str {
-        &self.entry_name
-    }
 
     /// Return the default value for this storage entry, if there is one. Returns `None` if there
     /// is no default value.
@@ -292,7 +155,7 @@ where
     }
 }
 
-impl<'atblock, Client, T> StorageEntryMapClient<'atblock, Client, T>
+impl<'atblock, Client, T> StorageEntryClient<'atblock, Client, T>
 where
     T: Config + 'atblock,
     Client: OnlineClientAtBlockT<'atblock, T>,
@@ -309,8 +172,9 @@ where
             info.info.keys.len()
         });
 
+        // For fetching, we need exactly as many keys as exist for a storage entry.
         if expected_num_keys != keys.num_encodable_values() {
-            return Err(StorageError::WrongNumberOfKeysProvided {
+            return Err(StorageError::WrongNumberOfKeysProvidedForFetch {
                 num_keys_provided: keys.num_encodable_values(),
                 num_keys_expected: expected_num_keys,
             });
@@ -337,6 +201,19 @@ where
         use subxt_rpcs::methods::chain_head::{
             ArchiveStorageEvent, StorageQuery, StorageQueryType,
         };
+
+        let expected_num_keys = with_info!(info = &self.info => {
+            info.info.keys.len()
+        });
+
+        // For iterating, we need at most one less key than the number that exists for a storage entry.
+        // TODO: The error message will be confusing if == keys are provided!
+        if keys.num_encodable_values() >= expected_num_keys {
+            return Err(StorageError::TooManyKeysProvidedForIter { 
+                num_keys_provided: keys.num_encodable_values(), 
+                max_keys_expected: expected_num_keys - 1 
+            });
+        }
 
         let block_hash = self.client.block_hash();
         let key_bytes = self.key(keys)?;

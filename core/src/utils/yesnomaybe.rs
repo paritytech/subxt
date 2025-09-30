@@ -6,26 +6,19 @@
 pub enum Yes {}
 /// A unit marker enum.
 pub enum Maybe {}
-/// A unit marker enum.
-pub enum No {}
 
-/// This is implemented for [`Yes`], [`No`] and [`Maybe`] and
+/// This is implemented for [`Yes`] and [`Maybe`] and
 /// allows us to check at runtime which of these types is present. 
-pub trait YesNoMaybe {
+pub trait YesMaybe {
     /// [`Yes`]
     fn is_yes() -> bool { false }
-    /// [`No`]
-    fn is_no() -> bool { false }
     /// [`Maybe`]
     fn is_maybe() -> bool { false }
 }
 
-impl YesNoMaybe for Yes {
+impl YesMaybe for Yes {
     fn is_yes() -> bool { true }
 }
-impl YesNoMaybe for No {
-    fn is_no() -> bool { true }
-}
-impl YesNoMaybe for Maybe {
+impl YesMaybe for Maybe {
     fn is_maybe() -> bool { true }
 }

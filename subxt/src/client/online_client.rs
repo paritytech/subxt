@@ -557,11 +557,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
             )));
         };
 
-        let client = client
-            .into_plain()
-            .expect("System.LastRuntimeUpgrade should always be a plain storage entry");
-
-        let value = match client.try_fetch().await {
+        let value = match client.try_fetch(()).await {
             Ok(Some(value)) => value,
             Ok(None) => return Some(Err(Error::Other(
                 "The storage item `system::lastRuntimeUpgrade` should always exist (2)".to_string(),
