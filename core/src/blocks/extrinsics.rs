@@ -516,9 +516,9 @@ mod tests {
         assert_matches!(
             result.err(),
             Some(
-                crate::error::ExtrinsicError::LeftoverBytes {
+                crate::error::ExtrinsicError::ExtrinsicDecodeError {
                     extrinsic_index: 0,
-                    num_leftover_bytes: _
+                    error: _
                 }
             )
         );
