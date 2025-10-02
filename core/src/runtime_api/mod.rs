@@ -43,9 +43,8 @@
 
 pub mod payload;
 
-use crate::error::{Error, MetadataError};
-use crate::metadata::{DecodeWithMetadata, Metadata};
-use alloc::borrow::ToOwned;
+use crate::error::{RuntimeApiError, MetadataError};
+use crate::metadata::Metadata;
 use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -55,7 +54,7 @@ use payload::Payload;
 /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
 /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
 /// the runtime API in question do not exist at all)
-pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), Error> {
+pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), RuntimeApiError> {
     let Some(static_hash) = payload.validation_hash() else {
         return Ok(());
     };
@@ -78,8 +77,16 @@ pub fn call_name<P: Payload>(payload: &P) -> String {
 }
 
 /// Return the encoded call args given a runtime API payload.
-pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>, Error> {
-    payload.encode_args(metadata)
+pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>, RuntimeApiError> {
+    let value = frame_decode::runtime_apis::encode_runtime_api_inputs(
+        payload.trait_name(),
+        payload.method_name(),
+        payload.args(),
+        metadata,
+        metadata.types()
+    ).map_err(RuntimeApiError::CouldNotEncodeInputs)?;
+
+    Ok(value)
 }
 
 /// Decode the value bytes at the location given by the provided runtime API payload.
@@ -87,17 +94,15 @@ pub fn decode_value<P: Payload>(
     bytes: &mut &[u8],
     payload: &P,
     metadata: &Metadata,
-) -> Result<P::ReturnType, Error> {
-    let api_method = metadata
-        .runtime_api_trait_by_name_err(payload.trait_name())?
-        .method_by_name(payload.method_name())
-        .ok_or_else(|| MetadataError::RuntimeMethodNotFound(payload.method_name().to_owned()))?;
-
-    let val = <P::ReturnType as DecodeWithMetadata>::decode_with_metadata(
-        &mut &bytes[..],
-        api_method.output_ty(),
+) -> Result<P::ReturnType, RuntimeApiError> {
+    let value = frame_decode::runtime_apis::decode_runtime_api_response(
+        payload.trait_name(),
+        payload.method_name(),
+        bytes,
         metadata,
-    )?;
+        metadata.types(),
+        P::ReturnType::into_visitor()
+    ).map_err(RuntimeApiError::CouldNotDecodeResponse)?;
 
-    Ok(val)
+    Ok(value)
 }

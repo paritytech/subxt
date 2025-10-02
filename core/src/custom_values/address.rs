@@ -4,23 +4,22 @@
 
 //! Construct addresses to access custom values with.
 
-use crate::dynamic::DecodedValueThunk;
-use crate::metadata::DecodeWithMetadata;
 use derive_where::derive_where;
-use crate::utils::YesNo;
+use scale_decode::DecodeAsType;
+use alloc::borrow::Cow;
 
 /// Use this with [`Address::IsDecodable`].
-pub use crate::utils::{Yes, No};
+pub use crate::utils::{No, Maybe, NoMaybe};
 
 /// This represents the address of a custom value in the metadata.
 /// Anything that implements it can be used to fetch custom values from the metadata.
 /// The trait is implemented by [`str`] for dynamic lookup and [`StaticAddress`] for static queries.
 pub trait Address {
     /// The type of the custom value.
-    type Target: DecodeWithMetadata;
+    type Target: DecodeAsType;
     /// Should be set to `Yes` for Dynamic values and static values that have a valid type.
     /// Should be `No` for custom values, that have an invalid type id.
-    type IsDecodable: YesNo;
+    type IsDecodable: NoMaybe;
 
     /// the name (key) by which the custom value can be accessed in the metadata.
     fn name(&self) -> &str;
@@ -31,31 +30,34 @@ pub trait Address {
     }
 }
 
-impl Address for str {
-    type Target = DecodedValueThunk;
-    type IsDecodable = Yes;
-
-    fn name(&self) -> &str {
-        self
-    }
-}
-
 /// A static address to a custom value.
 #[derive_where(Clone, Debug, PartialOrd, Ord, PartialEq, Eq)]
 pub struct StaticAddress<ReturnTy, IsDecodable> {
-    name: &'static str,
+    name: Cow<'static, str>,
     hash: Option<[u8; 32]>,
-    phantom: core::marker::PhantomData<(ReturnTy, IsDecodable)>,
+    marker: core::marker::PhantomData<(ReturnTy, IsDecodable)>,
 }
+
+/// A dynamic address to a custom value.
+pub type DynamicAddress<ReturnTy> = StaticAddress<ReturnTy, Maybe>;
 
 impl<ReturnTy, IsDecodable> StaticAddress<ReturnTy, IsDecodable> {
     #[doc(hidden)]
     /// Creates a new StaticAddress.
-    pub fn new_static(name: &'static str, hash: [u8; 32]) -> StaticAddress<ReturnTy, IsDecodable> {
-        StaticAddress::<ReturnTy, IsDecodable> {
-            name,
+    pub fn new_static(name: &'static str, hash: [u8; 32]) -> Self {
+        Self {
+            name: Cow::Borrowed(name),
             hash: Some(hash),
-            phantom: core::marker::PhantomData,
+            marker: core::marker::PhantomData,
+        }
+    }
+
+    /// Create a new [`StaticAddress`]
+    pub fn new(name: impl Into<Cow<'static, str>>) -> Self {
+        Self {
+            name: name.into(),
+            hash: None,
+            marker: core::marker::PhantomData,
         }
     }
 
@@ -64,20 +66,35 @@ impl<ReturnTy, IsDecodable> StaticAddress<ReturnTy, IsDecodable> {
         Self {
             name: self.name,
             hash: None,
-            phantom: self.phantom,
+            marker: self.marker,
         }
     }
 }
 
-impl<Target: DecodeWithMetadata, IsDecodable: YesNo> Address for StaticAddress<Target, IsDecodable> {
+impl<Target: DecodeAsType, IsDecodable: NoMaybe> Address for StaticAddress<Target, IsDecodable> {
     type Target = Target;
     type IsDecodable = IsDecodable;
 
     fn name(&self) -> &str {
-        self.name
+        &self.name
     }
 
     fn validation_hash(&self) -> Option<[u8; 32]> {
         self.hash
     }
+}
+
+// Support plain strings for looking up custom values (but prefer `dynamic` if you want to pick the return type)
+impl Address for &str {
+    type Target = scale_value::Value;
+    type IsDecodable = Maybe;
+
+    fn name(&self) -> &str {
+        self
+    }
+}
+
+/// Construct a new dynamic custom value lookup.
+pub fn dynamic<ReturnTy: DecodeAsType>(custom_value_name: impl Into<Cow<'static, str>>) -> DynamicAddress<ReturnTy> {
+    DynamicAddress::new(custom_value_name)
 }

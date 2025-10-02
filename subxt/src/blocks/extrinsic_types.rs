@@ -16,7 +16,7 @@ use subxt_core::blocks::{ExtrinsicDetails as CoreExtrinsicDetails, Extrinsics as
 
 // Re-export anything that's directly returned/used in the APIs below.
 pub use subxt_core::blocks::{
-    ExtrinsicMetadataDetails, ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions,
+    ExtrinsicMetadataDetails, ExtrinsicTransactionExtension, ExtrinsicExtrinsicParams,
     StaticExtrinsic,
 };
 
@@ -198,7 +198,7 @@ where
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::transaction_extensions()`].
-    pub fn transaction_extensions(&self) -> Option<ExtrinsicTransactionExtensions<'_, T>> {
+    pub fn transaction_extensions(&self) -> Option<ExtrinsicExtrinsicParams<'_, T>> {
         self.inner.transaction_extensions()
     }
 

@@ -31,7 +31,6 @@ pub mod custom_values;
 pub mod dynamic;
 pub mod error;
 pub mod events;
-pub mod metadata;
 pub mod runtime_api;
 pub mod storage;
 pub mod tx;
@@ -48,4 +47,8 @@ pub mod ext {
     pub use scale_decode;
     pub use scale_encode;
     pub use scale_value;
+}
+
+pub mod metadata {
+    pub use subxt_metadata::Metadata;
 }

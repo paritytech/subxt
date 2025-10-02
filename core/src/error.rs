@@ -28,7 +28,9 @@ pub enum Error {
     #[error(transparent)]
     Extrinsic(#[from] ExtrinsicError),
     #[error(transparent)]
-    Constants(#[from] ConstantsError),
+    Constant(#[from] ConstantError),
+    #[error(transparent)]
+    CustomValueError(CustomValueError)
 }
 
 // impl From<scale_decode::visitor::DecodeError> for Error {
@@ -91,15 +93,46 @@ pub enum MetadataError {
     CustomValueNameNotFound(String),
 }
 
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum RuntimeApiError {
+    #[error("The static Runtime API address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Failed to encode Runtime API inputs: {0}")]
+    CouldNotEncodeInputs(frame_decode::runtime_apis::RuntimeApiInputsEncodeError),
+    #[error("Failed to decode Runtime API: {0}")]
+    CouldNotDecodeResponse(frame_decode::runtime_apis::RuntimeApiDecodeError<u32>),
+}
+
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum CustomValueError {
+    #[error("The static custom value address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("The custom value '{0}' was not found")]
+    NotFound(String),
+    #[error("Failed to decode custom value: {0}")]
+    CouldNotDecodeCustomValue(frame_decode::custom_values::CustomValueDecodeError<u32>),
+}
+
 /// Something went wrong working with a constant.
 #[derive(Debug, DeriveError)]
 #[non_exhaustive]
 #[allow(missing_docs)]
-pub enum ConstantsError {
+pub enum ConstantError {
     #[error("The static constant address used is not compatible with the live chain")]
     IncompatibleCodegen,
-    #[error("Constant with name {0} not found in the live chain metadata")]
-    ConstantNameNotFound(String),
+    #[error("Can't find constant: pallet with name {0} not found")]
+    PalletNameNotFound(String),
+    #[error("Constant '{constant_name}' not found in pallet {pallet_name} in the live chain metadata")]
+    ConstantNameNotFound {
+        pallet_name: String,
+        constant_name: String
+    },
+    #[error("Failed to decode constant: {0}")]
+    CouldNotDecodeConstant(frame_decode::constants::ConstantDecodeError<u32>)
 }
 
 /// Something went wrong trying to encode or decode a storage address.
@@ -107,6 +140,15 @@ pub enum ConstantsError {
 #[non_exhaustive]
 #[allow(missing_docs)]
 pub enum StorageError {
+    #[error("The static storage address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Can't find storage value: pallet with name {0} not found")]
+    PalletNameNotFound(String),
+    #[error("Storage entry '{entry_name}' not found in pallet {pallet_name} in the live chain metadata")]
+    StorageEntryNotFound {
+        pallet_name: String,
+        entry_name: String
+    },
     #[error("Cannot obtain storage information from metadata: {0}")]
     StorageInfoError(frame_decode::storage::StorageInfoError<'static>),
     #[error("Cannot decode storage value: {0}")]
@@ -145,7 +187,7 @@ pub enum ExtrinsicError {
         /// Index of the extrinsic that failed to decode.
         extrinsic_index: usize,
         /// The decode error.
-        error: ExtrinsicDecodeError,
+        error: frame_decode::extrinsics::ExtrinsicDecodeError,
     },
     #[error("Failed to decode the fields of an extrinsic at index {extrinsic_index}: {error}")]
     CannotDecodeFields {
@@ -162,10 +204,6 @@ pub enum ExtrinsicError {
         error: scale_decode::Error
     }
 }
-
-/// An alias for [`frame_decode::extrinsics::ExtrinsicDecodeError`].
-///
-pub type ExtrinsicDecodeError = frame_decode::extrinsics::ExtrinsicDecodeError;
 
 /// An error that can be emitted when trying to construct an instance of [`crate::config::ExtrinsicParams`],
 /// encode data from the instance, or match on signed extensions.

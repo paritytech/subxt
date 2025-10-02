@@ -22,7 +22,7 @@ use alloc::vec::Vec;
 use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
 
-pub use yesnomaybe::{Yes, No, Maybe, YesMaybe, YesNo};
+pub use yesnomaybe::{Yes, No, Maybe, YesMaybe, NoMaybe, YesNo};
 pub use account_id::AccountId32;
 pub use account_id20::AccountId20;
 pub use era::Era;

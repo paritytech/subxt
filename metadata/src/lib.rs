@@ -39,6 +39,12 @@ use frame_decode::runtime_apis::{
 use frame_decode::view_functions::{
     ViewFunction, ViewFunctionInfo, ViewFunctionInfoError, ViewFunctionInput
 };
+use frame_decode::constants::{
+    ConstantInfo, ConstantInfoError, Constant
+};
+use frame_decode::custom_values::{
+    CustomValueInfo, CustomValueInfoError, CustomValue
+};
 
 use hashbrown::HashMap;
 use scale_info::{PortableRegistry, Variant, form::PortableForm};
@@ -253,6 +259,64 @@ impl frame_decode::view_functions::ViewFunctionTypeInfo for Metadata {
                     function_name: Cow::Borrowed(function.name())
                 }
             })
+        })
+    }
+}
+impl frame_decode::constants::ConstantTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn constant_info(
+        &self,
+        pallet_name: &str,
+        constant_name: &str,
+    ) -> Result<ConstantInfo<'_, Self::TypeId>, ConstantInfoError<'_>> {
+        let pallet = self.pallet_by_name("pallet_name")
+            .ok_or_else(|| ConstantInfoError::PalletNotFound { pallet_name: pallet_name.to_string() })?;
+        let constant = pallet.constant_by_name(constant_name)
+            .ok_or_else(|| ConstantInfoError::ConstantNotFound { pallet_name: Cow::Borrowed(pallet.name()), constant_name: constant_name.to_string() })?;
+
+        let info = ConstantInfo {
+            bytes: &constant.value,
+            type_id: constant.ty
+        };
+
+        Ok(info)
+    }
+
+    fn constants(&self) -> impl Iterator<Item = Constant<'_>> {
+        self.pallets().flat_map(|pallet| {
+            let pallet_name = pallet.name();
+            pallet.constants().map(|constant| {
+                Constant {
+                    pallet_name: Cow::Borrowed(pallet_name),
+                    constant_name: Cow::Borrowed(constant.name())
+                }
+            })
+        })
+    }
+}
+impl frame_decode::custom_values::CustomValueTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn custom_value_info(
+        &self,
+        name: &str,
+    ) -> Result<CustomValueInfo<'_, Self::TypeId>, CustomValueInfoError> {
+        let custom_value = self.custom()
+            .get(name)
+            .ok_or_else(|| CustomValueInfoError { not_found: name.to_string() })?;
+
+        let info = CustomValueInfo {
+            bytes: &custom_value.data,
+            type_id: custom_value.type_id
+        };
+
+        Ok(info)
+    }
+
+    fn custom_values(&self) -> impl Iterator<Item = CustomValue<'_>> {
+        self.custom.map.iter().map(|(name, _)| {
+            CustomValue { name: Cow::Borrowed(name) }
         })
     }
 }

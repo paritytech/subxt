@@ -33,26 +33,24 @@
 pub mod address;
 
 use crate::utils::Yes;
-use crate::{Error, Metadata, error::MetadataError, metadata::DecodeWithMetadata};
+use crate::{Metadata, error::CustomValueError};
 use address::Address;
 use alloc::vec::Vec;
+use frame_decode::custom_values::CustomValueTypeInfo;
 
 /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
 /// if the address is valid (or if it's not possible to check since the address has no validation hash).
 /// Returns an error if the address was not valid (wrong name, type or raw bytes)
-pub fn validate<Addr: Address + ?Sized>(address: &Addr, metadata: &Metadata) -> Result<(), Error> {
+pub fn validate<Addr: Address + ?Sized>(address: &Addr, metadata: &Metadata) -> Result<(), CustomValueError> {
     if let Some(actual_hash) = address.validation_hash() {
         let custom = metadata.custom();
         let custom_value = custom
             .get(address.name())
-            .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().into()))?;
+            .ok_or_else(|| CustomValueError::NotFound(address.name().into()))?;
         let expected_hash = custom_value.hash();
         if actual_hash != expected_hash {
-            return Err(MetadataError::IncompatibleCodegen.into());
+            return Err(CustomValueError::IncompatibleCodegen);
         }
-    }
-    if metadata.custom().get(address.name()).is_none() {
-        return Err(MetadataError::IncompatibleCodegen.into());
     }
     Ok(())
 }
@@ -62,17 +60,18 @@ pub fn validate<Addr: Address + ?Sized>(address: &Addr, metadata: &Metadata) -> 
 pub fn get<Addr: Address<IsDecodable = Yes> + ?Sized>(
     address: &Addr,
     metadata: &Metadata,
-) -> Result<Addr::Target, Error> {
+) -> Result<Addr::Target, CustomValueError> {
     // 1. Validate custom value shape if hash given:
     validate(address, metadata)?;
 
     // 2. Attempt to decode custom value:
-    let custom_value = metadata.custom_value_by_name_err(address.name())?;
-    let value = <Addr::Target as DecodeWithMetadata>::decode_with_metadata(
-        &mut custom_value.bytes(),
-        custom_value.type_id(),
+    let value = frame_decode::custom_values::decode_custom_value(
+        address.name(),
         metadata,
-    )?;
+        metadata.types(),
+        Addr::Target::into_visitor()
+    ).map_err(CustomValueError::CouldNotDecodeCustomValue)?;
+
     Ok(value)
 }
 
@@ -80,13 +79,14 @@ pub fn get<Addr: Address<IsDecodable = Yes> + ?Sized>(
 pub fn get_bytes<Addr: Address + ?Sized>(
     address: &Addr,
     metadata: &Metadata,
-) -> Result<Vec<u8>, Error> {
+) -> Result<Vec<u8>, CustomValueError> {
     // 1. Validate custom value shape if hash given:
     validate(address, metadata)?;
 
     // 2. Return the underlying bytes:
-    let custom_value = metadata.custom_value_by_name_err(address.name())?;
-    Ok(custom_value.bytes().to_vec())
+    let custom_value = metadata.custom_value_info(address.name())
+        .map_err(|e| CustomValueError::NotFound(e.not_found))?;
+    Ok(custom_value.bytes.to_vec())
 }
 
 #[cfg(test)]

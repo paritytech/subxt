@@ -40,3 +40,19 @@ impl YesMaybe for Yes {
 impl YesMaybe for Maybe {
     fn is_maybe() -> bool { true }
 }
+
+/// This is implemented for [`No`] and [`Maybe`] and
+/// allows us to check at runtime which of these types is present. 
+pub trait NoMaybe {
+    /// [`No`]
+    fn is_no() -> bool { false }
+    /// [`Maybe`]
+    fn is_maybe() -> bool { false }
+}
+
+impl NoMaybe for No {
+    fn is_no() -> bool { true }
+}
+impl NoMaybe for Maybe {
+    fn is_maybe() -> bool { true }
+}

@@ -45,10 +45,7 @@ mod prefix_of;
 
 pub mod address;
 
-use crate::{
-    Error, Metadata,
-    error::{MetadataError, StorageError},
-};
+use crate::{Metadata, error::StorageError};
 use address::Address;
 use alloc::vec::Vec;
 use frame_decode::storage::StorageTypeInfo;
@@ -61,7 +58,7 @@ pub use prefix_of::{ EqualOrPrefixOf, PrefixOf };
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<(), Error> {
+pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<(), StorageError> {
     let Some(hash) = address.validation_hash() else {
         return Ok(());
     };
@@ -69,15 +66,19 @@ pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<()
     let pallet_name = address.pallet_name();
     let entry_name = address.entry_name();
 
-    let pallet_metadata = metadata.pallet_by_name_err(pallet_name)?;
+    let pallet_metadata = metadata.pallet_by_name(pallet_name)
+        .ok_or_else(|| StorageError::PalletNameNotFound(pallet_name.to_string()))?;
+    let storage_hash = pallet_metadata.storage_hash(entry_name)
+        .ok_or_else(|| StorageError::StorageEntryNotFound {
+            pallet_name: pallet_name.to_string(),
+            entry_name: entry_name.to_string(),
+        })?;
 
-    let Some(expected_hash) = pallet_metadata.storage_hash(entry_name) else {
-        return Err(MetadataError::IncompatibleCodegen.into());
-    };
-    if expected_hash != hash {
-        return Err(MetadataError::IncompatibleCodegen.into());
+    if storage_hash != hash {
+        Err(StorageError::IncompatibleCodegen)
+    } else {
+        Ok(())
     }
-    Ok(())
 }
 
 /// Given a storage address and some metadata, this encodes the address into bytes which can be
@@ -86,7 +87,7 @@ pub fn get_address_bytes<Addr: Address, Keys: EqualOrPrefixOf<Addr::KeyParts>>(
     address: &Addr,
     metadata: &Metadata,
     keys: Keys,
-) -> Result<Vec<u8>, Error> {
+) -> Result<Vec<u8>, StorageError> {
     frame_decode::storage::encode_storage_key(
         address.pallet_name(),
         address.entry_name(),
@@ -101,7 +102,10 @@ pub fn get_address_bytes<Addr: Address, Keys: EqualOrPrefixOf<Addr::KeyParts>>(
 /// and storage entry part) into bytes. If the entry being addressed is inside a map, this returns
 /// the bytes needed to iterate over all of the entries within it.
 pub fn get_address_root_bytes<Addr: Address>(address: &Addr) -> [u8; 32] {
-    frame_decode::storage::encode_storage_key_prefix(address.pallet_name(), address.entry_name())
+    frame_decode::storage::encode_storage_key_prefix(
+        address.pallet_name(), 
+        address.entry_name()
+    )
 }
 
 /// Given some storage value that we've retrieved from a node, the address used to retrieve it, and
@@ -111,7 +115,7 @@ pub fn decode_value<Addr: Address>(
     bytes: &mut &[u8],
     address: &Addr,
     metadata: &Metadata,
-) -> Result<Addr::Value, Error> {
+) -> Result<Addr::Value, StorageError> {
     frame_decode::storage::decode_storage_value(
         address.pallet_name(),
         address.entry_name(),
@@ -127,7 +131,7 @@ pub fn decode_value<Addr: Address>(
 pub fn default_value<Addr: Address>(
     address: &Addr,
     metadata: &Metadata,
-) -> Result<Option<Addr::Value>, Error> {
+) -> Result<Option<Addr::Value>, StorageError> {
     let storage_info = metadata
         .storage_info(address.pallet_name(), address.entry_name())
         .map_err(|e| StorageError::StorageInfoError(e.into_owned()))?;

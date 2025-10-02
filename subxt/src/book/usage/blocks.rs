@@ -64,7 +64,7 @@
 //! get only [the first one](crate::blocks::Extrinsics::find_first), or [the last one](crate::blocks::Extrinsics::find_last).
 //!
 //! The following example monitors `TransferKeepAlive` extrinsics on the Polkadot network.
-//! We statically decode them and access the [tip](crate::blocks::ExtrinsicTransactionExtensions::tip()) and [account nonce](crate::blocks::ExtrinsicTransactionExtensions::nonce())
+//! We statically decode them and access the [tip](crate::blocks::ExtrinsicExtrinsicParams::tip()) and [account nonce](crate::blocks::ExtrinsicExtrinsicParams::nonce())
 //! transaction extensions.
 //!
 //! ```rust,ignore  
@@ -90,10 +90,10 @@
 //! The [Config](crate::Config) implementation for your chain defines which transaction extensions you expect.
 //! Once you get hold of the [ExtrinsicDetails](crate::blocks::ExtrinsicDetails) for an extrinsic you are interested in,
 //! you can try to [get its transaction extensions](crate::blocks::ExtrinsicDetails::transaction_extensions()).
-//! These are only available on V4 signed extrinsics or V5 general extrinsics. You can try to [find a specific transaction extension](crate::blocks::ExtrinsicTransactionExtensions::find),
-//! in the returned [transaction extensions](crate::blocks::ExtrinsicTransactionExtensions).
+//! These are only available on V4 signed extrinsics or V5 general extrinsics. You can try to [find a specific transaction extension](crate::blocks::ExtrinsicExtrinsicParams::find),
+//! in the returned [transaction extensions](crate::blocks::ExtrinsicExtrinsicParams).
 //!
-//! Subxt also provides utility functions to get the [tip](crate::blocks::ExtrinsicTransactionExtensions::tip()) and the
-//! [account nonce](crate::blocks::ExtrinsicTransactionExtensions::tip()) associated with an extrinsic, given its transaction extensions.
+//! Subxt also provides utility functions to get the [tip](crate::blocks::ExtrinsicExtrinsicParams::tip()) and the
+//! [account nonce](crate::blocks::ExtrinsicExtrinsicParams::tip()) associated with an extrinsic, given its transaction extensions.
 //! If you prefer to do things dynamically you can get the data of the transaction extension as a [scale value](crate::blocks::ExtrinsicTransactionExtension::value()).
 //!
