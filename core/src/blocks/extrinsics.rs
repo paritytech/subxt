@@ -515,12 +515,12 @@ mod tests {
         let result = Extrinsics::<SubstrateConfig>::decode_from(vec![vec![]], metadata);
         assert_matches!(
             result.err(),
-            Some(crate::Error::Block(
-                crate::error::BlockError::ExtrinsicDecodeError {
+            Some(
+                crate::error::ExtrinsicError::LeftoverBytes {
                     extrinsic_index: 0,
-                    error: _
+                    num_leftover_bytes: _
                 }
-            ))
+            )
         );
     }
 
@@ -535,12 +535,12 @@ mod tests {
 
         assert_matches!(
             result.err(),
-            Some(crate::Error::Block(
-                crate::error::BlockError::ExtrinsicDecodeError {
+            Some(
+                crate::error::ExtrinsicError::ExtrinsicDecodeError {
                     extrinsic_index: 0,
                     error: ExtrinsicDecodeError::VersionNotSupported(3),
                 }
-            ))
+            )
         );
     }
 
@@ -614,17 +614,13 @@ mod tests {
 
         assert_eq!(extrinsic.pallet_index(), 0);
         assert_eq!(
-            extrinsic
-                .pallet_name()
-                .expect("Valid metadata contains pallet name"),
+            extrinsic.pallet_name(),
             "Test"
         );
 
         assert_eq!(extrinsic.variant_index(), 2);
         assert_eq!(
-            extrinsic
-                .call_name()
-                .expect("Valid metadata contains variant name"),
+            extrinsic.call_name(),
             "TestCall"
         );
 
