@@ -44,7 +44,7 @@
 pub mod payload;
 
 use crate::error::RuntimeApiError;
-use crate::metadata::Metadata;
+use crate::Metadata;
 use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;

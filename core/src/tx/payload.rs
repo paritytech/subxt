@@ -6,7 +6,7 @@
 //! transactions that can be submitted.
 
 use crate::error::ExtrinsicError;
-use crate::metadata::Metadata;
+use crate::Metadata;
 use alloc::borrow::Cow;
 use alloc::boxed::Box;
 use alloc::string::String;
@@ -212,7 +212,7 @@ pub fn dynamic(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::metadata::Metadata;
+    use crate::Metadata;
     use codec::Decode;
     use scale_value::Composite;
 

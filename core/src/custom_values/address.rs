@@ -85,7 +85,7 @@ impl<Target: DecodeAsType, IsDecodable: NoMaybe> Address for StaticAddress<Targe
 }
 
 // Support plain strings for looking up custom values (but prefer `dynamic` if you want to pick the return type)
-impl Address for &str {
+impl Address for str {
     type Target = scale_value::Value;
     type IsDecodable = Maybe;
 

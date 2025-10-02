@@ -653,7 +653,7 @@ mod tests {
         expected: TestRawEventDetails,
     ) {
         let actual_fields_no_context: Vec<_> = actual
-            .field_values()
+            .decode_fields_as::<scale_value::Composite<()>>()
             .expect("can decode field values (2)")
             .into_values()
             .map(|value| value.remove_context())

@@ -32,7 +32,7 @@
 
 pub mod address;
 
-use crate::utils::Yes;
+use crate::utils::Maybe;
 use crate::{Metadata, error::CustomValueError};
 use address::Address;
 use alloc::vec::Vec;
@@ -58,7 +58,7 @@ pub fn validate<Addr: Address + ?Sized>(address: &Addr, metadata: &Metadata) -> 
 
 /// Access a custom value by the address it is registered under. This can be just a [str] to get back a dynamic value,
 /// or a static address from the generated static interface to get a value of a static type returned.
-pub fn get<Addr: Address<IsDecodable = Yes> + ?Sized>(
+pub fn get<Addr: Address<IsDecodable = Maybe> + ?Sized>(
     address: &Addr,
     metadata: &Metadata,
 ) -> Result<Addr::Target, CustomValueError> {
@@ -163,8 +163,9 @@ mod tests {
         let metadata = mock_metadata();
 
         assert!(custom_values::get("Invalid Address", &metadata).is_err());
-        let person_decoded_value_thunk = custom_values::get("Mr. Robot", &metadata).unwrap();
-        let person: Person = person_decoded_value_thunk.as_type().unwrap();
+
+        let person_addr = custom_values::address::dynamic::<Person>("Mr. Robot");
+        let person = custom_values::get(&person_addr, &metadata).unwrap();
         assert_eq!(
             person,
             Person {

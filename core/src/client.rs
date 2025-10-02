@@ -6,7 +6,7 @@
 
 use crate::{
     config::{Config, HashFor},
-    metadata::Metadata,
+    Metadata,
 };
 use derive_where::derive_where;
 

@@ -18,7 +18,7 @@ pub use dispatch_error::{
 };
 
 // Re-expose the errors we use from other crates here:
-pub use crate::metadata::Metadata;
+pub use crate::Metadata;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
 pub use subxt_core::error::{ExtrinsicError, MetadataError, StorageError};

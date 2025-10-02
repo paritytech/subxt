@@ -8,7 +8,7 @@
 pub mod payload;
 
 use crate::error::ViewFunctionError;
-use crate::metadata::Metadata;
+use crate::Metadata;
 use alloc::vec::Vec;
 use payload::Payload;
 use scale_decode::IntoVisitor;

@@ -12,7 +12,7 @@ pub mod utils;
 
 use crate::config::{Config, HashFor};
 use crate::error::Error;
-use crate::metadata::Metadata;
+use crate::Metadata;
 use async_trait::async_trait;
 use codec::{Decode, Encode};
 use futures::{Stream, StreamExt};

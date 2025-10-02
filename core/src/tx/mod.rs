@@ -61,7 +61,7 @@ pub mod signer;
 
 use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, HashFor, Hasher};
 use crate::error::ExtrinsicError;
-use crate::metadata::Metadata;
+use crate::Metadata;
 use crate::utils::Encoded;
 use alloc::borrow::Cow;
 use alloc::vec::Vec;

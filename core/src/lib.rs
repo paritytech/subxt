@@ -39,7 +39,7 @@ pub mod view_functions;
 
 pub use config::Config;
 pub use error::Error;
-pub use metadata::Metadata;
+pub use subxt_metadata::Metadata;
 
 /// Re-exports of some of the key external crates.
 pub mod ext {
@@ -47,9 +47,4 @@ pub mod ext {
     pub use scale_decode;
     pub use scale_encode;
     pub use scale_value;
-}
-
-/// Re-exports the [`subxt_metadata::Metadata`] type.
-pub mod metadata {
-    pub use subxt_metadata::Metadata;
 }
