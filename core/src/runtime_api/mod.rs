@@ -43,32 +43,39 @@
 
 pub mod payload;
 
-use crate::error::{RuntimeApiError, MetadataError};
+use crate::error::RuntimeApiError;
 use crate::metadata::Metadata;
 use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
 use payload::Payload;
+use scale_decode::IntoVisitor;
 
 /// Run the validation logic against some runtime API payload you'd like to use. Returns `Ok(())`
 /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
 /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
 /// the runtime API in question do not exist at all)
 pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), RuntimeApiError> {
-    let Some(static_hash) = payload.validation_hash() else {
+    let Some(hash) = payload.validation_hash() else {
         return Ok(());
     };
 
-    let api_trait = metadata.runtime_api_trait_by_name_err(payload.trait_name())?;
-    let Some(api_method) = api_trait.method_by_name(payload.method_name()) else {
-        return Err(MetadataError::IncompatibleCodegen.into());
-    };
+    let trait_name = payload.trait_name();
+    let method_name = payload.method_name();
 
-    let runtime_hash = api_method.hash();
-    if static_hash != runtime_hash {
-        return Err(MetadataError::IncompatibleCodegen.into());
+    let api_trait = metadata.runtime_api_trait_by_name(trait_name)
+        .ok_or_else(|| RuntimeApiError::TraitNotFound(trait_name.to_string()))?;
+    let api_method = api_trait.method_by_name(method_name)
+        .ok_or_else(|| RuntimeApiError::MethodNotFound { 
+            trait_name: trait_name.to_string(), 
+            method_name: method_name.to_string() 
+        })?;
+
+    if hash != api_method.hash() {
+        Err(RuntimeApiError::IncompatibleCodegen)
+    } else {
+        Ok(())
     }
-    Ok(())
 }
 
 /// Return the name of the runtime API call from the payload.

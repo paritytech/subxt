@@ -82,8 +82,8 @@ impl<ArgsType, ReturnTy> StaticPayload<ArgsType, ReturnTy> {
         args: ArgsType,
     ) -> Self {
         StaticPayload {
-            trait_name: Cow::Owned(trait_name.into()),
-            method_name: Cow::Owned(method_name.into()),
+            trait_name: trait_name.into(),
+            method_name: method_name.into(),
             args,
             validation_hash: None,
             _marker: PhantomData,

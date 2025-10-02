@@ -12,85 +12,79 @@ use thiserror::Error as DeriveError;
 #[derive(Debug, DeriveError)]
 #[allow(missing_docs)]
 pub enum Error {
-    // /// Codec error.
-    // #[error("Codec error: {0}")]
-    // Codec(codec::Error),
-    #[error(transparent)]
-    Metadata(#[from] MetadataError),
     #[error(transparent)]
     StorageError(#[from] StorageError),
-    // /// Error decoding to a [`crate::dynamic::Value`].
-    // #[error("Error decoding into dynamic value: {0}")]
-    // Decode(#[from] scale_decode::Error),
-    // /// Error encoding from a [`crate::dynamic::Value`].
-    // #[error("Error encoding from dynamic value: {0}")]
-    // Encode(#[from] scale_encode::Error),
     #[error(transparent)]
     Extrinsic(#[from] ExtrinsicError),
     #[error(transparent)]
     Constant(#[from] ConstantError),
     #[error(transparent)]
-    CustomValueError(CustomValueError)
+    CustomValue(#[from] CustomValueError),
+    #[error(transparent)]
+    RuntimeApi(#[from] RuntimeApiError),
+    #[error(transparent)]
+    ViewFunction(#[from] ViewFunctionError),
+    #[error(transparent)]
+    Events(#[from] EventsError),
 }
 
-// impl From<scale_decode::visitor::DecodeError> for Error {
-//     fn from(err: scale_decode::visitor::DecodeError) -> Error {
-//         Error::Decode(err.into())
-//     }
-// }
-
-// // TODO: when `codec::Error` implements `core::Error`
-// // remove this impl and replace it by thiserror #[from]
-// impl From<codec::Error> for Error {
-//     fn from(err: codec::Error) -> Error {
-//         Error::Codec(err)
-//     }
-// }
-
-/// Something went wrong trying to access details in the metadata.
-#[derive(Clone, Debug, PartialEq, DeriveError)]
+#[derive(Debug, DeriveError)]
 #[non_exhaustive]
 #[allow(missing_docs)]
-pub enum MetadataError {
-    // /// The DispatchError type isn't available in the metadata
-    // #[error("The DispatchError type isn't available")]
-    // DispatchErrorNotFound,
-    // /// Type not found in metadata.
-    // #[error("Type with ID {0} not found")]
-    // TypeNotFound(u32),
-    /// Pallet not found (index).
-    // /// Call type not found in metadata.
-    // #[error("Call type not found in pallet with index {0}")]
-    // CallTypeNotFoundInPallet(u8),
-    // /// Event type not found in metadata.
-    // #[error("Event type not found in pallet with index {0}")]
-    // EventTypeNotFoundInPallet(u8),
-    // // /// Storage details not found in metadata.
-    // // #[error("Storage details not found in pallet with name {0}")]
-    // // StorageNotFoundInPallet(String),
-    // // /// Storage entry not found.
-    // // #[error("Storage entry {0} not found")]
-    // // StorageEntryNotFound(String),
-    #[error("Pallet with index {0} not found")]
-    PalletIndexNotFound(u8),
-    #[error("Pallet with name {0} not found")]
-    PalletNameNotFound(String),
-    #[error("Variant with index {0} not found")]
-    VariantIndexNotFound(u8),
-    #[error("Constant with name {0} not found")]
-    ConstantNameNotFound(String),
-    #[error("Call with name {0} not found")]
-    CallNameNotFound(String),
-    #[error("Runtime trait with name {0} not found")]
-    RuntimeTraitNotFound(String),
-    #[error("Runtime method with name {0} not found")]
-    RuntimeMethodNotFound(String),
-    #[error("View Function with query ID {} not found", hex::encode(.0))]
-    ViewFunctionNotFound([u8; 32]),
-    #[error("The generated code is not compatible with the node")]
+pub enum EventsError {
+    #[error("Can't decode event: can't decode phase: {0}")]
+    CannotDecodePhase(codec::Error),
+    #[error("Can't decode event: can't decode pallet index: {0}")]
+    CannotDecodePalletIndex(codec::Error),
+    #[error("Can't decode event: can't decode variant index: {0}")]
+    CannotDecodeVariantIndex(codec::Error),
+    #[error("Can't decode event: can't find pallet with index {0}")]
+    CannotFindPalletWithIndex(u8),
+    #[error("Can't decode event: can't find variant with index {variant_index} in pallet {pallet_name}")]
+    CannotFindVariantWithIndex {
+        pallet_name: String,
+        variant_index: u8
+    },
+    #[error("Can't decode field {field_name:?} in event {pallet_name}.{event_name}: {reason}")]
+    CannotDecodeFieldInEvent {
+        pallet_name: String,
+        event_name: String,
+        field_name: String,
+        reason: scale_decode::visitor::DecodeError
+    },
+    #[error("Can't decode event topics: {0}")]
+    CannotDecodeEventTopics(codec::Error),
+    #[error("Can't decode the fields of event {pallet_name}.{event_name}: {reason}")]
+    CannotDecodeEventFields {
+        pallet_name: String,
+        event_name: String,
+        reason: scale_decode::Error
+    },
+    #[error("Can't decode event {pallet_name}.{event_name} to Event enum: {reason}")]
+    CannotDecodeEventEnum {
+        pallet_name: String,
+        event_name: String,
+        reason: scale_decode::Error
+    }
+}
+
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum ViewFunctionError {
+    #[error("The static View Function address used is not compatible with the live chain")]
     IncompatibleCodegen,
-    #[error("Custom value with name {0} not found")]
-    CustomValueNameNotFound(String),
+    #[error("Can't find View Function: pallet {0} not found")]
+    PalletNotFound(String),
+    #[error("Can't find View Function {function_name} in pallet {pallet_name}")]
+    ViewFunctionNotFound {
+        pallet_name: String,
+        function_name: String,
+    },
+    #[error("Failed to encode View Function inputs: {0}")]
+    CouldNotEncodeInputs(frame_decode::view_functions::ViewFunctionInputsEncodeError),
+    #[error("Failed to decode View Function: {0}")]
+    CouldNotDecodeResponse(frame_decode::view_functions::ViewFunctionDecodeError<u32>),
 }
 
 #[derive(Debug, DeriveError)]
@@ -99,6 +93,13 @@ pub enum MetadataError {
 pub enum RuntimeApiError {
     #[error("The static Runtime API address used is not compatible with the live chain")]
     IncompatibleCodegen,
+    #[error("Runtime API trait not found: {0}")]
+    TraitNotFound(String),
+    #[error("Runtime API method {method_name} not found in trait {trait_name}")]
+    MethodNotFound {
+        trait_name: String,
+        method_name: String,
+    },
     #[error("Failed to encode Runtime API inputs: {0}")]
     CouldNotEncodeInputs(frame_decode::runtime_apis::RuntimeApiInputsEncodeError),
     #[error("Failed to decode Runtime API: {0}")]
@@ -162,6 +163,17 @@ pub enum StorageError {
 #[non_exhaustive]
 #[allow(missing_docs)]
 pub enum ExtrinsicError {
+    #[error("The extrinsic payload is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Can't find extrinsic: pallet with name {0} not found")]
+    PalletNameNotFound(String),
+    #[error("Can't find extrinsic: call name {call_name} doesn't exist in pallet {pallet_name}")]
+    CallNameNotFound {
+        pallet_name: String,
+        call_name: String
+    },
+    #[error("Can't encode the extrinsic call data: {0}")]
+    CannotEncodeCallData(scale_encode::Error),
     #[error("Subxt does not support the extrinsic versions expected by the chain")]
     UnsupportedVersion,
     #[error("Cannot construct the required transaction extensions: {0}")]

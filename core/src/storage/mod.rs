@@ -92,7 +92,7 @@ pub fn get_address_bytes<Addr: Address, Keys: EqualOrPrefixOf<Addr::KeyParts>>(
         address.pallet_name(),
         address.entry_name(),
         &keys,
-        &**metadata,
+        metadata,
         metadata.types(),
     )
     .map_err(|e| StorageError::StorageKeyEncodeError(e).into())
@@ -120,7 +120,7 @@ pub fn decode_value<Addr: Address>(
         address.pallet_name(),
         address.entry_name(),
         bytes,
-        &**metadata,
+        metadata,
         metadata.types(),
         Addr::Value::into_visitor(),
     )
@@ -135,6 +135,7 @@ pub fn default_value<Addr: Address>(
     let storage_info = metadata
         .storage_info(address.pallet_name(), address.entry_name())
         .map_err(|e| StorageError::StorageInfoError(e.into_owned()))?;
+
     let value = frame_decode::storage::decode_default_storage_value_with_info(
         &storage_info,
         metadata.types(),

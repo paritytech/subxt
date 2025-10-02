@@ -5,10 +5,9 @@
 //! This module contains the trait and types used to represent
 //! transactions that can be submitted.
 
-use crate::Error;
-use crate::error::MetadataError;
+use crate::error::ExtrinsicError;
 use crate::metadata::Metadata;
-use alloc::borrow::{Cow, ToOwned};
+use alloc::borrow::Cow;
 use alloc::boxed::Box;
 use alloc::string::String;
 
@@ -21,11 +20,11 @@ use scale_value::{Composite, Value, ValueDef, Variant};
 /// to a node.
 pub trait Payload {
     /// Encode call data to the provided output.
-    fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error>;
+    fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), ExtrinsicError>;
 
     /// Encode call data and return the output. This is a convenience
     /// wrapper around [`Payload::encode_call_data_to`].
-    fn encode_call_data(&self, metadata: &Metadata) -> Result<Vec<u8>, Error> {
+    fn encode_call_data(&self, metadata: &Metadata) -> Result<Vec<u8>, ExtrinsicError> {
         let mut v = Vec::new();
         self.encode_call_data_to(metadata, &mut v)?;
         Ok(v)
@@ -46,10 +45,10 @@ macro_rules! boxed_payload {
                 &self,
                 metadata: &Metadata,
                 out: &mut Vec<u8>,
-            ) -> Result<(), Error> {
+            ) -> Result<(), ExtrinsicError> {
                 self.as_ref().encode_call_data_to(metadata, out)
             }
-            fn encode_call_data(&self, metadata: &Metadata) -> Result<Vec<u8>, Error> {
+            fn encode_call_data(&self, metadata: &Metadata) -> Result<Vec<u8>, ExtrinsicError> {
                 self.as_ref().encode_call_data(metadata)
             }
             fn validation_details(&self) -> Option<ValidationDetails<'_>> {
@@ -164,11 +163,15 @@ impl DefaultPayload<Composite<()>> {
 }
 
 impl<CallData: EncodeAsFields> Payload for DefaultPayload<CallData> {
-    fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error> {
-        let pallet = metadata.pallet_by_name_err(&self.pallet_name)?;
+    fn encode_call_data_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), ExtrinsicError> {
+        let pallet = metadata.pallet_by_name(&self.pallet_name)
+            .ok_or_else(|| ExtrinsicError::PalletNameNotFound(self.pallet_name.to_string()))?;
         let call = pallet
             .call_variant_by_name(&self.call_name)
-            .ok_or_else(|| MetadataError::CallNameNotFound((*self.call_name).to_owned()))?;
+            .ok_or_else(|| ExtrinsicError::CallNameNotFound {
+                pallet_name: pallet.name().to_string(),
+                call_name: self.call_name.to_string()
+            })?;
 
         let pallet_index = pallet.index();
         let call_index = call.index;
@@ -182,7 +185,8 @@ impl<CallData: EncodeAsFields> Payload for DefaultPayload<CallData> {
             .map(|f| scale_encode::Field::new(f.ty.id, f.name.as_deref()));
 
         self.call_data
-            .encode_as_fields_to(&mut fields, metadata.types(), out)?;
+            .encode_as_fields_to(&mut fields, metadata.types(), out)
+            .map_err(ExtrinsicError::CannotEncodeCallData)?;
         Ok(())
     }
 

@@ -7,28 +7,37 @@
 
 pub mod payload;
 
-use crate::error::{Error, MetadataError};
-use crate::metadata::{DecodeWithMetadata, Metadata};
+use crate::error::ViewFunctionError;
+use crate::metadata::Metadata;
 use alloc::vec::Vec;
 use payload::Payload;
+use scale_decode::IntoVisitor;
 
 /// Run the validation logic against some View Function payload you'd like to use. Returns `Ok(())`
 /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
 /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
 /// the View Function in question do not exist at all)
-pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), Error> {
-    let Some(static_hash) = payload.validation_hash() else {
+pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), ViewFunctionError> {
+    let Some(hash) = payload.validation_hash() else {
         return Ok(());
     };
 
-    let view_function = metadata
-        .view_function_by_query_id(payload.query_id())
-        .ok_or_else(|| MetadataError::ViewFunctionNotFound(*payload.query_id()))?;
-    if static_hash != view_function.hash() {
-        return Err(MetadataError::IncompatibleCodegen.into());
-    }
+    let pallet_name = payload.pallet_name();
+    let function_name = payload.function_name();
 
-    Ok(())
+    let view_function = metadata.pallet_by_name(pallet_name)
+        .ok_or_else(|| ViewFunctionError::PalletNotFound(pallet_name.to_string()))?
+        .view_function_by_name(function_name)
+        .ok_or_else(|| ViewFunctionError::ViewFunctionNotFound {
+            pallet_name: pallet_name.to_string(),
+            function_name: function_name.to_string()
+        })?;
+
+    if hash != view_function.hash() {
+        Err(ViewFunctionError::IncompatibleCodegen)
+    } else {
+        Ok(())
+    }
 }
 
 /// The name of the Runtime API call which can execute
@@ -36,17 +45,16 @@ pub const CALL_NAME: &str = "RuntimeViewFunction_execute_view_function";
 
 /// Encode the bytes that will be passed to the "execute_view_function" Runtime API call,
 /// to execute the View Function represented by the given payload.
-pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>, Error> {
-    let mut call_args = Vec::with_capacity(32);
-    call_args.extend_from_slice(payload.query_id());
+pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>, ViewFunctionError> {
+    let inputs = frame_decode::view_functions::encode_view_function_inputs(
+        payload.pallet_name(),
+        payload.function_name(),
+        payload.args(),
+        metadata,
+        metadata.types()
+    ).map_err(ViewFunctionError::CouldNotEncodeInputs)?;
 
-    let mut call_arg_params = Vec::new();
-    payload.encode_args_to(metadata, &mut call_arg_params)?;
-
-    use codec::Encode;
-    call_arg_params.encode_to(&mut call_args);
-
-    Ok(call_args)
+    Ok(inputs)
 }
 
 /// Decode the value bytes at the location given by the provided View Function payload.
@@ -54,16 +62,15 @@ pub fn decode_value<P: Payload>(
     bytes: &mut &[u8],
     payload: &P,
     metadata: &Metadata,
-) -> Result<P::ReturnType, Error> {
-    let view_function = metadata
-        .view_function_by_query_id(payload.query_id())
-        .ok_or_else(|| MetadataError::ViewFunctionNotFound(*payload.query_id()))?;
-
-    let val = <P::ReturnType as DecodeWithMetadata>::decode_with_metadata(
-        &mut &bytes[..],
-        view_function.output_ty(),
+) -> Result<P::ReturnType, ViewFunctionError> {
+    let value = frame_decode::view_functions::decode_view_function_response(
+        payload.pallet_name(),
+        payload.function_name(),
+        bytes,
         metadata,
-    )?;
+        metadata.types(),
+        P::ReturnType::into_visitor()
+    ).map_err(ViewFunctionError::CouldNotDecodeResponse)?;
 
-    Ok(val)
+    Ok(value)
 }

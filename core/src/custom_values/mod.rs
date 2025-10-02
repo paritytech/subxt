@@ -37,6 +37,7 @@ use crate::{Metadata, error::CustomValueError};
 use address::Address;
 use alloc::vec::Vec;
 use frame_decode::custom_values::CustomValueTypeInfo;
+use scale_decode::IntoVisitor;
 
 /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
 /// if the address is valid (or if it's not possible to check since the address has no validation hash).

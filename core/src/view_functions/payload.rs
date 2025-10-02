@@ -5,17 +5,11 @@
 //! This module contains the trait and types used to represent
 //! View Function calls that can be made.
 
-use alloc::vec::Vec;
 use core::marker::PhantomData;
 use derive_where::derive_where;
-use scale_encode::EncodeAsFields;
-use scale_value::Composite;
-
-use crate::Error;
-use crate::dynamic::DecodedValueThunk;
-use crate::error::MetadataError;
-
-use crate::metadata::{DecodeWithMetadata, Metadata};
+use scale_decode::DecodeAsType;
+use frame_decode::view_functions::IntoEncodableValues;
+use alloc::borrow::Cow;
 
 /// This represents a View Function payload that can call into the runtime of node.
 ///
@@ -33,24 +27,19 @@ use crate::metadata::{DecodeWithMetadata, Metadata};
 ///
 /// Each argument of the View Function must be scale-encoded.
 pub trait Payload {
+    /// Type of the arguments for this call.
+    type ArgsType: IntoEncodableValues;
     /// The return type of the function call.
-    // Note: `DecodeWithMetadata` is needed to decode the function call result
-    // with the `subxt::Metadata.
-    type ReturnType: DecodeWithMetadata;
+    type ReturnType: DecodeAsType;
 
-    /// The payload target.
-    fn query_id(&self) -> &[u8; 32];
+    /// The View Function pallet name.
+    fn pallet_name(&self) -> &str;
 
-    /// Scale encode the arguments data.
-    fn encode_args_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error>;
+    /// The View Function function name.
+    fn function_name(&self) -> &str;
 
-    /// Encode arguments data and return the output. This is a convenience
-    /// wrapper around [`Payload::encode_args_to`].
-    fn encode_args(&self, metadata: &Metadata) -> Result<Vec<u8>, Error> {
-        let mut v = Vec::new();
-        self.encode_args_to(metadata, &mut v)?;
-        Ok(v)
-    }
+    /// The arguments.
+    fn args(&self) -> &Self::ArgsType;
 
     /// Returns the statically generated validation hash.
     fn validation_hash(&self) -> Option<[u8; 32]> {
@@ -59,44 +48,38 @@ pub trait Payload {
 }
 
 /// A View Function payload containing the generic argument data
-/// and interpreting the result of the call as `ReturnTy`.
+/// and interpreting the result of the call as `ReturnType`.
 ///
 /// This can be created from static values (ie those generated
 /// via the `subxt` macro) or dynamic values via [`dynamic`].
-#[derive_where(Clone, Debug, Eq, Ord, PartialEq, PartialOrd; ArgsData)]
-pub struct DefaultPayload<ArgsData, ReturnTy> {
-    query_id: [u8; 32],
-    args_data: ArgsData,
+#[derive_where(Clone, Debug, Eq, Ord, PartialEq, PartialOrd; ArgsType)]
+pub struct StaticPayload<ArgsType, ReturnType> {
+    pallet_name: Cow<'static, str>,
+    function_name: Cow<'static, str>,
+    args: ArgsType,
     validation_hash: Option<[u8; 32]>,
-    _marker: PhantomData<ReturnTy>,
+    _marker: PhantomData<ReturnType>,
 }
 
-/// A statically generated View Function payload.
-pub type StaticPayload<ArgsData, ReturnTy> = DefaultPayload<ArgsData, ReturnTy>;
 /// A dynamic View Function payload.
-pub type DynamicPayload = DefaultPayload<Composite<()>, DecodedValueThunk>;
+pub type DynamicPayload<ArgsType, ReturnType> = StaticPayload<ArgsType, ReturnType>;
 
-impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> Payload
-    for DefaultPayload<ArgsData, ReturnTy>
+impl<ArgsType: IntoEncodableValues, ReturnType: DecodeAsType> Payload
+    for StaticPayload<ArgsType, ReturnType>
 {
-    type ReturnType = ReturnTy;
+    type ArgsType = ArgsType;
+    type ReturnType = ReturnType;
 
-    fn query_id(&self) -> &[u8; 32] {
-        &self.query_id
+    fn pallet_name(&self) -> &str {
+        &self.pallet_name
     }
 
-    fn encode_args_to(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), Error> {
-        let view_function = metadata
-            .view_function_by_query_id(&self.query_id)
-            .ok_or(MetadataError::ViewFunctionNotFound(self.query_id))?;
-        let mut fields = view_function
-            .inputs()
-            .map(|input| scale_encode::Field::named(input.id, &input.name));
+    fn function_name(&self) -> &str {
+        &self.function_name
+    }
 
-        self.args_data
-            .encode_as_fields_to(&mut fields, metadata.types(), out)?;
-
-        Ok(())
+    fn args(&self) -> &Self::ArgsType {
+        &self.args
     }
 
     fn validation_hash(&self) -> Option<[u8; 32]> {
@@ -104,30 +87,37 @@ impl<ArgsData: EncodeAsFields, ReturnTy: DecodeWithMetadata> Payload
     }
 }
 
-impl<ReturnTy, ArgsData> DefaultPayload<ArgsData, ReturnTy> {
-    /// Create a new [`DefaultPayload`] for a View Function call.
-    pub fn new(query_id: [u8; 32], args_data: ArgsData) -> Self {
-        DefaultPayload {
-            query_id,
-            args_data,
+impl<ReturnTy, ArgsType> StaticPayload<ArgsType, ReturnTy> {
+    /// Create a new [`StaticPayload`] for a View Function call.
+    pub fn new(
+        pallet_name: impl Into<Cow<'static, str>>,
+        function_name: impl Into<Cow<'static, str>>,
+        args: ArgsType,
+    ) -> Self {
+        StaticPayload {
+            pallet_name: pallet_name.into(),
+            function_name: function_name.into(),
+            args,
             validation_hash: None,
             _marker: PhantomData,
         }
     }
 
-    /// Create a new static [`DefaultPayload`] for a View Function call
+    /// Create a new static [`StaticPayload`] for a View Function call
     /// using static function name and scale-encoded argument data.
     ///
     /// This is only expected to be used from codegen.
     #[doc(hidden)]
     pub fn new_static(
-        query_id: [u8; 32],
-        args_data: ArgsData,
+        pallet_name: &'static str,
+        function_name: &'static str,
+        args: ArgsType,
         hash: [u8; 32],
-    ) -> DefaultPayload<ArgsData, ReturnTy> {
-        DefaultPayload {
-            query_id,
-            args_data,
+    ) -> StaticPayload<ArgsType, ReturnTy> {
+        StaticPayload {
+            pallet_name: Cow::Borrowed(pallet_name),
+            function_name: Cow::Borrowed(function_name),
+            args,
             validation_hash: Some(hash),
             _marker: core::marker::PhantomData,
         }
@@ -140,14 +130,13 @@ impl<ReturnTy, ArgsData> DefaultPayload<ArgsData, ReturnTy> {
             ..self
         }
     }
-
-    /// Returns the arguments data.
-    pub fn args_data(&self) -> &ArgsData {
-        &self.args_data
-    }
 }
 
 /// Create a new [`DynamicPayload`] to call a View Function.
-pub fn dynamic(query_id: [u8; 32], args_data: impl Into<Composite<()>>) -> DynamicPayload {
-    DefaultPayload::new(query_id, args_data.into())
+pub fn dynamic<ArgsType, ReturnType>(
+    pallet_name: impl Into<Cow<'static, str>>,
+    function_name: impl Into<Cow<'static, str>>,
+    args: ArgsType
+) -> DynamicPayload<ArgsType, ReturnType> {
+    DynamicPayload::new(pallet_name, function_name, args)
 }

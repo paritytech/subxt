@@ -49,6 +49,7 @@ pub mod ext {
     pub use scale_value;
 }
 
+/// Re-exports the [`subxt_metadata::Metadata`] type.
 pub mod metadata {
     pub use subxt_metadata::Metadata;
 }
