@@ -6,7 +6,7 @@
 
 mod dispatch_error;
 
-use subxt_core::error::{BlockError as CoreBlockError, Error as CoreError};
+use subxt_core::error::Error as CoreError;
 
 crate::macros::cfg_unstable_light_client! {
     pub use subxt_lightclient::LightClientError;
@@ -19,10 +19,19 @@ pub use dispatch_error::{
 
 // Re-expose the errors we use from other crates here:
 pub use crate::Metadata;
-pub use scale_decode::Error as DecodeError;
-pub use scale_encode::Error as EncodeError;
-pub use subxt_core::error::{ExtrinsicError, MetadataError, StorageError};
 pub use subxt_metadata::TryFromError as MetadataTryFromError;
+
+// Re-export subxt-core error types that we'll use directly:
+pub use subxt_core::error::{
+    ConstantError as CoreConstantError,
+    CustomValueError as CoreCustomValueError,
+    EventsError as CoreEventsError,
+    ExtrinsicError as CoreExtrinsicError,
+    ExtrinsicParamsError,
+    RuntimeApiError as CoreRuntimeApiError,
+    StorageError as CoreStorageError,
+    ViewFunctionError as CoreViewFunctionError,
+};
 
 /// The underlying error enum, generic over the type held by the `Runtime`
 /// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over
@@ -31,69 +40,64 @@ pub use subxt_metadata::TryFromError as MetadataTryFromError;
 #[non_exhaustive]
 pub enum Error {
     /// Io error.
-    #[error("Io error: {0}")]
+    #[error(transparent)]
     Io(#[from] std::io::Error),
-    /// Codec error.
-    #[error("Scale codec error: {0}")]
-    Codec(#[from] codec::Error),
     /// Rpc error.
     #[error(transparent)]
     Rpc(#[from] RpcError),
     /// Serde serialization error
-    #[error("Serde json error: {0}")]
+    #[error(transparent)]
     Serialization(#[from] serde_json::error::Error),
-    /// Error working with metadata.
-    #[error("Metadata error: {0}")]
-    Metadata(#[from] MetadataError),
     /// Error decoding metadata.
-    #[error("Metadata Decoding error: {0}")]
+    #[error(transparent)]
     MetadataDecoding(#[from] MetadataTryFromError),
     /// Runtime error.
-    #[error("Runtime error: {0}")]
+    #[error(transparent)]
     Runtime(#[from] DispatchError),
-    /// Error decoding to a [`crate::dynamic::Value`].
-    #[error("Error decoding into dynamic value: {0}")]
-    Decode(#[from] DecodeError),
-    /// Error encoding from a [`crate::dynamic::Value`].
-    #[error("Error encoding from dynamic value: {0}")]
-    Encode(#[from] EncodeError),
     /// Transaction progress error.
-    #[error("Transaction error: {0}")]
+    #[error(transparent)]
     Transaction(#[from] TransactionError),
-    /// Error constructing the appropriate extrinsic params.
-    #[error("Extrinsic params error: {0}")]
-    Extrinsic(#[from] ExtrinsicError),
     /// Block related error.
-    #[error("Block error: {0}")]
+    #[error(transparent)]
     Block(#[from] BlockError),
-    /// An error encoding a storage address.
-    #[error("Error encoding storage address: {0}")]
-    StorageAddress(#[from] StorageError),
+    /// Storage error.
+    #[error(transparent)]
+    Storage(#[from] StorageError),
+    /// Storage key error.
+    #[error(transparent)]
+    StorageKey(#[from] StorageKeyError),
+    /// Storage value error.
+    #[error(transparent)]
+    StorageValue(#[from] StorageValueError),
+    /// Constant error.
+    #[error(transparent)]
+    Constant(#[from] ConstantError),
+    /// Custom value error.
+    #[error(transparent)]
+    CustomValue(#[from] CustomValueError),
+    /// Runtime API error.
+    #[error(transparent)]
+    RuntimeApi(#[from] RuntimeApiError),
+    /// View function error.
+    #[error(transparent)]
+    ViewFunction(#[from] ViewFunctionError),
+    /// Events error.
+    #[error(transparent)]
+    Events(#[from] EventsError),
+    /// Extrinsic error.
+    #[error(transparent)]
+    Extrinsic(#[from] ExtrinsicError),
     /// The bytes representing an error that we were unable to decode.
     #[error("An error occurred but it could not be decoded: {0:?}")]
     Unknown(Vec<u8>),
     /// Light client error.
     #[cfg(feature = "unstable-light-client")]
     #[cfg_attr(docsrs, doc(cfg(feature = "unstable-light-client")))]
-    #[error("An error occurred but it could not be decoded: {0}")]
+    #[error(transparent)]
     LightClient(#[from] LightClientError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
-}
-
-impl From<CoreError> for Error {
-    fn from(value: CoreError) -> Self {
-        match value {
-            CoreError::Codec(e) => Error::Codec(e),
-            CoreError::Metadata(e) => Error::Metadata(e),
-            CoreError::StorageError(e) => Error::StorageAddress(e),
-            CoreError::Decode(e) => Error::Decode(e),
-            CoreError::Encode(e) => Error::Encode(e),
-            CoreError::Extrinsic(e) => Error::Extrinsic(e),
-            CoreError::Block(e) => Error::Block(e.into()),
-        }
-    }
 }
 
 impl<'a> From<&'a str> for Error {
@@ -114,15 +118,79 @@ impl From<std::convert::Infallible> for Error {
     }
 }
 
-impl From<scale_decode::visitor::DecodeError> for Error {
-    fn from(value: scale_decode::visitor::DecodeError) -> Self {
-        Error::Decode(value.into())
+impl From<codec::Error> for Error {
+    fn from(value: codec::Error) -> Self {
+        // Codec errors typically happen during event/extrinsic decoding, so we map to Other
+        Error::Other(format!("Codec error: {}", value))
+    }
+}
+
+impl From<scale_decode::Error> for Error {
+    fn from(value: scale_decode::Error) -> Self {
+        // Scale decode errors typically happen during decoding, so we map to Other
+        Error::Other(format!("Decode error: {}", value))
     }
 }
 
 impl From<subxt_rpcs::Error> for Error {
     fn from(value: subxt_rpcs::Error) -> Self {
         Error::Rpc(value.into())
+    }
+}
+
+// Add From implementations for core error types through their module-specific wrappers
+impl From<CoreStorageError> for Error {
+    fn from(e: CoreStorageError) -> Self {
+        Error::Storage(StorageError::from(e))
+    }
+}
+
+impl From<CoreExtrinsicError> for Error {
+    fn from(e: CoreExtrinsicError) -> Self {
+        Error::Extrinsic(ExtrinsicError::from(e))
+    }
+}
+
+impl From<CoreConstantError> for Error {
+    fn from(e: CoreConstantError) -> Self {
+        Error::Constant(ConstantError::from(e))
+    }
+}
+
+impl From<CoreCustomValueError> for Error {
+    fn from(e: CoreCustomValueError) -> Self {
+        Error::CustomValue(CustomValueError::from(e))
+    }
+}
+
+impl From<CoreRuntimeApiError> for Error {
+    fn from(e: CoreRuntimeApiError) -> Self {
+        Error::RuntimeApi(RuntimeApiError::from(e))
+    }
+}
+
+impl From<CoreViewFunctionError> for Error {
+    fn from(e: CoreViewFunctionError) -> Self {
+        Error::ViewFunction(ViewFunctionError::from(e))
+    }
+}
+
+impl From<CoreEventsError> for Error {
+    fn from(e: CoreEventsError) -> Self {
+        Error::Events(EventsError::from(e))
+    }
+}
+
+// Add From implementations for frame_decode error types that go through StorageError
+impl From<frame_decode::storage::StorageInfoError<'_>> for Error {
+    fn from(e: frame_decode::storage::StorageInfoError<'_>) -> Self {
+        Error::Storage(StorageError::from(e))
+    }
+}
+
+impl From<frame_decode::storage::StorageKeyEncodeError> for Error {
+    fn from(e: frame_decode::storage::StorageKeyEncodeError) -> Self {
+        Error::Storage(StorageError::from(e))
     }
 }
 
@@ -185,29 +253,8 @@ pub enum BlockError {
         /// Index of the extrinsic that failed to decode.
         extrinsic_index: usize,
         /// The decode error.
-        error: subxt_core::error::ExtrinsicDecodeError,
+        error: frame_decode::extrinsics::ExtrinsicDecodeError,
     },
-}
-
-impl From<CoreBlockError> for BlockError {
-    fn from(value: CoreBlockError) -> Self {
-        match value {
-            CoreBlockError::LeftoverBytes {
-                extrinsic_index,
-                num_leftover_bytes,
-            } => BlockError::LeftoverBytes {
-                extrinsic_index,
-                num_leftover_bytes,
-            },
-            CoreBlockError::ExtrinsicDecodeError {
-                extrinsic_index,
-                error,
-            } => BlockError::ExtrinsicDecodeError {
-                extrinsic_index,
-                error,
-            },
-        }
-    }
 }
 
 impl BlockError {
@@ -237,4 +284,401 @@ pub enum TransactionError {
     /// The transaction was dropped.
     #[error("The transaction was dropped: {0}")]
     Dropped(String),
+}
+
+// Module-specific error types following the subxt-core pattern:
+
+/// Errors that can occur when working with storage.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum StorageError {
+    #[error("Storage: The static storage address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Storage: Can't find storage value - pallet with name '{0}' not found")]
+    PalletNameNotFound(String),
+    #[error("Storage: Entry '{entry_name}' not found in pallet '{pallet_name}'")]
+    StorageEntryNotFound {
+        pallet_name: String,
+        entry_name: String,
+    },
+    #[error("Storage: Cannot obtain storage information from metadata: {0}")]
+    StorageInfoError(String),
+    #[error("Storage: Cannot decode storage value: {0}")]
+    StorageValueDecodeError(String),
+    #[error("Storage: Cannot encode storage key: {0}")]
+    StorageKeyEncodeError(#[from] frame_decode::storage::StorageKeyEncodeError),
+    #[error("Storage: RPC error - {0}")]
+    Rpc(#[from] RpcError),
+    #[error("Storage: Could not fetch next entry from storage subscription - {reason}")]
+    StorageEventError {
+        reason: String,
+    },
+    #[error(
+        "Storage: Wrong number of keys provided (expected {num_keys_expected}, got {num_keys_provided})"
+    )]
+    WrongNumberOfKeysProvidedForFetch {
+        num_keys_provided: usize,
+        num_keys_expected: usize,
+    },
+    #[error(
+        "Storage: Too many keys provided for iteration (expected at most {max_keys_expected}, got {num_keys_provided})"
+    )]
+    TooManyKeysProvidedForIter {
+        num_keys_provided: usize,
+        max_keys_expected: usize,
+    },
+}
+
+impl From<CoreStorageError> for StorageError {
+    fn from(e: CoreStorageError) -> Self {
+        match e {
+            CoreStorageError::IncompatibleCodegen => StorageError::IncompatibleCodegen,
+            CoreStorageError::PalletNameNotFound(name) => StorageError::PalletNameNotFound(name),
+            CoreStorageError::StorageEntryNotFound { pallet_name, entry_name } => {
+                StorageError::StorageEntryNotFound { pallet_name, entry_name }
+            }
+            CoreStorageError::StorageInfoError(e) => StorageError::StorageInfoError(e.to_string()),
+            CoreStorageError::StorageValueDecodeError(e) => {
+                StorageError::StorageValueDecodeError(e.to_string())
+            }
+            CoreStorageError::StorageKeyEncodeError(e) => StorageError::StorageKeyEncodeError(e),
+            _ => StorageError::StorageInfoError(e.to_string()),
+        }
+    }
+}
+
+impl From<frame_decode::storage::StorageInfoError<'_>> for StorageError {
+    fn from(e: frame_decode::storage::StorageInfoError<'_>) -> Self {
+        StorageError::StorageInfoError(e.to_string())
+    }
+}
+
+/// Errors that can occur when working with storage keys.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum StorageKeyError {
+    #[error("Storage: Could not decode storage key - {reason}")]
+    DecodeError {
+        reason: frame_decode::storage::StorageKeyDecodeError<String>,
+    },
+    #[error("Storage: Could not decode storage key - leftover bytes after decoding")]
+    LeftoverBytes {
+        leftover_bytes: Vec<u8>,
+    },
+    #[error("Storage: Could not decode part of storage key at index {index} - {reason}")]
+    DecodePartError {
+        index: usize,
+        reason: scale_decode::Error,
+    },
+    #[error("Storage: Could not decode values from storage key - {reason}")]
+    DecodeKeyValueError {
+        reason: frame_decode::storage::StorageKeyValueDecodeError,
+    },
+}
+
+/// Errors that can occur when working with storage values.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum StorageValueError {
+    #[error("Storage: Could not decode storage value - {reason}")]
+    DecodeError {
+        reason: scale_decode::Error,
+    },
+    #[error("Storage: Could not decode storage value - leftover bytes after decoding")]
+    LeftoverBytes {
+        leftover_bytes: Vec<u8>,
+    },
+}
+
+/// Errors that can occur when working with constants.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum ConstantError {
+    #[error("Constant: The static constant address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Constant: Can't find constant - pallet with name '{0}' not found")]
+    PalletNameNotFound(String),
+    #[error("Constant: '{constant_name}' not found in pallet '{pallet_name}'")]
+    ConstantNameNotFound {
+        pallet_name: String,
+        constant_name: String,
+    },
+    #[error("Constant: Failed to decode constant - {0}")]
+    CouldNotDecodeConstant(String),
+}
+
+impl From<CoreConstantError> for ConstantError {
+    fn from(e: CoreConstantError) -> Self {
+        match e {
+            CoreConstantError::IncompatibleCodegen => ConstantError::IncompatibleCodegen,
+            CoreConstantError::PalletNameNotFound(name) => ConstantError::PalletNameNotFound(name),
+            CoreConstantError::ConstantNameNotFound { pallet_name, constant_name } => {
+                ConstantError::ConstantNameNotFound { pallet_name, constant_name }
+            }
+            CoreConstantError::CouldNotDecodeConstant(e) => {
+                ConstantError::CouldNotDecodeConstant(e.to_string())
+            }
+            _ => ConstantError::CouldNotDecodeConstant(e.to_string()),
+        }
+    }
+}
+
+/// Errors that can occur when working with custom values.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum CustomValueError {
+    #[error("Custom Value: The static custom value address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Custom Value: '{0}' was not found")]
+    NotFound(String),
+    #[error("Custom Value: Failed to decode custom value - {0}")]
+    CouldNotDecodeCustomValue(String),
+}
+
+impl From<CoreCustomValueError> for CustomValueError {
+    fn from(e: CoreCustomValueError) -> Self {
+        match e {
+            CoreCustomValueError::IncompatibleCodegen => CustomValueError::IncompatibleCodegen,
+            CoreCustomValueError::NotFound(name) => CustomValueError::NotFound(name),
+            CoreCustomValueError::CouldNotDecodeCustomValue(e) => {
+                CustomValueError::CouldNotDecodeCustomValue(e.to_string())
+            }
+            _ => CustomValueError::CouldNotDecodeCustomValue(e.to_string()),
+        }
+    }
+}
+
+/// Errors that can occur when working with runtime APIs.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum RuntimeApiError {
+    #[error("Runtime API: The static Runtime API address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Runtime API: Trait '{0}' not found")]
+    TraitNotFound(String),
+    #[error("Runtime API: Method '{method_name}' not found in trait '{trait_name}'")]
+    MethodNotFound {
+        trait_name: String,
+        method_name: String,
+    },
+    #[error("Runtime API: Failed to encode inputs - {0}")]
+    CouldNotEncodeInputs(String),
+    #[error("Runtime API: Failed to decode response - {0}")]
+    CouldNotDecodeResponse(String),
+    #[error("Runtime API: RPC error - {0}")]
+    Rpc(#[from] RpcError),
+}
+
+impl From<CoreRuntimeApiError> for RuntimeApiError {
+    fn from(e: CoreRuntimeApiError) -> Self {
+        match e {
+            CoreRuntimeApiError::IncompatibleCodegen => RuntimeApiError::IncompatibleCodegen,
+            CoreRuntimeApiError::TraitNotFound(name) => RuntimeApiError::TraitNotFound(name),
+            CoreRuntimeApiError::MethodNotFound { trait_name, method_name } => {
+                RuntimeApiError::MethodNotFound { trait_name, method_name }
+            }
+            CoreRuntimeApiError::CouldNotEncodeInputs(e) => {
+                RuntimeApiError::CouldNotEncodeInputs(e.to_string())
+            }
+            CoreRuntimeApiError::CouldNotDecodeResponse(e) => {
+                RuntimeApiError::CouldNotDecodeResponse(e.to_string())
+            }
+            _ => RuntimeApiError::CouldNotDecodeResponse(e.to_string()),
+        }
+    }
+}
+
+/// Errors that can occur when working with view functions.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum ViewFunctionError {
+    #[error("View Function: The static View Function address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("View Function: Pallet '{0}' not found")]
+    PalletNotFound(String),
+    #[error("View Function: '{function_name}' not found in pallet '{pallet_name}'")]
+    ViewFunctionNotFound {
+        pallet_name: String,
+        function_name: String,
+    },
+    #[error("View Function: Failed to encode inputs - {0}")]
+    CouldNotEncodeInputs(String),
+    #[error("View Function: Failed to decode response - {0}")]
+    CouldNotDecodeResponse(String),
+    #[error("View Function: RPC error - {0}")]
+    Rpc(#[from] RpcError),
+}
+
+impl From<CoreViewFunctionError> for ViewFunctionError {
+    fn from(e: CoreViewFunctionError) -> Self {
+        match e {
+            CoreViewFunctionError::IncompatibleCodegen => ViewFunctionError::IncompatibleCodegen,
+            CoreViewFunctionError::PalletNotFound(name) => ViewFunctionError::PalletNotFound(name),
+            CoreViewFunctionError::ViewFunctionNotFound { pallet_name, function_name } => {
+                ViewFunctionError::ViewFunctionNotFound { pallet_name, function_name }
+            }
+            CoreViewFunctionError::CouldNotEncodeInputs(e) => {
+                ViewFunctionError::CouldNotEncodeInputs(e.to_string())
+            }
+            CoreViewFunctionError::CouldNotDecodeResponse(e) => {
+                ViewFunctionError::CouldNotDecodeResponse(e.to_string())
+            }
+            _ => ViewFunctionError::CouldNotDecodeResponse(e.to_string()),
+        }
+    }
+}
+
+/// Errors that can occur when working with events.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum EventsError {
+    #[error("Events: Can't decode event - can't decode phase: {0}")]
+    CannotDecodePhase(codec::Error),
+    #[error("Events: Can't decode event - can't decode pallet index: {0}")]
+    CannotDecodePalletIndex(codec::Error),
+    #[error("Events: Can't decode event - can't decode variant index: {0}")]
+    CannotDecodeVariantIndex(codec::Error),
+    #[error("Events: Can't decode event - can't find pallet with index {0}")]
+    CannotFindPalletWithIndex(u8),
+    #[error("Events: Can't decode event - can't find variant with index {variant_index} in pallet {pallet_name}")]
+    CannotFindVariantWithIndex {
+        pallet_name: String,
+        variant_index: u8,
+    },
+    #[error("Events: Can't decode field {field_name:?} in event {pallet_name}.{event_name} - {reason}")]
+    CannotDecodeFieldInEvent {
+        pallet_name: String,
+        event_name: String,
+        field_name: String,
+        reason: scale_decode::visitor::DecodeError,
+    },
+    #[error("Events: Can't decode event topics: {0}")]
+    CannotDecodeEventTopics(codec::Error),
+    #[error("Events: Can't decode fields of event {pallet_name}.{event_name} - {reason}")]
+    CannotDecodeEventFields {
+        pallet_name: String,
+        event_name: String,
+        reason: scale_decode::Error,
+    },
+    #[error("Events: Can't decode event {pallet_name}.{event_name} to Event enum - {reason}")]
+    CannotDecodeEventEnum {
+        pallet_name: String,
+        event_name: String,
+        reason: scale_decode::Error,
+    },
+    #[error("Events: RPC error - {0}")]
+    Rpc(#[from] RpcError),
+}
+
+impl From<CoreEventsError> for EventsError {
+    fn from(e: CoreEventsError) -> Self {
+        match e {
+            CoreEventsError::CannotDecodePhase(err) => EventsError::CannotDecodePhase(err),
+            CoreEventsError::CannotDecodePalletIndex(err) => EventsError::CannotDecodePalletIndex(err),
+            CoreEventsError::CannotDecodeVariantIndex(err) => EventsError::CannotDecodeVariantIndex(err),
+            CoreEventsError::CannotFindPalletWithIndex(idx) => EventsError::CannotFindPalletWithIndex(idx),
+            CoreEventsError::CannotFindVariantWithIndex { pallet_name, variant_index } => {
+                EventsError::CannotFindVariantWithIndex { pallet_name, variant_index }
+            }
+            CoreEventsError::CannotDecodeFieldInEvent { pallet_name, event_name, field_name, reason } => {
+                EventsError::CannotDecodeFieldInEvent { pallet_name, event_name, field_name, reason }
+            }
+            CoreEventsError::CannotDecodeEventTopics(err) => EventsError::CannotDecodeEventTopics(err),
+            CoreEventsError::CannotDecodeEventFields { pallet_name, event_name, reason } => {
+                EventsError::CannotDecodeEventFields { pallet_name, event_name, reason }
+            }
+            CoreEventsError::CannotDecodeEventEnum { pallet_name, event_name, reason } => {
+                EventsError::CannotDecodeEventEnum { pallet_name, event_name, reason }
+            }
+            _ => EventsError::CannotDecodeEventTopics(codec::Error::from("Unknown events error")),
+        }
+    }
+}
+
+/// Errors that can occur when working with extrinsics/transactions.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum ExtrinsicError {
+    #[error("Extrinsic: The extrinsic payload is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Extrinsic: Can't find extrinsic - pallet with name '{0}' not found")]
+    PalletNameNotFound(String),
+    #[error("Extrinsic: Call '{call_name}' doesn't exist in pallet '{pallet_name}'")]
+    CallNameNotFound {
+        pallet_name: String,
+        call_name: String,
+    },
+    #[error("Extrinsic: Can't encode call data - {0}")]
+    CannotEncodeCallData(scale_encode::Error),
+    #[error("Extrinsic: Unsupported extrinsic version")]
+    UnsupportedVersion,
+    #[error("Extrinsic: Cannot construct transaction extensions - {0}")]
+    Params(#[from] ExtrinsicParamsError),
+    #[error("Extrinsic: Cannot decode transaction extension '{name}' - {error}")]
+    CouldNotDecodeTransactionExtension {
+        name: String,
+        error: scale_decode::Error,
+    },
+    #[error("Extrinsic: Leftover bytes after decoding extrinsic at index {extrinsic_index} ({num_leftover_bytes} bytes remaining)")]
+    LeftoverBytes {
+        extrinsic_index: usize,
+        num_leftover_bytes: usize,
+    },
+    #[error("Extrinsic: Failed to decode extrinsic at index {extrinsic_index} - {error}")]
+    ExtrinsicDecodeError {
+        extrinsic_index: usize,
+        error: frame_decode::extrinsics::ExtrinsicDecodeError,
+    },
+    #[error("Extrinsic: Failed to decode fields of extrinsic at index {extrinsic_index} - {error}")]
+    CannotDecodeFields {
+        extrinsic_index: usize,
+        error: scale_decode::Error,
+    },
+    #[error("Extrinsic: Failed to decode extrinsic at index {extrinsic_index} to root enum - {error}")]
+    CannotDecodeIntoRootExtrinsic {
+        extrinsic_index: usize,
+        error: scale_decode::Error,
+    },
+    #[error("Extrinsic: RPC error - {0}")]
+    Rpc(#[from] RpcError),
+}
+
+impl From<CoreExtrinsicError> for ExtrinsicError {
+    fn from(e: CoreExtrinsicError) -> Self {
+        match e {
+            CoreExtrinsicError::IncompatibleCodegen => ExtrinsicError::IncompatibleCodegen,
+            CoreExtrinsicError::PalletNameNotFound(name) => ExtrinsicError::PalletNameNotFound(name),
+            CoreExtrinsicError::CallNameNotFound { pallet_name, call_name } => {
+                ExtrinsicError::CallNameNotFound { pallet_name, call_name }
+            }
+            CoreExtrinsicError::CannotEncodeCallData(err) => ExtrinsicError::CannotEncodeCallData(err),
+            CoreExtrinsicError::UnsupportedVersion => ExtrinsicError::UnsupportedVersion,
+            CoreExtrinsicError::Params(err) => ExtrinsicError::Params(err),
+            CoreExtrinsicError::CouldNotDecodeTransactionExtension { name, error } => {
+                ExtrinsicError::CouldNotDecodeTransactionExtension { name, error }
+            }
+            CoreExtrinsicError::LeftoverBytes { extrinsic_index, num_leftover_bytes } => {
+                ExtrinsicError::LeftoverBytes { extrinsic_index, num_leftover_bytes }
+            }
+            CoreExtrinsicError::ExtrinsicDecodeError { extrinsic_index, error } => {
+                ExtrinsicError::ExtrinsicDecodeError { extrinsic_index, error }
+            }
+            CoreExtrinsicError::CannotDecodeFields { extrinsic_index, error } => {
+                ExtrinsicError::CannotDecodeFields { extrinsic_index, error }
+            }
+            CoreExtrinsicError::CannotDecodeIntoRootExtrinsic { extrinsic_index, error } => {
+                ExtrinsicError::CannotDecodeIntoRootExtrinsic { extrinsic_index, error }
+            }
+            _ => ExtrinsicError::CannotEncodeCallData(scale_encode::Error::custom_string(e.to_string())),
+        }
+    }
 }

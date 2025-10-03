@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::error::StorageKeyError;
 use frame_decode::storage::{StorageInfo, StorageKey as StorageKeyPartInfo, IntoDecodableValues};
 use scale_info::PortableRegistry;
 use core::marker::PhantomData;

@@ -7,7 +7,7 @@ use crate::{
     blocks::Extrinsics,
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor, Header},
-    error::{BlockError, DecodeError, Error},
+    error::{BlockError, Error},
     events,
     runtime_api::RuntimeApi,
     storage::StorageClientAt,
@@ -173,10 +173,10 @@ where
         4 => u32::decode(cursor)?.into(),
         8 => u64::decode(cursor)?,
         _ => {
-            return Err(Error::Decode(DecodeError::custom_string(format!(
+            return Err(Error::Other(format!(
                 "state call AccountNonceApi_account_nonce returned an unexpected number of bytes: {} (expected 2, 4 or 8)",
                 account_nonce_bytes.len()
-            ))));
+            )));
         }
     };
     Ok(account_nonce)

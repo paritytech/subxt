@@ -11,7 +11,7 @@ use scale_decode::{DecodeAsType, TypeResolver, visitor::DecodeAsTypeResult};
 
 use std::{borrow::Cow, marker::PhantomData};
 
-use super::{Error, MetadataError};
+use super::Error;
 
 /// An error dispatching a transaction.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
@@ -169,24 +169,22 @@ impl std::fmt::Display for ModuleError {
 
 impl ModuleError {
     /// Return more details about this error.
-    pub fn details(&self) -> Result<ModuleErrorDetails<'_>, MetadataError> {
-        let pallet = self.metadata.pallet_by_index_err(self.pallet_index())?;
-        let variant = pallet
-            .error_variant_by_index(self.error_index())
-            .ok_or_else(|| MetadataError::VariantIndexNotFound(self.error_index()))?;
+    pub fn details(&self) -> Option<ModuleErrorDetails<'_>> {
+        let pallet = self.metadata.pallet_by_index(self.pallet_index())?;
+        let variant = pallet.error_variant_by_index(self.error_index())?;
 
-        Ok(ModuleErrorDetails { pallet, variant })
+        Some(ModuleErrorDetails { pallet, variant })
     }
 
     /// Return a formatted string of the resolved error details for debugging/display purposes.
     pub fn details_string(&self) -> String {
         match self.details() {
-            Ok(details) => format!(
+            Some(details) => format!(
                 "{pallet_name}::{variant_name}",
                 pallet_name = details.pallet.name(),
                 variant_name = details.variant.name,
             ),
-            Err(_) => format!(
+            None => format!(
                 "Unknown pallet error '{bytes:?}' (pallet and error details cannot be retrieved)",
                 bytes = self.bytes
             ),
@@ -223,7 +221,7 @@ impl ModuleError {
 /// Details about the module error.
 pub struct ModuleErrorDetails<'a> {
     /// The pallet that the error is in
-    pub pallet: crate::metadata::types::PalletMetadata<'a>,
+    pub pallet: crate::metadata::PalletMetadata<'a>,
     /// The variant representing the error
     pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }
@@ -238,7 +236,7 @@ impl DispatchError {
         let bytes = bytes.into();
         let dispatch_error_ty_id = metadata
             .dispatch_error_ty()
-            .ok_or(MetadataError::DispatchErrorNotFound)?;
+            .ok_or_else(|| super::Error::Other("DispatchError type not found in metadata".to_string()))?;
 
         // The aim is to decode our bytes into roughly this shape. This is copied from
         // `sp_runtime::DispatchError`; we need the variant names and any inner variant
@@ -290,10 +288,10 @@ impl DispatchError {
         }
 
         // Decode into our temporary error:
-        let decoded_dispatch_err = DecodedDispatchError::decode_with_metadata(
+        let decoded_dispatch_err = DecodedDispatchError::decode_as_type(
             &mut &*bytes,
             dispatch_error_ty_id,
-            &metadata,
+            metadata.types(),
         )?;
 
         // Convert into the outward-facing error, mainly by handling the Module variant.

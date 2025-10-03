@@ -8,7 +8,7 @@ use scale_info::PortableRegistry;
 use core::marker::PhantomData;
 use std::borrow::Cow;
 
-use crate::Error;
+use crate::error::StorageValueError;
 
 /// This represents a storage value.
 pub struct StorageValue<'entry, 'atblock, Value> {
@@ -39,22 +39,24 @@ impl<'entry, 'atblock, Value: DecodeAsType> StorageValue<'entry, 'atblock, Value
     }
 
     /// Decode this storage value into the provided response type.
-    pub fn decode(&self) -> Result<Value, Error> {
+    pub fn decode(&self) -> Result<Value, StorageValueError> {
         self.decode_as::<Value>()
     }
 
     /// Decode this storage value into an arbitrary type.
-    pub fn decode_as<T: DecodeAsType>(&self) -> Result<T, Error> {
+    pub fn decode_as<T: DecodeAsType>(&self) -> Result<T, StorageValueError> {
         let cursor = &mut &*self.bytes;
 
         let value = T::decode_as_type(
             cursor,
             self.info.value_id,
             self.types,
-        ).map_err(|e| todo!("Define proper errors"))?;
+        ).map_err(|reason| StorageValueError::DecodeError { reason })?;
 
         if !cursor.is_empty() {
-            return Err(todo!("Define proper errors"));
+            return Err(StorageValueError::LeftoverBytes {
+                leftover_bytes: cursor.to_vec(),
+            });
         }
 
         Ok(value)

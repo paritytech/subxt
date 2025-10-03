@@ -4,8 +4,9 @@
 
 use super::storage_value::StorageValue;
 use super::storage_key::StorageKey;
+use crate::error::StorageKeyError;
 use subxt_core::storage::address::Address;
-use frame_decode::storage::StorageInfo;
+use frame_decode::storage::{StorageInfo, IntoDecodableValues};
 use scale_info::PortableRegistry;
 use std::borrow::Cow;
 
@@ -42,7 +43,10 @@ impl<'entry, 'atblock, Addr: Address> StorageEntry<'entry, 'atblock, Addr> {
 
     /// Decode the key for this storage entry. This gives back a type from which we can
     /// decode specific parts of the key hash (where applicable).
-    pub fn key(&'_ self) -> Result<StorageKey<'_, 'atblock, Addr::KeyParts>, StorageKeyError> {
+    pub fn key(&'_ self) -> Result<StorageKey<'_, 'atblock, Addr::KeyParts>, StorageKeyError>
+    where
+        Addr::KeyParts: IntoDecodableValues,
+    {
         StorageKey::new(self.value.info, self.value.types, &self.key)
     }
 

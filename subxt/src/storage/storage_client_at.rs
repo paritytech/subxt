@@ -6,7 +6,7 @@ use crate::{
     backend::{BackendExt, BlockRef},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor},
-    error::{Error, MetadataError, StorageError},
+    error::Error,
     storage::storage_value::StorageValue,
 };
 use codec::Decode;
@@ -60,23 +60,24 @@ where
     T: Config,
     Client: OfflineClientT<T>,
 {
+    /// Access a specific storage entry. This returns a [`StorageEntryClient`] which can be used to
+    /// interact with the storage entry at this specific block.
     pub fn entry<Addr: Address>(&'_ self, address: Addr) -> Result<StorageEntryClient<'_, T, Client, Addr, Addr::IsPlain>, Error> {
-        subxt_core::storage::validate(&address, &self.client.metadata())?;
+        subxt_core::storage::validate(&address, &self.metadata)?;
 
         use frame_decode::storage::StorageTypeInfo;
         let types = self.metadata.types();
         let info = self
-            .client
-            .metadata()
+            .metadata
             .storage_info(address.pallet_name(), address.entry_name())?;
 
         Ok(StorageEntryClient {
-            client: self.client.clone(), 
-            block_ref: self.block_ref.clone(), 
+            client: self.client.clone(),
+            block_ref: self.block_ref.clone(),
             address,
             info,
             types,
-            _marker: core::marker::PhantomData 
+            _marker: core::marker::PhantomData
         })
     }
 }
