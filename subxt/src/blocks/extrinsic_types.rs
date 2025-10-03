@@ -11,13 +11,12 @@ use crate::{
 };
 
 use derive_where::derive_where;
-use scale_decode::DecodeAsType;
+use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_core::blocks::{ExtrinsicDetails as CoreExtrinsicDetails, Extrinsics as CoreExtrinsics};
 
 // Re-export anything that's directly returned/used in the APIs below.
 pub use subxt_core::blocks::{
-    ExtrinsicMetadataDetails, ExtrinsicTransactionExtension, ExtrinsicParams,
-    StaticExtrinsic,
+    ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions, StaticExtrinsic,
 };
 
 /// The body of a block.
@@ -198,7 +197,7 @@ where
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::transaction_extensions()`].
-    pub fn transaction_extensions(&self) -> Option<ExtrinsicExtrinsicParams<'_, T>> {
+    pub fn transaction_extensions(&self) -> Option<ExtrinsicTransactionExtensions<'_, T>> {
         self.inner.transaction_extensions()
     }
 
@@ -213,23 +212,18 @@ where
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::pallet_name()`].
-    pub fn pallet_name(&self) -> Result<&str, Error> {
-        self.inner.pallet_name().map_err(Into::into)
+    pub fn pallet_name(&self) -> &str {
+        self.inner.pallet_name()
     }
 
-    /// See [`subxt_core::blocks::ExtrinsicDetails::variant_name()`].
-    pub fn variant_name(&self) -> Result<&str, Error> {
-        self.inner.variant_name().map_err(Into::into)
+    /// See [`subxt_core::blocks::ExtrinsicDetails::call_name()`].
+    pub fn call_name(&self) -> &str {
+        self.inner.call_name()
     }
 
-    /// See [`subxt_core::blocks::ExtrinsicDetails::extrinsic_metadata()`].
-    pub fn extrinsic_metadata(&self) -> Result<ExtrinsicMetadataDetails<'_>, Error> {
-        self.inner.extrinsic_metadata().map_err(Into::into)
-    }
-
-    /// See [`subxt_core::blocks::ExtrinsicDetails::field_values()`].
-    pub fn field_values(&self) -> Result<scale_value::Composite<u32>, Error> {
-        self.inner.field_values().map_err(Into::into)
+    /// See [`subxt_core::blocks::ExtrinsicDetails::decode_as_fields()`].
+    pub fn decode_as_fields<E: DecodeAsFields>(&self) -> Result<E, Error> {
+        self.inner.decode_as_fields().map_err(Into::into)
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::as_extrinsic()`].

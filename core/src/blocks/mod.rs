@@ -76,7 +76,7 @@ pub use crate::error::ExtrinsicError;
 pub use extrinsic_transaction_extensions::{
     ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions,
 };
-pub use extrinsics::{ExtrinsicDetails, ExtrinsicMetadataDetails, Extrinsics, FoundExtrinsic};
+pub use extrinsics::{ExtrinsicDetails, Extrinsics, FoundExtrinsic};
 pub use static_extrinsic::StaticExtrinsic;
 
 /// Instantiate a new [`Extrinsics`] object, given a vector containing each extrinsic hash (in the

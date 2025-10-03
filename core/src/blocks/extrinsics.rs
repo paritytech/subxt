@@ -11,8 +11,7 @@ use crate::{
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use frame_decode::extrinsics::Extrinsic;
-use scale_decode::DecodeAsType;
-use subxt_metadata::PalletMetadata;
+use scale_decode::{DecodeAsFields, DecodeAsType};
 
 pub use crate::blocks::StaticExtrinsic;
 
@@ -278,7 +277,7 @@ where
 
     /// Decode and provide the extrinsic fields back in the form of a [`scale_value::Composite`]
     /// type which represents the named or unnamed fields that were present in the extrinsic.
-    pub fn field_values(&self) -> Result<scale_value::Composite<u32>, ExtrinsicError> {
+    pub fn decode_as_fields<E: DecodeAsFields>(&self) -> Result<E, ExtrinsicError> {
         let bytes = &mut self.field_bytes();
         let mut fields = self.decoded_info().call_data().map(|d| {
             let name = if d.name().is_empty() {
@@ -288,12 +287,11 @@ where
             };
             scale_decode::Field::new(*d.ty(), name)
         });
-        let decoded =
-            scale_value::scale::decode_as_fields(bytes, &mut fields, self.metadata.types())
-                .map_err(|e| ExtrinsicError::CannotDecodeFields {
-                    extrinsic_index: self.index as usize,
-                    error: e.into()
-                })?;
+        let decoded = E::decode_as_fields(bytes, &mut fields, self.metadata.types())
+            .map_err(|e| ExtrinsicError::CannotDecodeFields {
+                extrinsic_index: self.index as usize,
+                error: e.into()
+            })?;
 
         Ok(decoded)
     }
@@ -351,14 +349,6 @@ pub struct FoundExtrinsic<T: Config, E> {
     pub details: ExtrinsicDetails<T>,
     /// The decoded extrinsic value.
     pub value: E,
-}
-
-/// Details for the given extrinsic plucked from the metadata.
-pub struct ExtrinsicMetadataDetails<'a> {
-    /// Metadata for the pallet that the extrinsic belongs to.
-    pub pallet: PalletMetadata<'a>,
-    /// Metadata for the variant which describes the pallet extrinsics.
-    pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }
 
 #[cfg(test)]

@@ -5,7 +5,7 @@
 //! A representation of the dispatch error; an error returned when
 //! something fails in trying to submit/execute a transaction.
 
-use crate::metadata::{DecodeWithMetadata, Metadata};
+use crate::metadata::Metadata;
 use core::fmt::Debug;
 use scale_decode::{DecodeAsType, TypeResolver, visitor::DecodeAsTypeResult};
 

@@ -3,7 +3,7 @@ use crate::{
     config::{Config, HashFor},
 };
 use derive_where::derive_where;
-use scale_decode::DecodeAsType;
+use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_core::events::{EventDetails as CoreEventDetails, Events as CoreEvents};
 
 pub use subxt_core::events::{EventMetadataDetails, Phase, StaticEvent};
@@ -138,8 +138,8 @@ impl<T: Config> EventDetails<T> {
 
     /// Decode and provide the event fields back in the form of a [`scale_value::Composite`]
     /// type which represents the named or unnamed fields that were present in the event.
-    pub fn field_values(&self) -> Result<scale_value::Composite<u32>, Error> {
-        self.inner.field_values().map_err(Into::into)
+    pub fn decode_fields_as<E: DecodeAsFields>(&self) -> Result<E, Error> {
+        self.inner.decode_fields_as().map_err(Into::into)
     }
 
     /// Attempt to decode these [`EventDetails`] into a type representing the event fields.

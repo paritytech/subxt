@@ -7,7 +7,6 @@ use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor},
     error::{Error, MetadataError, StorageError},
-    metadata::DecodeWithMetadata,
     storage::storage_value::StorageValue,
 };
 use codec::Decode;
