@@ -8,10 +8,7 @@
 use crate::metadata::Metadata;
 use core::fmt::Debug;
 use scale_decode::{DecodeAsType, TypeResolver, visitor::DecodeAsTypeResult};
-
 use std::{borrow::Cow, marker::PhantomData};
-
-use super::{Error, MetadataError};
 
 /// An error dispatching a transaction.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
@@ -169,7 +166,7 @@ impl std::fmt::Display for ModuleError {
 
 impl ModuleError {
     /// Return more details about this error.
-    pub fn details(&self) -> Result<ModuleErrorDetails<'_>, MetadataError> {
+    pub fn details(&self) -> Result<ModuleErrorDetails<'_>, Error> {
         let pallet = self.metadata.pallet_by_index_err(self.pallet_index())?;
         let variant = pallet
             .error_variant_by_index(self.error_index())
@@ -223,7 +220,7 @@ impl ModuleError {
 /// Details about the module error.
 pub struct ModuleErrorDetails<'a> {
     /// The pallet that the error is in
-    pub pallet: crate::metadata::types::PalletMetadata<'a>,
+    pub pallet: subxt_metadata::PalletMetadata<'a>,
     /// The variant representing the error
     pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }

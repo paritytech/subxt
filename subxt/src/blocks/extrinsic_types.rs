@@ -6,10 +6,9 @@ use crate::{
     blocks::block_types::{CachedEvents, get_events},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor},
-    error::Error,
+    error::{ExtrinsicError, ExtrinsicDecodeErrorAt, EventsError},
     events,
 };
-
 use derive_where::derive_where;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_core::blocks::{ExtrinsicDetails as CoreExtrinsicDetails, Extrinsics as CoreExtrinsics};
@@ -37,7 +36,7 @@ where
         extrinsics: Vec<Vec<u8>>,
         cached_events: CachedEvents<T>,
         hash: HashFor<T>,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, ExtrinsicDecodeErrorAt> {
         let inner = CoreExtrinsics::decode_from(extrinsics, client.metadata())?;
         Ok(Self {
             inner,
@@ -80,10 +79,10 @@ where
     /// If an error occurs, all subsequent iterations return `None`.
     pub fn find<E: StaticExtrinsic>(
         &self,
-    ) -> impl Iterator<Item = Result<FoundExtrinsic<T, C, E>, Error>> {
+    ) -> impl Iterator<Item = Result<FoundExtrinsic<T, C, E>, ExtrinsicError>> {
         self.inner.find::<E>().map(|res| {
             match res {
-                Err(e) => Err(Error::from(e)),
+                Err(e) => Err(ExtrinsicError::from(e)),
                 Ok(ext) => {
                     // Wrap details from subxt-core into what we want here:
                     let details = ExtrinsicDetails::new(
@@ -104,18 +103,18 @@ where
 
     /// Iterate through the extrinsics using metadata to dynamically decode and skip
     /// them, and return the first extrinsic found which decodes to the provided `E` type.
-    pub fn find_first<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, C, E>>, Error> {
+    pub fn find_first<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, C, E>>, ExtrinsicError> {
         self.find::<E>().next().transpose()
     }
 
     /// Iterate through the extrinsics using metadata to dynamically decode and skip
     /// them, and return the last extrinsic found which decodes to the provided `Ev` type.
-    pub fn find_last<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, C, E>>, Error> {
+    pub fn find_last<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, C, E>>, ExtrinsicError> {
         self.find::<E>().last().transpose()
     }
 
     /// Find an extrinsics that decodes to the type provided. Returns true if it was found.
-    pub fn has<E: StaticExtrinsic>(&self) -> Result<bool, Error> {
+    pub fn has<E: StaticExtrinsic>(&self) -> Result<bool, ExtrinsicError> {
         Ok(self.find::<E>().next().transpose()?.is_some())
     }
 }
@@ -222,17 +221,17 @@ where
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::decode_as_fields()`].
-    pub fn decode_as_fields<E: DecodeAsFields>(&self) -> Result<E, Error> {
+    pub fn decode_as_fields<E: DecodeAsFields>(&self) -> Result<E, ExtrinsicError> {
         self.inner.decode_as_fields().map_err(Into::into)
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::as_extrinsic()`].
-    pub fn as_extrinsic<E: StaticExtrinsic>(&self) -> Result<Option<E>, Error> {
+    pub fn as_extrinsic<E: StaticExtrinsic>(&self) -> Result<Option<E>, ExtrinsicError> {
         self.inner.as_extrinsic::<E>().map_err(Into::into)
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::as_root_extrinsic()`].
-    pub fn as_root_extrinsic<E: DecodeAsType>(&self) -> Result<E, Error> {
+    pub fn as_root_extrinsic<E: DecodeAsType>(&self) -> Result<E, ExtrinsicError> {
         self.inner.as_root_extrinsic::<E>().map_err(Into::into)
     }
 }
@@ -243,7 +242,7 @@ where
     C: OnlineClientT<T>,
 {
     /// The events associated with the extrinsic.
-    pub async fn events(&self) -> Result<ExtrinsicEvents<T>, Error> {
+    pub async fn events(&self) -> Result<ExtrinsicEvents<T>, EventsError> {
         let events = get_events(&self.client, self.block_hash, &self.cached_events).await?;
         let ext_hash = self.inner.hash();
         Ok(ExtrinsicEvents::new(ext_hash, self.index(), events))
@@ -302,7 +301,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails<T>, Error>> {
+    pub fn iter(&self) -> impl Iterator<Item = Result<events::EventDetails<T>, EventsError>> {
         self.events.iter().filter(|ev| {
             ev.as_ref()
                 .map(|ev| ev.phase() == events::Phase::ApplyExtrinsic(self.idx))
@@ -314,7 +313,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::find()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn find<Ev: events::StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> {
+    pub fn find<Ev: events::StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, EventsError>> {
         self.iter()
             .filter_map(|ev| ev.and_then(|ev| ev.as_event::<Ev>()).transpose())
     }
@@ -324,7 +323,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::find_first()`] does, with the
     /// exception that it ignores events not related to the submitted extrinsic.
-    pub fn find_first<Ev: events::StaticEvent>(&self) -> Result<Option<Ev>, Error> {
+    pub fn find_first<Ev: events::StaticEvent>(&self) -> Result<Option<Ev>, EventsError> {
         self.find::<Ev>().next().transpose()
     }
 
@@ -333,7 +332,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::find_last()`] does, with the
     /// exception that it ignores events not related to the submitted extrinsic.
-    pub fn find_last<Ev: events::StaticEvent>(&self) -> Result<Option<Ev>, Error> {
+    pub fn find_last<Ev: events::StaticEvent>(&self) -> Result<Option<Ev>, EventsError> {
         self.find::<Ev>().last().transpose()
     }
 
@@ -341,7 +340,7 @@ impl<T: Config> ExtrinsicEvents<T> {
     ///
     /// This works in the same way that [`events::Events::has()`] does, with the
     /// exception that it ignores events not related to the submitted extrinsic.
-    pub fn has<Ev: events::StaticEvent>(&self) -> Result<bool, Error> {
+    pub fn has<Ev: events::StaticEvent>(&self) -> Result<bool, EventsError> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
 }

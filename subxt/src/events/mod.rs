@@ -9,7 +9,7 @@
 mod events_client;
 mod events_type;
 
-use crate::Error;
+use crate::error::EventsError;
 use crate::client::OnlineClientT;
 use subxt_core::{
     Metadata,
@@ -24,7 +24,7 @@ pub async fn new_events_from_client<T, C>(
     metadata: Metadata,
     block_hash: HashFor<T>,
     client: C,
-) -> Result<Events<T>, Error>
+) -> Result<Events<T>, EventsError>
 where
     T: Config,
     C: OnlineClientT<T>,

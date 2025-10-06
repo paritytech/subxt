@@ -6,13 +6,13 @@ use crate::{
     backend::{BackendExt, BlockRef, TransactionStatus},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, ExtrinsicParams, HashFor, Header},
-    error::{BlockError, Error},
+    error::{ExtrinsicError, TransactionStatusError},
     tx::{Payload, Signer as SignerT, TxProgress},
     utils::PhantomDataSendSync,
 };
 use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
-use futures::future::try_join;
+use futures::future::{ try_join, TryFutureExt };
 use subxt_core::tx::TransactionVersion;
 
 /// A client for working with transactions.
@@ -37,7 +37,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     /// if the call is valid (or if it's not possible to check since the call has no validation hash).
     /// Return an error if the call was not valid or something went wrong trying to validate it (ie
     /// the pallet or call in question do not exist at all).
-    pub fn validate<Call>(&self, call: &Call) -> Result<(), Error>
+    pub fn validate<Call>(&self, call: &Call) -> Result<(), ExtrinsicError>
     where
         Call: Payload,
     {
@@ -45,7 +45,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 
     /// Return the SCALE encoded bytes representing the call data of the transaction.
-    pub fn call_data<Call>(&self, call: &Call) -> Result<Vec<u8>, Error>
+    pub fn call_data<Call>(&self, call: &Call) -> Result<Vec<u8>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -55,7 +55,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     /// Creates an unsigned transaction without submitting it. Depending on the metadata, we might end
     /// up constructing either a v4 or v5 transaction. See [`Self::create_v4_unsigned`] or
     /// [`Self::create_v5_bare`] if you'd like to explicitly create an unsigned transaction of a certain version.
-    pub fn create_unsigned<Call>(&self, call: &Call) -> Result<SubmittableTransaction<T, C>, Error>
+    pub fn create_unsigned<Call>(&self, call: &Call) -> Result<SubmittableTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -78,7 +78,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     pub fn create_v4_unsigned<Call>(
         &self,
         call: &Call,
-    ) -> Result<SubmittableTransaction<T, C>, Error>
+    ) -> Result<SubmittableTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -95,7 +95,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     ///
     /// Prefer [`Self::create_unsigned()`] if you don't know which version to create; this will pick the
     /// most suitable one for the given chain.
-    pub fn create_v5_bare<Call>(&self, call: &Call) -> Result<SubmittableTransaction<T, C>, Error>
+    pub fn create_v5_bare<Call>(&self, call: &Call) -> Result<SubmittableTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -117,7 +117,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialTransaction<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -148,7 +148,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialTransaction<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -175,7 +175,7 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialTransaction<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -198,9 +198,21 @@ where
     C: OnlineClientT<T>,
 {
     /// Get the account nonce for a given account ID.
-    pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, Error> {
-        let block_ref = self.client.backend().latest_finalized_block_ref().await?;
-        crate::blocks::get_account_nonce(&self.client, account_id, block_ref.hash()).await
+    pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, ExtrinsicError> {
+        let block_ref = self
+            .client
+            .backend()
+            .latest_finalized_block_ref()
+            .await
+            .map_err(ExtrinsicError::CannotGetLatestFinalizedBlock)?;
+
+        crate::blocks::get_account_nonce(&self.client, account_id, block_ref.hash())
+            .await
+            .map_err(|e| ExtrinsicError::AccountNonceError { 
+                block_hash: block_ref.hash().into(), 
+                account_id: account_id.encode().into(), 
+                reason: e
+            })
     }
 
     /// Creates a partial transaction, without submitting it. This can then be signed and submitted.
@@ -209,7 +221,7 @@ where
         call: &Call,
         account_id: &T::AccountId,
         mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialTransaction<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -226,7 +238,7 @@ where
         call: &Call,
         account_id: &T::AccountId,
         mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialTransaction<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -243,7 +255,7 @@ where
         call: &Call,
         account_id: &T::AccountId,
         mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<PartialTransaction<T, C>, Error>
+    ) -> Result<PartialTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -257,7 +269,7 @@ where
         call: &Call,
         signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<SubmittableTransaction<T, C>, Error>
+    ) -> Result<SubmittableTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
         Signer: SignerT<T>,
@@ -278,7 +290,7 @@ where
         &mut self,
         call: &Call,
         signer: &Signer,
-    ) -> Result<TxProgress<T, C>, Error>
+    ) -> Result<TxProgress<T, C>, ExtrinsicError>
     where
         Call: Payload,
         Signer: SignerT<T>,
@@ -297,7 +309,7 @@ where
         call: &Call,
         signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<TxProgress<T, C>, Error>
+    ) -> Result<TxProgress<T, C>, ExtrinsicError>
     where
         Call: Payload,
         Signer: SignerT<T>,
@@ -322,7 +334,7 @@ where
         &mut self,
         call: &Call,
         signer: &Signer,
-    ) -> Result<HashFor<T>, Error>
+    ) -> Result<HashFor<T>, ExtrinsicError>
     where
         Call: Payload,
         Signer: SignerT<T>,
@@ -345,7 +357,7 @@ where
         call: &Call,
         signer: &Signer,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<HashFor<T>, Error>
+    ) -> Result<HashFor<T>, ExtrinsicError>
     where
         Call: Payload,
         Signer: SignerT<T>,
@@ -485,7 +497,7 @@ where
     ///
     /// Returns a [`TxProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
-    pub async fn submit_and_watch(&self) -> Result<TxProgress<T, C>, Error> {
+    pub async fn submit_and_watch(&self) -> Result<TxProgress<T, C>, ExtrinsicError> {
         // Get a hash of the transaction (we'll need this later).
         let ext_hash = self.hash();
 
@@ -494,7 +506,8 @@ where
             .client
             .backend()
             .submit_transaction(self.encoded())
-            .await?;
+            .await
+            .map_err(ExtrinsicError::ErrorSubmittingTransaction)?;
 
         Ok(TxProgress::new(sub, self.client.clone(), ext_hash))
     }
@@ -504,13 +517,14 @@ where
     /// It's usually better to call `submit_and_watch` to get an idea of the progress of the
     /// submission and whether it's eventually successful or not. This call does not guarantee
     /// success, and is just sending the transaction to the chain.
-    pub async fn submit(&self) -> Result<HashFor<T>, Error> {
+    pub async fn submit(&self) -> Result<HashFor<T>, ExtrinsicError> {
         let ext_hash = self.hash();
         let mut sub = self
             .client
             .backend()
             .submit_transaction(self.encoded())
-            .await?;
+            .await
+            .map_err(ExtrinsicError::ErrorSubmittingTransaction)?;
 
         // If we get a bad status or error back straight away then error, else return the hash.
         match sub.next().await {
@@ -521,19 +535,18 @@ where
                 | TransactionStatus::NoLongerInBestBlock
                 | TransactionStatus::InFinalizedBlock { .. } => Ok(ext_hash),
                 TransactionStatus::Error { message } => {
-                    Err(Error::Other(format!("Transaction error: {message}")))
+                    Err(ExtrinsicError::TransactionStatusError(TransactionStatusError::Error(message)))
                 }
                 TransactionStatus::Invalid { message } => {
-                    Err(Error::Other(format!("Transaction invalid: {message}")))
+                    Err(ExtrinsicError::TransactionStatusError(TransactionStatusError::Invalid(message)))
+
                 }
                 TransactionStatus::Dropped { message } => {
-                    Err(Error::Other(format!("Transaction dropped: {message}")))
+                    Err(ExtrinsicError::TransactionStatusError(TransactionStatusError::Dropped(message)))
                 }
             },
-            Some(Err(e)) => Err(e),
-            None => Err(Error::Other(
-                "Transaction broadcast was unsuccessful; stream terminated early".into(),
-            )),
+            Some(Err(e)) => Err(ExtrinsicError::TransactionStatusStreamError(e)),
+            None => Err(ExtrinsicError::UnexpectedEndOfTransactionStatusStream),
         }
     }
 
@@ -541,8 +554,13 @@ where
     /// valid can be added to a block, but may still end up in an error state.
     ///
     /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the transaction.
-    pub async fn validate(&self) -> Result<ValidationResult, Error> {
-        let latest_block_ref = self.client.backend().latest_finalized_block_ref().await?;
+    pub async fn validate(&self) -> Result<ValidationResult, ExtrinsicError> {
+        let latest_block_ref = self
+            .client
+            .backend()
+            .latest_finalized_block_ref()
+            .await
+            .map_err(ExtrinsicError::CannotGetLatestFinalizedBlock)?;
         self.validate_at(latest_block_ref).await
     }
 
@@ -553,7 +571,7 @@ where
     pub async fn validate_at(
         &self,
         at: impl Into<BlockRef<HashFor<T>>>,
-    ) -> Result<ValidationResult, Error> {
+    ) -> Result<ValidationResult, ExtrinsicError> {
         let block_hash = at.into().hash();
 
         // Approach taken from https://github.com/paritytech/json-rpc-interface-spec/issues/55.
@@ -570,17 +588,23 @@ where
                 Some(&params),
                 block_hash,
             )
-            .await?;
+            .await
+            .map_err(ExtrinsicError::CannotGetValidationInfo)?;
 
         ValidationResult::try_from_bytes(res)
     }
 
     /// This returns an estimate for what the transaction is expected to cost to execute, less any tips.
     /// The actual amount paid can vary from block to block based on node traffic and other factors.
-    pub async fn partial_fee_estimate(&self) -> Result<u128, Error> {
+    pub async fn partial_fee_estimate(&self) -> Result<u128, ExtrinsicError> {
         let mut params = self.encoded().to_vec();
         (self.encoded().len() as u32).encode_to(&mut params);
-        let latest_block_ref = self.client.backend().latest_finalized_block_ref().await?;
+        let latest_block_ref = self
+            .client
+            .backend()
+            .latest_finalized_block_ref()
+            .await
+            .map_err(ExtrinsicError::CannotGetLatestFinalizedBlock)?;
 
         // destructuring RuntimeDispatchInfo, see type information <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
         // data layout: {weight_ref_time: Compact<u64>, weight_proof_size: Compact<u64>, class: u8, partial_fee: u128}
@@ -592,7 +616,9 @@ where
                 Some(&params),
                 latest_block_ref.hash(),
             )
-            .await?;
+            .await
+            .map_err(ExtrinsicError::CannotGetFeeInfo)?;
+
         Ok(partial_fee)
     }
 }
@@ -602,19 +628,30 @@ async fn inject_account_nonce_and_block<T: Config, Client: OnlineClientT<T>>(
     client: &Client,
     account_id: &T::AccountId,
     params: &mut <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-) -> Result<(), Error> {
+) -> Result<(), ExtrinsicError> {
     use subxt_core::config::transaction_extensions::Params;
 
-    let block_ref = client.backend().latest_finalized_block_ref().await?;
+    let block_ref = client
+        .backend()
+        .latest_finalized_block_ref()
+        .await
+        .map_err(ExtrinsicError::CannotGetLatestFinalizedBlock)?;
 
     let (block_header, account_nonce) = try_join(
-        client.backend().block_header(block_ref.hash()),
-        crate::blocks::get_account_nonce(client, account_id, block_ref.hash()),
+        client.backend().block_header(block_ref.hash())
+            .map_err(ExtrinsicError::CannotGetLatestFinalizedBlock),
+        crate::blocks::get_account_nonce(client, account_id, block_ref.hash())
+            .map_err(|e| ExtrinsicError::AccountNonceError { 
+                block_hash: block_ref.hash().into(), 
+                account_id: account_id.encode().into(), 
+                reason: e
+            }),
     )
     .await?;
 
-    let block_header =
-        block_header.ok_or_else(|| Error::Block(BlockError::not_found(block_ref.hash())))?;
+    let block_header = block_header.ok_or_else(|| ExtrinsicError::CannotFindBlockHeader {
+        block_hash: block_ref.hash().into()
+    })?;
 
     params.inject_account_nonce(account_nonce);
     params.inject_block(block_header.number().into(), block_ref.hash());

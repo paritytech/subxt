@@ -6,7 +6,7 @@ use crate::blocks::extrinsic_transaction_extensions::ExtrinsicTransactionExtensi
 use crate::{
     Metadata,
     config::{Config, HashFor, Hasher},
-    error::ExtrinsicError,
+    error::{ ExtrinsicError, ExtrinsicDecodeErrorAt, ExtrinsicDecodeErrorAtReason },
 };
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -27,7 +27,7 @@ impl<T: Config> Extrinsics<T> {
     /// Instantiate a new [`Extrinsics`] object, given a vector containing
     /// each extrinsic hash (in the form of bytes) and some metadata that
     /// we'll use to decode them.
-    pub fn decode_from(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, ExtrinsicError> {
+    pub fn decode_from(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, ExtrinsicDecodeErrorAt> {
         let hasher = T::Hasher::new(&metadata);
         let extrinsics = extrinsics
             .into_iter()
@@ -41,24 +41,24 @@ impl<T: Config> Extrinsics<T> {
                     &metadata,
                     metadata.types(),
                 )
-                .map_err(|error| ExtrinsicError::ExtrinsicDecodeError {
+                .map_err(|error| ExtrinsicDecodeErrorAt {
                     extrinsic_index,
-                    error,
+                    error: ExtrinsicDecodeErrorAtReason::DecodeError(error),
                 })?
                 .into_owned();
 
                 // We didn't consume all bytes, so decoding probably failed.
                 if !cursor.is_empty() {
-                    return Err(ExtrinsicError::LeftoverBytes {
+                    return Err(ExtrinsicDecodeErrorAt {
                         extrinsic_index,
-                        num_leftover_bytes: cursor.len(),
+                        error: ExtrinsicDecodeErrorAtReason::LeftoverBytes(cursor.to_vec()),
                     }
                     .into());
                 }
 
                 Ok(Arc::new((decoded_info, bytes)))
             })
-            .collect::<Result<_, ExtrinsicError>>()?;
+            .collect::<Result<_, ExtrinsicDecodeErrorAt>>()?;
 
         Ok(Self {
             extrinsics,
@@ -506,7 +506,7 @@ mod tests {
         assert_matches!(
             result.err(),
             Some(
-                crate::error::ExtrinsicError::ExtrinsicDecodeError {
+                crate::error::ExtrinsicDecodeErrorAt {
                     extrinsic_index: 0,
                     error: _
                 }
@@ -526,9 +526,9 @@ mod tests {
         assert_matches!(
             result.err(),
             Some(
-                crate::error::ExtrinsicError::ExtrinsicDecodeError {
+                crate::error::ExtrinsicDecodeErrorAt {
                     extrinsic_index: 0,
-                    error: ExtrinsicDecodeError::VersionNotSupported(3),
+                    error: ExtrinsicDecodeErrorAtReason::DecodeError(ExtrinsicDecodeError::VersionNotSupported(3)),
                 }
             )
         );

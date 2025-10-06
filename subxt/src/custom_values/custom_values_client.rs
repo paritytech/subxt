@@ -1,5 +1,5 @@
 use crate::client::OfflineClientT;
-use crate::{Config, Error};
+use crate::{Config, error::CustomValueError};
 use derive_where::derive_where;
 
 use subxt_core::custom_values::address::{Address, Maybe};
@@ -27,20 +27,20 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
     pub fn at<Addr: Address<IsDecodable = Maybe> + ?Sized>(
         &self,
         address: &Addr,
-    ) -> Result<Addr::Target, Error> {
-        subxt_core::custom_values::get(address, &self.client.metadata()).map_err(Into::into)
+    ) -> Result<Addr::Target, CustomValueError> {
+        subxt_core::custom_values::get(address, &self.client.metadata())
     }
 
     /// Access the bytes of a custom value by the address it is registered under.
-    pub fn bytes_at<Addr: Address + ?Sized>(&self, address: &Addr) -> Result<Vec<u8>, Error> {
-        subxt_core::custom_values::get_bytes(address, &self.client.metadata()).map_err(Into::into)
+    pub fn bytes_at<Addr: Address + ?Sized>(&self, address: &Addr) -> Result<Vec<u8>, CustomValueError> {
+        subxt_core::custom_values::get_bytes(address, &self.client.metadata())
     }
 
     /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Returns an error if the address was not valid (wrong name, type or raw bytes)
-    pub fn validate<Addr: Address + ?Sized>(&self, address: &Addr) -> Result<(), Error> {
-        subxt_core::custom_values::validate(address, &self.client.metadata()).map_err(Into::into)
+    pub fn validate<Addr: Address + ?Sized>(&self, address: &Addr) -> Result<(), CustomValueError> {
+        subxt_core::custom_values::validate(address, &self.client.metadata())
     }
 }
 

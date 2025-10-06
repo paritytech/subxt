@@ -8,7 +8,7 @@ use crate::{
     backend::BlockRef,
     client::OnlineClientT,
     config::{Config, HashFor},
-    error::Error,
+    error::ViewFunctionError,
 };
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
@@ -43,13 +43,17 @@ where
     /// Obtain an interface to call View Functions at the latest finalized block.
     pub fn at_latest(
         &self,
-    ) -> impl Future<Output = Result<ViewFunctionsApi<T, Client>, Error>> + Send + 'static {
+    ) -> impl Future<Output = Result<ViewFunctionsApi<T, Client>, ViewFunctionError>> + Send + 'static {
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
         async move {
             // get the ref for the latest finalized block and use that.
-            let block_ref = client.backend().latest_finalized_block_ref().await?;
+            let block_ref = client
+                .backend()
+                .latest_finalized_block_ref()
+                .await
+                .map_err(ViewFunctionError::CannotGetLatestFinalizedBlock)?;
 
             Ok(ViewFunctionsApi::new(client, block_ref))
         }

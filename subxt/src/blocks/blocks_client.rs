@@ -7,7 +7,7 @@ use crate::{
     backend::{BlockRef, StreamOfResults},
     client::OnlineClientT,
     config::{Config, HashFor},
-    error::{BlockError, Error},
+    error::BlockError,
     utils::PhantomDataSendSync,
 };
 use derive_where::derive_where;
@@ -15,7 +15,7 @@ use futures::StreamExt;
 use std::future::Future;
 
 type BlockStream<T> = StreamOfResults<T>;
-type BlockStreamRes<T> = Result<BlockStream<T>, Error>;
+type BlockStreamRes<T> = Result<BlockStream<T>, BlockError>;
 
 /// A client for working with blocks.
 #[derive_where(Clone; Client)]
@@ -49,14 +49,14 @@ where
     pub fn at(
         &self,
         block_ref: impl Into<BlockRef<HashFor<T>>>,
-    ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
+    ) -> impl Future<Output = Result<Block<T, Client>, BlockError>> + Send + 'static {
         self.at_or_latest(Some(block_ref.into()))
     }
 
     /// Obtain block details of the latest finalized block.
     pub fn at_latest(
         &self,
-    ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
+    ) -> impl Future<Output = Result<Block<T, Client>, BlockError>> + Send + 'static {
         self.at_or_latest(None)
     }
 
@@ -65,18 +65,33 @@ where
     fn at_or_latest(
         &self,
         block_ref: Option<BlockRef<HashFor<T>>>,
-    ) -> impl Future<Output = Result<Block<T, Client>, Error>> + Send + 'static {
+    ) -> impl Future<Output = Result<Block<T, Client>, BlockError>> + Send + 'static {
         let client = self.client.clone();
         async move {
             // If a block ref isn't provided, we'll get the latest finalized ref to use.
             let block_ref = match block_ref {
                 Some(r) => r,
-                None => client.backend().latest_finalized_block_ref().await?,
+                None => {
+                    client
+                        .backend()
+                        .latest_finalized_block_ref()
+                        .await
+                        .map_err(BlockError::CouldNotGetLatestBlock)?
+                }
             };
 
-            let block_header = match client.backend().block_header(block_ref.hash()).await? {
+            let maybe_block_header = client
+                .backend()
+                .block_header(block_ref.hash())
+                .await
+                .map_err(|e| BlockError::CouldNotGetBlockHeader {
+                    block_hash: block_ref.hash().into(),
+                    reason: e,
+                })?;
+
+            let block_header = match maybe_block_header {
                 Some(header) => header,
-                None => return Err(BlockError::not_found(block_ref.hash()).into()),
+                None => return Err(BlockError::BlockNotFound { block_hash: block_ref.hash().into() }),
             };
 
             Ok(Block::new(block_header, block_ref, client))
@@ -89,14 +104,18 @@ where
     /// the time.
     pub fn subscribe_all(
         &self,
-    ) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, Error>> + Send + 'static
+    ) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, BlockError>> + Send + 'static
     where
         Client: Send + Sync + 'static,
     {
         let client = self.client.clone();
         let hasher = client.hasher();
         header_sub_fut_to_block_sub(self.clone(), async move {
-            let stream = client.backend().stream_all_block_headers(hasher).await?;
+            let stream = client
+                .backend()
+                .stream_all_block_headers(hasher)
+                .await
+                .map_err(BlockError::CouldNotSubscribeToAllBlocks)?;
             BlockStreamRes::Ok(stream)
         })
     }
@@ -107,14 +126,18 @@ where
     /// the time.
     pub fn subscribe_best(
         &self,
-    ) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, Error>> + Send + 'static
+    ) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, BlockError>> + Send + 'static
     where
         Client: Send + Sync + 'static,
     {
         let client = self.client.clone();
         let hasher = client.hasher();
         header_sub_fut_to_block_sub(self.clone(), async move {
-            let stream = client.backend().stream_best_block_headers(hasher).await?;
+            let stream = client
+                .backend()
+                .stream_best_block_headers(hasher)
+                .await
+                .map_err(BlockError::CouldNotSubscribeToBestBlocks)?;
             BlockStreamRes::Ok(stream)
         })
     }
@@ -122,7 +145,7 @@ where
     /// Subscribe to finalized blocks.
     pub fn subscribe_finalized(
         &self,
-    ) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, Error>> + Send + 'static
+    ) -> impl Future<Output = Result<BlockStream<Block<T, Client>>, BlockError>> + Send + 'static
     where
         Client: Send + Sync + 'static,
     {
@@ -132,7 +155,8 @@ where
             let stream = client
                 .backend()
                 .stream_finalized_block_headers(hasher)
-                .await?;
+                .await
+                .map_err(BlockError::CouldNotSubscribeToFinalizedBlocks)?;
             BlockStreamRes::Ok(stream)
         })
     }
@@ -143,10 +167,10 @@ where
 async fn header_sub_fut_to_block_sub<T, Client, S>(
     blocks_client: BlocksClient<T, Client>,
     sub: S,
-) -> Result<BlockStream<Block<T, Client>>, Error>
+) -> Result<BlockStream<Block<T, Client>>, BlockError>
 where
     T: Config,
-    S: Future<Output = Result<BlockStream<(T::Header, BlockRef<HashFor<T>>)>, Error>>
+    S: Future<Output = Result<BlockStream<(T::Header, BlockRef<HashFor<T>>)>, BlockError>>
         + Send
         + 'static,
     Client: OnlineClientT<T> + Send + Sync + 'static,

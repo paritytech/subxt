@@ -7,7 +7,7 @@ use crate::{
     blocks::Extrinsics,
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor, Header},
-    error::{BlockError, DecodeError, Error},
+    error::{BlockError, AccountNonceError, EventsError, ExtrinsicError},
     events,
     runtime_api::RuntimeApi,
     storage::StorageClientAt,
@@ -84,23 +84,30 @@ where
     C: OnlineClientT<T>,
 {
     /// Return the events associated with the block, fetching them from the node if necessary.
-    pub async fn events(&self) -> Result<events::Events<T>, Error> {
+    pub async fn events(&self) -> Result<events::Events<T>, EventsError> {
         get_events(&self.client, self.hash(), &self.cached_events).await
     }
 
     /// Fetch and return the extrinsics in the block body.
-    pub async fn extrinsics(&self) -> Result<Extrinsics<T, C>, Error> {
+    pub async fn extrinsics(&self) -> Result<Extrinsics<T, C>, ExtrinsicError> {
         let block_hash = self.hash();
-        let Some(extrinsics) = self.client.backend().block_body(block_hash).await? else {
-            return Err(BlockError::not_found(block_hash).into());
-        };
 
-        Extrinsics::new(
+        let extrinsics = self
+            .client
+            .backend()
+            .block_body(block_hash)
+            .await
+            .map_err(ExtrinsicError::CannotGetBlockBody)?
+            .ok_or_else(|| ExtrinsicError::BlockNotFound(block_hash.into()))?;
+
+        let extrinsics = Extrinsics::new(
             self.client.clone(),
             extrinsics,
             self.cached_events.clone(),
             block_hash,
-        )
+        )?;
+
+        Ok(extrinsics)
     }
 
     /// Work with storage.
@@ -109,13 +116,19 @@ where
     }
 
     /// Execute a runtime API call at this block.
-    pub async fn runtime_api(&self) -> Result<RuntimeApi<T, C>, Error> {
-        Ok(RuntimeApi::new(self.client.clone(), self.block_ref.clone()))
+    pub async fn runtime_api(&self) -> RuntimeApi<T, C> {
+        RuntimeApi::new(self.client.clone(), self.block_ref.clone())
     }
 
     /// Get the account nonce for a given account ID at this block.
-    pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, Error> {
-        get_account_nonce(&self.client, account_id, self.hash()).await
+    pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, BlockError> {
+        get_account_nonce(&self.client, account_id, self.hash())
+            .await
+            .map_err(|e| BlockError::AccountNonceError {
+                block_hash: self.hash().into(),
+                account_id: account_id.encode().into(),
+                reason: e
+            })
     }
 }
 
@@ -124,7 +137,7 @@ pub(crate) async fn get_events<C, T>(
     client: &C,
     block_hash: HashFor<T>,
     cached_events: &AsyncMutex<Option<events::Events<T>>>,
-) -> Result<events::Events<T>, Error>
+) -> Result<events::Events<T>, EventsError>
 where
     T: Config,
     C: OnlineClientT<T>,
@@ -152,7 +165,7 @@ pub(crate) async fn get_account_nonce<C, T>(
     client: &C,
     account_id: &T::AccountId,
     block_hash: HashFor<T>,
-) -> Result<u64, Error>
+) -> Result<u64, AccountNonceError>
 where
     C: OnlineClientT<T>,
     T: Config,
@@ -173,10 +186,7 @@ where
         4 => u32::decode(cursor)?.into(),
         8 => u64::decode(cursor)?,
         _ => {
-            return Err(Error::Decode(DecodeError::custom_string(format!(
-                "state call AccountNonceApi_account_nonce returned an unexpected number of bytes: {} (expected 2, 4 or 8)",
-                account_nonce_bytes.len()
-            ))));
+            return Err(AccountNonceError::WrongNumberOfBytes(account_nonce_bytes.len()));
         }
     };
     Ok(account_nonce)

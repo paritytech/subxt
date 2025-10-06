@@ -10,7 +10,7 @@ use crate::{
     backend::{BlockRef, StreamOfResults, TransactionStatus as BackendTxStatus},
     client::OnlineClientT,
     config::{Config, HashFor},
-    error::{DispatchError, Error, RpcError, TransactionError},
+    error::{DispatchError, TransactionEventsError, TransactionProgressError, TransactionFinalizedSuccessError, TransactionStatusError},
     events::EventsClient,
     utils::strip_compact_prefix,
 };
@@ -67,7 +67,7 @@ where
     /// Return the next transaction status when it's emitted. This just delegates to the
     /// [`futures::Stream`] implementation for [`TxProgress`], but allows you to
     /// avoid importing that trait if you don't otherwise need it.
-    pub async fn next(&mut self) -> Option<Result<TxStatus<T, C>, Error>> {
+    pub async fn next(&mut self) -> Option<Result<TxStatus<T, C>, TransactionProgressError>> {
         StreamExt::next(self).await
     }
 
@@ -81,24 +81,24 @@ where
     /// probability that the transaction will not make it into a block but there is no guarantee
     /// that this is true. In those cases the stream is closed however, so you currently have no way to find
     /// out if they finally made it into a block or not.
-    pub async fn wait_for_finalized(mut self) -> Result<TxInBlock<T, C>, Error> {
+    pub async fn wait_for_finalized(mut self) -> Result<TxInBlock<T, C>, TransactionProgressError> {
         while let Some(status) = self.next().await {
             match status? {
                 // Finalized! Return.
                 TxStatus::InFinalizedBlock(s) => return Ok(s),
                 // Error scenarios; return the error.
-                TxStatus::Error { message } => return Err(TransactionError::Error(message).into()),
+                TxStatus::Error { message } => return Err(TransactionStatusError::Error(message).into()),
                 TxStatus::Invalid { message } => {
-                    return Err(TransactionError::Invalid(message).into());
+                    return Err(TransactionStatusError::Invalid(message).into());
                 }
                 TxStatus::Dropped { message } => {
-                    return Err(TransactionError::Dropped(message).into());
+                    return Err(TransactionStatusError::Dropped(message).into());
                 }
                 // Ignore and wait for next status event:
                 _ => continue,
             }
         }
-        Err(RpcError::SubscriptionDropped.into())
+        Err(TransactionProgressError::UnexpectedEndOfTransactionStatusStream)
     }
 
     /// Wait for the transaction to be finalized, and for the transaction events to indicate
@@ -114,14 +114,14 @@ where
     /// out if they finally made it into a block or not.
     pub async fn wait_for_finalized_success(
         self,
-    ) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
+    ) -> Result<crate::blocks::ExtrinsicEvents<T>, TransactionFinalizedSuccessError> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
 }
 
 impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
-    type Item = Result<TxStatus<T, C>, Error>;
+    type Item = Result<TxStatus<T, C>, TransactionProgressError>;
 
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
@@ -132,37 +132,39 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
             None => return Poll::Ready(None),
         };
 
-        sub.poll_next_unpin(cx).map_ok(|status| {
-            match status {
-                BackendTxStatus::Validated => TxStatus::Validated,
-                BackendTxStatus::Broadcasted => TxStatus::Broadcasted,
-                BackendTxStatus::NoLongerInBestBlock => TxStatus::NoLongerInBestBlock,
-                BackendTxStatus::InBestBlock { hash } => {
-                    TxStatus::InBestBlock(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
+        sub.poll_next_unpin(cx)
+            .map_err(TransactionProgressError::CannotGetNextProgressUpdate)
+            .map_ok(|status| {
+                match status {
+                    BackendTxStatus::Validated => TxStatus::Validated,
+                    BackendTxStatus::Broadcasted => TxStatus::Broadcasted,
+                    BackendTxStatus::NoLongerInBestBlock => TxStatus::NoLongerInBestBlock,
+                    BackendTxStatus::InBestBlock { hash } => {
+                        TxStatus::InBestBlock(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
+                    }
+                    // These stream events mean that nothing further will be sent:
+                    BackendTxStatus::InFinalizedBlock { hash } => {
+                        self.sub = None;
+                        TxStatus::InFinalizedBlock(TxInBlock::new(
+                            hash,
+                            self.ext_hash,
+                            self.client.clone(),
+                        ))
+                    }
+                    BackendTxStatus::Error { message } => {
+                        self.sub = None;
+                        TxStatus::Error { message }
+                    }
+                    BackendTxStatus::Invalid { message } => {
+                        self.sub = None;
+                        TxStatus::Invalid { message }
+                    }
+                    BackendTxStatus::Dropped { message } => {
+                        self.sub = None;
+                        TxStatus::Dropped { message }
+                    }
                 }
-                // These stream events mean that nothing further will be sent:
-                BackendTxStatus::InFinalizedBlock { hash } => {
-                    self.sub = None;
-                    TxStatus::InFinalizedBlock(TxInBlock::new(
-                        hash,
-                        self.ext_hash,
-                        self.client.clone(),
-                    ))
-                }
-                BackendTxStatus::Error { message } => {
-                    self.sub = None;
-                    TxStatus::Error { message }
-                }
-                BackendTxStatus::Invalid { message } => {
-                    self.sub = None;
-                    TxStatus::Invalid { message }
-                }
-                BackendTxStatus::Dropped { message } => {
-                    self.sub = None;
-                    TxStatus::Dropped { message }
-                }
-            }
-        })
+            })
     }
 }
 
@@ -258,12 +260,18 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(&self) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
+    pub async fn wait_for_success(&self) -> Result<crate::blocks::ExtrinsicEvents<T>, TransactionEventsError> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
-        for ev in events.iter() {
-            let ev = ev?;
+        for (ev_idx, ev) in events.iter().enumerate() {
+            let ev = ev
+                .map_err(|e| TransactionEventsError::CannotDecodeEventInBlock {
+                    event_index: ev_idx,
+                    block_hash: self.block_hash().into(),
+                    error: e
+                })?;
+
             if ev.pallet_name() == "System" && ev.variant_name() == "ExtrinsicFailed" {
                 let dispatch_error =
                     DispatchError::decode_from(ev.field_bytes(), self.client.metadata())?;
@@ -280,15 +288,21 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn fetch_events(&self) -> Result<crate::blocks::ExtrinsicEvents<T>, Error> {
+    pub async fn fetch_events(&self) -> Result<crate::blocks::ExtrinsicEvents<T>, TransactionEventsError> {
         let hasher = self.client.hasher();
 
         let block_body = self
             .client
             .backend()
             .block_body(self.block_ref.hash())
-            .await?
-            .ok_or(Error::Transaction(TransactionError::BlockNotFound))?;
+            .await
+            .map_err(|e| TransactionEventsError::CannotFetchBlockBody {
+                block_hash: self.block_hash().into(),
+                error: e
+            })?
+            .ok_or_else(|| TransactionEventsError::BlockNotFound { 
+                block_hash: self.block_hash().into() 
+            })?;
 
         let extrinsic_idx = block_body
             .iter()
@@ -302,11 +316,19 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             })
             // If we successfully obtain the block hash we think contains our
             // extrinsic, the extrinsic should be in there somewhere..
-            .ok_or(Error::Transaction(TransactionError::BlockNotFound))?;
+            .ok_or_else(|| TransactionEventsError::CannotFindTransactionInBlock {
+                block_hash: self.block_hash().into(),
+                transaction_hash: self.ext_hash.into(),
+            })?;
 
         let events = EventsClient::new(self.client.clone())
             .at(self.block_ref.clone())
-            .await?;
+            .await
+            .map_err(|e| TransactionEventsError::CannotFetchEventsForTransaction {
+                block_hash: self.block_hash().into(),
+                transaction_hash: self.ext_hash.into(),
+                error: e
+            })?;
 
         Ok(crate::blocks::ExtrinsicEvents::new(
             self.ext_hash,
@@ -318,10 +340,11 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use subxt_core::client::RuntimeVersion;
 
     use crate::{
-        Error, SubstrateConfig,
+        SubstrateConfig,
         backend::{StreamOfResults, TransactionStatus},
         client::{OfflineClientT, OnlineClientT},
         config::{Config, HashFor},
@@ -375,7 +398,7 @@ mod test {
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
             finalized_result,
-            Err(Error::Transaction(crate::error::TransactionError::Error(e))) if e == "err"
+            Err(TransactionProgressError::TransactionStatusError(TransactionStatusError::Error(e))) if e == "err"
         ));
     }
 
@@ -390,7 +413,7 @@ mod test {
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
             finalized_result,
-            Err(Error::Transaction(crate::error::TransactionError::Invalid(e))) if e == "err"
+            Err(TransactionProgressError::TransactionStatusError(TransactionStatusError::Invalid(e))) if e == "err"
         ));
     }
 
@@ -405,7 +428,7 @@ mod test {
         let finalized_result = tx_progress.wait_for_finalized().await;
         assert!(matches!(
             finalized_result,
-            Err(Error::Transaction(crate::error::TransactionError::Dropped(e))) if e == "err"
+            Err(TransactionProgressError::TransactionStatusError(TransactionStatusError::Dropped(e))) if e == "err"
         ));
     }
 

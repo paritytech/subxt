@@ -1,7 +1,7 @@
 //! RPC utils.
 
 use super::{StreamOf, StreamOfResults};
-use crate::error::Error;
+use crate::error::BackendError;
 use futures::future::BoxFuture;
 use futures::{FutureExt, Stream, StreamExt};
 use std::{future::Future, pin::Pin, task::Poll};
@@ -10,10 +10,10 @@ use std::{future::Future, pin::Pin, task::Poll};
 type ResubscribeGetter<T> = Box<dyn FnMut() -> ResubscribeFuture<T> + Send>;
 
 /// Future that resolves to a subscription stream.
-type ResubscribeFuture<T> = Pin<Box<dyn Future<Output = Result<StreamOfResults<T>, Error>> + Send>>;
+type ResubscribeFuture<T> = Pin<Box<dyn Future<Output = Result<StreamOfResults<T>, BackendError>> + Send>>;
 
 pub(crate) enum PendingOrStream<T> {
-    Pending(BoxFuture<'static, Result<StreamOfResults<T>, Error>>),
+    Pending(BoxFuture<'static, Result<StreamOfResults<T>, BackendError>>),
     Stream(StreamOfResults<T>),
 }
 
@@ -35,7 +35,7 @@ struct RetrySubscription<T> {
 impl<T> std::marker::Unpin for RetrySubscription<T> {}
 
 impl<T> Stream for RetrySubscription<T> {
-    type Item = Result<T, Error>;
+    type Item = Result<T, BackendError>;
 
     fn poll_next(
         mut self: Pin<&mut Self>,
@@ -92,7 +92,7 @@ impl<T> Stream for RetrySubscription<T> {
 /// ```rust,no_run,standalone_crate
 /// use subxt::backend::utils::retry;
 ///
-/// async fn some_future() -> Result<(), subxt::error::Error> {
+/// async fn some_future() -> Result<(), subxt::error::BackendError> {
 ///    Ok(())
 /// }
 ///
@@ -101,10 +101,10 @@ impl<T> Stream for RetrySubscription<T> {
 ///    let result = retry(|| some_future()).await;
 /// }
 /// ```
-pub async fn retry<T, F, R>(mut retry_future: F) -> Result<R, Error>
+pub async fn retry<T, F, R>(mut retry_future: F) -> Result<R, BackendError>
 where
     F: FnMut() -> T,
-    T: Future<Output = Result<R, Error>>,
+    T: Future<Output = Result<R, BackendError>>,
 {
     const REJECTED_MAX_RETRIES: usize = 10;
     let mut rejected_retries = 0;
@@ -163,7 +163,7 @@ where
 ///    }).await;
 /// }
 /// ```
-pub async fn retry_stream<F, R>(sub_stream: F) -> Result<StreamOfResults<R>, Error>
+pub async fn retry_stream<F, R>(sub_stream: F) -> Result<StreamOfResults<R>, BackendError>
 where
     F: FnMut() -> ResubscribeFuture<R> + Send + 'static + Clone,
     R: Send + 'static,
@@ -187,12 +187,12 @@ mod tests {
     use super::*;
     use crate::backend::StreamOf;
 
-    fn disconnect_err() -> Error {
-        Error::Rpc(subxt_rpcs::Error::DisconnectedWillReconnect(String::new()).into())
+    fn disconnect_err() -> BackendError {
+        BackendError::Rpc(subxt_rpcs::Error::DisconnectedWillReconnect(String::new()).into())
     }
 
-    fn custom_err() -> Error {
-        Error::Other(String::new())
+    fn custom_err() -> BackendError {
+        BackendError::Other(String::new())
     }
 
     #[tokio::test]
@@ -213,7 +213,7 @@ mod tests {
 
         let result = retry_stream
             .take(5)
-            .collect::<Vec<Result<usize, Error>>>()
+            .collect::<Vec<Result<usize, BackendError>>>()
             .await;
 
         assert!(matches!(result[0], Ok(r) if r == 1));
@@ -270,6 +270,6 @@ mod tests {
 
         assert!(matches!(result[0], Ok(r) if r == 1));
         assert!(matches!(result[1], Err(ref e) if e.is_disconnected_will_reconnect()));
-        assert!(matches!(result[2], Err(ref e) if matches!(e, Error::Other(_))));
+        assert!(matches!(result[2], Err(ref e) if matches!(e, BackendError::Other(_))));
     }
 }

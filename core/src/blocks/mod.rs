@@ -70,8 +70,8 @@ mod static_extrinsic;
 
 use crate::Metadata;
 use crate::config::Config;
+use crate::error::ExtrinsicDecodeErrorAt;
 use alloc::vec::Vec;
-
 pub use crate::error::ExtrinsicError;
 pub use extrinsic_transaction_extensions::{
     ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions,
@@ -86,6 +86,6 @@ pub use static_extrinsic::StaticExtrinsic;
 pub fn decode_from<T: Config>(
     extrinsics: Vec<Vec<u8>>,
     metadata: Metadata,
-) -> Result<Extrinsics<T>, ExtrinsicError> {
+) -> Result<Extrinsics<T>, ExtrinsicDecodeErrorAt> {
     Extrinsics::decode_from(extrinsics, metadata)
 }

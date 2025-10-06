@@ -160,7 +160,6 @@ pub enum StorageError {
 
 /// An error that can be encountered when constructing a transaction.
 #[derive(Debug, DeriveError)]
-#[non_exhaustive]
 #[allow(missing_docs)]
 pub enum ExtrinsicError {
     #[error("The extrinsic payload is not compatible with the live chain")]
@@ -194,13 +193,8 @@ pub enum ExtrinsicError {
         /// Number of bytes leftover after decoding the extrinsic.
         num_leftover_bytes: usize,
     },
-    #[error("Failed to decode extrinsic at index {extrinsic_index}: {error}")]
-    ExtrinsicDecodeError {
-        /// Index of the extrinsic that failed to decode.
-        extrinsic_index: usize,
-        /// The decode error.
-        error: frame_decode::extrinsics::ExtrinsicDecodeError,
-    },
+    #[error("{0}")]
+    ExtrinsicDecodeErrorAt(#[from] ExtrinsicDecodeErrorAt),
     #[error("Failed to decode the fields of an extrinsic at index {extrinsic_index}: {error}")]
     CannotDecodeFields {
         /// Index of the extrinsic whose fields we could not decode
@@ -215,6 +209,25 @@ pub enum ExtrinsicError {
         /// The decode error.
         error: scale_decode::Error
     }
+}
+
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+#[error("Cannot decode extrinsic at index {extrinsic_index}: {error}")]
+pub struct ExtrinsicDecodeErrorAt {
+    pub extrinsic_index: usize,
+    pub error: ExtrinsicDecodeErrorAtReason
+}
+
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum ExtrinsicDecodeErrorAtReason {
+    #[error("{0}")]
+    DecodeError(frame_decode::extrinsics::ExtrinsicDecodeError),
+    #[error("Leftover bytes")]
+    LeftoverBytes(Vec<u8>)
 }
 
 /// An error that can be emitted when trying to construct an instance of [`crate::config::ExtrinsicParams`],
