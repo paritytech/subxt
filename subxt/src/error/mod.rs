@@ -458,3 +458,39 @@ pub enum TransactionFinalizedSuccessError {
     #[error("The transaction did not succeed: {0}")]
     SuccessError(#[from] TransactionEventsError)
 }
+
+/// Error decoding the [`DispatchError`]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum ModuleErrorDetailsError {
+    #[error("Could not get details for the DispatchError: could not find pallet index {pallet_index}")]
+    PalletNotFound {
+        pallet_index: u8
+    },
+    #[error("Could not get details for the DispatchError: could not find error index {error_index} in pallet {pallet_name}")]
+    ErrorVariantNotFound {
+        pallet_name: String,
+        error_index: u8
+    }
+}
+
+/// Error decoding the [`ModuleError`]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[error("Could not decode the DispatchError::Module payload into the given type: {0}")]
+pub struct ModuleErrorDecodeError(scale_decode::Error);
+
+/// Error decoding the [`DispatchError`]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum DispatchErrorDecodeError {
+    #[error("Could not decode the DispatchError: could not find the corresponding type ID in the metadata")]
+    DispatchErrorTypeIdNotFound,
+    #[error("Could not decode the DispatchError: {0}")]
+    CouldNotDecodeDispatchError(scale_decode::Error),
+    #[error("Could not decode the DispatchError::Module variant")]
+    CouldNotDecodeModuleError {
+        /// The bytes corresponding to the Module variant we were unable to decode:
+        bytes: Vec<u8>
+    }
+}
