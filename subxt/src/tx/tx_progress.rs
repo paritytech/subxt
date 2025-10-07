@@ -274,7 +274,11 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
 
             if ev.pallet_name() == "System" && ev.variant_name() == "ExtrinsicFailed" {
                 let dispatch_error =
-                    DispatchError::decode_from(ev.field_bytes(), self.client.metadata())?;
+                    DispatchError::decode_from(ev.field_bytes(), self.client.metadata())
+                        .map_err(|e| TransactionEventsError::CannotDecodeDispatchError { 
+                            error: e, 
+                            bytes: ev.field_bytes().to_vec()
+                        })?;
                 return Err(dispatch_error.into());
             }
         }

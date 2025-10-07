@@ -1,4 +1,4 @@
-// Copyright 2019-2024 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -42,15 +42,20 @@
 //! ```
 
 mod prefix_of;
+mod storage_entry;
+mod storage_value;
+mod storage_key;
+mod storage_key_value;
 
 pub mod address;
 
 use crate::{Metadata, error::StorageError};
 use address::Address;
-use alloc::vec::Vec;
-use frame_decode::storage::StorageTypeInfo;
-use scale_decode::IntoVisitor;
 
+pub use storage_key::{key, StorageKey, StorageKeyPart, StorageHasher};
+pub use storage_entry::{entry, StorageEntry};
+pub use storage_value::{value, StorageValue};
+pub use storage_key_value::{key_value, StorageKeyValue};
 pub use prefix_of::{ EqualOrPrefixOf, PrefixOf };
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
@@ -79,69 +84,4 @@ pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<()
     } else {
         Ok(())
     }
-}
-
-/// Given a storage address and some metadata, this encodes the address into bytes which can be
-/// handed to a node to retrieve the corresponding value.
-pub fn get_address_bytes<Addr: Address, Keys: EqualOrPrefixOf<Addr::KeyParts>>(
-    address: &Addr,
-    metadata: &Metadata,
-    keys: Keys,
-) -> Result<Vec<u8>, StorageError> {
-    frame_decode::storage::encode_storage_key(
-        address.pallet_name(),
-        address.entry_name(),
-        &keys,
-        metadata,
-        metadata.types(),
-    )
-    .map_err(|e| StorageError::StorageKeyEncodeError(e).into())
-}
-
-/// Given a storage address and some metadata, this encodes the root of the address (ie the pallet
-/// and storage entry part) into bytes. If the entry being addressed is inside a map, this returns
-/// the bytes needed to iterate over all of the entries within it.
-pub fn get_address_root_bytes<Addr: Address>(address: &Addr) -> [u8; 32] {
-    frame_decode::storage::encode_storage_key_prefix(
-        address.pallet_name(), 
-        address.entry_name()
-    )
-}
-
-/// Given some storage value that we've retrieved from a node, the address used to retrieve it, and
-/// metadata from the node, this function attempts to decode the bytes into the target value specified
-/// by the address.
-pub fn decode_value<Addr: Address>(
-    bytes: &mut &[u8],
-    address: &Addr,
-    metadata: &Metadata,
-) -> Result<Addr::Value, StorageError> {
-    frame_decode::storage::decode_storage_value(
-        address.pallet_name(),
-        address.entry_name(),
-        bytes,
-        metadata,
-        metadata.types(),
-        Addr::Value::into_visitor(),
-    )
-    .map_err(|e| StorageError::StorageValueDecodeError(e).into())
-}
-
-/// Return the default value at a given storage address if one is available, or None otherwise.
-pub fn default_value<Addr: Address>(
-    address: &Addr,
-    metadata: &Metadata,
-) -> Result<Option<Addr::Value>, StorageError> {
-    let storage_info = metadata
-        .storage_info(address.pallet_name(), address.entry_name())
-        .map_err(|e| StorageError::StorageInfoError(e.into_owned()))?;
-
-    let value = frame_decode::storage::decode_default_storage_value_with_info(
-        &storage_info,
-        metadata.types(),
-        Addr::Value::into_visitor(),
-    )
-    .map_err(|e| StorageError::StorageValueDecodeError(e))?;
-
-    Ok(value)
 }

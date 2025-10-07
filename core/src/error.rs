@@ -152,10 +152,57 @@ pub enum StorageError {
     },
     #[error("Cannot obtain storage information from metadata: {0}")]
     StorageInfoError(frame_decode::storage::StorageInfoError<'static>),
-    #[error("Cannot decode storage value: {0}")]
-    StorageValueDecodeError(frame_decode::storage::StorageValueDecodeError<u32>),
     #[error("Cannot encode storage key: {0}")]
     StorageKeyEncodeError(frame_decode::storage::StorageKeyEncodeError),
+    #[error("Cannot create a key to iterate over a plain entry")]
+    CannotIterPlainEntry {
+        pallet_name: String,
+        entry_name: String
+    },
+    #[error("Wrong number of key parts provided to iterate a storage address. We expected at most {max_expected} key parts but got {got} key parts")]
+    WrongNumberOfKeyPartsProvidedForIterating {
+        max_expected: usize,
+        got: usize,
+    },
+    #[error("Wrong number of key parts provided to fetch a storage address. We expected {expected} key parts but got {got} key parts")]
+    WrongNumberOfKeyPartsProvidedForFetching {
+        expected: usize,
+        got: usize,
+    },
+}
+
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum StorageKeyError {
+    #[error("Can't decode the storage key: {error}")]
+    StorageKeyDecodeError {
+        bytes: Vec<u8>,
+        error: frame_decode::storage::StorageKeyDecodeError<u32>
+    },
+    #[error("Can't decode the values from the storage key: {0}")]
+    CannotDecodeValuesInKey(frame_decode::storage::StorageKeyValueDecodeError),
+    #[error("Cannot decode storage key: there were leftover bytes, indicating that the decoding failed")]
+    LeftoverBytes {
+        bytes: Vec<u8>,
+    },
+    #[error("Can't decode a single value from the storage key part at index {index}: {error}")]
+    CannotDecodeValueInKey {
+        index: usize,
+        error: scale_decode::Error
+    }
+}
+
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum StorageValueError {
+    #[error("Cannot decode storage value: {0}")]
+    CannotDecode(frame_decode::storage::StorageValueDecodeError<u32>),
+    #[error("Cannot decode storage value: there were leftover bytes, indicating that the decoding failed")]
+    LeftoverBytes {
+        bytes: Vec<u8>,
+    }
 }
 
 /// An error that can be encountered when constructing a transaction.

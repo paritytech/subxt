@@ -445,6 +445,11 @@ pub enum TransactionEventsError {
         transaction_hash: Hex,
         error: EventsError
     },
+    #[error("The transaction led to a DispatchError, but we failed to decode it: {error}")]
+    CannotDecodeDispatchError {
+        error: DispatchErrorDecodeError,
+        bytes: Vec<u8>
+    },
     #[error("The transaction failed with the following dispatch error: {0}")]
     ExtrinsicFailed(#[from] DispatchError),
 }
@@ -493,4 +498,11 @@ pub enum DispatchErrorDecodeError {
         /// The bytes corresponding to the Module variant we were unable to decode:
         bytes: Vec<u8>
     }
+}
+
+/// Error working with storage.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum StorageError {
+
 }

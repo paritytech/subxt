@@ -5,7 +5,7 @@
 //! Construct addresses to access storage entries with.
 
 use alloc::borrow::Cow;
-use frame_decode::storage::IntoEncodableValues;
+use frame_decode::storage::{IntoEncodableValues, IntoDecodableValues};
 use scale_decode::DecodeAsType;
 use crate::utils::{Maybe, YesMaybe};
 
@@ -16,7 +16,7 @@ pub trait Address {
     /// All of the keys required to get to an individual value at this address.
     /// Keys must always impl [`IntoEncodableValues`], and for iteration must
     /// also impl [`frame_decode::storage::IntoDecodableValues`].
-    type KeyParts: IntoEncodableValues;
+    type KeyParts: IntoEncodableValues + IntoDecodableValues;
     /// Type of the storage value at this location.
     type Value: DecodeAsType;
     /// Does the address point to a plain value (as opposed to a map)? 
@@ -82,7 +82,7 @@ impl<KeyParts, Value, IsPlain> StaticAddress<KeyParts, Value, IsPlain> {
 impl<KeyParts, Value, IsPlain> Address
     for StaticAddress<KeyParts, Value, IsPlain>
 where
-    KeyParts: IntoEncodableValues,
+    KeyParts: IntoEncodableValues + IntoDecodableValues,
     Value: DecodeAsType,
     IsPlain: YesMaybe,
 {

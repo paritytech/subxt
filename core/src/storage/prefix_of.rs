@@ -11,7 +11,7 @@ use scale_encode::EncodeAsType;
 /// `(A,B)`, `(A,)` and `()`.
 pub trait PrefixOf<Keys>: IntoEncodableValues {}
 
-// Any reference which impls PrefixOf<K> also impls PrefixOf<K>
+// If T impls PrefixOf<K>, &T impls PrefixOf<K>.
 impl <'a, K, T: PrefixOf<K>> PrefixOf<K> for &'a T {}
 
 // Impls for tuples up to length 6 (storage maps rarely require more than 2 entries

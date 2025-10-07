@@ -6,7 +6,7 @@ use crate::{
     backend::{BackendExt, BlockRef},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor},
-    error::{Error, MetadataError, StorageError},
+    error::StorageError,
     storage::storage_value::StorageValue,
 };
 use codec::Decode;
@@ -60,7 +60,7 @@ where
     T: Config,
     Client: OfflineClientT<T>,
 {
-    pub fn entry<Addr: Address>(&'_ self, address: Addr) -> Result<StorageEntryClient<'_, T, Client, Addr, Addr::IsPlain>, Error> {
+    pub fn entry<Addr: Address>(&'_ self, address: Addr) -> Result<StorageEntryClient<'_, T, Client, Addr, Addr::IsPlain>, StorageError> {
         subxt_core::storage::validate(&address, &self.client.metadata())?;
 
         use frame_decode::storage::StorageTypeInfo;
@@ -135,7 +135,7 @@ where
     Addr: Address,
     Client: OnlineClientT<T>
 {
-    pub async fn fetch(&'_ self) -> Result<StorageValue<'_, 'atblock, Addr::Value>, Error> {
+    pub async fn fetch(&'_ self) -> Result<StorageValue<'_, 'atblock, Addr::Value>, StorageError> {
         let value = self
             .try_fetch()
             .await?
@@ -151,7 +151,7 @@ where
         Ok(value)
     }
 
-    pub async fn try_fetch(&self) -> Result<Option<StorageValue<'_, 'atblock, Addr::Value>>, Error> {
+    pub async fn try_fetch(&self) -> Result<Option<StorageValue<'_, 'atblock, Addr::Value>>, StorageError> {
         let value = self.client
             .backend()
             .storage_fetch_value(self.key_prefix().to_vec(), self.block_ref.hash())
@@ -178,7 +178,7 @@ where
     Addr: Address,
     Client: OnlineClientT<T>
 {
-    pub async fn fetch(&'_ self, keys: Addr::KeyParts) -> Result<StorageValue<'_, 'atblock, Addr::Value>, Error> {
+    pub async fn fetch(&'_ self, keys: Addr::KeyParts) -> Result<StorageValue<'_, 'atblock, Addr::Value>, StorageError> {
         if keys.num_encodable_values() != self.info.keys.len() {
             // This shouldn't be possible in static cases but if Vec<Value> is keys then we need to be checking.
             todo!("Error: wrong number of keys provided.")
@@ -193,7 +193,7 @@ where
         Ok(value)
     }
     
-    pub async fn try_fetch(&self, keys: Addr::KeyParts) -> Result<Option<StorageValue<'_, 'atblock, Addr::Value>>, Error> {    
+    pub async fn try_fetch(&self, keys: Addr::KeyParts) -> Result<Option<StorageValue<'_, 'atblock, Addr::Value>>, StorageError> {    
         if keys.num_encodable_values() != self.info.keys.len() {
             // This shouldn't be possible in static cases but if Vec<Value> is keys then we need to be checking.
             todo!("Error: wrong number of keys provided.")
@@ -220,7 +220,7 @@ where
     pub async fn iter<Keys: PrefixOf<Addr::KeyParts>>(
         &self, 
         keys: Keys
-    ) -> Result<impl futures::Stream<Item = Result<StorageEntry<'_, 'atblock, Addr>, Error>>, Error> {
+    ) -> Result<impl futures::Stream<Item = Result<StorageEntry<'_, 'atblock, Addr>, StorageError>>, StorageError> {
         if keys.num_encodable_values() >= self.info.keys.len() {
             // This shouldn't be possible in static cases but if Vec<Value> is keys then we need to be checking.
             todo!("Error: wrong number of keys provided.")
@@ -247,13 +247,6 @@ where
         Ok(Box::pin(stream))
     }
 
-    /// Keys for map values require additional values; you can provide [`Address::KeyParts`]
-    /// values to construct a complete key, or a prefix of these to construct a key that would
-    /// iterate over values.
-    pub fn key<Keys: EqualOrPrefixOf<Addr::KeyParts>>(&self, keys: Keys) -> Result<Vec<u8>, Error> {
-        self.key_from(keys)
-    }
-
     /// The first 32 bytes of the storage entry key, which points to the entry but not necessarily
     /// a single storage value (unless the entry is a plain value).
     pub fn key_prefix(&self) -> [u8; 32] {
@@ -265,7 +258,7 @@ where
 
     // An internal function to generate keys, because owing to lack of specialisation, things that impl
     // `EqualOrPrefixOf` don't also provably impl `PrefixOf`.
-    fn key_from<Keys: IntoEncodableValues>(&self, keys: Keys) -> Result<Vec<u8>, Error> {
+    fn key_from<Keys: IntoEncodableValues>(&self, keys: Keys) -> Result<Vec<u8>, StorageError> {
         let key_bytes = frame_decode::storage::encode_storage_key_with_info(
             &self.address.pallet_name(),
             &self.address.entry_name(),
@@ -287,7 +280,7 @@ where
     pub fn fetch_raw(
         &self,
         key: impl Into<Vec<u8>>,
-    ) -> impl Future<Output = Result<Option<Vec<u8>>, Error>> + 'static {
+    ) -> impl Future<Output = Result<Option<Vec<u8>>, StorageError>> + 'static {
         let client = self.client.clone();
         let key = key.into();
         // Keep this alive until the call is complete:
@@ -306,7 +299,7 @@ where
     pub fn fetch_raw_keys(
         &self,
         key: impl Into<Vec<u8>>,
-    ) -> impl Future<Output = Result<StreamOfResults<Vec<u8>>, Error>> + 'static {
+    ) -> impl Future<Output = Result<StreamOfResults<Vec<u8>>, StorageError>> + 'static {
         let client = self.client.clone();
         let block_hash = self.block_ref.hash();
         let key = key.into();
@@ -353,7 +346,7 @@ where
     pub fn fetch<'address, Addr>(
         &self,
         address: &'address Addr,
-    ) -> impl Future<Output = Result<Option<Addr::Target>, Error>> + use<'address, Addr, Client, T>
+    ) -> impl Future<Output = Result<Option<Addr::Target>, StorageError>> + use<'address, Addr, Client, T>
     where
         Addr: Address<IsFetchable = Yes> + 'address,
     {
@@ -382,7 +375,7 @@ where
     pub fn fetch_or_default<'address, Addr>(
         &self,
         address: &'address Addr,
-    ) -> impl Future<Output = Result<Addr::Target, Error>> + use<'address, Addr, Client, T>
+    ) -> impl Future<Output = Result<Addr::Target, StorageError>> + use<'address, Addr, Client, T>
     where
         Addr: Address<IsFetchable = Yes, IsDefaultable = Yes> + 'address,
     {
@@ -433,7 +426,7 @@ where
     pub fn iter<Addr>(
         &self,
         address: Addr,
-    ) -> impl Future<Output = Result<StreamOfResults<StorageKeyValuePair<Addr>>, Error>> + 'static
+    ) -> impl Future<Output = Result<StreamOfResults<StorageKeyValuePair<Addr>>, StorageError>> + 'static
     where
         Addr: Address<IsIterable = Yes> + 'static,
         Addr::Keys: 'static + Sized,
@@ -503,7 +496,7 @@ where
 
     /// The storage version of a pallet.
     /// The storage version refers to the `frame_support::traits::Metadata::StorageVersion` type.
-    pub async fn storage_version(&self, pallet_name: impl AsRef<str>) -> Result<u16, Error> {
+    pub async fn storage_version(&self, pallet_name: impl AsRef<str>) -> Result<u16, StorageError> {
         // check that the pallet exists in the metadata:
         self.client
             .metadata()
@@ -531,7 +524,7 @@ where
     }
 
     /// Fetch the runtime WASM code.
-    pub async fn runtime_wasm_code(&self) -> Result<Vec<u8>, Error> {
+    pub async fn runtime_wasm_code(&self) -> Result<Vec<u8>, StorageError> {
         // note: this should match the `CODE` constant in `sp_core::storage::well_known_keys`
         const CODE: &str = ":code";
         self.fetch_raw(CODE.as_bytes()).await?.ok_or_else(|| {
