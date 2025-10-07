@@ -6,16 +6,15 @@ use super::TryFromError;
 
 use crate::utils::variant_index::VariantIndex;
 use crate::{
-    ConstantMetadata, ExtrinsicMetadata, Metadata, OuterEnumsMetadata,
-    PalletMetadataInner, RuntimeApiMetadataInner, RuntimeApiMethodMetadataInner,
-    StorageEntryMetadata, StorageMetadata,
+    ConstantMetadata, ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner,
+    RuntimeApiMetadataInner, RuntimeApiMethodMetadataInner, StorageEntryMetadata, StorageMetadata,
     TransactionExtensionMetadataInner, ViewFunctionMetadataInner, utils::ordered_map::OrderedMap,
 };
+use frame_decode::runtime_apis::RuntimeApiTypeInfo;
+use frame_decode::storage::StorageTypeInfo;
 use frame_decode::view_functions::ViewFunctionTypeInfo;
 use frame_metadata::{v15, v16};
 use hashbrown::HashMap;
-use frame_decode::storage::StorageTypeInfo;
-use frame_decode::runtime_apis::RuntimeApiTypeInfo;
 use scale_info::form::PortableForm;
 
 impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
@@ -37,7 +36,8 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
                         .iter()
                         .map(|s| {
                             let entry_name = s.name.clone();
-                            let storage_info = m.storage_info(&name, &entry_name)
+                            let storage_info = m
+                                .storage_info(&name, &entry_name)
                                 .map_err(|e| e.into_owned())?
                                 .into_owned();
                             let storage_entry = StorageEntryMetadata {
@@ -49,19 +49,24 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
                             Ok::<_, TryFromError>((entry_name, storage_entry))
                         })
                         .collect::<Result<_, TryFromError>>()?,
-                })
+                }),
             };
 
-            let view_functions = p.view_functions.iter().map(|vf| {
-                let view_function_metadata = ViewFunctionMetadataInner {
-                    name: vf.name.clone(),
-                    info: m.view_function_info(&name, &vf.name)
-                        .map_err(|e| e.into_owned())?
-                        .into_owned(),
-                    docs: vf.docs.clone()
-                };
-                Ok((vf.name.clone(), view_function_metadata))
-            }).collect::<Result<_,TryFromError>>()?;
+            let view_functions = p
+                .view_functions
+                .iter()
+                .map(|vf| {
+                    let view_function_metadata = ViewFunctionMetadataInner {
+                        name: vf.name.clone(),
+                        info: m
+                            .view_function_info(&name, &vf.name)
+                            .map_err(|e| e.into_owned())?
+                            .into_owned(),
+                        docs: vf.docs.clone(),
+                    };
+                    Ok((vf.name.clone(), view_function_metadata))
+                })
+                .collect::<Result<_, TryFromError>>()?;
 
             let constants = p.constants.iter().map(|c| {
                 let name = c.name.clone();
@@ -101,27 +106,36 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
             );
         }
 
-        let apis = m.apis.iter().map(|api| {
-            let trait_name = api.name.clone();
-            let methods  = api.methods.iter().map(|method| {
-                let method_name = method.name.clone();
-                let method_info = RuntimeApiMethodMetadataInner {
-                    info: m.runtime_api_info(&trait_name, &method.name)
-                        .map_err(|e| e.into_owned())?
-                        .into_owned(),
-                    name: method.name.clone(),
-                    docs: method.docs.clone()
-                };
-                Ok((method_name, method_info))
-            }).collect::<Result<_,TryFromError>>()?;
+        let apis = m
+            .apis
+            .iter()
+            .map(|api| {
+                let trait_name = api.name.clone();
+                let methods = api
+                    .methods
+                    .iter()
+                    .map(|method| {
+                        let method_name = method.name.clone();
+                        let method_info = RuntimeApiMethodMetadataInner {
+                            info: m
+                                .runtime_api_info(&trait_name, &method.name)
+                                .map_err(|e| e.into_owned())?
+                                .into_owned(),
+                            name: method.name.clone(),
+                            docs: method.docs.clone(),
+                        };
+                        Ok((method_name, method_info))
+                    })
+                    .collect::<Result<_, TryFromError>>()?;
 
-            let runtime_api_metadata = RuntimeApiMetadataInner {
-                name: trait_name.clone(),
-                methods,
-                docs: api.docs.clone()
-            };
-            Ok((trait_name, runtime_api_metadata))
-        }).collect::<Result<_,TryFromError>>()?;
+                let runtime_api_metadata = RuntimeApiMetadataInner {
+                    name: trait_name.clone(),
+                    methods,
+                    docs: api.docs.clone(),
+                };
+                Ok((trait_name, runtime_api_metadata))
+            })
+            .collect::<Result<_, TryFromError>>()?;
 
         let custom_map = m
             .custom
@@ -187,9 +201,7 @@ fn from_extrinsic_metadata(value: v16::ExtrinsicMetadata<PortableForm>) -> Extri
     }
 }
 
-fn from_constant_metadata(
-    s: v16::PalletConstantMetadata<PortableForm>,
-) -> ConstantMetadata {
+fn from_constant_metadata(s: v16::PalletConstantMetadata<PortableForm>) -> ConstantMetadata {
     ConstantMetadata {
         name: s.name,
         ty: s.ty.id,

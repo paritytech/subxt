@@ -6,7 +6,7 @@ use crate::{
     blocks::block_types::{CachedEvents, get_events},
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor},
-    error::{ExtrinsicError, ExtrinsicDecodeErrorAt, EventsError},
+    error::{EventsError, ExtrinsicDecodeErrorAt, ExtrinsicError},
     events,
 };
 use derive_where::derive_where;
@@ -103,13 +103,17 @@ where
 
     /// Iterate through the extrinsics using metadata to dynamically decode and skip
     /// them, and return the first extrinsic found which decodes to the provided `E` type.
-    pub fn find_first<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, C, E>>, ExtrinsicError> {
+    pub fn find_first<E: StaticExtrinsic>(
+        &self,
+    ) -> Result<Option<FoundExtrinsic<T, C, E>>, ExtrinsicError> {
         self.find::<E>().next().transpose()
     }
 
     /// Iterate through the extrinsics using metadata to dynamically decode and skip
     /// them, and return the last extrinsic found which decodes to the provided `Ev` type.
-    pub fn find_last<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, C, E>>, ExtrinsicError> {
+    pub fn find_last<E: StaticExtrinsic>(
+        &self,
+    ) -> Result<Option<FoundExtrinsic<T, C, E>>, ExtrinsicError> {
         self.find::<E>().last().transpose()
     }
 

@@ -101,10 +101,8 @@ pub async fn run<'a>(
             return format!("The method does not require an {input_value_placeholder}");
         }
 
-        let fields: Vec<(Option<&str>, u32)> = method
-            .inputs()
-            .map(|f| (Some(&*f.name), f.id))
-            .collect();
+        let fields: Vec<(Option<&str>, u32)> =
+            method.inputs().map(|f| (Some(&*f.name), f.id)).collect();
         let fields_description =
             fields_description(&fields, method.name(), metadata.types()).indent(4);
 
@@ -170,11 +168,8 @@ pub async fn run<'a>(
         })
         .collect::<color_eyre::Result<Vec<Value>>>()?;
 
-    let method_call = subxt::dynamic::runtime_api_call::<_, Value>(
-        api_name, 
-        method.name(), 
-        args_data
-    );
+    let method_call =
+        subxt::dynamic::runtime_api_call::<_, Value>(api_name, method.name(), args_data);
     let client = create_client(&file_or_url).await?;
     let output_value = client
         .runtime_api()

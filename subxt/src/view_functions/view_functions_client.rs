@@ -43,7 +43,8 @@ where
     /// Obtain an interface to call View Functions at the latest finalized block.
     pub fn at_latest(
         &self,
-    ) -> impl Future<Output = Result<ViewFunctionsApi<T, Client>, ViewFunctionError>> + Send + 'static {
+    ) -> impl Future<Output = Result<ViewFunctionsApi<T, Client>, ViewFunctionError>> + Send + 'static
+    {
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();

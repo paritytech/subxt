@@ -11,8 +11,8 @@ use crate::backend::{
     Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
     TransactionStatus,
 };
-use crate::error::BackendError;
 use crate::config::{Config, HashFor, Header};
+use crate::error::BackendError;
 use async_trait::async_trait;
 use futures::TryStreamExt;
 use futures::{Future, FutureExt, Stream, StreamExt, future, future::Either, stream};
@@ -232,7 +232,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         .await
     }
 
-    async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, BackendError> {
+    async fn stream_runtime_version(
+        &self,
+    ) -> Result<StreamOfResults<RuntimeVersion>, BackendError> {
         let methods = self.methods.clone();
 
         let retry_sub = retry_stream(move || {
@@ -493,7 +495,8 @@ pub struct StorageFetchDescendantKeysStream<T: Config> {
     // What key do we start paginating from? None = from the beginning.
     pagination_start_key: Option<Vec<u8>>,
     // Keys, future and cached:
-    keys_fut: Option<Pin<Box<dyn Future<Output = Result<Vec<Vec<u8>>, BackendError>> + Send + 'static>>>,
+    keys_fut:
+        Option<Pin<Box<dyn Future<Output = Result<Vec<Vec<u8>>, BackendError>> + Send + 'static>>>,
     // Set to true when we're done:
     done: bool,
 }

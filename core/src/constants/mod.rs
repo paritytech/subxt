@@ -40,10 +40,10 @@
 
 pub mod address;
 
-use address::Address;
-use alloc::borrow::ToOwned;
 use crate::Metadata;
 use crate::error::ConstantError;
+use address::Address;
+use alloc::borrow::ToOwned;
 use scale_decode::IntoVisitor;
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
@@ -55,15 +55,11 @@ pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<()
     if let Some(actual_hash) = address.validation_hash() {
         let expected_hash = metadata
             .pallet_by_name(address.pallet_name())
-            .ok_or_else(|| {
-                ConstantError::PalletNameNotFound(address.pallet_name().to_string())
-            })?
+            .ok_or_else(|| ConstantError::PalletNameNotFound(address.pallet_name().to_string()))?
             .constant_hash(address.constant_name())
-            .ok_or_else(|| {
-                ConstantError::ConstantNameNotFound {
-                    pallet_name: address.pallet_name().to_string(),
-                    constant_name: address.constant_name().to_owned()
-                }
+            .ok_or_else(|| ConstantError::ConstantNameNotFound {
+                pallet_name: address.pallet_name().to_string(),
+                constant_name: address.constant_name().to_owned(),
             })?;
         if actual_hash != expected_hash {
             return Err(ConstantError::IncompatibleCodegen);
@@ -74,7 +70,10 @@ pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<()
 
 /// Fetch a constant out of the metadata given a constant address. If the `address` has been
 /// statically generated, this will validate that the constant shape is as expected, too.
-pub fn get<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<Addr::Target, ConstantError> {
+pub fn get<Addr: Address>(
+    address: &Addr,
+    metadata: &Metadata,
+) -> Result<Addr::Target, ConstantError> {
     // 1. Validate constant shape if hash given:
     validate(address, metadata)?;
 
@@ -84,8 +83,9 @@ pub fn get<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<Addr::T
         address.constant_name(),
         metadata,
         metadata.types(),
-        Addr::Target::into_visitor()
-    ).map_err(ConstantError::CouldNotDecodeConstant)?;
+        Addr::Target::into_visitor(),
+    )
+    .map_err(ConstantError::CouldNotDecodeConstant)?;
 
     Ok(constant)
 }

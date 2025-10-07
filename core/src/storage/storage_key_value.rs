@@ -2,13 +2,13 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::{StorageKey, StorageValue, Address};
+use super::{Address, StorageKey, StorageValue};
 use crate::error::StorageKeyError;
 use frame_decode::storage::StorageInfo;
 use scale_info::PortableRegistry;
 use std::borrow::Cow;
 
-/// This represents a storage key/value pair, which is typically returned from 
+/// This represents a storage key/value pair, which is typically returned from
 /// iterating over values in some storage map.
 pub struct StorageKeyValue<'entry, 'info, Addr: Address> {
     key: Vec<u8>,

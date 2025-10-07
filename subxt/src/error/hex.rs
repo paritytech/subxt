@@ -2,7 +2,7 @@
 #[derive(PartialEq, Eq, Clone, Debug, PartialOrd, Ord)]
 pub struct Hex(String);
 
-impl <T: AsRef<[u8]>> From<T> for Hex {
+impl<T: AsRef<[u8]>> From<T> for Hex {
     fn from(value: T) -> Self {
         Hex(hex::encode(value.as_ref()))
     }

@@ -59,9 +59,9 @@
 pub mod payload;
 pub mod signer;
 
+use crate::Metadata;
 use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, HashFor, Hasher};
 use crate::error::ExtrinsicError;
-use crate::Metadata;
 use crate::utils::Encoded;
 use alloc::borrow::Cow;
 use alloc::vec::Vec;
@@ -79,7 +79,7 @@ pub use crate::client::{ClientState, RuntimeVersion};
 /// the pallet or call in question do not exist at all).
 pub fn validate<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<(), ExtrinsicError> {
     let Some(details) = call.validation_details() else {
-        return Ok(())
+        return Ok(());
     };
 
     let pallet_name = details.pallet_name;
@@ -91,7 +91,7 @@ pub fn validate<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<(), E
         .call_hash(call_name)
         .ok_or_else(|| ExtrinsicError::CallNameNotFound {
             pallet_name: pallet_name.to_string(),
-            call_name: call_name.to_string()
+            call_name: call_name.to_string(),
         })?;
 
     if details.hash != expected_hash {
@@ -128,7 +128,10 @@ pub enum TransactionVersion {
 }
 
 /// Return the SCALE encoded bytes representing the call data of the transaction.
-pub fn call_data<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<Vec<u8>, ExtrinsicError> {
+pub fn call_data<Call: Payload>(
+    call: &Call,
+    metadata: &Metadata,
+) -> Result<Vec<u8>, ExtrinsicError> {
     let mut bytes = Vec::new();
     call.encode_call_data_to(metadata, &mut bytes)?;
     Ok(bytes)

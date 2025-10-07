@@ -7,8 +7,7 @@ use super::TryFromError;
 use crate::utils::variant_index::VariantIndex;
 use crate::{
     ConstantMetadata, CustomMetadataInner, ExtrinsicMetadata, Metadata, OuterEnumsMetadata,
-    PalletMetadataInner, StorageEntryMetadata,
-    StorageMetadata, TransactionExtensionMetadataInner,
+    PalletMetadataInner, StorageEntryMetadata, StorageMetadata, TransactionExtensionMetadataInner,
     utils::ordered_map::OrderedMap,
 };
 use alloc::borrow::ToOwned;
@@ -16,8 +15,8 @@ use alloc::collections::BTreeMap;
 use alloc::string::String;
 use alloc::vec::Vec;
 use alloc::{format, vec};
-use frame_metadata::v14;
 use frame_decode::storage::StorageTypeInfo;
+use frame_metadata::v14;
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;
 
@@ -41,7 +40,8 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
                         .iter()
                         .map(|s| {
                             let entry_name: String = s.name.clone().into();
-                            let storage_info = m.storage_info(&name, &entry_name)
+                            let storage_info = m
+                                .storage_info(&name, &entry_name)
                                 .map_err(|e| e.into_owned())?
                                 .into_owned();
                             let storage_entry = StorageEntryMetadata {
@@ -53,12 +53,13 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
                             Ok::<_, TryFromError>((name.clone(), storage_entry))
                         })
                         .collect::<Result<_, TryFromError>>()?,
-                })
+                }),
             };
 
-            let constants = p.constants.iter().map(|c| {
-                (name.clone(), from_constant_metadata(c.clone()))
-            });
+            let constants = p
+                .constants
+                .iter()
+                .map(|c| (name.clone(), from_constant_metadata(c.clone())));
 
             let call_variant_index =
                 VariantIndex::build(p.calls.as_ref().map(|c| c.ty.id), &m.types);
@@ -148,9 +149,7 @@ fn from_extrinsic_metadata(
     }
 }
 
-fn from_constant_metadata(
-    s: v14::PalletConstantMetadata<PortableForm>,
-) -> ConstantMetadata {
+fn from_constant_metadata(s: v14::PalletConstantMetadata<PortableForm>) -> ConstantMetadata {
     ConstantMetadata {
         name: s.name,
         ty: s.ty.id,

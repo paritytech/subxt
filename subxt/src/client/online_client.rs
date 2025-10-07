@@ -10,7 +10,7 @@ use crate::{
     blocks::{BlockRef, BlocksClient},
     config::{Config, HashFor},
     constants::ConstantsClient,
-    error::{OnlineClientError, BackendError, RuntimeUpdaterError, RuntimeUpdateeApplyError},
+    error::{BackendError, OnlineClientError, RuntimeUpdateeApplyError, RuntimeUpdaterError},
     events::EventsClient,
     runtime_api::RuntimeApiClient,
     storage::StorageClient,
@@ -18,10 +18,10 @@ use crate::{
     view_functions::ViewFunctionsClient,
 };
 use derive_where::derive_where;
+use futures::TryFutureExt;
 use futures::future;
 use std::sync::{Arc, RwLock};
 use subxt_core::client::{ClientState, RuntimeVersion};
-use futures::TryFutureExt;
 
 /// A trait representing a client that can perform
 /// online actions.
@@ -75,7 +75,9 @@ impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     ///
     /// Allows insecure URLs without SSL encryption, e.g. (http:// and ws:// URLs).
-    pub async fn from_insecure_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, OnlineClientError> {
+    pub async fn from_insecure_url(
+        url: impl AsRef<str>,
+    ) -> Result<OnlineClient<T>, OnlineClientError> {
         let client = RpcClient::from_insecure_url(url).await?;
         let backend = LegacyBackend::builder().build(client);
         OnlineClient::from_backend(Arc::new(backend)).await
@@ -119,16 +121,20 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
     /// implementation to power it. Other details will be obtained from the chain.
-    pub async fn from_backend<B: Backend<T>>(backend: Arc<B>) -> Result<OnlineClient<T>, OnlineClientError> {
+    pub async fn from_backend<B: Backend<T>>(
+        backend: Arc<B>,
+    ) -> Result<OnlineClient<T>, OnlineClientError> {
         let latest_block = backend
             .latest_finalized_block_ref()
             .await
             .map_err(OnlineClientError::CannotGetLatestFinalizedBlock)?;
 
         let (genesis_hash, runtime_version, metadata) = future::join3(
-            backend.genesis_hash()
+            backend
+                .genesis_hash()
                 .map_err(OnlineClientError::CannotGetGenesisHash),
-            backend.current_runtime_version()
+            backend
+                .current_runtime_version()
                 .map_err(OnlineClientError::CannotGetCurrentRuntimeVersion),
             OnlineClient::fetch_metadata(&*backend, latest_block.hash())
                 .map_err(OnlineClientError::CannotFetchMetadata),
@@ -458,7 +464,8 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     /// Instead that's up to the user of this API to decide when to update and
     /// to perform the actual updating.
     pub async fn runtime_updates(&self) -> Result<RuntimeUpdaterStream<T>, RuntimeUpdaterError> {
-        let stream = self.0
+        let stream = self
+            .0
             .backend()
             .stream_runtime_version()
             .await
@@ -487,10 +494,7 @@ impl<T: Config> RuntimeUpdaterStream<T> {
             .ok_or(RuntimeUpdaterError::UnexpectedEndOfUpdateStream)?
             .map_err(RuntimeUpdaterError::CannotGetNextRuntimeVersion)?;
 
-        let at = wait_runtime_upgrade_in_finalized_block(
-            &self.client, 
-            &runtime_version
-        ).await?;
+        let at = wait_runtime_upgrade_in_finalized_block(&self.client, &runtime_version).await?;
 
         let metadata = OnlineClient::fetch_metadata(self.client.backend(), at.hash())
             .await
@@ -545,10 +549,8 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
             .ok_or(RuntimeUpdaterError::UnexpectedEndOfBlockStream)?
             .map_err(RuntimeUpdaterError::CannotGetNextFinalizedBlock)?;
 
-        let addr = crate::dynamic::storage::<(), scale_value::Value>(
-            "System", 
-            "LastRuntimeUpgrade"
-        );
+        let addr =
+            crate::dynamic::storage::<(), scale_value::Value>("System", "LastRuntimeUpgrade");
 
         let client_at = client.storage().at(block_ref.hash());
         let client = client_at
@@ -565,7 +567,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
 
         #[derive(scale_decode::DecodeAsType)]
         struct LastRuntimeUpgrade {
-            spec_version: u32
+            spec_version: u32,
         }
 
         let value = value

@@ -12,7 +12,4 @@ mod storage_client_at;
 
 pub use storage_client::StorageClient;
 pub use storage_client_at::StorageClientAt;
-pub use subxt_core::storage::address::{
-    Address, StaticAddress, DynamicAddress, dynamic,
-};
-
+pub use subxt_core::storage::address::{Address, DynamicAddress, StaticAddress, dynamic};

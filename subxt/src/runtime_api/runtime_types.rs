@@ -69,7 +69,8 @@ where
     pub fn call<Call: Payload>(
         &self,
         payload: Call,
-    ) -> impl Future<Output = Result<Call::ReturnType, RuntimeApiError>> + use<Call, Client, T> {
+    ) -> impl Future<Output = Result<Call::ReturnType, RuntimeApiError>> + use<Call, Client, T>
+    {
         let client = self.client.clone();
         let block_hash = self.block_ref.hash();
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),

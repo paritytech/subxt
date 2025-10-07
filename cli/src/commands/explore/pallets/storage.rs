@@ -1,18 +1,11 @@
 use clap::Args;
-use color_eyre::{
-    eyre::bail,
-    owo_colors::OwoColorize,
-};
+use color_eyre::{eyre::bail, owo_colors::OwoColorize};
 use indoc::{formatdoc, writedoc};
 use scale_typegen_description::type_description;
 use scale_value::Value;
 use std::fmt::Write;
 use std::write;
-use subxt::metadata::{
-    Metadata,
-    PalletMetadata, 
-    StorageMetadata,
-};
+use subxt::metadata::{Metadata, PalletMetadata, StorageMetadata};
 
 use crate::utils::{
     FileOrUrl, Indent, SyntaxHighlight, create_client, first_paragraph_of_docs,
@@ -112,21 +105,28 @@ pub async fn explore_storage(
     // inform user about shape of the key if it can be provided:
     let storage_keys = storage.keys().collect::<Vec<_>>();
     if !storage_keys.is_empty() {
-        let key_ty_description = format!("({})",
+        let key_ty_description = format!(
+            "({})",
             storage_keys
                 .iter()
-                .map(|key| type_description(key.key_id, metadata.types(), true).expect("No type Description"))
+                .map(|key| type_description(key.key_id, metadata.types(), true)
+                    .expect("No type Description"))
                 .collect::<Vec<_>>()
                 .join(", ")
-        ).indent(4).highlight();
+        )
+        .indent(4)
+        .highlight();
 
-        let key_ty_example = format!("({})",
+        let key_ty_example = format!(
+            "({})",
             storage_keys
                 .iter()
                 .map(|key| type_example(key.key_id, metadata.types()).to_string())
                 .collect::<Vec<_>>()
                 .join(", ")
-        ).indent(4).highlight();
+        )
+        .indent(4)
+        .highlight();
 
         writedoc! {output, "
 
@@ -148,7 +148,8 @@ pub async fn explore_storage(
         return Ok(());
     }
 
-    let storage_entry_keys: Vec<Value> = match (!trailing_args.is_empty(), !storage_keys.is_empty()) {
+    let storage_entry_keys: Vec<Value> = match (!trailing_args.is_empty(), !storage_keys.is_empty())
+    {
         // keys provided, keys not needed.
         (true, false) => {
             let trailing_args_str = trailing_args.join(" ");
@@ -194,27 +195,15 @@ pub async fn explore_storage(
     // construct the client:
     let client = create_client(&file_or_url).await?;
 
-    let storage_query = subxt::dynamic::storage::<Vec<Value>, Value>(
-        pallet_name, 
-        storage.name()
-    );
+    let storage_query = subxt::dynamic::storage::<Vec<Value>, Value>(pallet_name, storage.name());
 
-    let storage_client_at = client
-        .storage()
-        .at_latest()
-        .await?;
-    
-    let storage_entry = storage_client_at
-        .entry(storage_query)?;
+    let storage_client_at = client.storage().at_latest().await?;
 
-    let storage_value = storage_entry
-        .fetch(storage_entry_keys)
-        .await?;
+    let storage_entry = storage_client_at.entry(storage_query)?;
 
-    let value = storage_value
-        .decode()?
-        .to_string()
-        .highlight();
+    let storage_value = storage_entry.fetch(storage_entry_keys).await?;
+
+    let value = storage_value.decode()?.to_string().highlight();
 
     writedoc! {output, "
 

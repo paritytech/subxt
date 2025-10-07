@@ -1,6 +1,7 @@
 use crate::{
-    error::EventsError, Metadata,
+    Metadata,
     config::{Config, HashFor},
+    error::EventsError,
 };
 use derive_where::derive_where;
 use scale_decode::{DecodeAsFields, DecodeAsType};

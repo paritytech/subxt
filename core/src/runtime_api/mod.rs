@@ -43,8 +43,8 @@
 
 pub mod payload;
 
-use crate::error::RuntimeApiError;
 use crate::Metadata;
+use crate::error::RuntimeApiError;
 use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -63,13 +63,16 @@ pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), Runt
     let trait_name = payload.trait_name();
     let method_name = payload.method_name();
 
-    let api_trait = metadata.runtime_api_trait_by_name(trait_name)
+    let api_trait = metadata
+        .runtime_api_trait_by_name(trait_name)
         .ok_or_else(|| RuntimeApiError::TraitNotFound(trait_name.to_string()))?;
-    let api_method = api_trait.method_by_name(method_name)
-        .ok_or_else(|| RuntimeApiError::MethodNotFound { 
-            trait_name: trait_name.to_string(), 
-            method_name: method_name.to_string() 
-        })?;
+    let api_method =
+        api_trait
+            .method_by_name(method_name)
+            .ok_or_else(|| RuntimeApiError::MethodNotFound {
+                trait_name: trait_name.to_string(),
+                method_name: method_name.to_string(),
+            })?;
 
     if hash != api_method.hash() {
         Err(RuntimeApiError::IncompatibleCodegen)
@@ -90,8 +93,9 @@ pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>
         payload.method_name(),
         payload.args(),
         metadata,
-        metadata.types()
-    ).map_err(RuntimeApiError::CouldNotEncodeInputs)?;
+        metadata.types(),
+    )
+    .map_err(RuntimeApiError::CouldNotEncodeInputs)?;
 
     Ok(value)
 }
@@ -108,8 +112,9 @@ pub fn decode_value<P: Payload>(
         bytes,
         metadata,
         metadata.types(),
-        P::ReturnType::into_visitor()
-    ).map_err(RuntimeApiError::CouldNotDecodeResponse)?;
+        P::ReturnType::into_visitor(),
+    )
+    .map_err(RuntimeApiError::CouldNotDecodeResponse)?;
 
     Ok(value)
 }

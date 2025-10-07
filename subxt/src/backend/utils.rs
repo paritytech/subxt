@@ -10,7 +10,8 @@ use std::{future::Future, pin::Pin, task::Poll};
 type ResubscribeGetter<T> = Box<dyn FnMut() -> ResubscribeFuture<T> + Send>;
 
 /// Future that resolves to a subscription stream.
-type ResubscribeFuture<T> = Pin<Box<dyn Future<Output = Result<StreamOfResults<T>, BackendError>> + Send>>;
+type ResubscribeFuture<T> =
+    Pin<Box<dyn Future<Output = Result<StreamOfResults<T>, BackendError>> + Send>>;
 
 pub(crate) enum PendingOrStream<T> {
     Pending(BoxFuture<'static, Result<StreamOfResults<T>, BackendError>>),

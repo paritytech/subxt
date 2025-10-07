@@ -2,19 +2,19 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::error::StorageValueError;
+use alloc::borrow::Cow;
 use core::marker::PhantomData;
 use frame_decode::storage::StorageInfo;
-use alloc::borrow::Cow;
-use scale_info::PortableRegistry;
 use scale_decode::DecodeAsType;
-use crate::error::StorageValueError;
+use scale_info::PortableRegistry;
 
 /// This represents a storage value.
 pub struct StorageValue<'entry, 'info, Value> {
     pub(crate) info: &'entry StorageInfo<'info, u32>,
     pub(crate) types: &'info PortableRegistry,
     bytes: Cow<'entry, [u8]>,
-    marker: PhantomData<Value>
+    marker: PhantomData<Value>,
 }
 
 impl<'entry, 'info, Value: DecodeAsType> StorageValue<'entry, 'info, Value> {
@@ -51,15 +51,16 @@ impl<'entry, 'info, Value: DecodeAsType> StorageValue<'entry, 'info, Value> {
         let cursor = &mut &*self.bytes;
 
         let value = frame_decode::storage::decode_storage_value_with_info(
-            cursor, 
-            self.info, 
-            self.types, 
-            T::into_visitor()
-        ).map_err(StorageValueError::CannotDecode)?;
+            cursor,
+            self.info,
+            self.types,
+            T::into_visitor(),
+        )
+        .map_err(StorageValueError::CannotDecode)?;
 
         if !cursor.is_empty() {
             return Err(StorageValueError::LeftoverBytes {
-                bytes: cursor.to_vec()
+                bytes: cursor.to_vec(),
             });
         }
 

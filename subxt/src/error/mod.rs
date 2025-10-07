@@ -18,25 +18,25 @@ pub use dispatch_error::{
 
 // Re-expose the errors we use from other crates here:
 pub use crate::Metadata;
+pub use hex::Hex;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
 pub use subxt_metadata::TryFromError as MetadataTryFromError;
-pub use hex::Hex;
 
 // Re-export core error types we're just reusing.
 pub use subxt_core::error::{
-    // These errors are exposed as-is:
-    ExtrinsicDecodeErrorAt,
     ConstantError,
     CustomValueError,
-    StorageKeyError,
-    StorageValueError,
+    EventsError as CoreEventsError,
+    // These errors are exposed as-is:
+    ExtrinsicDecodeErrorAt,
     // These errors are wrapped:
     ExtrinsicError as CoreExtrinsicError,
     RuntimeApiError as CoreRuntimeApiError,
-    EventsError as CoreEventsError,
-    ViewFunctionError as CoreViewFunctionError,
     StorageError as CoreStorageError,
+    StorageKeyError,
+    StorageValueError,
+    ViewFunctionError as CoreViewFunctionError,
 };
 
 /// A global error type. Any of the errors exposed here can convert into this
@@ -112,22 +112,25 @@ impl Error {
 
     /// Checks whether the error was caused by a RPC request being rejected.
     pub fn is_rpc_limit_reached(&self) -> bool {
-        matches!(self.backend_error(), Some(BackendError::Rpc(RpcError::LimitReached)))
+        matches!(
+            self.backend_error(),
+            Some(BackendError::Rpc(RpcError::LimitReached))
+        )
     }
 
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
-            Error::ExtrinsicDecodeErrorAt(_) |
-            Error::ConstantError(_) |
-            Error::CustomValueError(_) |
-            Error::StorageKeyError(_) |
-            Error::StorageValueError(_) |
-            Error::BackendError(_) |
-            Error::RuntimeUpdateeApplyError(_) |
-            Error::TransactionStatusError(_) |
-            Error::ModuleErrorDetailsError(_) |
-            Error::ModuleErrorDecodeError(_) |
-            Error::DispatchErrorDecodeError(_) => None,
+            Error::ExtrinsicDecodeErrorAt(_)
+            | Error::ConstantError(_)
+            | Error::CustomValueError(_)
+            | Error::StorageKeyError(_)
+            | Error::StorageValueError(_)
+            | Error::BackendError(_)
+            | Error::RuntimeUpdateeApplyError(_)
+            | Error::TransactionStatusError(_)
+            | Error::ModuleErrorDetailsError(_)
+            | Error::ModuleErrorDecodeError(_)
+            | Error::DispatchErrorDecodeError(_) => None,
             Error::BlockError(e) => e.backend_error(),
             Error::AccountNonceError(e) => e.backend_error(),
             Error::OnlineClientError(e) => e.backend_error(),
@@ -156,9 +159,9 @@ pub enum BackendError {
     CouldNotScaleDecodeRuntimeResponse(codec::Error),
     #[error("Backend error: Could not codec::Decode metadata bytes into subxt::Metadata: {0}")]
     CouldNotDecodeMetadata(codec::Error),
-    // This is for errors in `Backend` implementations which aren't any of the "pre-defined" set above: 
+    // This is for errors in `Backend` implementations which aren't any of the "pre-defined" set above:
     #[error("Custom backend error: {0}")]
-    Other(String)
+    Other(String),
 }
 
 impl BackendError {
@@ -206,14 +209,14 @@ pub enum RpcError {
 #[non_exhaustive]
 #[allow(missing_docs)]
 pub enum BlockError {
-    #[error("Could not find the block body with hash {block_hash} (perhaps it was on a non-finalized fork?)")]
-    BlockNotFound {
-        block_hash: Hex,
-    },
+    #[error(
+        "Could not find the block body with hash {block_hash} (perhaps it was on a non-finalized fork?)"
+    )]
+    BlockNotFound { block_hash: Hex },
     #[error("Could not download the block header with hash {block_hash}: {reason}")]
     CouldNotGetBlockHeader {
         block_hash: Hex,
-        reason: BackendError
+        reason: BackendError,
     },
     #[error("Could not download the latest block header: {0}")]
     CouldNotGetLatestBlock(BackendError),
@@ -227,19 +230,19 @@ pub enum BlockError {
     AccountNonceError {
         block_hash: Hex,
         account_id: Hex,
-        reason: AccountNonceError
-    }
+        reason: AccountNonceError,
+    },
 }
 
 impl BlockError {
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
-            BlockError::CouldNotGetBlockHeader { reason: e, ..} |
-            BlockError::CouldNotGetLatestBlock(e) |
-            BlockError::CouldNotSubscribeToAllBlocks(e) |
-            BlockError::CouldNotSubscribeToBestBlocks(e) |
-            BlockError::CouldNotSubscribeToFinalizedBlocks(e) => Some(e),
-            _ => None
+            BlockError::CouldNotGetBlockHeader { reason: e, .. }
+            | BlockError::CouldNotGetLatestBlock(e)
+            | BlockError::CouldNotSubscribeToAllBlocks(e)
+            | BlockError::CouldNotSubscribeToBestBlocks(e)
+            | BlockError::CouldNotSubscribeToFinalizedBlocks(e) => Some(e),
+            _ => None,
         }
     }
 }
@@ -271,7 +274,9 @@ impl AccountNonceError {
 pub enum OnlineClientError {
     #[error("Cannot construct OnlineClient: {0}")]
     RpcError(#[from] subxt_rpcs::Error),
-    #[error("Cannot construct OnlineClient: Cannot fetch latest finalized block to obtain init details from: {0}")]
+    #[error(
+        "Cannot construct OnlineClient: Cannot fetch latest finalized block to obtain init details from: {0}"
+    )]
     CannotGetLatestFinalizedBlock(BackendError),
     #[error("Cannot construct OnlineClient: Cannot fetch genesis hash: {0}")]
     CannotGetGenesisHash(BackendError),
@@ -311,7 +316,9 @@ pub enum RuntimeUpdaterError {
     CannotGetNextFinalizedBlock(BackendError),
     #[error("Cannot fetch new metadata for runtime update: {0}")]
     CannotFetchNewMetadata(BackendError),
-    #[error("Error subscribing to runtime updates: Cannot find the System.LastRuntimeUpgrade storage entry")]
+    #[error(
+        "Error subscribing to runtime updates: Cannot find the System.LastRuntimeUpgrade storage entry"
+    )]
     CantFindSystemLastRuntimeUpgrade,
     #[error("Error subscribing to runtime updates: Cannot fetch last runtime upgrade: {0}")]
     CantFetchLastRuntimeUpgrade(StorageError),
@@ -400,25 +407,29 @@ pub enum ExtrinsicError {
     BlockNotFound(Hex),
     #[error("{0}")]
     CouldNotDecodeExtrinsics(#[from] ExtrinsicDecodeErrorAt),
-    #[error("Extrinsic submission error: Cannot get latest finalized block to grab account nonce at: {0}")]
+    #[error(
+        "Extrinsic submission error: Cannot get latest finalized block to grab account nonce at: {0}"
+    )]
     CannotGetLatestFinalizedBlock(BackendError),
     #[error("Cannot find block header for block {block_hash}")]
-    CannotFindBlockHeader {
-        block_hash: Hex
-    },
+    CannotFindBlockHeader { block_hash: Hex },
     #[error("Error getting account nonce at block {block_hash}")]
     AccountNonceError {
         block_hash: Hex,
         account_id: Hex,
-        reason: AccountNonceError
+        reason: AccountNonceError,
     },
     #[error("Cannot submit extrinsic: {0}")]
     ErrorSubmittingTransaction(BackendError),
     #[error("A transaction status error was returned while submitting the extrinsic: {0}")]
     TransactionStatusError(TransactionStatusError),
-    #[error("The transaction status stream encountered an error while submitting the extrinsic: {0}")]
+    #[error(
+        "The transaction status stream encountered an error while submitting the extrinsic: {0}"
+    )]
     TransactionStatusStreamError(BackendError),
-    #[error("The transaction status stream unexpectedly ended, so we don't know the status of the submitted extrinsic")]
+    #[error(
+        "The transaction status stream unexpectedly ended, so we don't know the status of the submitted extrinsic"
+    )]
     UnexpectedEndOfTransactionStatusStream,
     #[error("Cannot get fee info from Runtime API: {0}")]
     CannotGetFeeInfo(BackendError),
@@ -452,7 +463,9 @@ impl ExtrinsicError {
 pub enum ViewFunctionError {
     #[error("{0}")]
     OfflineError(#[from] CoreViewFunctionError),
-    #[error("Cannot access View Functions at latest block: Cannot fetch latest finalized block: {0}")]
+    #[error(
+        "Cannot access View Functions at latest block: Cannot fetch latest finalized block: {0}"
+    )]
     CannotGetLatestFinalizedBlock(BackendError),
     #[error("Cannot call the View Function Runtime API: {0}")]
     CannotCallApi(BackendError),
@@ -477,7 +490,9 @@ pub enum TransactionProgressError {
     CannotGetNextProgressUpdate(BackendError),
     #[error("Error during transaction progress: {0}")]
     TransactionStatusError(#[from] TransactionStatusError),
-    #[error("The transaction status stream unexpectedly ended, so we have no further transaction progress updates")]
+    #[error(
+        "The transaction status stream unexpectedly ended, so we have no further transaction progress updates"
+    )]
     UnexpectedEndOfTransactionStatusStream,
 }
 
@@ -512,36 +527,40 @@ pub enum TransactionStatusError {
 #[non_exhaustive]
 #[allow(missing_docs)]
 pub enum TransactionEventsError {
-    #[error("The block containing the submitted transaction ({block_hash}) could not be downloaded: {error}")]
+    #[error(
+        "The block containing the submitted transaction ({block_hash}) could not be downloaded: {error}"
+    )]
     CannotFetchBlockBody {
         block_hash: Hex,
         error: BackendError,
     },
-    #[error("Cannot find the the submitted transaction (hash: {transaction_hash}) in the block (hash: {block_hash}) it is supposed to be in.")]
+    #[error(
+        "Cannot find the the submitted transaction (hash: {transaction_hash}) in the block (hash: {block_hash}) it is supposed to be in."
+    )]
     CannotFindTransactionInBlock {
         block_hash: Hex,
         transaction_hash: Hex,
     },
     #[error("The block containing the submitted transaction ({block_hash}) could not be found")]
-    BlockNotFound {
-        block_hash: Hex
-    },
-    #[error("Could not decode event at index {event_index} for the submitted transaction at block {block_hash}: {error}")]
+    BlockNotFound { block_hash: Hex },
+    #[error(
+        "Could not decode event at index {event_index} for the submitted transaction at block {block_hash}: {error}"
+    )]
     CannotDecodeEventInBlock {
         event_index: usize,
         block_hash: Hex,
-        error: EventsError
+        error: EventsError,
     },
     #[error("Could not fetch events for the submitted transaction: {error}")]
     CannotFetchEventsForTransaction {
         block_hash: Hex,
         transaction_hash: Hex,
-        error: EventsError
+        error: EventsError,
     },
     #[error("The transaction led to a DispatchError, but we failed to decode it: {error}")]
     CannotDecodeDispatchError {
         error: DispatchErrorDecodeError,
-        bytes: Vec<u8>
+        bytes: Vec<u8>,
     },
     #[error("The transaction failed with the following dispatch error: {0}")]
     ExtrinsicFailed(#[from] DispatchError),
@@ -568,7 +587,7 @@ pub enum TransactionFinalizedSuccessError {
     #[error("Could not finalize the transaction: {0}")]
     FinalizationError(#[from] TransactionProgressError),
     #[error("The transaction did not succeed: {0}")]
-    SuccessError(#[from] TransactionEventsError)
+    SuccessError(#[from] TransactionEventsError),
 }
 
 impl TransactionFinalizedSuccessError {
@@ -585,15 +604,17 @@ impl TransactionFinalizedSuccessError {
 #[non_exhaustive]
 #[allow(missing_docs)]
 pub enum ModuleErrorDetailsError {
-    #[error("Could not get details for the DispatchError: could not find pallet index {pallet_index}")]
-    PalletNotFound {
-        pallet_index: u8
-    },
-    #[error("Could not get details for the DispatchError: could not find error index {error_index} in pallet {pallet_name}")]
+    #[error(
+        "Could not get details for the DispatchError: could not find pallet index {pallet_index}"
+    )]
+    PalletNotFound { pallet_index: u8 },
+    #[error(
+        "Could not get details for the DispatchError: could not find error index {error_index} in pallet {pallet_name}"
+    )]
     ErrorVariantNotFound {
         pallet_name: String,
-        error_index: u8
-    }
+        error_index: u8,
+    },
 }
 
 /// Error decoding the [`ModuleError`]
@@ -608,15 +629,17 @@ pub struct ModuleErrorDecodeError(scale_decode::Error);
 #[non_exhaustive]
 #[allow(missing_docs)]
 pub enum DispatchErrorDecodeError {
-    #[error("Could not decode the DispatchError: could not find the corresponding type ID in the metadata")]
+    #[error(
+        "Could not decode the DispatchError: could not find the corresponding type ID in the metadata"
+    )]
     DispatchErrorTypeIdNotFound,
     #[error("Could not decode the DispatchError: {0}")]
     CouldNotDecodeDispatchError(scale_decode::Error),
     #[error("Could not decode the DispatchError::Module variant")]
     CouldNotDecodeModuleError {
         /// The bytes corresponding to the Module variant we were unable to decode:
-        bytes: Vec<u8>
-    }
+        bytes: Vec<u8>,
+    },
 }
 
 /// Error working with storage.
@@ -628,7 +651,9 @@ pub enum StorageError {
     Offline(#[from] CoreStorageError),
     #[error("Cannot access storage at latest block: Cannot fetch latest finalized block: {0}")]
     CannotGetLatestFinalizedBlock(BackendError),
-    #[error("No storage value found at the given address, and no default value to fall back to using.")]
+    #[error(
+        "No storage value found at the given address, and no default value to fall back to using."
+    )]
     NoValueFound,
     #[error("Cannot fetch the storage value: {0}")]
     CannotFetchValue(BackendError),

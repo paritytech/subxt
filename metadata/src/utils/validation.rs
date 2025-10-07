@@ -6,8 +6,7 @@
 
 use crate::{
     CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, PalletMetadata,
-    RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata,
-    ViewFunctionMetadata,
+    RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, ViewFunctionMetadata,
 };
 use alloc::vec::Vec;
 use hashbrown::HashMap;
@@ -291,7 +290,14 @@ fn get_storage_entry_hash(registry: &PortableRegistry, entry: &StorageEntryMetad
     let mut bytes = concat_and_hash3(
         &hash(entry.name.as_bytes()),
         &get_type_hash(registry, entry.info.value_id),
-        &hash(entry.info.default_value.as_ref().map(|b| &**b).unwrap_or_default())
+        &hash(
+            entry
+                .info
+                .default_value
+                .as_ref()
+                .map(|b| &**b)
+                .unwrap_or_default(),
+        ),
     );
 
     for key in &*entry.info.keys {
@@ -301,7 +307,7 @@ fn get_storage_entry_hash(registry: &PortableRegistry, entry: &StorageEntryMetad
             &get_type_hash(registry, key.key_id),
         )
     }
-    
+
     bytes
 }
 

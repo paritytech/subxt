@@ -49,7 +49,9 @@ where
     }
 
     /// Obtain events for the latest finalized block.
-    pub fn at_latest(&self) -> impl Future<Output = Result<Events<T>, EventsError>> + Send + 'static {
+    pub fn at_latest(
+        &self,
+    ) -> impl Future<Output = Result<Events<T>, EventsError>> + Send + 'static {
         self.at_or_latest(None)
     }
 
@@ -72,8 +74,7 @@ where
                     .map_err(EventsError::CannotGetLatestFinalizedBlock)?,
             };
 
-            let event_bytes = get_event_bytes(client.backend(), block_ref.hash())
-                .await?;
+            let event_bytes = get_event_bytes(client.backend(), block_ref.hash()).await?;
             Ok(Events::decode_from(event_bytes, client.metadata()))
         }
     }

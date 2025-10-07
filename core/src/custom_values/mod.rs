@@ -42,7 +42,10 @@ use scale_decode::IntoVisitor;
 /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
 /// if the address is valid (or if it's not possible to check since the address has no validation hash).
 /// Returns an error if the address was not valid (wrong name, type or raw bytes)
-pub fn validate<Addr: Address + ?Sized>(address: &Addr, metadata: &Metadata) -> Result<(), CustomValueError> {
+pub fn validate<Addr: Address + ?Sized>(
+    address: &Addr,
+    metadata: &Metadata,
+) -> Result<(), CustomValueError> {
     if let Some(actual_hash) = address.validation_hash() {
         let custom = metadata.custom();
         let custom_value = custom
@@ -70,8 +73,9 @@ pub fn get<Addr: Address<IsDecodable = Maybe> + ?Sized>(
         address.name(),
         metadata,
         metadata.types(),
-        Addr::Target::into_visitor()
-    ).map_err(CustomValueError::CouldNotDecodeCustomValue)?;
+        Addr::Target::into_visitor(),
+    )
+    .map_err(CustomValueError::CouldNotDecodeCustomValue)?;
 
     Ok(value)
 }
@@ -85,7 +89,8 @@ pub fn get_bytes<Addr: Address + ?Sized>(
     validate(address, metadata)?;
 
     // 2. Return the underlying bytes:
-    let custom_value = metadata.custom_value_info(address.name())
+    let custom_value = metadata
+        .custom_value_info(address.name())
         .map_err(|e| CustomValueError::NotFound(e.not_found))?;
     Ok(custom_value.bytes.to_vec())
 }

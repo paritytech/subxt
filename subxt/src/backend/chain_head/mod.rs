@@ -462,7 +462,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         }
     }
 
-    async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, BackendError> {
+    async fn stream_runtime_version(
+        &self,
+    ) -> Result<StreamOfResults<RuntimeVersion>, BackendError> {
         // Keep track of runtime details announced in new blocks, and then when blocks
         // are finalized, find the latest of these that has runtime details, and clear the rest.
         let mut runtimes = HashMap::new();

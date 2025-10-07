@@ -11,14 +11,11 @@ use crate::{
 use derive_where::derive_where;
 use futures::StreamExt;
 use std::marker::PhantomData;
-use subxt_core::storage::{address::Address, PrefixOf};
-use subxt_core::utils::{Maybe, Yes};
 use subxt_core::Metadata;
+use subxt_core::storage::{PrefixOf, address::Address};
+use subxt_core::utils::{Maybe, Yes};
 
-pub use subxt_core::storage::{
-    StorageKeyValue,
-    StorageValue
-};
+pub use subxt_core::storage::{StorageKeyValue, StorageValue};
 
 /// Query the runtime storage.
 #[derive_where(Clone; Client)]
@@ -29,10 +26,10 @@ pub struct StorageClientAt<T: Config, Client> {
     _marker: PhantomData<T>,
 }
 
-impl<T, Client> StorageClientAt<T, Client> 
+impl<T, Client> StorageClientAt<T, Client>
 where
     T: Config,
-    Client: OfflineClientT<T>
+    Client: OfflineClientT<T>,
 {
     /// Create a new [`StorageClientAt`].
     pub(crate) fn new(client: Client, block_ref: BlockRef<HashFor<T>>) -> Self {
@@ -56,18 +53,21 @@ where
     Client: OfflineClientT<T>,
 {
     /// This returns a [`StorageEntryClient`], which allows working with the storage entry at the provided address.
-    pub fn entry<Addr: Address>(&'_ self, address: Addr) -> Result<StorageEntryClient<'_, T, Client, Addr, Addr::IsPlain>, StorageError> {
+    pub fn entry<Addr: Address>(
+        &'_ self,
+        address: Addr,
+    ) -> Result<StorageEntryClient<'_, T, Client, Addr, Addr::IsPlain>, StorageError> {
         let inner = subxt_core::storage::entry(address, &self.metadata)?;
         Ok(StorageEntryClient {
             inner,
-            client: self.client.clone(), 
+            client: self.client.clone(),
             block_ref: self.block_ref.clone(),
-            _marker: core::marker::PhantomData 
+            _marker: core::marker::PhantomData,
         })
     }
 }
 
-/// This represents a single storage entry (be it a plain value or map) 
+/// This represents a single storage entry (be it a plain value or map)
 /// and the operations that can be performed on it.
 pub struct StorageEntryClient<'atblock, T: Config, Client, Addr, IsPlain> {
     inner: subxt_core::storage::StorageEntry<'atblock, Addr, IsPlain>,
@@ -76,7 +76,7 @@ pub struct StorageEntryClient<'atblock, T: Config, Client, Addr, IsPlain> {
     _marker: PhantomData<T>,
 }
 
-impl <'atblock, T, Client, Addr, IsPlain> StorageEntryClient<'atblock, T, Client, Addr, IsPlain> 
+impl<'atblock, T, Client, Addr, IsPlain> StorageEntryClient<'atblock, T, Client, Addr, IsPlain>
 where
     T: Config,
     Addr: Address,
@@ -109,23 +109,26 @@ where
 }
 
 // Plain values get a fetch method with no extra arguments.
-impl <'atblock, T, Client, Addr> StorageEntryClient<'atblock, T, Client, Addr, Yes> 
+impl<'atblock, T, Client, Addr> StorageEntryClient<'atblock, T, Client, Addr, Yes>
 where
     T: Config,
     Addr: Address,
-    Client: OnlineClientT<T>
+    Client: OnlineClientT<T>,
 {
     pub async fn fetch(&'_ self) -> Result<StorageValue<'_, 'atblock, Addr::Value>, StorageError> {
-        let value = self
-            .try_fetch()
-            .await?
-            .map_or_else(|| self.inner.default_value().ok_or(StorageError::NoValueFound), Ok)?;
+        let value = self.try_fetch().await?.map_or_else(
+            || self.inner.default_value().ok_or(StorageError::NoValueFound),
+            Ok,
+        )?;
 
         Ok(value)
     }
 
-    pub async fn try_fetch(&self) -> Result<Option<StorageValue<'_, 'atblock, Addr::Value>>, StorageError> {
-        let value = self.client
+    pub async fn try_fetch(
+        &self,
+    ) -> Result<Option<StorageValue<'_, 'atblock, Addr::Value>>, StorageError> {
+        let value = self
+            .client
             .backend()
             .storage_fetch_value(self.key_prefix().to_vec(), self.block_ref.hash())
             .await
@@ -135,21 +138,24 @@ where
         Ok(value)
     }
 
-    /// The keys for plain storage values are always 32 byte hashes. 
+    /// The keys for plain storage values are always 32 byte hashes.
     pub fn key_prefix(&self) -> [u8; 32] {
-        self.inner.key_prefix()   
+        self.inner.key_prefix()
     }
 }
 
 // When HasDefaultValue = Yes, we expect there to exist a valid default value and will use that
 // if we fetch an entry and get nothing back.
-impl <'atblock, T, Client, Addr> StorageEntryClient<'atblock, T, Client, Addr, Maybe> 
+impl<'atblock, T, Client, Addr> StorageEntryClient<'atblock, T, Client, Addr, Maybe>
 where
     T: Config,
     Addr: Address,
-    Client: OnlineClientT<T>
+    Client: OnlineClientT<T>,
 {
-    pub async fn fetch(&'_ self, keys: Addr::KeyParts) -> Result<StorageValue<'_, 'atblock, Addr::Value>, StorageError> {       
+    pub async fn fetch(
+        &'_ self,
+        keys: Addr::KeyParts,
+    ) -> Result<StorageValue<'_, 'atblock, Addr::Value>, StorageError> {
         let value = self
             .try_fetch(keys)
             .await?
@@ -158,11 +164,15 @@ where
 
         Ok(value)
     }
-    
-    pub async fn try_fetch(&self, keys: Addr::KeyParts) -> Result<Option<StorageValue<'_, 'atblock, Addr::Value>>, StorageError> {    
+
+    pub async fn try_fetch(
+        &self,
+        keys: Addr::KeyParts,
+    ) -> Result<Option<StorageValue<'_, 'atblock, Addr::Value>>, StorageError> {
         let key = self.inner.fetch_key(keys)?;
 
-        let value = self.client
+        let value = self
+            .client
             .backend()
             .storage_fetch_value(key, self.block_ref.hash())
             .await
@@ -174,13 +184,17 @@ where
     }
 
     pub async fn iter<Keys: PrefixOf<Addr::KeyParts>>(
-        &self, 
-        keys: Keys
-    ) -> Result<impl futures::Stream<Item = Result<StorageKeyValue<'_, 'atblock, Addr>, StorageError>>, StorageError> {
+        &self,
+        keys: Keys,
+    ) -> Result<
+        impl futures::Stream<Item = Result<StorageKeyValue<'_, 'atblock, Addr>, StorageError>>,
+        StorageError,
+    > {
         let key_bytes = self.inner.iter_key(keys)?;
         let block_hash = self.block_ref.hash();
 
-        let stream = self.client
+        let stream = self
+            .client
             .backend()
             .storage_fetch_descendant_values(key_bytes, block_hash)
             .await
@@ -199,7 +213,7 @@ where
     /// The first 32 bytes of the storage entry key, which points to the entry but not necessarily
     /// a single storage value (unless the entry is a plain value).
     pub fn key_prefix(&self) -> [u8; 32] {
-        self.inner.key_prefix()   
+        self.inner.key_prefix()
     }
 }
 

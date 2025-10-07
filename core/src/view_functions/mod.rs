@@ -7,8 +7,8 @@
 
 pub mod payload;
 
-use crate::error::ViewFunctionError;
 use crate::Metadata;
+use crate::error::ViewFunctionError;
 use alloc::vec::Vec;
 use payload::Payload;
 use scale_decode::IntoVisitor;
@@ -25,12 +25,13 @@ pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), View
     let pallet_name = payload.pallet_name();
     let function_name = payload.function_name();
 
-    let view_function = metadata.pallet_by_name(pallet_name)
+    let view_function = metadata
+        .pallet_by_name(pallet_name)
         .ok_or_else(|| ViewFunctionError::PalletNotFound(pallet_name.to_string()))?
         .view_function_by_name(function_name)
         .ok_or_else(|| ViewFunctionError::ViewFunctionNotFound {
             pallet_name: pallet_name.to_string(),
-            function_name: function_name.to_string()
+            function_name: function_name.to_string(),
         })?;
 
     if hash != view_function.hash() {
@@ -45,14 +46,18 @@ pub const CALL_NAME: &str = "RuntimeViewFunction_execute_view_function";
 
 /// Encode the bytes that will be passed to the "execute_view_function" Runtime API call,
 /// to execute the View Function represented by the given payload.
-pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>, ViewFunctionError> {
+pub fn call_args<P: Payload>(
+    payload: &P,
+    metadata: &Metadata,
+) -> Result<Vec<u8>, ViewFunctionError> {
     let inputs = frame_decode::view_functions::encode_view_function_inputs(
         payload.pallet_name(),
         payload.function_name(),
         payload.args(),
         metadata,
-        metadata.types()
-    ).map_err(ViewFunctionError::CouldNotEncodeInputs)?;
+        metadata.types(),
+    )
+    .map_err(ViewFunctionError::CouldNotEncodeInputs)?;
 
     Ok(inputs)
 }
@@ -69,8 +74,9 @@ pub fn decode_value<P: Payload>(
         bytes,
         metadata,
         metadata.types(),
-        P::ReturnType::into_visitor()
-    ).map_err(ViewFunctionError::CouldNotDecodeResponse)?;
+        P::ReturnType::into_visitor(),
+    )
+    .map_err(ViewFunctionError::CouldNotDecodeResponse)?;
 
     Ok(value)
 }

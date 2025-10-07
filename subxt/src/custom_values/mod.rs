@@ -7,4 +7,4 @@
 mod custom_values_client;
 
 pub use custom_values_client::CustomValuesClient;
-pub use subxt_core::custom_values::address::{Address, StaticAddress, DynamicAddress, dynamic};
+pub use subxt_core::custom_values::address::{Address, DynamicAddress, StaticAddress, dynamic};

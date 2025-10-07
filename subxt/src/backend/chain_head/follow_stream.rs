@@ -34,7 +34,11 @@ pub type FollowEventStreamGetter<Hash> = Box<dyn FnMut() -> FollowEventStreamFut
 
 /// The future which will return a stream of follow events and the subscription ID for it.
 pub type FollowEventStreamFut<Hash> = Pin<
-    Box<dyn Future<Output = Result<(FollowEventStream<Hash>, String), BackendError>> + Send + 'static>,
+    Box<
+        dyn Future<Output = Result<(FollowEventStream<Hash>, String), BackendError>>
+            + Send
+            + 'static,
+    >,
 >;
 
 /// The stream of follow events.

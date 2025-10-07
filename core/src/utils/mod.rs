@@ -22,7 +22,6 @@ use alloc::vec::Vec;
 use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
 
-pub use yesnomaybe::{Yes, No, Maybe, YesMaybe, NoMaybe, YesNo};
 pub use account_id::AccountId32;
 pub use account_id20::AccountId20;
 pub use era::Era;
@@ -32,6 +31,7 @@ pub use primitive_types::{H160, H256, H512};
 pub use static_type::Static;
 pub use unchecked_extrinsic::UncheckedExtrinsic;
 pub use wrapper_opaque::WrapperKeepOpaque;
+pub use yesnomaybe::{Maybe, No, NoMaybe, Yes, YesMaybe, YesNo};
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload

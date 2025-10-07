@@ -10,7 +10,10 @@ use crate::{
     backend::{BlockRef, StreamOfResults, TransactionStatus as BackendTxStatus},
     client::OnlineClientT,
     config::{Config, HashFor},
-    error::{DispatchError, TransactionEventsError, TransactionProgressError, TransactionFinalizedSuccessError, TransactionStatusError},
+    error::{
+        DispatchError, TransactionEventsError, TransactionFinalizedSuccessError,
+        TransactionProgressError, TransactionStatusError,
+    },
     events::EventsClient,
     utils::strip_compact_prefix,
 };
@@ -87,7 +90,9 @@ where
                 // Finalized! Return.
                 TxStatus::InFinalizedBlock(s) => return Ok(s),
                 // Error scenarios; return the error.
-                TxStatus::Error { message } => return Err(TransactionStatusError::Error(message).into()),
+                TxStatus::Error { message } => {
+                    return Err(TransactionStatusError::Error(message).into());
+                }
                 TxStatus::Invalid { message } => {
                     return Err(TransactionStatusError::Invalid(message).into());
                 }
@@ -139,9 +144,11 @@ impl<T: Config, C: Clone> Stream for TxProgress<T, C> {
                     BackendTxStatus::Validated => TxStatus::Validated,
                     BackendTxStatus::Broadcasted => TxStatus::Broadcasted,
                     BackendTxStatus::NoLongerInBestBlock => TxStatus::NoLongerInBestBlock,
-                    BackendTxStatus::InBestBlock { hash } => {
-                        TxStatus::InBestBlock(TxInBlock::new(hash, self.ext_hash, self.client.clone()))
-                    }
+                    BackendTxStatus::InBestBlock { hash } => TxStatus::InBestBlock(TxInBlock::new(
+                        hash,
+                        self.ext_hash,
+                        self.client.clone(),
+                    )),
                     // These stream events mean that nothing further will be sent:
                     BackendTxStatus::InFinalizedBlock { hash } => {
                         self.sub = None;
@@ -260,25 +267,27 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(&self) -> Result<crate::blocks::ExtrinsicEvents<T>, TransactionEventsError> {
+    pub async fn wait_for_success(
+        &self,
+    ) -> Result<crate::blocks::ExtrinsicEvents<T>, TransactionEventsError> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
         for (ev_idx, ev) in events.iter().enumerate() {
-            let ev = ev
-                .map_err(|e| TransactionEventsError::CannotDecodeEventInBlock {
-                    event_index: ev_idx,
-                    block_hash: self.block_hash().into(),
-                    error: e
-                })?;
+            let ev = ev.map_err(|e| TransactionEventsError::CannotDecodeEventInBlock {
+                event_index: ev_idx,
+                block_hash: self.block_hash().into(),
+                error: e,
+            })?;
 
             if ev.pallet_name() == "System" && ev.variant_name() == "ExtrinsicFailed" {
                 let dispatch_error =
-                    DispatchError::decode_from(ev.field_bytes(), self.client.metadata())
-                        .map_err(|e| TransactionEventsError::CannotDecodeDispatchError { 
-                            error: e, 
-                            bytes: ev.field_bytes().to_vec()
-                        })?;
+                    DispatchError::decode_from(ev.field_bytes(), self.client.metadata()).map_err(
+                        |e| TransactionEventsError::CannotDecodeDispatchError {
+                            error: e,
+                            bytes: ev.field_bytes().to_vec(),
+                        },
+                    )?;
                 return Err(dispatch_error.into());
             }
         }
@@ -292,7 +301,9 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn fetch_events(&self) -> Result<crate::blocks::ExtrinsicEvents<T>, TransactionEventsError> {
+    pub async fn fetch_events(
+        &self,
+    ) -> Result<crate::blocks::ExtrinsicEvents<T>, TransactionEventsError> {
         let hasher = self.client.hasher();
 
         let block_body = self
@@ -302,10 +313,10 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
             .await
             .map_err(|e| TransactionEventsError::CannotFetchBlockBody {
                 block_hash: self.block_hash().into(),
-                error: e
+                error: e,
             })?
-            .ok_or_else(|| TransactionEventsError::BlockNotFound { 
-                block_hash: self.block_hash().into() 
+            .ok_or_else(|| TransactionEventsError::BlockNotFound {
+                block_hash: self.block_hash().into(),
             })?;
 
         let extrinsic_idx = block_body
@@ -328,11 +339,13 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
         let events = EventsClient::new(self.client.clone())
             .at(self.block_ref.clone())
             .await
-            .map_err(|e| TransactionEventsError::CannotFetchEventsForTransaction {
-                block_hash: self.block_hash().into(),
-                transaction_hash: self.ext_hash.into(),
-                error: e
-            })?;
+            .map_err(
+                |e| TransactionEventsError::CannotFetchEventsForTransaction {
+                    block_hash: self.block_hash().into(),
+                    transaction_hash: self.ext_hash.into(),
+                    error: e,
+                },
+            )?;
 
         Ok(crate::blocks::ExtrinsicEvents::new(
             self.ext_hash,

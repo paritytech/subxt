@@ -12,7 +12,7 @@ use crate::{
 };
 use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
-use futures::future::{ try_join, TryFutureExt };
+use futures::future::{TryFutureExt, try_join};
 use subxt_core::tx::TransactionVersion;
 
 /// A client for working with transactions.
@@ -55,7 +55,10 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     /// Creates an unsigned transaction without submitting it. Depending on the metadata, we might end
     /// up constructing either a v4 or v5 transaction. See [`Self::create_v4_unsigned`] or
     /// [`Self::create_v5_bare`] if you'd like to explicitly create an unsigned transaction of a certain version.
-    pub fn create_unsigned<Call>(&self, call: &Call) -> Result<SubmittableTransaction<T, C>, ExtrinsicError>
+    pub fn create_unsigned<Call>(
+        &self,
+        call: &Call,
+    ) -> Result<SubmittableTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -95,7 +98,10 @@ impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     ///
     /// Prefer [`Self::create_unsigned()`] if you don't know which version to create; this will pick the
     /// most suitable one for the given chain.
-    pub fn create_v5_bare<Call>(&self, call: &Call) -> Result<SubmittableTransaction<T, C>, ExtrinsicError>
+    pub fn create_v5_bare<Call>(
+        &self,
+        call: &Call,
+    ) -> Result<SubmittableTransaction<T, C>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -208,10 +214,10 @@ where
 
         crate::blocks::get_account_nonce(&self.client, account_id, block_ref.hash())
             .await
-            .map_err(|e| ExtrinsicError::AccountNonceError { 
-                block_hash: block_ref.hash().into(), 
-                account_id: account_id.encode().into(), 
-                reason: e
+            .map_err(|e| ExtrinsicError::AccountNonceError {
+                block_hash: block_ref.hash().into(),
+                account_id: account_id.encode().into(),
+                reason: e,
             })
     }
 
@@ -534,15 +540,18 @@ where
                 | TransactionStatus::InBestBlock { .. }
                 | TransactionStatus::NoLongerInBestBlock
                 | TransactionStatus::InFinalizedBlock { .. } => Ok(ext_hash),
-                TransactionStatus::Error { message } => {
-                    Err(ExtrinsicError::TransactionStatusError(TransactionStatusError::Error(message)))
-                }
+                TransactionStatus::Error { message } => Err(
+                    ExtrinsicError::TransactionStatusError(TransactionStatusError::Error(message)),
+                ),
                 TransactionStatus::Invalid { message } => {
-                    Err(ExtrinsicError::TransactionStatusError(TransactionStatusError::Invalid(message)))
-
+                    Err(ExtrinsicError::TransactionStatusError(
+                        TransactionStatusError::Invalid(message),
+                    ))
                 }
                 TransactionStatus::Dropped { message } => {
-                    Err(ExtrinsicError::TransactionStatusError(TransactionStatusError::Dropped(message)))
+                    Err(ExtrinsicError::TransactionStatusError(
+                        TransactionStatusError::Dropped(message),
+                    ))
                 }
             },
             Some(Err(e)) => Err(ExtrinsicError::TransactionStatusStreamError(e)),
@@ -638,19 +647,22 @@ async fn inject_account_nonce_and_block<T: Config, Client: OnlineClientT<T>>(
         .map_err(ExtrinsicError::CannotGetLatestFinalizedBlock)?;
 
     let (block_header, account_nonce) = try_join(
-        client.backend().block_header(block_ref.hash())
+        client
+            .backend()
+            .block_header(block_ref.hash())
             .map_err(ExtrinsicError::CannotGetLatestFinalizedBlock),
-        crate::blocks::get_account_nonce(client, account_id, block_ref.hash())
-            .map_err(|e| ExtrinsicError::AccountNonceError { 
-                block_hash: block_ref.hash().into(), 
-                account_id: account_id.encode().into(), 
-                reason: e
-            }),
+        crate::blocks::get_account_nonce(client, account_id, block_ref.hash()).map_err(|e| {
+            ExtrinsicError::AccountNonceError {
+                block_hash: block_ref.hash().into(),
+                account_id: account_id.encode().into(),
+                reason: e,
+            }
+        }),
     )
     .await?;
 
     let block_header = block_header.ok_or_else(|| ExtrinsicError::CannotFindBlockHeader {
-        block_hash: block_ref.hash().into()
+        block_hash: block_ref.hash().into(),
     })?;
 
     params.inject_account_nonce(account_nonce);

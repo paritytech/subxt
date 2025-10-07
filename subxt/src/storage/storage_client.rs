@@ -4,10 +4,10 @@
 
 use super::storage_client_at::StorageClientAt;
 use crate::{
-    error::StorageError,
     backend::BlockRef,
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor},
+    error::StorageError,
 };
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
@@ -57,7 +57,8 @@ where
     /// Obtain storage at the latest finalized block.
     pub fn at_latest(
         &self,
-    ) -> impl Future<Output = Result<StorageClientAt<T, Client>, StorageError>> + Send + 'static {
+    ) -> impl Future<Output = Result<StorageClientAt<T, Client>, StorageError>> + Send + 'static
+    {
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();

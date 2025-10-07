@@ -12,13 +12,13 @@ pub mod utils;
 
 use crate::config::{Config, HashFor};
 use crate::error::BackendError;
-use subxt_metadata::Metadata;
 use async_trait::async_trait;
 use codec::{Decode, Encode};
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use std::sync::Arc;
 use subxt_core::client::RuntimeVersion;
+use subxt_metadata::Metadata;
 
 /// Some re-exports from the [`subxt_rpcs`] crate, also accessible in full via [`crate::ext::subxt_rpcs`].
 pub mod rpc {
@@ -117,7 +117,8 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     async fn current_runtime_version(&self) -> Result<RuntimeVersion, BackendError>;
 
     /// A stream of all new runtime versions as they occur.
-    async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, BackendError>;
+    async fn stream_runtime_version(&self)
+    -> Result<StreamOfResults<RuntimeVersion>, BackendError>;
 
     /// A stream of all new block headers as they arrive.
     async fn stream_all_block_headers(
@@ -178,13 +179,17 @@ pub trait BackendExt<T: Config>: Backend<T> {
         at: HashFor<T>,
     ) -> Result<D, BackendError> {
         let bytes = self.call(method, call_parameters, at).await?;
-        let res = D::decode(&mut &*bytes)
-            .map_err(BackendError::CouldNotScaleDecodeRuntimeResponse)?;
+        let res =
+            D::decode(&mut &*bytes).map_err(BackendError::CouldNotScaleDecodeRuntimeResponse)?;
         Ok(res)
     }
 
     /// Return the metadata at some version.
-    async fn metadata_at_version(&self, version: u32, at: HashFor<T>) -> Result<Metadata, BackendError> {
+    async fn metadata_at_version(
+        &self,
+        version: u32,
+        at: HashFor<T>,
+    ) -> Result<Metadata, BackendError> {
         let param = version.encode();
 
         let opaque: Option<frame_metadata::OpaqueMetadata> = self
@@ -194,8 +199,8 @@ pub trait BackendExt<T: Config>: Backend<T> {
             return Err(BackendError::MetadataVersionNotFound(version));
         };
 
-        let metadata: Metadata = Decode::decode(&mut &opaque.0[..])
-            .map_err(BackendError::CouldNotDecodeMetadata)?;
+        let metadata: Metadata =
+            Decode::decode(&mut &opaque.0[..]).map_err(BackendError::CouldNotDecodeMetadata)?;
         Ok(metadata)
     }
 
@@ -203,8 +208,8 @@ pub trait BackendExt<T: Config>: Backend<T> {
     async fn legacy_metadata(&self, at: HashFor<T>) -> Result<Metadata, BackendError> {
         let opaque: frame_metadata::OpaqueMetadata =
             self.call_decoding("Metadata_metadata", None, at).await?;
-        let metadata: Metadata = Decode::decode(&mut &opaque.0[..])
-            .map_err(BackendError::CouldNotDecodeMetadata)?;
+        let metadata: Metadata =
+            Decode::decode(&mut &opaque.0[..]).map_err(BackendError::CouldNotDecodeMetadata)?;
         Ok(metadata)
     }
 }

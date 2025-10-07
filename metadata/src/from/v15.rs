@@ -6,17 +6,16 @@ use super::TryFromError;
 
 use crate::utils::variant_index::VariantIndex;
 use crate::{
-    ConstantMetadata, ExtrinsicMetadata, Metadata, OuterEnumsMetadata,
-    PalletMetadataInner, RuntimeApiMetadataInner, RuntimeApiMethodMetadataInner,
-    StorageEntryMetadata, StorageMetadata,
+    ConstantMetadata, ExtrinsicMetadata, Metadata, OuterEnumsMetadata, PalletMetadataInner,
+    RuntimeApiMetadataInner, RuntimeApiMethodMetadataInner, StorageEntryMetadata, StorageMetadata,
     TransactionExtensionMetadataInner, utils::ordered_map::OrderedMap,
 };
 use alloc::collections::BTreeMap;
 use alloc::vec;
 use alloc::vec::Vec;
-use frame_metadata::v15;
-use frame_decode::storage::StorageTypeInfo;
 use frame_decode::runtime_apis::RuntimeApiTypeInfo;
+use frame_decode::storage::StorageTypeInfo;
+use frame_metadata::v15;
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;
 
@@ -37,7 +36,8 @@ impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
                         .iter()
                         .map(|s| {
                             let entry_name = s.name.clone();
-                            let storage_info = m.storage_info(&name, &entry_name)
+                            let storage_info = m
+                                .storage_info(&name, &entry_name)
                                 .map_err(|e| e.into_owned())?
                                 .into_owned();
                             let storage_entry = StorageEntryMetadata {
@@ -49,7 +49,7 @@ impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
                             Ok::<_, TryFromError>((entry_name, storage_entry))
                         })
                         .collect::<Result<_, TryFromError>>()?,
-                })
+                }),
             };
 
             let constants = p.constants.iter().map(|c| {
@@ -85,27 +85,36 @@ impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
             );
         }
 
-        let apis = m.apis.iter().map(|api| {
-            let trait_name = api.name.clone();
-            let methods  = api.methods.iter().map(|method| {
-                let method_name = method.name.clone();
-                let method_info = RuntimeApiMethodMetadataInner {
-                    info: m.runtime_api_info(&trait_name, &method.name)
-                        .map_err(|e| e.into_owned())?
-                        .into_owned(),
-                    name: method.name.clone(),
-                    docs: method.docs.clone()
-                };
-                Ok((method_name, method_info))
-            }).collect::<Result<_,TryFromError>>()?;
+        let apis = m
+            .apis
+            .iter()
+            .map(|api| {
+                let trait_name = api.name.clone();
+                let methods = api
+                    .methods
+                    .iter()
+                    .map(|method| {
+                        let method_name = method.name.clone();
+                        let method_info = RuntimeApiMethodMetadataInner {
+                            info: m
+                                .runtime_api_info(&trait_name, &method.name)
+                                .map_err(|e| e.into_owned())?
+                                .into_owned(),
+                            name: method.name.clone(),
+                            docs: method.docs.clone(),
+                        };
+                        Ok((method_name, method_info))
+                    })
+                    .collect::<Result<_, TryFromError>>()?;
 
-            let runtime_api_metadata = RuntimeApiMetadataInner {
-                name: trait_name.clone(),
-                methods,
-                docs: api.docs.clone()
-            };
-            Ok((trait_name, runtime_api_metadata))
-        }).collect::<Result<_,TryFromError>>()?;
+                let runtime_api_metadata = RuntimeApiMetadataInner {
+                    name: trait_name.clone(),
+                    methods,
+                    docs: api.docs.clone(),
+                };
+                Ok((trait_name, runtime_api_metadata))
+            })
+            .collect::<Result<_, TryFromError>>()?;
 
         let dispatch_error_ty = m
             .types
@@ -162,9 +171,7 @@ fn from_extrinsic_metadata(value: v15::ExtrinsicMetadata<PortableForm>) -> Extri
     }
 }
 
-fn from_constant_metadata(
-    s: v15::PalletConstantMetadata<PortableForm>,
-) -> ConstantMetadata {
+fn from_constant_metadata(s: v15::PalletConstantMetadata<PortableForm>) -> ConstantMetadata {
     ConstantMetadata {
         name: s.name,
         ty: s.ty.id,

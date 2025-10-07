@@ -4,10 +4,10 @@
 
 //! Construct addresses to access storage entries with.
 
-use alloc::borrow::Cow;
-use frame_decode::storage::{IntoEncodableValues, IntoDecodableValues};
-use scale_decode::DecodeAsType;
 use crate::utils::{Maybe, YesMaybe};
+use alloc::borrow::Cow;
+use frame_decode::storage::{IntoDecodableValues, IntoEncodableValues};
+use scale_decode::DecodeAsType;
 
 /// A storage address. This allows access to a given storage entry, which can then
 /// be iterated over or fetched from by providing the relevant set of keys, or
@@ -19,7 +19,7 @@ pub trait Address {
     type KeyParts: IntoEncodableValues + IntoDecodableValues;
     /// Type of the storage value at this location.
     type Value: DecodeAsType;
-    /// Does the address point to a plain value (as opposed to a map)? 
+    /// Does the address point to a plain value (as opposed to a map)?
     /// Set to [`crate::utils::Yes`] to enable APIs which require a map,
     /// or [`crate::utils::Maybe`] to enable APIs which allow a map.
     type IsPlain: YesMaybe;
@@ -46,11 +46,7 @@ impl<KeyParts, Value, IsPlain> StaticAddress<KeyParts, Value, IsPlain> {
     /// Create a new [`StaticAddress`] using static strings for the pallet and call name.
     /// This is only expected to be used from codegen.
     #[doc(hidden)]
-    pub fn new_static(
-        pallet_name: &'static str,
-        entry_name: &'static str,
-        hash: [u8; 32],
-    ) -> Self {
+    pub fn new_static(pallet_name: &'static str, entry_name: &'static str, hash: [u8; 32]) -> Self {
         Self {
             pallet_name: Cow::Borrowed(pallet_name),
             entry_name: Cow::Borrowed(entry_name),
@@ -60,15 +56,12 @@ impl<KeyParts, Value, IsPlain> StaticAddress<KeyParts, Value, IsPlain> {
     }
 
     /// Create a new address.
-    pub fn new(
-        pallet_name: impl Into<String>,
-        entry_name: impl Into<String>,
-    ) -> Self {
+    pub fn new(pallet_name: impl Into<String>, entry_name: impl Into<String>) -> Self {
         Self {
             pallet_name: pallet_name.into().into(),
             entry_name: entry_name.into().into(),
             validation_hash: None,
-            marker: core::marker::PhantomData
+            marker: core::marker::PhantomData,
         }
     }
 
@@ -79,8 +72,7 @@ impl<KeyParts, Value, IsPlain> StaticAddress<KeyParts, Value, IsPlain> {
     }
 }
 
-impl<KeyParts, Value, IsPlain> Address
-    for StaticAddress<KeyParts, Value, IsPlain>
+impl<KeyParts, Value, IsPlain> Address for StaticAddress<KeyParts, Value, IsPlain>
 where
     KeyParts: IntoEncodableValues + IntoDecodableValues,
     Value: DecodeAsType,
@@ -105,7 +97,8 @@ where
 
 /// A dynamic address is simply a [`StaticAddress`] which asserts that the
 /// entry *might* be a map and *might* have a default value.
-pub type DynamicAddress<KeyParts = Vec<scale_value::Value>, Value = scale_value::Value> = StaticAddress<KeyParts, Value, Maybe>;
+pub type DynamicAddress<KeyParts = Vec<scale_value::Value>, Value = scale_value::Value> =
+    StaticAddress<KeyParts, Value, Maybe>;
 
 /// Construct a new dynamic storage address. You can define the type of the
 /// storage keys and value yourself here, but have no guarantee that they will
@@ -116,4 +109,3 @@ pub fn dynamic<KeyParts: IntoEncodableValues, Value: DecodeAsType>(
 ) -> DynamicAddress<KeyParts, Value> {
     DynamicAddress::<KeyParts, Value>::new(pallet_name.into(), entry_name.into())
 }
-

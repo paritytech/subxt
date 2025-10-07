@@ -5,11 +5,11 @@
 //! This module contains the trait and types used to represent
 //! View Function calls that can be made.
 
+use alloc::borrow::Cow;
 use core::marker::PhantomData;
 use derive_where::derive_where;
-use scale_decode::DecodeAsType;
 use frame_decode::view_functions::IntoEncodableValues;
-use alloc::borrow::Cow;
+use scale_decode::DecodeAsType;
 
 /// This represents a View Function payload that can call into the runtime of node.
 ///
@@ -136,7 +136,7 @@ impl<ReturnTy, ArgsType> StaticPayload<ArgsType, ReturnTy> {
 pub fn dynamic<ArgsType, ReturnType>(
     pallet_name: impl Into<String>,
     function_name: impl Into<String>,
-    args: ArgsType
+    args: ArgsType,
 ) -> DynamicPayload<ArgsType, ReturnType> {
     DynamicPayload::new(pallet_name, function_name, args)
 }

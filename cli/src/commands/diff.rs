@@ -235,11 +235,14 @@ impl StorageEntryDiff {
         let value_different = value_1_hash != value_2_hash;
 
         let key_parts_same = storage_entry_1.keys().len() == storage_entry_2.keys().len()
-            && storage_entry_1.keys().zip(storage_entry_2.keys()).all(|(a, b)| {
-                let a_hash = metadata_1.type_hash(a.key_id).expect("type is in metadata");
-                let b_hash = metadata_2.type_hash(b.key_id).expect("type is in metadata");
-                a.hasher == b.hasher && a_hash == b_hash
-            });
+            && storage_entry_1
+                .keys()
+                .zip(storage_entry_2.keys())
+                .all(|(a, b)| {
+                    let a_hash = metadata_1.type_hash(a.key_id).expect("type is in metadata");
+                    let b_hash = metadata_2.type_hash(b.key_id).expect("type is in metadata");
+                    a.hasher == b.hasher && a_hash == b_hash
+                });
 
         let key_different = !key_parts_same;
 

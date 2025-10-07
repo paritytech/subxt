@@ -7,7 +7,8 @@ pub mod runtime {}
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a new API client, configured to talk to Polkadot nodes.
-    let api = OnlineClient::<PolkadotConfig>::from_url("wss://westend-asset-hub-rpc.polkadot.io").await?;
+    let api =
+        OnlineClient::<PolkadotConfig>::from_url("wss://westend-asset-hub-rpc.polkadot.io").await?;
 
     let query = runtime::storage().staking().era_pruning_state_iter();
     let mut results = api.storage().at_latest().await?.iter(query).await?;

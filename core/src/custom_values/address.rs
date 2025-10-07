@@ -4,12 +4,12 @@
 
 //! Construct addresses to access custom values with.
 
+use alloc::borrow::Cow;
 use derive_where::derive_where;
 use scale_decode::DecodeAsType;
-use alloc::borrow::Cow;
 
 /// Use this with [`Address::IsDecodable`].
-pub use crate::utils::{No, Maybe, NoMaybe};
+pub use crate::utils::{Maybe, No, NoMaybe};
 
 /// This represents the address of a custom value in the metadata.
 /// Anything that implements it can be used to fetch custom values from the metadata.
@@ -95,6 +95,8 @@ impl Address for str {
 }
 
 /// Construct a new dynamic custom value lookup.
-pub fn dynamic<ReturnTy: DecodeAsType>(custom_value_name: impl Into<String>) -> DynamicAddress<ReturnTy> {
+pub fn dynamic<ReturnTy: DecodeAsType>(
+    custom_value_name: impl Into<String>,
+) -> DynamicAddress<ReturnTy> {
     DynamicAddress::new(custom_value_name)
 }

@@ -76,9 +76,7 @@ fn bench_get_storage_hash(c: &mut Criterion) {
         for storage in storage_entries.entries() {
             let entry_name = storage.name();
             let bench_name = format!("{pallet_name}/{entry_name}");
-            group.bench_function(&bench_name, |b| {
-                b.iter(|| pallet.storage_hash(entry_name))
-            });
+            group.bench_function(&bench_name, |b| b.iter(|| pallet.storage_hash(entry_name)));
         }
     }
 }

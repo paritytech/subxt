@@ -6,7 +6,7 @@ use crate::blocks::extrinsic_transaction_extensions::ExtrinsicTransactionExtensi
 use crate::{
     Metadata,
     config::{Config, HashFor, Hasher},
-    error::{ ExtrinsicError, ExtrinsicDecodeErrorAt, ExtrinsicDecodeErrorAtReason },
+    error::{ExtrinsicDecodeErrorAt, ExtrinsicDecodeErrorAtReason, ExtrinsicError},
 };
 use alloc::sync::Arc;
 use alloc::vec::Vec;
@@ -27,7 +27,10 @@ impl<T: Config> Extrinsics<T> {
     /// Instantiate a new [`Extrinsics`] object, given a vector containing
     /// each extrinsic hash (in the form of bytes) and some metadata that
     /// we'll use to decode them.
-    pub fn decode_from(extrinsics: Vec<Vec<u8>>, metadata: Metadata) -> Result<Self, ExtrinsicDecodeErrorAt> {
+    pub fn decode_from(
+        extrinsics: Vec<Vec<u8>>,
+        metadata: Metadata,
+    ) -> Result<Self, ExtrinsicDecodeErrorAt> {
         let hasher = T::Hasher::new(&metadata);
         let extrinsics = extrinsics
             .into_iter()
@@ -36,16 +39,13 @@ impl<T: Config> Extrinsics<T> {
                 let cursor = &mut &*bytes;
 
                 // Try to decode the extrinsic.
-                let decoded_info = frame_decode::extrinsics::decode_extrinsic(
-                    cursor,
-                    &metadata,
-                    metadata.types(),
-                )
-                .map_err(|error| ExtrinsicDecodeErrorAt {
-                    extrinsic_index,
-                    error: ExtrinsicDecodeErrorAtReason::DecodeError(error),
-                })?
-                .into_owned();
+                let decoded_info =
+                    frame_decode::extrinsics::decode_extrinsic(cursor, &metadata, metadata.types())
+                        .map_err(|error| ExtrinsicDecodeErrorAt {
+                            extrinsic_index,
+                            error: ExtrinsicDecodeErrorAtReason::DecodeError(error),
+                        })?
+                        .into_owned();
 
                 // We didn't consume all bytes, so decoding probably failed.
                 if !cursor.is_empty() {
@@ -117,13 +117,17 @@ impl<T: Config> Extrinsics<T> {
 
     /// Iterate through the extrinsics using metadata to dynamically decode and skip
     /// them, and return the first extrinsic found which decodes to the provided `E` type.
-    pub fn find_first<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, E>>, ExtrinsicError> {
+    pub fn find_first<E: StaticExtrinsic>(
+        &self,
+    ) -> Result<Option<FoundExtrinsic<T, E>>, ExtrinsicError> {
         self.find::<E>().next().transpose()
     }
 
     /// Iterate through the extrinsics using metadata to dynamically decode and skip
     /// them, and return the last extrinsic found which decodes to the provided `Ev` type.
-    pub fn find_last<E: StaticExtrinsic>(&self) -> Result<Option<FoundExtrinsic<T, E>>, ExtrinsicError> {
+    pub fn find_last<E: StaticExtrinsic>(
+        &self,
+    ) -> Result<Option<FoundExtrinsic<T, E>>, ExtrinsicError> {
         self.find::<E>().last().transpose()
     }
 
@@ -287,10 +291,12 @@ where
             };
             scale_decode::Field::new(*d.ty(), name)
         });
-        let decoded = E::decode_as_fields(bytes, &mut fields, self.metadata.types())
-            .map_err(|e| ExtrinsicError::CannotDecodeFields {
-                extrinsic_index: self.index as usize,
-                error: e.into()
+        let decoded =
+            E::decode_as_fields(bytes, &mut fields, self.metadata.types()).map_err(|e| {
+                ExtrinsicError::CannotDecodeFields {
+                    extrinsic_index: self.index as usize,
+                    error: e.into(),
+                }
             })?;
 
         Ok(decoded)
@@ -314,7 +320,7 @@ where
                 E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())
                     .map_err(|e| ExtrinsicError::CannotDecodeFields {
                         extrinsic_index: self.index as usize,
-                        error: e.into()
+                        error: e.into(),
                     })?;
             Ok(Some(decoded))
         } else {
@@ -330,9 +336,10 @@ where
             &mut &self.call_bytes()[..],
             self.metadata.outer_enums().call_enum_ty(),
             self.metadata.types(),
-        ).map_err(|e| ExtrinsicError::CannotDecodeIntoRootExtrinsic {
+        )
+        .map_err(|e| ExtrinsicError::CannotDecodeIntoRootExtrinsic {
             extrinsic_index: self.index as usize,
-            error: e.into()
+            error: e.into(),
         })?;
 
         Ok(decoded)
@@ -505,12 +512,10 @@ mod tests {
         let result = Extrinsics::<SubstrateConfig>::decode_from(vec![vec![]], metadata);
         assert_matches!(
             result.err(),
-            Some(
-                crate::error::ExtrinsicDecodeErrorAt {
-                    extrinsic_index: 0,
-                    error: _
-                }
-            )
+            Some(crate::error::ExtrinsicDecodeErrorAt {
+                extrinsic_index: 0,
+                error: _
+            })
         );
     }
 
@@ -525,12 +530,12 @@ mod tests {
 
         assert_matches!(
             result.err(),
-            Some(
-                crate::error::ExtrinsicDecodeErrorAt {
-                    extrinsic_index: 0,
-                    error: ExtrinsicDecodeErrorAtReason::DecodeError(ExtrinsicDecodeError::VersionNotSupported(3)),
-                }
-            )
+            Some(crate::error::ExtrinsicDecodeErrorAt {
+                extrinsic_index: 0,
+                error: ExtrinsicDecodeErrorAtReason::DecodeError(
+                    ExtrinsicDecodeError::VersionNotSupported(3)
+                ),
+            })
         );
     }
 
@@ -603,16 +608,10 @@ mod tests {
         assert_eq!(extrinsic.index(), 0);
 
         assert_eq!(extrinsic.pallet_index(), 0);
-        assert_eq!(
-            extrinsic.pallet_name(),
-            "Test"
-        );
+        assert_eq!(extrinsic.pallet_name(), "Test");
 
         assert_eq!(extrinsic.variant_index(), 2);
-        assert_eq!(
-            extrinsic.call_name(),
-            "TestCall"
-        );
+        assert_eq!(extrinsic.call_name(), "TestCall");
 
         // Decode the extrinsic to the root enum.
         let decoded_extrinsic = extrinsic

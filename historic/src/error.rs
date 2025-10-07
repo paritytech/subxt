@@ -263,7 +263,7 @@ pub enum StorageError {
         /// The number of keys that were provided.
         num_keys_provided: usize,
         /// The maximum number of keys that we expect.
-        max_keys_expected: usize
+        max_keys_expected: usize,
     },
     #[error(
         "Could not extract storage information from metadata: Unsupported metadata version ({version})"
@@ -302,8 +302,8 @@ pub enum StorageKeyError {
     },
     #[error("Could not decode values out of the storage key: {reason}")]
     DecodeKeyValueError {
-        reason: frame_decode::storage::StorageKeyValueDecodeError
-    }
+        reason: frame_decode::storage::StorageKeyValueDecodeError,
+    },
 }
 
 #[allow(missing_docs)]

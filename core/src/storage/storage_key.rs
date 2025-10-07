@@ -2,10 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use frame_decode::storage::{StorageInfo, StorageKey as StorageKeyPartInfo, IntoDecodableValues};
-use scale_info::PortableRegistry;
-use core::marker::PhantomData;
 use crate::error::StorageKeyError;
+use core::marker::PhantomData;
+use frame_decode::storage::{IntoDecodableValues, StorageInfo, StorageKey as StorageKeyPartInfo};
+use scale_info::PortableRegistry;
 
 pub use frame_decode::storage::StorageHasher;
 
@@ -14,7 +14,7 @@ pub struct StorageKey<'bytes, 'info, KeyParts> {
     info: StorageKeyPartInfo<u32>,
     types: &'info PortableRegistry,
     bytes: &'bytes [u8],
-    marker: PhantomData<KeyParts>
+    marker: PhantomData<KeyParts>,
 }
 
 impl<'bytes, 'info, KeyParts: IntoDecodableValues> StorageKey<'bytes, 'info, KeyParts> {
@@ -25,12 +25,11 @@ impl<'bytes, 'info, KeyParts: IntoDecodableValues> StorageKey<'bytes, 'info, Key
     ) -> Result<Self, StorageKeyError> {
         let cursor = &mut &*bytes;
         let storage_key_info = frame_decode::storage::decode_storage_key_with_info(
-            cursor,
-            &info,
-            types,
-        ).map_err(|e| StorageKeyError::StorageKeyDecodeError { 
-            bytes: bytes.to_vec(), 
-            error: e 
+            cursor, &info, types,
+        )
+        .map_err(|e| StorageKeyError::StorageKeyDecodeError {
+            bytes: bytes.to_vec(),
+            error: e,
         })?;
 
         if !cursor.is_empty() {
@@ -43,19 +42,17 @@ impl<'bytes, 'info, KeyParts: IntoDecodableValues> StorageKey<'bytes, 'info, Key
             info: storage_key_info,
             types,
             bytes,
-            marker: PhantomData
+            marker: PhantomData,
         })
     }
 
     /// Attempt to decode the values contained within this storage key. The target type is
     /// given by the storage address used to access this entry. To decode into a custom type,
     /// use [`Self::parts()`] or [`Self::part()`] and decode each part.
-    pub fn decode(&self) -> Result<KeyParts,StorageKeyError> {
-        let values = frame_decode::storage::decode_storage_key_values(
-            self.bytes, 
-            &self.info, 
-            self.types
-        ).map_err(StorageKeyError::CannotDecodeValuesInKey)?;
+    pub fn decode(&self) -> Result<KeyParts, StorageKeyError> {
+        let values =
+            frame_decode::storage::decode_storage_key_values(self.bytes, &self.info, self.types)
+                .map_err(StorageKeyError::CannotDecodeValuesInKey)?;
 
         Ok(values)
     }
@@ -100,10 +97,10 @@ impl<'key, 'bytes, 'info> StorageKeyPart<'key, 'bytes, 'info> {
     pub fn bytes(&self) -> &'bytes [u8] {
         let part = &self.info[self.index];
         let hash_range = part.hash_range();
-        let value_range = part
-            .value()
-            .map(|v| v.range())
-            .unwrap_or(std::ops::Range { start: hash_range.end, end: hash_range.end });
+        let value_range = part.value().map(|v| v.range()).unwrap_or(std::ops::Range {
+            start: hash_range.end,
+            end: hash_range.end,
+        });
         let combined_range = std::ops::Range {
             start: hash_range.start,
             end: value_range.end,
@@ -129,11 +126,11 @@ impl<'key, 'bytes, 'info> StorageKeyPart<'key, 'bytes, 'info> {
         let value_bytes = &self.bytes[value_info.range()];
         let value_ty = value_info.ty().clone();
 
-        let decoded_key_part = T::decode_as_type(
-            &mut &*value_bytes,
-            value_ty,
-            self.types,
-        ).map_err(|e| StorageKeyError::CannotDecodeValueInKey { index: self.index, error: e })?;
+        let decoded_key_part = T::decode_as_type(&mut &*value_bytes, value_ty, self.types)
+            .map_err(|e| StorageKeyError::CannotDecodeValueInKey {
+                index: self.index,
+                error: e,
+            })?;
 
         Ok(Some(decoded_key_part))
     }

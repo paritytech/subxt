@@ -14,7 +14,7 @@ pub use storage_entry::StorageEntry;
 pub use storage_key::{StorageHasher, StorageKey, StorageKeyPart};
 pub use storage_value::StorageValue;
 // We take how storage keys can be passed in from `frame-decode`, so re-export here.
-pub use frame_decode::storage::{IntoEncodableValues, EncodableValues};
+pub use frame_decode::storage::{EncodableValues, IntoEncodableValues};
 
 /// Work with storage.
 pub struct StorageClient<'atblock, Client, T> {
@@ -68,7 +68,7 @@ where
     pub fn entries(&self) -> impl Iterator<Item = StorageEntriesItem<'atblock, Client, T>> {
         let client = self.client;
         let metadata = client.metadata();
-    
+
         frame_decode::helpers::list_storage_entries_any(metadata).map(|entry| StorageEntriesItem {
             entry,
             client: self.client,
@@ -209,9 +209,9 @@ where
         // For iterating, we need at most one less key than the number that exists for a storage entry.
         // TODO: The error message will be confusing if == keys are provided!
         if keys.num_encodable_values() >= expected_num_keys {
-            return Err(StorageError::TooManyKeysProvidedForIter { 
-                num_keys_provided: keys.num_encodable_values(), 
-                max_keys_expected: expected_num_keys - 1 
+            return Err(StorageError::TooManyKeysProvidedForIter {
+                num_keys_provided: keys.num_encodable_values(),
+                max_keys_expected: expected_num_keys - 1,
             });
         }
 

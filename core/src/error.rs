@@ -40,17 +40,19 @@ pub enum EventsError {
     CannotDecodeVariantIndex(codec::Error),
     #[error("Can't decode event: can't find pallet with index {0}")]
     CannotFindPalletWithIndex(u8),
-    #[error("Can't decode event: can't find variant with index {variant_index} in pallet {pallet_name}")]
+    #[error(
+        "Can't decode event: can't find variant with index {variant_index} in pallet {pallet_name}"
+    )]
     CannotFindVariantWithIndex {
         pallet_name: String,
-        variant_index: u8
+        variant_index: u8,
     },
     #[error("Can't decode field {field_name:?} in event {pallet_name}.{event_name}: {reason}")]
     CannotDecodeFieldInEvent {
         pallet_name: String,
         event_name: String,
         field_name: String,
-        reason: scale_decode::visitor::DecodeError
+        reason: scale_decode::visitor::DecodeError,
     },
     #[error("Can't decode event topics: {0}")]
     CannotDecodeEventTopics(codec::Error),
@@ -58,14 +60,14 @@ pub enum EventsError {
     CannotDecodeEventFields {
         pallet_name: String,
         event_name: String,
-        reason: scale_decode::Error
+        reason: scale_decode::Error,
     },
     #[error("Can't decode event {pallet_name}.{event_name} to Event enum: {reason}")]
     CannotDecodeEventEnum {
         pallet_name: String,
         event_name: String,
-        reason: scale_decode::Error
-    }
+        reason: scale_decode::Error,
+    },
 }
 
 #[derive(Debug, DeriveError)]
@@ -127,13 +129,15 @@ pub enum ConstantError {
     IncompatibleCodegen,
     #[error("Can't find constant: pallet with name {0} not found")]
     PalletNameNotFound(String),
-    #[error("Constant '{constant_name}' not found in pallet {pallet_name} in the live chain metadata")]
+    #[error(
+        "Constant '{constant_name}' not found in pallet {pallet_name} in the live chain metadata"
+    )]
     ConstantNameNotFound {
         pallet_name: String,
-        constant_name: String
+        constant_name: String,
     },
     #[error("Failed to decode constant: {0}")]
-    CouldNotDecodeConstant(frame_decode::constants::ConstantDecodeError<u32>)
+    CouldNotDecodeConstant(frame_decode::constants::ConstantDecodeError<u32>),
 }
 
 /// Something went wrong trying to encode or decode a storage address.
@@ -145,10 +149,12 @@ pub enum StorageError {
     IncompatibleCodegen,
     #[error("Can't find storage value: pallet with name {0} not found")]
     PalletNameNotFound(String),
-    #[error("Storage entry '{entry_name}' not found in pallet {pallet_name} in the live chain metadata")]
+    #[error(
+        "Storage entry '{entry_name}' not found in pallet {pallet_name} in the live chain metadata"
+    )]
     StorageEntryNotFound {
         pallet_name: String,
-        entry_name: String
+        entry_name: String,
     },
     #[error("Cannot obtain storage information from metadata: {0}")]
     StorageInfoError(frame_decode::storage::StorageInfoError<'static>),
@@ -157,18 +163,16 @@ pub enum StorageError {
     #[error("Cannot create a key to iterate over a plain entry")]
     CannotIterPlainEntry {
         pallet_name: String,
-        entry_name: String
+        entry_name: String,
     },
-    #[error("Wrong number of key parts provided to iterate a storage address. We expected at most {max_expected} key parts but got {got} key parts")]
-    WrongNumberOfKeyPartsProvidedForIterating {
-        max_expected: usize,
-        got: usize,
-    },
-    #[error("Wrong number of key parts provided to fetch a storage address. We expected {expected} key parts but got {got} key parts")]
-    WrongNumberOfKeyPartsProvidedForFetching {
-        expected: usize,
-        got: usize,
-    },
+    #[error(
+        "Wrong number of key parts provided to iterate a storage address. We expected at most {max_expected} key parts but got {got} key parts"
+    )]
+    WrongNumberOfKeyPartsProvidedForIterating { max_expected: usize, got: usize },
+    #[error(
+        "Wrong number of key parts provided to fetch a storage address. We expected {expected} key parts but got {got} key parts"
+    )]
+    WrongNumberOfKeyPartsProvidedForFetching { expected: usize, got: usize },
 }
 
 #[derive(Debug, DeriveError)]
@@ -178,19 +182,19 @@ pub enum StorageKeyError {
     #[error("Can't decode the storage key: {error}")]
     StorageKeyDecodeError {
         bytes: Vec<u8>,
-        error: frame_decode::storage::StorageKeyDecodeError<u32>
+        error: frame_decode::storage::StorageKeyDecodeError<u32>,
     },
     #[error("Can't decode the values from the storage key: {0}")]
     CannotDecodeValuesInKey(frame_decode::storage::StorageKeyValueDecodeError),
-    #[error("Cannot decode storage key: there were leftover bytes, indicating that the decoding failed")]
-    LeftoverBytes {
-        bytes: Vec<u8>,
-    },
+    #[error(
+        "Cannot decode storage key: there were leftover bytes, indicating that the decoding failed"
+    )]
+    LeftoverBytes { bytes: Vec<u8> },
     #[error("Can't decode a single value from the storage key part at index {index}: {error}")]
     CannotDecodeValueInKey {
         index: usize,
-        error: scale_decode::Error
-    }
+        error: scale_decode::Error,
+    },
 }
 
 #[derive(Debug, DeriveError)]
@@ -199,10 +203,10 @@ pub enum StorageKeyError {
 pub enum StorageValueError {
     #[error("Cannot decode storage value: {0}")]
     CannotDecode(frame_decode::storage::StorageValueDecodeError<u32>),
-    #[error("Cannot decode storage value: there were leftover bytes, indicating that the decoding failed")]
-    LeftoverBytes {
-        bytes: Vec<u8>,
-    }
+    #[error(
+        "Cannot decode storage value: there were leftover bytes, indicating that the decoding failed"
+    )]
+    LeftoverBytes { bytes: Vec<u8> },
 }
 
 /// An error that can be encountered when constructing a transaction.
@@ -216,7 +220,7 @@ pub enum ExtrinsicError {
     #[error("Can't find extrinsic: call name {call_name} doesn't exist in pallet {pallet_name}")]
     CallNameNotFound {
         pallet_name: String,
-        call_name: String
+        call_name: String,
     },
     #[error("Can't encode the extrinsic call data: {0}")]
     CannotEncodeCallData(scale_encode::Error),
@@ -229,7 +233,7 @@ pub enum ExtrinsicError {
         /// The extension name.
         name: String,
         /// The decode error.
-        error: scale_decode::Error
+        error: scale_decode::Error,
     },
     #[error(
         "After decoding the extrinsic at index {extrinsic_index}, {num_leftover_bytes} bytes were left, suggesting that decoding may have failed"
@@ -247,15 +251,15 @@ pub enum ExtrinsicError {
         /// Index of the extrinsic whose fields we could not decode
         extrinsic_index: usize,
         /// The decode error.
-        error: scale_decode::Error
+        error: scale_decode::Error,
     },
     #[error("Failed to decode the extrinsic at index {extrinsic_index} to a root enum: {error}")]
     CannotDecodeIntoRootExtrinsic {
         /// Index of the extrinsic that we failed to decode
         extrinsic_index: usize,
         /// The decode error.
-        error: scale_decode::Error
-    }
+        error: scale_decode::Error,
+    },
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -264,7 +268,7 @@ pub enum ExtrinsicError {
 #[error("Cannot decode extrinsic at index {extrinsic_index}: {error}")]
 pub struct ExtrinsicDecodeErrorAt {
     pub extrinsic_index: usize,
-    pub error: ExtrinsicDecodeErrorAtReason
+    pub error: ExtrinsicDecodeErrorAtReason,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -274,7 +278,7 @@ pub enum ExtrinsicDecodeErrorAtReason {
     #[error("{0}")]
     DecodeError(frame_decode::extrinsics::ExtrinsicDecodeError),
     #[error("Leftover bytes")]
-    LeftoverBytes(Vec<u8>)
+    LeftoverBytes(Vec<u8>),
 }
 
 /// An error that can be emitted when trying to construct an instance of [`crate::config::ExtrinsicParams`],

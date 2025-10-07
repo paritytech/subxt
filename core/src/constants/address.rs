@@ -96,6 +96,9 @@ impl<ReturnTy: DecodeAsType> Address for StaticAddress<ReturnTy> {
 }
 
 /// Construct a new dynamic constant lookup.
-pub fn dynamic<ReturnTy: DecodeAsType>(pallet_name: impl Into<String>, constant_name: impl Into<String>) -> DynamicAddress<ReturnTy> {
+pub fn dynamic<ReturnTy: DecodeAsType>(
+    pallet_name: impl Into<String>,
+    constant_name: impl Into<String>,
+) -> DynamicAddress<ReturnTy> {
     DynamicAddress::new(pallet_name, constant_name)
 }

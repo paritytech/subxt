@@ -7,8 +7,8 @@ use crate::config::transaction_extensions::{
     ChargeAssetTxPayment, ChargeTransactionPayment, CheckNonce,
 };
 use crate::dynamic::Value;
-use crate::{Metadata, config::Config};
 use crate::error::ExtrinsicError;
+use crate::{Metadata, config::Config};
 use frame_decode::extrinsics::ExtrinsicExtensions;
 use scale_decode::DecodeAsType;
 
@@ -123,9 +123,10 @@ impl<'a, T: Config> ExtrinsicTransactionExtension<'a, T> {
             &mut &self.bytes[..],
             self.ty_id,
             self.metadata.types(),
-        ).map_err(|e| ExtrinsicError::CouldNotDecodeTransactionExtension {
+        )
+        .map_err(|e| ExtrinsicError::CouldNotDecodeTransactionExtension {
             name: self.identifier.to_owned(),
-            error: e.into()
+            error: e.into(),
         })?;
         Ok(value)
     }
@@ -143,14 +144,11 @@ impl<'a, T: Config> ExtrinsicTransactionExtension<'a, T> {
     }
 
     fn as_type<E: DecodeAsType>(&self) -> Result<E, ExtrinsicError> {
-        let value = E::decode_as_type(
-            &mut &self.bytes[..], 
-            self.ty_id, 
-            self.metadata.types()
-        ).map_err(|e| ExtrinsicError::CouldNotDecodeTransactionExtension {
-            name: self.identifier.to_owned(),
-            error: e.into()
-        })?;
+        let value = E::decode_as_type(&mut &self.bytes[..], self.ty_id, self.metadata.types())
+            .map_err(|e| ExtrinsicError::CouldNotDecodeTransactionExtension {
+                name: self.identifier.to_owned(),
+                error: e.into(),
+            })?;
         Ok(value)
     }
 }

@@ -46,8 +46,9 @@ use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_metadata::PalletMetadata;
 
 use crate::{
-    error::EventsError, Metadata,
+    Metadata,
     config::{Config, HashFor},
+    error::EventsError,
 };
 
 /// Create a new [`Events`] instance from the given bytes.
@@ -248,15 +249,12 @@ impl<T: Config> EventDetails<T> {
     ) -> Result<EventDetails<T>, EventsError> {
         let input = &mut &all_bytes[start_idx..];
 
-        let phase = Phase::decode(input)
-            .map_err(EventsError::CannotDecodePhase)?;
+        let phase = Phase::decode(input).map_err(EventsError::CannotDecodePhase)?;
 
         let event_start_idx = all_bytes.len() - input.len();
 
-        let pallet_index = u8::decode(input)
-            .map_err(EventsError::CannotDecodePalletIndex)?;
-        let variant_index = u8::decode(input)
-            .map_err(EventsError::CannotDecodeVariantIndex)?;
+        let pallet_index = u8::decode(input).map_err(EventsError::CannotDecodePalletIndex)?;
+        let variant_index = u8::decode(input).map_err(EventsError::CannotDecodeVariantIndex)?;
 
         let event_fields_start_idx = all_bytes.len() - input.len();
 
@@ -266,9 +264,9 @@ impl<T: Config> EventDetails<T> {
             .ok_or_else(|| EventsError::CannotFindPalletWithIndex(pallet_index))?;
         let event_variant = event_pallet
             .event_variant_by_index(variant_index)
-            .ok_or_else(|| EventsError::CannotFindVariantWithIndex { 
-                pallet_name: event_pallet.name().to_string(), 
-                variant_index: variant_index, 
+            .ok_or_else(|| EventsError::CannotFindVariantWithIndex {
+                pallet_name: event_pallet.name().to_string(),
+                variant_index: variant_index,
             })?;
 
         tracing::debug!(
@@ -286,11 +284,14 @@ impl<T: Config> EventDetails<T> {
                 metadata.types(),
                 scale_decode::visitor::IgnoreVisitor::new(),
             )
-            .map_err(|e| EventsError::CannotDecodeFieldInEvent { 
-                pallet_name: event_pallet.name().to_string(), 
-                event_name: event_variant.name.clone(), 
-                field_name: field_metadata.name.clone().unwrap_or("<unknown>".to_string()), 
-                reason: e 
+            .map_err(|e| EventsError::CannotDecodeFieldInEvent {
+                pallet_name: event_pallet.name().to_string(),
+                event_name: event_variant.name.clone(),
+                field_name: field_metadata
+                    .name
+                    .clone()
+                    .unwrap_or("<unknown>".to_string()),
+                reason: e,
             })?;
         }
 
@@ -298,8 +299,8 @@ impl<T: Config> EventDetails<T> {
         let event_fields_end_idx = all_bytes.len() - input.len();
 
         // topics come after the event data in EventRecord.
-        let topics = Vec::<HashFor<T>>::decode(input)
-            .map_err(EventsError::CannotDecodeEventTopics)?;
+        let topics =
+            Vec::<HashFor<T>>::decode(input).map_err(EventsError::CannotDecodeEventTopics)?;
 
         // what bytes did we skip over in total, including topics.
         let end_idx = all_bytes.len() - input.len();
@@ -391,11 +392,13 @@ impl<T: Config> EventDetails<T> {
             .iter()
             .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
 
-        let decoded = E::decode_as_fields(bytes, &mut fields, self.metadata.types())
-            .map_err(|e| EventsError::CannotDecodeEventFields { 
-                pallet_name: event_metadata.pallet.name().to_string(), 
-                event_name: event_metadata.variant.name.clone(), 
-                reason: e 
+        let decoded =
+            E::decode_as_fields(bytes, &mut fields, self.metadata.types()).map_err(|e| {
+                EventsError::CannotDecodeEventFields {
+                    pallet_name: event_metadata.pallet.name().to_string(),
+                    event_name: event_metadata.variant.name.clone(),
+                    reason: e,
+                }
             })?;
 
         Ok(decoded)
@@ -413,10 +416,10 @@ impl<T: Config> EventDetails<T> {
                 .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
             let decoded =
                 E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())
-                    .map_err(|e| EventsError::CannotDecodeEventFields { 
-                        pallet_name: E::PALLET.to_string(), 
-                        event_name: E::EVENT.to_string(), 
-                        reason: e 
+                    .map_err(|e| EventsError::CannotDecodeEventFields {
+                        pallet_name: E::PALLET.to_string(),
+                        event_name: E::EVENT.to_string(),
+                        reason: e,
                     })?;
             Ok(Some(decoded))
         } else {
@@ -434,12 +437,13 @@ impl<T: Config> EventDetails<T> {
             &mut &bytes[..],
             self.metadata.outer_enums().event_enum_ty(),
             self.metadata.types(),
-        ).map_err(|e| {
+        )
+        .map_err(|e| {
             let md = self.event_metadata();
-            EventsError::CannotDecodeEventEnum { 
-                pallet_name: md.pallet.name().to_string(), 
-                event_name: md.variant.name.clone(), 
-                reason: e 
+            EventsError::CannotDecodeEventEnum {
+                pallet_name: md.pallet.name().to_string(),
+                event_name: md.variant.name.clone(),
+                reason: e,
             }
         })?;
 

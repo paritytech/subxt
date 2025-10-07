@@ -71,8 +71,8 @@ mod static_extrinsic;
 use crate::Metadata;
 use crate::config::Config;
 use crate::error::ExtrinsicDecodeErrorAt;
-use alloc::vec::Vec;
 pub use crate::error::ExtrinsicError;
+use alloc::vec::Vec;
 pub use extrinsic_transaction_extensions::{
     ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions,
 };

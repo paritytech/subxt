@@ -10,49 +10,73 @@ pub enum Maybe {}
 pub enum No {}
 
 /// This is implemented for [`Yes`] and [`No`] and
-/// allows us to check at runtime which of these types is present. 
+/// allows us to check at runtime which of these types is present.
 pub trait YesNo {
     /// [`Yes`]
-    fn is_yes() -> bool { false }
+    fn is_yes() -> bool {
+        false
+    }
     /// [`No`]
-    fn is_no() -> bool { false }
+    fn is_no() -> bool {
+        false
+    }
 }
 
 impl YesNo for Yes {
-    fn is_yes() -> bool { true }
+    fn is_yes() -> bool {
+        true
+    }
 }
 impl YesNo for No {
-    fn is_no() -> bool { true }
+    fn is_no() -> bool {
+        true
+    }
 }
 
 /// This is implemented for [`Yes`] and [`Maybe`] and
-/// allows us to check at runtime which of these types is present. 
+/// allows us to check at runtime which of these types is present.
 pub trait YesMaybe {
     /// [`Yes`]
-    fn is_yes() -> bool { false }
+    fn is_yes() -> bool {
+        false
+    }
     /// [`Maybe`]
-    fn is_maybe() -> bool { false }
+    fn is_maybe() -> bool {
+        false
+    }
 }
 
 impl YesMaybe for Yes {
-    fn is_yes() -> bool { true }
+    fn is_yes() -> bool {
+        true
+    }
 }
 impl YesMaybe for Maybe {
-    fn is_maybe() -> bool { true }
+    fn is_maybe() -> bool {
+        true
+    }
 }
 
 /// This is implemented for [`No`] and [`Maybe`] and
-/// allows us to check at runtime which of these types is present. 
+/// allows us to check at runtime which of these types is present.
 pub trait NoMaybe {
     /// [`No`]
-    fn is_no() -> bool { false }
+    fn is_no() -> bool {
+        false
+    }
     /// [`Maybe`]
-    fn is_maybe() -> bool { false }
+    fn is_maybe() -> bool {
+        false
+    }
 }
 
 impl NoMaybe for No {
-    fn is_no() -> bool { true }
+    fn is_no() -> bool {
+        true
+    }
 }
 impl NoMaybe for Maybe {
-    fn is_maybe() -> bool { true }
+    fn is_maybe() -> bool {
+        true
+    }
 }

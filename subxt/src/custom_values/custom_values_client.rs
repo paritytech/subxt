@@ -32,7 +32,10 @@ impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
     }
 
     /// Access the bytes of a custom value by the address it is registered under.
-    pub fn bytes_at<Addr: Address + ?Sized>(&self, address: &Addr) -> Result<Vec<u8>, CustomValueError> {
+    pub fn bytes_at<Addr: Address + ?Sized>(
+        &self,
+        address: &Addr,
+    ) -> Result<Vec<u8>, CustomValueError> {
         subxt_core::custom_values::get_bytes(address, &self.client.metadata())
     }
 

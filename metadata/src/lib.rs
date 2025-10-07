@@ -26,24 +26,18 @@ use alloc::borrow::Cow;
 use alloc::collections::BTreeMap;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
+use frame_decode::constants::{Constant, ConstantInfo, ConstantInfoError};
+use frame_decode::custom_values::{CustomValue, CustomValueInfo, CustomValueInfoError};
 use frame_decode::extrinsics::{
     ExtrinsicCallInfo, ExtrinsicExtensionInfo, ExtrinsicInfoArg, ExtrinsicInfoError,
     ExtrinsicSignatureInfo,
 };
-use frame_decode::storage::{
-    StorageEntry, StorageInfo, StorageInfoError, StorageKeyInfo
-};
 use frame_decode::runtime_apis::{
-    RuntimeApi, RuntimeApiInfo, RuntimeApiInfoError, RuntimeApiInput
+    RuntimeApi, RuntimeApiInfo, RuntimeApiInfoError, RuntimeApiInput,
 };
+use frame_decode::storage::{StorageEntry, StorageInfo, StorageInfoError, StorageKeyInfo};
 use frame_decode::view_functions::{
-    ViewFunction, ViewFunctionInfo, ViewFunctionInfoError, ViewFunctionInput
-};
-use frame_decode::constants::{
-    ConstantInfo, ConstantInfoError, Constant
-};
-use frame_decode::custom_values::{
-    CustomValueInfo, CustomValueInfoError, CustomValue
+    ViewFunction, ViewFunctionInfo, ViewFunctionInfoError, ViewFunctionInput,
 };
 
 use hashbrown::HashMap;
@@ -54,10 +48,10 @@ use utils::{
     variant_index::VariantIndex,
 };
 
+pub use frame_decode::storage::StorageHasher;
 pub use from::SUPPORTED_METADATA_VERSIONS;
 pub use from::TryFromError;
 pub use utils::validation::MetadataHasher;
-pub use frame_decode::storage::StorageHasher;
 
 type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;
 
@@ -164,18 +158,28 @@ impl frame_decode::storage::StorageTypeInfo for Metadata {
         pallet_name: &str,
         storage_entry: &str,
     ) -> Result<StorageInfo<'_, Self::TypeId>, StorageInfoError<'_>> {
-        let pallet = self.pallet_by_name(pallet_name)
-            .ok_or_else(|| StorageInfoError::PalletNotFound { pallet_name: pallet_name.to_string() })?;
+        let pallet =
+            self.pallet_by_name(pallet_name)
+                .ok_or_else(|| StorageInfoError::PalletNotFound {
+                    pallet_name: pallet_name.to_string(),
+                })?;
         let entry = pallet
             .storage()
             .map(|storage| storage.entry_by_name(storage_entry))
             .flatten()
-            .ok_or_else(|| StorageInfoError::StorageNotFound { name: storage_entry.to_string(), pallet_name: Cow::Borrowed(pallet.name()) })?;
+            .ok_or_else(|| StorageInfoError::StorageNotFound {
+                name: storage_entry.to_string(),
+                pallet_name: Cow::Borrowed(pallet.name()),
+            })?;
 
         let info = StorageInfo {
             keys: Cow::Borrowed(&*entry.info.keys),
             value_id: entry.info.value_id,
-            default_value: entry.info.default_value.as_ref().map(|def| Cow::Borrowed(&**def))
+            default_value: entry
+                .info
+                .default_value
+                .as_ref()
+                .map(|def| Cow::Borrowed(&**def)),
         };
 
         Ok(info)
@@ -185,11 +189,9 @@ impl frame_decode::storage::StorageTypeInfo for Metadata {
         self.pallets().flat_map(|pallet| {
             let pallet_name = pallet.name();
             pallet.storage().into_iter().flat_map(|storage| {
-                storage.entries().iter().map(|entry| {
-                    StorageEntry {
-                        pallet_name: Cow::Borrowed(pallet_name),
-                        storage_entry: Cow::Borrowed(entry.name())
-                    }
+                storage.entries().iter().map(|entry| StorageEntry {
+                    pallet_name: Cow::Borrowed(pallet_name),
+                    storage_entry: Cow::Borrowed(entry.name()),
                 })
             })
         })
@@ -203,14 +205,22 @@ impl frame_decode::runtime_apis::RuntimeApiTypeInfo for Metadata {
         trait_name: &str,
         method_name: &str,
     ) -> Result<RuntimeApiInfo<'_, Self::TypeId>, RuntimeApiInfoError<'_>> {
-        let api_trait = self.apis.get_by_key(trait_name)
-            .ok_or_else(|| RuntimeApiInfoError::TraitNotFound { trait_name: trait_name.to_string() })?;
-        let api_method = api_trait.methods.get_by_key(method_name)
-            .ok_or_else(|| RuntimeApiInfoError::MethodNotFound { trait_name: Cow::Borrowed(&api_trait.name), method_name: method_name.to_string() })?;
+        let api_trait =
+            self.apis
+                .get_by_key(trait_name)
+                .ok_or_else(|| RuntimeApiInfoError::TraitNotFound {
+                    trait_name: trait_name.to_string(),
+                })?;
+        let api_method = api_trait.methods.get_by_key(method_name).ok_or_else(|| {
+            RuntimeApiInfoError::MethodNotFound {
+                trait_name: Cow::Borrowed(&api_trait.name),
+                method_name: method_name.to_string(),
+            }
+        })?;
 
         let info = RuntimeApiInfo {
             inputs: Cow::Borrowed(&api_method.info.inputs),
-            output_id: api_method.info.output_id
+            output_id: api_method.info.output_id,
         };
 
         Ok(info)
@@ -219,11 +229,9 @@ impl frame_decode::runtime_apis::RuntimeApiTypeInfo for Metadata {
     fn runtime_apis(&self) -> impl Iterator<Item = RuntimeApi<'_>> {
         self.runtime_api_traits().flat_map(|api_trait| {
             let trait_name = api_trait.name();
-            api_trait.methods().map(|method| {
-                RuntimeApi {
-                    trait_name: Cow::Borrowed(trait_name),
-                    method_name: Cow::Borrowed(method.name())
-                }
+            api_trait.methods().map(|method| RuntimeApi {
+                trait_name: Cow::Borrowed(trait_name),
+                method_name: Cow::Borrowed(method.name()),
             })
         })
     }
@@ -236,15 +244,22 @@ impl frame_decode::view_functions::ViewFunctionTypeInfo for Metadata {
         pallet_name: &str,
         function_name: &str,
     ) -> Result<ViewFunctionInfo<'_, Self::TypeId>, ViewFunctionInfoError<'_>> {
-        let pallet = self.pallet_by_name(pallet_name)
-            .ok_or_else(|| ViewFunctionInfoError::PalletNotFound { pallet_name: pallet_name.to_string() })?;
-        let function = pallet.view_function_by_name(function_name)
-            .ok_or_else(|| ViewFunctionInfoError::FunctionNotFound { pallet_name: Cow::Borrowed(pallet.name()), function_name: function_name.to_string() })?;
+        let pallet = self.pallet_by_name(pallet_name).ok_or_else(|| {
+            ViewFunctionInfoError::PalletNotFound {
+                pallet_name: pallet_name.to_string(),
+            }
+        })?;
+        let function = pallet.view_function_by_name(function_name).ok_or_else(|| {
+            ViewFunctionInfoError::FunctionNotFound {
+                pallet_name: Cow::Borrowed(pallet.name()),
+                function_name: function_name.to_string(),
+            }
+        })?;
 
         let info = ViewFunctionInfo {
             inputs: Cow::Borrowed(&function.inner.info.inputs),
             output_id: function.inner.info.output_id,
-            query_id: *function.query_id()
+            query_id: *function.query_id(),
         };
 
         Ok(info)
@@ -253,11 +268,9 @@ impl frame_decode::view_functions::ViewFunctionTypeInfo for Metadata {
     fn view_functions(&self) -> impl Iterator<Item = ViewFunction<'_>> {
         self.pallets().flat_map(|pallet| {
             let pallet_name = pallet.name();
-            pallet.view_functions().map(|function| {
-                ViewFunction {
-                    pallet_name: Cow::Borrowed(pallet_name),
-                    function_name: Cow::Borrowed(function.name())
-                }
+            pallet.view_functions().map(|function| ViewFunction {
+                pallet_name: Cow::Borrowed(pallet_name),
+                function_name: Cow::Borrowed(function.name()),
             })
         })
     }
@@ -270,14 +283,21 @@ impl frame_decode::constants::ConstantTypeInfo for Metadata {
         pallet_name: &str,
         constant_name: &str,
     ) -> Result<ConstantInfo<'_, Self::TypeId>, ConstantInfoError<'_>> {
-        let pallet = self.pallet_by_name("pallet_name")
-            .ok_or_else(|| ConstantInfoError::PalletNotFound { pallet_name: pallet_name.to_string() })?;
-        let constant = pallet.constant_by_name(constant_name)
-            .ok_or_else(|| ConstantInfoError::ConstantNotFound { pallet_name: Cow::Borrowed(pallet.name()), constant_name: constant_name.to_string() })?;
+        let pallet = self.pallet_by_name("pallet_name").ok_or_else(|| {
+            ConstantInfoError::PalletNotFound {
+                pallet_name: pallet_name.to_string(),
+            }
+        })?;
+        let constant = pallet.constant_by_name(constant_name).ok_or_else(|| {
+            ConstantInfoError::ConstantNotFound {
+                pallet_name: Cow::Borrowed(pallet.name()),
+                constant_name: constant_name.to_string(),
+            }
+        })?;
 
         let info = ConstantInfo {
             bytes: &constant.value,
-            type_id: constant.ty
+            type_id: constant.ty,
         };
 
         Ok(info)
@@ -286,11 +306,9 @@ impl frame_decode::constants::ConstantTypeInfo for Metadata {
     fn constants(&self) -> impl Iterator<Item = Constant<'_>> {
         self.pallets().flat_map(|pallet| {
             let pallet_name = pallet.name();
-            pallet.constants().map(|constant| {
-                Constant {
-                    pallet_name: Cow::Borrowed(pallet_name),
-                    constant_name: Cow::Borrowed(constant.name())
-                }
+            pallet.constants().map(|constant| Constant {
+                pallet_name: Cow::Borrowed(pallet_name),
+                constant_name: Cow::Borrowed(constant.name()),
             })
         })
     }
@@ -302,21 +320,24 @@ impl frame_decode::custom_values::CustomValueTypeInfo for Metadata {
         &self,
         name: &str,
     ) -> Result<CustomValueInfo<'_, Self::TypeId>, CustomValueInfoError> {
-        let custom_value = self.custom()
+        let custom_value = self
+            .custom()
             .get(name)
-            .ok_or_else(|| CustomValueInfoError { not_found: name.to_string() })?;
+            .ok_or_else(|| CustomValueInfoError {
+                not_found: name.to_string(),
+            })?;
 
         let info = CustomValueInfo {
             bytes: &custom_value.data,
-            type_id: custom_value.type_id
+            type_id: custom_value.type_id,
         };
 
         Ok(info)
     }
 
     fn custom_values(&self) -> impl Iterator<Item = CustomValue<'_>> {
-        self.custom.map.iter().map(|(name, _)| {
-            CustomValue { name: Cow::Borrowed(name) }
+        self.custom.map.iter().map(|(name, _)| CustomValue {
+            name: Cow::Borrowed(name),
         })
     }
 }
@@ -655,7 +676,7 @@ impl StorageEntryMetadata {
     pub fn keys(&self) -> impl ExactSizeIterator<Item = &StorageKeyInfo<u32>> {
         let keys = &*self.info.keys;
         keys.iter()
-    } 
+    }
     /// Value type for this storage entry.
     pub fn value_ty(&self) -> u32 {
         self.info.value_id
@@ -912,7 +933,9 @@ impl<'a> RuntimeApiMethodMetadata<'a> {
         &self.inner.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &'a RuntimeApiInput<'static, u32>> + use<'a> {
+    pub fn inputs(
+        &self,
+    ) -> impl ExactSizeIterator<Item = &'a RuntimeApiInput<'static, u32>> + use<'a> {
         let inputs = &*self.inner.info.inputs;
         inputs.iter()
     }
@@ -959,7 +982,9 @@ impl<'a> ViewFunctionMetadata<'a> {
         &self.inner.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &'a ViewFunctionInput<'static, u32>> + use<'a> {
+    pub fn inputs(
+        &self,
+    ) -> impl ExactSizeIterator<Item = &'a ViewFunctionInput<'static, u32>> + use<'a> {
         let inputs = &*self.inner.info.inputs;
         inputs.iter()
     }

@@ -7,7 +7,7 @@ use crate::{
     blocks::Extrinsics,
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor, Header},
-    error::{BlockError, AccountNonceError, EventsError, ExtrinsicError},
+    error::{AccountNonceError, BlockError, EventsError, ExtrinsicError},
     events,
     runtime_api::RuntimeApi,
     storage::StorageClientAt,
@@ -127,7 +127,7 @@ where
             .map_err(|e| BlockError::AccountNonceError {
                 block_hash: self.hash().into(),
                 account_id: account_id.encode().into(),
-                reason: e
+                reason: e,
             })
     }
 }
@@ -186,7 +186,9 @@ where
         4 => u32::decode(cursor)?.into(),
         8 => u64::decode(cursor)?,
         _ => {
-            return Err(AccountNonceError::WrongNumberOfBytes(account_nonce_bytes.len()));
+            return Err(AccountNonceError::WrongNumberOfBytes(
+                account_nonce_bytes.len(),
+            ));
         }
     };
     Ok(account_nonce)

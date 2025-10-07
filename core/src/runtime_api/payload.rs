@@ -8,8 +8,8 @@
 use alloc::borrow::Cow;
 use core::marker::PhantomData;
 use derive_where::derive_where;
-use scale_decode::DecodeAsType;
 use frame_decode::runtime_apis::IntoEncodableValues;
+use scale_decode::DecodeAsType;
 
 /// This represents a runtime API payload that can be used to call a Runtime API on
 /// a chain and decode the response.

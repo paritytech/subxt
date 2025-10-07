@@ -43,20 +43,20 @@
 
 mod prefix_of;
 mod storage_entry;
-mod storage_value;
 mod storage_key;
 mod storage_key_value;
+mod storage_value;
 
 pub mod address;
 
 use crate::{Metadata, error::StorageError};
 use address::Address;
 
-pub use storage_key::{StorageKey, StorageKeyPart, StorageHasher};
-pub use storage_entry::{entry, StorageEntry};
-pub use storage_value::StorageValue;
+pub use prefix_of::{EqualOrPrefixOf, PrefixOf};
+pub use storage_entry::{StorageEntry, entry};
+pub use storage_key::{StorageHasher, StorageKey, StorageKeyPart};
 pub use storage_key_value::StorageKeyValue;
-pub use prefix_of::{ EqualOrPrefixOf, PrefixOf };
+pub use storage_value::StorageValue;
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
 /// that the shape of the storage value is the same as the shape expected by the static address.
@@ -71,13 +71,15 @@ pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<()
     let pallet_name = address.pallet_name();
     let entry_name = address.entry_name();
 
-    let pallet_metadata = metadata.pallet_by_name(pallet_name)
+    let pallet_metadata = metadata
+        .pallet_by_name(pallet_name)
         .ok_or_else(|| StorageError::PalletNameNotFound(pallet_name.to_string()))?;
-    let storage_hash = pallet_metadata.storage_hash(entry_name)
-        .ok_or_else(|| StorageError::StorageEntryNotFound {
+    let storage_hash = pallet_metadata.storage_hash(entry_name).ok_or_else(|| {
+        StorageError::StorageEntryNotFound {
             pallet_name: pallet_name.to_string(),
             entry_name: entry_name.to_string(),
-        })?;
+        }
+    })?;
 
     if storage_hash != hash {
         Err(StorageError::IncompatibleCodegen)

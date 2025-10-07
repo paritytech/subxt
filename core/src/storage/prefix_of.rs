@@ -12,57 +12,54 @@ use scale_encode::EncodeAsType;
 pub trait PrefixOf<Keys>: IntoEncodableValues {}
 
 // If T impls PrefixOf<K>, &T impls PrefixOf<K>.
-impl <'a, K, T: PrefixOf<K>> PrefixOf<K> for &'a T {}
+impl<'a, K, T: PrefixOf<K>> PrefixOf<K> for &'a T {}
 
 // Impls for tuples up to length 6 (storage maps rarely require more than 2 entries
 // so it's very unlikely we'll ever need to go this deep).
-impl <A> PrefixOf<(A,)> for () {}
+impl<A> PrefixOf<(A,)> for () {}
 
-impl <A, B> PrefixOf<(A,B)> for () {}
-impl <A, B> PrefixOf<(A, B)> for (A,) 
-where (A,): IntoEncodableValues {}
+impl<A, B> PrefixOf<(A, B)> for () {}
+impl<A, B> PrefixOf<(A, B)> for (A,) where (A,): IntoEncodableValues {}
 
-impl <A, B, C> PrefixOf<(A, B, C)> for () {}
-impl <A, B, C> PrefixOf<(A, B, C)> for (A,) 
-where (A,): IntoEncodableValues {}
-impl <A, B, C> PrefixOf<(A, B, C)> for (A, B) 
-where (A, B): IntoEncodableValues {}
+impl<A, B, C> PrefixOf<(A, B, C)> for () {}
+impl<A, B, C> PrefixOf<(A, B, C)> for (A,) where (A,): IntoEncodableValues {}
+impl<A, B, C> PrefixOf<(A, B, C)> for (A, B) where (A, B): IntoEncodableValues {}
 
-impl <A, B, C, D> PrefixOf<(A, B, C, D)> for () {}
-impl <A, B, C, D> PrefixOf<(A, B, C, D)> for (A,) 
-where (A,): IntoEncodableValues {}
-impl <A, B, C, D> PrefixOf<(A, B, C, D)> for (A, B) 
-where (A, B): IntoEncodableValues {}
-impl <A, B, C, D> PrefixOf<(A, B, C, D)> for (A, B, C) 
-where (A, B, C): IntoEncodableValues {}
+impl<A, B, C, D> PrefixOf<(A, B, C, D)> for () {}
+impl<A, B, C, D> PrefixOf<(A, B, C, D)> for (A,) where (A,): IntoEncodableValues {}
+impl<A, B, C, D> PrefixOf<(A, B, C, D)> for (A, B) where (A, B): IntoEncodableValues {}
+impl<A, B, C, D> PrefixOf<(A, B, C, D)> for (A, B, C) where (A, B, C): IntoEncodableValues {}
 
-impl <A, B, C, D, E> PrefixOf<(A, B, C, D, E)> for () {}
-impl <A, B, C, D, E> PrefixOf<(A, B, C, D, E)> for (A,) 
-where (A,): IntoEncodableValues {}
-impl <A, B, C, D, E> PrefixOf<(A, B, C, D, E)> for (A, B) 
-where (A, B): IntoEncodableValues {}
-impl <A, B, C, D, E> PrefixOf<(A, B, C, D, E)> for (A, B, C) 
-where (A, B, C): IntoEncodableValues {}
-impl <A, B, C, D, E> PrefixOf<(A, B, C, D, E)> for (A, B, C, D) 
-where (A, B, C, D): IntoEncodableValues {}
+impl<A, B, C, D, E> PrefixOf<(A, B, C, D, E)> for () {}
+impl<A, B, C, D, E> PrefixOf<(A, B, C, D, E)> for (A,) where (A,): IntoEncodableValues {}
+impl<A, B, C, D, E> PrefixOf<(A, B, C, D, E)> for (A, B) where (A, B): IntoEncodableValues {}
+impl<A, B, C, D, E> PrefixOf<(A, B, C, D, E)> for (A, B, C) where (A, B, C): IntoEncodableValues {}
+impl<A, B, C, D, E> PrefixOf<(A, B, C, D, E)> for (A, B, C, D) where
+    (A, B, C, D): IntoEncodableValues
+{
+}
 
-impl <A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for () {}
-impl <A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for (A,) 
-where (A,): IntoEncodableValues {}
-impl <A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for (A, B) 
-where (A, B): IntoEncodableValues {}
-impl <A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for (A, B, C) 
-where (A, B, C): IntoEncodableValues {}
-impl <A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for (A, B, C, D) 
-where (A, B, C, D): IntoEncodableValues {}
-impl <A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for (A, B, C, D, E) 
-where (A, B, C, D, E): IntoEncodableValues {}
+impl<A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for () {}
+impl<A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for (A,) where (A,): IntoEncodableValues {}
+impl<A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for (A, B) where (A, B): IntoEncodableValues {}
+impl<A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for (A, B, C) where
+    (A, B, C): IntoEncodableValues
+{
+}
+impl<A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for (A, B, C, D) where
+    (A, B, C, D): IntoEncodableValues
+{
+}
+impl<A, B, C, D, E, F> PrefixOf<(A, B, C, D, E, F)> for (A, B, C, D, E) where
+    (A, B, C, D, E): IntoEncodableValues
+{
+}
 
 // Vecs are prefixes of vecs. The length is not statically known and so
 // these would be given dynamically only, leaving the correct length to the user.
-impl <T: EncodeAsType> PrefixOf<Vec<T>> for Vec<T> {}
+impl<T: EncodeAsType> PrefixOf<Vec<T>> for Vec<T> {}
 
-// We don't use arrays in Subxt for storage entry access, but `IntoEncodableValues` 
+// We don't use arrays in Subxt for storage entry access, but `IntoEncodableValues`
 // supports them so let's allow impls which do use them to benefit too.
 macro_rules! array_impl {
     ($n:literal: $($p:literal)+) => {
@@ -103,8 +100,8 @@ tuple_impl_eq!(A B C D E);
 tuple_impl_eq!(A B C D E F);
 
 // Vec
-impl <T: EncodeAsType> EqualOrPrefixOf<Vec<T>> for Vec<T> {}
-impl <'a, T: EncodeAsType> EqualOrPrefixOf<Vec<T>> for &'a Vec<T> {}
+impl<T: EncodeAsType> EqualOrPrefixOf<Vec<T>> for Vec<T> {}
+impl<'a, T: EncodeAsType> EqualOrPrefixOf<Vec<T>> for &'a Vec<T> {}
 
 // Arrays
 macro_rules! array_impl_eq {
@@ -116,7 +113,7 @@ macro_rules! array_impl_eq {
     }
 }
 
-impl <const N: usize, A, T> EqualOrPrefixOf<[A; N]> for T where T: PrefixOf<[A; N]> {}
+impl<const N: usize, A, T> EqualOrPrefixOf<[A; N]> for T where T: PrefixOf<[A; N]> {}
 array_impl_eq!(1 2 3 4 5 6);
 
 #[cfg(test)]
@@ -125,7 +122,7 @@ mod test {
 
     struct Test<Keys: IntoEncodableValues>(core::marker::PhantomData<Keys>);
 
-    impl <Keys: IntoEncodableValues> Test<Keys> {
+    impl<Keys: IntoEncodableValues> Test<Keys> {
         fn new() -> Self {
             Test(core::marker::PhantomData)
         }
@@ -154,10 +151,10 @@ mod test {
 
         //// This shouldn't work:
         // t.accepts_prefix_of([0,1,2,3,4]);
-        t.accepts_prefix_of(&[0,1,2,3]);
-        t.accepts_prefix_of([0,1,2,3]);
-        t.accepts_prefix_of([0,1,2]);
-        t.accepts_prefix_of([0,1]);
+        t.accepts_prefix_of(&[0, 1, 2, 3]);
+        t.accepts_prefix_of([0, 1, 2, 3]);
+        t.accepts_prefix_of([0, 1, 2]);
+        t.accepts_prefix_of([0, 1]);
         t.accepts_prefix_of([0]);
         t.accepts_prefix_of([]);
     }
@@ -180,17 +177,17 @@ mod test {
 
         let t = Test::<[u64; 5]>::new();
 
-        t.accepts_eq_or_prefix_of(&[0,1,2,3,4]);
-        t.accepts_eq_or_prefix_of(&[0,1,2,3]);
-        t.accepts_eq_or_prefix_of(&[0,1,2]);
-        t.accepts_eq_or_prefix_of(&[0,1]);
-        t.accepts_eq_or_prefix_of(&[0,]);
+        t.accepts_eq_or_prefix_of(&[0, 1, 2, 3, 4]);
+        t.accepts_eq_or_prefix_of(&[0, 1, 2, 3]);
+        t.accepts_eq_or_prefix_of(&[0, 1, 2]);
+        t.accepts_eq_or_prefix_of(&[0, 1]);
+        t.accepts_eq_or_prefix_of(&[0]);
         t.accepts_eq_or_prefix_of(&[]);
 
-        t.accepts_eq_or_prefix_of([0,1,2,3,4]);
-        t.accepts_eq_or_prefix_of([0,1,2,3]);
-        t.accepts_eq_or_prefix_of([0,1,2]);
-        t.accepts_eq_or_prefix_of([0,1]);
+        t.accepts_eq_or_prefix_of([0, 1, 2, 3, 4]);
+        t.accepts_eq_or_prefix_of([0, 1, 2, 3]);
+        t.accepts_eq_or_prefix_of([0, 1, 2]);
+        t.accepts_eq_or_prefix_of([0, 1]);
         t.accepts_eq_or_prefix_of([0]);
         t.accepts_eq_or_prefix_of([]);
     }

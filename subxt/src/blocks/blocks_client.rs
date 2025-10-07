@@ -71,13 +71,11 @@ where
             // If a block ref isn't provided, we'll get the latest finalized ref to use.
             let block_ref = match block_ref {
                 Some(r) => r,
-                None => {
-                    client
-                        .backend()
-                        .latest_finalized_block_ref()
-                        .await
-                        .map_err(BlockError::CouldNotGetLatestBlock)?
-                }
+                None => client
+                    .backend()
+                    .latest_finalized_block_ref()
+                    .await
+                    .map_err(BlockError::CouldNotGetLatestBlock)?,
             };
 
             let maybe_block_header = client
@@ -91,7 +89,11 @@ where
 
             let block_header = match maybe_block_header {
                 Some(header) => header,
-                None => return Err(BlockError::BlockNotFound { block_hash: block_ref.hash().into() }),
+                None => {
+                    return Err(BlockError::BlockNotFound {
+                        block_hash: block_ref.hash().into(),
+                    });
+                }
             };
 
             Ok(Block::new(block_header, block_ref, client))
