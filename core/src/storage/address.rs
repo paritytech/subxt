@@ -61,12 +61,12 @@ impl<KeyParts, Value, IsPlain> StaticAddress<KeyParts, Value, IsPlain> {
 
     /// Create a new address.
     pub fn new(
-        pallet_name: impl Into<Cow<'static, str>>,
-        entry_name: impl Into<Cow<'static, str>>,
+        pallet_name: impl Into<String>,
+        entry_name: impl Into<String>,
     ) -> Self {
         Self {
-            pallet_name: pallet_name.into(),
-            entry_name: entry_name.into(),
+            pallet_name: pallet_name.into().into(),
+            entry_name: entry_name.into().into(),
             validation_hash: None,
             marker: core::marker::PhantomData
         }
@@ -111,9 +111,9 @@ pub type DynamicAddress<KeyParts = Vec<scale_value::Value>, Value = scale_value:
 /// storage keys and value yourself here, but have no guarantee that they will
 /// be correct.
 pub fn dynamic<KeyParts: IntoEncodableValues, Value: DecodeAsType>(
-    pallet_name: impl Into<Cow<'static, str>>,
-    entry_name: impl Into<Cow<'static, str>>,
+    pallet_name: impl Into<String>,
+    entry_name: impl Into<String>,
 ) -> DynamicAddress<KeyParts, Value> {
-    DynamicAddress::<KeyParts, Value>::new(pallet_name, entry_name)
+    DynamicAddress::<KeyParts, Value>::new(pallet_name.into(), entry_name.into())
 }
 

@@ -77,13 +77,13 @@ impl<ArgsType: IntoEncodableValues, ReturnType: DecodeAsType> Payload
 impl<ArgsType, ReturnTy> StaticPayload<ArgsType, ReturnTy> {
     /// Create a new [`StaticPayload`].
     pub fn new(
-        trait_name: impl Into<Cow<'static, str>>,
-        method_name: impl Into<Cow<'static, str>>,
+        trait_name: impl Into<String>,
+        method_name: impl Into<String>,
         args: ArgsType,
     ) -> Self {
         StaticPayload {
-            trait_name: trait_name.into(),
-            method_name: method_name.into(),
+            trait_name: trait_name.into().into(),
+            method_name: method_name.into().into(),
             args,
             validation_hash: None,
             _marker: PhantomData,
@@ -131,8 +131,8 @@ impl<ArgsType, ReturnTy> StaticPayload<ArgsType, ReturnTy> {
 
 /// Create a new [`DynamicPayload`].
 pub fn dynamic<ArgsType, ReturnType>(
-    trait_name: impl Into<Cow<'static, str>>,
-    method_name: impl Into<Cow<'static, str>>,
+    trait_name: impl Into<String>,
+    method_name: impl Into<String>,
     args_data: ArgsType,
 ) -> DynamicPayload<ArgsType, ReturnType> {
     DynamicPayload::new(trait_name, method_name, args_data.into())

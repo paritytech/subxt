@@ -90,13 +90,13 @@ impl<ArgsType: IntoEncodableValues, ReturnType: DecodeAsType> Payload
 impl<ReturnTy, ArgsType> StaticPayload<ArgsType, ReturnTy> {
     /// Create a new [`StaticPayload`] for a View Function call.
     pub fn new(
-        pallet_name: impl Into<Cow<'static, str>>,
-        function_name: impl Into<Cow<'static, str>>,
+        pallet_name: impl Into<String>,
+        function_name: impl Into<String>,
         args: ArgsType,
     ) -> Self {
         StaticPayload {
-            pallet_name: pallet_name.into(),
-            function_name: function_name.into(),
+            pallet_name: pallet_name.into().into(),
+            function_name: function_name.into().into(),
             args,
             validation_hash: None,
             _marker: PhantomData,
@@ -134,8 +134,8 @@ impl<ReturnTy, ArgsType> StaticPayload<ArgsType, ReturnTy> {
 
 /// Create a new [`DynamicPayload`] to call a View Function.
 pub fn dynamic<ArgsType, ReturnType>(
-    pallet_name: impl Into<Cow<'static, str>>,
-    function_name: impl Into<Cow<'static, str>>,
+    pallet_name: impl Into<String>,
+    function_name: impl Into<String>,
     args: ArgsType
 ) -> DynamicPayload<ArgsType, ReturnType> {
     DynamicPayload::new(pallet_name, function_name, args)

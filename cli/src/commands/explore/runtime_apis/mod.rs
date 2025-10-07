@@ -103,13 +103,13 @@ pub async fn run<'a>(
 
         let fields: Vec<(Option<&str>, u32)> = method
             .inputs()
-            .map(|f| (Some(f.name.as_str()), f.ty))
+            .map(|f| (Some(&*f.name), f.id))
             .collect();
         let fields_description =
             fields_description(&fields, method.name(), metadata.types()).indent(4);
 
         let fields_example =
-            fields_composite_example(method.inputs().map(|e| e.ty), metadata.types())
+            fields_composite_example(method.inputs().map(|e| e.id), metadata.types())
                 .indent(4)
                 .highlight();
 
@@ -164,13 +164,17 @@ pub async fn run<'a>(
             {value_str}
             "}?;
             // encode, then decode. This ensures that the scale value is of the correct shape for the param:
-            let bytes = value.encode_as_type(ty.ty, metadata.types())?;
-            let value = Value::decode_as_type(&mut &bytes[..], ty.ty, metadata.types())?;
+            let bytes = value.encode_as_type(ty.id, metadata.types())?;
+            let value = Value::decode_as_type(&mut &bytes[..], ty.id, metadata.types())?;
             Ok(value)
         })
         .collect::<color_eyre::Result<Vec<Value>>>()?;
 
-    let method_call = subxt::dynamic::runtime_api_call(api_name, method.name(), args_data);
+    let method_call = subxt::dynamic::runtime_api_call::<_, Value>(
+        api_name, 
+        method.name(), 
+        args_data
+    );
     let client = create_client(&file_or_url).await?;
     let output_value = client
         .runtime_api()
@@ -179,7 +183,7 @@ pub async fn run<'a>(
         .call(method_call)
         .await?;
 
-    let output_value = output_value.to_value()?.to_string().highlight();
+    let output_value = output_value.to_string().highlight();
     writedoc! {output, "
 
     Returned value:

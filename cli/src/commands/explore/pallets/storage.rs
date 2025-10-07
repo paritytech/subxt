@@ -1,6 +1,6 @@
 use clap::Args;
 use color_eyre::{
-    eyre::{bail, eyre},
+    eyre::bail,
     owo_colors::OwoColorize,
 };
 use indoc::{formatdoc, writedoc};
@@ -10,7 +10,8 @@ use std::fmt::Write;
 use std::write;
 use subxt::metadata::{
     Metadata,
-    types::{PalletMetadata, StorageEntryType, StorageMetadata},
+    PalletMetadata, 
+    StorageMetadata,
 };
 
 use crate::utils::{
@@ -75,12 +76,7 @@ pub async fn explore_storage(
         );
     };
 
-    let (return_ty_id, key_ty_id) = match storage.entry_type() {
-        StorageEntryType::Plain(value) => (*value, None),
-        StorageEntryType::Map {
-            value_ty, key_ty, ..
-        } => (*value_ty, Some(*key_ty)),
-    };
+    let return_ty_id = storage.value_ty();
 
     let key_value_placeholder = "<KEY_VALUE>".blue();
 
@@ -114,15 +110,23 @@ pub async fn explore_storage(
     "}?;
 
     // inform user about shape of the key if it can be provided:
-    if let Some(key_ty_id) = key_ty_id {
-        let key_ty_description = type_description(key_ty_id, metadata.types(), true)
-            .expect("No type Description")
-            .indent(4)
-            .highlight();
+    let storage_keys = storage.keys().collect::<Vec<_>>();
+    if !storage_keys.is_empty() {
+        let key_ty_description = format!("({})",
+            storage_keys
+                .iter()
+                .map(|key| type_description(key.key_id, metadata.types(), true).expect("No type Description"))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ).indent(4).highlight();
 
-        let key_ty_example = type_example(key_ty_id, metadata.types())
-            .indent(4)
-            .highlight();
+        let key_ty_example = format!("({})",
+            storage_keys
+                .iter()
+                .map(|key| type_example(key.key_id, metadata.types()).to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        ).indent(4).highlight();
 
         writedoc! {output, "
 
@@ -144,7 +148,7 @@ pub async fn explore_storage(
         return Ok(());
     }
 
-    let storage_entry_keys: Vec<Value> = match (!trailing_args.is_empty(), key_ty_id.is_some()) {
+    let storage_entry_keys: Vec<Value> = match (!trailing_args.is_empty(), !storage_keys.is_empty()) {
         // keys provided, keys not needed.
         (true, false) => {
             let trailing_args_str = trailing_args.join(" ");
@@ -190,18 +194,28 @@ pub async fn explore_storage(
     // construct the client:
     let client = create_client(&file_or_url).await?;
 
-    let storage_query = subxt::dynamic::storage(pallet_name, storage.name(), storage_entry_keys);
-    let decoded_value_thunk_or_none = client
+    let storage_query = subxt::dynamic::storage::<Vec<Value>, Value>(
+        pallet_name, 
+        storage.name()
+    );
+
+    let storage_client_at = client
         .storage()
         .at_latest()
-        .await?
-        .fetch(&storage_query)
+        .await?;
+    
+    let storage_entry = storage_client_at
+        .entry(storage_query)?;
+
+    let storage_value = storage_entry
+        .fetch(storage_entry_keys)
         .await?;
 
-    let decoded_value_thunk =
-        decoded_value_thunk_or_none.ok_or(eyre!("Value not found in storage."))?;
+    let value = storage_value
+        .decode()?
+        .to_string()
+        .highlight();
 
-    let value = decoded_value_thunk.to_value()?.to_string().highlight();
     writedoc! {output, "
 
     The value of the storage entry is:

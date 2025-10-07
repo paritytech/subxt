@@ -53,9 +53,9 @@ impl<ReturnTy, IsDecodable> StaticAddress<ReturnTy, IsDecodable> {
     }
 
     /// Create a new [`StaticAddress`]
-    pub fn new(name: impl Into<Cow<'static, str>>) -> Self {
+    pub fn new(name: impl Into<String>) -> Self {
         Self {
-            name: name.into(),
+            name: name.into().into(),
             hash: None,
             marker: core::marker::PhantomData,
         }
@@ -95,6 +95,6 @@ impl Address for str {
 }
 
 /// Construct a new dynamic custom value lookup.
-pub fn dynamic<ReturnTy: DecodeAsType>(custom_value_name: impl Into<Cow<'static, str>>) -> DynamicAddress<ReturnTy> {
+pub fn dynamic<ReturnTy: DecodeAsType>(custom_value_name: impl Into<String>) -> DynamicAddress<ReturnTy> {
     DynamicAddress::new(custom_value_name)
 }
