@@ -6,9 +6,9 @@
 
 mod storage_client;
 mod storage_client_at;
-mod storage_value;
-mod storage_entry;
-mod storage_key;
+// mod storage_value;
+// mod storage_key_value;
+// mod storage_key;
 
 pub use storage_client::StorageClient;
 pub use storage_client_at::StorageClientAt;

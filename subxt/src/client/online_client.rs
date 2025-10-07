@@ -561,7 +561,7 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
             .try_fetch(())
             .await
             .map_err(RuntimeUpdaterError::CantFetchLastRuntimeUpgrade)?
-            .or_else(RuntimeUpdaterError::CantFindSystemLastRuntimeUpgrade)?;
+            .ok_or(RuntimeUpdaterError::CantFindSystemLastRuntimeUpgrade)?;
 
         #[derive(scale_decode::DecodeAsType)]
         struct LastRuntimeUpgrade {

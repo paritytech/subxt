@@ -3,10 +3,9 @@
 // see LICENSE for license details.
 
 use core::marker::PhantomData;
-
 use crate::utils::{Maybe, Yes, YesMaybe};
 use crate::{error::StorageError};
-use super::{address::Address, PrefixOf, value, StorageValue};
+use super::{address::Address, PrefixOf, StorageValue, StorageKeyValue};
 use alloc::vec::Vec;
 use frame_decode::storage::{IntoEncodableValues, StorageInfo};
 use scale_info::PortableRegistry;
@@ -59,11 +58,24 @@ impl <'info, Addr: Address, IsPlain> StorageEntry<'info, Addr, IsPlain> {
         !self.is_plain()
     }
 
-    /// Return the default value for this storage entry, if there is one. Returns `None` if there
-    /// is no default value.
+    /// Instantiate a [`StorageKeyValue`] for this entry.
+    /// 
+    /// It is expected that the bytes are obtained by iterating key/value pairs at this address.
+    pub fn key_value(&self, key_bytes: Vec<u8>, value_bytes: Vec<u8>) -> StorageKeyValue<'_, 'info, Addr> {
+        StorageKeyValue::new(&self.info, self.types, key_bytes, value_bytes.into())
+    }
+
+    /// Instantiate a [`StorageValue`] for this entry.
+    /// 
+    /// It is expected that the bytes are obtained by fetching a value at this address.
+    pub fn value(&self, bytes: Vec<u8>) -> StorageValue<'_, 'info, Addr::Value> {
+        StorageValue::new(&self.info, &self.types, bytes)
+    }
+
+    /// Return the default [`StorageValue`] for this storage entry, if there is one.
     pub fn default_value(&self) -> Option<StorageValue<'_, 'info, Addr::Value>> {
         if let Some(default_bytes) = self.info.default_value.as_deref() {
-            Some(value(default_bytes, &self.info, self.types))
+            Some(StorageValue::new(&self.info, self.types, default_bytes))
         } else {
             None
         }

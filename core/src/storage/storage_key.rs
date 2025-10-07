@@ -9,36 +9,6 @@ use crate::error::StorageKeyError;
 
 pub use frame_decode::storage::StorageHasher;
 
-/// Construct and decode a storage key given some [`StorageInfo`], types, and the key bytes.
-pub fn key<'bytes, 'info, KeyParts: IntoDecodableValues>(
-    info: &StorageInfo<'info, u32>,
-    types: &'info PortableRegistry,
-    bytes: &'bytes [u8],
-) -> Result<StorageKey<'bytes, 'info, KeyParts>, StorageKeyError> {
-    let cursor = &mut &*bytes;
-    let storage_key_info = frame_decode::storage::decode_storage_key_with_info(
-        cursor,
-        &info,
-        types,
-    ).map_err(|e| StorageKeyError::StorageKeyDecodeError { 
-        bytes: bytes.to_vec(), 
-        error: e 
-    })?;
-
-    if !cursor.is_empty() {
-        return Err(StorageKeyError::LeftoverBytes {
-            bytes: cursor.to_vec(),
-        });
-    }
-
-    Ok(StorageKey {
-        info: storage_key_info,
-        types,
-        bytes,
-        marker: PhantomData
-    })
-}
-
 /// This represents the different parts of a storage key.
 pub struct StorageKey<'bytes, 'info, KeyParts> {
     info: StorageKeyPartInfo<u32>,
@@ -48,6 +18,35 @@ pub struct StorageKey<'bytes, 'info, KeyParts> {
 }
 
 impl<'bytes, 'info, KeyParts: IntoDecodableValues> StorageKey<'bytes, 'info, KeyParts> {
+    pub(crate) fn new(
+        info: &StorageInfo<'info, u32>,
+        types: &'info PortableRegistry,
+        bytes: &'bytes [u8],
+    ) -> Result<Self, StorageKeyError> {
+        let cursor = &mut &*bytes;
+        let storage_key_info = frame_decode::storage::decode_storage_key_with_info(
+            cursor,
+            &info,
+            types,
+        ).map_err(|e| StorageKeyError::StorageKeyDecodeError { 
+            bytes: bytes.to_vec(), 
+            error: e 
+        })?;
+
+        if !cursor.is_empty() {
+            return Err(StorageKeyError::LeftoverBytes {
+                bytes: cursor.to_vec(),
+            });
+        }
+
+        Ok(StorageKey {
+            info: storage_key_info,
+            types,
+            bytes,
+            marker: PhantomData
+        })
+    }
+
     /// Attempt to decode the values contained within this storage key. The target type is
     /// given by the storage address used to access this entry. To decode into a custom type,
     /// use [`Self::parts()`] or [`Self::part()`] and decode each part.

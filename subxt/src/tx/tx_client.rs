@@ -661,26 +661,29 @@ async fn inject_account_nonce_and_block<T: Config, Client: OnlineClientT<T>>(
 
 impl ValidationResult {
     #[allow(clippy::get_first)]
-    fn try_from_bytes(bytes: Vec<u8>) -> Result<ValidationResult, crate::Error> {
+    fn try_from_bytes(bytes: Vec<u8>) -> Result<ValidationResult, ExtrinsicError> {
         // TaggedTransactionQueue_validate_transaction returns this:
         // https://github.com/paritytech/substrate/blob/0cdf7029017b70b7c83c21a4dc0aa1020e7914f6/primitives/runtime/src/transaction_validity.rs#L210
         // We copy some of the inner types and put the three states (valid, invalid, unknown) into one enum,
         // because from our perspective, the call was successful regardless.
         if bytes.get(0) == Some(&0) {
             // ok: valid. Decode but, for now we discard most of the information
-            let res = TransactionValid::decode(&mut &bytes[1..])?;
+            let res = TransactionValid::decode(&mut &bytes[1..])
+                .map_err(ExtrinsicError::CannotDecodeValidationResult)?;
             Ok(ValidationResult::Valid(res))
         } else if bytes.get(0) == Some(&1) && bytes.get(1) == Some(&0) {
             // error: invalid
-            let res = TransactionInvalid::decode(&mut &bytes[2..])?;
+            let res = TransactionInvalid::decode(&mut &bytes[2..])
+                .map_err(ExtrinsicError::CannotDecodeValidationResult)?;
             Ok(ValidationResult::Invalid(res))
         } else if bytes.get(0) == Some(&1) && bytes.get(1) == Some(&1) {
             // error: unknown
-            let res = TransactionUnknown::decode(&mut &bytes[2..])?;
+            let res = TransactionUnknown::decode(&mut &bytes[2..])
+                .map_err(ExtrinsicError::CannotDecodeValidationResult)?;
             Ok(ValidationResult::Unknown(res))
         } else {
             // unable to decode the bytes; they aren't what we expect.
-            Err(crate::Error::Unknown(bytes))
+            Err(ExtrinsicError::UnexpectedValidationResultBytes(bytes))
         }
     }
 }

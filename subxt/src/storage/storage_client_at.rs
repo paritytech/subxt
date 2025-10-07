@@ -7,23 +7,18 @@ use crate::{
     client::{OfflineClientT, OnlineClientT},
     config::{Config, HashFor},
     error::StorageError,
-    storage::storage_value::StorageValue,
 };
-use codec::Decode;
 use derive_where::derive_where;
 use futures::StreamExt;
-use scale_info::PortableRegistry;
-use std::{future::Future, marker::PhantomData};
-use subxt_core::storage::{address::Address, PrefixOf, EqualOrPrefixOf};
-use subxt_core::utils::{Maybe, Yes, YesMaybe};
+use std::marker::PhantomData;
+use subxt_core::storage::{address::Address, PrefixOf};
+use subxt_core::utils::{Maybe, Yes};
 use subxt_core::Metadata;
-use frame_decode::storage::{IntoEncodableValues, StorageInfo};
-use std::borrow::Cow;
-use scale_decode::DecodeAsType;
-use super::storage_entry::StorageEntry;
 
-/// This is returned from a couple of storage functions.
-pub use crate::backend::StreamOf;
+pub use subxt_core::storage::{
+    StorageKeyValue,
+    StorageValue
+};
 
 /// Query the runtime storage.
 #[derive_where(Clone; Client)]
@@ -60,22 +55,13 @@ where
     T: Config,
     Client: OfflineClientT<T>,
 {
+    /// This returns a [`StorageEntryClient`], which allows working with the storage entry at the provided address.
     pub fn entry<Addr: Address>(&'_ self, address: Addr) -> Result<StorageEntryClient<'_, T, Client, Addr, Addr::IsPlain>, StorageError> {
-        subxt_core::storage::validate(&address, &self.client.metadata())?;
-
-        use frame_decode::storage::StorageTypeInfo;
-        let types = self.metadata.types();
-        let info = self
-            .client
-            .metadata()
-            .storage_info(address.pallet_name(), address.entry_name())?;
-
+        let inner = subxt_core::storage::entry(address, &self.metadata)?;
         Ok(StorageEntryClient {
+            inner,
             client: self.client.clone(), 
-            block_ref: self.block_ref.clone(), 
-            address,
-            info,
-            types,
+            block_ref: self.block_ref.clone(),
             _marker: core::marker::PhantomData 
         })
     }
@@ -84,12 +70,10 @@ where
 /// This represents a single storage entry (be it a plain value or map) 
 /// and the operations that can be performed on it.
 pub struct StorageEntryClient<'atblock, T: Config, Client, Addr, IsPlain> {
+    inner: subxt_core::storage::StorageEntry<'atblock, Addr, IsPlain>,
     client: Client,
     block_ref: BlockRef<HashFor<T>>,
-    address: Addr,
-    info: StorageInfo<'atblock, u32>,
-    types: &'atblock PortableRegistry,
-    _marker: PhantomData<(T, IsPlain)>,
+    _marker: PhantomData<T>,
 }
 
 impl <'atblock, T, Client, Addr, IsPlain> StorageEntryClient<'atblock, T, Client, Addr, IsPlain> 
@@ -99,32 +83,28 @@ where
 {
     /// Name of the pallet containing this storage entry.
     pub fn pallet_name(&self) -> &str {
-        self.address.pallet_name()
+        self.inner.pallet_name()
     }
 
     /// Name of the storage entry.
     pub fn entry_name(&self) -> &str {
-        self.address.entry_name()
+        self.inner.entry_name()
     }
 
     /// Is the storage entry a plain value?
     pub fn is_plain(&self) -> bool {
-        self.info.keys.is_empty()
+        self.inner.is_plain()
     }
 
     /// Is the storage entry a map?
     pub fn is_map(&self) -> bool {
-        !self.is_plain()
+        self.inner.is_map()
     }
 
     /// Return the default value for this storage entry, if there is one. Returns `None` if there
     /// is no default value.
     pub fn default_value(&self) -> Option<StorageValue<'_, 'atblock, Addr::Value>> {
-        if let Some(default_bytes) = self.info.default_value.as_deref() {
-            Some(StorageValue::new(&self.info, self.types, Cow::Borrowed(default_bytes)))
-        } else {
-            None
-        }
+        self.inner.default_value()
     }
 }
 
@@ -139,14 +119,7 @@ where
         let value = self
             .try_fetch()
             .await?
-            .unwrap_or_else(|| {
-                let bytes = self.info
-                    .default_value
-                    .as_deref()
-                    .unwrap_or_default()
-                    .to_vec();
-                StorageValue::new(&self.info, self.types, bytes)
-            });
+            .map_or_else(|| self.inner.default_value().ok_or(StorageError::NoValueFound), Ok)?;
 
         Ok(value)
     }
@@ -155,18 +128,16 @@ where
         let value = self.client
             .backend()
             .storage_fetch_value(self.key_prefix().to_vec(), self.block_ref.hash())
-            .await?
-            .map(|bytes| StorageValue::new(&self.info, self.types, bytes));
+            .await
+            .map_err(StorageError::CannotFetchValue)?
+            .map(|bytes| self.inner.value(bytes));
 
         Ok(value)
     }
 
     /// The keys for plain storage values are always 32 byte hashes. 
     pub fn key_prefix(&self) -> [u8; 32] {
-        frame_decode::storage::encode_storage_key_prefix(
-            self.address.pallet_name(),
-            self.address.entry_name()
-        )    
+        self.inner.key_prefix()   
     }
 }
 
@@ -178,12 +149,7 @@ where
     Addr: Address,
     Client: OnlineClientT<T>
 {
-    pub async fn fetch(&'_ self, keys: Addr::KeyParts) -> Result<StorageValue<'_, 'atblock, Addr::Value>, StorageError> {
-        if keys.num_encodable_values() != self.info.keys.len() {
-            // This shouldn't be possible in static cases but if Vec<Value> is keys then we need to be checking.
-            todo!("Error: wrong number of keys provided.")
-        }
-        
+    pub async fn fetch(&'_ self, keys: Addr::KeyParts) -> Result<StorageValue<'_, 'atblock, Addr::Value>, StorageError> {       
         let value = self
             .try_fetch(keys)
             .await?
@@ -194,24 +160,14 @@ where
     }
     
     pub async fn try_fetch(&self, keys: Addr::KeyParts) -> Result<Option<StorageValue<'_, 'atblock, Addr::Value>>, StorageError> {    
-        if keys.num_encodable_values() != self.info.keys.len() {
-            // This shouldn't be possible in static cases but if Vec<Value> is keys then we need to be checking.
-            todo!("Error: wrong number of keys provided.")
-        }
-
-        let key = frame_decode::storage::encode_storage_key_with_info(
-            self.address.pallet_name(),
-            self.address.entry_name(),
-            keys,
-            &self.info,
-            self.types
-        )?;
+        let key = self.inner.fetch_key(keys)?;
 
         let value = self.client
             .backend()
             .storage_fetch_value(key, self.block_ref.hash())
-            .await?
-            .map(|bytes| StorageValue::new(&self.info, self.types, bytes))
+            .await
+            .map_err(StorageError::CannotFetchValue)?
+            .map(|bytes| self.inner.value(bytes))
             .or_else(|| self.default_value());
 
         Ok(value)
@@ -220,28 +176,21 @@ where
     pub async fn iter<Keys: PrefixOf<Addr::KeyParts>>(
         &self, 
         keys: Keys
-    ) -> Result<impl futures::Stream<Item = Result<StorageEntry<'_, 'atblock, Addr>, StorageError>>, StorageError> {
-        if keys.num_encodable_values() >= self.info.keys.len() {
-            // This shouldn't be possible in static cases but if Vec<Value> is keys then we need to be checking.
-            todo!("Error: wrong number of keys provided.")
-        }
-
+    ) -> Result<impl futures::Stream<Item = Result<StorageKeyValue<'_, 'atblock, Addr>, StorageError>>, StorageError> {
+        let key_bytes = self.inner.iter_key(keys)?;
         let block_hash = self.block_ref.hash();
-        let key_bytes = self.key_from(keys)?;
-        let info = &self.info;
-        let types = self.types;
 
         let stream = self.client
             .backend()
             .storage_fetch_descendant_values(key_bytes, block_hash)
-            .await?
+            .await
+            .map_err(StorageError::CannotIterateValues)?
             .map(|kv| {
                 let kv = match kv {
                     Ok(kv) => kv,
-                    Err(e) => return Err(e),
+                    Err(e) => return Err(StorageError::StreamFailure(e)),
                 };
-
-                Ok(StorageEntry::new(info, types, kv.key, Cow::Owned(kv.value)))
+                Ok(self.inner.key_value(kv.key, kv.value))
             });
 
         Ok(Box::pin(stream))
@@ -250,23 +199,7 @@ where
     /// The first 32 bytes of the storage entry key, which points to the entry but not necessarily
     /// a single storage value (unless the entry is a plain value).
     pub fn key_prefix(&self) -> [u8; 32] {
-        frame_decode::storage::encode_storage_key_prefix(
-            self.address.pallet_name(),
-            self.address.entry_name()
-        )    
-    }
-
-    // An internal function to generate keys, because owing to lack of specialisation, things that impl
-    // `EqualOrPrefixOf` don't also provably impl `PrefixOf`.
-    fn key_from<Keys: IntoEncodableValues>(&self, keys: Keys) -> Result<Vec<u8>, StorageError> {
-        let key_bytes = frame_decode::storage::encode_storage_key_with_info(
-            &self.address.pallet_name(),
-            &self.address.entry_name(),
-            keys,
-            &self.info,
-            self.types,
-        )?;
-        Ok(key_bytes)
+        self.inner.key_prefix()   
     }
 }
 

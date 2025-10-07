@@ -25,133 +25,124 @@ pub use hex::Hex;
 
 // Re-export core error types we're just reusing.
 pub use subxt_core::error::{
+    // These errors are exposed as-is:
     ExtrinsicDecodeErrorAt,
     ConstantError,
     CustomValueError,
+    StorageKeyError,
+    StorageValueError,
+    // These errors are wrapped:
     ExtrinsicError as CoreExtrinsicError,
     RuntimeApiError as CoreRuntimeApiError,
     EventsError as CoreEventsError,
     ViewFunctionError as CoreViewFunctionError,
+    StorageError as CoreStorageError,
 };
 
-// /// The underlying error enum, generic over the type held by the `Runtime`
-// /// variant. Prefer to use the [`Error<E>`] and [`Error`] aliases over
-// /// using this type directly.
-// #[derive(Debug, thiserror::Error)]
-// #[non_exhaustive]
-// pub enum Error {
-//     /// Io error.
-//     #[error("Io error: {0}")]
-//     Io(#[from] std::io::Error),
-//     /// Codec error.
-//     #[error("Scale codec error: {0}")]
-//     Codec(#[from] codec::Error),
-//     /// Rpc error.
-//     #[error(transparent)]
-//     Rpc(#[from] RpcError),
-//     /// Serde serialization error
-//     #[error("Serde json error: {0}")]
-//     Serialization(#[from] serde_json::error::Error),
-//     /// Error working with metadata.
-//     #[error("Metadata error: {0}")]
-//     Metadata(#[from] MetadataError),
-//     /// Error decoding metadata.
-//     #[error("Metadata Decoding error: {0}")]
-//     MetadataDecoding(#[from] MetadataTryFromError),
-//     /// Runtime error.
-//     #[error("Runtime error: {0}")]
-//     Runtime(#[from] DispatchError),
-//     /// Error decoding to a [`crate::dynamic::Value`].
-//     #[error("Error decoding into dynamic value: {0}")]
-//     Decode(#[from] DecodeError),
-//     /// Error encoding from a [`crate::dynamic::Value`].
-//     #[error("Error encoding from dynamic value: {0}")]
-//     Encode(#[from] EncodeError),
-//     /// Transaction progress error.
-//     #[error("Transaction error: {0}")]
-//     Transaction(#[from] TransactionStatusError),
-//     /// Error constructing the appropriate extrinsic params.
-//     #[error("Extrinsic params error: {0}")]
-//     Extrinsic(#[from] ExtrinsicError),
-//     /// Block related error.
-//     #[error("Block error: {0}")]
-//     Block(#[from] BlockError),
-//     /// An error encoding a storage address.
-//     #[error("Error encoding storage address: {0}")]
-//     StorageAddress(#[from] StorageError),
-//     /// The bytes representing an error that we were unable to decode.
-//     #[error("An error occurred but it could not be decoded: {0:?}")]
-//     Unknown(Vec<u8>),
-//     /// Light client error.
-//     #[cfg(feature = "unstable-light-client")]
-//     #[cfg_attr(docsrs, doc(cfg(feature = "unstable-light-client")))]
-//     #[error("An error occurred but it could not be decoded: {0}")]
-//     LightClient(#[from] LightClientError),
-//     /// Other error.
-//     #[error("Other error: {0}")]
-//     Other(String),
-// }
+/// A global error type. Any of the errors exposed here can convert into this
+/// error via `.into()`, but this error isn't itself exposed from anything.
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum Error {
+    #[error(transparent)]
+    ExtrinsicDecodeErrorAt(#[from] ExtrinsicDecodeErrorAt),
+    #[error(transparent)]
+    ConstantError(#[from] ConstantError),
+    #[error(transparent)]
+    CustomValueError(#[from] CustomValueError),
+    #[error(transparent)]
+    StorageKeyError(#[from] StorageKeyError),
+    #[error(transparent)]
+    StorageValueError(#[from] StorageValueError),
+    #[error(transparent)]
+    BackendError(#[from] BackendError),
+    #[error(transparent)]
+    BlockError(#[from] BlockError),
+    #[error(transparent)]
+    AccountNonceError(#[from] AccountNonceError),
+    #[error(transparent)]
+    OnlineClientError(#[from] OnlineClientError),
+    #[error(transparent)]
+    RuntimeUpdaterError(#[from] RuntimeUpdaterError),
+    #[error(transparent)]
+    RuntimeUpdateeApplyError(#[from] RuntimeUpdateeApplyError),
+    #[error(transparent)]
+    RuntimeApiError(#[from] RuntimeApiError),
+    #[error(transparent)]
+    EventsError(#[from] EventsError),
+    #[error(transparent)]
+    ExtrinsicError(#[from] ExtrinsicError),
+    #[error(transparent)]
+    ViewFunctionError(#[from] ViewFunctionError),
+    #[error(transparent)]
+    TransactionProgressError(#[from] TransactionProgressError),
+    #[error(transparent)]
+    TransactionStatusError(#[from] TransactionStatusError),
+    #[error(transparent)]
+    TransactionEventsError(#[from] TransactionEventsError),
+    #[error(transparent)]
+    TransactionFinalizedSuccessError(#[from] TransactionFinalizedSuccessError),
+    #[error(transparent)]
+    ModuleErrorDetailsError(#[from] ModuleErrorDetailsError),
+    #[error(transparent)]
+    ModuleErrorDecodeError(#[from] ModuleErrorDecodeError),
+    #[error(transparent)]
+    DispatchErrorDecodeError(#[from] DispatchErrorDecodeError),
+    #[error(transparent)]
+    StorageError(#[from] StorageError),
+}
 
-// impl From<CoreError> for Error {
-//     fn from(value: CoreError) -> Self {
-//         match value {
-//             CoreError::Codec(e) => Error::Codec(e),
-//             CoreError::Metadata(e) => Error::Metadata(e),
-//             CoreError::StorageError(e) => Error::StorageAddress(e),
-//             CoreError::Decode(e) => Error::Decode(e),
-//             CoreError::Encode(e) => Error::Encode(e),
-//             CoreError::Extrinsic(e) => Error::Extrinsic(e),
-//             CoreError::Block(e) => Error::Block(e.into()),
-//         }
-//     }
-// }
+impl From<std::convert::Infallible> for Error {
+    fn from(value: std::convert::Infallible) -> Self {
+        match value {}
+    }
+}
 
-// impl<'a> From<&'a str> for Error {
-//     fn from(error: &'a str) -> Self {
-//         Error::Other(error.into())
-//     }
-// }
+impl Error {
+    /// Checks whether the error was caused by a RPC re-connection.
+    pub fn is_disconnected_will_reconnect(&self) -> bool {
+        matches!(
+            self.backend_error(),
+            Some(BackendError::Rpc(RpcError::ClientError(
+                subxt_rpcs::Error::DisconnectedWillReconnect(_)
+            )))
+        )
+    }
 
-// impl From<String> for Error {
-//     fn from(error: String) -> Self {
-//         Error::Other(error)
-//     }
-// }
+    /// Checks whether the error was caused by a RPC request being rejected.
+    pub fn is_rpc_limit_reached(&self) -> bool {
+        matches!(self.backend_error(), Some(BackendError::Rpc(RpcError::LimitReached)))
+    }
 
-// impl From<std::convert::Infallible> for Error {
-//     fn from(value: std::convert::Infallible) -> Self {
-//         match value {}
-//     }
-// }
-
-// impl From<scale_decode::visitor::DecodeError> for Error {
-//     fn from(value: scale_decode::visitor::DecodeError) -> Self {
-//         Error::Decode(value.into())
-//     }
-// }
-
-// impl From<subxt_rpcs::Error> for Error {
-//     fn from(value: subxt_rpcs::Error) -> Self {
-//         Error::Rpc(value.into())
-//     }
-// }
-
-// impl Error {
-//     /// Checks whether the error was caused by a RPC re-connection.
-//     pub fn is_disconnected_will_reconnect(&self) -> bool {
-//         matches!(
-//             self,
-//             Error::Rpc(RpcError::ClientError(
-//                 subxt_rpcs::Error::DisconnectedWillReconnect(_)
-//             ))
-//         )
-//     }
-
-//     /// Checks whether the error was caused by a RPC request being rejected.
-//     pub fn is_rpc_limit_reached(&self) -> bool {
-//         matches!(self, Error::Rpc(RpcError::LimitReached))
-//     }
-// }
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            Error::ExtrinsicDecodeErrorAt(_) |
+            Error::ConstantError(_) |
+            Error::CustomValueError(_) |
+            Error::StorageKeyError(_) |
+            Error::StorageValueError(_) |
+            Error::BackendError(_) |
+            Error::RuntimeUpdateeApplyError(_) |
+            Error::TransactionStatusError(_) |
+            Error::ModuleErrorDetailsError(_) |
+            Error::ModuleErrorDecodeError(_) |
+            Error::DispatchErrorDecodeError(_) => None,
+            Error::BlockError(e) => e.backend_error(),
+            Error::AccountNonceError(e) => e.backend_error(),
+            Error::OnlineClientError(e) => e.backend_error(),
+            Error::RuntimeUpdaterError(e) => e.backend_error(),
+            Error::RuntimeApiError(e) => e.backend_error(),
+            Error::EventsError(e) => e.backend_error(),
+            Error::ExtrinsicError(e) => e.backend_error(),
+            Error::ViewFunctionError(e) => e.backend_error(),
+            Error::TransactionProgressError(e) => e.backend_error(),
+            Error::TransactionEventsError(e) => e.backend_error(),
+            Error::TransactionFinalizedSuccessError(e) => e.backend_error(),
+            Error::StorageError(e) => e.backend_error(),
+        }
+    }
+}
 
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
@@ -198,8 +189,6 @@ impl From<subxt_rpcs::Error> for BackendError {
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum RpcError {
-    // Dev note: We need the error to be safely sent between threads
-    // for `subscribe_to_block_headers_filling_in_gaps` and friends.
     /// Error related to the RPC client.
     #[error("RPC error: {0}")]
     ClientError(#[from] subxt_rpcs::Error),
@@ -207,7 +196,7 @@ pub enum RpcError {
     /// which is not technically an RPC error but is treated as an error in our own APIs.
     #[error("RPC error: limit reached")]
     LimitReached,
-    /// The RPC subscription dropped.
+    /// The RPC subscription was dropped.
     #[error("RPC error: subscription dropped.")]
     SubscriptionDropped,
 }
@@ -215,17 +204,12 @@ pub enum RpcError {
 /// Block error
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
+#[allow(missing_docs)]
 pub enum BlockError {
-    /// An error containing the hash of the block that was not found.
     #[error("Could not find the block body with hash {block_hash} (perhaps it was on a non-finalized fork?)")]
     BlockNotFound {
         block_hash: Hex,
     },
-    // #[error("Could not download the block body with hash {block_hash}: {reason}")]
-    // CouldNotGetBlockBody {
-    //     block_hash: String,
-    //     reason: BackendError
-    // },
     #[error("Could not download the block header with hash {block_hash}: {reason}")]
     CouldNotGetBlockHeader {
         block_hash: Hex,
@@ -247,8 +231,22 @@ pub enum BlockError {
     }
 }
 
+impl BlockError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            BlockError::CouldNotGetBlockHeader { reason: e, ..} |
+            BlockError::CouldNotGetLatestBlock(e) |
+            BlockError::CouldNotSubscribeToAllBlocks(e) |
+            BlockError::CouldNotSubscribeToBestBlocks(e) |
+            BlockError::CouldNotSubscribeToFinalizedBlocks(e) => Some(e),
+            _ => None
+        }
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
+#[allow(missing_docs)]
 pub enum AccountNonceError {
     #[error("Could not retrieve account nonce: {0}")]
     CouldNotRetrieve(#[from] BackendError),
@@ -256,6 +254,15 @@ pub enum AccountNonceError {
     CouldNotDecode(#[from] codec::Error),
     #[error("Wrong number of account nonce bytes returned: {0} (expected 2, 4 or 8)")]
     WrongNumberOfBytes(usize),
+}
+
+impl AccountNonceError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            AccountNonceError::CouldNotRetrieve(e) => Some(e),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -272,6 +279,18 @@ pub enum OnlineClientError {
     CannotGetCurrentRuntimeVersion(BackendError),
     #[error("Cannot construct OnlineClient: Cannot fetch metadata: {0}")]
     CannotFetchMetadata(BackendError),
+}
+
+impl OnlineClientError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            OnlineClientError::CannotGetLatestFinalizedBlock(e)
+            | OnlineClientError::CannotGetGenesisHash(e)
+            | OnlineClientError::CannotGetCurrentRuntimeVersion(e)
+            | OnlineClientError::CannotFetchMetadata(e) => Some(e),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -295,14 +314,28 @@ pub enum RuntimeUpdaterError {
     #[error("Error subscribing to runtime updates: Cannot find the System.LastRuntimeUpgrade storage entry")]
     CantFindSystemLastRuntimeUpgrade,
     #[error("Error subscribing to runtime updates: Cannot fetch last runtime upgrade: {0}")]
-    CantFetchLastRuntimeUpgrade(),
+    CantFetchLastRuntimeUpgrade(StorageError),
     #[error("Error subscribing to runtime updates: Cannot decode last runtime upgrade: {0}")]
-    CannotDecodeLastRuntimeUpgrade(scale_decode::Error),
+    CannotDecodeLastRuntimeUpgrade(StorageValueError),
+}
+
+impl RuntimeUpdaterError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            RuntimeUpdaterError::CannotStreamRuntimeVersion(e)
+            | RuntimeUpdaterError::CannotGetNextRuntimeVersion(e)
+            | RuntimeUpdaterError::CannotStreamFinalizedBlocks(e)
+            | RuntimeUpdaterError::CannotGetNextFinalizedBlock(e)
+            | RuntimeUpdaterError::CannotFetchNewMetadata(e) => Some(e),
+            _ => None,
+        }
+    }
 }
 
 /// Error that can occur during upgrade.
 #[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
+#[allow(missing_docs)]
 pub enum RuntimeUpdateeApplyError {
     #[error("The proposed runtime update is the same as the current version")]
     SameVersion,
@@ -311,6 +344,7 @@ pub enum RuntimeUpdateeApplyError {
 /// Error working with Runtime APIs
 #[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
+#[allow(missing_docs)]
 pub enum RuntimeApiError {
     #[error("Cannot access Runtime APIs at latest block: Cannot fetch latest finalized block: {0}")]
     CannotGetLatestFinalizedBlock(BackendError),
@@ -320,9 +354,20 @@ pub enum RuntimeApiError {
     CannotCallApi(BackendError),
 }
 
+impl RuntimeApiError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            RuntimeApiError::CannotGetLatestFinalizedBlock(e)
+            | RuntimeApiError::CannotCallApi(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
 /// Error working with events.
 #[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
+#[allow(missing_docs)]
 pub enum EventsError {
     #[error("{0}")]
     OfflineError(#[from] CoreEventsError),
@@ -332,9 +377,20 @@ pub enum EventsError {
     CannotFetchEventBytes(BackendError),
 }
 
+impl EventsError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            EventsError::CannotGetLatestFinalizedBlock(e)
+            | EventsError::CannotFetchEventBytes(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
 /// Error working with extrinsics.
 #[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
+#[allow(missing_docs)]
 pub enum ExtrinsicError {
     #[error("{0}")]
     OfflineError(#[from] CoreExtrinsicError),
@@ -368,11 +424,31 @@ pub enum ExtrinsicError {
     CannotGetFeeInfo(BackendError),
     #[error("Cannot get validation info from Runtime API: {0}")]
     CannotGetValidationInfo(BackendError),
+    #[error("Cannot decode ValidationResult bytes: {0}")]
+    CannotDecodeValidationResult(codec::Error),
+    #[error("ValidationResult bytes could not be decoded")]
+    UnexpectedValidationResultBytes(Vec<u8>),
+}
+
+impl ExtrinsicError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            ExtrinsicError::CannotGetBlockBody(e)
+            | ExtrinsicError::CannotGetLatestFinalizedBlock(e)
+            | ExtrinsicError::ErrorSubmittingTransaction(e)
+            | ExtrinsicError::TransactionStatusStreamError(e)
+            | ExtrinsicError::CannotGetFeeInfo(e)
+            | ExtrinsicError::CannotGetValidationInfo(e) => Some(e),
+            ExtrinsicError::AccountNonceError { reason, .. } => reason.backend_error(),
+            _ => None,
+        }
+    }
 }
 
 /// Error working with View Functions.
 #[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
+#[allow(missing_docs)]
 pub enum ViewFunctionError {
     #[error("{0}")]
     OfflineError(#[from] CoreViewFunctionError),
@@ -382,9 +458,20 @@ pub enum ViewFunctionError {
     CannotCallApi(BackendError),
 }
 
+impl ViewFunctionError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            ViewFunctionError::CannotGetLatestFinalizedBlock(e)
+            | ViewFunctionError::CannotCallApi(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
 /// Error during the transaction progress.
 #[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
+#[allow(missing_docs)]
 pub enum TransactionProgressError {
     #[error("Cannot get the next transaction progress update: {0}")]
     CannotGetNextProgressUpdate(BackendError),
@@ -394,16 +481,21 @@ pub enum TransactionProgressError {
     UnexpectedEndOfTransactionStatusStream,
 }
 
+impl TransactionProgressError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            TransactionProgressError::CannotGetNextProgressUpdate(e) => Some(e),
+            TransactionProgressError::TransactionStatusError(_) => None,
+            TransactionProgressError::UnexpectedEndOfTransactionStatusStream => None,
+        }
+    }
+}
+
 /// An error emitted as the result of a transaction progress update.
 #[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
 #[non_exhaustive]
+#[allow(missing_docs)]
 pub enum TransactionStatusError {
-    // /// The block hash that the transaction was added to could not be found.
-    // /// This is probably because the block was retracted before being finalized.
-    // #[error(
-    //     "The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)"
-    // )]
-    // BlockNotFound,
     /// An error happened on the node that the transaction was submitted to.
     #[error("Error handling transaction: {0}")]
     Error(String),
@@ -418,6 +510,7 @@ pub enum TransactionStatusError {
 /// Error fetching events for a just-submitted transaction
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
+#[allow(missing_docs)]
 pub enum TransactionEventsError {
     #[error("The block containing the submitted transaction ({block_hash}) could not be downloaded: {error}")]
     CannotFetchBlockBody {
@@ -454,9 +547,23 @@ pub enum TransactionEventsError {
     ExtrinsicFailed(#[from] DispatchError),
 }
 
+impl TransactionEventsError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            TransactionEventsError::CannotFetchBlockBody { error, .. } => Some(error),
+            TransactionEventsError::CannotDecodeEventInBlock { error, .. }
+            | TransactionEventsError::CannotFetchEventsForTransaction { error, .. } => {
+                error.backend_error()
+            }
+            _ => None,
+        }
+    }
+}
+
 /// Error waiting for the transaction to be finalized and successful.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
+#[allow(missing_docs)]
 pub enum TransactionFinalizedSuccessError {
     #[error("Could not finalize the transaction: {0}")]
     FinalizationError(#[from] TransactionProgressError),
@@ -464,9 +571,19 @@ pub enum TransactionFinalizedSuccessError {
     SuccessError(#[from] TransactionEventsError)
 }
 
+impl TransactionFinalizedSuccessError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            TransactionFinalizedSuccessError::FinalizationError(e) => e.backend_error(),
+            TransactionFinalizedSuccessError::SuccessError(e) => e.backend_error(),
+        }
+    }
+}
+
 /// Error decoding the [`DispatchError`]
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
+#[allow(missing_docs)]
 pub enum ModuleErrorDetailsError {
     #[error("Could not get details for the DispatchError: could not find pallet index {pallet_index}")]
     PalletNotFound {
@@ -482,12 +599,14 @@ pub enum ModuleErrorDetailsError {
 /// Error decoding the [`ModuleError`]
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
+#[allow(missing_docs)]
 #[error("Could not decode the DispatchError::Module payload into the given type: {0}")]
 pub struct ModuleErrorDecodeError(scale_decode::Error);
 
 /// Error decoding the [`DispatchError`]
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
+#[allow(missing_docs)]
 pub enum DispatchErrorDecodeError {
     #[error("Could not decode the DispatchError: could not find the corresponding type ID in the metadata")]
     DispatchErrorTypeIdNotFound,
@@ -503,6 +622,30 @@ pub enum DispatchErrorDecodeError {
 /// Error working with storage.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
+#[allow(missing_docs)]
 pub enum StorageError {
+    #[error("{0}")]
+    Offline(#[from] CoreStorageError),
+    #[error("Cannot access storage at latest block: Cannot fetch latest finalized block: {0}")]
+    CannotGetLatestFinalizedBlock(BackendError),
+    #[error("No storage value found at the given address, and no default value to fall back to using.")]
+    NoValueFound,
+    #[error("Cannot fetch the storage value: {0}")]
+    CannotFetchValue(BackendError),
+    #[error("Cannot iterate storage values: {0}")]
+    CannotIterateValues(BackendError),
+    #[error("Encountered an error iterating over storage values: {0}")]
+    StreamFailure(BackendError),
+}
 
+impl StorageError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            StorageError::CannotGetLatestFinalizedBlock(e)
+            | StorageError::CannotFetchValue(e)
+            | StorageError::CannotIterateValues(e)
+            | StorageError::StreamFailure(e) => Some(e),
+            _ => None,
+        }
+    }
 }

@@ -52,10 +52,10 @@ pub mod address;
 use crate::{Metadata, error::StorageError};
 use address::Address;
 
-pub use storage_key::{key, StorageKey, StorageKeyPart, StorageHasher};
+pub use storage_key::{StorageKey, StorageKeyPart, StorageHasher};
 pub use storage_entry::{entry, StorageEntry};
-pub use storage_value::{value, StorageValue};
-pub use storage_key_value::{key_value, StorageKeyValue};
+pub use storage_value::StorageValue;
+pub use storage_key_value::StorageKeyValue;
 pub use prefix_of::{ EqualOrPrefixOf, PrefixOf };
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates

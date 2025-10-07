@@ -9,23 +9,6 @@ use scale_info::PortableRegistry;
 use scale_decode::DecodeAsType;
 use crate::error::StorageValueError;
 
-/// Create a [`StorageValue`] to decode some storage value bytes.
-/// 
-/// The generic `Value` parameter determines what the default type
-/// that the value will decode into is.
-pub fn value<'entry, 'info, Value>(
-    bytes: impl Into<Cow<'entry, [u8]>>,
-    info: &'entry StorageInfo<'info, u32>,
-    types: &'info PortableRegistry
-) -> StorageValue<'entry, 'info, Value> {
-    StorageValue {
-        info,
-        types,
-        bytes: bytes.into(),
-        marker: PhantomData,
-    }
-}
-
 /// This represents a storage value.
 pub struct StorageValue<'entry, 'info, Value> {
     pub(crate) info: &'entry StorageInfo<'info, u32>,
@@ -35,6 +18,19 @@ pub struct StorageValue<'entry, 'info, Value> {
 }
 
 impl<'entry, 'info, Value: DecodeAsType> StorageValue<'entry, 'info, Value> {
+    pub(crate) fn new(
+        info: &'entry StorageInfo<'info, u32>,
+        types: &'info PortableRegistry,
+        bytes: impl Into<Cow<'entry, [u8]>>,
+    ) -> StorageValue<'entry, 'info, Value> {
+        StorageValue {
+            info,
+            types,
+            bytes: bytes.into(),
+            marker: PhantomData,
+        }
+    }
+
     /// Get the raw bytes for this storage value.
     pub fn bytes(&self) -> &[u8] {
         &self.bytes
