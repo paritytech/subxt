@@ -382,7 +382,7 @@ impl<T: Config> EventDetails<T> {
 
     /// Decode and provide the event fields back in the form of a [`scale_value::Composite`]
     /// type which represents the named or unnamed fields that were present in the event.
-    pub fn decode_fields_as<E: DecodeAsFields>(&self) -> Result<E, EventsError> {
+    pub fn decode_as_fields<E: DecodeAsFields>(&self) -> Result<E, EventsError> {
         let bytes = &mut self.field_bytes();
         let event_metadata = self.event_metadata();
 
@@ -657,7 +657,7 @@ mod tests {
         expected: TestRawEventDetails,
     ) {
         let actual_fields_no_context: Vec<_> = actual
-            .decode_fields_as::<scale_value::Composite<()>>()
+            .decode_as_fields::<scale_value::Composite<()>>()
             .expect("can decode field values (2)")
             .into_values()
             .map(|value| value.remove_context())

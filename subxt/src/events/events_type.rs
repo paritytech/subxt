@@ -139,8 +139,8 @@ impl<T: Config> EventDetails<T> {
 
     /// Decode and provide the event fields back in the form of a [`scale_value::Composite`]
     /// type which represents the named or unnamed fields that were present in the event.
-    pub fn decode_fields_as<E: DecodeAsFields>(&self) -> Result<E, EventsError> {
-        self.inner.decode_fields_as().map_err(Into::into)
+    pub fn decode_as_fields<E: DecodeAsFields>(&self) -> Result<E, EventsError> {
+        self.inner.decode_as_fields().map_err(Into::into)
     }
 
     /// Attempt to decode these [`EventDetails`] into a type representing the event fields.

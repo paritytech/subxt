@@ -2,6 +2,7 @@
 use subxt::dynamic::{At, Value};
 use subxt::{OnlineClient, PolkadotConfig};
 use subxt_signer::sr25519::dev;
+use subxt::utils::AccountId32;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -9,9 +10,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Build a dynamic storage query to access account information.
-    let account = dev::alice().public_key();
+    let account: AccountId32 = dev::alice().public_key().into();
     let storage_query =
-        subxt::dynamic::storage("System", "Account", vec![Value::from_bytes(account)]);
+        subxt::dynamic::storage::<(AccountId32,), Value>("System", "Account");
 
     // Use that query to `fetch` a result. Because the query is dynamic, we don't know what the result
     // type will be either, and so we get a type back that can be decoded into a dynamic Value type.

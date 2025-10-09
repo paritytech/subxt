@@ -57,16 +57,17 @@ fn generate_custom_value_fn(
         .types()
         .resolve(custom_value.type_id())
         .is_some();
+    
     let (return_ty, decodable) = if type_is_valid {
         let return_ty = type_gen
             .resolve_type_path(custom_value.type_id())
             .expect("type is in metadata; qed")
             .to_token_stream(type_gen.settings());
-        let decodable = quote!(#crate_path::utils::Yes);
+        let decodable = quote!(#crate_path::utils::Maybe);
         (return_ty, decodable)
     } else {
         // if type registry does not contain the type, we can just return the Encoded scale bytes.
-        (quote!(()), quote!(()))
+        (quote!(()), quote!(#crate_path::utils::No))
     };
 
     Some(quote!(

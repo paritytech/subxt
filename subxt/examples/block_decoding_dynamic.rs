@@ -21,10 +21,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 continue; // we do not look at inherents in this example
             };
 
-            let meta = ext.extrinsic_metadata()?;
-            let fields = ext.field_values()?;
+            // Decode the fields into our dynamic Value type to display:
+            let fields = ext.decode_as_fields::<scale_value::Value>()?;
 
-            println!("  {}/{}", meta.pallet.name(), meta.variant.name);
+            println!("  {}/{}", ext.pallet_name(), ext.call_name());
             println!("    Transaction Extensions:");
             for signed_ext in transaction_extensions.iter() {
                 // We only want to take a look at these 3 signed extensions, because the others all just have unit fields.

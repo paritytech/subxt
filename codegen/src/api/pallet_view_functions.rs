@@ -12,7 +12,45 @@ use scale_typegen::typegen::ir::ToTokensWithSettings;
 use std::collections::HashSet;
 use subxt_metadata::{PalletMetadata, ViewFunctionMetadata};
 
+pub fn generate_pallet_view_functions(
+    type_gen: &TypeGenerator,
+    pallet: &PalletMetadata,
+    crate_path: &syn::Path,
+) -> Result<TokenStream2, CodegenError> {
+    if !pallet.has_view_functions() {
+        // If there are no view functions in this pallet, we
+        // don't generate anything.
+        return Ok(quote! {});
+    }
+
+    let view_functions: Vec<_> = pallet
+        .view_functions()
+        .map(|vf| generate_pallet_view_function(pallet.name(), vf, type_gen, crate_path))
+        .collect::<Result<_, _>>()?;
+
+    let view_functions_types = view_functions.iter().map(|(apis, _)| apis);
+    let view_functions_methods = view_functions.iter().map(|(_, getters)| getters);
+
+    let types_mod_ident = type_gen.types_mod_ident();
+
+    Ok(quote! {
+        pub mod view_functions {
+            use super::root_mod;
+            use super::#types_mod_ident;
+
+            pub struct ViewFunctionsApi;
+
+            impl ViewFunctionsApi {
+                #( #view_functions_methods )*
+            }
+
+            #( #view_functions_types )*
+        }
+    })
+}
+
 fn generate_pallet_view_function(
+    pallet_name: &str,
     view_function: ViewFunctionMetadata<'_>,
     type_gen: &TypeGenerator,
     crate_path: &syn::Path,
@@ -20,9 +58,7 @@ fn generate_pallet_view_function(
     let types_mod_ident = type_gen.types_mod_ident();
 
     let view_function_name_str = view_function.name();
-    let view_function_name_ident = format_ident!("{}", view_function_name_str);
-
-    let query_id = view_function.query_id();
+    let view_function_name_ident = format_ident!("{view_function_name_str}");
     let validation_hash = view_function.hash();
 
     let docs = view_function.docs();
@@ -81,12 +117,11 @@ fn generate_pallet_view_function(
             .collect()
     };
 
-    let input_struct_params = view_function_inputs
+    let input_tuple_types = view_function_inputs
         .iter()
         .map(|i| {
-            let arg = &i.name;
             let ty = &i.type_alias;
-            quote!(pub #arg: #ty)
+            quote!(#view_function_name_ident::#ty)
         })
         .collect::<Vec<_>>();
 
@@ -111,18 +146,11 @@ fn generate_pallet_view_function(
         .resolve_type_path(view_function.output_ty())?
         .to_token_stream(type_gen.settings());
 
-    let input_struct_derives = type_gen.settings().derives.default_derives();
-
     // Define the input and output type bits.
-    let view_function_def = quote!(
+    let view_function_types = quote!(
         pub mod #view_function_name_ident {
             use super::root_mod;
             use super::#types_mod_ident;
-
-            #input_struct_derives
-            pub struct Input {
-                #(#input_struct_params,)*
-            }
 
             #(#input_type_aliases)*
 
@@ -134,61 +162,23 @@ fn generate_pallet_view_function(
     );
 
     // Define the getter method that will live on the `ViewFunctionApi` type.
-    let view_function_getter = quote!(
+    let view_function_method = quote!(
         #docs
         pub fn #view_function_name_ident(
             &self,
             #(#input_args),*
         ) -> #crate_path::view_functions::payload::StaticPayload<
-            #view_function_name_ident::Input,
+            (#(#input_tuple_types,)*),
             #view_function_name_ident::output::Output
         > {
             #crate_path::view_functions::payload::StaticPayload::new_static(
-                [#(#query_id,)*],
-                #view_function_name_ident::Input {
-                    #(#input_param_names,)*
-                },
+                #pallet_name,
+                #view_function_name_str,
+                (#(#input_param_names,)*),
                 [#(#validation_hash,)*],
             )
         }
     );
 
-    Ok((view_function_def, view_function_getter))
-}
-
-pub fn generate_pallet_view_functions(
-    type_gen: &TypeGenerator,
-    pallet: &PalletMetadata,
-    crate_path: &syn::Path,
-) -> Result<TokenStream2, CodegenError> {
-    if !pallet.has_view_functions() {
-        // If there are no view functions in this pallet, we
-        // don't generate anything.
-        return Ok(quote! {});
-    }
-
-    let view_functions: Vec<_> = pallet
-        .view_functions()
-        .map(|vf| generate_pallet_view_function(vf, type_gen, crate_path))
-        .collect::<Result<_, _>>()?;
-
-    let view_functions_defs = view_functions.iter().map(|(apis, _)| apis);
-    let view_functions_getters = view_functions.iter().map(|(_, getters)| getters);
-
-    let types_mod_ident = type_gen.types_mod_ident();
-
-    Ok(quote! {
-        pub mod view_functions {
-            use super::root_mod;
-            use super::#types_mod_ident;
-
-            pub struct ViewFunctionsApi;
-
-            impl ViewFunctionsApi {
-                #( #view_functions_getters )*
-            }
-
-            #( #view_functions_defs )*
-        }
-    })
+    Ok((view_function_types, view_function_method))
 }

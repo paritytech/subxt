@@ -19,7 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let pallet = event.pallet_name();
         let variant = event.variant_name();
-        let field_values = event.field_values()?;
+        let field_values = event.decode_as_fields::<scale_value::Value>()?;
 
         println!("{pallet}::{variant}: {field_values}");
     }
