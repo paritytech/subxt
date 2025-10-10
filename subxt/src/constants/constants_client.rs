@@ -40,4 +40,10 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
         let metadata = self.client.metadata();
         subxt_core::constants::get(address, &metadata)
     }
+
+    /// Access the bytes of a constant by the address it is registered under.
+    pub fn bytes_at<Addr: Address>(&self, address: &Addr) -> Result<Vec<u8>, ConstantError> {
+        let metadata = self.client.metadata();
+        subxt_core::constants::get_bytes(address, &metadata)
+    }
 }

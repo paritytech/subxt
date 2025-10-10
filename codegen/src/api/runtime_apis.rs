@@ -106,7 +106,7 @@ fn generate_runtime_api(
                         while !unique_names.insert(name.clone()) {
                             name = format!("{name}_param{idx}");
                         }
-    
+
                         // The alias is either InputName if provided, or Param1, Param2 etc if not.
                         // If we get unlucky we may even end up with ParamParam1 etc.
                         let mut alias = name.trim_start_matches('_').to_upper_camel_case();
@@ -117,14 +117,13 @@ fn generate_runtime_api(
                         while !unique_aliases.insert(alias.clone()) {
                             alias = format!("{alias}Param{idx}");
                         }
-        
+
                         // Generate alias for runtime type.
                         let type_path = type_gen
                             .resolve_type_path(input.id)
                             .expect("runtime api input type is in metadata; qed")
                             .to_token_stream(type_gen.settings());
 
-    
                         Input {
                             name: format_ident!("{name}"),
                             type_alias: format_ident!("{alias}"),
@@ -133,7 +132,7 @@ fn generate_runtime_api(
                     })
                     .collect()
             };
-            
+
             let input_tuple_types = runtime_api_inputs
                 .iter()
                 .map(|i| {
@@ -141,7 +140,7 @@ fn generate_runtime_api(
                     quote!(#method_name::#ty)
                 })
                 .collect::<Vec<_>>();
-            
+
             let input_args = runtime_api_inputs
                 .iter()
                 .map(|i| {
@@ -151,24 +150,20 @@ fn generate_runtime_api(
                 })
                 .collect::<Vec<_>>();
 
-            let input_param_names = runtime_api_inputs
-                .iter()
-                .map(|i| &i.name);
+            let input_param_names = runtime_api_inputs.iter().map(|i| &i.name);
 
-            let input_type_aliases = runtime_api_inputs
-                .iter()
-                .map(|i| {
-                    let ty = &i.type_alias;
-                    let path = &i.type_path;
-                    quote!(pub type #ty = #path;)
-                });
+            let input_type_aliases = runtime_api_inputs.iter().map(|i| {
+                let ty = &i.type_alias;
+                let path = &i.type_path;
+                quote!(pub type #ty = #path;)
+            });
 
             let output_type_path = type_gen
                 .resolve_type_path(method.output_ty())?
                 .to_token_stream(type_gen.settings());
-            
+
             // Define the input and output type bits for the method.
-            let runtime_api_types = quote!{
+            let runtime_api_types = quote! {
                 pub mod #method_name {
                     use super::root_mod;
                     use super::#types_mod_ident;
@@ -202,7 +197,8 @@ fn generate_runtime_api(
             );
 
             Ok((runtime_api_types, runtime_api_method))
-        }).collect::<Result<Vec<_>, CodegenError>>()?;
+        })
+        .collect::<Result<Vec<_>, CodegenError>>()?;
 
     let trait_name = format_ident!("{}", trait_name_str);
     let types = types_and_methods.iter().map(|(types, _)| types);

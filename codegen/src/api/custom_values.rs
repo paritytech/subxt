@@ -57,7 +57,7 @@ fn generate_custom_value_fn(
         .types()
         .resolve(custom_value.type_id())
         .is_some();
-    
+
     let (return_ty, decodable) = if type_is_valid {
         let return_ty = type_gen
             .resolve_type_path(custom_value.type_id())

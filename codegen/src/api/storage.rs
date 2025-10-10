@@ -2,8 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use heck::{ToSnakeCase as _};
-use proc_macro2::{TokenStream as TokenStream2};
+use heck::ToSnakeCase as _;
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{format_ident, quote};
 use scale_typegen::TypeGenerator;
 use subxt_metadata::{PalletMetadata, StorageEntryMetadata};
@@ -105,7 +105,7 @@ fn generate_storage_entry_fns(
 
             Input {
                 type_alias,
-                type_path
+                type_path,
             }
         })
         .collect();

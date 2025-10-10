@@ -10,22 +10,22 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a new API client, configured to talk to Polkadot nodes.
     let api = OnlineClient::<PolkadotConfig>::new().await?;
+    let account = dev::alice().public_key().into();
 
     // Build a storage query to access account information.
-    let account = dev::alice().public_key().into();
-    let storage_query = polkadot::storage().system().account(account);
+    let storage_query = polkadot::storage().system().account();
 
-    // Use that query to `fetch` a result. This returns an `Option<_>`, which will be
-    // `None` if no value exists at the given address. You can also use `fetch_default`
-    // where applicable, which will return the default value if none exists.
-    let result = api
-        .storage()
-        .at_latest()
-        .await?
-        .fetch(&storage_query)
-        .await?;
+    // Use that query to access a storage entry, fetch a result and decode the value.
+    // The static address knows that fetching requires a tuple of one value, an
+    // AccountId32.
+    let client_at = api.storage().at_latest().await?;
+    let entry = client_at.entry(storage_query)?;
+    let value = entry.fetch((account,)).await?;
 
-    let v = result.unwrap().data.free;
-    println!("Alice: {v}");
+    let account_info = value.decode()?;
+
+    // The static address that we got from the subxt macro knows the expected input
+    // and return types, so it is decoded into a static type for us.
+    println!("Alice: {account_info:?}");
     Ok(())
 }

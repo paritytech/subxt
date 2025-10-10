@@ -44,6 +44,7 @@ use crate::Metadata;
 use crate::error::ConstantError;
 use address::Address;
 use alloc::borrow::ToOwned;
+use frame_decode::constants::ConstantTypeInfo;
 use scale_decode::IntoVisitor;
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
@@ -88,4 +89,19 @@ pub fn get<Addr: Address>(
     .map_err(ConstantError::CouldNotDecodeConstant)?;
 
     Ok(constant)
+}
+
+/// Access the bytes of a constant by the address it is registered under.
+pub fn get_bytes<Addr: Address>(
+    address: &Addr,
+    metadata: &Metadata,
+) -> Result<Vec<u8>, ConstantError> {
+    // 1. Validate custom value shape if hash given:
+    validate(address, metadata)?;
+
+    // 2. Return the underlying bytes:
+    let constant = metadata
+        .constant_info(address.pallet_name(), address.constant_name())
+        .map_err(|e| ConstantError::ConstantInfoError(e.into_owned()))?;
+    Ok(constant.bytes.to_vec())
 }

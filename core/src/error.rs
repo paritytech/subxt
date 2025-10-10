@@ -138,6 +138,8 @@ pub enum ConstantError {
     },
     #[error("Failed to decode constant: {0}")]
     CouldNotDecodeConstant(frame_decode::constants::ConstantDecodeError<u32>),
+    #[error("Cannot obtain constant information from metadata: {0}")]
+    ConstantInfoError(frame_decode::constants::ConstantInfoError<'static>),
 }
 
 /// Something went wrong trying to encode or decode a storage address.

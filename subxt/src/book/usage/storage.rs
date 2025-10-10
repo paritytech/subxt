@@ -113,13 +113,6 @@
 #![doc = include_str!("../../../examples/storage_iterating_dynamic.rs")]
 //! ```
 //!
-//! Here is an example of iterating over partial keys. In this example some multi-signature operations
-//! are sent to the node. We can iterate over the pending multisig operations of a single multisig account:
-//!
-//! ```rust,ignore
-#![doc = include_str!("../../../examples/storage_iterating_partial.rs")]
-//! ```
-//!
 //! ### Advanced
 //!
 //! For more advanced use cases, have a look at [`crate::storage::Storage::fetch_raw`] and
