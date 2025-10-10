@@ -18,10 +18,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Use that query to access a storage entry, fetch a result and decode the value.
     let client_at = api.storage().at_latest().await?;
-    let entry = client_at.entry(storage_query)?;
-    let value = entry.fetch((account,)).await?;
-
-    let account_info = value.decode()?;
+    let account_info = client_at
+        .entry(storage_query)?
+        .fetch((account,))
+        .await?
+        .decode()?;
 
     // With out `Value` type we can dig in to find what we want using the `At`
     // trait and `.at()` method that this provides on the Value.

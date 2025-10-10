@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::error::StorageKeyError;
+use alloc::sync::Arc;
 use core::marker::PhantomData;
 use frame_decode::storage::{IntoDecodableValues, StorageInfo, StorageKey as StorageKeyPartInfo};
 use scale_info::PortableRegistry;
@@ -10,18 +11,18 @@ use scale_info::PortableRegistry;
 pub use frame_decode::storage::StorageHasher;
 
 /// This represents the different parts of a storage key.
-pub struct StorageKey<'bytes, 'info, KeyParts> {
-    info: StorageKeyPartInfo<u32>,
+pub struct StorageKey<'info, KeyParts> {
+    info: Arc<StorageKeyPartInfo<u32>>,
     types: &'info PortableRegistry,
-    bytes: &'bytes [u8],
+    bytes: Arc<[u8]>,
     marker: PhantomData<KeyParts>,
 }
 
-impl<'bytes, 'info, KeyParts: IntoDecodableValues> StorageKey<'bytes, 'info, KeyParts> {
+impl<'info, KeyParts: IntoDecodableValues> StorageKey<'info, KeyParts> {
     pub(crate) fn new(
         info: &StorageInfo<'info, u32>,
         types: &'info PortableRegistry,
-        bytes: &'bytes [u8],
+        bytes: Arc<[u8]>,
     ) -> Result<Self, StorageKeyError> {
         let cursor = &mut &*bytes;
         let storage_key_info = frame_decode::storage::decode_storage_key_with_info(
@@ -39,7 +40,7 @@ impl<'bytes, 'info, KeyParts: IntoDecodableValues> StorageKey<'bytes, 'info, Key
         }
 
         Ok(StorageKey {
-            info: storage_key_info,
+            info: Arc::new(storage_key_info),
             types,
             bytes,
             marker: PhantomData,
@@ -51,7 +52,7 @@ impl<'bytes, 'info, KeyParts: IntoDecodableValues> StorageKey<'bytes, 'info, Key
     /// use [`Self::parts()`] or [`Self::part()`] and decode each part.
     pub fn decode(&self) -> Result<KeyParts, StorageKeyError> {
         let values =
-            frame_decode::storage::decode_storage_key_values(self.bytes, &self.info, self.types)
+            frame_decode::storage::decode_storage_key_values(&self.bytes, &self.info, self.types)
                 .map_err(StorageKeyError::CannotDecodeValuesInKey)?;
 
         Ok(values)
@@ -59,24 +60,24 @@ impl<'bytes, 'info, KeyParts: IntoDecodableValues> StorageKey<'bytes, 'info, Key
 
     /// Iterate over the parts of this storage key. Each part of a storage key corresponds to a
     /// single value that has been hashed.
-    pub fn parts(&'_ self) -> impl ExactSizeIterator<Item = StorageKeyPart<'_, 'bytes, 'info>> {
+    pub fn parts(&self) -> impl ExactSizeIterator<Item = StorageKeyPart<'info>> {
         let parts_len = self.info.parts().len();
         (0..parts_len).map(move |index| StorageKeyPart {
             index,
-            info: &self.info,
+            info: self.info.clone(),
             types: self.types,
-            bytes: self.bytes,
+            bytes: self.bytes.clone(),
         })
     }
 
     /// Return the part of the storage key at the provided index, or `None` if the index is out of bounds.
-    pub fn part(&self, index: usize) -> Option<StorageKeyPart<'_, 'bytes, 'info>> {
+    pub fn part(&self, index: usize) -> Option<StorageKeyPart<'info>> {
         if index < self.parts().len() {
             Some(StorageKeyPart {
                 index,
-                info: &self.info,
+                info: self.info.clone(),
                 types: self.types,
-                bytes: self.bytes,
+                bytes: self.bytes.clone(),
             })
         } else {
             None
@@ -85,16 +86,16 @@ impl<'bytes, 'info, KeyParts: IntoDecodableValues> StorageKey<'bytes, 'info, Key
 }
 
 /// This represents a part of a storage key.
-pub struct StorageKeyPart<'key, 'bytes, 'info> {
+pub struct StorageKeyPart<'info> {
     index: usize,
-    info: &'key StorageKeyPartInfo<u32>,
+    info: Arc<StorageKeyPartInfo<u32>>,
     types: &'info PortableRegistry,
-    bytes: &'bytes [u8],
+    bytes: Arc<[u8]>,
 }
 
-impl<'key, 'bytes, 'info> StorageKeyPart<'key, 'bytes, 'info> {
+impl<'info> StorageKeyPart<'info> {
     /// Get the raw bytes for this part of the storage key.
-    pub fn bytes(&self) -> &'bytes [u8] {
+    pub fn bytes(&self) -> &[u8] {
         let part = &self.info[self.index];
         let hash_range = part.hash_range();
         let value_range = part.value().map(|v| v.range()).unwrap_or(std::ops::Range {

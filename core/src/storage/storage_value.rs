@@ -3,30 +3,30 @@
 // see LICENSE for license details.
 
 use crate::error::StorageValueError;
-use alloc::borrow::Cow;
+use alloc::sync::Arc;
 use core::marker::PhantomData;
 use frame_decode::storage::StorageInfo;
 use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
 
 /// This represents a storage value.
-pub struct StorageValue<'entry, 'info, Value> {
-    pub(crate) info: &'entry StorageInfo<'info, u32>,
+pub struct StorageValue<'info, Value> {
+    pub(crate) info: Arc<StorageInfo<'info, u32>>,
     pub(crate) types: &'info PortableRegistry,
-    bytes: Cow<'entry, [u8]>,
+    bytes: Vec<u8>,
     marker: PhantomData<Value>,
 }
 
-impl<'entry, 'info, Value: DecodeAsType> StorageValue<'entry, 'info, Value> {
+impl<'info, Value: DecodeAsType> StorageValue<'info, Value> {
     pub(crate) fn new(
-        info: &'entry StorageInfo<'info, u32>,
+        info: Arc<StorageInfo<'info, u32>>,
         types: &'info PortableRegistry,
-        bytes: impl Into<Cow<'entry, [u8]>>,
-    ) -> StorageValue<'entry, 'info, Value> {
+        bytes: Vec<u8>,
+    ) -> StorageValue<'info, Value> {
         StorageValue {
             info,
             types,
-            bytes: bytes.into(),
+            bytes,
             marker: PhantomData,
         }
     }
@@ -52,7 +52,7 @@ impl<'entry, 'info, Value: DecodeAsType> StorageValue<'entry, 'info, Value> {
 
         let value = frame_decode::storage::decode_storage_value_with_info(
             cursor,
-            self.info,
+            &self.info,
             self.types,
             T::into_visitor(),
         )

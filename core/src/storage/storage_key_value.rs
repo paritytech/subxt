@@ -4,24 +4,24 @@
 
 use super::{Address, StorageKey, StorageValue};
 use crate::error::StorageKeyError;
+use alloc::sync::Arc;
 use frame_decode::storage::StorageInfo;
 use scale_info::PortableRegistry;
-use std::borrow::Cow;
 
 /// This represents a storage key/value pair, which is typically returned from
 /// iterating over values in some storage map.
-pub struct StorageKeyValue<'entry, 'info, Addr: Address> {
-    key: Vec<u8>,
+pub struct StorageKeyValue<'info, Addr: Address> {
+    key: Arc<[u8]>,
     // This contains the storage information already:
-    value: StorageValue<'entry, 'info, Addr::Value>,
+    value: StorageValue<'info, Addr::Value>,
 }
 
-impl<'entry, 'info, Addr: Address> StorageKeyValue<'entry, 'info, Addr> {
+impl<'info, Addr: Address> StorageKeyValue<'info, Addr> {
     pub(crate) fn new(
-        info: &'entry StorageInfo<'info, u32>,
+        info: Arc<StorageInfo<'info, u32>>,
         types: &'info PortableRegistry,
-        key_bytes: Vec<u8>,
-        value_bytes: Cow<'info, [u8]>,
+        key_bytes: Arc<[u8]>,
+        value_bytes: Vec<u8>,
     ) -> Self {
         StorageKeyValue {
             key: key_bytes,
@@ -34,19 +34,14 @@ impl<'entry, 'info, Addr: Address> StorageKeyValue<'entry, 'info, Addr> {
         &self.key
     }
 
-    /// Consume this storage entry and return the raw bytes for the key and value.
-    pub fn into_key_and_value_bytes(self) -> (Vec<u8>, Vec<u8>) {
-        (self.key, self.value.into_bytes())
-    }
-
     /// Decode the key for this storage entry. This gives back a type from which we can
     /// decode specific parts of the key hash (where applicable).
-    pub fn key(&'_ self) -> Result<StorageKey<'_, 'info, Addr::KeyParts>, StorageKeyError> {
-        StorageKey::new(self.value.info, self.value.types, &self.key)
+    pub fn key(&'_ self) -> Result<StorageKey<'info, Addr::KeyParts>, StorageKeyError> {
+        StorageKey::new(&self.value.info, self.value.types, self.key.clone())
     }
 
     /// Return the storage value.
-    pub fn value(&self) -> &StorageValue<'entry, 'info, Addr::Value> {
+    pub fn value(&self) -> &StorageValue<'info, Addr::Value> {
         &self.value
     }
 }

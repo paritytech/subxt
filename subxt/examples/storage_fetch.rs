@@ -19,10 +19,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // The static address knows that fetching requires a tuple of one value, an
     // AccountId32.
     let client_at = api.storage().at_latest().await?;
-    let entry = client_at.entry(storage_query)?;
-    let value = entry.fetch((account,)).await?;
-
-    let account_info = value.decode()?;
+    let account_info = client_at
+        .entry(storage_query)?
+        .fetch((account,))
+        .await?
+        .decode()?;
 
     // The static address that we got from the subxt macro knows the expected input
     // and return types, so it is decoded into a static type for us.

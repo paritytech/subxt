@@ -17,12 +17,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Use that query to access a storage entry, iterate over it and decode values.
     let client_at = api.storage().at_latest().await?;
-    let entry = client_at.entry(storage_query)?;
 
     // We provide an empty tuple when iterating. If the storage entry had been an N map with
     // multiple keys, then we could provide any prefix of those keys to iterate over. This is
     // statically type checked, so only a valid number/type of keys in the tuple is accepted.
-    let mut values = entry.iter(()).await?;
+    let mut values = client_at.entry(storage_query)?.iter(()).await?;
 
     while let Some(kv) = values.next().await {
         let kv = kv?;

@@ -553,26 +553,21 @@ async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
             crate::dynamic::storage::<(), scale_value::Value>("System", "LastRuntimeUpgrade");
 
         let client_at = client.storage().at(block_ref.hash());
-        let client = client_at
+        let value = client_at
             .entry(addr)
             // The storage `system::lastRuntimeUpgrade` should always exist.
             // <https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/system/src/lib.rs#L958>
-            .map_err(|_| RuntimeUpdaterError::CantFindSystemLastRuntimeUpgrade)?;
-
-        let value = client
-            .try_fetch(())
+            .map_err(|_| RuntimeUpdaterError::CantFindSystemLastRuntimeUpgrade)?
+            .fetch(())
             .await
             .map_err(RuntimeUpdaterError::CantFetchLastRuntimeUpgrade)?
-            .ok_or(RuntimeUpdaterError::CantFindSystemLastRuntimeUpgrade)?;
+            .decode_as::<LastRuntimeUpgrade>()
+            .map_err(RuntimeUpdaterError::CannotDecodeLastRuntimeUpgrade)?;
 
         #[derive(scale_decode::DecodeAsType)]
         struct LastRuntimeUpgrade {
             spec_version: u32,
         }
-
-        let value = value
-            .decode_as::<LastRuntimeUpgrade>()
-            .map_err(RuntimeUpdaterError::CannotDecodeLastRuntimeUpgrade)?;
 
         // We are waiting for the chain to have the same spec version
         // as sent out via the runtime subscription.
