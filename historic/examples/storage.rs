@@ -30,7 +30,7 @@ async fn main() -> Result<(), Error> {
         // We can fetch a specific account balance by its key, like so (here I just picked a random key
         // I knew to exist from iterating over storage entries):
         let account_id_hex = "9a4d0faa2ba8c3cc5711852960940793acf55bf195b6eecf88fa78e961d0ce4a";
-        let account_id = hex::decode(account_id_hex).unwrap();
+        let account_id: [u8; 32] = hex::decode(account_id_hex).unwrap().try_into().unwrap();
         if let Some(entry) = account_balances.fetch((account_id,)).await? {
             // We can decode the value into our generic `scale_value::Value` type, which can
             // represent any SCALE-encoded value, like so:
@@ -86,6 +86,21 @@ async fn main() -> Result<(), Error> {
             let balance_info = entry.value().decode_as::<scale_value::Value>()?;
             println!("  {account_id_hex} => {balance_info}");
         }
+
+        // We can also chain things together to fetch and decode a value in one go.
+        let _val = client_at_block
+            .storage()
+            .entry("System", "Account")?
+            .fetch((account_id,))
+            .await?
+            .unwrap()
+            .decode_as::<scale_value::Value>()?;
+
+        let _vals = client_at_block
+            .storage()
+            .entry("System", "Account")?
+            .iter(())
+            .await?;
     }
 
     Ok(())

@@ -8,6 +8,7 @@ use crate::config::Config;
 use crate::error::StorageError;
 use crate::storage::storage_info::with_info;
 use std::borrow::Cow;
+use std::sync::Arc;
 use storage_info::AnyStorageInfo;
 
 pub use storage_entry::StorageEntry;
@@ -33,10 +34,10 @@ impl<'atblock, Client, T> StorageClient<'atblock, Client, T> {
 }
 
 // Things that we can do offline with storage.
-impl<'atblock, 'client: 'atblock, Client, T> StorageClient<'atblock, Client, T>
+impl<'atblock, Client, T> StorageClient<'atblock, Client, T>
 where
-    T: Config + 'client,
-    Client: OfflineClientAtBlockT<'client, T>,
+    T: Config + 'atblock,
+    Client: OfflineClientAtBlockT<'atblock, T>,
 {
     /// Select the storage entry you'd like to work with.
     pub fn entry(
@@ -58,7 +59,7 @@ where
             client: self.client,
             pallet_name,
             entry_name,
-            info: storage_info,
+            info: Arc::new(storage_info),
             marker: std::marker::PhantomData,
         })
     }
@@ -84,10 +85,10 @@ pub struct StorageEntriesItem<'atblock, Client, T> {
     marker: std::marker::PhantomData<T>,
 }
 
-impl<'atblock, 'client: 'atblock, Client, T> StorageEntriesItem<'atblock, Client, T>
+impl<'atblock, Client, T> StorageEntriesItem<'atblock, Client, T>
 where
-    T: Config + 'client,
-    Client: OfflineClientAtBlockT<'client, T>,
+    T: Config + 'atblock,
+    Client: OfflineClientAtBlockT<'atblock, T>,
 {
     /// The pallet name.
     pub fn pallet_name(&self) -> &str {
@@ -106,8 +107,8 @@ where
             marker: std::marker::PhantomData,
         }
         .entry(
-            self.entry.pallet_name.to_owned(),
-            self.entry.storage_entry.to_owned(),
+            self.entry.pallet_name.clone(),
+            self.entry.storage_entry.clone(),
         )
     }
 }
@@ -117,7 +118,7 @@ pub struct StorageEntryClient<'atblock, Client, T> {
     client: &'atblock Client,
     pallet_name: String,
     entry_name: String,
-    info: AnyStorageInfo<'atblock>,
+    info: Arc<AnyStorageInfo<'atblock>>,
     marker: std::marker::PhantomData<T>,
 }
 
@@ -146,10 +147,10 @@ where
 
     /// Return the default value for this storage entry, if there is one. Returns `None` if there
     /// is no default value.
-    pub fn default_value(&self) -> Option<StorageValue<'_, 'atblock>> {
-        with_info!(info = &self.info => {
+    pub fn default_value(&self) -> Option<StorageValue<'atblock>> {
+        with_info!(info = &*self.info => {
             info.info.default_value.as_ref().map(|default_value| {
-                StorageValue::new(&self.info, default_value.clone())
+                StorageValue::new(self.info.clone(), default_value.clone())
             })
         })
     }
@@ -167,8 +168,8 @@ where
     pub async fn fetch<Keys: IntoEncodableValues>(
         &self,
         keys: Keys,
-    ) -> Result<Option<StorageValue<'_, 'atblock>>, StorageError> {
-        let expected_num_keys = with_info!(info = &self.info => {
+    ) -> Result<Option<StorageValue<'atblock>>, StorageError> {
+        let expected_num_keys = with_info!(info = &*self.info => {
             info.info.keys.len()
         });
 
@@ -181,9 +182,10 @@ where
         }
 
         let key_bytes = self.key(keys)?;
+        let info = self.info.clone();
         let value = fetch(self.client, &key_bytes)
             .await?
-            .map(|bytes| StorageValue::new(&self.info, Cow::Owned(bytes)))
+            .map(|bytes| StorageValue::new(info, Cow::Owned(bytes)))
             .or_else(|| self.default_value());
 
         Ok(value)
@@ -194,7 +196,9 @@ where
         &self,
         keys: Keys,
     ) -> Result<
-        impl futures::Stream<Item = Result<StorageEntry<'_, 'atblock>, StorageError>> + Unpin,
+        impl futures::Stream<Item = Result<StorageEntry<'atblock>, StorageError>>
+        + Unpin
+        + use<'atblock, Client, T, Keys>,
         StorageError,
     > {
         use futures::stream::StreamExt;
@@ -202,7 +206,7 @@ where
             ArchiveStorageEvent, StorageQuery, StorageQueryType,
         };
 
-        let expected_num_keys = with_info!(info = &self.info => {
+        let expected_num_keys = with_info!(info = &*self.info => {
             info.info.keys.len()
         });
 
@@ -230,23 +234,22 @@ where
             .await
             .map_err(|e| StorageError::RpcError { reason: e })?;
 
-        let sub = sub.filter_map(async |item| {
-            let item = match item {
-                Ok(ArchiveStorageEvent::Item(item)) => item,
-                Ok(ArchiveStorageEvent::Error(err)) => {
-                    return Some(Err(StorageError::StorageEventError { reason: err.error }));
-                }
-                Ok(ArchiveStorageEvent::Done) => return None,
-                Err(e) => return Some(Err(StorageError::RpcError { reason: e })),
-            };
+        let info = self.info.clone();
+        let sub = sub.filter_map(move |item| {
+            let info = info.clone();
+            async move {
+                let item = match item {
+                    Ok(ArchiveStorageEvent::Item(item)) => item,
+                    Ok(ArchiveStorageEvent::Error(err)) => {
+                        return Some(Err(StorageError::StorageEventError { reason: err.error }));
+                    }
+                    Ok(ArchiveStorageEvent::Done) => return None,
+                    Err(e) => return Some(Err(StorageError::RpcError { reason: e })),
+                };
 
-            item.value.map(|value| {
-                Ok(StorageEntry::new(
-                    &self.info,
-                    item.key.0,
-                    Cow::Owned(value.0),
-                ))
-            })
+                item.value
+                    .map(|value| Ok(StorageEntry::new(info, item.key.0, Cow::Owned(value.0))))
+            }
         });
 
         Ok(Box::pin(sub))
@@ -259,7 +262,7 @@ where
     // it yet, so we don't expose this. If we did expose it, we might want to return some struct that wraps
     // the key bytes and some metadata about them. Or maybe just fetch_raw and iter_raw.
     fn key<Keys: IntoEncodableValues>(&self, keys: Keys) -> Result<Vec<u8>, StorageError> {
-        with_info!(info = &self.info => {
+        with_info!(info = &*self.info => {
             let key_bytes = frame_decode::storage::encode_storage_key_with_info(
                 &self.pallet_name,
                 &self.entry_name,
