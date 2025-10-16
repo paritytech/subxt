@@ -255,7 +255,7 @@ pub struct Json<T>(pub T);
 
 impl Json<serde_json::Value> {
     /// Create a [`Json<serde_json::Value>`] from some serializable value.
-    /// Useful when value types are heterogenous.
+    /// Useful when value types are heterogeneous.
     pub fn value_of<T: serde::Serialize>(item: T) -> Self {
         Json(serde_json::to_value(item).expect("item cannot be converted to a serde_json::Value"))
     }
