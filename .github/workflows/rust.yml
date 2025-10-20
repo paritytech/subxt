@@ -251,7 +251,7 @@ jobs:
         uses: Swatinem/rust-cache@9d47c6ad4b02e050fd481d890b2ea34778fd09d6 # v2.7.8
 
       - name: Install 
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           # Node version 20 and higher seem to cause an issue with the JS example so stick to 19 for now.
           node-version: 19.x
