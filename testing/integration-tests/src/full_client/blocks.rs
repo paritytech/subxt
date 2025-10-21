@@ -351,6 +351,7 @@ async fn decode_transaction_extensions_from_blocks() {
         "CheckWeight",
         "ChargeAssetTxPayment",
         "CheckMetadataHash",
+        "EthSetOrigin",
         "WeightReclaim",
     ];
 
