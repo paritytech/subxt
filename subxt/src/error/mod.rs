@@ -94,10 +94,16 @@ pub enum Error {
     // Dev note: Subxt doesn't directly return Raw* errors. These exist so that when
     // users use common crates (like parity-scale-codec and subxt-rpcs), errors returned
     // there can be handled automatically using ? when the expected error is subxt::Error.
-    #[error(transparent)]
+    #[error("Other RPC client error: {0}")]
     OtherRpcClientError(#[from] subxt_rpcs::Error),
-    #[error(transparent)]
+    #[error("Other codec error: {0}")]
     OtherCodecError(#[from] codec::Error),
+    #[cfg(feature = "unstable-light-client")]
+    #[error("Other light client error: {0}")]
+    OtherLightClientError(#[from] subxt_lightclient::LightClientError),
+    #[cfg(feature = "unstable-light-client")]
+    #[error("Other light client RPC error: {0}")]
+    OtherLightClientRpcError(#[from] subxt_lightclient::LightClientRpcError),
     // Dev note: Nothing in subxt should ever emit this error. It can instead be used
     // to easily map other errors into a subxt::Error for convenience. Some From impls
     // make this automatic for common "other" error types.
@@ -147,20 +153,6 @@ impl Error {
 
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
-            Error::ExtrinsicDecodeErrorAt(_)
-            | Error::ConstantError(_)
-            | Error::CustomValueError(_)
-            | Error::StorageKeyError(_)
-            | Error::StorageValueError(_)
-            | Error::BackendError(_)
-            | Error::RuntimeUpdateeApplyError(_)
-            | Error::TransactionStatusError(_)
-            | Error::ModuleErrorDetailsError(_)
-            | Error::ModuleErrorDecodeError(_)
-            | Error::DispatchErrorDecodeError(_)
-            | Error::OtherRpcClientError(_)
-            | Error::OtherCodecError(_)
-            | Error::Other(_) => None,
             Error::BlockError(e) => e.backend_error(),
             Error::AccountNonceError(e) => e.backend_error(),
             Error::OnlineClientError(e) => e.backend_error(),
@@ -173,6 +165,8 @@ impl Error {
             Error::TransactionEventsError(e) => e.backend_error(),
             Error::TransactionFinalizedSuccessError(e) => e.backend_error(),
             Error::StorageError(e) => e.backend_error(),
+            // Any errors that **don't** return a BackendError anywhere will return None:
+            _ => None,
         }
     }
 }

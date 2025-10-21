@@ -104,7 +104,7 @@ async fn runtime_api_call(api: &Client) -> Result<(), subxt::Error> {
 
     let block = sub.next().await.unwrap()?;
     tracing::trace!("First block took {:?}", now.elapsed());
-    let rt = block.runtime_api().await?;
+    let rt = block.runtime_api().await;
 
     // get metadata via state_call. if it decodes ok, it's probably all good.
     let result_bytes = rt.call_raw("Metadata_metadata", None).await?;
@@ -137,7 +137,7 @@ async fn dynamic_constant_query(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
     tracing::trace!("Check dynamic_constant_query");
 
-    let constant_query = subxt::dynamic::constant("System", "BlockLength");
+    let constant_query = subxt::dynamic::constant::<u128>("System", "BlockLength");
     let _value = api.constants().at(&constant_query)?;
 
     tracing::trace!("Dynamic constant query took {:?}\n", now.elapsed());
