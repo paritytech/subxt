@@ -60,7 +60,7 @@ impl<'atblock> AnyStorageInfo<'atblock> {
         Ok(info)
     }
 
-    /// Is the storage entry a map (ie something we'd provide extra keys to to access a value, or otherwise iterate over)?
+    /// Is the storage entry a map (ie something we'd provide extra keys to access a value, or otherwise iterate over)?
     pub fn is_map(&self) -> bool {
         match self {
             AnyStorageInfo::Legacy(info) => !info.info.keys.is_empty(),

@@ -32,7 +32,7 @@ async fn fetch_finalized_blocks<T: Config>(
         .subscribe_finalized()
         .await
         .expect("issue subscribing to finalized in fetch_finalized_blocks")
-        .skip(1) // <- skip first block incase next is close to being ready already.
+        .skip(1) // <- skip first block in case next is close to being ready already.
         .take(n)
         .map(|r| r.expect("issue fetching block in fetch_finalized_blocks"))
 }

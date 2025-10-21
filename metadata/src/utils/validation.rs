@@ -910,14 +910,14 @@ mod tests {
         // Build metadata with both pallets.
         let metadata_both = pallets_to_metadata(pallets);
 
-        // Hashing will ignore any non-existant pallet and return the same result.
+        // Hashing will ignore any non-existent pallet and return the same result.
         let hash = MetadataHasher::new(&metadata_one)
             .only_these_pallets(&["First", "Second"])
             .hash();
         let hash_rhs = MetadataHasher::new(&metadata_one)
             .only_these_pallets(&["First"])
             .hash();
-        assert_eq!(hash, hash_rhs, "hashing should ignore non-existant pallets");
+        assert_eq!(hash, hash_rhs, "hashing should ignore non-existent pallets");
 
         // Hashing one pallet from metadata with 2 pallets inserted will ignore the second pallet.
         let hash_second = MetadataHasher::new(&metadata_both)

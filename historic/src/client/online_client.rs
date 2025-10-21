@@ -292,7 +292,7 @@ async fn get_metadata<T: Config>(
             })?;
 
         // Option because we may have asked for a version that doesn't exist. Compact because we get back a Vec<u8>
-        // of the metadata bytes, and the Vec is preceeded by it's compact encoded length. The actual bytes are then
+        // of the metadata bytes, and the Vec is preceded by it's compact encoded length. The actual bytes are then
         // decoded as a `RuntimeMetadataPrefixed`, after this.
         let (_, metadata) = <Option<(Compact<u32>, RuntimeMetadataPrefixed)>>::decode(&mut &rpc_response[..])
             .map_err(|e| OnlineClientAtBlockError::CannotGetMetadata {
