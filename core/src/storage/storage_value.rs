@@ -10,6 +10,7 @@ use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
 
 /// This represents a storage value.
+#[derive(Debug)]
 pub struct StorageValue<'info, Value> {
     pub(crate) info: Arc<StorageInfo<'info, u32>>,
     pub(crate) types: &'info PortableRegistry,

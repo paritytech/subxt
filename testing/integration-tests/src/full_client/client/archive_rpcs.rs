@@ -75,7 +75,6 @@ async fn archive_v1_call() {
         let subxt_metadata_versions = block
             .runtime_api()
             .await
-            .unwrap()
             .call(node_runtime::apis().metadata().metadata_versions())
             .await
             .unwrap()
@@ -184,20 +183,15 @@ async fn archive_v1_storage() {
 
     while let Some(block) = blocks.next().await {
         let block_hash = block.hash();
-        let account_info_addr = {
-            let alice: AccountId32 = dev::alice().public_key().into();
-            let addr = node_runtime::storage().system().account(alice);
-            api.storage().address_bytes(&addr).unwrap()
-        };
+        let alice: AccountId32 = dev::alice().public_key().into();
+        let addr = node_runtime::storage().system().account();
 
-        // Fetch raw value using Subxt to compare against
-        let subxt_account_info = api
-            .storage()
-            .at(block.reference())
-            .fetch_raw(account_info_addr.clone())
-            .await
-            .unwrap()
-            .unwrap();
+        // Fetch value using Subxt to compare against
+        let storage_at = api.storage().at(block.reference());
+        let storage_entry = storage_at.entry(addr).unwrap();
+        let subxt_account_info = storage_entry.fetch((alice.clone(),)).await.unwrap();
+        let subxt_account_info_bytes = subxt_account_info.bytes();
+        let account_info_addr = storage_entry.key((alice,)).unwrap();
 
         // Construct archive query; ask for item then hash of item.
         let storage_query = vec![
@@ -223,7 +217,7 @@ async fn archive_v1_storage() {
             query_item,
             ArchiveStorageEventItem {
                 key: Bytes(account_info_addr.clone()),
-                value: Some(Bytes(subxt_account_info.clone())),
+                value: Some(Bytes(subxt_account_info_bytes.to_vec())),
                 hash: None,
                 closest_descendant_merkle_value: None,
                 child_trie_key: None
@@ -238,7 +232,7 @@ async fn archive_v1_storage() {
             ArchiveStorageEventItem {
                 key: Bytes(account_info_addr),
                 value: None,
-                hash: Some(hasher.hash(&subxt_account_info)),
+                hash: Some(hasher.hash(subxt_account_info_bytes)),
                 closest_descendant_merkle_value: None,
                 child_trie_key: None
             }

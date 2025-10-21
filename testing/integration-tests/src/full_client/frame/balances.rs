@@ -8,7 +8,7 @@ use crate::{
 };
 use codec::Decode;
 use subxt::{
-    error::{DispatchError, Error, TokenError},
+    error::{DispatchError, TokenError, TransactionEventsError, TransactionFinalizedSuccessError},
     utils::{AccountId32, MultiAddress},
 };
 use subxt_signer::sr25519::dev;
@@ -21,25 +21,21 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice_account_addr = node_runtime::storage()
-        .system()
-        .account(alice.public_key().to_account_id());
-    let bob_account_addr = node_runtime::storage()
-        .system()
-        .account(bob.public_key().to_account_id());
+    let storage_at = api.storage().at_latest().await?;
 
-    let alice_pre = api
-        .storage()
-        .at_latest()
+    let account_addr = node_runtime::storage().system().account();
+
+    let account_entry = storage_at.entry(account_addr.clone())?;
+
+    let alice_pre = account_entry
+        .fetch((alice.public_key().to_account_id(),))
         .await?
-        .fetch_or_default(&alice_account_addr)
-        .await?;
-    let bob_pre = api
-        .storage()
-        .at_latest()
+        .decode()?;
+
+    let bob_pre = account_entry
+        .fetch((bob.public_key().to_account_id(),))
         .await?
-        .fetch_or_default(&bob_account_addr)
-        .await?;
+        .decode()?;
 
     let tx = node_runtime::tx()
         .balances()
@@ -73,18 +69,15 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     };
     assert_eq!(event, expected_event);
 
-    let alice_post = api
-        .storage()
-        .at_latest()
+    let alice_post = account_entry
+        .fetch((alice.public_key().to_account_id(),))
         .await?
-        .fetch_or_default(&alice_account_addr)
-        .await?;
-    let bob_post = api
-        .storage()
-        .at_latest()
+        .decode()?;
+
+    let bob_post = account_entry
+        .fetch((bob.public_key().to_account_id(),))
         .await?
-        .fetch_or_default(&bob_account_addr)
-        .await?;
+        .decode()?;
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
     assert_eq!(bob_pre.data.free + 10_000, bob_post.data.free);
@@ -94,36 +87,28 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
 #[cfg(fullclient)]
 #[subxt_test]
 async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
-    use subxt::ext::scale_value::{At, Composite, Value};
+    use subxt::ext::scale_value::{At, Value};
 
     let alice = dev::alice();
     let bob = dev::bob();
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice_account_addr = subxt::dynamic::storage(
-        "System",
-        "Account",
-        vec![Value::from_bytes(alice.public_key().to_account_id())],
-    );
-    let bob_account_addr = subxt::dynamic::storage(
-        "System",
-        "Account",
-        vec![Value::from_bytes(bob.public_key().to_account_id())],
-    );
+    let storage_at = api.storage().at_latest().await?;
 
-    let alice_pre = api
-        .storage()
-        .at_latest()
+    let account_addr = subxt::dynamic::storage::<(Value,), Value>("System", "Account");
+
+    let account_entry = storage_at.entry(account_addr)?;
+
+    let alice_pre = account_entry
+        .fetch((Value::from_bytes(alice.public_key().to_account_id()),))
         .await?
-        .fetch_or_default(&alice_account_addr)
-        .await?;
-    let bob_pre = api
-        .storage()
-        .at_latest()
+        .decode()?;
+
+    let bob_pre = account_entry
+        .fetch((Value::from_bytes(bob.public_key().to_account_id()),))
         .await?
-        .fetch_or_default(&bob_account_addr)
-        .await?;
+        .decode()?;
 
     let tx = subxt::dynamic::tx(
         "Balances",
@@ -149,64 +134,32 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
         .filter_map(|ev| ev.ok())
         .find(|ev| ev.pallet_name() == "Balances" && ev.variant_name() == "Transfer")
         .expect("Failed to find Transfer event")
-        .field_values()?
+        .decode_as_fields::<scale_value::Value>()
+        .expect("Failed to decode event fields")
         .map_context(|_| ());
 
-    let expected_fields = Composite::Named(vec![
-        (
-            "from".into(),
-            Value::unnamed_composite(vec![Value::from_bytes(alice.public_key().to_account_id())]),
-        ),
-        (
-            "to".into(),
-            Value::unnamed_composite(vec![Value::from_bytes(bob.public_key().to_account_id())]),
-        ),
-        ("amount".into(), Value::u128(10_000)),
+    let expected_fields = Value::unnamed_composite(vec![
+        Value::unnamed_composite(vec![Value::from_bytes(alice.public_key().to_account_id())]),
+        Value::unnamed_composite(vec![Value::from_bytes(bob.public_key().to_account_id())]),
+        Value::u128(10_000),
     ]);
     assert_eq!(event_fields, expected_fields);
 
-    let alice_post = api
-        .storage()
-        .at_latest()
+    let alice_post = account_entry
+        .fetch((Value::from_bytes(alice.public_key().to_account_id()),))
         .await?
-        .fetch_or_default(&alice_account_addr)
-        .await?;
-    let bob_post = api
-        .storage()
-        .at_latest()
+        .decode()?;
+
+    let bob_post = account_entry
+        .fetch((Value::from_bytes(bob.public_key().to_account_id()),))
         .await?
-        .fetch_or_default(&bob_account_addr)
-        .await?;
+        .decode()?;
 
-    let alice_pre_free = alice_pre
-        .to_value()?
-        .at("data")
-        .at("free")
-        .unwrap()
-        .as_u128()
-        .unwrap();
-    let alice_post_free = alice_post
-        .to_value()?
-        .at("data")
-        .at("free")
-        .unwrap()
-        .as_u128()
-        .unwrap();
+    let alice_pre_free = alice_pre.at("data").at("free").unwrap().as_u128().unwrap();
+    let alice_post_free = alice_post.at("data").at("free").unwrap().as_u128().unwrap();
 
-    let bob_pre_free = bob_pre
-        .to_value()?
-        .at("data")
-        .at("free")
-        .unwrap()
-        .as_u128()
-        .unwrap();
-    let bob_post_free = bob_post
-        .to_value()?
-        .at("data")
-        .at("free")
-        .unwrap()
-        .as_u128()
-        .unwrap();
+    let bob_pre_free = bob_pre.at("data").at("free").unwrap().as_u128().unwrap();
+    let bob_post_free = bob_post.at("data").at("free").unwrap().as_u128().unwrap();
 
     assert!(alice_pre_free - 10_000 >= alice_post_free);
     assert_eq!(bob_pre_free + 10_000, bob_post_free);
@@ -222,16 +175,16 @@ async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let bob_account_info_addr = node_runtime::storage()
-        .system()
-        .account(bob.public_key().to_account_id());
+    let storage_at = api.storage().at_latest().await?;
 
-    let bob_pre = api
-        .storage()
-        .at_latest()
+    let account_addr = node_runtime::storage().system().account();
+
+    let account_entry = storage_at.entry(account_addr)?;
+
+    let bob_pre = account_entry
+        .fetch((bob.public_key().to_account_id(),))
         .await?
-        .fetch_or_default(&bob_account_info_addr)
-        .await?;
+        .decode()?;
 
     // Do a transfer several times. If this works, it indicates that the
     // nonce is properly incremented each time.
@@ -252,12 +205,10 @@ async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
             .await?;
     }
 
-    let bob_post = api
-        .storage()
-        .at_latest()
+    let bob_post = account_entry
+        .fetch((bob.public_key().to_account_id(),))
         .await?
-        .fetch_or_default(&bob_account_info_addr)
-        .await?;
+        .decode()?;
 
     assert_eq!(bob_pre.data.free + 30_000, bob_post.data.free);
     Ok(())
@@ -274,8 +225,12 @@ async fn storage_total_issuance() {
         .at_latest()
         .await
         .unwrap()
-        .fetch_or_default(&addr)
+        .entry(addr)
+        .unwrap()
+        .fetch()
         .await
+        .unwrap()
+        .decode()
         .unwrap();
     assert_ne!(total_issuance, 0);
 }
@@ -286,14 +241,16 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let holds_addr = node_runtime::storage().balances().holds(bob);
+    let holds_addr = node_runtime::storage().balances().holds();
 
     let holds = api
         .storage()
         .at_latest()
         .await?
-        .fetch_or_default(&holds_addr)
+        .entry(holds_addr)?
+        .fetch((bob,))
         .await?
+        .decode()?
         .0;
 
     assert_eq!(holds.len(), 0);
@@ -345,13 +302,18 @@ async fn transfer_error() {
         .wait_for_finalized_success()
         .await;
 
+    // Check that we get a FundsUnavailable error
+    let is_funds_unavailable = if let Err(TransactionFinalizedSuccessError::SuccessError(
+        TransactionEventsError::ExtrinsicFailed(DispatchError::Token(TokenError::FundsUnavailable)),
+    )) = res
+    {
+        true
+    } else {
+        false
+    };
+
     assert!(
-        matches!(
-            res,
-            Err(Error::Runtime(DispatchError::Token(
-                TokenError::FundsUnavailable
-            )))
-        ),
+        is_funds_unavailable,
         "Expected an insufficient balance, got {res:?}"
     );
 }

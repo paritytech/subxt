@@ -91,6 +91,18 @@ pub enum Error {
     DispatchErrorDecodeError(#[from] DispatchErrorDecodeError),
     #[error(transparent)]
     StorageError(#[from] StorageError),
+    // Dev note: Subxt doesn't directly return Raw* errors. These exist so that when
+    // users use common crates (like parity-scale-codec and subxt-rpcs), errors returned
+    // there can be handled automatically using ? when the expected error is subxt::Error.
+    #[error(transparent)]
+    OtherRpcClientError(#[from] subxt_rpcs::Error),
+    #[error(transparent)]
+    OtherCodecError(#[from] codec::Error),
+    // Dev note: Nothing in subxt should ever emit this error. It can instead be used
+    // to easily map other errors into a subxt::Error for convenience. Some From impls
+    // make this automatic for common "other" error types.
+    #[error("Other error: {0}")]
+    Other(Box<dyn std::error::Error + Send + Sync + 'static>),
 }
 
 impl From<std::convert::Infallible> for Error {
@@ -100,6 +112,21 @@ impl From<std::convert::Infallible> for Error {
 }
 
 impl Error {
+    /// Create a generic error. This is a quick workaround when you are using
+    /// [`Error`] and have a non-Subxt error to return.
+    pub fn other<E: std::error::Error + Send + Sync + 'static>(error: E) -> Error {
+        Error::Other(Box::new(error))
+    }
+
+    /// Create a generic error from a string. This is a quick workaround when you are using
+    /// [`Error`] and have a non-Subxt error to return.
+    pub fn other_str(error: impl Into<String>) -> Error {
+        #[derive(thiserror::Error, Debug, Clone)]
+        #[error("{0}")]
+        struct StrError(String);
+        Error::Other(Box::new(StrError(error.into())))
+    }
+
     /// Checks whether the error was caused by a RPC re-connection.
     pub fn is_disconnected_will_reconnect(&self) -> bool {
         matches!(
@@ -130,7 +157,10 @@ impl Error {
             | Error::TransactionStatusError(_)
             | Error::ModuleErrorDetailsError(_)
             | Error::ModuleErrorDecodeError(_)
-            | Error::DispatchErrorDecodeError(_) => None,
+            | Error::DispatchErrorDecodeError(_)
+            | Error::OtherRpcClientError(_)
+            | Error::OtherCodecError(_)
+            | Error::Other(_) => None,
             Error::BlockError(e) => e.backend_error(),
             Error::AccountNonceError(e) => e.backend_error(),
             Error::OnlineClientError(e) => e.backend_error(),
@@ -661,6 +691,8 @@ pub enum StorageError {
     CannotIterateValues(BackendError),
     #[error("Encountered an error iterating over storage values: {0}")]
     StreamFailure(BackendError),
+    #[error("Cannot decode the storage version for a given entry: {0}")]
+    CannotDecodeStorageVersion(codec::Error),
 }
 
 impl StorageError {

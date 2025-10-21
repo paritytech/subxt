@@ -158,7 +158,7 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     let mut sub = api.blocks().subscribe_best().await?;
 
     let block = sub.next().await.unwrap()?;
-    let rt = block.runtime_api().await?;
+    let rt = block.runtime_api().await;
 
     // get metadata via raw state_call.
     let meta_bytes = rt.call_raw("Metadata_metadata", None).await?;

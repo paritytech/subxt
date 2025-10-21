@@ -10,6 +10,7 @@ use scale_info::PortableRegistry;
 
 /// This represents a storage key/value pair, which is typically returned from
 /// iterating over values in some storage map.
+#[derive(Debug)]
 pub struct StorageKeyValue<'info, Addr: Address> {
     key: Arc<[u8]>,
     // This contains the storage information already:

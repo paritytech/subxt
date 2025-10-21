@@ -42,6 +42,27 @@ pub struct StaticAddress<KeyParts, Value, IsPlain> {
     marker: core::marker::PhantomData<(KeyParts, Value, IsPlain)>,
 }
 
+impl<KeyParts, Value, IsPlain> Clone for StaticAddress<KeyParts, Value, IsPlain> {
+    fn clone(&self) -> Self {
+        Self {
+            pallet_name: self.pallet_name.clone(),
+            entry_name: self.entry_name.clone(),
+            validation_hash: self.validation_hash,
+            marker: self.marker,
+        }
+    }
+}
+
+impl<KeyParts, Value, IsPlain> std::fmt::Debug for StaticAddress<KeyParts, Value, IsPlain> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("StaticAddress")
+            .field("pallet_name", &self.pallet_name)
+            .field("entry_name", &self.entry_name)
+            .field("validation_hash", &self.validation_hash)
+            .finish()
+    }
+}
+
 impl<KeyParts, Value, IsPlain> StaticAddress<KeyParts, Value, IsPlain> {
     /// Create a new [`StaticAddress`] using static strings for the pallet and call name.
     /// This is only expected to be used from codegen.

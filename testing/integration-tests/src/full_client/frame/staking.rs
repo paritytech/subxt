@@ -13,8 +13,9 @@ use crate::{
     },
     subxt_test, test_context,
 };
-use assert_matches::assert_matches;
-use subxt::error::{DispatchError, Error};
+use subxt::error::{
+    DispatchError, Error, TransactionEventsError, TransactionFinalizedSuccessError,
+};
 use subxt_signer::{
     SecretUri,
     sr25519::{self, dev},
@@ -83,11 +84,16 @@ async fn validate_not_possible_for_controller_account() -> Result<(), Error> {
         .wait_for_finalized_success()
         .await;
 
-    assert_matches!(announce_validator, Err(Error::Runtime(DispatchError::Module(err))) => {
+    if let Err(TransactionFinalizedSuccessError::SuccessError(
+        TransactionEventsError::ExtrinsicFailed(DispatchError::Module(err)),
+    )) = announce_validator
+    {
         let details = err.details().unwrap();
         assert_eq!(details.pallet.name(), "Staking");
         assert_eq!(&details.variant.name, "NotController");
-    });
+    } else {
+        panic!("Expected an error");
+    }
     Ok(())
 }
 
@@ -142,11 +148,16 @@ async fn nominate_not_possible_for_controller_account() -> Result<(), Error> {
         .wait_for_finalized_success()
         .await;
 
-    assert_matches!(nomination, Err(Error::Runtime(DispatchError::Module(err))) => {
+    if let Err(TransactionFinalizedSuccessError::SuccessError(
+        TransactionEventsError::ExtrinsicFailed(DispatchError::Module(err)),
+    )) = nomination
+    {
         let details = err.details().unwrap();
         assert_eq!(details.pallet.name(), "Staking");
         assert_eq!(&details.variant.name, "NotController");
-    });
+    } else {
+        panic!("Expected an error");
+    }
     Ok(())
 }
 
@@ -175,16 +186,15 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
         .wait_for_finalized_success()
         .await?;
 
-    let ledger_addr = node_runtime::storage()
-        .staking()
-        .ledger(alice_stash.public_key().to_account_id());
+    let ledger_addr = node_runtime::storage().staking().ledger();
     let ledger = api
         .storage()
         .at_latest()
         .await?
-        .fetch(&ledger_addr)
+        .entry(ledger_addr)?
+        .fetch((alice_stash.public_key().to_account_id(),))
         .await?
-        .unwrap();
+        .decode()?;
     assert_eq!(alice_stash.public_key().to_account_id(), ledger.stash);
 
     let chill_tx = node_runtime::tx().staking().chill();
@@ -201,11 +211,16 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
         .wait_for_finalized_success()
         .await;
 
-    assert_matches!(chill, Err(Error::Runtime(DispatchError::Module(err))) => {
+    if let Err(TransactionFinalizedSuccessError::SuccessError(
+        TransactionEventsError::ExtrinsicFailed(DispatchError::Module(err)),
+    )) = chill
+    {
         let details = err.details().unwrap();
         assert_eq!(details.pallet.name(), "Staking");
         assert_eq!(&details.variant.name, "NotController");
-    });
+    } else {
+        panic!("Expected an error");
+    }
 
     let signed_extrinsic = api
         .tx()
@@ -256,11 +271,16 @@ async fn tx_bond() -> Result<(), Error> {
         .wait_for_finalized_success()
         .await;
 
-    assert_matches!(bond_again, Err(Error::Runtime(DispatchError::Module(err))) => {
+    if let Err(TransactionFinalizedSuccessError::SuccessError(
+        TransactionEventsError::ExtrinsicFailed(DispatchError::Module(err)),
+    )) = bond_again
+    {
         let details = err.details().unwrap();
         assert_eq!(details.pallet.name(), "Staking");
         assert_eq!(&details.variant.name, "AlreadyBonded");
-    });
+    } else {
+        panic!("Expected an error");
+    }
     Ok(())
 }
 
@@ -283,9 +303,10 @@ async fn storage_current_era() -> Result<(), Error> {
         .storage()
         .at_latest()
         .await?
-        .fetch(&current_era_addr)
+        .entry(current_era_addr)?
+        .fetch()
         .await?
-        .expect("current era always exists");
+        .decode()?;
     Ok(())
 }
 
@@ -293,13 +314,15 @@ async fn storage_current_era() -> Result<(), Error> {
 async fn storage_era_reward_points() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
-    let reward_points_addr = node_runtime::storage().staking().eras_reward_points(0);
+    let reward_points_addr = node_runtime::storage().staking().eras_reward_points();
     let current_era_result = api
         .storage()
         .at_latest()
         .await?
-        .fetch(&reward_points_addr)
-        .await;
+        .entry(reward_points_addr)?
+        .fetch((0,))
+        .await?
+        .decode();
     assert!(current_era_result.is_ok());
 
     Ok(())

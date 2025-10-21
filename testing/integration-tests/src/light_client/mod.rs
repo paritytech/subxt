@@ -120,13 +120,10 @@ async fn storage_plain_lookup(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
     tracing::trace!("Check storage_plain_lookup");
 
+    let storage_at = api.storage().at_latest().await?;
+
     let addr = node_runtime::storage().timestamp().now();
-    let entry = api
-        .storage()
-        .at_latest()
-        .await?
-        .fetch_or_default(&addr)
-        .await?;
+    let entry = storage_at.fetch(addr, ()).await?.decode()?;
 
     tracing::trace!("Storage lookup took {:?}\n", now.elapsed());
 

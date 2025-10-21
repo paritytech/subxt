@@ -3,8 +3,8 @@
 // see LICENSE for license details.
 
 use subxt::{
-    Config, Error, OnlineClient, SubstrateConfig, backend::StreamOf, blocks::Block,
-    client::OnlineClientT,
+    Config, OnlineClient, SubstrateConfig, backend::StreamOf, blocks::Block, client::OnlineClientT,
+    error::BackendError,
 };
 
 /// Wait for blocks to be produced before running tests. Specifically, we
@@ -32,7 +32,9 @@ pub async fn wait_for_number_of_blocks<C: Config>(
 /// This may be useful on the unstable backend when the initial blocks may be large
 /// and one relies on something to included in finalized block in ner future.
 pub async fn consume_initial_blocks(
-    blocks: &mut StreamOf<Result<Block<SubstrateConfig, OnlineClient<SubstrateConfig>>, Error>>,
+    blocks: &mut StreamOf<
+        Result<Block<SubstrateConfig, OnlineClient<SubstrateConfig>>, BackendError>,
+    >,
 ) {
     use tokio::time::{Duration, Instant, interval_at};
     const MAX_DURATION: Duration = Duration::from_millis(200);

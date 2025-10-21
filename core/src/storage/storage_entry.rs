@@ -4,10 +4,9 @@
 
 use super::{PrefixOf, StorageKeyValue, StorageValue, address::Address};
 use crate::error::StorageError;
-use crate::utils::{Maybe, Yes, YesMaybe};
+use crate::utils::YesMaybe;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
-use core::marker::PhantomData;
 use frame_decode::storage::{IntoEncodableValues, StorageInfo};
 use scale_info::PortableRegistry;
 use subxt_metadata::Metadata;
@@ -16,7 +15,7 @@ use subxt_metadata::Metadata;
 pub fn entry<'info, Addr: Address>(
     address: Addr,
     metadata: &'info Metadata,
-) -> Result<StorageEntry<'info, Addr, Addr::IsPlain>, StorageError> {
+) -> Result<StorageEntry<'info, Addr>, StorageError> {
     super::validate(&address, &metadata)?;
 
     use frame_decode::storage::StorageTypeInfo;
@@ -29,27 +28,25 @@ pub fn entry<'info, Addr: Address>(
         address,
         info: Arc::new(info),
         types,
-        marker: PhantomData,
     })))
 }
 
 /// This represents a single storage entry (be it a plain value or map).
-pub struct StorageEntry<'info, Addr, IsPlain>(Arc<StorageEntryInner<'info, Addr, IsPlain>>);
+pub struct StorageEntry<'info, Addr>(Arc<StorageEntryInner<'info, Addr>>);
 
-impl<'info, Addr, IsPlain> Clone for StorageEntry<'info, Addr, IsPlain> {
+impl<'info, Addr> Clone for StorageEntry<'info, Addr> {
     fn clone(&self) -> Self {
         Self(self.0.clone())
     }
 }
 
-struct StorageEntryInner<'info, Addr, IsPlain> {
+struct StorageEntryInner<'info, Addr> {
     address: Addr,
     info: Arc<StorageInfo<'info, u32>>,
     types: &'info PortableRegistry,
-    marker: core::marker::PhantomData<IsPlain>,
 }
 
-impl<'info, Addr: Address, IsPlain> StorageEntry<'info, Addr, IsPlain> {
+impl<'info, Addr: Address> StorageEntry<'info, Addr> {
     /// Name of the pallet containing this storage entry.
     pub fn pallet_name(&self) -> &str {
         self.0.address.pallet_name()
@@ -127,16 +124,7 @@ impl<'info, Addr: Address, IsPlain> StorageEntry<'info, Addr, IsPlain> {
 
         Ok(key)
     }
-}
 
-impl<'info, Addr: Address> StorageEntry<'info, Addr, Yes> {
-    /// This constructs a key suitable for fetching a value at the given plain storage address.
-    pub fn fetch_key(&self) -> Vec<u8> {
-        self.key_prefix().to_vec()
-    }
-}
-
-impl<'info, Addr: Address> StorageEntry<'info, Addr, Maybe> {
     /// This constructs a key suitable for fetching a value at the given map storage address. This will error
     /// if we can see that the wrong number of key parts are provided.
     pub fn fetch_key(&self, key_parts: Addr::KeyParts) -> Result<Vec<u8>, StorageError> {
