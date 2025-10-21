@@ -90,7 +90,6 @@ sp-crypto-hashing = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
-frame-decode = { workspace = true }
 either = { workspace = true }
 web-time = { workspace = true }
 
