@@ -135,5 +135,5 @@ pub fn dynamic<ArgsType, ReturnType>(
     method_name: impl Into<String>,
     args_data: ArgsType,
 ) -> DynamicPayload<ArgsType, ReturnType> {
-    DynamicPayload::new(trait_name, method_name, args_data.into())
+    DynamicPayload::new(trait_name, method_name, args_data)
 }

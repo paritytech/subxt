@@ -52,8 +52,7 @@ impl<T: Config> Extrinsics<T> {
                     return Err(ExtrinsicDecodeErrorAt {
                         extrinsic_index,
                         error: ExtrinsicDecodeErrorAtReason::LeftoverBytes(cursor.to_vec()),
-                    }
-                    .into());
+                    });
                 }
 
                 Ok(Arc::new((decoded_info, bytes)))
@@ -295,7 +294,7 @@ where
             E::decode_as_fields(bytes, &mut fields, self.metadata.types()).map_err(|e| {
                 ExtrinsicError::CannotDecodeFields {
                     extrinsic_index: self.index as usize,
-                    error: e.into(),
+                    error: e,
                 }
             })?;
 
@@ -320,7 +319,7 @@ where
                 E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())
                     .map_err(|e| ExtrinsicError::CannotDecodeFields {
                         extrinsic_index: self.index as usize,
-                        error: e.into(),
+                        error: e,
                     })?;
             Ok(Some(decoded))
         } else {
@@ -339,7 +338,7 @@ where
         )
         .map_err(|e| ExtrinsicError::CannotDecodeIntoRootExtrinsic {
             extrinsic_index: self.index as usize,
-            error: e.into(),
+            error: e,
         })?;
 
         Ok(decoded)
@@ -487,7 +486,7 @@ mod tests {
         let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
         let metadata: subxt_metadata::Metadata = runtime_metadata.try_into().unwrap();
 
-        Metadata::from(metadata)
+        metadata
     }
 
     #[test]

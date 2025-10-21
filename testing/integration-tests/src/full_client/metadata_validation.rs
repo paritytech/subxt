@@ -50,7 +50,7 @@ async fn metadata_to_api(metadata: Metadata, ctx: &TestContext) -> OfflineClient
 
 fn v15_to_metadata(v15: RuntimeMetadataV15) -> Metadata {
     let subxt_md: subxt_metadata::Metadata = v15.try_into().unwrap();
-    subxt_md.into()
+    subxt_md
 }
 
 fn default_pallet() -> PalletMetadata {

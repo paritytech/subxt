@@ -13,6 +13,7 @@ use std::{borrow::Cow, marker::PhantomData};
 
 /// An error dispatching a transaction.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
+#[allow(clippy::large_enum_variant)]
 #[non_exhaustive]
 pub enum DispatchError {
     /// Some error occurred.

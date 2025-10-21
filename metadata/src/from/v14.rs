@@ -39,7 +39,7 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
                         .entries
                         .iter()
                         .map(|s| {
-                            let entry_name: String = s.name.clone().into();
+                            let entry_name: String = s.name.clone();
                             let storage_info = m
                                 .storage_info(&name, &entry_name)
                                 .map_err(|e| e.into_owned())?
@@ -47,7 +47,7 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
                             let storage_entry = StorageEntryMetadata {
                                 name: entry_name,
                                 info: storage_info,
-                                docs: s.docs.clone().into(),
+                                docs: s.docs.clone(),
                             };
 
                             Ok::<_, TryFromError>((name.clone(), storage_entry))

@@ -147,7 +147,7 @@ impl<'a, T: Config> ExtrinsicTransactionExtension<'a, T> {
         let value = E::decode_as_type(&mut &self.bytes[..], self.ty_id, self.metadata.types())
             .map_err(|e| ExtrinsicError::CouldNotDecodeTransactionExtension {
                 name: self.identifier.to_owned(),
-                error: e.into(),
+                error: e,
             })?;
         Ok(value)
     }

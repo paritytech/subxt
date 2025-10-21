@@ -266,7 +266,7 @@ impl<T: Config> EventDetails<T> {
             .event_variant_by_index(variant_index)
             .ok_or_else(|| EventsError::CannotFindVariantWithIndex {
                 pallet_name: event_pallet.name().to_string(),
-                variant_index: variant_index,
+                variant_index,
             })?;
 
         tracing::debug!(
@@ -587,7 +587,7 @@ pub(crate) mod test_utils {
         let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
         let metadata: subxt_metadata::Metadata = runtime_metadata.try_into().unwrap();
 
-        Metadata::from(metadata)
+        metadata
     }
 
     /// Build an `Events` object for test purposes, based on the details provided,

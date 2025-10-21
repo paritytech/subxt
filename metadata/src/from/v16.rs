@@ -43,7 +43,7 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
                             let storage_entry = StorageEntryMetadata {
                                 name: entry_name.clone(),
                                 info: storage_info,
-                                docs: s.docs.clone().into(),
+                                docs: s.docs.clone(),
                             };
 
                             Ok::<_, TryFromError>((entry_name, storage_entry))
@@ -73,11 +73,9 @@ impl TryFrom<v16::RuntimeMetadataV16> for Metadata {
                 (name, from_constant_metadata(c.clone()))
             });
 
-            let call_variant_index = VariantIndex::build(p.calls.as_ref().map(|c| c.ty.id), &types);
-            let error_variant_index =
-                VariantIndex::build(p.error.as_ref().map(|e| e.ty.id), &types);
-            let event_variant_index =
-                VariantIndex::build(p.event.as_ref().map(|e| e.ty.id), &types);
+            let call_variant_index = VariantIndex::build(p.calls.as_ref().map(|c| c.ty.id), types);
+            let error_variant_index = VariantIndex::build(p.error.as_ref().map(|e| e.ty.id), types);
+            let event_variant_index = VariantIndex::build(p.event.as_ref().map(|e| e.ty.id), types);
 
             let associated_types = p
                 .associated_types

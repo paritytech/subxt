@@ -16,7 +16,7 @@ pub fn entry<'info, Addr: Address>(
     address: Addr,
     metadata: &'info Metadata,
 ) -> Result<StorageEntry<'info, Addr>, StorageError> {
-    super::validate(&address, &metadata)?;
+    super::validate(&address, metadata)?;
 
     use frame_decode::storage::StorageTypeInfo;
     let types = metadata.types();
@@ -92,15 +92,9 @@ impl<'info, Addr: Address> StorageEntry<'info, Addr> {
 
     /// Return the default [`StorageValue`] for this storage entry, if there is one.
     pub fn default_value(&self) -> Option<StorageValue<'info, Addr::Value>> {
-        if let Some(default_bytes) = self.0.info.default_value.as_deref() {
-            Some(StorageValue::new(
-                self.0.info.clone(),
-                self.0.types,
-                default_bytes.to_vec(),
-            ))
-        } else {
-            None
-        }
+        self.0.info.default_value.as_deref().map(|default_bytes| {
+            StorageValue::new(self.0.info.clone(), self.0.types, default_bytes.to_vec())
+        })
     }
 
     /// The keys for plain storage values are always 32 byte hashes.

@@ -165,8 +165,7 @@ impl frame_decode::storage::StorageTypeInfo for Metadata {
                 })?;
         let entry = pallet
             .storage()
-            .map(|storage| storage.entry_by_name(storage_entry))
-            .flatten()
+            .and_then(|storage| storage.entry_by_name(storage_entry))
             .ok_or_else(|| StorageInfoError::StorageNotFound {
                 name: storage_entry.to_string(),
                 pallet_name: Cow::Borrowed(pallet.name()),
@@ -328,7 +327,7 @@ impl frame_decode::custom_values::CustomValueTypeInfo for Metadata {
             })?;
 
         let info = CustomValueInfo {
-            bytes: &custom_value.data,
+            bytes: custom_value.data,
             type_id: custom_value.type_id,
         };
 
@@ -336,7 +335,7 @@ impl frame_decode::custom_values::CustomValueTypeInfo for Metadata {
     }
 
     fn custom_values(&self) -> impl Iterator<Item = CustomValue<'_>> {
-        self.custom.map.iter().map(|(name, _)| CustomValue {
+        self.custom.map.keys().map(|name| CustomValue {
             name: Cow::Borrowed(name),
         })
     }

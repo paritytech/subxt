@@ -12,7 +12,7 @@ use scale_encode::EncodeAsType;
 pub trait PrefixOf<Keys>: IntoEncodableValues {}
 
 // If T impls PrefixOf<K>, &T impls PrefixOf<K>.
-impl<'a, K, T: PrefixOf<K>> PrefixOf<K> for &'a T {}
+impl<K, T: PrefixOf<K>> PrefixOf<K> for &T {}
 
 // Impls for tuples up to length 6 (storage maps rarely require more than 2 entries
 // so it's very unlikely we'll ever need to go this deep).
@@ -101,7 +101,7 @@ tuple_impl_eq!(A B C D E F);
 
 // Vec
 impl<T: EncodeAsType> EqualOrPrefixOf<Vec<T>> for Vec<T> {}
-impl<'a, T: EncodeAsType> EqualOrPrefixOf<Vec<T>> for &'a Vec<T> {}
+impl<T: EncodeAsType> EqualOrPrefixOf<Vec<T>> for &Vec<T> {}
 
 // Arrays
 macro_rules! array_impl_eq {
@@ -151,7 +151,7 @@ mod test {
 
         //// This shouldn't work:
         // t.accepts_prefix_of([0,1,2,3,4]);
-        t.accepts_prefix_of(&[0, 1, 2, 3]);
+        t.accepts_prefix_of([0, 1, 2, 3]);
         t.accepts_prefix_of([0, 1, 2, 3]);
         t.accepts_prefix_of([0, 1, 2]);
         t.accepts_prefix_of([0, 1]);
@@ -167,8 +167,8 @@ mod test {
         // And we'd want to be able to call some method like this:
         t.accepts_eq_or_prefix_of(&(true, String::from("hi"), 0));
         t.accepts_eq_or_prefix_of(&(true, String::from("hi")));
-        t.accepts_eq_or_prefix_of(&(true,));
-        t.accepts_eq_or_prefix_of(&());
+        t.accepts_eq_or_prefix_of((true,));
+        t.accepts_eq_or_prefix_of(());
 
         t.accepts_eq_or_prefix_of((true, String::from("hi"), 0));
         t.accepts_eq_or_prefix_of((true, String::from("hi")));
@@ -177,12 +177,12 @@ mod test {
 
         let t = Test::<[u64; 5]>::new();
 
-        t.accepts_eq_or_prefix_of(&[0, 1, 2, 3, 4]);
-        t.accepts_eq_or_prefix_of(&[0, 1, 2, 3]);
-        t.accepts_eq_or_prefix_of(&[0, 1, 2]);
-        t.accepts_eq_or_prefix_of(&[0, 1]);
-        t.accepts_eq_or_prefix_of(&[0]);
-        t.accepts_eq_or_prefix_of(&[]);
+        t.accepts_eq_or_prefix_of([0, 1, 2, 3, 4]);
+        t.accepts_eq_or_prefix_of([0, 1, 2, 3]);
+        t.accepts_eq_or_prefix_of([0, 1, 2]);
+        t.accepts_eq_or_prefix_of([0, 1]);
+        t.accepts_eq_or_prefix_of([0]);
+        t.accepts_eq_or_prefix_of([]);
 
         t.accepts_eq_or_prefix_of([0, 1, 2, 3, 4]);
         t.accepts_eq_or_prefix_of([0, 1, 2, 3]);

@@ -160,7 +160,7 @@ mod tests {
         };
 
         let metadata: subxt_metadata::Metadata = frame_metadata.try_into().unwrap();
-        Metadata::from(metadata)
+        metadata
     }
 
     #[test]

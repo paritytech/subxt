@@ -606,7 +606,7 @@ impl TransactionEventsError {
 /// Error waiting for the transaction to be finalized and successful.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
-#[allow(missing_docs)]
+#[allow(missing_docs, clippy::large_enum_variant)]
 pub enum TransactionFinalizedSuccessError {
     #[error("Could not finalize the transaction: {0}")]
     FinalizationError(#[from] TransactionProgressError),

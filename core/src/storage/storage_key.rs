@@ -26,7 +26,7 @@ impl<'info, KeyParts: IntoDecodableValues> StorageKey<'info, KeyParts> {
     ) -> Result<Self, StorageKeyError> {
         let cursor = &mut &*bytes;
         let storage_key_info = frame_decode::storage::decode_storage_key_with_info(
-            cursor, &info, types,
+            cursor, info, types,
         )
         .map_err(|e| StorageKeyError::StorageKeyDecodeError {
             bytes: bytes.to_vec(),
@@ -125,7 +125,7 @@ impl<'info> StorageKeyPart<'info> {
         };
 
         let value_bytes = &self.bytes[value_info.range()];
-        let value_ty = value_info.ty().clone();
+        let value_ty = *value_info.ty();
 
         let decoded_key_part = T::decode_as_type(&mut &*value_bytes, value_ty, self.types)
             .map_err(|e| StorageKeyError::CannotDecodeValueInKey {

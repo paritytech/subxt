@@ -303,14 +303,14 @@ async fn transfer_error() {
         .await;
 
     // Check that we get a FundsUnavailable error
-    let is_funds_unavailable = if let Err(TransactionFinalizedSuccessError::SuccessError(
-        TransactionEventsError::ExtrinsicFailed(DispatchError::Token(TokenError::FundsUnavailable)),
-    )) = res
-    {
-        true
-    } else {
-        false
-    };
+    let is_funds_unavailable = matches!(
+        res,
+        Err(TransactionFinalizedSuccessError::SuccessError(
+            TransactionEventsError::ExtrinsicFailed(DispatchError::Token(
+                TokenError::FundsUnavailable
+            )),
+        ))
+    );
 
     assert!(
         is_funds_unavailable,

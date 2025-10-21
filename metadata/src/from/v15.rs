@@ -43,7 +43,7 @@ impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
                             let storage_entry = StorageEntryMetadata {
                                 name: entry_name.clone(),
                                 info: storage_info,
-                                docs: s.docs.clone().into(),
+                                docs: s.docs.clone(),
                             };
 
                             Ok::<_, TryFromError>((entry_name, storage_entry))
@@ -129,7 +129,7 @@ impl TryFrom<v15::RuntimeMetadataV15> for Metadata {
             pallets_by_index,
             extrinsic: from_extrinsic_metadata(m.extrinsic),
             dispatch_error_ty,
-            apis: apis,
+            apis,
             outer_enums: OuterEnumsMetadata {
                 call_enum_ty: m.outer_enums.call_enum_ty.id,
                 event_enum_ty: m.outer_enums.event_enum_ty.id,
