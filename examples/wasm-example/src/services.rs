@@ -28,7 +28,7 @@ pub(crate) async fn fetch_events_dynamically() -> Result<Vec<String>, subxt::Err
         let event = event?;
         let pallet = event.pallet_name();
         let variant = event.variant_name();
-        let field_values = event.field_values()?;
+        let field_values = event.decode_as_fields::<subxt::dynamic::Value>()?;
         event_strings.push(format!("{pallet}::{variant}: {field_values}"));
     }
     Ok(event_strings)
@@ -66,7 +66,7 @@ pub(crate) async fn subscribe_to_finalized_blocks(
 
                 let pallet_name = evt.pallet_name();
                 let event_name = evt.variant_name();
-                let event_values = evt.field_values()?;
+                let event_values = evt.decode_as_fields::<subxt::dynamic::Value>()?;
 
                 writeln!(output, "        {pallet_name}_{event_name}").ok();
                 writeln!(output, "          {}", event_values).ok();
