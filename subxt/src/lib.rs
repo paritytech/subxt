@@ -74,7 +74,7 @@ pub mod metadata {
 /// Submit dynamic transactions.
 pub mod dynamic {
     pub use subxt_core::dynamic::{
-        At, DecodedValue, Value, constant, runtime_api_call, storage, tx, view_function_call,
+        At, Value, constant, runtime_api_call, storage, tx, view_function_call,
     };
 }
 

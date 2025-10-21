@@ -12,7 +12,6 @@
 //! - [`blocks`]: decode and explore block bodies.
 //! - [`constants`]: access and validate the constant addresses in some metadata.
 //! - [`custom_values`]: access and validate the custom value addresses in some metadata.
-//! - [`metadata`]: decode bytes into the metadata used throughout this library.
 //! - [`storage`]: construct storage request payloads and decode the results you'd get back.
 //! - [`tx`]: construct and sign transactions (extrinsics).
 //! - [`runtime_api`]: construct runtime API request payloads and decode the results you'd get back.

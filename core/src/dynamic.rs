@@ -7,12 +7,6 @@
 
 pub use scale_value::{At, Value};
 
-/// A [`scale_value::Value`] type endowed with contextual information
-/// regarding what type was used to decode each part of it. This implements
-/// [`crate::metadata::DecodeWithMetadata`], and is used as a return type
-/// for dynamic requests.
-pub type DecodedValue = scale_value::Value<u32>;
-
 // Submit dynamic transactions.
 pub use crate::tx::payload::dynamic as tx;
 
