@@ -282,11 +282,11 @@ impl frame_decode::constants::ConstantTypeInfo for Metadata {
         pallet_name: &str,
         constant_name: &str,
     ) -> Result<ConstantInfo<'_, Self::TypeId>, ConstantInfoError<'_>> {
-        let pallet = self.pallet_by_name("pallet_name").ok_or_else(|| {
-            ConstantInfoError::PalletNotFound {
-                pallet_name: pallet_name.to_string(),
-            }
-        })?;
+        let pallet =
+            self.pallet_by_name(pallet_name)
+                .ok_or_else(|| ConstantInfoError::PalletNotFound {
+                    pallet_name: pallet_name.to_string(),
+                })?;
         let constant = pallet.constant_by_name(constant_name).ok_or_else(|| {
             ConstantInfoError::ConstantNotFound {
                 pallet_name: Cow::Borrowed(pallet.name()),
@@ -342,6 +342,11 @@ impl frame_decode::custom_values::CustomValueTypeInfo for Metadata {
 }
 
 impl Metadata {
+    /// This is essentiall an alias for `<Metadata as codec::Decode>::decode(&mut bytes)`
+    pub fn decode_from(mut bytes: &[u8]) -> Result<Self, codec::Error> {
+        <Self as codec::Decode>::decode(&mut bytes)
+    }
+
     /// Access the underlying type registry.
     pub fn types(&self) -> &PortableRegistry {
         &self.types

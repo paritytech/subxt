@@ -209,9 +209,9 @@ where
         self.inner.pallet_index()
     }
 
-    /// See [`subxt_core::blocks::ExtrinsicDetails::variant_index()`].
-    pub fn variant_index(&self) -> u8 {
-        self.inner.variant_index()
+    /// See [`subxt_core::blocks::ExtrinsicDetails::call_index()`].
+    pub fn call_index(&self) -> u8 {
+        self.inner.call_index()
     }
 
     /// See [`subxt_core::blocks::ExtrinsicDetails::pallet_name()`].

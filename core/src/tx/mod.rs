@@ -13,7 +13,7 @@
 //! use subxt_core::config::DefaultExtrinsicParamsBuilder as Params;
 //! use subxt_core::tx;
 //! use subxt_core::utils::H256;
-//! use subxt_core::metadata;
+//! use subxt_core::Metadata;
 //!
 //! // If we generate types without `subxt`, we need to point to `::subxt_core`:
 //! #[subxt(
@@ -26,7 +26,7 @@
 //! let state = tx::ClientState::<PolkadotConfig> {
 //!     metadata: {
 //!         let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
-//!         metadata::decode_from(&metadata_bytes[..]).unwrap()
+//!         Metadata::decode_from(&metadata_bytes[..]).unwrap()
 //!     },
 //!     genesis_hash: {
 //!         let h = "91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3";

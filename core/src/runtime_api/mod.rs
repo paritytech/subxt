@@ -10,7 +10,7 @@
 //! ```rust
 //! use subxt_macro::subxt;
 //! use subxt_core::runtime_api;
-//! use subxt_core::metadata;
+//! use subxt_core::Metadata;
 //!
 //! // If we generate types without `subxt`, we need to point to `::subxt_core`:
 //! #[subxt(
@@ -21,7 +21,7 @@
 //!
 //! // Some metadata we'll use to work with storage entries:
 //! let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
-//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//! let metadata = Metadata::decode_from(&metadata_bytes[..]).unwrap();
 //!
 //! // Build a storage query to access account information.
 //! let payload = polkadot::apis().metadata().metadata_versions();

@@ -10,7 +10,7 @@
 //! use subxt_signer::sr25519::dev;
 //! use subxt_macro::subxt;
 //! use subxt_core::storage;
-//! use subxt_core::metadata;
+//! use subxt_core::Metadata;
 //!
 //! // If we generate types without `subxt`, we need to point to `::subxt_core`:
 //! #[subxt(
@@ -21,22 +21,26 @@
 //!
 //! // Some metadata we'll use to work with storage entries:
 //! let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
-//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//! let metadata = Metadata::decode_from(&metadata_bytes[..]).unwrap();
 //!
 //! // Build a storage query to access account information.
-//! let account = dev::alice().public_key().into();
-//! let address = polkadot::storage().system().account(account);
+//! let address = polkadot::storage().system().account();
 //!
 //! // We can validate that the address is compatible with the given metadata.
 //! storage::validate(&address, &metadata).unwrap();
 //!
-//! // Encode the address to bytes. These can be sent to a node to query the value.
-//! storage::get_address_bytes(&address, &metadata).unwrap();
+//! // We can fetch details about the storage entry associated with this address:
+//! let entry = storage::entry(address, &metadata).unwrap();
 //!
-//! // If we were to obtain a value back from the node at that address, we could
-//! // then decode it using the same address and metadata like so:
+//! // .. including generating a key to fetch the entry with:
+//! let fetch_key = entry.fetch_key((dev::alice().public_key().into(),)).unwrap();
+//!
+//! // .. or generating a key to iterate over entries with at a given depth:
+//! let iter_key = entry.iter_key(()).unwrap();
+//!
+//! // Given a value, we can decode it:
 //! let value_bytes = hex::decode("00000000000000000100000000000000000064a7b3b6e00d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080").unwrap();
-//! let value = storage::decode_value(&mut &*value_bytes, &address, &metadata).unwrap();
+//! let value = entry.value(value_bytes).decode().unwrap();
 //!
 //! println!("Alice's account info: {value:?}");
 //! ```

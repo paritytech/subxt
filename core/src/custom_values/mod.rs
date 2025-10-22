@@ -12,7 +12,7 @@
 //! ```rust
 //! use subxt_macro::subxt;
 //! use subxt_core::custom_values;
-//! use subxt_core::metadata;
+//! use subxt_core::Metadata;
 //!
 //! // If we generate types without `subxt`, we need to point to `::subxt_core`:
 //! #[subxt(
@@ -23,7 +23,7 @@
 //!
 //! // Some metadata we'd like to access custom values in:
 //! let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
-//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//! let metadata = Metadata::decode_from(&metadata_bytes[..]).unwrap();
 //!
 //! // At the moment, we don't expect to see any custom values in the metadata
 //! // for Polkadot, so this will return an error:

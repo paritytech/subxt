@@ -264,7 +264,7 @@ where
     }
 
     /// The index of the extrinsic variant that the extrinsic originated from.
-    pub fn variant_index(&self) -> u8 {
+    pub fn call_index(&self) -> u8 {
         self.decoded_info().call_index()
     }
 
@@ -609,7 +609,7 @@ mod tests {
         assert_eq!(extrinsic.pallet_index(), 0);
         assert_eq!(extrinsic.pallet_name(), "Test");
 
-        assert_eq!(extrinsic.variant_index(), 2);
+        assert_eq!(extrinsic.call_index(), 2);
         assert_eq!(extrinsic.call_name(), "TestCall");
 
         // Decode the extrinsic to the root enum.

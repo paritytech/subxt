@@ -15,7 +15,7 @@
 //!
 //! use subxt_macro::subxt;
 //! use subxt_core::blocks;
-//! use subxt_core::metadata;
+//! use subxt_core::Metadata;
 //! use subxt_core::config::PolkadotConfig;
 //! use alloc::vec;
 //!
@@ -28,7 +28,7 @@
 //!
 //! // Some metadata we'd like to use to help us decode extrinsics:
 //! let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
-//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//! let metadata = Metadata::decode_from(&metadata_bytes[..]).unwrap();
 //!
 //! // Some extrinsics we'd like to decode:
 //! let ext_bytes = vec![
@@ -45,14 +45,14 @@
 //!
 //! // We can iterate over them and decode various details out of them.
 //! for ext in exts.iter() {
-//!     println!("Pallet: {}", ext.pallet_name().unwrap());
-//!     println!("Call:   {}", ext.variant_name().unwrap());
+//!     println!("Pallet: {}", ext.pallet_name());
+//!     println!("Call:   {}", ext.call_name());
 //! }
 //!
 //! # let ext_details: Vec<_> = exts.iter()
 //! #     .map(|ext| {
-//! #         let pallet = ext.pallet_name().unwrap().to_string();
-//! #         let call = ext.variant_name().unwrap().to_string();
+//! #         let pallet = ext.pallet_name().to_string();
+//! #         let call = ext.call_name().to_string();
 //! #         (pallet, call)
 //! #     })
 //! #     .collect();

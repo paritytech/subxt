@@ -10,7 +10,8 @@
 //! use subxt_macro::subxt;
 //! use subxt_core::config::PolkadotConfig;
 //! use subxt_core::events;
-//! use subxt_core::metadata;
+//! use subxt_core::Metadata;
+//! use subxt_core::dynamic::Value;
 //!
 //! // If we generate types without `subxt`, we need to point to `::subxt_core`:
 //! #[subxt(
@@ -21,7 +22,7 @@
 //!
 //! // Some metadata we'll use to work with storage entries:
 //! let metadata_bytes = include_bytes!("../../artifacts/polkadot_metadata_full.scale");
-//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//! let metadata = Metadata::decode_from(&metadata_bytes[..]).unwrap();
 //!
 //! // Some bytes representing events (located in System.Events storage):
 //! let event_bytes = hex::decode("1c00000000000000a2e9b53d5517020000000100000000000310c96d901d0102000000020000000408d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27dbeea5a030000000000000000000000000000020000000402d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48102700000000000000000000000000000000020000000407be5ddb1579b72e84524fc29e78609e3caf42e85aa118ebfe0b0ad404b5bdd25fbeea5a030000000000000000000000000000020000002100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27dbeea5a03000000000000000000000000000000000000000000000000000000000000020000000000426df03e00000000").unwrap();
@@ -34,7 +35,7 @@
 //!     let ev = ev.unwrap();
 //!     println!("Index: {}", ev.index());
 //!     println!("Name: {}.{}", ev.pallet_name(), ev.variant_name());
-//!     println!("Fields: {:?}", ev.field_values().unwrap());
+//!     println!("Fields: {:?}", ev.decode_as_fields::<Value>().unwrap());
 //! }
 //! ```
 
