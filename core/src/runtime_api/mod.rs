@@ -46,7 +46,7 @@ pub mod payload;
 use crate::Metadata;
 use crate::error::RuntimeApiError;
 use alloc::format;
-use alloc::string::String;
+use alloc::string::{String, ToString};
 use alloc::vec::Vec;
 use payload::Payload;
 use scale_decode::IntoVisitor;

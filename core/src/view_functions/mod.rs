@@ -9,6 +9,7 @@ pub mod payload;
 
 use crate::Metadata;
 use crate::error::ViewFunctionError;
+use alloc::string::ToString;
 use alloc::vec::Vec;
 use payload::Payload;
 use scale_decode::IntoVisitor;

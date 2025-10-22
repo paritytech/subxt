@@ -98,11 +98,11 @@ impl<'info> StorageKeyPart<'info> {
     pub fn bytes(&self) -> &[u8] {
         let part = &self.info[self.index];
         let hash_range = part.hash_range();
-        let value_range = part.value().map(|v| v.range()).unwrap_or(std::ops::Range {
+        let value_range = part.value().map(|v| v.range()).unwrap_or(core::ops::Range {
             start: hash_range.end,
             end: hash_range.end,
         });
-        let combined_range = std::ops::Range {
+        let combined_range = core::ops::Range {
             start: hash_range.start,
             end: value_range.end,
         };

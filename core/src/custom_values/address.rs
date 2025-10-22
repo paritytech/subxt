@@ -5,6 +5,7 @@
 //! Construct addresses to access custom values with.
 
 use alloc::borrow::Cow;
+use alloc::string::String;
 use derive_where::derive_where;
 use scale_decode::DecodeAsType;
 

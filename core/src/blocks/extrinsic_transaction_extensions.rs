@@ -9,6 +9,7 @@ use crate::config::transaction_extensions::{
 use crate::dynamic::Value;
 use crate::error::ExtrinsicError;
 use crate::{Metadata, config::Config};
+use alloc::borrow::ToOwned;
 use frame_decode::extrinsics::ExtrinsicExtensions;
 use scale_decode::DecodeAsType;
 

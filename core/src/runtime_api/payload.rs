@@ -6,6 +6,7 @@
 //! runtime API calls that can be made.
 
 use alloc::borrow::Cow;
+use alloc::string::String;
 use core::marker::PhantomData;
 use derive_where::derive_where;
 use frame_decode::runtime_apis::IntoEncodableValues;

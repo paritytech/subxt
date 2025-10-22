@@ -9,7 +9,7 @@ use crate::Metadata;
 use crate::error::ExtrinsicError;
 use alloc::borrow::Cow;
 use alloc::boxed::Box;
-use alloc::string::String;
+use alloc::string::{String, ToString};
 
 use alloc::vec::Vec;
 use codec::Encode;

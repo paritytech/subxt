@@ -51,6 +51,7 @@ pub mod address;
 
 use crate::{Metadata, error::StorageError};
 use address::Address;
+use alloc::string::ToString;
 
 pub use prefix_of::{EqualOrPrefixOf, PrefixOf};
 pub use storage_entry::{StorageEntry, entry};

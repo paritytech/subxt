@@ -4,6 +4,7 @@
 
 use crate::error::StorageValueError;
 use alloc::sync::Arc;
+use alloc::vec::Vec;
 use core::marker::PhantomData;
 use frame_decode::storage::StorageInfo;
 use scale_decode::DecodeAsType;

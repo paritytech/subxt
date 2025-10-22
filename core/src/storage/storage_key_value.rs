@@ -5,6 +5,7 @@
 use super::{Address, StorageKey, StorageValue};
 use crate::error::StorageKeyError;
 use alloc::sync::Arc;
+use alloc::vec::Vec;
 use frame_decode::storage::StorageInfo;
 use scale_info::PortableRegistry;
 

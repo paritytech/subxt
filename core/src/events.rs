@@ -38,6 +38,7 @@
 //! }
 //! ```
 
+use alloc::string::ToString;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use codec::{Compact, Decode, Encode};

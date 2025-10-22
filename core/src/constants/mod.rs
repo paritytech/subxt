@@ -44,6 +44,8 @@ use crate::Metadata;
 use crate::error::ConstantError;
 use address::Address;
 use alloc::borrow::ToOwned;
+use alloc::string::ToString;
+use alloc::vec::Vec;
 use frame_decode::constants::ConstantTypeInfo;
 use scale_decode::IntoVisitor;
 

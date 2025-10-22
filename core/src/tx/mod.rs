@@ -64,6 +64,7 @@ use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, HashFor, Ha
 use crate::error::ExtrinsicError;
 use crate::utils::Encoded;
 use alloc::borrow::Cow;
+use alloc::string::ToString;
 use alloc::vec::Vec;
 use codec::{Compact, Encode};
 use payload::Payload;

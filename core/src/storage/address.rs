@@ -6,6 +6,8 @@
 
 use crate::utils::{Maybe, YesMaybe};
 use alloc::borrow::Cow;
+use alloc::string::String;
+use alloc::vec::Vec;
 use frame_decode::storage::{IntoDecodableValues, IntoEncodableValues};
 use scale_decode::DecodeAsType;
 
@@ -53,7 +55,7 @@ impl<KeyParts, Value, IsPlain> Clone for StaticAddress<KeyParts, Value, IsPlain>
     }
 }
 
-impl<KeyParts, Value, IsPlain> std::fmt::Debug for StaticAddress<KeyParts, Value, IsPlain> {
+impl<KeyParts, Value, IsPlain> core::fmt::Debug for StaticAddress<KeyParts, Value, IsPlain> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("StaticAddress")
             .field("pallet_name", &self.pallet_name)
