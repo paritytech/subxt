@@ -9,90 +9,57 @@
 //! node storage. With Subxt, you can query this key/value storage with the following steps:
 //!
 //! 1. [Constructing a storage query](#constructing-a-storage-query).
-//! 2. [Submitting the query to get back the associated values](#submitting-it).
+//! 2. [Submitting the query to get back the associated entry](#submitting-it).
+//! 3. [Fetching](#fetching-storage-entries) or [iterating](#iterating-storage-entries) over that
+//!    entry to retrieve the value or values within it.
 //!
 //! ## Constructing a storage query
 //!
 //! We can use the statically generated interface to build storage queries:
 //!
 //! ```rust,no_run,standalone_crate
-//! use subxt_signer::sr25519::dev;
-//!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
 //! pub mod polkadot {}
 //!
-//! let account = dev::alice().public_key().into();
-//! let storage_query = polkadot::storage().system().account(account);
+//! let storage_query = polkadot::storage().system().account();
 //! ```
 //!
-//! Alternately, we can dynamically construct a storage query. This will not be type checked or
-//! validated until it's submitted:
+//! Alternately, we can dynamically construct a storage query. A dynamic query needs the input
+//! and return value types to be specified, where we can use [`crate::dynamic::Value`] if unsure.
 //!
 //! ```rust,no_run,standalone_crate
-//! use subxt_signer::sr25519::dev;
 //! use subxt::dynamic::Value;
 //!
-//! let account = dev::alice().public_key();
-//! let storage_query = subxt::dynamic::storage("System", "Account", vec![
-//!     Value::from_bytes(account)
-//! ]);
+//! let storage_query = subxt::dynamic::storage::<(Value,), Value>("System", "Account");
 //! ```
-//!
-//! As well as accessing specific entries, some storage locations can also be iterated over (such as
-//! the map of account information). To do this, suffix `_iter` onto the query constructor (this
-//! will only be available on static constructors when iteration is actually possible):
-//!
-//! ```rust,no_run,standalone_crate
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
-//! pub mod polkadot {}
-//!
-//! // A static query capable of iterating over accounts:
-//! let storage_query = polkadot::storage().system().account_iter();
-//! // A dynamic query to do the same:
-//! let storage_query = subxt::dynamic::storage("System", "Account", ());
-//! ```
-//!
-//! Some storage entries are maps with multiple keys. As an example, we might end up with
-//! an API like `runtime::storage().foo().bar(u8, bool, u16, String)` to fetch some entry "bar".
-//! When this is the case, the codegen will generate multiple iterator query functions alongside
-//! the function to fetch an individual value:
-//!
-//! - `runtime::storage().foo().bar(u8, bool, u16, String)`: fetch a single entry from the "bar" map.
-//! - `runtime::storage().foo().bar_iter()`: iterate over all of the entries in the "bar" map.
-//! - `runtime::storage().foo().bar_iter1(u8)`: iterate over all of the entries in the "bar" map under
-//!   a given `u8`.
-//! - `runtime::storage().foo().bar_iter2(u8, bool)`: iterate over all of the entries in the "bar" map under
-//!   a given `u8` and `bool` value.
-//! - `runtime::storage().foo().bar_iter3(u8, bool, u16)`: iterate over all of the entries in the "bar" map under
-//!   a given `u8`, `bool` and `u16` value.
-//!
-//! All valid storage queries implement [`crate::storage::Address`]. As well as describing
-//! how to build a valid storage query, this trait also has some associated types that determine the
-//! shape of the result you'll get back, and determine what you can do with it (ie, can you iterate
-//! over storage entries using it).
-//!
-//! Static queries set appropriate values for these associated types, and can therefore only be used
-//! where it makes sense. Dynamic queries don't know any better and can be used in more places, but
-//! may fail at runtime instead if they are invalid in those places.
 //!
 //! ## Submitting it
 //!
-//! Storage queries can be handed to various functions in [`crate::storage::Storage`] in order to
+//! Storage queries can be handed to various functions in [`crate::storage::StorageClientAt`] in order to
 //! obtain the associated values (also referred to as storage entries) back.
+//!
+//! The core API here is [`crate::storage::StorageClientAt::entry()`], which takes a query and looks up the
+//! corresponding storage entry, from which you can then fetch or iterate over the values contained within.
+//! [`crate::storage::StorageClientAt::fetch()`] and [`crate::storage::StorageClientAt::iter()`] are shorthand
+//! for this.
+//!
+//! When you wish to manually query some entry, [`crate::storage::StorageClientAt::fetch_raw()`] exists to take
+//! in raw bytes pointing at some storage value, and return the value bytes if possible. [`crate::storage::StorageClientAt::storage_version()`]
+//! and [`crate::storage::StorageClientAt::runtime_wasm_code()`] use this to retrieve the version of some storage API
+//! and the current Runtime WASM blob respectively.
 //!
 //! ### Fetching storage entries
 //!
 //! The simplest way to access storage entries is to construct a query and then call either
-//! [`crate::storage::Storage::fetch()`] or [`crate::storage::Storage::fetch_or_default()`] (the
-//! latter will only work for storage queries that have a default value when empty):
+//! [`crate::storage::StorageClientAt::fetch()`]:
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../examples/storage_fetch.rs")]
 //! ```
 //!
-//! For completeness, below is an example using a dynamic query instead. The return type from a
-//! dynamic query is a [`crate::dynamic::DecodedValueThunk`], which can be decoded into a
-//! [`crate::dynamic::Value`], or else the raw bytes can be accessed instead.
+//! For completeness, below is an example using a dynamic query instead. Dynamic queries can define the types that
+//! they wish to accept inputs and decode the return value into ([`crate::dynamic::Value`] can be used here anywhere we
+//! are not sure of the specific types).
 //!
 //! ```rust,ignore
 #![doc = include_str!("../../../examples/storage_fetch_dynamic.rs")]
@@ -112,12 +79,4 @@
 //! ```rust,ignore
 #![doc = include_str!("../../../examples/storage_iterating_dynamic.rs")]
 //! ```
-//!
-//! ### Advanced
-//!
-//! For more advanced use cases, have a look at [`crate::storage::Storage::fetch_raw`] and
-//! [`crate::storage::Storage::fetch_raw_keys`]. Both of these take raw bytes as arguments, which can be
-//! obtained from a [`crate::storage::Address`] by using
-//! [`crate::storage::StorageClient::address_bytes()`] or
-//! [`crate::storage::StorageClient::address_root_bytes()`].
 //!

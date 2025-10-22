@@ -1,6 +1,6 @@
 use super::extrinsic_call::ExtrinsicCall;
 use super::extrinsic_info::{AnyExtrinsicInfo, with_info};
-use super::extrinsic_transaction_extensions::ExtrinsicExtrinsicParams;
+use super::extrinsic_transaction_extensions::ExtrinsicTransactionParams;
 use crate::client::OfflineClientAtBlockT;
 use crate::config::Config;
 use crate::error::ExtrinsicsError;
@@ -106,8 +106,8 @@ impl<'extrinsics, 'atblock> Extrinsic<'extrinsics, 'atblock> {
     /// Get information about the transaction extensions of this extrinsic.
     pub fn transaction_extensions(
         &self,
-    ) -> Option<ExtrinsicExtrinsicParams<'extrinsics, 'atblock>> {
-        ExtrinsicExtrinsicParams::new(self.bytes, self.info)
+    ) -> Option<ExtrinsicTransactionParams<'extrinsics, 'atblock>> {
+        ExtrinsicTransactionParams::new(self.bytes, self.info)
     }
 }
 

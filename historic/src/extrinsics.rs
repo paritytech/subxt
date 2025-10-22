@@ -7,7 +7,7 @@ mod extrinsic_info;
 mod extrinsic_transaction_extensions;
 mod extrinsics_type;
 
-pub use extrinsic_transaction_extensions::ExtrinsicExtrinsicParams;
+pub use extrinsic_transaction_extensions::ExtrinsicTransactionParams;
 pub use extrinsics_type::{Extrinsic, Extrinsics};
 
 /// Work with extrinsics.

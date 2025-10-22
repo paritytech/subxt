@@ -16,7 +16,7 @@ struct ExtrinsicExtensionsInfo<'extrinsics, 'atblock, TypeId, Resolver> {
 }
 
 /// This represents the transaction extensions of an extrinsic.
-pub struct ExtrinsicExtrinsicParams<'extrinsics, 'atblock> {
+pub struct ExtrinsicTransactionParams<'extrinsics, 'atblock> {
     all_bytes: &'extrinsics [u8],
     info: AnyExtrinsicExtensionsInfo<'extrinsics, 'atblock>,
 }
@@ -31,7 +31,7 @@ macro_rules! with_extensions_info {
     };
 }
 
-impl<'extrinsics, 'atblock> ExtrinsicExtrinsicParams<'extrinsics, 'atblock> {
+impl<'extrinsics, 'atblock> ExtrinsicTransactionParams<'extrinsics, 'atblock> {
     pub(crate) fn new(
         all_bytes: &'extrinsics [u8],
         info: &'extrinsics AnyExtrinsicInfo<'atblock>,
