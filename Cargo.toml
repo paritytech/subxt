@@ -127,8 +127,8 @@ hyper = "1"
 http-body = "1"
 
 # Light client support:
-smoldot = { version = "0.19.3", default-features = false }
-smoldot-light = { version = "0.17.1", default-features = false }
+smoldot = { version = "0.20.0", default-features = false }
+smoldot-light = { version = "0.18.0", default-features = false }
 tokio-stream = "0.1.16"
 futures-util = "0.3.31"
 rand = "0.8.5"
