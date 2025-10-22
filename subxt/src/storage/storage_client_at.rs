@@ -197,6 +197,8 @@ where
     Addr: Address,
     Client: OnlineClientT<T>,
 {
+    /// Fetch the storage value at this location. If no value is found, the default value will be returned
+    /// for this entry if one exists. If no value is found and no default value exists, an error will be returned.
     pub async fn fetch(&self) -> Result<StorageValue<'atblock, Addr::Value>, StorageError> {
         let value = self.try_fetch().await?.map_or_else(
             || self.inner.default_value().ok_or(StorageError::NoValueFound),
@@ -206,6 +208,7 @@ where
         Ok(value)
     }
 
+    /// Fetch the storage value at this location. If no value is found, `None` will be returned.
     pub async fn try_fetch(
         &self,
     ) -> Result<Option<StorageValue<'atblock, Addr::Value>>, StorageError> {
@@ -240,6 +243,13 @@ where
     Addr: Address,
     Client: OnlineClientT<T>,
 {
+    /// Fetch a storage value within this storage entry. 
+    /// 
+    /// This entry may be a map, and so you must provide the relevant values for each part of the storage
+    /// key that is required in order to point to a single value.
+    /// 
+    /// If no value is found, the default value will be returned for this entry if one exists. If no value is 
+    /// found and no default value exists, an error will be returned.
     pub async fn fetch(
         &self,
         key_parts: Addr::KeyParts,
@@ -247,6 +257,12 @@ where
         fetch(&self.inner, &self.client, self.block_ref.hash(), key_parts).await
     }
 
+    /// Fetch a storage value within this storage entry. 
+    /// 
+    /// This entry may be a map, and so you must provide the relevant values for each part of the storage
+    /// key that is required in order to point to a single value.
+    /// 
+    /// If no value is found, `None` will be returned.
     pub async fn try_fetch(
         &self,
         key_parts: Addr::KeyParts,
@@ -254,6 +270,12 @@ where
         try_fetch(&self.inner, &self.client, self.block_ref.hash(), key_parts).await
     }
 
+    /// Iterate over storage values within this storage entry.
+    /// 
+    /// You may provide any prefix of the values needed to point to a single value. Normally you will 
+    /// provide `()` to iterate over _everything_, or `(first_key,)` to iterate over everything underneath 
+    /// `first_key` in the map, or `(first_key, second_key)` to iterate over everything underneath `first_key` 
+    /// and `second_key` in the map, and so on, up to the actual depth of the map - 1.
     pub async fn iter<KeyParts: PrefixOf<Addr::KeyParts>>(
         &self,
         key_parts: KeyParts,
