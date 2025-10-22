@@ -6,10 +6,7 @@
 
 mod storage_client;
 mod storage_client_at;
-// mod storage_value;
-// mod storage_key_value;
-// mod storage_key;
 
 pub use storage_client::StorageClient;
-pub use storage_client_at::StorageClientAt;
+pub use storage_client_at::{StorageClientAt, StorageEntryClient, StorageKeyValue, StorageValue};
 pub use subxt_core::storage::address::{Address, DynamicAddress, StaticAddress, dynamic};
