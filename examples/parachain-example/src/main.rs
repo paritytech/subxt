@@ -63,14 +63,14 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     println!("NFT created.");
 
     // check in storage, that alice is the official owner of the NFT:
-    let nft_owner_storage_query = statemint::storage().uniques().asset(COLLECTION_ID, NTF_ID);
+    let nft_owner_storage_query = statemint::storage().uniques().asset();
     let nft_storage_details = api
         .storage()
         .at_latest()
         .await?
-        .fetch(&nft_owner_storage_query)
+        .fetch(nft_owner_storage_query, (COLLECTION_ID, NTF_ID))
         .await?
-        .ok_or("The NFT should have an owner (alice)")?;
+        .decode()?;
 
     // make sure that alice is the owner of the NFT:
     assert_eq!(nft_storage_details.owner, dev::alice().public_key().into());
