@@ -24,8 +24,7 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error> {
         .storage()
         .at_latest()
         .await?
-        .entry(addr)?
-        .fetch()
+        .fetch(addr, ())
         .await?
         .decode()?;
     assert!(entry > 0);
@@ -56,8 +55,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
         .storage()
         .at_latest()
         .await?
-        .entry(nonce_addr)?
-        .fetch((alice,))
+        .fetch(nonce_addr, (alice,))
         .await?
         .decode()?;
     assert_eq!(entry.nonce, 1);
@@ -137,8 +135,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
         .storage()
         .at_latest()
         .await?
-        .entry(addr)?
-        .fetch((99, alice, bob))
+        .fetch(addr, (99, alice, bob))
         .await?
         .decode()?;
     assert_eq!(entry.amount, 123);
@@ -258,12 +255,12 @@ async fn storage_iter_decode_keys() -> Result<(), subxt::Error> {
 
     let storage_static = node_runtime::storage().system().account();
     let storage_at_static = api.storage().at_latest().await?;
-    let results_static = storage_at_static.entry(storage_static)?.iter(()).await?;
+    let results_static = storage_at_static.iter(storage_static, ()).await?;
 
     let storage_dynamic =
         subxt::dynamic::storage::<(scale_value::Value,), scale_value::Value>("System", "Account");
     let storage_at_dynamic = api.storage().at_latest().await?;
-    let results_dynamic = storage_at_dynamic.entry(storage_dynamic)?.iter(()).await?;
+    let results_dynamic = storage_at_dynamic.iter(storage_dynamic, ()).await?;
 
     // Even the testing node should have more than 3 accounts registered.
     let results_static = results_static.take(3).collect::<Vec<_>>().await;

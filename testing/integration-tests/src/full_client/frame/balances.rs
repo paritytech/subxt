@@ -21,18 +21,17 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let storage_at = api.storage().at_latest().await?;
-
     let account_addr = node_runtime::storage().system().account();
 
-    let account_entry = storage_at.entry(account_addr.clone())?;
+    let storage_at_pre = api.storage().at_latest().await?;
+    let account_entry_pre = storage_at_pre.entry(account_addr.clone())?;
 
-    let alice_pre = account_entry
+    let alice_pre = account_entry_pre
         .fetch((alice.public_key().to_account_id(),))
         .await?
         .decode()?;
 
-    let bob_pre = account_entry
+    let bob_pre = account_entry_pre
         .fetch((bob.public_key().to_account_id(),))
         .await?
         .decode()?;
@@ -69,12 +68,15 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     };
     assert_eq!(event, expected_event);
 
-    let alice_post = account_entry
+    let storage_at_post = api.storage().at_latest().await?;
+    let account_entry_post = storage_at_post.entry(account_addr.clone())?;
+
+    let alice_post = account_entry_post
         .fetch((alice.public_key().to_account_id(),))
         .await?
         .decode()?;
 
-    let bob_post = account_entry
+    let bob_post = account_entry_post
         .fetch((bob.public_key().to_account_id(),))
         .await?
         .decode()?;
@@ -175,14 +177,14 @@ async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let storage_at = api.storage().at_latest().await?;
-
-    let account_addr = node_runtime::storage().system().account();
-
-    let account_entry = storage_at.entry(account_addr)?;
-
-    let bob_pre = account_entry
-        .fetch((bob.public_key().to_account_id(),))
+    let bob_pre = api
+        .storage()
+        .at_latest()
+        .await?
+        .fetch(
+            node_runtime::storage().system().account(),
+            (bob.public_key().to_account_id(),),
+        )
         .await?
         .decode()?;
 
@@ -199,14 +201,19 @@ async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
 
         signed_extrinsic
             .submit_and_watch()
-            .await
-            .unwrap()
+            .await?
             .wait_for_finalized_success()
             .await?;
     }
 
-    let bob_post = account_entry
-        .fetch((bob.public_key().to_account_id(),))
+    let bob_post = api
+        .storage()
+        .at_latest()
+        .await?
+        .fetch(
+            node_runtime::storage().system().account(),
+            (bob.public_key().to_account_id(),),
+        )
         .await?
         .decode()?;
 
@@ -247,8 +254,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
         .storage()
         .at_latest()
         .await?
-        .entry(holds_addr)?
-        .fetch((bob,))
+        .fetch(holds_addr, (bob,))
         .await?
         .decode()?
         .0;

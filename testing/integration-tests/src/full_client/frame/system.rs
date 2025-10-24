@@ -21,8 +21,7 @@ async fn storage_account() -> Result<(), subxt::Error> {
         .storage()
         .at_latest()
         .await?
-        .entry(account_info_addr)?
-        .fetch((alice.public_key().to_account_id(),))
+        .fetch(account_info_addr, (alice.public_key().to_account_id(),))
         .await?
         .decode()?;
 

@@ -191,8 +191,7 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
         .storage()
         .at_latest()
         .await?
-        .entry(ledger_addr)?
-        .fetch((alice_stash.public_key().to_account_id(),))
+        .fetch(ledger_addr, (alice_stash.public_key().to_account_id(),))
         .await?
         .decode()?;
     assert_eq!(alice_stash.public_key().to_account_id(), ledger.stash);
@@ -303,8 +302,7 @@ async fn storage_current_era() -> Result<(), Error> {
         .storage()
         .at_latest()
         .await?
-        .entry(current_era_addr)?
-        .fetch()
+        .fetch(current_era_addr, ())
         .await?
         .decode()?;
     Ok(())
@@ -319,8 +317,7 @@ async fn storage_era_reward_points() -> Result<(), Error> {
         .storage()
         .at_latest()
         .await?
-        .entry(reward_points_addr)?
-        .fetch((0,))
+        .fetch(reward_points_addr, (0,))
         .await?
         .decode();
     assert!(current_era_result.is_ok());
