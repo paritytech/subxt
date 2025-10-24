@@ -9,6 +9,7 @@ use crate::{
 use codec::Decode;
 use subxt::{
     error::{DispatchError, TokenError, TransactionEventsError, TransactionFinalizedSuccessError},
+    ext::scale_decode::DecodeAsType,
     utils::{AccountId32, MultiAddress},
 };
 use subxt_signer::sr25519::dev;
@@ -96,18 +97,17 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let storage_at = api.storage().at_latest().await?;
-
     let account_addr = subxt::dynamic::storage::<(Value,), Value>("System", "Account");
 
-    let account_entry = storage_at.entry(account_addr)?;
+    let storage_at_pre = api.storage().at_latest().await?;
+    let account_entry_pre = storage_at_pre.entry(account_addr.clone())?;
 
-    let alice_pre = account_entry
+    let alice_pre = account_entry_pre
         .fetch((Value::from_bytes(alice.public_key().to_account_id()),))
         .await?
         .decode()?;
 
-    let bob_pre = account_entry
+    let bob_pre = account_entry_pre
         .fetch((Value::from_bytes(bob.public_key().to_account_id()),))
         .await?
         .decode()?;
@@ -131,28 +131,39 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
         .wait_for_finalized_success()
         .await?;
 
-    let event_fields = events
+    let actual_transfer_event = events
         .iter()
         .filter_map(|ev| ev.ok())
         .find(|ev| ev.pallet_name() == "Balances" && ev.variant_name() == "Transfer")
         .expect("Failed to find Transfer event")
-        .decode_as_fields::<scale_value::Value>()
-        .expect("Failed to decode event fields")
-        .map_context(|_| ());
+        .decode_as_fields::<DecodedTransferEvent>()
+        .expect("Failed to decode event fields");
 
-    let expected_fields = Value::unnamed_composite(vec![
-        Value::unnamed_composite(vec![Value::from_bytes(alice.public_key().to_account_id())]),
-        Value::unnamed_composite(vec![Value::from_bytes(bob.public_key().to_account_id())]),
-        Value::u128(10_000),
-    ]);
-    assert_eq!(event_fields, expected_fields);
+    #[derive(DecodeAsType, Debug, PartialEq)]
+    #[decode_as_type(crate_path = "::subxt::ext::scale_decode")]
+    struct DecodedTransferEvent {
+        from: AccountId32,
+        to: AccountId32,
+        amount: u128,
+    }
 
-    let alice_post = account_entry
+    let expected_transfer_event = DecodedTransferEvent {
+        from: alice.public_key().to_account_id(),
+        to: bob.public_key().to_account_id(),
+        amount: 10000,
+    };
+
+    assert_eq!(actual_transfer_event, expected_transfer_event);
+
+    let storage_at_post = api.storage().at_latest().await?;
+    let account_entry_post = storage_at_post.entry(account_addr.clone())?;
+
+    let alice_post = account_entry_post
         .fetch((Value::from_bytes(alice.public_key().to_account_id()),))
         .await?
         .decode()?;
 
-    let bob_post = account_entry
+    let bob_post = account_entry_post
         .fetch((Value::from_bytes(bob.public_key().to_account_id()),))
         .await?
         .decode()?;

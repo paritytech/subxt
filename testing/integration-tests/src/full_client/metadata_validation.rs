@@ -167,9 +167,9 @@ async fn constant_values_are_not_validated() {
         .expect("ExistentialDeposit constant must be present");
 
     // Modifying a constant value should not lead to an error:
-    existential.value = vec![0u8; 32];
+    existential.value = vec![0u8; 16];
 
-    // Build our API again, this time form the metadata we've tweaked.
+    // Build our API again, this time from the metadata we've tweaked.
     let api_from_modified_metadata = {
         let metadata_before = v15_to_metadata(v15_metadata);
         metadata_to_api(metadata_before, &ctx).await

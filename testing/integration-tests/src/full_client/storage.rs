@@ -79,7 +79,7 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
         .at_latest()
         .await?
         .entry(storage_addr)?
-        .key((KeyTypeId([1, 2, 3, 4]), vec![5, 6, 7, 8]))?;
+        .key(((KeyTypeId([1, 2, 3, 4]), vec![5, 6, 7, 8]),))?;
 
     // Let's manually hash to what we assume it should be and compare:
     let expected_key_bytes = {
