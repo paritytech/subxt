@@ -32,6 +32,7 @@ use codec::Compact;
 use std::sync::Arc;
 use subxt::backend::chain_head::ChainHeadBackend;
 use subxt::backend::rpc::RpcClient;
+use subxt::dynamic::Value;
 use subxt::{client::OnlineClient, config::PolkadotConfig, lightclient::LightClient};
 use subxt_metadata::Metadata;
 
@@ -137,7 +138,7 @@ async fn dynamic_constant_query(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
     tracing::trace!("Check dynamic_constant_query");
 
-    let constant_query = subxt::dynamic::constant::<u128>("System", "BlockLength");
+    let constant_query = subxt::dynamic::constant::<Value>("System", "BlockLength");
     let _value = api.constants().at(&constant_query)?;
 
     tracing::trace!("Dynamic constant query took {:?}\n", now.elapsed());
