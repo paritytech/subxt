@@ -45,21 +45,21 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
                                 .map_err(|e| e.into_owned())?
                                 .into_owned();
                             let storage_entry = StorageEntryMetadata {
-                                name: entry_name,
+                                name: entry_name.clone(),
                                 info: storage_info,
                                 docs: s.docs.clone(),
                             };
 
-                            Ok::<_, TryFromError>((name.clone(), storage_entry))
+                            Ok::<_, TryFromError>((entry_name, storage_entry))
                         })
                         .collect::<Result<_, TryFromError>>()?,
                 }),
             };
 
-            let constants = p
-                .constants
-                .iter()
-                .map(|c| (name.clone(), from_constant_metadata(c.clone())));
+            let constants = p.constants.iter().map(|c| {
+                let name = c.name.clone();
+                (name, from_constant_metadata(c.clone()))
+            });
 
             let call_variant_index =
                 VariantIndex::build(p.calls.as_ref().map(|c| c.ty.id), &m.types);
