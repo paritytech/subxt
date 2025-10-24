@@ -62,7 +62,7 @@ pub trait OfflineClientAtBlockT<'client, T: Config + 'client> {
 // private to allow changes if possible.
 #[doc(hidden)]
 pub struct OfflineClientAtBlock<'client, T: Config + 'client> {
-    /// The configuration for thie chain.
+    /// The configuration for this chain.
     config: &'client T,
     /// Historic types to use at this block number.
     legacy_types: TypeRegistrySet<'client>,
