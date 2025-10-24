@@ -313,14 +313,9 @@ mod tests {
 
         let code = generate_code(runtime_apis);
 
-        let structure = quote! {
-            pub struct Test {
-                pub foo: test::Foo,
-                pub bar: test::Bar,
-            }
-        };
         let expected_alias = quote!(
             pub mod test {
+                use super::root_mod;
                 use super::runtime_types;
                 pub type Foo = ::core::primitive::bool;
                 pub type Bar = ::core::primitive::bool;
@@ -330,7 +325,7 @@ mod tests {
                 }
             }
         );
-        assert!(code.contains(&structure.to_string()));
+
         assert!(code.contains(&expected_alias.to_string()));
     }
 
@@ -363,15 +358,9 @@ mod tests {
 
         let code = generate_code(runtime_apis);
 
-        let structure = quote! {
-            pub struct Test {
-                pub a: test::A,
-                pub a_param1: test::AParam1,
-                pub a_param2: test::AParam2,
-            }
-        };
         let expected_alias = quote!(
             pub mod test {
+                use super::root_mod;
                 use super::runtime_types;
                 pub type A = ::core::primitive::bool;
                 pub type AParam1 = ::core::primitive::bool;
@@ -383,7 +372,6 @@ mod tests {
             }
         );
 
-        assert!(code.contains(&structure.to_string()));
         assert!(code.contains(&expected_alias.to_string()));
     }
 
@@ -424,17 +412,9 @@ mod tests {
 
         let code = generate_code(runtime_apis);
 
-        let structure = quote! {
-            pub struct Test {
-                pub _0: test::Param0,
-                pub a: test::A,
-                pub param_0: test::Param0Param2,
-                pub _3: test::Param3,
-                pub param_0_param_2: test::Param0Param2Param4,
-            }
-        };
         let expected_alias = quote!(
             pub mod test {
+                use super::root_mod;
                 use super::runtime_types;
                 pub type Param0 = ::core::primitive::bool;
                 pub type A = ::core::primitive::bool;
@@ -448,7 +428,6 @@ mod tests {
             }
         );
 
-        assert!(code.contains(&structure.to_string()));
         assert!(code.contains(&expected_alias.to_string()));
     }
 }
