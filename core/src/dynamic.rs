@@ -21,3 +21,6 @@ pub use crate::runtime_api::payload::dynamic as runtime_api_call;
 
 // Execute View Function API function call dynamically.
 pub use crate::view_functions::payload::dynamic as view_function_call;
+
+/// Obtain a custom value from the metadata.
+pub use crate::custom_values::address::dynamic as custom_value;

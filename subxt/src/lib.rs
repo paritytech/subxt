@@ -73,9 +73,7 @@ pub mod metadata {
 
 /// Submit dynamic transactions.
 pub mod dynamic {
-    pub use subxt_core::dynamic::{
-        At, Value, constant, runtime_api_call, storage, tx, view_function_call,
-    };
+    pub use subxt_core::dynamic::*;
 }
 
 // Expose light client bits
