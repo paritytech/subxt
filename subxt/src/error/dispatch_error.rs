@@ -117,7 +117,7 @@ pub enum ArithmeticError {
     DivisionByZero,
 }
 
-/// An error relating to thr transactional layers when dispatching a transaction.
+/// An error relating to the transactional layers when dispatching a transaction.
 #[derive(scale_decode::DecodeAsType, Debug, thiserror::Error, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum TransactionalError {

@@ -383,7 +383,7 @@ pub fn get_runtime_api_hash(runtime_api: &RuntimeApiMethodMetadata) -> Hash {
 /// Obtain the hash of all of a runtime API trait, including all of its methods.
 pub fn get_runtime_apis_hash(trait_metadata: RuntimeApiMetadata) -> Hash {
     // Each API is already hashed considering the trait name, so we don't need
-    // to consider thr trait name again here.
+    // to consider the trait name again here.
     trait_metadata
         .methods()
         .fold([0u8; HASH_LEN], |bytes, method_metadata| {
@@ -420,7 +420,7 @@ pub fn get_view_function_hash(view_function: &ViewFunctionMetadata) -> Hash {
 /// Obtain the hash of all of the view functions in a pallet, including all of its methods.
 fn get_pallet_view_functions_hash(pallet_metadata: &PalletMetadata) -> Hash {
     // Each API is already hashed considering the trait name, so we don't need
-    // to consider thr trait name again here.
+    // to consider the trait name again here.
     pallet_metadata
         .view_functions()
         .fold([0u8; HASH_LEN], |bytes, method_metadata| {
