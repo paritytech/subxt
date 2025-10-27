@@ -265,7 +265,7 @@ pub mod api {
             pub mod execute_block {
                 use super::root_mod;
                 use super::runtime_types;
-                pub type Block = runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: authorize_call :: AuthorizeCall , runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > > ;
+                pub type Block = runtime_types :: sp_runtime :: generic :: block :: LazyBlock < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: authorize_call :: AuthorizeCall , runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > > ;
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ();
@@ -809,7 +809,7 @@ pub mod api {
             pub mod check_inherents {
                 use super::root_mod;
                 use super::runtime_types;
-                pub type Block = runtime_types :: sp_runtime :: generic :: block :: Block < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: authorize_call :: AuthorizeCall , runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > > ;
+                pub type Block = runtime_types :: sp_runtime :: generic :: block :: LazyBlock < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 > , :: subxt :: ext :: subxt_core :: utils :: UncheckedExtrinsic < :: subxt :: ext :: subxt_core :: utils :: MultiAddress < :: subxt :: ext :: subxt_core :: utils :: AccountId32 , () > , runtime_types :: rococo_runtime :: RuntimeCall , runtime_types :: sp_runtime :: MultiSignature , (runtime_types :: frame_system :: extensions :: authorize_call :: AuthorizeCall , runtime_types :: frame_system :: extensions :: check_non_zero_sender :: CheckNonZeroSender , runtime_types :: frame_system :: extensions :: check_spec_version :: CheckSpecVersion , runtime_types :: frame_system :: extensions :: check_tx_version :: CheckTxVersion , runtime_types :: frame_system :: extensions :: check_genesis :: CheckGenesis , runtime_types :: frame_system :: extensions :: check_mortality :: CheckMortality , runtime_types :: frame_system :: extensions :: check_nonce :: CheckNonce , runtime_types :: frame_system :: extensions :: check_weight :: CheckWeight , runtime_types :: pallet_transaction_payment :: ChargeTransactionPayment , runtime_types :: frame_metadata_hash_extension :: CheckMetadataHash , runtime_types :: frame_system :: extensions :: weight_reclaim :: WeightReclaim ,) > > ;
                 pub type Data = runtime_types::sp_inherents::InherentData;
                 pub mod output {
                     use super::runtime_types;
@@ -1642,13 +1642,13 @@ pub mod api {
                 pub fn unapplied_slashes_v2(
                     &self,
                 ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
-                    types::UnappliedSlashesV2,
-                    types::unapplied_slashes_v2::output::Output,
+                    (),
+                    unapplied_slashes_v2::output::Output,
                 > {
                     ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "ParachainHost",
                         "unapplied_slashes_v2",
-                        types::UnappliedSlashesV2 {},
+                        (),
                         [
                             59u8, 242u8, 7u8, 62u8, 162u8, 16u8, 216u8, 73u8, 47u8, 18u8, 125u8,
                             146u8, 231u8, 203u8, 34u8, 53u8, 238u8, 12u8, 70u8, 105u8, 5u8, 89u8,
@@ -1663,7 +1663,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v8::validator_app::Public,
+                        runtime_types::polkadot_primitives::v9::validator_app::Public,
                     >;
                 }
             }
@@ -1675,10 +1675,10 @@ pub mod api {
                     pub type Output = (
                         ::subxt::ext::subxt_core::alloc::vec::Vec<
                             ::subxt::ext::subxt_core::alloc::vec::Vec<
-                                runtime_types::polkadot_primitives::v8::ValidatorIndex,
+                                runtime_types::polkadot_primitives::v9::ValidatorIndex,
                             >,
                         >,
-                        runtime_types::polkadot_primitives::v8::GroupRotationInfo<
+                        runtime_types::polkadot_primitives::v9::GroupRotationInfo<
                             ::core::primitive::u32,
                         >,
                     );
@@ -1690,7 +1690,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::vstaging::CoreState<
+                        runtime_types::polkadot_primitives::v9::CoreState<
                             ::subxt::ext::subxt_core::utils::H256,
                             ::core::primitive::u32,
                         >,
@@ -1702,11 +1702,11 @@ pub mod api {
                 use super::runtime_types;
                 pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 pub type Assumption =
-                    runtime_types::polkadot_primitives::v8::OccupiedCoreAssumption;
+                    runtime_types::polkadot_primitives::v9::OccupiedCoreAssumption;
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::core::option::Option<
-                        runtime_types::polkadot_primitives::v8::PersistedValidationData<
+                        runtime_types::polkadot_primitives::v9::PersistedValidationData<
                             ::subxt::ext::subxt_core::utils::H256,
                             ::core::primitive::u32,
                         >,
@@ -1721,14 +1721,14 @@ pub mod api {
                     ::subxt::ext::subxt_core::utils::H256;
                 pub mod output {
                     use super::runtime_types;
-                    pub type Output = :: core :: option :: Option < (runtime_types :: polkadot_primitives :: v8 :: PersistedValidationData < :: subxt :: ext :: subxt_core :: utils :: H256 , :: core :: primitive :: u32 > , runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ,) > ;
+                    pub type Output = :: core :: option :: Option < (runtime_types :: polkadot_primitives :: v9 :: PersistedValidationData < :: subxt :: ext :: subxt_core :: utils :: H256 , :: core :: primitive :: u32 > , runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ,) > ;
                 }
             }
             pub mod check_validation_outputs {
                 use super::root_mod;
                 use super::runtime_types;
                 pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
-                pub type Outputs = runtime_types::polkadot_primitives::v8::CandidateCommitments<
+                pub type Outputs = runtime_types::polkadot_primitives::v9::CandidateCommitments<
                     ::core::primitive::u32,
                 >;
                 pub mod output {
@@ -1749,7 +1749,7 @@ pub mod api {
                 use super::runtime_types;
                 pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 pub type Assumption =
-                    runtime_types::polkadot_primitives::v8::OccupiedCoreAssumption;
+                    runtime_types::polkadot_primitives::v9::OccupiedCoreAssumption;
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::core::option::Option<
@@ -1764,7 +1764,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::core::option::Option<
-                        runtime_types::polkadot_primitives::vstaging::CommittedCandidateReceiptV2<
+                        runtime_types::polkadot_primitives::v9::CommittedCandidateReceiptV2<
                             ::subxt::ext::subxt_core::utils::H256,
                         >,
                     >;
@@ -1776,7 +1776,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::vstaging::CandidateEvent<
+                        runtime_types::polkadot_primitives::v9::CandidateEvent<
                             ::subxt::ext::subxt_core::utils::H256,
                         >,
                     >;
@@ -1829,7 +1829,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::core::option::Option<
-                        runtime_types::polkadot_primitives::vstaging::ScrapedOnChainVotes<
+                        runtime_types::polkadot_primitives::v9::ScrapedOnChainVotes<
                             ::subxt::ext::subxt_core::utils::H256,
                         >,
                     >;
@@ -1842,15 +1842,15 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output =
-                        ::core::option::Option<runtime_types::polkadot_primitives::v8::SessionInfo>;
+                        ::core::option::Option<runtime_types::polkadot_primitives::v9::SessionInfo>;
                 }
             }
             pub mod submit_pvf_check_statement {
                 use super::root_mod;
                 use super::runtime_types;
-                pub type Stmt = runtime_types::polkadot_primitives::v8::PvfCheckStatement;
+                pub type Stmt = runtime_types::polkadot_primitives::v9::PvfCheckStatement;
                 pub type Signature =
-                    runtime_types::polkadot_primitives::v8::validator_app::Signature;
+                    runtime_types::polkadot_primitives::v9::validator_app::Signature;
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ();
@@ -1869,7 +1869,7 @@ pub mod api {
                 use super::runtime_types;
                 pub type ParaId = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 pub type Assumption =
-                    runtime_types::polkadot_primitives::v8::OccupiedCoreAssumption;
+                    runtime_types::polkadot_primitives::v9::OccupiedCoreAssumption;
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = :: core :: option :: Option < runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash > ;
@@ -1883,7 +1883,7 @@ pub mod api {
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<(
                         ::core::primitive::u32,
                         runtime_types::polkadot_core_primitives::CandidateHash,
-                        runtime_types::polkadot_primitives::v8::DisputeState<
+                        runtime_types::polkadot_primitives::v9::DisputeState<
                             ::core::primitive::u32,
                         >,
                     )>;
@@ -1896,7 +1896,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::core::option::Option<
-                        runtime_types::polkadot_primitives::v8::executor_params::ExecutorParams,
+                        runtime_types::polkadot_primitives::v9::executor_params::ExecutorParams,
                     >;
                 }
             }
@@ -1908,7 +1908,7 @@ pub mod api {
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<(
                         ::core::primitive::u32,
                         runtime_types::polkadot_core_primitives::CandidateHash,
-                        runtime_types::polkadot_primitives::v8::slashing::PendingSlashes,
+                        runtime_types::polkadot_primitives::v9::slashing::LegacyPendingSlashes,
                     )>;
                 }
             }
@@ -1916,11 +1916,11 @@ pub mod api {
                 use super::root_mod;
                 use super::runtime_types;
                 pub type ValidatorId =
-                    runtime_types::polkadot_primitives::v8::validator_app::Public;
+                    runtime_types::polkadot_primitives::v9::validator_app::Public;
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::core::option::Option<
-                        runtime_types::polkadot_primitives::v8::slashing::OpaqueKeyOwnershipProof,
+                        runtime_types::polkadot_primitives::v9::slashing::OpaqueKeyOwnershipProof,
                     >;
                 }
             }
@@ -1928,9 +1928,9 @@ pub mod api {
                 use super::root_mod;
                 use super::runtime_types;
                 pub type DisputeProof =
-                    runtime_types::polkadot_primitives::v8::slashing::DisputeProof;
+                    runtime_types::polkadot_primitives::v9::slashing::DisputeProof;
                 pub type KeyOwnershipProof =
-                    runtime_types::polkadot_primitives::v8::slashing::OpaqueKeyOwnershipProof;
+                    runtime_types::polkadot_primitives::v9::slashing::OpaqueKeyOwnershipProof;
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::core::option::Option<()>;
@@ -1952,7 +1952,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::core::option::Option<
-                        runtime_types::polkadot_primitives::vstaging::async_backing::BackingState<
+                        runtime_types::polkadot_primitives::v9::async_backing::BackingState<
                             ::subxt::ext::subxt_core::utils::H256,
                             ::core::primitive::u32,
                         >,
@@ -1965,7 +1965,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output =
-                        runtime_types::polkadot_primitives::v8::async_backing::AsyncBackingParams;
+                        runtime_types::polkadot_primitives::v9::async_backing::AsyncBackingParams;
                 }
             }
             pub mod disabled_validators {
@@ -1974,7 +1974,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v8::ValidatorIndex,
+                        runtime_types::polkadot_primitives::v9::ValidatorIndex,
                     >;
                 }
             }
@@ -1994,7 +1994,7 @@ pub mod api {
                 use super::runtime_types;
                 pub mod output {
                     use super::runtime_types;
-                    pub type Output = runtime_types::polkadot_primitives::v8::ApprovalVotingParams;
+                    pub type Output = runtime_types::polkadot_primitives::v9::ApprovalVotingParams;
                 }
             }
             pub mod claim_queue {
@@ -2003,7 +2003,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::utils::KeyedVec<
-                        runtime_types::polkadot_primitives::v8::CoreIndex,
+                        runtime_types::polkadot_primitives::v9::CoreIndex,
                         ::subxt::ext::subxt_core::alloc::vec::Vec<
                             runtime_types::polkadot_parachain_primitives::primitives::Id,
                         >,
@@ -2017,7 +2017,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::vstaging::CommittedCandidateReceiptV2<
+                        runtime_types::polkadot_primitives::v9::CommittedCandidateReceiptV2<
                             ::subxt::ext::subxt_core::utils::H256,
                         >,
                     >;
@@ -2038,7 +2038,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::core::option::Option<
-                        runtime_types::polkadot_primitives::vstaging::async_backing::Constraints<
+                        runtime_types::polkadot_primitives::v9::async_backing::Constraints<
                             ::core::primitive::u32,
                         >,
                     >;
@@ -2060,6 +2060,18 @@ pub mod api {
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
                         runtime_types::polkadot_parachain_primitives::primitives::Id,
                     >;
+                }
+            }
+            pub mod unapplied_slashes_v2 {
+                use super::root_mod;
+                use super::runtime_types;
+                pub mod output {
+                    use super::runtime_types;
+                    pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<(
+                        ::core::primitive::u32,
+                        runtime_types::polkadot_core_primitives::CandidateHash,
+                        runtime_types::polkadot_primitives::v9::slashing::PendingSlashes,
+                    )>;
                 }
             }
         }
@@ -2232,30 +2244,6 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Generates a proof that the `prev_block_number` is part of the canonical chain at"]
-                #[doc = " `best_known_block_number`."]
-                pub fn generate_ancestry_proof(
-                    &self,
-                    prev_block_number: generate_ancestry_proof::PrevBlockNumber,
-                    best_known_block_number: generate_ancestry_proof::BestKnownBlockNumber,
-                ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
-                    (
-                        generate_ancestry_proof::PrevBlockNumber,
-                        generate_ancestry_proof::BestKnownBlockNumber,
-                    ),
-                    generate_ancestry_proof::output::Output,
-                > {
-                    ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
-                        "BeefyApi",
-                        "generate_ancestry_proof",
-                        (prev_block_number, best_known_block_number),
-                        [
-                            2u8, 159u8, 64u8, 196u8, 142u8, 10u8, 120u8, 189u8, 137u8, 49u8, 163u8,
-                            103u8, 5u8, 137u8, 190u8, 89u8, 232u8, 17u8, 216u8, 145u8, 99u8, 131u8,
-                            85u8, 67u8, 75u8, 234u8, 62u8, 61u8, 226u8, 61u8, 187u8, 120u8,
-                        ],
-                    )
-                }
             }
             pub mod beefy_genesis {
                 use super::root_mod;
@@ -2324,17 +2312,6 @@ pub mod api {
                 use super::runtime_types;
                 pub type SetId = ::core::primitive::u64;
                 pub type AuthorityId = runtime_types::sp_consensus_beefy::ecdsa_crypto::Public;
-                pub mod output {
-                    use super::runtime_types;
-                    pub type Output =
-                        ::core::option::Option<runtime_types::sp_runtime::OpaqueValue>;
-                }
-            }
-            pub mod generate_ancestry_proof {
-                use super::root_mod;
-                use super::runtime_types;
-                pub type PrevBlockNumber = ::core::primitive::u32;
-                pub type BestKnownBlockNumber = ::core::option::Option<::core::primitive::u32>;
                 pub mod output {
                     use super::runtime_types;
                     pub type Output =
@@ -2414,19 +2391,19 @@ pub mod api {
                 #[doc = " `best_known_block_number`."]
                 pub fn generate_ancestry_proof(
                     &self,
-                    prev_block_number: types::generate_ancestry_proof::PrevBlockNumber,
-                    best_known_block_number: types::generate_ancestry_proof::BestKnownBlockNumber,
+                    prev_block_number: generate_ancestry_proof::PrevBlockNumber,
+                    best_known_block_number: generate_ancestry_proof::BestKnownBlockNumber,
                 ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
-                    types::GenerateAncestryProof,
-                    types::generate_ancestry_proof::output::Output,
+                    (
+                        generate_ancestry_proof::PrevBlockNumber,
+                        generate_ancestry_proof::BestKnownBlockNumber,
+                    ),
+                    generate_ancestry_proof::output::Output,
                 > {
                     ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "MmrApi",
                         "generate_ancestry_proof",
-                        types::GenerateAncestryProof {
-                            prev_block_number,
-                            best_known_block_number,
-                        },
+                        (prev_block_number, best_known_block_number),
                         [
                             27u8, 149u8, 193u8, 12u8, 185u8, 136u8, 82u8, 137u8, 95u8, 191u8,
                             145u8, 212u8, 204u8, 107u8, 205u8, 20u8, 85u8, 54u8, 11u8, 206u8, 35u8,
@@ -2530,6 +2507,21 @@ pub mod api {
                                 ::subxt::ext::subxt_core::utils::H256,
                             >,
                         ),
+                        runtime_types::sp_mmr_primitives::Error,
+                    >;
+                }
+            }
+            pub mod generate_ancestry_proof {
+                use super::root_mod;
+                use super::runtime_types;
+                pub type PrevBlockNumber = ::core::primitive::u32;
+                pub type BestKnownBlockNumber = ::core::option::Option<::core::primitive::u32>;
+                pub mod output {
+                    use super::runtime_types;
+                    pub type Output = ::core::result::Result<
+                        runtime_types::sp_mmr_primitives::AncestryProof<
+                            ::subxt::ext::subxt_core::utils::H256,
+                        >,
                         runtime_types::sp_mmr_primitives::Error,
                     >;
                 }
@@ -3992,9 +3984,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                173u8, 137u8, 192u8, 241u8, 4u8, 159u8, 94u8, 161u8, 91u8, 92u8, 138u8, 158u8,
-                90u8, 97u8, 50u8, 216u8, 25u8, 250u8, 34u8, 194u8, 23u8, 156u8, 224u8, 243u8, 26u8,
-                114u8, 50u8, 209u8, 139u8, 175u8, 116u8, 238u8,
+                69u8, 189u8, 40u8, 46u8, 154u8, 179u8, 21u8, 77u8, 146u8, 225u8, 154u8, 179u8,
+                31u8, 247u8, 135u8, 79u8, 75u8, 55u8, 139u8, 239u8, 139u8, 13u8, 164u8, 32u8,
+                238u8, 182u8, 15u8, 160u8, 130u8, 83u8, 125u8, 127u8,
             ]
     }
     pub mod system {
@@ -8602,19 +8594,16 @@ pub mod api {
                     &self,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
                     (),
-                    types::tx_payment_credit::TxPaymentCredit,
+                    tx_payment_credit::output::Output,
                     ::subxt::ext::subxt_core::utils::Yes,
-                    (),
-                    (),
                 > {
                     ::subxt::ext::subxt_core::storage::address::StaticAddress::new_static(
                         "TransactionPayment",
                         "TxPaymentCredit",
-                        (),
                         [
-                            39u8, 127u8, 132u8, 77u8, 25u8, 10u8, 195u8, 64u8, 255u8, 212u8, 183u8,
-                            177u8, 238u8, 24u8, 81u8, 65u8, 93u8, 177u8, 209u8, 134u8, 245u8,
-                            241u8, 252u8, 87u8, 179u8, 61u8, 168u8, 77u8, 65u8, 13u8, 72u8, 205u8,
+                            200u8, 46u8, 84u8, 207u8, 2u8, 81u8, 201u8, 150u8, 218u8, 189u8, 138u8,
+                            151u8, 91u8, 194u8, 144u8, 2u8, 28u8, 38u8, 88u8, 233u8, 242u8, 207u8,
+                            20u8, 172u8, 99u8, 167u8, 57u8, 12u8, 121u8, 0u8, 162u8, 148u8,
                         ],
                     )
                 }
@@ -8633,6 +8622,14 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = runtime_types::pallet_transaction_payment::Releases;
+                }
+            }
+            pub mod tx_payment_credit {
+                use super::root_mod;
+                use super::runtime_types;
+                pub mod output {
+                    use super::runtime_types;
+                    pub type Output = runtime_types :: frame_support :: traits :: storage :: NoDrop < runtime_types :: frame_support :: traits :: tokens :: fungible :: imbalance :: Imbalance < :: core :: primitive :: u128 > > ;
                 }
             }
         }
@@ -9272,7 +9269,7 @@ pub mod api {
                 pub fn key_owner(
                     &self,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (key_owner::Param0, key_owner::Param1),
+                    (key_owner::Param0,),
                     key_owner::output::Output,
                     ::subxt::ext::subxt_core::utils::Maybe,
                 > {
@@ -9280,10 +9277,10 @@ pub mod api {
                         "Session",
                         "KeyOwner",
                         [
-                            34u8, 236u8, 193u8, 233u8, 122u8, 51u8, 58u8, 15u8, 249u8, 88u8, 21u8,
-                            218u8, 153u8, 108u8, 172u8, 160u8, 103u8, 47u8, 101u8, 189u8, 188u8,
-                            111u8, 235u8, 216u8, 212u8, 75u8, 22u8, 253u8, 252u8, 193u8, 236u8,
-                            142u8,
+                            92u8, 40u8, 121u8, 10u8, 108u8, 141u8, 24u8, 38u8, 207u8, 27u8, 52u8,
+                            42u8, 159u8, 143u8, 245u8, 52u8, 228u8, 75u8, 69u8, 108u8, 103u8,
+                            235u8, 92u8, 167u8, 197u8, 252u8, 146u8, 155u8, 187u8, 238u8, 86u8,
+                            91u8,
                         ],
                     )
                 }
@@ -9348,8 +9345,10 @@ pub mod api {
             pub mod key_owner {
                 use super::root_mod;
                 use super::runtime_types;
-                pub type Param0 = runtime_types::sp_core::crypto::KeyTypeId;
-                pub type Param1 = ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+                pub type Param0 = (
+                    runtime_types::sp_core::crypto::KeyTypeId,
+                    ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+                );
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::utils::AccountId32;
@@ -23594,7 +23593,7 @@ pub mod api {
                 pub fn retries(
                     &self,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (retries::Param0, retries::Param1),
+                    (retries::Param0,),
                     retries::output::Output,
                     ::subxt::ext::subxt_core::utils::Maybe,
                 > {
@@ -23602,10 +23601,9 @@ pub mod api {
                         "Scheduler",
                         "Retries",
                         [
-                            115u8, 159u8, 161u8, 193u8, 24u8, 223u8, 30u8, 53u8, 160u8, 101u8,
-                            62u8, 140u8, 115u8, 192u8, 144u8, 7u8, 210u8, 158u8, 121u8, 80u8,
-                            241u8, 200u8, 187u8, 242u8, 194u8, 41u8, 21u8, 146u8, 226u8, 173u8,
-                            97u8, 31u8,
+                            81u8, 168u8, 89u8, 22u8, 140u8, 48u8, 1u8, 90u8, 95u8, 116u8, 91u8,
+                            50u8, 52u8, 16u8, 32u8, 133u8, 218u8, 238u8, 160u8, 164u8, 167u8, 45u8,
+                            54u8, 155u8, 45u8, 125u8, 129u8, 180u8, 95u8, 3u8, 121u8, 199u8,
                         ],
                     )
                 }
@@ -23665,8 +23663,7 @@ pub mod api {
             pub mod retries {
                 use super::root_mod;
                 use super::runtime_types;
-                pub type Param0 = ::core::primitive::u32;
-                pub type Param1 = ::core::primitive::u32;
+                pub type Param0 = (::core::primitive::u32, ::core::primitive::u32);
                 pub mod output {
                     use super::runtime_types;
                     pub type Output =
@@ -26004,7 +26001,7 @@ pub mod api {
                 pub fn preimage_for(
                     &self,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (preimage_for::Param0, preimage_for::Param1),
+                    (preimage_for::Param0,),
                     preimage_for::output::Output,
                     ::subxt::ext::subxt_core::utils::Maybe,
                 > {
@@ -26012,9 +26009,10 @@ pub mod api {
                         "Preimage",
                         "PreimageFor",
                         [
-                            227u8, 112u8, 48u8, 31u8, 27u8, 149u8, 255u8, 242u8, 111u8, 184u8,
-                            166u8, 0u8, 66u8, 134u8, 54u8, 208u8, 66u8, 73u8, 157u8, 64u8, 67u8,
-                            231u8, 32u8, 109u8, 209u8, 162u8, 63u8, 255u8, 21u8, 7u8, 42u8, 32u8,
+                            237u8, 141u8, 81u8, 17u8, 238u8, 42u8, 71u8, 117u8, 210u8, 197u8,
+                            222u8, 249u8, 97u8, 233u8, 153u8, 182u8, 136u8, 80u8, 72u8, 45u8,
+                            179u8, 37u8, 249u8, 127u8, 91u8, 162u8, 81u8, 205u8, 49u8, 253u8,
+                            255u8, 38u8,
                         ],
                     )
                 }
@@ -26046,8 +26044,10 @@ pub mod api {
             pub mod preimage_for {
                 use super::root_mod;
                 use super::runtime_types;
-                pub type Param0 = ::subxt::ext::subxt_core::utils::H256;
-                pub type Param1 = ::core::primitive::u32;
+                pub type Param0 = (
+                    ::subxt::ext::subxt_core::utils::H256,
+                    ::core::primitive::u32,
+                );
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = runtime_types::bounded_collections::bounded_vec::BoundedVec<
@@ -33141,7 +33141,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v8::ValidatorIndex,
+                        runtime_types::polkadot_primitives::v9::ValidatorIndex,
                     >;
                 }
             }
@@ -33151,7 +33151,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v8::validator_app::Public,
+                        runtime_types::polkadot_primitives::v9::validator_app::Public,
                     >;
                 }
             }
@@ -33449,10 +33449,9 @@ pub mod api {
                 use super::runtime_types;
                 pub mod output {
                     use super::runtime_types;
-                    pub type Output =
-                        runtime_types::polkadot_primitives::vstaging::ScrapedOnChainVotes<
-                            ::subxt::ext::subxt_core::utils::H256,
-                        >;
+                    pub type Output = runtime_types::polkadot_primitives::v9::ScrapedOnChainVotes<
+                        ::subxt::ext::subxt_core::utils::H256,
+                    >;
                 }
             }
         }
@@ -33541,7 +33540,7 @@ pub mod api {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
                         ::subxt::ext::subxt_core::alloc::vec::Vec<
-                            runtime_types::polkadot_primitives::v8::ValidatorIndex,
+                            runtime_types::polkadot_primitives::v9::ValidatorIndex,
                         >,
                     >;
                 }
@@ -33559,7 +33558,7 @@ pub mod api {
                 use super::runtime_types;
                 pub mod output {
                     use super::runtime_types;
-                    pub type Output = :: subxt :: ext :: subxt_core :: utils :: KeyedVec < runtime_types :: polkadot_primitives :: v8 :: CoreIndex , :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: scheduler :: common :: Assignment > > ;
+                    pub type Output = :: subxt :: ext :: subxt_core :: utils :: KeyedVec < runtime_types :: polkadot_primitives :: v9 :: CoreIndex , :: subxt :: ext :: subxt_core :: alloc :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: scheduler :: common :: Assignment > > ;
                 }
             }
         }
@@ -34544,7 +34543,7 @@ pub mod api {
                 pub fn past_code_hash(
                     &self,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (past_code_hash::Param0, past_code_hash::Param1),
+                    (past_code_hash::Param0,),
                     past_code_hash::output::Output,
                     ::subxt::ext::subxt_core::utils::Maybe,
                 > {
@@ -34552,10 +34551,9 @@ pub mod api {
                         "Paras",
                         "PastCodeHash",
                         [
-                            98u8, 182u8, 187u8, 41u8, 222u8, 151u8, 201u8, 127u8, 169u8, 65u8,
-                            95u8, 15u8, 44u8, 179u8, 184u8, 4u8, 44u8, 162u8, 198u8, 238u8, 95u8,
-                            160u8, 118u8, 246u8, 68u8, 30u8, 39u8, 75u8, 146u8, 207u8, 167u8,
-                            213u8,
+                            210u8, 74u8, 255u8, 112u8, 254u8, 14u8, 42u8, 29u8, 136u8, 57u8, 163u8,
+                            23u8, 17u8, 66u8, 212u8, 205u8, 185u8, 57u8, 42u8, 227u8, 85u8, 134u8,
+                            33u8, 210u8, 118u8, 131u8, 139u8, 121u8, 33u8, 175u8, 126u8, 58u8,
                         ],
                     )
                 }
@@ -34942,8 +34940,10 @@ pub mod api {
             pub mod past_code_hash {
                 use super::root_mod;
                 use super::runtime_types;
-                pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
-                pub type Param1 = ::core::primitive::u32;
+                pub type Param0 = (
+                    runtime_types::polkadot_parachain_primitives::primitives::Id,
+                    ::core::primitive::u32,
+                );
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = runtime_types :: polkadot_parachain_primitives :: primitives :: ValidationCodeHash ;
@@ -35016,7 +35016,7 @@ pub mod api {
                 pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 pub mod output {
                     use super::runtime_types;
-                    pub type Output = runtime_types::polkadot_primitives::v8::UpgradeGoAhead;
+                    pub type Output = runtime_types::polkadot_primitives::v9::UpgradeGoAhead;
                 }
             }
             pub mod upgrade_restriction_signal {
@@ -35025,7 +35025,7 @@ pub mod api {
                 pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 pub mod output {
                     use super::runtime_types;
-                    pub type Output = runtime_types::polkadot_primitives::v8::UpgradeRestriction;
+                    pub type Output = runtime_types::polkadot_primitives::v9::UpgradeRestriction;
                 }
             }
             pub mod upgrade_cooldowns {
@@ -36694,7 +36694,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v8::assignment_app::Public,
+                        runtime_types::polkadot_primitives::v9::assignment_app::Public,
                     >;
                 }
             }
@@ -36712,7 +36712,7 @@ pub mod api {
                 pub type Param0 = ::core::primitive::u32;
                 pub mod output {
                     use super::runtime_types;
-                    pub type Output = runtime_types::polkadot_primitives::v8::SessionInfo;
+                    pub type Output = runtime_types::polkadot_primitives::v9::SessionInfo;
                 }
             }
             pub mod account_keys {
@@ -36733,7 +36733,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output =
-                        runtime_types::polkadot_primitives::v8::executor_params::ExecutorParams;
+                        runtime_types::polkadot_primitives::v9::executor_params::ExecutorParams;
                 }
             }
         }
@@ -36978,7 +36978,7 @@ pub mod api {
                 pub type Param1 = runtime_types::polkadot_core_primitives::CandidateHash;
                 pub mod output {
                     use super::runtime_types;
-                    pub type Output = runtime_types::polkadot_primitives::v8::DisputeState<
+                    pub type Output = runtime_types::polkadot_primitives::v9::DisputeState<
                         ::core::primitive::u32,
                     >;
                 }
@@ -36991,7 +36991,7 @@ pub mod api {
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
-                        runtime_types::polkadot_primitives::v8::ValidatorIndex,
+                        runtime_types::polkadot_primitives::v9::ValidatorIndex,
                     >;
                 }
             }
@@ -37134,7 +37134,8 @@ pub mod api {
                 pub type Param1 = runtime_types::polkadot_core_primitives::CandidateHash;
                 pub mod output {
                     use super::runtime_types;
-                    pub type Output = runtime_types::polkadot_primitives::vstaging::PendingSlashes;
+                    pub type Output =
+                        runtime_types::polkadot_primitives::v9::slashing::PendingSlashes;
                 }
             }
             pub mod validator_set_counts {
@@ -38038,7 +38039,7 @@ pub mod api {
             pub mod affinity_entries {
                 use super::root_mod;
                 use super::runtime_types;
-                pub type Param0 = runtime_types::polkadot_primitives::v8::CoreIndex;
+                pub type Param0 = runtime_types::polkadot_primitives::v9::CoreIndex;
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::subxt::ext::subxt_core::alloc::vec::Vec<
@@ -38142,7 +38143,7 @@ pub mod api {
                 pub fn core_schedules(
                     &self,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (core_schedules::Param0, core_schedules::Param1),
+                    (core_schedules::Param0,),
                     core_schedules::output::Output,
                     ::subxt::ext::subxt_core::utils::Maybe,
                 > {
@@ -38150,9 +38151,9 @@ pub mod api {
                         "CoretimeAssignmentProvider",
                         "CoreSchedules",
                         [
-                            77u8, 91u8, 46u8, 138u8, 194u8, 1u8, 13u8, 201u8, 24u8, 134u8, 252u8,
-                            142u8, 20u8, 47u8, 127u8, 213u8, 43u8, 119u8, 64u8, 134u8, 192u8, 36u8,
-                            28u8, 196u8, 35u8, 188u8, 197u8, 211u8, 39u8, 127u8, 189u8, 164u8,
+                            19u8, 0u8, 96u8, 29u8, 157u8, 30u8, 60u8, 179u8, 243u8, 28u8, 135u8,
+                            240u8, 245u8, 161u8, 250u8, 229u8, 75u8, 72u8, 0u8, 118u8, 225u8, 12u8,
+                            198u8, 223u8, 15u8, 30u8, 113u8, 56u8, 241u8, 245u8, 64u8, 128u8,
                         ],
                     )
                 }
@@ -38182,8 +38183,10 @@ pub mod api {
             pub mod core_schedules {
                 use super::root_mod;
                 use super::runtime_types;
-                pub type Param0 = ::core::primitive::u32;
-                pub type Param1 = runtime_types::polkadot_primitives::v8::CoreIndex;
+                pub type Param0 = (
+                    ::core::primitive::u32,
+                    runtime_types::polkadot_primitives::v9::CoreIndex,
+                );
                 pub mod output {
                     use super::runtime_types;
                     pub type Output =
@@ -38195,7 +38198,7 @@ pub mod api {
             pub mod core_descriptors {
                 use super::root_mod;
                 use super::runtime_types;
-                pub type Param0 = runtime_types::polkadot_primitives::v8::CoreIndex;
+                pub type Param0 = runtime_types::polkadot_primitives::v9::CoreIndex;
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = runtime_types :: polkadot_runtime_parachains :: assigner_coretime :: CoreDescriptor < :: core :: primitive :: u32 > ;
@@ -39739,7 +39742,7 @@ pub mod api {
                 pub fn reserved_amounts(
                     &self,
                 ) -> ::subxt::ext::subxt_core::storage::address::StaticAddress<
-                    (reserved_amounts::Param0, reserved_amounts::Param1),
+                    (reserved_amounts::Param0,),
                     reserved_amounts::output::Output,
                     ::subxt::ext::subxt_core::utils::Maybe,
                 > {
@@ -39747,10 +39750,10 @@ pub mod api {
                         "Auctions",
                         "ReservedAmounts",
                         [
-                            123u8, 105u8, 179u8, 24u8, 57u8, 231u8, 254u8, 135u8, 82u8, 158u8,
-                            136u8, 76u8, 37u8, 83u8, 35u8, 2u8, 154u8, 173u8, 188u8, 69u8, 201u8,
-                            205u8, 246u8, 11u8, 124u8, 253u8, 94u8, 137u8, 79u8, 240u8, 32u8,
-                            215u8,
+                            228u8, 148u8, 21u8, 107u8, 157u8, 65u8, 177u8, 118u8, 114u8, 18u8,
+                            145u8, 153u8, 143u8, 98u8, 115u8, 232u8, 183u8, 58u8, 138u8, 244u8,
+                            182u8, 149u8, 242u8, 129u8, 158u8, 82u8, 81u8, 119u8, 160u8, 45u8,
+                            27u8, 65u8,
                         ],
                     )
                 }
@@ -39794,8 +39797,10 @@ pub mod api {
             pub mod reserved_amounts {
                 use super::root_mod;
                 use super::runtime_types;
-                pub type Param0 = ::subxt::ext::subxt_core::utils::AccountId32;
-                pub type Param1 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                pub type Param0 = (
+                    ::subxt::ext::subxt_core::utils::AccountId32,
+                    runtime_types::polkadot_parachain_primitives::primitives::Id,
+                );
                 pub mod output {
                     use super::runtime_types;
                     pub type Output = ::core::primitive::u128;
@@ -40651,10 +40656,9 @@ pub mod api {
                         "Crowdloan",
                         "Funds",
                         [
-                            238u8, 177u8, 89u8, 4u8, 142u8, 243u8, 134u8, 146u8, 22u8, 247u8,
-                            158u8, 134u8, 242u8, 181u8, 98u8, 77u8, 126u8, 13u8, 244u8, 243u8,
-                            145u8, 3u8, 62u8, 202u8, 85u8, 137u8, 7u8, 83u8, 26u8, 148u8, 253u8,
-                            64u8,
+                            87u8, 128u8, 254u8, 219u8, 58u8, 122u8, 17u8, 56u8, 210u8, 33u8, 39u8,
+                            86u8, 6u8, 148u8, 62u8, 202u8, 59u8, 125u8, 19u8, 188u8, 51u8, 67u8,
+                            245u8, 175u8, 59u8, 39u8, 177u8, 7u8, 89u8, 183u8, 217u8, 46u8,
                         ],
                     )
                 }
