@@ -95,6 +95,22 @@ impl<ReturnTy: DecodeAsType> Address for StaticAddress<ReturnTy> {
     }
 }
 
+impl<A: AsRef<str>, B: AsRef<str>> Address for (A, B) {
+    type Target = scale_value::Value;
+
+    fn pallet_name(&self) -> &str {
+        self.0.as_ref()
+    }
+
+    fn constant_name(&self) -> &str {
+        self.1.as_ref()
+    }
+
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        None
+    }
+}
+
 /// Construct a new dynamic constant lookup.
 pub fn dynamic<ReturnTy: DecodeAsType>(
     pallet_name: impl Into<String>,
