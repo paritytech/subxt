@@ -24,25 +24,22 @@ impl<T, Client> CustomValuesClient<T, Client> {
 impl<T: Config, Client: OfflineClientT<T>> CustomValuesClient<T, Client> {
     /// Access a custom value by the address it is registered under. This can be just a [str] to get back a dynamic value,
     /// or a static address from the generated static interface to get a value of a static type returned.
-    pub fn at<Addr: Address<IsDecodable = Maybe> + ?Sized>(
+    pub fn at<Addr: Address<IsDecodable = Maybe>>(
         &self,
-        address: &Addr,
+        address: Addr,
     ) -> Result<Addr::Target, CustomValueError> {
         subxt_core::custom_values::get(address, &self.client.metadata())
     }
 
     /// Access the bytes of a custom value by the address it is registered under.
-    pub fn bytes_at<Addr: Address + ?Sized>(
-        &self,
-        address: &Addr,
-    ) -> Result<Vec<u8>, CustomValueError> {
+    pub fn bytes_at<Addr: Address>(&self, address: Addr) -> Result<Vec<u8>, CustomValueError> {
         subxt_core::custom_values::get_bytes(address, &self.client.metadata())
     }
 
     /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Returns an error if the address was not valid (wrong name, type or raw bytes)
-    pub fn validate<Addr: Address + ?Sized>(&self, address: &Addr) -> Result<(), CustomValueError> {
+    pub fn validate<Addr: Address>(&self, address: Addr) -> Result<(), CustomValueError> {
         subxt_core::custom_values::validate(address, &self.client.metadata())
     }
 }

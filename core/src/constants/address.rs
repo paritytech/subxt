@@ -29,6 +29,40 @@ pub trait Address {
     }
 }
 
+// Any reference to an address is a valid address.
+impl<'a, A: Address + ?Sized> Address for &'a A {
+    type Target = A::Target;
+
+    fn pallet_name(&self) -> &str {
+        A::pallet_name(*self)
+    }
+
+    fn constant_name(&self) -> &str {
+        A::constant_name(*self)
+    }
+
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        A::validation_hash(*self)
+    }
+}
+
+// (str, str) and similar are valid addresses.
+impl<A: AsRef<str>, B: AsRef<str>> Address for (A, B) {
+    type Target = scale_value::Value;
+
+    fn pallet_name(&self) -> &str {
+        self.0.as_ref()
+    }
+
+    fn constant_name(&self) -> &str {
+        self.1.as_ref()
+    }
+
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        None
+    }
+}
+
 /// This represents the address of a constant.
 #[derive_where(Clone, Debug, PartialOrd, Ord, PartialEq, Eq)]
 pub struct StaticAddress<ReturnTy> {
@@ -92,22 +126,6 @@ impl<ReturnTy: DecodeAsType> Address for StaticAddress<ReturnTy> {
 
     fn validation_hash(&self) -> Option<[u8; 32]> {
         self.constant_hash
-    }
-}
-
-impl<A: AsRef<str>, B: AsRef<str>> Address for (A, B) {
-    type Target = scale_value::Value;
-
-    fn pallet_name(&self) -> &str {
-        self.0.as_ref()
-    }
-
-    fn constant_name(&self) -> &str {
-        self.1.as_ref()
-    }
-
-    fn validation_hash(&self) -> Option<[u8; 32]> {
-        None
     }
 }
 

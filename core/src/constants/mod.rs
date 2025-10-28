@@ -54,7 +54,7 @@ use scale_decode::IntoVisitor;
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<(), ConstantError> {
+pub fn validate<Addr: Address>(address: Addr, metadata: &Metadata) -> Result<(), ConstantError> {
     if let Some(actual_hash) = address.validation_hash() {
         let expected_hash = metadata
             .pallet_by_name(address.pallet_name())
@@ -74,11 +74,11 @@ pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<()
 /// Fetch a constant out of the metadata given a constant address. If the `address` has been
 /// statically generated, this will validate that the constant shape is as expected, too.
 pub fn get<Addr: Address>(
-    address: &Addr,
+    address: Addr,
     metadata: &Metadata,
 ) -> Result<Addr::Target, ConstantError> {
     // 1. Validate constant shape if hash given:
-    validate(address, metadata)?;
+    validate(&address, metadata)?;
 
     // 2. Attempt to decode the constant into the type given:
     let constant = frame_decode::constants::decode_constant(
@@ -95,11 +95,11 @@ pub fn get<Addr: Address>(
 
 /// Access the bytes of a constant by the address it is registered under.
 pub fn get_bytes<Addr: Address>(
-    address: &Addr,
+    address: Addr,
     metadata: &Metadata,
 ) -> Result<Vec<u8>, ConstantError> {
     // 1. Validate custom value shape if hash given:
-    validate(address, metadata)?;
+    validate(&address, metadata)?;
 
     // 2. Return the underlying bytes:
     let constant = metadata

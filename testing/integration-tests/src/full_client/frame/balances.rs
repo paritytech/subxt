@@ -25,7 +25,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let account_addr = node_runtime::storage().system().account();
 
     let storage_at_pre = api.storage().at_latest().await?;
-    let account_entry_pre = storage_at_pre.entry(account_addr.clone())?;
+    let account_entry_pre = storage_at_pre.entry(&account_addr)?;
 
     let alice_pre = account_entry_pre
         .fetch((alice.public_key().to_account_id(),))
@@ -70,7 +70,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     assert_eq!(event, expected_event);
 
     let storage_at_post = api.storage().at_latest().await?;
-    let account_entry_post = storage_at_post.entry(account_addr.clone())?;
+    let account_entry_post = storage_at_post.entry(&account_addr)?;
 
     let alice_post = account_entry_post
         .fetch((alice.public_key().to_account_id(),))
@@ -100,7 +100,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     let account_addr = subxt::dynamic::storage::<(Value,), Value>("System", "Account");
 
     let storage_at_pre = api.storage().at_latest().await?;
-    let account_entry_pre = storage_at_pre.entry(account_addr.clone())?;
+    let account_entry_pre = storage_at_pre.entry(&account_addr)?;
 
     let alice_pre = account_entry_pre
         .fetch((Value::from_bytes(alice.public_key().to_account_id()),))
@@ -156,7 +156,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     assert_eq!(actual_transfer_event, expected_transfer_event);
 
     let storage_at_post = api.storage().at_latest().await?;
-    let account_entry_post = storage_at_post.entry(account_addr.clone())?;
+    let account_entry_post = storage_at_post.entry(&account_addr)?;
 
     let alice_post = account_entry_post
         .fetch((Value::from_bytes(alice.public_key().to_account_id()),))

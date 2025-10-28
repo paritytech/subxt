@@ -55,7 +55,7 @@ use scale_decode::IntoVisitor;
 /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
 /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
 /// the runtime API in question do not exist at all)
-pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), RuntimeApiError> {
+pub fn validate<P: Payload>(payload: P, metadata: &Metadata) -> Result<(), RuntimeApiError> {
     let Some(hash) = payload.validation_hash() else {
         return Ok(());
     };
@@ -82,12 +82,12 @@ pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), Runt
 }
 
 /// Return the name of the runtime API call from the payload.
-pub fn call_name<P: Payload>(payload: &P) -> String {
+pub fn call_name<P: Payload>(payload: P) -> String {
     format!("{}_{}", payload.trait_name(), payload.method_name())
 }
 
 /// Return the encoded call args given a runtime API payload.
-pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>, RuntimeApiError> {
+pub fn call_args<P: Payload>(payload: P, metadata: &Metadata) -> Result<Vec<u8>, RuntimeApiError> {
     let value = frame_decode::runtime_apis::encode_runtime_api_inputs(
         payload.trait_name(),
         payload.method_name(),
@@ -103,7 +103,7 @@ pub fn call_args<P: Payload>(payload: &P, metadata: &Metadata) -> Result<Vec<u8>
 /// Decode the value bytes at the location given by the provided runtime API payload.
 pub fn decode_value<P: Payload>(
     bytes: &mut &[u8],
-    payload: &P,
+    payload: P,
     metadata: &Metadata,
 ) -> Result<P::ReturnType, RuntimeApiError> {
     let value = frame_decode::runtime_apis::decode_runtime_api_response(

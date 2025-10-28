@@ -31,6 +31,30 @@ pub trait Address {
     }
 }
 
+// Any reference to an address is a valid address
+impl<'a, A: Address + ?Sized> Address for &'a A {
+    type Target = A::Target;
+    type IsDecodable = A::IsDecodable;
+
+    fn name(&self) -> &str {
+        A::name(*self)
+    }
+
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        A::validation_hash(*self)
+    }
+}
+
+// Support plain strings for looking up custom values.
+impl Address for str {
+    type Target = scale_value::Value;
+    type IsDecodable = Maybe;
+
+    fn name(&self) -> &str {
+        self
+    }
+}
+
 /// A static address to a custom value.
 #[derive_where(Clone, Debug, PartialOrd, Ord, PartialEq, Eq)]
 pub struct StaticAddress<ReturnTy, IsDecodable> {
@@ -82,16 +106,6 @@ impl<Target: DecodeAsType, IsDecodable: NoMaybe> Address for StaticAddress<Targe
 
     fn validation_hash(&self) -> Option<[u8; 32]> {
         self.hash
-    }
-}
-
-// Support plain strings for looking up custom values (but prefer `dynamic` if you want to pick the return type)
-impl Address for str {
-    type Target = scale_value::Value;
-    type IsDecodable = Maybe;
-
-    fn name(&self) -> &str {
-        self
     }
 }
 

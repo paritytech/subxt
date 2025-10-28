@@ -65,14 +65,19 @@ async fn storage_child_values_same_across_backends() -> Result<(), subxt::Error>
 
     let chainhead_storage = chainhead_client.storage().at(block_ref.clone());
     let a: Vec<_> = chainhead_storage
-        .iter(addr.clone(), ())
+        .iter(&addr, ())
         .await
         .unwrap()
         .collect()
         .await;
 
     let legacy_storage = legacy_client.storage().at(block_ref.clone());
-    let b: Vec<_> = legacy_storage.iter(addr, ()).await.unwrap().collect().await;
+    let b: Vec<_> = legacy_storage
+        .iter(&addr, ())
+        .await
+        .unwrap()
+        .collect()
+        .await;
 
     for (a, b) in a.into_iter().zip(b.into_iter()) {
         let a = a.unwrap();

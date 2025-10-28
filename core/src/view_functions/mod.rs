@@ -18,7 +18,7 @@ use scale_decode::IntoVisitor;
 /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
 /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
 /// the View Function in question do not exist at all)
-pub fn validate<P: Payload>(payload: &P, metadata: &Metadata) -> Result<(), ViewFunctionError> {
+pub fn validate<P: Payload>(payload: P, metadata: &Metadata) -> Result<(), ViewFunctionError> {
     let Some(hash) = payload.validation_hash() else {
         return Ok(());
     };
@@ -48,7 +48,7 @@ pub const CALL_NAME: &str = "RuntimeViewFunction_execute_view_function";
 /// Encode the bytes that will be passed to the "execute_view_function" Runtime API call,
 /// to execute the View Function represented by the given payload.
 pub fn call_args<P: Payload>(
-    payload: &P,
+    payload: P,
     metadata: &Metadata,
 ) -> Result<Vec<u8>, ViewFunctionError> {
     let inputs = frame_decode::view_functions::encode_view_function_inputs(
@@ -66,7 +66,7 @@ pub fn call_args<P: Payload>(
 /// Decode the value bytes at the location given by the provided View Function payload.
 pub fn decode_value<P: Payload>(
     bytes: &mut &[u8],
-    payload: &P,
+    payload: P,
     metadata: &Metadata,
 ) -> Result<P::ReturnType, ViewFunctionError> {
     let value = frame_decode::view_functions::decode_view_function_response(

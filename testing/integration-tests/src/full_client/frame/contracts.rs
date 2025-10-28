@@ -224,7 +224,7 @@ async fn tx_call() {
     let contract_info_addr = node_runtime::storage().contracts().contract_info_of();
 
     let contract_info = storage_at
-        .fetch(contract_info_addr.clone(), (contract.clone(),))
+        .fetch(&contract_info_addr, (contract.clone(),))
         .await
         .unwrap();
 

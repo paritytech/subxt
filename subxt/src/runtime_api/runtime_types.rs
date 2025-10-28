@@ -40,7 +40,7 @@ where
     /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
     /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
     /// the runtime API in question do not exist at all)
-    pub fn validate<Call: Payload>(&self, payload: &Call) -> Result<(), RuntimeApiError> {
+    pub fn validate<Call: Payload>(&self, payload: Call) -> Result<(), RuntimeApiError> {
         subxt_core::runtime_api::validate(payload, &self.client.metadata()).map_err(Into::into)
     }
 

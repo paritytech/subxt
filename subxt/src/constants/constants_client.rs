@@ -28,7 +28,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie
     /// the pallet or constant in question do not exist at all).
-    pub fn validate<Addr: Address>(&self, address: &Addr) -> Result<(), ConstantError> {
+    pub fn validate<Addr: Address>(&self, address: Addr) -> Result<(), ConstantError> {
         let metadata = self.client.metadata();
         subxt_core::constants::validate(address, &metadata)
     }
@@ -36,13 +36,13 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     /// Access the constant at the address given, returning the type defined by this address.
     /// This is probably used with addresses given from static codegen, although you can manually
     /// construct your own, too.
-    pub fn at<Addr: Address>(&self, address: &Addr) -> Result<Addr::Target, ConstantError> {
+    pub fn at<Addr: Address>(&self, address: Addr) -> Result<Addr::Target, ConstantError> {
         let metadata = self.client.metadata();
         subxt_core::constants::get(address, &metadata)
     }
 
     /// Access the bytes of a constant by the address it is registered under.
-    pub fn bytes_at<Addr: Address>(&self, address: &Addr) -> Result<Vec<u8>, ConstantError> {
+    pub fn bytes_at<Addr: Address>(&self, address: Addr) -> Result<Vec<u8>, ConstantError> {
         let metadata = self.client.metadata();
         subxt_core::constants::get_bytes(address, &metadata)
     }

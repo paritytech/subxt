@@ -35,6 +35,28 @@ pub trait Payload {
     }
 }
 
+// Any reference to a payload is a valid payload.
+impl<'a, P: Payload + ?Sized> Payload for &'a P {
+    type ArgsType = P::ArgsType;
+    type ReturnType = P::ReturnType;
+
+    fn trait_name(&self) -> &str {
+        P::trait_name(*self)
+    }
+
+    fn method_name(&self) -> &str {
+        P::method_name(*self)
+    }
+
+    fn args(&self) -> &Self::ArgsType {
+        P::args(*self)
+    }
+
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        P::validation_hash(*self)
+    }
+}
+
 /// A runtime API payload containing the generic argument data
 /// and interpreting the result of the call as `ReturnTy`.
 ///

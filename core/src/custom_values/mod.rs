@@ -42,10 +42,7 @@ use scale_decode::IntoVisitor;
 /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
 /// if the address is valid (or if it's not possible to check since the address has no validation hash).
 /// Returns an error if the address was not valid (wrong name, type or raw bytes)
-pub fn validate<Addr: Address + ?Sized>(
-    address: &Addr,
-    metadata: &Metadata,
-) -> Result<(), CustomValueError> {
+pub fn validate<Addr: Address>(address: Addr, metadata: &Metadata) -> Result<(), CustomValueError> {
     if let Some(actual_hash) = address.validation_hash() {
         let custom = metadata.custom();
         let custom_value = custom
@@ -61,12 +58,12 @@ pub fn validate<Addr: Address + ?Sized>(
 
 /// Access a custom value by the address it is registered under. This can be just a [str] to get back a dynamic value,
 /// or a static address from the generated static interface to get a value of a static type returned.
-pub fn get<Addr: Address<IsDecodable = Maybe> + ?Sized>(
-    address: &Addr,
+pub fn get<Addr: Address<IsDecodable = Maybe>>(
+    address: Addr,
     metadata: &Metadata,
 ) -> Result<Addr::Target, CustomValueError> {
     // 1. Validate custom value shape if hash given:
-    validate(address, metadata)?;
+    validate(&address, metadata)?;
 
     // 2. Attempt to decode custom value:
     let value = frame_decode::custom_values::decode_custom_value(
@@ -81,12 +78,12 @@ pub fn get<Addr: Address<IsDecodable = Maybe> + ?Sized>(
 }
 
 /// Access the bytes of a custom value by the address it is registered under.
-pub fn get_bytes<Addr: Address + ?Sized>(
-    address: &Addr,
+pub fn get_bytes<Addr: Address>(
+    address: Addr,
     metadata: &Metadata,
 ) -> Result<Vec<u8>, CustomValueError> {
     // 1. Validate custom value shape if hash given:
-    validate(address, metadata)?;
+    validate(&address, metadata)?;
 
     // 2. Return the underlying bytes:
     let custom_value = metadata

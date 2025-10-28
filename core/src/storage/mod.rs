@@ -68,7 +68,7 @@ pub use storage_value::StorageValue;
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<(), StorageError> {
+pub fn validate<Addr: Address>(address: Addr, metadata: &Metadata) -> Result<(), StorageError> {
     let Some(hash) = address.validation_hash() else {
         return Ok(());
     };
