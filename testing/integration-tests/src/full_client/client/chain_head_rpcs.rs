@@ -134,8 +134,12 @@ async fn chainhead_v1_storage() {
     let sub_id = blocks.subscription_id().unwrap();
 
     let alice: AccountId32 = dev::alice().public_key().into();
-    let addr = node_runtime::storage().system().account(alice);
-    let addr_bytes = api.storage().address_bytes(&addr).unwrap();
+
+    let addr_bytes = {
+        let storage_at = api.storage().at_latest().await.unwrap();
+        let addr = node_runtime::storage().system().account();
+        storage_at.entry(addr).unwrap().key((alice,)).unwrap()
+    };
 
     let items = vec![StorageQuery {
         key: addr_bytes.as_slice(),

@@ -13,6 +13,6 @@ mod online_client;
 
 pub use offline_client::{OfflineClient, OfflineClientT};
 pub use online_client::{
-    ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream, Update, UpgradeError,
+    ClientRuntimeUpdater, OnlineClient, OnlineClientT, RuntimeUpdaterStream, Update,
 };
 pub use subxt_core::client::{ClientState, RuntimeVersion};

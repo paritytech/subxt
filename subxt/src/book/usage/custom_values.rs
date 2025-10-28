@@ -13,13 +13,32 @@
 //!
 //! ## Getting a custom value
 //!
-//! Custom values can be accessed via a [`CustomValuesClient`](crate::custom_values::CustomValuesClient).
-//! The client exposes an `at` function by which a custom value can be fetched, given an address to this custom value.
-//! An address can be as simple as the aforementioned __name__ as a [str]. This will return a dynamic value, that you can manually decode into the type you want.
-//! Suppose, the custom types contain a value of type `Foo` under the name `"foo"` you can access it like in this example:
+//! First, you must construct an address to access a custom value. This can be either:
+//! - a raw [`str`] which assumes the return type to be the dynamic [`crate::dynamic::Value`] type,
+//! - created via [`dynamic`](crate::custom_values::dynamic) function whereby you set the return type
+//!   that you want back,
+//! - created via statically generated addresses as part of the `#[subxt]` macro which define the return type.
+//!
+//! With an address, use [`at`](crate::custom_values::CustomValuesClient::at) to access and decode specific values, and
+//! [`bytes_at`](crate::custom_values::CustomValuesClient::bytes_at) to access the raw bytes.
+//!
+//! ## Examples
+//!
+//! Dynamically accessing a custom value using a [`str`] to select which one:
 //!
 //! ```rust,ignore
-//! use subxt::{OnlineClient, PolkadotConfig, ext::{codec::Decode, scale_decode::DecodeAsType}};
+//! use subxt::{OnlineClient, PolkadotConfig, ext::scale_decode::DecodeAsType};
+//! use subxt::dynamic::Value;
+//!
+//! let api = OnlineClient::<PolkadotConfig>::new().await?;
+//! let custom_value_client = api.custom_values();
+//! let foo: Value = custom_value_client.at("foo")?;
+//! ```
+//!
+//! Use the [`dynamic`](crate::custom_values::dynamic) function to select the return type:
+//!
+//! ```rust,ignore
+//! use subxt::{OnlineClient, PolkadotConfig, ext::scale_decode::DecodeAsType};
 //!
 //! #[derive(Decode, DecodeAsType, Debug)]
 //! struct Foo {
@@ -29,9 +48,8 @@
 //!
 //! let api = OnlineClient::<PolkadotConfig>::new().await?;
 //! let custom_value_client = api.custom_values();
-//! let foo_dynamic = custom_value_client.at("foo")?;
-//! let foo: Foo = foo_dynamic.as_type()?;
-//!
+//! let custom_value_addr = subxt::custom_values::dynamic::<Foo>("foo");
+//! let foo: Foo = custom_value_client.at(&custom_value_addr)?;
 //! ```
 //!
 //! Alternatively we also provide a statically generated api for custom values:
@@ -49,6 +67,3 @@
 //! let foo = custom_value_client.at(&static_address)?;
 //! ```         
 //!
-//! Note: Names of custom values are converted to __snake_case__ to produce a valid function name during code generation.
-//! If there are multiple values where the names would be equal when converted to __snake_case__, functions might not be statically generated for some of them, because of naming conflicts.
-//! Make sure names in the custom values of your metadata differ significantly.

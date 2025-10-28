@@ -5,10 +5,8 @@
 //! Types associated with accessing and working with storage items.
 
 mod storage_client;
-mod storage_type;
+mod storage_client_at;
 
 pub use storage_client::StorageClient;
-pub use storage_type::{Storage, StorageKeyValuePair};
-pub use subxt_core::storage::address::{
-    Address, DefaultAddress, DynamicAddress, StaticAddress, StaticStorageKey, StorageKey, dynamic,
-};
+pub use storage_client_at::{StorageClientAt, StorageEntryClient, StorageKeyValue, StorageValue};
+pub use subxt_core::storage::address::{Address, DynamicAddress, StaticAddress, dynamic};

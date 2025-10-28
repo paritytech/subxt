@@ -5,7 +5,7 @@
 use super::follow_stream_driver::FollowStreamDriverHandle;
 use super::follow_stream_unpin::BlockRef;
 use crate::config::{Config, HashFor};
-use crate::error::{Error, RpcError};
+use crate::error::{BackendError, RpcError};
 use futures::{FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;
 use std::future::Future;
@@ -36,7 +36,7 @@ impl<T: Config> StorageItems<T> {
         at: HashFor<T>,
         follow_handle: &FollowStreamDriverHandle<HashFor<T>>,
         methods: ChainHeadRpcMethods<T>,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, BackendError> {
         let sub_id = super::get_subscription_id(follow_handle).await?;
 
         // Subscribe to events and make the initial request to get an operation ID.
@@ -92,10 +92,10 @@ impl<T: Config> StorageItems<T> {
 pub type FollowEventStream<Hash> =
     Pin<Box<dyn Stream<Item = FollowEvent<BlockRef<Hash>>> + Send + 'static>>;
 pub type ContinueFutGetter = Box<dyn Fn() -> ContinueFut + Send + 'static>;
-pub type ContinueFut = Pin<Box<dyn Future<Output = Result<(), Error>> + Send + 'static>>;
+pub type ContinueFut = Pin<Box<dyn Future<Output = Result<(), BackendError>> + Send + 'static>>;
 
 impl<T: Config> Stream for StorageItems<T> {
-    type Item = Result<StorageResult, Error>;
+    type Item = Result<StorageResult, BackendError>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         loop {
@@ -157,7 +157,7 @@ impl<T: Config> Stream for StorageItems<T> {
                 FollowEvent::OperationError(err) if err.operation_id == *self.operation_id => {
                     // Something went wrong obtaining storage items; mark as done and return the error.
                     self.done = true;
-                    return Poll::Ready(Some(Err(Error::Other(err.error))));
+                    return Poll::Ready(Some(Err(BackendError::Other(err.error))));
                 }
                 _ => {
                     // We don't care about this event; wait for the next.

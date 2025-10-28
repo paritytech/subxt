@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::config::{Config, HashFor};
-use crate::error::Error;
+use crate::error::BackendError;
 use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
 use std::future::Future;
 use std::pin::Pin;
@@ -34,12 +34,16 @@ pub type FollowEventStreamGetter<Hash> = Box<dyn FnMut() -> FollowEventStreamFut
 
 /// The future which will return a stream of follow events and the subscription ID for it.
 pub type FollowEventStreamFut<Hash> = Pin<
-    Box<dyn Future<Output = Result<(FollowEventStream<Hash>, String), Error>> + Send + 'static>,
+    Box<
+        dyn Future<Output = Result<(FollowEventStream<Hash>, String), BackendError>>
+            + Send
+            + 'static,
+    >,
 >;
 
 /// The stream of follow events.
 pub type FollowEventStream<Hash> =
-    Pin<Box<dyn Stream<Item = Result<FollowEvent<Hash>, Error>> + Send + 'static>>;
+    Pin<Box<dyn Stream<Item = Result<FollowEvent<Hash>, BackendError>> + Send + 'static>>;
 
 /// Either a ready message with the current subscription ID, or
 /// an event from the stream itself.
@@ -108,7 +112,7 @@ impl<Hash> FollowStream<Hash> {
                     let stream = methods.chainhead_v1_follow(true).await?;
                     // Extract the subscription ID:
                     let Some(sub_id) = stream.subscription_id().map(ToOwned::to_owned) else {
-                        return Err(Error::Other(
+                        return Err(BackendError::Other(
                             "Subscription ID expected for chainHead_follow response, but not given"
                                 .to_owned(),
                         ));
@@ -128,7 +132,7 @@ impl<Hash> FollowStream<Hash> {
 impl<Hash> std::marker::Unpin for FollowStream<Hash> {}
 
 impl<Hash> Stream for FollowStream<Hash> {
-    type Item = Result<FollowStreamMsg<Hash>, Error>;
+    type Item = Result<FollowStreamMsg<Hash>, BackendError>;
 
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let this = self.get_mut();
@@ -228,7 +232,7 @@ pub(super) mod test_utils {
     where
         Hash: Send + 'static,
         F: Fn() -> I + Send + 'static,
-        I: IntoIterator<Item = Result<FollowEvent<Hash>, Error>>,
+        I: IntoIterator<Item = Result<FollowEvent<Hash>, BackendError>>,
     {
         let start_idx = Arc::new(AtomicUsize::new(0));
 
@@ -307,7 +311,7 @@ pub mod test {
                 Ok(FollowEvent::Stop),
                 Ok(ev_new_block(1, 2)),
                 // Nothing should be emitted after an error:
-                Err(Error::Other("ended".to_owned())),
+                Err(BackendError::Other("ended".to_owned())),
                 Ok(ev_new_block(2, 3)),
             ]
         });

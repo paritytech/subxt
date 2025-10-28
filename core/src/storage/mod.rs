@@ -1,4 +1,4 @@
-// Copyright 2019-2024 Parity Technologies (UK) Ltd.
+// Copyright 2019-2025 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -10,7 +10,7 @@
 //! use subxt_signer::sr25519::dev;
 //! use subxt_macro::subxt;
 //! use subxt_core::storage;
-//! use subxt_core::metadata;
+//! use subxt_core::Metadata;
 //!
 //! // If we generate types without `subxt`, we need to point to `::subxt_core`:
 //! #[subxt(
@@ -21,45 +21,54 @@
 //!
 //! // Some metadata we'll use to work with storage entries:
 //! let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
-//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//! let metadata = Metadata::decode_from(&metadata_bytes[..]).unwrap();
 //!
 //! // Build a storage query to access account information.
-//! let account = dev::alice().public_key().into();
-//! let address = polkadot::storage().system().account(account);
+//! let address = polkadot::storage().system().account();
 //!
 //! // We can validate that the address is compatible with the given metadata.
 //! storage::validate(&address, &metadata).unwrap();
 //!
-//! // Encode the address to bytes. These can be sent to a node to query the value.
-//! storage::get_address_bytes(&address, &metadata).unwrap();
+//! // We can fetch details about the storage entry associated with this address:
+//! let entry = storage::entry(address, &metadata).unwrap();
 //!
-//! // If we were to obtain a value back from the node at that address, we could
-//! // then decode it using the same address and metadata like so:
+//! // .. including generating a key to fetch the entry with:
+//! let fetch_key = entry.fetch_key((dev::alice().public_key().into(),)).unwrap();
+//!
+//! // .. or generating a key to iterate over entries with at a given depth:
+//! let iter_key = entry.iter_key(()).unwrap();
+//!
+//! // Given a value, we can decode it:
 //! let value_bytes = hex::decode("00000000000000000100000000000000000064a7b3b6e00d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080").unwrap();
-//! let value = storage::decode_value(&mut &*value_bytes, &address, &metadata).unwrap();
+//! let value = entry.value(value_bytes).decode().unwrap();
 //!
 //! println!("Alice's account info: {value:?}");
 //! ```
 
+mod prefix_of;
+mod storage_entry;
 mod storage_key;
-mod utils;
+mod storage_key_value;
+mod storage_value;
 
 pub mod address;
 
-use crate::{Error, Metadata, error::MetadataError, metadata::DecodeWithMetadata};
+use crate::{Metadata, error::StorageError};
 use address::Address;
-use alloc::vec::Vec;
+use alloc::string::ToString;
 
-// This isn't a part of the public API, but expose here because it's useful in Subxt.
-#[doc(hidden)]
-pub use utils::lookup_storage_entry_details;
+pub use prefix_of::{EqualOrPrefixOf, PrefixOf};
+pub use storage_entry::{StorageEntry, entry};
+pub use storage_key::{StorageHasher, StorageKey, StorageKeyPart};
+pub use storage_key_value::StorageKeyValue;
+pub use storage_value::StorageValue;
 
 /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
 /// that the shape of the storage value is the same as the shape expected by the static address.
 ///
 /// When the provided `address` is dynamic (and thus does not come with any expectation of the
 /// shape of the constant value), this just returns `Ok(())`
-pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<(), Error> {
+pub fn validate<Addr: Address>(address: Addr, metadata: &Metadata) -> Result<(), StorageError> {
     let Some(hash) = address.validation_hash() else {
         return Ok(());
     };
@@ -67,76 +76,19 @@ pub fn validate<Addr: Address>(address: &Addr, metadata: &Metadata) -> Result<()
     let pallet_name = address.pallet_name();
     let entry_name = address.entry_name();
 
-    let pallet_metadata = metadata.pallet_by_name_err(pallet_name)?;
+    let pallet_metadata = metadata
+        .pallet_by_name(pallet_name)
+        .ok_or_else(|| StorageError::PalletNameNotFound(pallet_name.to_string()))?;
+    let storage_hash = pallet_metadata.storage_hash(entry_name).ok_or_else(|| {
+        StorageError::StorageEntryNotFound {
+            pallet_name: pallet_name.to_string(),
+            entry_name: entry_name.to_string(),
+        }
+    })?;
 
-    let Some(expected_hash) = pallet_metadata.storage_hash(entry_name) else {
-        return Err(MetadataError::IncompatibleCodegen.into());
-    };
-    if expected_hash != hash {
-        return Err(MetadataError::IncompatibleCodegen.into());
+    if storage_hash != hash {
+        Err(StorageError::IncompatibleCodegen)
+    } else {
+        Ok(())
     }
-    Ok(())
-}
-
-/// Given a storage address and some metadata, this encodes the address into bytes which can be
-/// handed to a node to retrieve the corresponding value.
-pub fn get_address_bytes<Addr: Address>(
-    address: &Addr,
-    metadata: &Metadata,
-) -> Result<Vec<u8>, Error> {
-    let mut bytes = Vec::new();
-    utils::write_storage_address_root_bytes(address, &mut bytes);
-    address.append_entry_bytes(metadata, &mut bytes)?;
-    Ok(bytes)
-}
-
-/// Given a storage address and some metadata, this encodes the root of the address (ie the pallet
-/// and storage entry part) into bytes. If the entry being addressed is inside a map, this returns
-/// the bytes needed to iterate over all of the entries within it.
-pub fn get_address_root_bytes<Addr: Address>(address: &Addr) -> Vec<u8> {
-    let mut bytes = Vec::new();
-    utils::write_storage_address_root_bytes(address, &mut bytes);
-    bytes
-}
-
-/// Given some storage value that we've retrieved from a node, the address used to retrieve it, and
-/// metadata from the node, this function attempts to decode the bytes into the target value specified
-/// by the address.
-pub fn decode_value<Addr: Address>(
-    bytes: &mut &[u8],
-    address: &Addr,
-    metadata: &Metadata,
-) -> Result<Addr::Target, Error> {
-    let pallet_name = address.pallet_name();
-    let entry_name = address.entry_name();
-
-    let (_, entry_metadata) =
-        utils::lookup_storage_entry_details(pallet_name, entry_name, metadata)?;
-    let value_ty_id = match entry_metadata.entry_type() {
-        subxt_metadata::StorageEntryType::Plain(ty) => *ty,
-        subxt_metadata::StorageEntryType::Map { value_ty, .. } => *value_ty,
-    };
-
-    let val = Addr::Target::decode_with_metadata(bytes, value_ty_id, metadata)?;
-    Ok(val)
-}
-
-/// Return the default value at a given storage address if one is available, or an error otherwise.
-pub fn default_value<Addr: Address>(
-    address: &Addr,
-    metadata: &Metadata,
-) -> Result<Addr::Target, Error> {
-    let pallet_name = address.pallet_name();
-    let entry_name = address.entry_name();
-
-    let (_, entry_metadata) =
-        utils::lookup_storage_entry_details(pallet_name, entry_name, metadata)?;
-    let value_ty_id = match entry_metadata.entry_type() {
-        subxt_metadata::StorageEntryType::Plain(ty) => *ty,
-        subxt_metadata::StorageEntryType::Map { value_ty, .. } => *value_ty,
-    };
-
-    let default_bytes = entry_metadata.default_bytes();
-    let val = Addr::Target::decode_with_metadata(&mut &*default_bytes, value_ty_id, metadata)?;
-    Ok(val)
 }

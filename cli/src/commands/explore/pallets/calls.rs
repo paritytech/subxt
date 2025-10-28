@@ -12,7 +12,7 @@ use subxt::utils::H256;
 use subxt::{
     OfflineClient,
     config::SubstrateConfig,
-    metadata::{Metadata, types::PalletMetadata},
+    metadata::{Metadata, PalletMetadata},
 };
 
 use crate::utils::{

@@ -15,6 +15,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Obtain the value:
     let value = api.constants().at(&constant_query)?;
 
+    // Or obtain the bytes:
+    let bytes = api.constants().bytes_at(&constant_query)?;
+
+    println!("Encoded block length: {bytes:?}");
     println!("Block length: {value:?}");
     Ok(())
 }

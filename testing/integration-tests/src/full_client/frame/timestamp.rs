@@ -9,13 +9,14 @@ async fn storage_get_current_timestamp() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let timestamp = api
-        .storage()
-        .at_latest()
-        .await
-        .unwrap()
-        .fetch(&node_runtime::storage().timestamp().now())
-        .await;
+    let storage_at = api.storage().at_latest().await.unwrap();
 
-    assert!(timestamp.is_ok())
+    let timestamp_value = storage_at
+        .entry(node_runtime::storage().timestamp().now())
+        .unwrap()
+        .fetch()
+        .await
+        .unwrap();
+
+    assert!(timestamp_value.decode().is_ok())
 }

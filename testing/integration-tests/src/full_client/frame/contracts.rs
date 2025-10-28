@@ -75,7 +75,8 @@ impl ContractsTestContext {
 
         let code_stored = events
             .find_first::<events::CodeStored>()?
-            .ok_or_else(|| Error::Other("Failed to find a CodeStored event".into()))?;
+            .ok_or_else(|| Error::other_str("Failed to find a CodeStored event"))?;
+
         Ok(code_stored.code_hash)
     }
 
@@ -109,13 +110,13 @@ impl ContractsTestContext {
 
         let code_stored = events
             .find_first::<events::CodeStored>()?
-            .ok_or_else(|| Error::Other("Failed to find a CodeStored event".into()))?;
+            .ok_or_else(|| Error::other_str("Failed to find a CodeStored event"))?;
         let instantiated = events
             .find_first::<events::Instantiated>()?
-            .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
+            .ok_or_else(|| Error::other_str("Failed to find a Instantiated event"))?;
         let _extrinsic_success = events
             .find_first::<system::events::ExtrinsicSuccess>()?
-            .ok_or_else(|| Error::Other("Failed to find a ExtrinsicSuccess event".into()))?;
+            .ok_or_else(|| Error::other_str("Failed to find a ExtrinsicSuccess event"))?;
 
         tracing::info!("  Code hash: {:?}", code_stored.code_hash);
         tracing::info!("  Contract address: {:?}", instantiated.contract);
@@ -156,7 +157,7 @@ impl ContractsTestContext {
         tracing::info!("Instantiate result: {:?}", result);
         let instantiated = result
             .find_first::<events::Instantiated>()?
-            .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
+            .ok_or_else(|| Error::other_str("Failed to find a Instantiated event"))?;
 
         Ok(instantiated.contract)
     }
@@ -218,37 +219,26 @@ async fn tx_call() {
     let cxt = ContractsTestContext::init().await;
     let (_, contract) = cxt.instantiate_with_code().await.unwrap();
 
-    let info_addr = node_runtime::storage()
-        .contracts()
-        .contract_info_of(contract.clone());
+    let storage_at = cxt.client().storage().at_latest().await.unwrap();
 
-    let contract_info = cxt
-        .client()
-        .storage()
-        .at_latest()
+    let contract_info_addr = node_runtime::storage().contracts().contract_info_of();
+
+    let contract_info = storage_at
+        .fetch(&contract_info_addr, (contract.clone(),))
         .await
-        .unwrap()
-        .fetch(&info_addr)
-        .await;
+        .unwrap();
 
     assert!(
-        contract_info.is_ok(),
+        contract_info.decode().is_ok(),
         "Contract info is not ok, is: {contract_info:?}"
     );
 
-    let info_addr_iter = node_runtime::storage().contracts().contract_info_of_iter();
+    let mut iter = storage_at.iter(contract_info_addr, ()).await.unwrap();
 
-    let keys_and_values = cxt
-        .client()
-        .storage()
-        .at_latest()
-        .await
-        .unwrap()
-        .iter(info_addr_iter)
-        .await
-        .unwrap()
-        .collect::<Vec<_>>()
-        .await;
+    let mut keys_and_values = Vec::new();
+    while let Some(kv) = iter.next().await {
+        keys_and_values.push(kv);
+    }
 
     assert_eq!(keys_and_values.len(), 1);
     println!("keys+values post: {keys_and_values:?}");

@@ -21,10 +21,6 @@ pub enum Error {
     #[error(transparent)]
     StorageError(#[from] StorageError),
     #[error(transparent)]
-    StorageEntryIsNotAMap(#[from] StorageEntryIsNotAMap),
-    #[error(transparent)]
-    StorageEntryIsNotAPlainValue(#[from] StorageEntryIsNotAPlainValue),
-    #[error(transparent)]
     StorageKeyError(#[from] StorageKeyError),
     #[error(transparent)]
     StorageValueError(#[from] StorageValueError),
@@ -214,22 +210,22 @@ pub enum ExtrinsicCallError {
 
 #[allow(missing_docs)]
 #[derive(Debug, thiserror::Error)]
-#[error("Storage entry is not a map: pallet {pallet_name}, storage {storage_name}")]
+#[error("Storage entry is not a map: pallet {pallet_name}, storage {entry_name}")]
 pub struct StorageEntryIsNotAMap {
     /// The pallet containing the storage entry that was not found.
     pub pallet_name: String,
     /// The storage entry that was not found.
-    pub storage_name: String,
+    pub entry_name: String,
 }
 
 #[allow(missing_docs)]
 #[derive(Debug, thiserror::Error)]
-#[error("Storage entry is not a plain value: pallet {pallet_name}, storage {storage_name}")]
+#[error("Storage entry is not a plain value: pallet {pallet_name}, storage {entry_name}")]
 pub struct StorageEntryIsNotAPlainValue {
     /// The pallet containing the storage entry that was not found.
     pub pallet_name: String,
     /// The storage entry that was not found.
-    pub storage_name: String,
+    pub entry_name: String,
 }
 
 #[allow(missing_docs)]
@@ -252,13 +248,22 @@ pub enum StorageError {
         reason: frame_decode::storage::StorageKeyEncodeError,
     },
     #[error(
-        "Too many keys provided: expected {num_keys_expected} keys, but got {num_keys_provided}"
+        "Wrong number of keys provided to fetch a value: expected {num_keys_expected} keys, but got {num_keys_provided}"
     )]
-    WrongNumberOfKeysProvided {
+    WrongNumberOfKeysProvidedForFetch {
         /// The number of keys that were provided.
         num_keys_provided: usize,
         /// The number of keys expected.
         num_keys_expected: usize,
+    },
+    #[error(
+        "too many keys were provided to iterate over a storage entry: expected at most {max_keys_expected} keys, but got {num_keys_provided}"
+    )]
+    TooManyKeysProvidedForIter {
+        /// The number of keys that were provided.
+        num_keys_provided: usize,
+        /// The maximum number of keys that we expect.
+        max_keys_expected: usize,
     },
     #[error(
         "Could not extract storage information from metadata: Unsupported metadata version ({version})"
@@ -294,6 +299,10 @@ pub enum StorageKeyError {
     DecodePartError {
         index: usize,
         reason: scale_decode::Error,
+    },
+    #[error("Could not decode values out of the storage key: {reason}")]
+    DecodeKeyValueError {
+        reason: frame_decode::storage::StorageKeyValueDecodeError,
     },
 }
 

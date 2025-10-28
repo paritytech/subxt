@@ -13,6 +13,7 @@ mod multi_signature;
 mod static_type;
 mod unchecked_extrinsic;
 mod wrapper_opaque;
+mod yesnomaybe;
 
 use alloc::borrow::ToOwned;
 use alloc::format;
@@ -30,6 +31,7 @@ pub use primitive_types::{H160, H256, H512};
 pub use static_type::Static;
 pub use unchecked_extrinsic::UncheckedExtrinsic;
 pub use wrapper_opaque::WrapperKeepOpaque;
+pub use yesnomaybe::{Maybe, No, NoMaybe, Yes, YesMaybe, YesNo};
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
@@ -72,9 +74,6 @@ unsafe impl<T> Sync for PhantomDataSendSync<T> {}
 /// with collections like BTreeMap. This has the same type params
 /// as `BTreeMap` which allows us to easily swap the two during codegen.
 pub type KeyedVec<K, V> = Vec<(K, V)>;
-
-/// A unit marker struct.
-pub struct Yes;
 
 /// A quick helper to encode some bytes to hex.
 pub fn to_hex(bytes: impl AsRef<[u8]>) -> String {

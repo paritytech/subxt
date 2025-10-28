@@ -7,7 +7,7 @@ use crate::{
     backend::BlockRef,
     client::OnlineClientT,
     config::{Config, HashFor},
-    error::Error,
+    error::RuntimeApiError,
 };
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
@@ -40,7 +40,7 @@ where
     /// if the payload is valid (or if it's not possible to check since the payload has no validation hash).
     /// Return an error if the payload was not valid or something went wrong trying to validate it (ie
     /// the runtime API in question do not exist at all)
-    pub fn validate<Call: Payload>(&self, payload: &Call) -> Result<(), Error> {
+    pub fn validate<Call: Payload>(&self, payload: Call) -> Result<(), RuntimeApiError> {
         subxt_core::runtime_api::validate(payload, &self.client.metadata()).map_err(Into::into)
     }
 
@@ -50,7 +50,7 @@ where
         &self,
         function: &'a str,
         call_parameters: Option<&'a [u8]>,
-    ) -> impl Future<Output = Result<Vec<u8>, Error>> + use<'a, Client, T> {
+    ) -> impl Future<Output = Result<Vec<u8>, RuntimeApiError>> + use<'a, Client, T> {
         let client = self.client.clone();
         let block_hash = self.block_ref.hash();
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
@@ -59,7 +59,8 @@ where
             let data = client
                 .backend()
                 .call(function, call_parameters, block_hash)
-                .await?;
+                .await
+                .map_err(RuntimeApiError::CannotCallApi)?;
             Ok(data)
         }
     }
@@ -68,7 +69,8 @@ where
     pub fn call<Call: Payload>(
         &self,
         payload: Call,
-    ) -> impl Future<Output = Result<Call::ReturnType, Error>> + use<Call, Client, T> {
+    ) -> impl Future<Output = Result<Call::ReturnType, RuntimeApiError>> + use<Call, Client, T>
+    {
         let client = self.client.clone();
         let block_hash = self.block_ref.hash();
         // Ensure that the returned future doesn't have a lifetime tied to api.runtime_api(),
@@ -87,7 +89,8 @@ where
             let bytes = client
                 .backend()
                 .call(&call_name, Some(call_args.as_slice()), block_hash)
-                .await?;
+                .await
+                .map_err(RuntimeApiError::CannotCallApi)?;
 
             // Decode the response.
             let value = subxt_core::runtime_api::decode_value(&mut &*bytes, &payload, &metadata)?;

@@ -6,53 +6,238 @@
 
 use alloc::boxed::Box;
 use alloc::string::String;
-use subxt_metadata::StorageHasher;
+use alloc::vec::Vec;
 use thiserror::Error as DeriveError;
 
 /// The error emitted when something goes wrong.
 #[derive(Debug, DeriveError)]
+#[allow(missing_docs)]
 pub enum Error {
-    /// Codec error.
-    #[error("Codec error: {0}")]
-    Codec(codec::Error),
-    /// Metadata error.
     #[error(transparent)]
-    Metadata(#[from] MetadataError),
-    /// Storage address error.
+    StorageError(#[from] StorageError),
     #[error(transparent)]
-    StorageAddress(#[from] StorageAddressError),
-    /// Error decoding to a [`crate::dynamic::Value`].
-    #[error("Error decoding into dynamic value: {0}")]
-    Decode(#[from] scale_decode::Error),
-    /// Error encoding from a [`crate::dynamic::Value`].
-    #[error("Error encoding from dynamic value: {0}")]
-    Encode(#[from] scale_encode::Error),
-    /// Error constructing an extrinsic.
-    #[error("Error constructing transaction: {0}")]
     Extrinsic(#[from] ExtrinsicError),
-    /// Block body error.
-    #[error("Error working with block_body: {0}")]
-    Block(#[from] BlockError),
+    #[error(transparent)]
+    Constant(#[from] ConstantError),
+    #[error(transparent)]
+    CustomValue(#[from] CustomValueError),
+    #[error(transparent)]
+    RuntimeApi(#[from] RuntimeApiError),
+    #[error(transparent)]
+    ViewFunction(#[from] ViewFunctionError),
+    #[error(transparent)]
+    Events(#[from] EventsError),
 }
 
-impl From<scale_decode::visitor::DecodeError> for Error {
-    fn from(err: scale_decode::visitor::DecodeError) -> Error {
-        Error::Decode(err.into())
-    }
-}
-
-// TODO: when `codec::Error` implements `core::Error`
-// remove this impl and replace it by thiserror #[from]
-impl From<codec::Error> for Error {
-    fn from(err: codec::Error) -> Error {
-        Error::Codec(err)
-    }
-}
-
-/// Block error
 #[derive(Debug, DeriveError)]
-pub enum BlockError {
-    /// Leftover bytes found after decoding the extrinsic.
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum EventsError {
+    #[error("Can't decode event: can't decode phase: {0}")]
+    CannotDecodePhase(codec::Error),
+    #[error("Can't decode event: can't decode pallet index: {0}")]
+    CannotDecodePalletIndex(codec::Error),
+    #[error("Can't decode event: can't decode variant index: {0}")]
+    CannotDecodeVariantIndex(codec::Error),
+    #[error("Can't decode event: can't find pallet with index {0}")]
+    CannotFindPalletWithIndex(u8),
+    #[error(
+        "Can't decode event: can't find variant with index {variant_index} in pallet {pallet_name}"
+    )]
+    CannotFindVariantWithIndex {
+        pallet_name: String,
+        variant_index: u8,
+    },
+    #[error("Can't decode field {field_name:?} in event {pallet_name}.{event_name}: {reason}")]
+    CannotDecodeFieldInEvent {
+        pallet_name: String,
+        event_name: String,
+        field_name: String,
+        reason: scale_decode::visitor::DecodeError,
+    },
+    #[error("Can't decode event topics: {0}")]
+    CannotDecodeEventTopics(codec::Error),
+    #[error("Can't decode the fields of event {pallet_name}.{event_name}: {reason}")]
+    CannotDecodeEventFields {
+        pallet_name: String,
+        event_name: String,
+        reason: scale_decode::Error,
+    },
+    #[error("Can't decode event {pallet_name}.{event_name} to Event enum: {reason}")]
+    CannotDecodeEventEnum {
+        pallet_name: String,
+        event_name: String,
+        reason: scale_decode::Error,
+    },
+}
+
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum ViewFunctionError {
+    #[error("The static View Function address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Can't find View Function: pallet {0} not found")]
+    PalletNotFound(String),
+    #[error("Can't find View Function {function_name} in pallet {pallet_name}")]
+    ViewFunctionNotFound {
+        pallet_name: String,
+        function_name: String,
+    },
+    #[error("Failed to encode View Function inputs: {0}")]
+    CouldNotEncodeInputs(frame_decode::view_functions::ViewFunctionInputsEncodeError),
+    #[error("Failed to decode View Function: {0}")]
+    CouldNotDecodeResponse(frame_decode::view_functions::ViewFunctionDecodeError<u32>),
+}
+
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum RuntimeApiError {
+    #[error("The static Runtime API address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Runtime API trait not found: {0}")]
+    TraitNotFound(String),
+    #[error("Runtime API method {method_name} not found in trait {trait_name}")]
+    MethodNotFound {
+        trait_name: String,
+        method_name: String,
+    },
+    #[error("Failed to encode Runtime API inputs: {0}")]
+    CouldNotEncodeInputs(frame_decode::runtime_apis::RuntimeApiInputsEncodeError),
+    #[error("Failed to decode Runtime API: {0}")]
+    CouldNotDecodeResponse(frame_decode::runtime_apis::RuntimeApiDecodeError<u32>),
+}
+
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum CustomValueError {
+    #[error("The static custom value address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("The custom value '{0}' was not found")]
+    NotFound(String),
+    #[error("Failed to decode custom value: {0}")]
+    CouldNotDecodeCustomValue(frame_decode::custom_values::CustomValueDecodeError<u32>),
+}
+
+/// Something went wrong working with a constant.
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum ConstantError {
+    #[error("The static constant address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Can't find constant: pallet with name {0} not found")]
+    PalletNameNotFound(String),
+    #[error(
+        "Constant '{constant_name}' not found in pallet {pallet_name} in the live chain metadata"
+    )]
+    ConstantNameNotFound {
+        pallet_name: String,
+        constant_name: String,
+    },
+    #[error("Failed to decode constant: {0}")]
+    CouldNotDecodeConstant(frame_decode::constants::ConstantDecodeError<u32>),
+    #[error("Cannot obtain constant information from metadata: {0}")]
+    ConstantInfoError(frame_decode::constants::ConstantInfoError<'static>),
+}
+
+/// Something went wrong trying to encode or decode a storage address.
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum StorageError {
+    #[error("The static storage address used is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Can't find storage value: pallet with name {0} not found")]
+    PalletNameNotFound(String),
+    #[error(
+        "Storage entry '{entry_name}' not found in pallet {pallet_name} in the live chain metadata"
+    )]
+    StorageEntryNotFound {
+        pallet_name: String,
+        entry_name: String,
+    },
+    #[error("Cannot obtain storage information from metadata: {0}")]
+    StorageInfoError(frame_decode::storage::StorageInfoError<'static>),
+    #[error("Cannot encode storage key: {0}")]
+    StorageKeyEncodeError(frame_decode::storage::StorageKeyEncodeError),
+    #[error("Cannot create a key to iterate over a plain entry")]
+    CannotIterPlainEntry {
+        pallet_name: String,
+        entry_name: String,
+    },
+    #[error(
+        "Wrong number of key parts provided to iterate a storage address. We expected at most {max_expected} key parts but got {got} key parts"
+    )]
+    WrongNumberOfKeyPartsProvidedForIterating { max_expected: usize, got: usize },
+    #[error(
+        "Wrong number of key parts provided to fetch a storage address. We expected {expected} key parts but got {got} key parts"
+    )]
+    WrongNumberOfKeyPartsProvidedForFetching { expected: usize, got: usize },
+}
+
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum StorageKeyError {
+    #[error("Can't decode the storage key: {error}")]
+    StorageKeyDecodeError {
+        bytes: Vec<u8>,
+        error: frame_decode::storage::StorageKeyDecodeError<u32>,
+    },
+    #[error("Can't decode the values from the storage key: {0}")]
+    CannotDecodeValuesInKey(frame_decode::storage::StorageKeyValueDecodeError),
+    #[error(
+        "Cannot decode storage key: there were leftover bytes, indicating that the decoding failed"
+    )]
+    LeftoverBytes { bytes: Vec<u8> },
+    #[error("Can't decode a single value from the storage key part at index {index}: {error}")]
+    CannotDecodeValueInKey {
+        index: usize,
+        error: scale_decode::Error,
+    },
+}
+
+#[derive(Debug, DeriveError)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum StorageValueError {
+    #[error("Cannot decode storage value: {0}")]
+    CannotDecode(frame_decode::storage::StorageValueDecodeError<u32>),
+    #[error(
+        "Cannot decode storage value: there were leftover bytes, indicating that the decoding failed"
+    )]
+    LeftoverBytes { bytes: Vec<u8> },
+}
+
+/// An error that can be encountered when constructing a transaction.
+#[derive(Debug, DeriveError)]
+#[allow(missing_docs)]
+pub enum ExtrinsicError {
+    #[error("The extrinsic payload is not compatible with the live chain")]
+    IncompatibleCodegen,
+    #[error("Can't find extrinsic: pallet with name {0} not found")]
+    PalletNameNotFound(String),
+    #[error("Can't find extrinsic: call name {call_name} doesn't exist in pallet {pallet_name}")]
+    CallNameNotFound {
+        pallet_name: String,
+        call_name: String,
+    },
+    #[error("Can't encode the extrinsic call data: {0}")]
+    CannotEncodeCallData(scale_encode::Error),
+    #[error("Subxt does not support the extrinsic versions expected by the chain")]
+    UnsupportedVersion,
+    #[error("Cannot construct the required transaction extensions: {0}")]
+    Params(#[from] ExtrinsicParamsError),
+    #[error("Cannot decode transaction extension '{name}': {error}")]
+    CouldNotDecodeTransactionExtension {
+        /// The extension name.
+        name: String,
+        /// The decode error.
+        error: scale_decode::Error,
+    },
     #[error(
         "After decoding the extrinsic at index {extrinsic_index}, {num_leftover_bytes} bytes were left, suggesting that decoding may have failed"
     )]
@@ -62,140 +247,49 @@ pub enum BlockError {
         /// Number of bytes leftover after decoding the extrinsic.
         num_leftover_bytes: usize,
     },
-    /// Something went wrong decoding the extrinsic.
-    #[error("Failed to decode extrinsic at index {extrinsic_index}: {error}")]
-    ExtrinsicDecodeError {
-        /// Index of the extrinsic that failed to decode.
+    #[error("{0}")]
+    ExtrinsicDecodeErrorAt(#[from] ExtrinsicDecodeErrorAt),
+    #[error("Failed to decode the fields of an extrinsic at index {extrinsic_index}: {error}")]
+    CannotDecodeFields {
+        /// Index of the extrinsic whose fields we could not decode
         extrinsic_index: usize,
         /// The decode error.
-        error: ExtrinsicDecodeError,
+        error: scale_decode::Error,
+    },
+    #[error("Failed to decode the extrinsic at index {extrinsic_index} to a root enum: {error}")]
+    CannotDecodeIntoRootExtrinsic {
+        /// Index of the extrinsic that we failed to decode
+        extrinsic_index: usize,
+        /// The decode error.
+        error: scale_decode::Error,
     },
 }
 
-/// An alias for [`frame_decode::extrinsics::ExtrinsicDecodeError`].
-///
-pub type ExtrinsicDecodeError = frame_decode::extrinsics::ExtrinsicDecodeError;
-
-/// Something went wrong trying to access details in the metadata.
-#[derive(Clone, Debug, PartialEq, DeriveError)]
+#[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
-pub enum MetadataError {
-    /// The DispatchError type isn't available in the metadata
-    #[error("The DispatchError type isn't available")]
-    DispatchErrorNotFound,
-    /// Type not found in metadata.
-    #[error("Type with ID {0} not found")]
-    TypeNotFound(u32),
-    /// Pallet not found (index).
-    #[error("Pallet with index {0} not found")]
-    PalletIndexNotFound(u8),
-    /// Pallet not found (name).
-    #[error("Pallet with name {0} not found")]
-    PalletNameNotFound(String),
-    /// Variant not found.
-    #[error("Variant with index {0} not found")]
-    VariantIndexNotFound(u8),
-    /// Constant not found.
-    #[error("Constant with name {0} not found")]
-    ConstantNameNotFound(String),
-    /// Call not found.
-    #[error("Call with name {0} not found")]
-    CallNameNotFound(String),
-    /// Runtime trait not found.
-    #[error("Runtime trait with name {0} not found")]
-    RuntimeTraitNotFound(String),
-    /// Runtime method not found.
-    #[error("Runtime method with name {0} not found")]
-    RuntimeMethodNotFound(String),
-    /// View Function not found.
-    #[error("View Function with query ID {} not found", hex::encode(.0))]
-    ViewFunctionNotFound([u8; 32]),
-    /// Call type not found in metadata.
-    #[error("Call type not found in pallet with index {0}")]
-    CallTypeNotFoundInPallet(u8),
-    /// Event type not found in metadata.
-    #[error("Event type not found in pallet with index {0}")]
-    EventTypeNotFoundInPallet(u8),
-    /// Storage details not found in metadata.
-    #[error("Storage details not found in pallet with name {0}")]
-    StorageNotFoundInPallet(String),
-    /// Storage entry not found.
-    #[error("Storage entry {0} not found")]
-    StorageEntryNotFound(String),
-    /// The generated interface used is not compatible with the node.
-    #[error("The generated code is not compatible with the node")]
-    IncompatibleCodegen,
-    /// Custom value not found.
-    #[error("Custom value with name {0} not found")]
-    CustomValueNameNotFound(String),
+#[allow(missing_docs)]
+#[error("Cannot decode extrinsic at index {extrinsic_index}: {error}")]
+pub struct ExtrinsicDecodeErrorAt {
+    pub extrinsic_index: usize,
+    pub error: ExtrinsicDecodeErrorAtReason,
 }
 
-/// Something went wrong trying to encode or decode a storage address.
-#[derive(Clone, Debug, DeriveError)]
+#[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
-pub enum StorageAddressError {
-    /// Storage lookup does not have the expected number of keys.
-    #[error("Storage lookup requires {expected} keys but more keys have been provided.")]
-    TooManyKeys {
-        /// The number of keys provided in the storage address.
-        expected: usize,
-    },
-    /// This storage entry in the metadata does not have the correct number of hashers to fields.
-    #[error("Storage entry in metadata does not have the correct number of hashers to fields")]
-    WrongNumberOfHashers {
-        /// The number of hashers in the metadata for this storage entry.
-        hashers: usize,
-        /// The number of fields in the metadata for this storage entry.
-        fields: usize,
-    },
-    /// We weren't given enough bytes to decode the storage address/key.
-    #[error("Not enough remaining bytes to decode the storage address/key")]
-    NotEnoughBytes,
-    /// We have leftover bytes after decoding the storage address.
-    #[error("We have leftover bytes after decoding the storage address")]
-    TooManyBytes,
-    /// The bytes of a storage address are not the expected address for decoding the storage keys of the address.
-    #[error(
-        "Storage address bytes are not the expected format. Addresses need to be at least 16 bytes (pallet ++ entry) and follow a structure given by the hashers defined in the metadata"
-    )]
-    UnexpectedAddressBytes,
-    /// An invalid hasher was used to reconstruct a value from a chunk of bytes that is part of a storage address. Hashers where the hash does not contain the original value are invalid for this purpose.
-    #[error(
-        "An invalid hasher was used to reconstruct a value with type ID {ty_id} from a hash formed by a {hasher:?} hasher. This is only possible for concat-style hashers or the identity hasher"
-    )]
-    HasherCannotReconstructKey {
-        /// Type id of the key's type.
-        ty_id: u32,
-        /// The invalid hasher that caused this error.
-        hasher: StorageHasher,
-    },
-}
-
-/// An error that can be encountered when constructing a transaction.
-#[derive(Debug, DeriveError)]
-#[non_exhaustive]
-pub enum ExtrinsicError {
-    /// Transaction version not supported by Subxt.
-    #[error("Subxt does not support the extrinsic versions expected by the chain")]
-    UnsupportedVersion,
-    /// Issue encoding transaction extensions.
-    #[error("Cannot construct the required transaction extensions: {0}")]
-    Params(#[from] ExtrinsicParamsError),
-}
-
-impl From<ExtrinsicParamsError> for Error {
-    fn from(value: ExtrinsicParamsError) -> Self {
-        Error::Extrinsic(value.into())
-    }
+#[allow(missing_docs)]
+pub enum ExtrinsicDecodeErrorAtReason {
+    #[error("{0}")]
+    DecodeError(frame_decode::extrinsics::ExtrinsicDecodeError),
+    #[error("Leftover bytes")]
+    LeftoverBytes(Vec<u8>),
 }
 
 /// An error that can be emitted when trying to construct an instance of [`crate::config::ExtrinsicParams`],
 /// encode data from the instance, or match on signed extensions.
 #[derive(Debug, DeriveError)]
 #[non_exhaustive]
+#[allow(missing_docs)]
 pub enum ExtrinsicParamsError {
-    /// Cannot find a type id in the metadata. The context provides some additional
-    /// information about the source of the error (eg the signed extension name).
     #[error("Cannot find type id '{type_id} in the metadata (context: {context})")]
     MissingTypeId {
         /// Type ID.
@@ -203,10 +297,8 @@ pub enum ExtrinsicParamsError {
         /// Some arbitrary context to help narrow the source of the error.
         context: &'static str,
     },
-    /// A signed extension in use on some chain was not provided.
     #[error("The chain expects a signed extension with the name {0}, but we did not provide one")]
     UnknownTransactionExtension(String),
-    /// Some custom error.
     #[error("Error constructing extrinsic parameters: {0}")]
     Custom(Box<dyn core::error::Error + Send + Sync + 'static>),
 }

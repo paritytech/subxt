@@ -4,7 +4,6 @@
 
 use crate::utils::node_runtime;
 use crate::{subxt_test, test_context};
-use core::ops::Deref;
 use frame_decode::extrinsics::ExtrinsicType;
 use subxt_signer::sr25519::dev;
 
@@ -25,12 +24,9 @@ async fn v4_unsigned_encode_decode() -> Result<(), subxt::Error> {
     let tx_bytes = api.tx().create_v4_unsigned(&call).unwrap().into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
-    let decoded = frame_decode::extrinsics::decode_extrinsic(
-        tx_bytes_cursor,
-        md.deref(),
-        api.metadata().types(),
-    )
-    .unwrap();
+    let decoded =
+        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, &md, api.metadata().types())
+            .unwrap();
 
     assert_eq!(tx_bytes_cursor.len(), 0);
     assert_eq!(decoded.version(), 4);
@@ -55,12 +51,8 @@ async fn v5_bare_encode_decode() -> Result<(), subxt::Error> {
     let tx_bytes = api.tx().create_v5_bare(&call).unwrap().into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
-    let decoded = frame_decode::extrinsics::decode_extrinsic(
-        tx_bytes_cursor,
-        md.deref(),
-        api.metadata().types(),
-    )
-    .unwrap();
+    let decoded =
+        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, &md, md.types()).unwrap();
 
     assert_eq!(tx_bytes_cursor.len(), 0);
     assert_eq!(decoded.version(), 5);
@@ -92,12 +84,8 @@ async fn v4_signed_encode_decode() -> Result<(), subxt::Error> {
         .into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
-    let decoded = frame_decode::extrinsics::decode_extrinsic(
-        tx_bytes_cursor,
-        md.deref(),
-        api.metadata().types(),
-    )
-    .unwrap();
+    let decoded =
+        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, &md, md.types()).unwrap();
 
     assert_eq!(tx_bytes_cursor.len(), 0);
     assert_eq!(decoded.version(), 4);
@@ -129,12 +117,8 @@ async fn v5_general_encode_decode() -> Result<(), subxt::Error> {
         .into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
-    let decoded = frame_decode::extrinsics::decode_extrinsic(
-        tx_bytes_cursor,
-        md.deref(),
-        api.metadata().types(),
-    )
-    .unwrap();
+    let decoded =
+        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, &md, md.types()).unwrap();
 
     assert_eq!(tx_bytes_cursor.len(), 0);
     assert_eq!(decoded.version(), 5);

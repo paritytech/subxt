@@ -11,14 +11,14 @@ pub mod legacy;
 pub mod utils;
 
 use crate::config::{Config, HashFor};
-use crate::error::Error;
-use crate::metadata::Metadata;
+use crate::error::BackendError;
 use async_trait::async_trait;
 use codec::{Decode, Encode};
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use std::sync::Arc;
 use subxt_core::client::RuntimeVersion;
+use subxt_metadata::Metadata;
 
 /// Some re-exports from the [`subxt_rpcs`] crate, also accessible in full via [`crate::ext::subxt_rpcs`].
 pub mod rpc {
@@ -82,66 +82,67 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
         &self,
         keys: Vec<Vec<u8>>,
         at: HashFor<T>,
-    ) -> Result<StreamOfResults<StorageResponse>, Error>;
+    ) -> Result<StreamOfResults<StorageResponse>, BackendError>;
 
     /// Fetch keys underneath the given key from storage.
     async fn storage_fetch_descendant_keys(
         &self,
         key: Vec<u8>,
         at: HashFor<T>,
-    ) -> Result<StreamOfResults<Vec<u8>>, Error>;
+    ) -> Result<StreamOfResults<Vec<u8>>, BackendError>;
 
     /// Fetch values underneath the given key from storage.
     async fn storage_fetch_descendant_values(
         &self,
         key: Vec<u8>,
         at: HashFor<T>,
-    ) -> Result<StreamOfResults<StorageResponse>, Error>;
+    ) -> Result<StreamOfResults<StorageResponse>, BackendError>;
 
     /// Fetch the genesis hash
-    async fn genesis_hash(&self) -> Result<HashFor<T>, Error>;
+    async fn genesis_hash(&self) -> Result<HashFor<T>, BackendError>;
 
     /// Get a block header
-    async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, Error>;
+    async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, BackendError>;
 
     /// Return the extrinsics found in the block. Each extrinsic is represented
     /// by a vector of bytes which has _not_ been SCALE decoded (in other words, the
     /// first bytes in the vector will decode to the compact encoded length of the extrinsic)
-    async fn block_body(&self, at: HashFor<T>) -> Result<Option<Vec<Vec<u8>>>, Error>;
+    async fn block_body(&self, at: HashFor<T>) -> Result<Option<Vec<Vec<u8>>>, BackendError>;
 
     /// Get the most recent finalized block hash.
     /// Note: needed only in blocks client for finalized block stream; can prolly be removed.
-    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<HashFor<T>>, Error>;
+    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<HashFor<T>>, BackendError>;
 
     /// Get information about the current runtime.
-    async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error>;
+    async fn current_runtime_version(&self) -> Result<RuntimeVersion, BackendError>;
 
     /// A stream of all new runtime versions as they occur.
-    async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error>;
+    async fn stream_runtime_version(&self)
+    -> Result<StreamOfResults<RuntimeVersion>, BackendError>;
 
     /// A stream of all new block headers as they arrive.
     async fn stream_all_block_headers(
         &self,
         hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error>;
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError>;
 
     /// A stream of best block headers.
     async fn stream_best_block_headers(
         &self,
         hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error>;
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError>;
 
     /// A stream of finalized block headers.
     async fn stream_finalized_block_headers(
         &self,
         hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error>;
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError>;
 
     /// Submit a transaction. This will return a stream of events about it.
     async fn submit_transaction(
         &self,
         bytes: &[u8],
-    ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, Error>;
+    ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, BackendError>;
 
     /// Make a call to some runtime API.
     async fn call(
@@ -149,7 +150,7 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
         method: &str,
         call_parameters: Option<&[u8]>,
         at: HashFor<T>,
-    ) -> Result<Vec<u8>, Error>;
+    ) -> Result<Vec<u8>, BackendError>;
 }
 
 /// helpful utility methods derived from those provided on [`Backend`]
@@ -160,7 +161,7 @@ pub trait BackendExt<T: Config>: Backend<T> {
         &self,
         key: Vec<u8>,
         at: HashFor<T>,
-    ) -> Result<Option<Vec<u8>>, Error> {
+    ) -> Result<Option<Vec<u8>>, BackendError> {
         self.storage_fetch_values(vec![key], at)
             .await?
             .next()
@@ -176,32 +177,39 @@ pub trait BackendExt<T: Config>: Backend<T> {
         method: &str,
         call_parameters: Option<&[u8]>,
         at: HashFor<T>,
-    ) -> Result<D, Error> {
+    ) -> Result<D, BackendError> {
         let bytes = self.call(method, call_parameters, at).await?;
-        let res = D::decode(&mut &*bytes)?;
+        let res =
+            D::decode(&mut &*bytes).map_err(BackendError::CouldNotScaleDecodeRuntimeResponse)?;
         Ok(res)
     }
 
     /// Return the metadata at some version.
-    async fn metadata_at_version(&self, version: u32, at: HashFor<T>) -> Result<Metadata, Error> {
+    async fn metadata_at_version(
+        &self,
+        version: u32,
+        at: HashFor<T>,
+    ) -> Result<Metadata, BackendError> {
         let param = version.encode();
 
         let opaque: Option<frame_metadata::OpaqueMetadata> = self
             .call_decoding("Metadata_metadata_at_version", Some(&param), at)
             .await?;
         let Some(opaque) = opaque else {
-            return Err(Error::Other("Metadata version not found".into()));
+            return Err(BackendError::MetadataVersionNotFound(version));
         };
 
-        let metadata: Metadata = Decode::decode(&mut &opaque.0[..])?;
+        let metadata: Metadata =
+            Decode::decode(&mut &opaque.0[..]).map_err(BackendError::CouldNotDecodeMetadata)?;
         Ok(metadata)
     }
 
     /// Return V14 metadata from the legacy `Metadata_metadata` call.
-    async fn legacy_metadata(&self, at: HashFor<T>) -> Result<Metadata, Error> {
+    async fn legacy_metadata(&self, at: HashFor<T>) -> Result<Metadata, BackendError> {
         let opaque: frame_metadata::OpaqueMetadata =
             self.call_decoding("Metadata_metadata", None, at).await?;
-        let metadata: Metadata = Decode::decode(&mut &opaque.0[..])?;
+        let metadata: Metadata =
+            Decode::decode(&mut &opaque.0[..]).map_err(BackendError::CouldNotDecodeMetadata)?;
         Ok(metadata)
     }
 }
@@ -325,8 +333,8 @@ impl<T> StreamOf<T> {
     }
 }
 
-/// A stream of [`Result<Item, Error>`].
-pub type StreamOfResults<T> = StreamOf<Result<T, Error>>;
+/// A stream of [`Result<Item, BackendError>`].
+pub type StreamOfResults<T> = StreamOf<Result<T, BackendError>>;
 
 /// The status of the transaction.
 ///
@@ -541,7 +549,7 @@ mod test {
         /// - `call`
         /// The test covers them because they follow the simple pattern of:
         /// ```rust,no_run,standalone_crate
-        ///  async fn THE_THING(&self) -> Result<HashFor<T>, Error> {
+        ///  async fn THE_THING(&self) -> Result<HashFor<T>, BackendError> {
         ///    retry(|| <DO THE THING> ).await
         ///  }
         /// ```
@@ -574,7 +582,7 @@ mod test {
         /// ```rust,no_run,standalone_crate
         /// async fn stream_the_thing(
         ///     &self,
-        /// ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {
+        /// ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
         ///     let methods = self.methods.clone();
         ///     let retry_sub = retry_stream(move || {
         ///         let methods = methods.clone();
@@ -635,7 +643,7 @@ mod test {
             );
             assert!(matches!(
                 results.next().await.unwrap(),
-                Err(Error::Rpc(RpcError::ClientError(
+                Err(BackendError::Rpc(RpcError::ClientError(
                     subxt_rpcs::Error::Client(_)
                 )))
             ));
@@ -644,7 +652,6 @@ mod test {
     }
 
     mod unstable_backend {
-        use crate::error::RpcError;
         use subxt_rpcs::methods::chain_head::{
             self, Bytes, Initialized, MethodResponse, MethodResponseStarted, OperationError,
             OperationId, OperationStorageItems, RuntimeSpec, RuntimeVersionEvent,
@@ -858,7 +865,7 @@ mod test {
                     .next()
                     .await
                     .unwrap()
-                    .is_err_and(|e| matches!(e, Error::Other(e) if e == "error"))
+                    .is_err_and(|e| matches!(e, BackendError::Other(e) if e == "error"))
             );
             assert!(response.next().await.is_none());
         }
@@ -1047,7 +1054,7 @@ mod test {
             let response = backend
                 .storage_fetch_values(["ID1".into()].into(), random_hash())
                 .await;
-            assert!(matches!(response, Err(Error::Rpc(RpcError::LimitReached))));
+            assert!(matches!(response, Err(e) if e.is_rpc_limit_reached()));
 
             // Advance the driver until a new chainHead_follow subscription has been started up.
             let _ = driver.next().await.unwrap();

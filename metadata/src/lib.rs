@@ -24,13 +24,22 @@ mod utils;
 
 use alloc::borrow::Cow;
 use alloc::collections::BTreeMap;
-use alloc::string::String;
-use alloc::sync::Arc;
+use alloc::string::{String, ToString};
 use alloc::vec::Vec;
+use frame_decode::constants::{Constant, ConstantInfo, ConstantInfoError};
+use frame_decode::custom_values::{CustomValue, CustomValueInfo, CustomValueInfoError};
 use frame_decode::extrinsics::{
     ExtrinsicCallInfo, ExtrinsicExtensionInfo, ExtrinsicInfoArg, ExtrinsicInfoError,
     ExtrinsicSignatureInfo,
 };
+use frame_decode::runtime_apis::{
+    RuntimeApi, RuntimeApiInfo, RuntimeApiInfoError, RuntimeApiInput,
+};
+use frame_decode::storage::{StorageEntry, StorageInfo, StorageInfoError, StorageKeyInfo};
+use frame_decode::view_functions::{
+    ViewFunction, ViewFunctionInfo, ViewFunctionInfoError, ViewFunctionInput,
+};
+
 use hashbrown::HashMap;
 use scale_info::{PortableRegistry, Variant, form::PortableForm};
 use utils::{
@@ -39,8 +48,7 @@ use utils::{
     variant_index::VariantIndex,
 };
 
-type ArcStr = Arc<str>;
-
+pub use frame_decode::storage::StorageHasher;
 pub use from::SUPPORTED_METADATA_VERSIONS;
 pub use from::TryFromError;
 pub use utils::validation::MetadataHasher;
@@ -55,7 +63,7 @@ pub struct Metadata {
     /// Type registry containing all types used in the metadata.
     types: PortableRegistry,
     /// Metadata of all the pallets.
-    pallets: OrderedMap<ArcStr, PalletMetadataInner>,
+    pallets: OrderedMap<String, PalletMetadataInner>,
     /// Find the location in the pallet Vec by pallet index.
     pallets_by_index: HashMap<u8, usize>,
     /// Metadata of the extrinsic.
@@ -65,7 +73,7 @@ pub struct Metadata {
     /// The type Id of the `DispatchError` type, which Subxt makes use of.
     dispatch_error_ty: Option<u32>,
     /// Details about each of the runtime API traits.
-    apis: OrderedMap<ArcStr, RuntimeApiMetadataInner>,
+    apis: OrderedMap<String, RuntimeApiMetadataInner>,
     /// Allows users to add custom types to the metadata. A map that associates a string key to a `CustomValueMetadata`.
     custom: CustomMetadataInner,
 }
@@ -75,7 +83,7 @@ pub struct Metadata {
 impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
     type TypeId = u32;
 
-    fn get_call_info(
+    fn extrinsic_call_info(
         &self,
         pallet_index: u8,
         call_index: u8,
@@ -108,7 +116,7 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         })
     }
 
-    fn get_signature_info(
+    fn extrinsic_signature_info(
         &self,
     ) -> Result<ExtrinsicSignatureInfo<Self::TypeId>, ExtrinsicInfoError<'_>> {
         Ok(ExtrinsicSignatureInfo {
@@ -117,7 +125,7 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         })
     }
 
-    fn get_extension_info(
+    fn extrinsic_extension_info(
         &self,
         extension_version: Option<u8>,
     ) -> Result<ExtrinsicExtensionInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
@@ -142,8 +150,203 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         Ok(ExtrinsicExtensionInfo { extension_ids })
     }
 }
+impl frame_decode::storage::StorageTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn storage_info(
+        &self,
+        pallet_name: &str,
+        storage_entry: &str,
+    ) -> Result<StorageInfo<'_, Self::TypeId>, StorageInfoError<'_>> {
+        let pallet =
+            self.pallet_by_name(pallet_name)
+                .ok_or_else(|| StorageInfoError::PalletNotFound {
+                    pallet_name: pallet_name.to_string(),
+                })?;
+        let entry = pallet
+            .storage()
+            .and_then(|storage| storage.entry_by_name(storage_entry))
+            .ok_or_else(|| StorageInfoError::StorageNotFound {
+                name: storage_entry.to_string(),
+                pallet_name: Cow::Borrowed(pallet.name()),
+            })?;
+
+        let info = StorageInfo {
+            keys: Cow::Borrowed(&*entry.info.keys),
+            value_id: entry.info.value_id,
+            default_value: entry
+                .info
+                .default_value
+                .as_ref()
+                .map(|def| Cow::Borrowed(&**def)),
+        };
+
+        Ok(info)
+    }
+
+    fn storage_entries(&self) -> impl Iterator<Item = StorageEntry<'_>> {
+        self.pallets().flat_map(|pallet| {
+            let pallet_name = pallet.name();
+            pallet.storage().into_iter().flat_map(|storage| {
+                storage.entries().iter().map(|entry| StorageEntry {
+                    pallet_name: Cow::Borrowed(pallet_name),
+                    storage_entry: Cow::Borrowed(entry.name()),
+                })
+            })
+        })
+    }
+}
+impl frame_decode::runtime_apis::RuntimeApiTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn runtime_api_info(
+        &self,
+        trait_name: &str,
+        method_name: &str,
+    ) -> Result<RuntimeApiInfo<'_, Self::TypeId>, RuntimeApiInfoError<'_>> {
+        let api_trait =
+            self.apis
+                .get_by_key(trait_name)
+                .ok_or_else(|| RuntimeApiInfoError::TraitNotFound {
+                    trait_name: trait_name.to_string(),
+                })?;
+        let api_method = api_trait.methods.get_by_key(method_name).ok_or_else(|| {
+            RuntimeApiInfoError::MethodNotFound {
+                trait_name: Cow::Borrowed(&api_trait.name),
+                method_name: method_name.to_string(),
+            }
+        })?;
+
+        let info = RuntimeApiInfo {
+            inputs: Cow::Borrowed(&api_method.info.inputs),
+            output_id: api_method.info.output_id,
+        };
+
+        Ok(info)
+    }
+
+    fn runtime_apis(&self) -> impl Iterator<Item = RuntimeApi<'_>> {
+        self.runtime_api_traits().flat_map(|api_trait| {
+            let trait_name = api_trait.name();
+            api_trait.methods().map(|method| RuntimeApi {
+                trait_name: Cow::Borrowed(trait_name),
+                method_name: Cow::Borrowed(method.name()),
+            })
+        })
+    }
+}
+impl frame_decode::view_functions::ViewFunctionTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn view_function_info(
+        &self,
+        pallet_name: &str,
+        function_name: &str,
+    ) -> Result<ViewFunctionInfo<'_, Self::TypeId>, ViewFunctionInfoError<'_>> {
+        let pallet = self.pallet_by_name(pallet_name).ok_or_else(|| {
+            ViewFunctionInfoError::PalletNotFound {
+                pallet_name: pallet_name.to_string(),
+            }
+        })?;
+        let function = pallet.view_function_by_name(function_name).ok_or_else(|| {
+            ViewFunctionInfoError::FunctionNotFound {
+                pallet_name: Cow::Borrowed(pallet.name()),
+                function_name: function_name.to_string(),
+            }
+        })?;
+
+        let info = ViewFunctionInfo {
+            inputs: Cow::Borrowed(&function.inner.info.inputs),
+            output_id: function.inner.info.output_id,
+            query_id: *function.query_id(),
+        };
+
+        Ok(info)
+    }
+
+    fn view_functions(&self) -> impl Iterator<Item = ViewFunction<'_>> {
+        self.pallets().flat_map(|pallet| {
+            let pallet_name = pallet.name();
+            pallet.view_functions().map(|function| ViewFunction {
+                pallet_name: Cow::Borrowed(pallet_name),
+                function_name: Cow::Borrowed(function.name()),
+            })
+        })
+    }
+}
+impl frame_decode::constants::ConstantTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn constant_info(
+        &self,
+        pallet_name: &str,
+        constant_name: &str,
+    ) -> Result<ConstantInfo<'_, Self::TypeId>, ConstantInfoError<'_>> {
+        let pallet =
+            self.pallet_by_name(pallet_name)
+                .ok_or_else(|| ConstantInfoError::PalletNotFound {
+                    pallet_name: pallet_name.to_string(),
+                })?;
+        let constant = pallet.constant_by_name(constant_name).ok_or_else(|| {
+            ConstantInfoError::ConstantNotFound {
+                pallet_name: Cow::Borrowed(pallet.name()),
+                constant_name: constant_name.to_string(),
+            }
+        })?;
+
+        let info = ConstantInfo {
+            bytes: &constant.value,
+            type_id: constant.ty,
+        };
+
+        Ok(info)
+    }
+
+    fn constants(&self) -> impl Iterator<Item = Constant<'_>> {
+        self.pallets().flat_map(|pallet| {
+            let pallet_name = pallet.name();
+            pallet.constants().map(|constant| Constant {
+                pallet_name: Cow::Borrowed(pallet_name),
+                constant_name: Cow::Borrowed(constant.name()),
+            })
+        })
+    }
+}
+impl frame_decode::custom_values::CustomValueTypeInfo for Metadata {
+    type TypeId = u32;
+
+    fn custom_value_info(
+        &self,
+        name: &str,
+    ) -> Result<CustomValueInfo<'_, Self::TypeId>, CustomValueInfoError> {
+        let custom_value = self
+            .custom()
+            .get(name)
+            .ok_or_else(|| CustomValueInfoError {
+                not_found: name.to_string(),
+            })?;
+
+        let info = CustomValueInfo {
+            bytes: custom_value.data,
+            type_id: custom_value.type_id,
+        };
+
+        Ok(info)
+    }
+
+    fn custom_values(&self) -> impl Iterator<Item = CustomValue<'_>> {
+        self.custom.map.keys().map(|name| CustomValue {
+            name: Cow::Borrowed(name),
+        })
+    }
+}
 
 impl Metadata {
+    /// This is essentiall an alias for `<Metadata as codec::Decode>::decode(&mut bytes)`
+    pub fn decode_from(mut bytes: &[u8]) -> Result<Self, codec::Error> {
+        <Self as codec::Decode>::decode(&mut bytes)
+    }
+
     /// Access the underlying type registry.
     pub fn types(&self) -> &PortableRegistry {
         &self.types
@@ -215,20 +418,6 @@ impl Metadata {
             inner,
             types: self.types(),
         })
-    }
-
-    /// Access a view function given its query ID, if any.
-    pub fn view_function_by_query_id(
-        &'_ self,
-        query_id: &[u8; 32],
-    ) -> Option<ViewFunctionMetadata<'_>> {
-        // Dev note: currently, we only have pallet view functions, and here
-        // we just do a naive thing of iterating over the pallets to find the one
-        // we're looking for. Eventually we should construct a separate map of view
-        // functions for easy querying here.
-        self.pallets()
-            .flat_map(|p| p.view_functions())
-            .find(|vf| vf.query_id() == query_id)
     }
 
     /// Returns custom user defined types
@@ -418,7 +607,7 @@ impl<'a> PalletMetadata<'a> {
 #[derive(Debug, Clone)]
 struct PalletMetadataInner {
     /// Pallet name.
-    name: ArcStr,
+    name: String,
     /// Pallet index.
     index: u8,
     /// Pallet storage metadata.
@@ -436,9 +625,9 @@ struct PalletMetadataInner {
     /// Error variants by name/u8.
     error_variant_index: VariantIndex,
     /// Map from constant name to constant details.
-    constants: OrderedMap<ArcStr, ConstantMetadata>,
+    constants: OrderedMap<String, ConstantMetadata>,
     /// Details about each of the pallet view functions.
-    view_functions: OrderedMap<ArcStr, ViewFunctionMetadataInner>,
+    view_functions: OrderedMap<String, ViewFunctionMetadataInner>,
     /// Mapping from associated type to type ID describing its shape.
     associated_types: BTreeMap<String, u32>,
     /// Pallet documentation.
@@ -451,7 +640,7 @@ pub struct StorageMetadata {
     /// The common prefix used by all storage entries.
     prefix: String,
     /// Map from storage entry name to details.
-    entries: OrderedMap<ArcStr, StorageEntryMetadata>,
+    entries: OrderedMap<String, StorageEntryMetadata>,
 }
 
 impl StorageMetadata {
@@ -475,13 +664,9 @@ impl StorageMetadata {
 #[derive(Debug, Clone)]
 pub struct StorageEntryMetadata {
     /// Variable name of the storage entry.
-    name: ArcStr,
-    /// An `Option` modifier of that storage entry.
-    modifier: StorageEntryModifier,
-    /// Type of the value stored in the entry.
-    entry_type: StorageEntryType,
-    /// Default value (SCALE encoded).
-    default: Vec<u8>,
+    name: String,
+    /// Information about the storage entry.
+    info: StorageInfo<'static, u32>,
     /// Storage entry documentation.
     docs: Vec<String>,
 }
@@ -491,17 +676,18 @@ impl StorageEntryMetadata {
     pub fn name(&self) -> &str {
         &self.name
     }
-    /// Is the entry value optional or does it have a default value.
-    pub fn modifier(&self) -> StorageEntryModifier {
-        self.modifier
+    /// Keys in this storage entry.
+    pub fn keys(&self) -> impl ExactSizeIterator<Item = &StorageKeyInfo<u32>> {
+        let keys = &*self.info.keys;
+        keys.iter()
     }
-    /// Type of the storage entry.
-    pub fn entry_type(&self) -> &StorageEntryType {
-        &self.entry_type
+    /// Value type for this storage entry.
+    pub fn value_ty(&self) -> u32 {
+        self.info.value_id
     }
-    /// The SCALE encoded default value for this entry.
-    pub fn default_bytes(&self) -> &[u8] {
-        &self.default
+    /// The default value, if one exists, for this entry.
+    pub fn default_value(&self) -> Option<&[u8]> {
+        self.info.default_value.as_deref()
     }
     /// Storage entry documentation.
     pub fn docs(&self) -> &[String] {
@@ -509,101 +695,11 @@ impl StorageEntryMetadata {
     }
 }
 
-/// The type of a storage entry.
-#[derive(Debug, Clone)]
-pub enum StorageEntryType {
-    /// Plain storage entry (just the value).
-    Plain(u32),
-    /// A storage map.
-    Map {
-        /// One or more hashers, should be one hasher per key element.
-        hashers: Vec<StorageHasher>,
-        /// The type of the key, can be a tuple with elements for each of the hashers.
-        key_ty: u32,
-        /// The type of the value.
-        value_ty: u32,
-    },
-}
-
-impl StorageEntryType {
-    /// The type of the value.
-    pub fn value_ty(&self) -> u32 {
-        match self {
-            StorageEntryType::Map { value_ty, .. } | StorageEntryType::Plain(value_ty) => *value_ty,
-        }
-    }
-
-    /// The type of the key, can be a tuple with elements for each of the hashers. None for a Plain storage entry.
-    pub fn key_ty(&self) -> Option<u32> {
-        match self {
-            StorageEntryType::Map { key_ty, .. } => Some(*key_ty),
-            StorageEntryType::Plain(_) => None,
-        }
-    }
-}
-
-/// Hasher used by storage maps.
-#[derive(Debug, Clone, Copy)]
-pub enum StorageHasher {
-    /// 128-bit Blake2 hash.
-    Blake2_128,
-    /// 256-bit Blake2 hash.
-    Blake2_256,
-    /// Multiple 128-bit Blake2 hashes concatenated.
-    Blake2_128Concat,
-    /// 128-bit XX hash.
-    Twox128,
-    /// 256-bit XX hash.
-    Twox256,
-    /// Multiple 64-bit XX hashes concatenated.
-    Twox64Concat,
-    /// Identity hashing (no hashing).
-    Identity,
-}
-
-impl StorageHasher {
-    /// The hash produced by a [`StorageHasher`] can have these two components, in order:
-    ///
-    /// 1. A fixed size hash. (not present for [`StorageHasher::Identity`]).
-    /// 2. The SCALE encoded key that was used as an input to the hasher (only present for
-    ///    [`StorageHasher::Twox64Concat`], [`StorageHasher::Blake2_128Concat`] or [`StorageHasher::Identity`]).
-    ///
-    /// This function returns the number of bytes used to represent the first of these.
-    pub fn len_excluding_key(&self) -> usize {
-        match self {
-            StorageHasher::Blake2_128Concat => 16,
-            StorageHasher::Twox64Concat => 8,
-            StorageHasher::Blake2_128 => 16,
-            StorageHasher::Blake2_256 => 32,
-            StorageHasher::Twox128 => 16,
-            StorageHasher::Twox256 => 32,
-            StorageHasher::Identity => 0,
-        }
-    }
-
-    /// Returns true if the key used to produce the hash is appended to the hash itself.
-    pub fn ends_with_key(&self) -> bool {
-        matches!(
-            self,
-            StorageHasher::Blake2_128Concat | StorageHasher::Twox64Concat | StorageHasher::Identity
-        )
-    }
-}
-
-/// Is the storage entry optional, or does it have a default value.
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub enum StorageEntryModifier {
-    /// The storage entry returns an `Option<T>`, with `None` if the key is not present.
-    Optional,
-    /// The storage entry returns `T::Default` if the key is not present.
-    Default,
-}
-
 /// Metadata for a single constant.
 #[derive(Debug, Clone)]
 pub struct ConstantMetadata {
     /// Name of the pallet constant.
-    name: ArcStr,
+    name: String,
     /// Type of the pallet constant.
     ty: u32,
     /// Value stored in the constant (SCALE encoded).
@@ -816,9 +912,9 @@ impl<'a> RuntimeApiMetadata<'a> {
 #[derive(Debug, Clone)]
 struct RuntimeApiMetadataInner {
     /// Trait name.
-    name: ArcStr,
+    name: String,
     /// Trait methods.
-    methods: OrderedMap<ArcStr, RuntimeApiMethodMetadataInner>,
+    methods: OrderedMap<String, RuntimeApiMethodMetadataInner>,
     /// Trait documentation.
     docs: Vec<String>,
 }
@@ -841,12 +937,15 @@ impl<'a> RuntimeApiMethodMetadata<'a> {
         &self.inner.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &'a MethodParamMetadata> + use<'a> {
-        self.inner.inputs.iter()
+    pub fn inputs(
+        &self,
+    ) -> impl ExactSizeIterator<Item = &'a RuntimeApiInput<'static, u32>> + use<'a> {
+        let inputs = &*self.inner.info.inputs;
+        inputs.iter()
     }
     /// Method return type.
     pub fn output_ty(&self) -> u32 {
-        self.inner.output_ty
+        self.inner.info.output_id
     }
     /// Return a hash for the method.
     pub fn hash(&self) -> [u8; HASH_LEN] {
@@ -857,11 +956,9 @@ impl<'a> RuntimeApiMethodMetadata<'a> {
 #[derive(Debug, Clone)]
 struct RuntimeApiMethodMetadataInner {
     /// Method name.
-    name: ArcStr,
-    /// Method parameters.
-    inputs: Vec<MethodParamMetadata>,
-    /// Method output type.
-    output_ty: u32,
+    name: String,
+    /// Info.
+    info: RuntimeApiInfo<'static, u32>,
     /// Method documentation.
     docs: Vec<String>,
 }
@@ -882,19 +979,22 @@ impl<'a> ViewFunctionMetadata<'a> {
     /// Query ID. This is used to query the function. Roughly, it is constructed by doing
     /// `twox_128(pallet_name) ++ twox_128("fn_name(fnarg_types) -> return_ty")` .
     pub fn query_id(&self) -> &'a [u8; 32] {
-        &self.inner.query_id
+        &self.inner.info.query_id
     }
     /// Method documentation.
     pub fn docs(&self) -> &'a [String] {
         &self.inner.docs
     }
     /// Method inputs.
-    pub fn inputs(&self) -> impl ExactSizeIterator<Item = &'a MethodParamMetadata> + use<'a> {
-        self.inner.inputs.iter()
+    pub fn inputs(
+        &self,
+    ) -> impl ExactSizeIterator<Item = &'a ViewFunctionInput<'static, u32>> + use<'a> {
+        let inputs = &*self.inner.info.inputs;
+        inputs.iter()
     }
     /// Method return type.
     pub fn output_ty(&self) -> u32 {
-        self.inner.output_ty
+        self.inner.info.output_id
     }
     /// Return a hash for the method. The query ID of a view function validates it to some
     /// degree, but only takes type _names_ into account. This hash takes into account the
@@ -907,13 +1007,9 @@ impl<'a> ViewFunctionMetadata<'a> {
 #[derive(Debug, Clone)]
 struct ViewFunctionMetadataInner {
     /// View function name.
-    name: ArcStr,
-    /// View function query ID.
-    query_id: [u8; 32],
-    /// Input types.
-    inputs: Vec<MethodParamMetadata>,
-    /// Output type.
-    output_ty: u32,
+    name: String,
+    /// Info.
+    info: ViewFunctionInfo<'static, u32>,
     /// Documentation.
     docs: Vec<String>,
 }

@@ -3,16 +3,17 @@ use super::storage_info::with_info;
 use crate::error::StorageValueError;
 use scale_decode::DecodeAsType;
 use std::borrow::Cow;
+use std::sync::Arc;
 
 /// This represents a storage value.
-pub struct StorageValue<'entry, 'atblock> {
-    pub(crate) info: &'entry AnyStorageInfo<'atblock>,
+pub struct StorageValue<'atblock> {
+    pub(crate) info: Arc<AnyStorageInfo<'atblock>>,
     bytes: Cow<'atblock, [u8]>,
 }
 
-impl<'entry, 'atblock> StorageValue<'entry, 'atblock> {
+impl<'atblock> StorageValue<'atblock> {
     /// Create a new storage value.
-    pub fn new(info: &'entry AnyStorageInfo<'atblock>, bytes: Cow<'atblock, [u8]>) -> Self {
+    pub fn new(info: Arc<AnyStorageInfo<'atblock>>, bytes: Cow<'atblock, [u8]>) -> Self {
         Self { info, bytes }
     }
 
@@ -27,8 +28,8 @@ impl<'entry, 'atblock> StorageValue<'entry, 'atblock> {
     }
 
     /// Decode this storage value.
-    pub fn decode<T: DecodeAsType>(&self) -> Result<T, StorageValueError> {
-        with_info!(info = &self.info => {
+    pub fn decode_as<T: DecodeAsType>(&self) -> Result<T, StorageValueError> {
+        with_info!(info = &*self.info => {
             let cursor = &mut &*self.bytes;
 
             let value = T::decode_as_type(

@@ -5,8 +5,8 @@
 //! A couple of client types that we use elsewhere.
 
 use crate::{
+    Metadata,
     config::{Config, HashFor},
-    metadata::Metadata,
 };
 use derive_where::derive_where;
 

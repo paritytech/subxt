@@ -215,7 +215,6 @@ struct StorageEntryDiff {
     key_different: bool,
     value_different: bool,
     default_different: bool,
-    modifier_different: bool,
 }
 
 impl StorageEntryDiff {
@@ -225,41 +224,32 @@ impl StorageEntryDiff {
         metadata_1: &Metadata,
         metadata_2: &Metadata,
     ) -> Self {
-        let value_1_ty_id = storage_entry_1.entry_type().value_ty();
+        let value_1_ty_id = storage_entry_1.value_ty();
         let value_1_hash = metadata_1
             .type_hash(value_1_ty_id)
             .expect("type is in metadata; qed");
-        let value_2_ty_id = storage_entry_2.entry_type().value_ty();
+        let value_2_ty_id = storage_entry_2.value_ty();
         let value_2_hash = metadata_2
             .type_hash(value_2_ty_id)
             .expect("type is in metadata; qed");
         let value_different = value_1_hash != value_2_hash;
 
-        let key_1_hash = storage_entry_1
-            .entry_type()
-            .key_ty()
-            .map(|key_ty| {
-                metadata_1
-                    .type_hash(key_ty)
-                    .expect("type is in metadata; qed")
-            })
-            .unwrap_or_default();
-        let key_2_hash = storage_entry_2
-            .entry_type()
-            .key_ty()
-            .map(|key_ty| {
-                metadata_2
-                    .type_hash(key_ty)
-                    .expect("type is in metadata; qed")
-            })
-            .unwrap_or_default();
-        let key_different = key_1_hash != key_2_hash;
+        let key_parts_same = storage_entry_1.keys().len() == storage_entry_2.keys().len()
+            && storage_entry_1
+                .keys()
+                .zip(storage_entry_2.keys())
+                .all(|(a, b)| {
+                    let a_hash = metadata_1.type_hash(a.key_id).expect("type is in metadata");
+                    let b_hash = metadata_2.type_hash(b.key_id).expect("type is in metadata");
+                    a.hasher == b.hasher && a_hash == b_hash
+                });
+
+        let key_different = !key_parts_same;
 
         StorageEntryDiff {
             key_different,
             value_different,
-            default_different: storage_entry_1.default_bytes() != storage_entry_2.default_bytes(),
-            modifier_different: storage_entry_1.modifier() != storage_entry_2.modifier(),
+            default_different: storage_entry_1.default_value() != storage_entry_2.default_value(),
         }
     }
 
@@ -270,9 +260,6 @@ impl StorageEntryDiff {
         }
         if self.value_different {
             strings.push("value type");
-        }
-        if self.modifier_different {
-            strings.push("modifier");
         }
         if self.default_different {
             strings.push("default value");

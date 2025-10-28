@@ -5,7 +5,7 @@
 use super::ChainHeadRpcMethods;
 use super::follow_stream::FollowStream;
 use crate::config::{Config, Hash, HashFor};
-use crate::error::Error;
+use crate::error::BackendError;
 use futures::stream::{FuturesUnordered, Stream, StreamExt};
 use subxt_rpcs::methods::chain_head::{
     BestBlockChanged, Finalized, FollowEvent, Initialized, NewBlock,
@@ -71,7 +71,7 @@ pub type UnpinFut = Pin<Box<dyn Future<Output = ()> + Send + 'static>>;
 impl<H: Hash> std::marker::Unpin for FollowStreamUnpin<H> {}
 
 impl<H: Hash> Stream for FollowStreamUnpin<H> {
-    type Item = Result<FollowStreamMsg<BlockRef<H>>, Error>;
+    type Item = Result<FollowStreamMsg<BlockRef<H>>, BackendError>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let mut this = self.as_mut();
@@ -482,7 +482,7 @@ pub(super) mod test_utils {
     where
         H: Hash + 'static,
         F: Fn() -> I + Send + 'static,
-        I: IntoIterator<Item = Result<FollowEvent<H>, Error>>,
+        I: IntoIterator<Item = Result<FollowEvent<H>, BackendError>>,
     {
         // Unpin requests will come here so that we can look out for them.
         let (unpin_tx, unpin_rx) = std::sync::mpsc::channel();
@@ -567,7 +567,7 @@ mod test {
                     Ok(ev_new_block(0, 1)),
                     Ok(ev_new_block(1, 2)),
                     Ok(ev_new_block(2, 3)),
-                    Err(Error::Other("ended".to_owned())),
+                    Err(BackendError::Other("ended".to_owned())),
                 ]
             },
             10,
@@ -593,7 +593,7 @@ mod test {
                 [
                     Ok(ev_initialized(0)),
                     Ok(ev_finalized([1], [])),
-                    Err(Error::Other("ended".to_owned())),
+                    Err(BackendError::Other("ended".to_owned())),
                 ]
             },
             3,
@@ -624,7 +624,7 @@ mod test {
                     Ok(ev_finalized([3], [])),
                     Ok(ev_finalized([4], [])),
                     Ok(ev_finalized([5], [])),
-                    Err(Error::Other("ended".to_owned())),
+                    Err(BackendError::Other("ended".to_owned())),
                 ]
             },
             3,
@@ -663,7 +663,7 @@ mod test {
                     Ok(ev_new_block(1, 2)),
                     Ok(ev_finalized([1], [])),
                     Ok(ev_finalized([2], [])),
-                    Err(Error::Other("ended".to_owned())),
+                    Err(BackendError::Other("ended".to_owned())),
                 ]
             },
             10,
@@ -711,7 +711,7 @@ mod test {
                     Ok(ev_finalized([1], [])),
                     Ok(ev_finalized([2], [3])),
                     Ok(ev_finalized([4], [])),
-                    Err(Error::Other("ended".to_owned())),
+                    Err(BackendError::Other("ended".to_owned())),
                 ]
             },
             10,
@@ -771,7 +771,7 @@ mod test {
                     Ok(ev_best_block(1)),
                     Ok(ev_finalized([1], [])),
                     Ok(ev_finalized([2], [])),
-                    Err(Error::Other("ended".to_owned())),
+                    Err(BackendError::Other("ended".to_owned())),
                 ]
             },
             10,

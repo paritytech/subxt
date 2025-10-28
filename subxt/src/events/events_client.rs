@@ -6,7 +6,7 @@ use crate::backend::{Backend, BackendExt, BlockRef};
 use crate::{
     client::OnlineClientT,
     config::{Config, HashFor},
-    error::Error,
+    error::EventsError,
     events::Events,
 };
 use derive_where::derive_where;
@@ -44,12 +44,14 @@ where
     pub fn at(
         &self,
         block_ref: impl Into<BlockRef<HashFor<T>>>,
-    ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
+    ) -> impl Future<Output = Result<Events<T>, EventsError>> + Send + 'static {
         self.at_or_latest(Some(block_ref.into()))
     }
 
     /// Obtain events for the latest finalized block.
-    pub fn at_latest(&self) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
+    pub fn at_latest(
+        &self,
+    ) -> impl Future<Output = Result<Events<T>, EventsError>> + Send + 'static {
         self.at_or_latest(None)
     }
 
@@ -57,7 +59,7 @@ where
     fn at_or_latest(
         &self,
         block_ref: Option<BlockRef<HashFor<T>>>,
-    ) -> impl Future<Output = Result<Events<T>, Error>> + Send + 'static {
+    ) -> impl Future<Output = Result<Events<T>, EventsError>> + Send + 'static {
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
@@ -65,7 +67,11 @@ where
             // If a block ref isn't provided, we'll get the latest finalized block to use.
             let block_ref = match block_ref {
                 Some(r) => r,
-                None => client.backend().latest_finalized_block_ref().await?,
+                None => client
+                    .backend()
+                    .latest_finalized_block_ref()
+                    .await
+                    .map_err(EventsError::CannotGetLatestFinalizedBlock)?,
             };
 
             let event_bytes = get_event_bytes(client.backend(), block_ref.hash()).await?;
@@ -88,9 +94,11 @@ fn system_events_key() -> [u8; 32] {
 pub(crate) async fn get_event_bytes<T: Config>(
     backend: &dyn Backend<T>,
     block_hash: HashFor<T>,
-) -> Result<Vec<u8>, Error> {
-    Ok(backend
+) -> Result<Vec<u8>, EventsError> {
+    let bytes = backend
         .storage_fetch_value(system_events_key().to_vec(), block_hash)
-        .await?
-        .unwrap_or_default())
+        .await
+        .map_err(EventsError::CannotFetchEventBytes)?
+        .unwrap_or_default();
+    Ok(bytes)
 }

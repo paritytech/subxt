@@ -16,170 +16,6 @@ use quote::{format_ident, quote};
 
 use crate::CodegenError;
 
-/// Generates runtime functions for the given API metadata.
-fn generate_runtime_api(
-    api: RuntimeApiMetadata,
-    type_gen: &TypeGenerator,
-    crate_path: &syn::Path,
-) -> Result<(TokenStream2, TokenStream2), CodegenError> {
-    // Trait name must remain as is (upper case) to identify the runtime call.
-    let trait_name_str = api.name();
-    // The snake case for the trait name.
-    let trait_name_snake = format_ident!("{}", api.name().to_snake_case());
-    let docs = api.docs();
-    let docs: TokenStream2 = type_gen
-        .settings()
-        .should_gen_docs
-        .then_some(quote! { #( #[doc = #docs ] )* })
-        .unwrap_or_default();
-
-    let structs_and_methods = api
-        .methods()
-        .map(|method| {
-            let method_name = format_ident!("{}", method.name());
-            let method_name_str = method.name();
-
-            let docs = method.docs();
-            let docs: TokenStream2 = type_gen
-                .settings()
-                .should_gen_docs
-                .then_some(quote! { #( #[doc = #docs ] )* })
-                .unwrap_or_default();
-
-            let mut unique_names = HashSet::new();
-            let mut unique_aliases = HashSet::new();
-
-            let inputs: Vec<_> = method
-                .inputs()
-                .enumerate()
-                .map(|(idx, input)| {
-                    // These are method names, which can just be '_', but struct field names can't
-                    // just be an underscore, so fix any such names we find to work in structs.
-                    let mut name = input.name.trim_start_matches('_').to_string();
-                    if name.is_empty() {
-                        name = format!("_{idx}");
-                    }
-                    while !unique_names.insert(name.clone()) {
-                        // Name is already used, append the index until it is unique.
-                        name = format!("{name}_param{idx}");
-                    }
-
-                    let mut alias = name.to_upper_camel_case();
-                    // Note: name is not empty.
-                    if alias.as_bytes()[0].is_ascii_digit() {
-                        alias = format!("Param{alias}");
-                    }
-                    while !unique_aliases.insert(alias.clone()) {
-                        alias = format!("{alias}Param{idx}");
-                    }
-
-                    let (alias_name, name) = (format_ident!("{alias}"), format_ident!("{name}"));
-
-                    // Generate alias for runtime type.
-                    let ty = type_gen
-                        .resolve_type_path(input.ty)
-                        .expect("runtime api input type is in metadata; qed")
-                        .to_token_stream(type_gen.settings());
-                    let aliased_param = quote!( pub type #alias_name = #ty; );
-
-                    // Structures are placed on the same level as the alias module.
-                    let struct_ty_path = quote!( #method_name::#alias_name );
-                    let struct_param = quote!(#name: #struct_ty_path);
-
-                    // Function parameters must be indented by `types`.
-                    let fn_param = quote!(#name: types::#struct_ty_path);
-                    (fn_param, struct_param, name, aliased_param)
-                })
-                .collect();
-
-            let fn_params = inputs.iter().map(|(fn_param, _, _, _)| fn_param);
-            let struct_params = inputs.iter().map(|(_, struct_param, _, _)| struct_param);
-            let param_names = inputs.iter().map(|(_, _, name, _)| name);
-            let type_aliases = inputs.iter().map(|(_, _, _, aliased_param)| aliased_param);
-            let types_mod_ident = type_gen.types_mod_ident();
-
-            let output = type_gen.resolve_type_path(method.output_ty())?.to_token_stream(type_gen.settings());
-            let aliased_module = quote!(
-                pub mod #method_name {
-                    use super::#types_mod_ident;
-
-                    #( #type_aliases )*
-
-                    // Guard the `Output` name against collisions by placing it in a dedicated module.
-                    pub mod output {
-                        use super::#types_mod_ident;
-                        pub type Output = #output;
-                    }
-                }
-            );
-
-            // From the method metadata generate a structure that holds
-            // all parameter types. This structure is used with metadata
-            // to encode parameters to the call via `encode_as_fields_to`.
-            let derives = type_gen.settings().derives.default_derives();
-            let struct_name = format_ident!("{}", method.name().to_upper_camel_case());
-            let struct_input = quote!(
-                #aliased_module
-
-                #derives
-                pub struct #struct_name {
-                    #( pub #struct_params, )*
-                }
-            );
-
-            let call_hash = method.hash();
-            let method = quote!(
-                #docs
-                pub fn #method_name(&self, #( #fn_params, )* ) -> #crate_path::runtime_api::payload::StaticPayload<types::#struct_name, types::#method_name::output::Output> {
-                    #crate_path::runtime_api::payload::StaticPayload::new_static(
-                        #trait_name_str,
-                        #method_name_str,
-                        types::#struct_name { #( #param_names, )* },
-                        [#(#call_hash,)*],
-                    )
-                }
-            );
-
-            Ok((struct_input, method))
-        })
-        .collect::<Result<Vec<_>, CodegenError>>()?;
-
-    let trait_name = format_ident!("{}", trait_name_str);
-
-    let structs = structs_and_methods.iter().map(|(struct_, _)| struct_);
-    let methods = structs_and_methods.iter().map(|(_, method)| method);
-    let types_mod_ident = type_gen.types_mod_ident();
-
-    let runtime_api = quote!(
-        pub mod #trait_name_snake {
-            use super::root_mod;
-            use super::#types_mod_ident;
-
-            #docs
-            pub struct #trait_name;
-
-            impl #trait_name {
-                #( #methods )*
-            }
-
-            pub mod types {
-                use super::#types_mod_ident;
-
-                #( #structs )*
-            }
-        }
-    );
-
-    // A getter for the `RuntimeApi` to get the trait structure.
-    let trait_getter = quote!(
-        pub fn #trait_name_snake(&self) -> #trait_name_snake::#trait_name {
-            #trait_name_snake::#trait_name
-        }
-    );
-
-    Ok((runtime_api, trait_getter))
-}
-
 /// Generate the runtime APIs.
 pub fn generate_runtime_apis(
     metadata: &Metadata,
@@ -192,8 +28,8 @@ pub fn generate_runtime_apis(
         .map(|api| generate_runtime_api(api, type_gen, crate_path))
         .collect::<Result<_, _>>()?;
 
-    let runtime_apis_def = runtime_fns.iter().map(|(apis, _)| apis);
-    let runtime_apis_getters = runtime_fns.iter().map(|(_, getters)| getters);
+    let trait_defs = runtime_fns.iter().map(|(apis, _)| apis);
+    let trait_getters = runtime_fns.iter().map(|(_, getters)| getters);
 
     Ok(quote! {
         pub mod runtime_apis {
@@ -205,12 +41,194 @@ pub fn generate_runtime_apis(
             pub struct RuntimeApi;
 
             impl RuntimeApi {
-                #( #runtime_apis_getters )*
+                #( #trait_getters )*
             }
 
-            #( #runtime_apis_def )*
+            #( #trait_defs )*
         }
     })
+}
+
+/// Generates runtime functions for the given API metadata.
+fn generate_runtime_api(
+    api: RuntimeApiMetadata,
+    type_gen: &TypeGenerator,
+    crate_path: &syn::Path,
+) -> Result<(TokenStream2, TokenStream2), CodegenError> {
+    let types_mod_ident = type_gen.types_mod_ident();
+    // Trait name must remain as is (upper case) to identify the runtime call.
+    let trait_name_str = api.name();
+    // The snake case for the trait name.
+    let trait_name_snake = format_ident!("{}", api.name().to_snake_case());
+
+    let docs = api.docs();
+    let docs: TokenStream2 = type_gen
+        .settings()
+        .should_gen_docs
+        .then_some(quote! { #( #[doc = #docs ] )* })
+        .unwrap_or_default();
+
+    let types_and_methods = api
+        .methods()
+        .map(|method| {
+            let method_name = format_ident!("{}", method.name());
+            let method_name_str = method.name();
+            let validation_hash = method.hash();
+
+            let docs = method.docs();
+            let docs: TokenStream2 = type_gen
+                .settings()
+                .should_gen_docs
+                .then_some(quote! { #( #[doc = #docs ] )* })
+                .unwrap_or_default();
+
+            struct Input {
+                name: syn::Ident,
+                type_alias: syn::Ident,
+                type_path: TokenStream2,
+            }
+
+            let runtime_api_inputs: Vec<Input> = {
+                let mut unique_names = HashSet::new();
+                let mut unique_aliases = HashSet::new();
+
+                method
+                    .inputs()
+                    .enumerate()
+                    .map(|(idx, input)| {
+                        // The method argument name is either the input name or the
+                        // index (eg _1, _2 etc) if one isn't provided.
+                        // if we get unlucky we'll end up with param_param1 etc.
+                        let mut name = input.name.trim_start_matches('_').to_string();
+                        if name.is_empty() {
+                            name = format!("_{idx}");
+                        }
+                        while !unique_names.insert(name.clone()) {
+                            name = format!("{name}_param{idx}");
+                        }
+
+                        // The alias is either InputName if provided, or Param1, Param2 etc if not.
+                        // If we get unlucky we may even end up with ParamParam1 etc.
+                        let mut alias = name.trim_start_matches('_').to_upper_camel_case();
+                        // Note: name is not empty.
+                        if alias.as_bytes()[0].is_ascii_digit() {
+                            alias = format!("Param{alias}");
+                        }
+                        while !unique_aliases.insert(alias.clone()) {
+                            alias = format!("{alias}Param{idx}");
+                        }
+
+                        // Generate alias for runtime type.
+                        let type_path = type_gen
+                            .resolve_type_path(input.id)
+                            .expect("runtime api input type is in metadata; qed")
+                            .to_token_stream(type_gen.settings());
+
+                        Input {
+                            name: format_ident!("{name}"),
+                            type_alias: format_ident!("{alias}"),
+                            type_path,
+                        }
+                    })
+                    .collect()
+            };
+
+            let input_tuple_types = runtime_api_inputs
+                .iter()
+                .map(|i| {
+                    let ty = &i.type_alias;
+                    quote!(#method_name::#ty)
+                })
+                .collect::<Vec<_>>();
+
+            let input_args = runtime_api_inputs
+                .iter()
+                .map(|i| {
+                    let arg = &i.name;
+                    let ty = &i.type_alias;
+                    quote!(#arg: #method_name::#ty)
+                })
+                .collect::<Vec<_>>();
+
+            let input_param_names = runtime_api_inputs.iter().map(|i| &i.name);
+
+            let input_type_aliases = runtime_api_inputs.iter().map(|i| {
+                let ty = &i.type_alias;
+                let path = &i.type_path;
+                quote!(pub type #ty = #path;)
+            });
+
+            let output_type_path = type_gen
+                .resolve_type_path(method.output_ty())?
+                .to_token_stream(type_gen.settings());
+
+            // Define the input and output type bits for the method.
+            let runtime_api_types = quote! {
+                pub mod #method_name {
+                    use super::root_mod;
+                    use super::#types_mod_ident;
+
+                    #(#input_type_aliases)*
+
+                    pub mod output {
+                        use super::#types_mod_ident;
+                        pub type Output = #output_type_path;
+                    }
+                }
+            };
+
+            // Define the getter method that will live on the `ViewFunctionApi` type.
+            let runtime_api_method = quote!(
+                #docs
+                pub fn #method_name(
+                    &self,
+                    #(#input_args),*
+                ) -> #crate_path::runtime_api::payload::StaticPayload<
+                    (#(#input_tuple_types,)*),
+                    #method_name::output::Output
+                > {
+                    #crate_path::runtime_api::payload::StaticPayload::new_static(
+                        #trait_name_str,
+                        #method_name_str,
+                        (#(#input_param_names,)*),
+                        [#(#validation_hash,)*],
+                    )
+                }
+            );
+
+            Ok((runtime_api_types, runtime_api_method))
+        })
+        .collect::<Result<Vec<_>, CodegenError>>()?;
+
+    let trait_name = format_ident!("{}", trait_name_str);
+    let types = types_and_methods.iter().map(|(types, _)| types);
+    let methods = types_and_methods.iter().map(|(_, methods)| methods);
+
+    // The runtime API definition and types.
+    let trait_defs = quote!(
+        pub mod #trait_name_snake {
+            use super::root_mod;
+            use super::#types_mod_ident;
+
+            #docs
+            pub struct #trait_name;
+
+            impl #trait_name {
+                #( #methods )*
+            }
+
+            #( #types )*
+        }
+    );
+
+    // A getter for the `RuntimeApi` to get the trait structure.
+    let trait_getter = quote!(
+        pub fn #trait_name_snake(&self) -> #trait_name_snake::#trait_name {
+            #trait_name_snake::#trait_name
+        }
+    );
+
+    Ok((trait_defs, trait_getter))
 }
 
 #[cfg(test)]
@@ -295,14 +313,9 @@ mod tests {
 
         let code = generate_code(runtime_apis);
 
-        let structure = quote! {
-            pub struct Test {
-                pub foo: test::Foo,
-                pub bar: test::Bar,
-            }
-        };
         let expected_alias = quote!(
             pub mod test {
+                use super::root_mod;
                 use super::runtime_types;
                 pub type Foo = ::core::primitive::bool;
                 pub type Bar = ::core::primitive::bool;
@@ -312,7 +325,7 @@ mod tests {
                 }
             }
         );
-        assert!(code.contains(&structure.to_string()));
+
         assert!(code.contains(&expected_alias.to_string()));
     }
 
@@ -345,15 +358,9 @@ mod tests {
 
         let code = generate_code(runtime_apis);
 
-        let structure = quote! {
-            pub struct Test {
-                pub a: test::A,
-                pub a_param1: test::AParam1,
-                pub a_param2: test::AParam2,
-            }
-        };
         let expected_alias = quote!(
             pub mod test {
+                use super::root_mod;
                 use super::runtime_types;
                 pub type A = ::core::primitive::bool;
                 pub type AParam1 = ::core::primitive::bool;
@@ -365,7 +372,6 @@ mod tests {
             }
         );
 
-        assert!(code.contains(&structure.to_string()));
         assert!(code.contains(&expected_alias.to_string()));
     }
 
@@ -406,17 +412,9 @@ mod tests {
 
         let code = generate_code(runtime_apis);
 
-        let structure = quote! {
-            pub struct Test {
-                pub _0: test::Param0,
-                pub a: test::A,
-                pub param_0: test::Param0Param2,
-                pub _3: test::Param3,
-                pub param_0_param_2: test::Param0Param2Param4,
-            }
-        };
         let expected_alias = quote!(
             pub mod test {
+                use super::root_mod;
                 use super::runtime_types;
                 pub type Param0 = ::core::primitive::bool;
                 pub type A = ::core::primitive::bool;
@@ -430,7 +428,6 @@ mod tests {
             }
         );
 
-        assert!(code.contains(&structure.to_string()));
         assert!(code.contains(&expected_alias.to_string()));
     }
 }

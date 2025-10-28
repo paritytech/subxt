@@ -1,3 +1,3 @@
 # result_large_err lint complains if error variant is 128 bytes or more by default.
 # Our error is. Let's up this limit a bit for now to avoid lots of warnings.
-large-error-threshold = 256
+large-error-threshold = 512

@@ -44,7 +44,7 @@ impl<'atblock> AnyStorageInfo<'atblock> {
             Resolver: scale_type_resolver::TypeResolver<TypeId = Info::TypeId>,
             AnyStorageInfo<'atblock>: From<StorageInfo<'atblock, Info::TypeId, Resolver>>,
         {
-            m.get_storage_info(pallet_name, entry_name)
+            m.storage_info(pallet_name, entry_name)
                 .map(|frame_storage_info| {
                     let info = StorageInfo {
                         info: frame_storage_info,
@@ -84,7 +84,7 @@ impl<'atblock> From<StorageInfo<'atblock, u32, scale_info::PortableRegistry>>
     }
 }
 
-pub struct StorageInfo<'atblock, TypeId, Resolver> {
+pub struct StorageInfo<'atblock, TypeId: Clone, Resolver> {
     pub info: frame_decode::storage::StorageInfo<'atblock, TypeId>,
     pub resolver: &'atblock Resolver,
 }

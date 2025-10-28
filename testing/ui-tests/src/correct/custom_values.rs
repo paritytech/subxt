@@ -20,8 +20,8 @@ fn main() {
     assert_eq!(foo, expected_foo);
 
     // dynamic query:
-    let foo_value = api.custom_values().at("Foo").unwrap();
-    let foo: Foo = foo_value.as_type().unwrap();
+    let foo_address = subxt::dynamic::custom_value::<Foo>("Foo");
+    let foo = api.custom_values().at(&foo_address).unwrap();
     assert_eq!(foo, expected_foo);
 
     // static query for some custom value that has an invalid type id: (we can still access the bytes)
