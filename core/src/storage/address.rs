@@ -118,6 +118,24 @@ where
     }
 }
 
+impl<A: AsRef<str>, B: AsRef<str>> Address for (A, B) {
+    type KeyParts = Vec<scale_value::Value>;
+    type Value = scale_value::Value;
+    type IsPlain = Maybe;
+
+    fn pallet_name(&self) -> &str {
+        self.0.as_ref()
+    }
+
+    fn entry_name(&self) -> &str {
+        self.1.as_ref()
+    }
+
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        None
+    }
+}
+
 /// A dynamic address is simply a [`StaticAddress`] which asserts that the
 /// entry *might* be a map and *might* have a default value.
 pub type DynamicAddress<KeyParts = Vec<scale_value::Value>, Value = scale_value::Value> =

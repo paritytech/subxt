@@ -195,15 +195,16 @@ pub async fn explore_storage(
     // construct the client:
     let client = create_client(&file_or_url).await?;
 
-    let storage_query = subxt::dynamic::storage::<Vec<Value>, Value>(pallet_name, storage.name());
+    // Fetch the value:
+    let storage_value = client
+        .storage()
+        .at_latest()
+        .await?
+        .fetch((pallet_name, storage.name()), storage_entry_keys)
+        .await?
+        .decode()?;
 
-    let storage_client_at = client.storage().at_latest().await?;
-
-    let storage_entry = storage_client_at.entry(storage_query)?;
-
-    let storage_value = storage_entry.fetch(storage_entry_keys).await?;
-
-    let value = storage_value.decode()?.to_string().highlight();
+    let value = storage_value.to_string().highlight();
 
     writedoc! {output, "
 
