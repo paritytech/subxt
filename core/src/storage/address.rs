@@ -37,7 +37,7 @@ pub trait Address {
 }
 
 // Any reference to an address is a valid address.
-impl<'a, A: Address + ?Sized> Address for &'a A {
+impl<A: Address + ?Sized> Address for &'_ A {
     type KeyParts = A::KeyParts;
     type Value = A::Value;
     type IsPlain = A::IsPlain;

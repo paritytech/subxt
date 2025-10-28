@@ -36,7 +36,7 @@ pub trait Payload {
 }
 
 // Any reference to a payload is a valid payload.
-impl<'a, P: Payload + ?Sized> Payload for &'a P {
+impl<P: Payload + ?Sized> Payload for &'_ P {
     type ArgsType = P::ArgsType;
     type ReturnType = P::ReturnType;
 
