@@ -123,7 +123,8 @@ async fn system_chain_type() {
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
 
-    let _ = rpc.system_chain_type().await.unwrap();
+    let chain_type = rpc.system_chain_type().await.unwrap();
+    assert_eq!(chain_type, "Development");
 }
 
 #[subxt_test]
