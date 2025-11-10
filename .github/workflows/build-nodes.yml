@@ -20,11 +20,11 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y protobuf-compiler curl gcc make clang cmake llvm-dev libclang-dev
 
-      - name: Install Rust stable toolchain
+      - name: Install Rust v1.88 toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: 1.88
           components: rust-src
           target: wasm32-unknown-unknown
 
