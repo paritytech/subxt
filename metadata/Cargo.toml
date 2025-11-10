@@ -17,9 +17,6 @@ description = "Command line utilities for checking metadata compatibility betwee
 default = ["std"]
 std = ["scale-info/std", "frame-metadata/std"]
 
-# Enable decoding of legacy metadata, too.
-legacy = ["dep:scale-info-legacy"]
-
 [dependencies]
 scale-info = { workspace = true, default-features = false }
 scale-info-legacy = { workspace = true, optional = true }
