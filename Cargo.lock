@@ -5800,7 +5800,6 @@ dependencies = [
  "hashbrown 0.14.5",
  "parity-scale-codec",
  "scale-info",
- "scale-info-legacy",
  "sp-crypto-hashing",
  "subxt-utils-stripmetadata",
  "thiserror 2.0.12",
