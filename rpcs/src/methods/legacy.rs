@@ -126,6 +126,11 @@ impl<T: RpcConfig> LegacyRpcMethods<T> {
         self.client.request("system_version", rpc_params![]).await
     }
 
+    /// Fetch system chain type
+    pub async fn system_chain_type(&self) -> Result<String, Error> {
+        self.client.request("system_chainType", rpc_params![]).await
+    }
+
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
         self.client

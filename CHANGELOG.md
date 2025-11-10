@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Add `system_chain_type()` RPC method to `LegacyRpcMethods`
+
 ## [0.44.0] - 2025-08-28
 
 This small release primarily fixes a few issues, but also adds the code for a prelease of `subxt-historic`, a new crate (at the moment) for working with historic blocks and state. Future releases will aim to stabilize this crate to the level of other `subxt` crates or otherwise merge the logic into `subxt` itself.
