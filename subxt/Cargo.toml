@@ -131,7 +131,7 @@ subxt-signer = { path = "../signer", features = ["unstable-eth"] }
 subxt-rpcs = { workspace = true, features = ["subxt", "mock-rpc-client"] }
 # Tracing subscriber is useful for light-client examples to ensure that
 # the `bootNodes` and chain spec are configured correctly. If all is fine, then
-# the light-client wlll emit INFO logs with
+# the light-client will emit INFO logs with
 # `GrandPa warp sync finished` and `Finalized block runtime ready.`
 tracing-subscriber = { workspace = true }
 # These deps are needed to test the reconnecting rpc client
