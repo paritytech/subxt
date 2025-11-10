@@ -19,25 +19,22 @@ async fn main() -> Result<(), Error> {
         let client_at_block = client.at(block_number).await?;
 
         // We'll work the account balances at the given block, for this example.
-        let account_balances = client_at_block
-            .storage()
-            .entry("System", "Account")?
-            .into_map()?;
+        let account_balances = client_at_block.storage().entry("System", "Account")?;
 
         // We can see the default value for this entry at this block, if one exists.
-        if let Some(default_value) = account_balances.default() {
-            let default_balance_info = default_value.decode::<scale_value::Value>()?;
+        if let Some(default_value) = account_balances.default_value() {
+            let default_balance_info = default_value.decode_as::<scale_value::Value>()?;
             println!("  Default balance info: {default_balance_info}");
         }
 
         // We can fetch a specific account balance by its key, like so (here I just picked a random key
         // I knew to exist from iterating over storage entries):
         let account_id_hex = "9a4d0faa2ba8c3cc5711852960940793acf55bf195b6eecf88fa78e961d0ce4a";
-        let account_id = hex::decode(account_id_hex).unwrap();
+        let account_id: [u8; 32] = hex::decode(account_id_hex).unwrap().try_into().unwrap();
         if let Some(entry) = account_balances.fetch((account_id,)).await? {
             // We can decode the value into our generic `scale_value::Value` type, which can
             // represent any SCALE-encoded value, like so:
-            let _balance_info = entry.decode::<scale_value::Value>()?;
+            let _balance_info = entry.decode_as::<scale_value::Value>()?;
 
             // Or, if we know what shape to expect, we can decode the parts of the value that we care
             // about directly into a static type, which is more efficient and allows easy type-safe
@@ -53,7 +50,7 @@ async fn main() -> Result<(), Error> {
                 misc_frozen: u128,
                 fee_frozen: u128,
             }
-            let balance_info = entry.decode::<BalanceInfo>()?;
+            let balance_info = entry.decode_as::<BalanceInfo>()?;
 
             println!(
                 "  Single balance info from {account_id_hex} => free: {} reserved: {} misc_frozen: {} fee_frozen: {}",
@@ -72,23 +69,38 @@ async fn main() -> Result<(), Error> {
         let mut all_balances = account_balances.iter(()).await?.take(10);
         while let Some(entry) = all_balances.next().await {
             let entry = entry?;
-            let key = entry.decode_key()?;
+            let key = entry.key()?;
 
             // Decode the account ID from the key (we know here that we're working
             // with a map which has one value, an account ID, so we just decode that part:
             let account_id = key
                 .part(0)
                 .unwrap()
-                .decode::<[u8; 32]>()?
+                .decode_as::<[u8; 32]>()?
                 .expect("We expect this key to decode into a 32 byte AccountId");
 
             let account_id_hex = hex::encode(account_id);
 
             // Decode these values into our generic scale_value::Value type. Less efficient than
             // defining a static type as above, but easier for the sake of the example.
-            let balance_info = entry.decode_value::<scale_value::Value>()?;
+            let balance_info = entry.value().decode_as::<scale_value::Value>()?;
             println!("  {account_id_hex} => {balance_info}");
         }
+
+        // We can also chain things together to fetch and decode a value in one go.
+        let _val = client_at_block
+            .storage()
+            .entry("System", "Account")?
+            .fetch((account_id,))
+            .await?
+            .unwrap()
+            .decode_as::<scale_value::Value>()?;
+
+        let _vals = client_at_block
+            .storage()
+            .entry("System", "Account")?
+            .iter(())
+            .await?;
     }
 
     Ok(())

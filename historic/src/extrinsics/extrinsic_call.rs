@@ -98,7 +98,7 @@ impl<'extrinsics, 'atblock> ExtrinsicCallFields<'extrinsics, 'atblock> {
     }
 
     /// Attempt to decode the fields into the given type.
-    pub fn decode<T: scale_decode::DecodeAsFields>(&self) -> Result<T, ExtrinsicCallError> {
+    pub fn decode_as<T: scale_decode::DecodeAsFields>(&self) -> Result<T, ExtrinsicCallError> {
         with_info!(&self.info => {
             let cursor = &mut self.bytes();
             let mut fields = &mut info.info.call_data().map(|named_arg| {
@@ -156,7 +156,7 @@ impl<'extrinsics, 'atblock> ExtrinsicCallField<'extrinsics, 'atblock> {
     }
 
     /// Attempt to decode the value of this field into the given type.
-    pub fn decode<T: scale_decode::DecodeAsType>(&self) -> Result<T, ExtrinsicCallError> {
+    pub fn decode_as<T: scale_decode::DecodeAsType>(&self) -> Result<T, ExtrinsicCallError> {
         with_call_field_info!(&self.info => {
             let cursor = &mut &*self.field_bytes;
             let decoded = T::decode_as_type(cursor, info.info.ty().clone(), info.resolver)

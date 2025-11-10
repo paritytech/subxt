@@ -4,7 +4,7 @@
 
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
 use crate::config::Hash;
-use crate::error::{Error, RpcError};
+use crate::error::{BackendError, RpcError};
 use futures::stream::{Stream, StreamExt};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::ops::DerefMut;
@@ -42,7 +42,7 @@ impl<H: Hash> FollowStreamDriver<H> {
 }
 
 impl<H: Hash> Stream for FollowStreamDriver<H> {
-    type Item = Result<(), Error>;
+    type Item = Result<(), BackendError>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         match self.inner.poll_next_unpin(cx) {
@@ -421,7 +421,7 @@ where
     H: Hash,
     F: Fn(FollowEvent<BlockRef<H>>) -> Vec<BlockRef<H>>,
 {
-    type Item = Result<(String, Vec<BlockRef<H>>), Error>;
+    type Item = Result<(String, Vec<BlockRef<H>>), BackendError>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         if self.is_done {
@@ -500,7 +500,7 @@ mod test_utils {
     where
         H: Hash + 'static,
         F: Fn() -> I + Send + 'static,
-        I: IntoIterator<Item = Result<FollowEvent<H>, Error>>,
+        I: IntoIterator<Item = Result<FollowEvent<H>, BackendError>>,
     {
         let (stream, _) = test_unpin_stream_getter(events, max_life);
         FollowStreamDriver::new(stream)
@@ -537,7 +537,7 @@ mod test {
                     Ok(ev_new_block(0, 1)),
                     Ok(ev_best_block(1)),
                     Ok(ev_finalized([1], [])),
-                    Err(Error::Other("ended".to_owned())),
+                    Err(BackendError::Other("ended".to_owned())),
                 ]
             },
             10,
@@ -580,7 +580,7 @@ mod test {
                     Ok(ev_finalized([1], [])),
                     Ok(ev_new_block(1, 2)),
                     Ok(ev_new_block(2, 3)),
-                    Err(Error::Other("ended".to_owned())),
+                    Err(BackendError::Other("ended".to_owned())),
                 ]
             },
             10,
@@ -630,7 +630,7 @@ mod test {
                     Ok(ev_new_block(1, 2)),
                     Ok(ev_new_block(2, 3)),
                     Ok(ev_finalized([1], [])),
-                    Err(Error::Other("ended".to_owned())),
+                    Err(BackendError::Other("ended".to_owned())),
                 ]
             },
             10,
@@ -668,7 +668,7 @@ mod test {
                     Ok(FollowEvent::Stop),
                     Ok(ev_initialized(1)),
                     Ok(ev_finalized([2], [])),
-                    Err(Error::Other("ended".to_owned())),
+                    Err(BackendError::Other("ended".to_owned())),
                 ]
             },
             10,
@@ -714,7 +714,7 @@ mod test {
                     // Emulate that we missed some blocks.
                     Ok(ev_initialized(13)),
                     Ok(ev_finalized([14], [])),
-                    Err(Error::Other("ended".to_owned())),
+                    Err(BackendError::Other("ended".to_owned())),
                 ]
             },
             10,
@@ -742,7 +742,7 @@ mod test {
             )
         );
         assert!(
-            matches!(&evs[1], Err(Error::Rpc(RpcError::ClientError(subxt_rpcs::Error::DisconnectedWillReconnect(e)))) if e.contains("Missed at least one block when the connection was lost"))
+            matches!(&evs[1], Err(BackendError::Rpc(RpcError::ClientError(subxt_rpcs::Error::DisconnectedWillReconnect(e)))) if e.contains("Missed at least one block when the connection was lost"))
         );
         assert_eq!(
             evs[2].as_ref().unwrap(),

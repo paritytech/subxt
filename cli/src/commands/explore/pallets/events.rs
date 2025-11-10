@@ -2,7 +2,7 @@ use clap::Args;
 use color_eyre::eyre::eyre;
 use indoc::{formatdoc, writedoc};
 use scale_info::{Variant, form::PortableForm};
-use subxt::metadata::{Metadata, types::PalletMetadata};
+use subxt::metadata::{Metadata, PalletMetadata};
 
 use crate::utils::{Indent, fields_description, first_paragraph_of_docs};
 

@@ -10,7 +10,7 @@ use crate::{
     blocks::{BlockRef, BlocksClient},
     config::{Config, HashFor},
     constants::ConstantsClient,
-    error::Error,
+    error::{BackendError, OnlineClientError, RuntimeUpdateeApplyError, RuntimeUpdaterError},
     events::EventsClient,
     runtime_api::RuntimeApiClient,
     storage::StorageClient,
@@ -18,6 +18,7 @@ use crate::{
     view_functions::ViewFunctionsClient,
 };
 use derive_where::derive_where;
+use futures::TryFutureExt;
 use futures::future;
 use std::sync::{Arc, RwLock};
 use subxt_core::client::{ClientState, RuntimeVersion};
@@ -60,13 +61,13 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
-    pub async fn new() -> Result<OnlineClient<T>, Error> {
+    pub async fn new() -> Result<OnlineClient<T>, OnlineClientError> {
         let url = "ws://127.0.0.1:9944";
         OnlineClient::from_url(url).await
     }
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
-    pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
+    pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, OnlineClientError> {
         subxt_rpcs::utils::validate_url_is_secure(url.as_ref())?;
         OnlineClient::from_insecure_url(url).await
     }
@@ -74,7 +75,9 @@ impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     ///
     /// Allows insecure URLs without SSL encryption, e.g. (http:// and ws:// URLs).
-    pub async fn from_insecure_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, Error> {
+    pub async fn from_insecure_url(
+        url: impl AsRef<str>,
+    ) -> Result<OnlineClient<T>, OnlineClientError> {
         let client = RpcClient::from_insecure_url(url).await?;
         let backend = LegacyBackend::builder().build(client);
         OnlineClient::from_backend(Arc::new(backend)).await
@@ -86,7 +89,7 @@ impl<T: Config> OnlineClient<T> {
     /// This will use the current default [`Backend`], which may change in future releases.
     pub async fn from_rpc_client(
         rpc_client: impl Into<RpcClient>,
-    ) -> Result<OnlineClient<T>, Error> {
+    ) -> Result<OnlineClient<T>, OnlineClientError> {
         let rpc_client = rpc_client.into();
         let backend = Arc::new(LegacyBackend::builder().build(rpc_client));
         OnlineClient::from_backend(backend).await
@@ -110,7 +113,7 @@ impl<T: Config> OnlineClient<T> {
         runtime_version: RuntimeVersion,
         metadata: impl Into<Metadata>,
         rpc_client: impl Into<RpcClient>,
-    ) -> Result<OnlineClient<T>, Error> {
+    ) -> Result<OnlineClient<T>, OnlineClientError> {
         let rpc_client = rpc_client.into();
         let backend = Arc::new(LegacyBackend::builder().build(rpc_client));
         OnlineClient::from_backend_with(genesis_hash, runtime_version, metadata, backend)
@@ -118,13 +121,23 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
     /// implementation to power it. Other details will be obtained from the chain.
-    pub async fn from_backend<B: Backend<T>>(backend: Arc<B>) -> Result<OnlineClient<T>, Error> {
-        let latest_block = backend.latest_finalized_block_ref().await?;
+    pub async fn from_backend<B: Backend<T>>(
+        backend: Arc<B>,
+    ) -> Result<OnlineClient<T>, OnlineClientError> {
+        let latest_block = backend
+            .latest_finalized_block_ref()
+            .await
+            .map_err(OnlineClientError::CannotGetLatestFinalizedBlock)?;
 
         let (genesis_hash, runtime_version, metadata) = future::join3(
-            backend.genesis_hash(),
-            backend.current_runtime_version(),
-            OnlineClient::fetch_metadata(&*backend, latest_block.hash()),
+            backend
+                .genesis_hash()
+                .map_err(OnlineClientError::CannotGetGenesisHash),
+            backend
+                .current_runtime_version()
+                .map_err(OnlineClientError::CannotGetCurrentRuntimeVersion),
+            OnlineClient::fetch_metadata(&*backend, latest_block.hash())
+                .map_err(OnlineClientError::CannotFetchMetadata),
         )
         .await;
 
@@ -148,7 +161,7 @@ impl<T: Config> OnlineClient<T> {
         runtime_version: RuntimeVersion,
         metadata: impl Into<Metadata>,
         backend: Arc<B>,
-    ) -> Result<OnlineClient<T>, Error> {
+    ) -> Result<OnlineClient<T>, OnlineClientError> {
         use subxt_core::config::Hasher;
 
         let metadata = metadata.into();
@@ -169,7 +182,7 @@ impl<T: Config> OnlineClient<T> {
     async fn fetch_metadata(
         backend: &dyn Backend<T>,
         block_hash: HashFor<T>,
-    ) -> Result<Metadata, Error> {
+    ) -> Result<Metadata, BackendError> {
         #[cfg(feature = "unstable-metadata")]
         {
             /// The unstable metadata version number.
@@ -194,7 +207,7 @@ impl<T: Config> OnlineClient<T> {
     async fn fetch_latest_stable_metadata(
         backend: &dyn Backend<T>,
         block_hash: HashFor<T>,
-    ) -> Result<Metadata, Error> {
+    ) -> Result<Metadata, BackendError> {
         // The metadata versions we support in Subxt, from newest to oldest.
         use subxt_metadata::SUPPORTED_METADATA_VERSIONS;
 
@@ -235,7 +248,7 @@ impl<T: Config> OnlineClient<T> {
     /// tokio::spawn(async move {
     ///     let mut update_stream = updater.runtime_updates().await.unwrap();
     ///
-    ///     while let Some(Ok(update)) = update_stream.next().await {
+    ///     while let Ok(update) = update_stream.next().await {
     ///         let version = update.runtime_version().spec_version;
     ///
     ///         match updater.apply_update(update) {
@@ -416,9 +429,9 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     }
 
     /// Tries to apply a new update.
-    pub fn apply_update(&self, update: Update) -> Result<(), UpgradeError> {
+    pub fn apply_update(&self, update: Update) -> Result<(), RuntimeUpdateeApplyError> {
         if !self.is_runtime_version_different(&update.runtime_version) {
-            return Err(UpgradeError::SameVersion);
+            return Err(RuntimeUpdateeApplyError::SameVersion);
         }
 
         self.do_update(update);
@@ -430,12 +443,12 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     ///
     /// *Note:* This will run indefinitely until it errors, so the typical usage
     /// would be to run it in a separate background task.
-    pub async fn perform_runtime_updates(&self) -> Result<(), Error> {
+    pub async fn perform_runtime_updates(&self) -> Result<(), RuntimeUpdaterError> {
         // Obtain an update subscription to further detect changes in the runtime version of the node.
         let mut runtime_version_stream = self.runtime_updates().await?;
 
-        while let Some(update) = runtime_version_stream.next().await {
-            let update = update?;
+        loop {
+            let update = runtime_version_stream.next().await?;
 
             // This only fails if received the runtime version is the same the current runtime version
             // which might occur because that runtime subscriptions in substrate sends out the initial
@@ -443,8 +456,6 @@ impl<T: Config> ClientRuntimeUpdater<T> {
             // Thus, fine to ignore here as it strictly speaking isn't really an error
             let _ = self.apply_update(update);
         }
-
-        Ok(())
     }
 
     /// Low-level API to get runtime updates as a stream but it's doesn't check if the
@@ -452,9 +463,16 @@ impl<T: Config> ClientRuntimeUpdater<T> {
     ///
     /// Instead that's up to the user of this API to decide when to update and
     /// to perform the actual updating.
-    pub async fn runtime_updates(&self) -> Result<RuntimeUpdaterStream<T>, Error> {
+    pub async fn runtime_updates(&self) -> Result<RuntimeUpdaterStream<T>, RuntimeUpdaterError> {
+        let stream = self
+            .0
+            .backend()
+            .stream_runtime_version()
+            .await
+            .map_err(RuntimeUpdaterError::CannotStreamRuntimeVersion)?;
+
         Ok(RuntimeUpdaterStream {
-            stream: self.0.backend().stream_runtime_version().await?,
+            stream,
             client: self.0.clone(),
         })
     }
@@ -468,36 +486,25 @@ pub struct RuntimeUpdaterStream<T: Config> {
 
 impl<T: Config> RuntimeUpdaterStream<T> {
     /// Wait for the next runtime update.
-    pub async fn next(&mut self) -> Option<Result<Update, Error>> {
-        let runtime_version = match self.stream.next().await? {
-            Ok(runtime_version) => runtime_version,
-            Err(err) => return Some(Err(err)),
-        };
+    pub async fn next(&mut self) -> Result<Update, RuntimeUpdaterError> {
+        let runtime_version = self
+            .stream
+            .next()
+            .await
+            .ok_or(RuntimeUpdaterError::UnexpectedEndOfUpdateStream)?
+            .map_err(RuntimeUpdaterError::CannotGetNextRuntimeVersion)?;
 
-        let at =
-            match wait_runtime_upgrade_in_finalized_block(&self.client, &runtime_version).await? {
-                Ok(at) => at,
-                Err(err) => return Some(Err(err)),
-            };
+        let at = wait_runtime_upgrade_in_finalized_block(&self.client, &runtime_version).await?;
 
-        let metadata = match OnlineClient::fetch_metadata(self.client.backend(), at.hash()).await {
-            Ok(metadata) => metadata,
-            Err(err) => return Some(Err(err)),
-        };
+        let metadata = OnlineClient::fetch_metadata(self.client.backend(), at.hash())
+            .await
+            .map_err(RuntimeUpdaterError::CannotFetchNewMetadata)?;
 
-        Some(Ok(Update {
+        Ok(Update {
             metadata,
             runtime_version,
-        }))
+        })
     }
-}
-
-/// Error that can occur during upgrade.
-#[non_exhaustive]
-#[derive(Debug, Clone)]
-pub enum UpgradeError {
-    /// The version is the same as the current version.
-    SameVersion,
 }
 
 /// Represents the state when a runtime upgrade occurred.
@@ -522,64 +529,52 @@ impl Update {
 async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
     client: &OnlineClient<T>,
     runtime_version: &RuntimeVersion,
-) -> Option<Result<BlockRef<HashFor<T>>, Error>> {
-    use scale_value::At;
-
+) -> Result<BlockRef<HashFor<T>>, RuntimeUpdaterError> {
     let hasher = client
         .inner
         .read()
         .expect("Lock shouldn't be poisoned")
         .hasher;
 
-    let mut block_sub = match client
+    let mut block_sub = client
         .backend()
         .stream_finalized_block_headers(hasher)
         .await
-    {
-        Ok(s) => s,
-        Err(err) => return Some(Err(err)),
-    };
+        .map_err(RuntimeUpdaterError::CannotStreamFinalizedBlocks)?;
 
     let block_ref = loop {
-        let (_, block_ref) = match block_sub.next().await? {
-            Ok(n) => n,
-            Err(err) => return Some(Err(err)),
-        };
+        let (_, block_ref) = block_sub
+            .next()
+            .await
+            .ok_or(RuntimeUpdaterError::UnexpectedEndOfBlockStream)?
+            .map_err(RuntimeUpdaterError::CannotGetNextFinalizedBlock)?;
 
-        let key: Vec<scale_value::Value> = vec![];
-        let addr = crate::dynamic::storage("System", "LastRuntimeUpgrade", key);
+        let addr =
+            crate::dynamic::storage::<(), scale_value::Value>("System", "LastRuntimeUpgrade");
 
-        let chunk = match client.storage().at(block_ref.hash()).fetch(&addr).await {
-            Ok(Some(v)) => v,
-            Ok(None) => {
-                // The storage `system::lastRuntimeUpgrade` should always exist.
-                // <https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/system/src/lib.rs#L958>
-                unreachable!("The storage item `system::lastRuntimeUpgrade` should always exist")
-            }
-            Err(e) => return Some(Err(e)),
-        };
+        let client_at = client.storage().at(block_ref.hash());
+        let value = client_at
+            .entry(addr)
+            // The storage `system::lastRuntimeUpgrade` should always exist.
+            // <https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/system/src/lib.rs#L958>
+            .map_err(|_| RuntimeUpdaterError::CantFindSystemLastRuntimeUpgrade)?
+            .fetch(())
+            .await
+            .map_err(RuntimeUpdaterError::CantFetchLastRuntimeUpgrade)?
+            .decode_as::<LastRuntimeUpgrade>()
+            .map_err(RuntimeUpdaterError::CannotDecodeLastRuntimeUpgrade)?;
 
-        let scale_val = match chunk.to_value() {
-            Ok(v) => v,
-            Err(e) => return Some(Err(e.into())),
-        };
-
-        let Some(Ok(spec_version)) = scale_val
-            .at("spec_version")
-            .and_then(|v| v.as_u128())
-            .map(u32::try_from)
-        else {
-            return Some(Err(Error::Other(
-                "Decoding `RuntimeVersion::spec_version` as u32 failed".to_string(),
-            )));
-        };
+        #[derive(scale_decode::DecodeAsType)]
+        struct LastRuntimeUpgrade {
+            spec_version: u32,
+        }
 
         // We are waiting for the chain to have the same spec version
         // as sent out via the runtime subscription.
-        if spec_version == runtime_version.spec_version {
+        if value.spec_version == runtime_version.spec_version {
             break block_ref;
         }
     };
 
-    Some(Ok(block_ref))
+    Ok(block_ref)
 }

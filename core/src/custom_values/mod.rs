@@ -12,7 +12,7 @@
 //! ```rust
 //! use subxt_macro::subxt;
 //! use subxt_core::custom_values;
-//! use subxt_core::metadata;
+//! use subxt_core::Metadata;
 //!
 //! // If we generate types without `subxt`, we need to point to `::subxt_core`:
 //! #[subxt(
@@ -23,7 +23,7 @@
 //!
 //! // Some metadata we'd like to access custom values in:
 //! let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
-//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//! let metadata = Metadata::decode_from(&metadata_bytes[..]).unwrap();
 //!
 //! // At the moment, we don't expect to see any custom values in the metadata
 //! // for Polkadot, so this will return an error:
@@ -32,61 +32,64 @@
 
 pub mod address;
 
-use crate::utils::Yes;
-use crate::{Error, Metadata, error::MetadataError, metadata::DecodeWithMetadata};
+use crate::utils::Maybe;
+use crate::{Metadata, error::CustomValueError};
 use address::Address;
 use alloc::vec::Vec;
+use frame_decode::custom_values::CustomValueTypeInfo;
+use scale_decode::IntoVisitor;
 
 /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
 /// if the address is valid (or if it's not possible to check since the address has no validation hash).
 /// Returns an error if the address was not valid (wrong name, type or raw bytes)
-pub fn validate<Addr: Address + ?Sized>(address: &Addr, metadata: &Metadata) -> Result<(), Error> {
+pub fn validate<Addr: Address>(address: Addr, metadata: &Metadata) -> Result<(), CustomValueError> {
     if let Some(actual_hash) = address.validation_hash() {
         let custom = metadata.custom();
         let custom_value = custom
             .get(address.name())
-            .ok_or_else(|| MetadataError::CustomValueNameNotFound(address.name().into()))?;
+            .ok_or_else(|| CustomValueError::NotFound(address.name().into()))?;
         let expected_hash = custom_value.hash();
         if actual_hash != expected_hash {
-            return Err(MetadataError::IncompatibleCodegen.into());
+            return Err(CustomValueError::IncompatibleCodegen);
         }
-    }
-    if metadata.custom().get(address.name()).is_none() {
-        return Err(MetadataError::IncompatibleCodegen.into());
     }
     Ok(())
 }
 
 /// Access a custom value by the address it is registered under. This can be just a [str] to get back a dynamic value,
 /// or a static address from the generated static interface to get a value of a static type returned.
-pub fn get<Addr: Address<IsDecodable = Yes> + ?Sized>(
-    address: &Addr,
+pub fn get<Addr: Address<IsDecodable = Maybe>>(
+    address: Addr,
     metadata: &Metadata,
-) -> Result<Addr::Target, Error> {
+) -> Result<Addr::Target, CustomValueError> {
     // 1. Validate custom value shape if hash given:
-    validate(address, metadata)?;
+    validate(&address, metadata)?;
 
     // 2. Attempt to decode custom value:
-    let custom_value = metadata.custom_value_by_name_err(address.name())?;
-    let value = <Addr::Target as DecodeWithMetadata>::decode_with_metadata(
-        &mut custom_value.bytes(),
-        custom_value.type_id(),
+    let value = frame_decode::custom_values::decode_custom_value(
+        address.name(),
         metadata,
-    )?;
+        metadata.types(),
+        Addr::Target::into_visitor(),
+    )
+    .map_err(CustomValueError::CouldNotDecodeCustomValue)?;
+
     Ok(value)
 }
 
 /// Access the bytes of a custom value by the address it is registered under.
-pub fn get_bytes<Addr: Address + ?Sized>(
-    address: &Addr,
+pub fn get_bytes<Addr: Address>(
+    address: Addr,
     metadata: &Metadata,
-) -> Result<Vec<u8>, Error> {
+) -> Result<Vec<u8>, CustomValueError> {
     // 1. Validate custom value shape if hash given:
-    validate(address, metadata)?;
+    validate(&address, metadata)?;
 
     // 2. Return the underlying bytes:
-    let custom_value = metadata.custom_value_by_name_err(address.name())?;
-    Ok(custom_value.bytes().to_vec())
+    let custom_value = metadata
+        .custom_value_info(address.name())
+        .map_err(|e| CustomValueError::NotFound(e.not_found))?;
+    Ok(custom_value.bytes.to_vec())
 }
 
 #[cfg(test)]
@@ -154,7 +157,7 @@ mod tests {
         };
 
         let metadata: subxt_metadata::Metadata = frame_metadata.try_into().unwrap();
-        Metadata::from(metadata)
+        metadata
     }
 
     #[test]
@@ -162,8 +165,9 @@ mod tests {
         let metadata = mock_metadata();
 
         assert!(custom_values::get("Invalid Address", &metadata).is_err());
-        let person_decoded_value_thunk = custom_values::get("Mr. Robot", &metadata).unwrap();
-        let person: Person = person_decoded_value_thunk.as_type().unwrap();
+
+        let person_addr = custom_values::address::dynamic::<Person>("Mr. Robot");
+        let person = custom_values::get(&person_addr, &metadata).unwrap();
         assert_eq!(
             person,
             Person {

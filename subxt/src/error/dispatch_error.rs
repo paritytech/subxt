@@ -5,16 +5,15 @@
 //! A representation of the dispatch error; an error returned when
 //! something fails in trying to submit/execute a transaction.
 
-use crate::metadata::{DecodeWithMetadata, Metadata};
+use super::{DispatchErrorDecodeError, ModuleErrorDecodeError, ModuleErrorDetailsError};
+use crate::metadata::Metadata;
 use core::fmt::Debug;
 use scale_decode::{DecodeAsType, TypeResolver, visitor::DecodeAsTypeResult};
-
 use std::{borrow::Cow, marker::PhantomData};
-
-use super::{Error, MetadataError};
 
 /// An error dispatching a transaction.
 #[derive(Debug, thiserror::Error, PartialEq, Eq)]
+#[allow(clippy::large_enum_variant)]
 #[non_exhaustive]
 pub enum DispatchError {
     /// Some error occurred.
@@ -169,11 +168,19 @@ impl std::fmt::Display for ModuleError {
 
 impl ModuleError {
     /// Return more details about this error.
-    pub fn details(&self) -> Result<ModuleErrorDetails<'_>, MetadataError> {
-        let pallet = self.metadata.pallet_by_index_err(self.pallet_index())?;
+    pub fn details(&self) -> Result<ModuleErrorDetails<'_>, ModuleErrorDetailsError> {
+        let pallet = self.metadata.pallet_by_index(self.pallet_index()).ok_or(
+            ModuleErrorDetailsError::PalletNotFound {
+                pallet_index: self.pallet_index(),
+            },
+        )?;
+
         let variant = pallet
             .error_variant_by_index(self.error_index())
-            .ok_or_else(|| MetadataError::VariantIndexNotFound(self.error_index()))?;
+            .ok_or_else(|| ModuleErrorDetailsError::ErrorVariantNotFound {
+                pallet_name: pallet.name().into(),
+                error_index: self.error_index(),
+            })?;
 
         Ok(ModuleErrorDetails { pallet, variant })
     }
@@ -209,12 +216,13 @@ impl ModuleError {
     }
 
     /// Attempts to decode the ModuleError into the top outer Error enum.
-    pub fn as_root_error<E: DecodeAsType>(&self) -> Result<E, Error> {
+    pub fn as_root_error<E: DecodeAsType>(&self) -> Result<E, ModuleErrorDecodeError> {
         let decoded = E::decode_as_type(
             &mut &self.bytes[..],
             self.metadata.outer_enums().error_enum_ty(),
             self.metadata.types(),
-        )?;
+        )
+        .map_err(ModuleErrorDecodeError)?;
 
         Ok(decoded)
     }
@@ -223,7 +231,7 @@ impl ModuleError {
 /// Details about the module error.
 pub struct ModuleErrorDetails<'a> {
     /// The pallet that the error is in
-    pub pallet: crate::metadata::types::PalletMetadata<'a>,
+    pub pallet: subxt_metadata::PalletMetadata<'a>,
     /// The variant representing the error
     pub variant: &'a scale_info::Variant<scale_info::form::PortableForm>,
 }
@@ -234,11 +242,11 @@ impl DispatchError {
     pub fn decode_from<'a>(
         bytes: impl Into<Cow<'a, [u8]>>,
         metadata: Metadata,
-    ) -> Result<Self, super::Error> {
+    ) -> Result<Self, DispatchErrorDecodeError> {
         let bytes = bytes.into();
         let dispatch_error_ty_id = metadata
             .dispatch_error_ty()
-            .ok_or(MetadataError::DispatchErrorNotFound)?;
+            .ok_or(DispatchErrorDecodeError::DispatchErrorTypeIdNotFound)?;
 
         // The aim is to decode our bytes into roughly this shape. This is copied from
         // `sp_runtime::DispatchError`; we need the variant names and any inner variant
@@ -290,11 +298,12 @@ impl DispatchError {
         }
 
         // Decode into our temporary error:
-        let decoded_dispatch_err = DecodedDispatchError::decode_with_metadata(
+        let decoded_dispatch_err = DecodedDispatchError::decode_as_type(
             &mut &*bytes,
             dispatch_error_ty_id,
-            &metadata,
-        )?;
+            metadata.types(),
+        )
+        .map_err(DispatchErrorDecodeError::CouldNotDecodeDispatchError)?;
 
         // Convert into the outward-facing error, mainly by handling the Module variant.
         let dispatch_error = match decoded_dispatch_err {
@@ -333,7 +342,9 @@ impl DispatchError {
                         "Can't decode error sp_runtime::DispatchError: bytes do not match known shapes"
                     );
                     // Return _all_ of the bytes; every "unknown" return should be consistent.
-                    return Err(super::Error::Unknown(bytes.to_vec()));
+                    return Err(DispatchErrorDecodeError::CouldNotDecodeModuleError {
+                        bytes: bytes.to_vec(),
+                    });
                 };
 
                 // And return our outward-facing version:

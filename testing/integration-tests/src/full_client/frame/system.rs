@@ -6,7 +6,6 @@ use crate::{
     node_runtime::{self, system},
     subxt_test, test_context,
 };
-use assert_matches::assert_matches;
 use subxt_signer::sr25519::dev;
 
 #[subxt_test]
@@ -16,18 +15,16 @@ async fn storage_account() -> Result<(), subxt::Error> {
 
     let alice = dev::alice();
 
-    let account_info_addr = node_runtime::storage()
-        .system()
-        .account(alice.public_key().to_account_id());
+    let account_info_addr = node_runtime::storage().system().account();
 
-    let account_info = api
+    let _account_info = api
         .storage()
         .at_latest()
         .await?
-        .fetch_or_default(&account_info_addr)
-        .await;
+        .fetch(account_info_addr, (alice.public_key().to_account_id(),))
+        .await?
+        .decode()?;
 
-    assert_matches!(account_info, Ok(_));
     Ok(())
 }
 

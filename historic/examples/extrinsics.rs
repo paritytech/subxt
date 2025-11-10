@@ -43,7 +43,7 @@ async fn main() -> Result<(), Error> {
                 println!(
                     "    {}: {}",
                     field.name(),
-                    field.decode::<scale_value::Value>().unwrap()
+                    field.decode_as::<scale_value::Value>().unwrap()
                 );
             }
 
@@ -53,7 +53,7 @@ async fn main() -> Result<(), Error> {
                 extrinsic
                     .call()
                     .fields()
-                    .decode::<scale_value::Composite<_>>()
+                    .decode_as::<scale_value::Composite<_>>()
                     .unwrap()
             );
 
@@ -66,14 +66,14 @@ async fn main() -> Result<(), Error> {
                     println!(
                         "    {}: {}",
                         extension.name(),
-                        extension.decode::<scale_value::Value>().unwrap()
+                        extension.decode_as::<scale_value::Value>().unwrap()
                     );
                 }
 
                 // Or all of them at once:
                 println!(
                     "    All: {}",
-                    extensions.decode::<scale_value::Composite<_>>().unwrap()
+                    extensions.decode_as::<scale_value::Composite<_>>().unwrap()
                 );
             }
         }

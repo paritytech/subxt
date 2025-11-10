@@ -3,7 +3,7 @@ use crate::{error::StorageKeyError, storage::storage_info::with_info};
 use scale_info_legacy::{LookupName, TypeRegistrySet};
 
 // This is part of our public interface.
-pub use frame_decode::storage::StorageHasher;
+pub use frame_decode::storage::{IntoDecodableValues, StorageHasher};
 
 enum AnyStorageKeyInfo<'atblock> {
     Legacy(StorageKeyInfo<'atblock, LookupName, TypeRegistrySet<'atblock>>),
@@ -78,6 +78,23 @@ impl<'entry, 'atblock> StorageKey<'entry, 'atblock> {
         })
     }
 
+    /// Attempt to decode the values contained within this storage key to the `Target` type
+    /// provided. This type is typically a tuple of types which each implement [`scale_decode::DecodeAsType`]
+    /// and correspond to each of the key types present, in order.
+    pub fn decode_as<Target: IntoDecodableValues>(&self) -> Result<Target, StorageKeyError> {
+        with_key_info!(info = &self.info => {
+            let values = frame_decode::storage::decode_storage_key_values(
+                self.bytes,
+                &info.info,
+                info.resolver
+            ).map_err(|e| {
+                StorageKeyError::DecodeKeyValueError { reason: e }
+            })?;
+
+            Ok(values)
+        })
+    }
+
     /// Iterate over the parts of this storage key. Each part of a storage key corresponds to a
     /// single value that has been hashed.
     pub fn parts(&'_ self) -> impl ExactSizeIterator<Item = StorageKeyPart<'_, 'entry, 'atblock>> {
@@ -137,7 +154,7 @@ impl<'key, 'entry, 'atblock> StorageKeyPart<'key, 'entry, 'atblock> {
     /// is available as a part of the key hash, allowing us to decode it into anything
     /// implementing [`scale_decode::DecodeAsType`]. If the key was produced using a
     /// different hasher, this will return `None`.
-    pub fn decode<T: scale_decode::DecodeAsType>(&self) -> Result<Option<T>, StorageKeyError> {
+    pub fn decode_as<T: scale_decode::DecodeAsType>(&self) -> Result<Option<T>, StorageKeyError> {
         with_key_info!(info = &self.info => {
             let part_info = &info.info[self.index];
             let Some(value_info) = part_info.value() else {

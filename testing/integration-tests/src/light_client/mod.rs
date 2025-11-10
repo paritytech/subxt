@@ -32,6 +32,7 @@ use codec::Compact;
 use std::sync::Arc;
 use subxt::backend::chain_head::ChainHeadBackend;
 use subxt::backend::rpc::RpcClient;
+use subxt::dynamic::Value;
 use subxt::{client::OnlineClient, config::PolkadotConfig, lightclient::LightClient};
 use subxt_metadata::Metadata;
 
@@ -104,7 +105,7 @@ async fn runtime_api_call(api: &Client) -> Result<(), subxt::Error> {
 
     let block = sub.next().await.unwrap()?;
     tracing::trace!("First block took {:?}", now.elapsed());
-    let rt = block.runtime_api().await?;
+    let rt = block.runtime_api().await;
 
     // get metadata via state_call. if it decodes ok, it's probably all good.
     let result_bytes = rt.call_raw("Metadata_metadata", None).await?;
@@ -120,13 +121,10 @@ async fn storage_plain_lookup(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
     tracing::trace!("Check storage_plain_lookup");
 
+    let storage_at = api.storage().at_latest().await?;
+
     let addr = node_runtime::storage().timestamp().now();
-    let entry = api
-        .storage()
-        .at_latest()
-        .await?
-        .fetch_or_default(&addr)
-        .await?;
+    let entry = storage_at.fetch(addr, ()).await?.decode()?;
 
     tracing::trace!("Storage lookup took {:?}\n", now.elapsed());
 
@@ -140,7 +138,7 @@ async fn dynamic_constant_query(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
     tracing::trace!("Check dynamic_constant_query");
 
-    let constant_query = subxt::dynamic::constant("System", "BlockLength");
+    let constant_query = subxt::dynamic::constant::<Value>("System", "BlockLength");
     let _value = api.constants().at(&constant_query)?;
 
     tracing::trace!("Dynamic constant query took {:?}\n", now.elapsed());

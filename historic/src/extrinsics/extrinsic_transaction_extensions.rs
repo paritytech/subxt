@@ -16,7 +16,7 @@ struct ExtrinsicExtensionsInfo<'extrinsics, 'atblock, TypeId, Resolver> {
 }
 
 /// This represents the transaction extensions of an extrinsic.
-pub struct ExtrinsicTransactionExtensions<'extrinsics, 'atblock> {
+pub struct ExtrinsicTransactionParams<'extrinsics, 'atblock> {
     all_bytes: &'extrinsics [u8],
     info: AnyExtrinsicExtensionsInfo<'extrinsics, 'atblock>,
 }
@@ -31,7 +31,7 @@ macro_rules! with_extensions_info {
     };
 }
 
-impl<'extrinsics, 'atblock> ExtrinsicTransactionExtensions<'extrinsics, 'atblock> {
+impl<'extrinsics, 'atblock> ExtrinsicTransactionParams<'extrinsics, 'atblock> {
     pub(crate) fn new(
         all_bytes: &'extrinsics [u8],
         info: &'extrinsics AnyExtrinsicInfo<'atblock>,
@@ -105,7 +105,7 @@ impl<'extrinsics, 'atblock> ExtrinsicTransactionExtensions<'extrinsics, 'atblock
 
     /// Attempt to decode the transaction extensions into a type where each field name is the name of the transaction
     /// extension and the field value is the decoded extension.
-    pub fn decode<T: scale_decode::DecodeAsFields>(
+    pub fn decode_as<T: scale_decode::DecodeAsFields>(
         &self,
     ) -> Result<T, ExtrinsicTransactionExtensionError> {
         with_extensions_info!(&self.info => {
@@ -189,7 +189,7 @@ impl<'extrinsics, 'atblock> ExtrinsicTransactionExtension<'extrinsics, 'atblock>
     }
 
     /// Decode the bytes for this transaction extension into a type that implements `scale_decode::DecodeAsType`.
-    pub fn decode<T: scale_decode::DecodeAsType>(
+    pub fn decode_as<T: scale_decode::DecodeAsType>(
         &self,
     ) -> Result<T, ExtrinsicTransactionExtensionError> {
         with_extension_info!(&self.info => {

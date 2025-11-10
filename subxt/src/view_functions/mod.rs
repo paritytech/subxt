@@ -7,8 +7,6 @@
 mod view_function_types;
 mod view_functions_client;
 
-pub use subxt_core::view_functions::payload::{
-    DefaultPayload, DynamicPayload, Payload, StaticPayload, dynamic,
-};
+pub use subxt_core::view_functions::payload::{DynamicPayload, Payload, StaticPayload, dynamic};
 pub use view_function_types::ViewFunctionsApi;
 pub use view_functions_client::ViewFunctionsClient;

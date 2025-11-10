@@ -13,7 +13,7 @@ use futures::StreamExt;
 
 use subxt::{
     backend::BackendExt,
-    error::{DispatchError, Error},
+    error::{DispatchError, TransactionEventsError, TransactionFinalizedSuccessError},
     tx::{TransactionInvalid, ValidationResult},
 };
 use subxt_signer::sr25519::dev;
@@ -27,42 +27,16 @@ mod chain_head_rpcs;
 
 #[cfg(fullclient)]
 #[subxt_test]
-async fn storage_fetch_raw_keys() {
+async fn storage_iter() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let addr = node_runtime::storage().system().account_iter();
-    let len = api
-        .storage()
-        .at_latest()
-        .await
-        .unwrap()
-        .fetch_raw_keys(addr.to_root_bytes())
-        .await
-        .unwrap()
-        .filter_map(async |r| r.ok())
-        .count()
-        .await;
+    let addr = node_runtime::storage().system().account();
+    let storage = api.storage().at_latest().await.unwrap();
+    let entry = storage.entry(addr)?;
 
-    assert_eq!(len, 17)
-}
-
-#[cfg(fullclient)]
-#[subxt_test]
-async fn storage_iter() {
-    let ctx = test_context().await;
-    let api = ctx.client();
-
-    let addr = node_runtime::storage().system().account_iter();
-    let addr_bytes = api.storage().address_bytes(&addr).unwrap();
-    assert_eq!(addr_bytes, addr.to_root_bytes());
-
-    let len = api
-        .storage()
-        .at_latest()
-        .await
-        .unwrap()
-        .iter(addr)
+    let len = entry
+        .iter(())
         .await
         .unwrap()
         .filter_map(async |r| r.ok())
@@ -70,17 +44,18 @@ async fn storage_iter() {
         .await;
 
     assert_eq!(len, 17);
+    Ok(())
 }
 
 #[cfg(fullclient)]
 #[subxt_test]
-async fn storage_child_values_same_across_backends() {
+async fn storage_child_values_same_across_backends() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
 
     let chainhead_client = ctx.chainhead_backend().await;
     let legacy_client = ctx.legacy_backend().await;
 
-    let addr = node_runtime::storage().system().account_iter();
+    let addr = node_runtime::storage().system().account();
     let block_ref = legacy_client
         .blocks()
         .at_latest()
@@ -88,18 +63,17 @@ async fn storage_child_values_same_across_backends() {
         .unwrap()
         .reference();
 
-    let a: Vec<_> = chainhead_client
-        .storage()
-        .at(block_ref.clone())
-        .iter(addr.clone())
+    let chainhead_storage = chainhead_client.storage().at(block_ref.clone());
+    let a: Vec<_> = chainhead_storage
+        .iter(&addr, ())
         .await
         .unwrap()
         .collect()
         .await;
-    let b: Vec<_> = legacy_client
-        .storage()
-        .at(block_ref.clone())
-        .iter(addr)
+
+    let legacy_storage = legacy_client.storage().at(block_ref.clone());
+    let b: Vec<_> = legacy_storage
+        .iter(&addr, ())
         .await
         .unwrap()
         .collect()
@@ -109,8 +83,10 @@ async fn storage_child_values_same_across_backends() {
         let a = a.unwrap();
         let b = b.unwrap();
 
-        assert_eq!(a, b);
+        assert_eq!(a.key_bytes(), b.key_bytes());
+        assert_eq!(a.value().bytes(), b.value().bytes());
     }
+    Ok(())
 }
 
 #[subxt_test]
@@ -273,7 +249,10 @@ async fn decode_a_module_error() {
         .await
         .expect_err("an 'unknown asset' error");
 
-    let Error::Runtime(DispatchError::Module(module_err)) = err else {
+    let TransactionFinalizedSuccessError::SuccessError(TransactionEventsError::ExtrinsicFailed(
+        DispatchError::Module(module_err),
+    )) = err
+    else {
         panic!("Expected a ModuleError, got {err:?}");
     };
 
