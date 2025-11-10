@@ -26,19 +26,15 @@ use alloc::borrow::Cow;
 use alloc::collections::BTreeMap;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
-use frame_decode::constants::{Constant, ConstantInfo, ConstantInfoError};
+use frame_decode::constants::{ConstantInfo, ConstantInfoError, Entry};
 use frame_decode::custom_values::{CustomValue, CustomValueInfo, CustomValueInfoError};
 use frame_decode::extrinsics::{
     ExtrinsicCallInfo, ExtrinsicExtensionInfo, ExtrinsicInfoArg, ExtrinsicInfoError,
     ExtrinsicSignatureInfo,
 };
-use frame_decode::runtime_apis::{
-    RuntimeApi, RuntimeApiInfo, RuntimeApiInfoError, RuntimeApiInput,
-};
-use frame_decode::storage::{StorageEntry, StorageInfo, StorageInfoError, StorageKeyInfo};
-use frame_decode::view_functions::{
-    ViewFunction, ViewFunctionInfo, ViewFunctionInfoError, ViewFunctionInput,
-};
+use frame_decode::runtime_apis::{RuntimeApiInfo, RuntimeApiInfoError, RuntimeApiInput};
+use frame_decode::storage::{StorageInfo, StorageInfoError, StorageKeyInfo};
+use frame_decode::view_functions::{ViewFunctionInfo, ViewFunctionInfoError, ViewFunctionInput};
 
 use hashbrown::HashMap;
 use scale_info::{PortableRegistry, Variant, form::PortableForm};
@@ -184,15 +180,18 @@ impl frame_decode::storage::StorageTypeInfo for Metadata {
         Ok(info)
     }
 
-    fn storage_entries(&self) -> impl Iterator<Item = StorageEntry<'_>> {
+    fn storage_entries(&self) -> impl Iterator<Item = Entry<'_>> {
         self.pallets().flat_map(|pallet| {
             let pallet_name = pallet.name();
-            pallet.storage().into_iter().flat_map(|storage| {
-                storage.entries().iter().map(|entry| StorageEntry {
-                    pallet_name: Cow::Borrowed(pallet_name),
-                    storage_entry: Cow::Borrowed(entry.name()),
-                })
-            })
+            let pallet_iter = core::iter::once(Entry::In(pallet_name.into()));
+            let entries_iter = pallet.storage().into_iter().flat_map(|storage| {
+                storage
+                    .entries()
+                    .iter()
+                    .map(|entry| Entry::Name(entry.name().into()))
+            });
+
+            pallet_iter.chain(entries_iter)
         })
     }
 }
@@ -225,13 +224,15 @@ impl frame_decode::runtime_apis::RuntimeApiTypeInfo for Metadata {
         Ok(info)
     }
 
-    fn runtime_apis(&self) -> impl Iterator<Item = RuntimeApi<'_>> {
+    fn runtime_apis(&self) -> impl Iterator<Item = Entry<'_>> {
         self.runtime_api_traits().flat_map(|api_trait| {
             let trait_name = api_trait.name();
-            api_trait.methods().map(|method| RuntimeApi {
-                trait_name: Cow::Borrowed(trait_name),
-                method_name: Cow::Borrowed(method.name()),
-            })
+            let trait_iter = core::iter::once(Entry::In(trait_name.into()));
+            let method_iter = api_trait
+                .methods()
+                .map(|method| Entry::Name(method.name().into()));
+
+            trait_iter.chain(method_iter)
         })
     }
 }
@@ -264,13 +265,15 @@ impl frame_decode::view_functions::ViewFunctionTypeInfo for Metadata {
         Ok(info)
     }
 
-    fn view_functions(&self) -> impl Iterator<Item = ViewFunction<'_>> {
+    fn view_functions(&self) -> impl Iterator<Item = Entry<'_>> {
         self.pallets().flat_map(|pallet| {
             let pallet_name = pallet.name();
-            pallet.view_functions().map(|function| ViewFunction {
-                pallet_name: Cow::Borrowed(pallet_name),
-                function_name: Cow::Borrowed(function.name()),
-            })
+            let pallet_iter = core::iter::once(Entry::In(pallet_name.into()));
+            let fn_iter = pallet
+                .view_functions()
+                .map(|function| Entry::Name(function.name().into()));
+
+            pallet_iter.chain(fn_iter)
         })
     }
 }
@@ -302,13 +305,15 @@ impl frame_decode::constants::ConstantTypeInfo for Metadata {
         Ok(info)
     }
 
-    fn constants(&self) -> impl Iterator<Item = Constant<'_>> {
+    fn constants(&self) -> impl Iterator<Item = Entry<'_>> {
         self.pallets().flat_map(|pallet| {
             let pallet_name = pallet.name();
-            pallet.constants().map(|constant| Constant {
-                pallet_name: Cow::Borrowed(pallet_name),
-                constant_name: Cow::Borrowed(constant.name()),
-            })
+            let pallet_iter = core::iter::once(Entry::In(pallet_name.into()));
+            let constant_iter = pallet
+                .constants()
+                .map(|constant| Entry::Name(constant.name().into()));
+
+            pallet_iter.chain(constant_iter)
         })
     }
 }

@@ -70,17 +70,32 @@ where
         let client = self.client;
         let metadata = client.metadata();
 
-        frame_decode::helpers::list_storage_entries_any(metadata).map(|entry| StorageEntriesItem {
-            entry,
-            client: self.client,
-            marker: std::marker::PhantomData,
+        let mut pallet_name = Cow::Borrowed("");
+        frame_decode::helpers::list_storage_entries_any(metadata).filter_map(move |entry| {
+            match entry {
+                frame_decode::storage::Entry::In(name) => {
+                    // Set the pallet name for upcoming entries:
+                    pallet_name = name;
+                    None
+                }
+                frame_decode::storage::Entry::Name(entry_name) => {
+                    // Output each entry with the last seen pallet name:
+                    Some(StorageEntriesItem {
+                        pallet_name: pallet_name.clone(),
+                        entry_name,
+                        client: self.client,
+                        marker: std::marker::PhantomData,
+                    })
+                }
+            }
         })
     }
 }
 
 /// Working with a specific storage entry.
 pub struct StorageEntriesItem<'atblock, Client, T> {
-    entry: frame_decode::storage::StorageEntry<'atblock>,
+    pallet_name: Cow<'atblock, str>,
+    entry_name: Cow<'atblock, str>,
     client: &'atblock Client,
     marker: std::marker::PhantomData<T>,
 }
@@ -92,12 +107,12 @@ where
 {
     /// The pallet name.
     pub fn pallet_name(&self) -> &str {
-        &self.entry.pallet_name
+        &self.pallet_name
     }
 
     /// The storage entry name.
     pub fn entry_name(&self) -> &str {
-        &self.entry.storage_entry
+        &self.entry_name
     }
 
     /// Extract the relevant storage information so that we can work with this entry.
@@ -106,10 +121,7 @@ where
             client: self.client,
             marker: std::marker::PhantomData,
         }
-        .entry(
-            self.entry.pallet_name.clone(),
-            self.entry.storage_entry.clone(),
-        )
+        .entry(&*self.pallet_name, &*self.entry_name)
     }
 }
 
