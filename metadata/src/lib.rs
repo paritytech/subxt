@@ -49,6 +49,9 @@ pub use from::SUPPORTED_METADATA_VERSIONS;
 pub use from::TryFromError;
 pub use utils::validation::MetadataHasher;
 
+#[cfg(feature = "legacy")]
+pub use from::legacy::Error as LegacyFromError;
+
 type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;
 
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
@@ -60,8 +63,18 @@ pub struct Metadata {
     types: PortableRegistry,
     /// Metadata of all the pallets.
     pallets: OrderedMap<String, PalletMetadataInner>,
-    /// Find the location in the pallet Vec by pallet index.
-    pallets_by_index: HashMap<u8, usize>,
+    /// Find the pallet for a given call index.
+    pallets_by_call_index: HashMap<u8, usize>,
+    /// Find the pallet for a given event index.
+    /// 
+    /// for modern metadatas, this is the same as pallets_by_call_index,
+    /// but for old metadatas this can vary.
+    pallets_by_event_index: HashMap<u8, usize>,
+    /// Find the pallet for a given error index.
+    ///
+    /// for modern metadatas, this is the same as pallets_by_call_index,
+    /// but for old metadatas this can vary.
+    pallets_by_error_index: HashMap<u8, usize>,
     /// Metadata of the extrinsic.
     extrinsic: ExtrinsicMetadata,
     /// The types of the outer enums.
@@ -84,7 +97,7 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         pallet_index: u8,
         call_index: u8,
     ) -> Result<ExtrinsicCallInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
-        let pallet = self.pallet_by_index(pallet_index).ok_or({
+        let pallet = self.pallet_by_call_index(pallet_index).ok_or({
             ExtrinsicInfoError::PalletNotFound {
                 index: pallet_index,
             }
@@ -347,9 +360,63 @@ impl frame_decode::custom_values::CustomValueTypeInfo for Metadata {
 }
 
 impl Metadata {
-    /// This is essentiall an alias for `<Metadata as codec::Decode>::decode(&mut bytes)`
+    /// This is essentially an alias for `<Metadata as codec::Decode>::decode(&mut bytes)`
     pub fn decode_from(mut bytes: &[u8]) -> Result<Self, codec::Error> {
         <Self as codec::Decode>::decode(&mut bytes)
+    }
+
+    /// Convert V13 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v13(
+        metadata: &frame_metadata::v13::RuntimeMetadataV13, 
+        types: scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v13(metadata, types)
+    }
+
+    /// Convert V12 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v12(
+        metadata: &frame_metadata::v12::RuntimeMetadataV12, 
+        types: scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v12(metadata, types)
+    }
+
+    /// Convert V13 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v11(
+        metadata: &frame_metadata::v11::RuntimeMetadataV11, 
+        types: scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v11(metadata, types)
+    }
+
+    /// Convert V13 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v10(
+        metadata: &frame_metadata::v10::RuntimeMetadataV10,
+        types: scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v10(metadata, types)
+    }
+
+    /// Convert V9 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v9(
+        metadata: &frame_metadata::v9::RuntimeMetadataV9,
+        types: scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v9(metadata, types)
+    }
+
+    /// Convert V8 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v8(
+        metadata: &frame_metadata::v8::RuntimeMetadataV8,
+        types: scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v8(metadata, types)
     }
 
     /// Access the underlying type registry.
@@ -385,10 +452,36 @@ impl Metadata {
         })
     }
 
-    /// Access a pallet given its encoded variant index.
-    pub fn pallet_by_index(&self, variant_index: u8) -> Option<PalletMetadata<'_>> {
+    /// Access a pallet given some call/extrinsic pallet index byte
+    pub fn pallet_by_call_index(&self, variant_index: u8) -> Option<PalletMetadata<'_>> {
         let inner = self
-            .pallets_by_index
+            .pallets_by_call_index
+            .get(&variant_index)
+            .and_then(|i| self.pallets.get_by_index(*i))?;
+
+        Some(PalletMetadata {
+            inner,
+            types: self.types(),
+        })
+    }
+
+    /// Access a pallet given some event pallet index byte
+    pub fn pallet_by_event_index(&self, variant_index: u8) -> Option<PalletMetadata<'_>> {
+        let inner = self
+            .pallets_by_event_index
+            .get(&variant_index)
+            .and_then(|i| self.pallets.get_by_index(*i))?;
+
+        Some(PalletMetadata {
+            inner,
+            types: self.types(),
+        })
+    }
+
+    /// Access a pallet given some error pallet index byte
+    pub fn pallet_by_error_index(&self, variant_index: u8) -> Option<PalletMetadata<'_>> {
+        let inner = self
+            .pallets_by_error_index
             .get(&variant_index)
             .and_then(|i| self.pallets.get_by_index(*i))?;
 
@@ -458,9 +551,19 @@ impl<'a> PalletMetadata<'a> {
         &self.inner.name
     }
 
-    /// The pallet index.
-    pub fn index(&self) -> u8 {
-        self.inner.index
+    /// The index to use for calls in this pallet.
+    pub fn call_index(&self) -> u8 {
+        self.inner.call_index
+    }
+
+    /// The index to use for events in this pallet.
+    pub fn event_index(&self) -> u8 {
+        self.inner.event_index
+    }
+
+    /// The index to use for errors in this pallet.
+    pub fn error_index(&self) -> u8 {
+        self.inner.error_index
     }
 
     /// The pallet docs.
@@ -613,8 +716,18 @@ impl<'a> PalletMetadata<'a> {
 struct PalletMetadataInner {
     /// Pallet name.
     name: String,
-    /// Pallet index.
-    index: u8,
+    /// The index for calls in the pallet.
+    call_index: u8,
+    /// The index for events in the pallet.
+    /// 
+    /// This is the same as `call_index` for modern metadatas,
+    /// but can be different for older metadatas (pre-V12).
+    event_index: u8,
+    /// The index for errors in the pallet.
+    /// 
+    /// This is the same as `call_index` for modern metadatas,
+    /// but can be different for older metadatas (pre-V12).
+    error_index: u8,
     /// Pallet storage metadata.
     storage: Option<StorageMetadata>,
     /// Type ID for the pallet Call enum.
