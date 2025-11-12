@@ -3,21 +3,21 @@ mod portable_registry_builder;
 use crate::Metadata;
 use crate::utils::ordered_map::OrderedMap;
 use crate::utils::variant_index::VariantIndex;
-use portable_registry_builder::PortableRegistryBuilder;
 use alloc::borrow::ToOwned;
-use alloc::vec::Vec;
-use alloc::string::ToString;
-use alloc::format;
 use alloc::collections::BTreeMap;
-use scale_info_legacy::type_registry::RuntimeApiName;
-use frame_metadata::v15;
-use scale_info_legacy::TypeRegistrySet;
-use frame_decode::storage::StorageTypeInfo;
+use alloc::format;
+use alloc::string::ToString;
+use alloc::vec::Vec;
+use frame_decode::constants::ConstantTypeInfo;
 use frame_decode::extrinsics::ExtrinsicTypeInfo;
 use frame_decode::runtime_apis::RuntimeApiTypeInfo;
-use frame_decode::constants::ConstantTypeInfo;
+use frame_decode::storage::StorageTypeInfo;
+use frame_metadata::v15;
+use portable_registry_builder::PortableRegistryBuilder;
+use scale_info_legacy::TypeRegistrySet;
+use scale_info_legacy::type_registry::RuntimeApiName;
 
-macro_rules! from_vx_to_vx {
+macro_rules! from_historic {
     ($vis:vis fn $fn_name:ident($metadata:path $(, builtin_index: $builtin_index:ident)? )) => {
         $vis fn $fn_name(metadata: &$metadata, mut types: TypeRegistrySet<'_>) -> Result<Metadata, Error> {
             // Extend the types with important information from the metadata:
@@ -81,21 +81,21 @@ macro_rules! from_vx_to_vx {
                             .storage_info(&pallet_name, &entry_name)
                             .map_err(|e| Error::StorageInfoError(e.into_owned()))?;
                         let entry_name = entry_name.into_owned();
-            
+
                         let info = info.map_ids(|old_id| {
                             portable_registry_builder.add_type(old_id)
                         }).map_err(|e| {
                             let ctx = format!("adding type used in storage entry {pallet_name}.{entry_name}");
                             Error::add_type(ctx, e)
                         })?;
-            
+
                         let entry = crate::StorageEntryMetadata {
                             name: entry_name.clone(),
                             info: info.into_owned(),
                             // We don't expose docs via our storage info yet.
                             docs: Vec::new(),
                         };
-            
+
                         Ok((entry_name, entry))
                     }).collect::<Result<OrderedMap<_, _>, _>>()?;
 
@@ -298,12 +298,12 @@ macro_rules! from_vx_to_vx {
     }}
 }
 
-from_vx_to_vx!(pub fn from_v13(frame_metadata::v13::RuntimeMetadataV13, builtin_index: yes));
-from_vx_to_vx!(pub fn from_v12(frame_metadata::v12::RuntimeMetadataV12, builtin_index: yes));
-from_vx_to_vx!(pub fn from_v11(frame_metadata::v11::RuntimeMetadataV11));
-from_vx_to_vx!(pub fn from_v10(frame_metadata::v10::RuntimeMetadataV10));
-from_vx_to_vx!(pub fn from_v9(frame_metadata::v9::RuntimeMetadataV9));
-from_vx_to_vx!(pub fn from_v8(frame_metadata::v8::RuntimeMetadataV8));
+from_historic!(pub fn from_v13(frame_metadata::v13::RuntimeMetadataV13, builtin_index: yes));
+from_historic!(pub fn from_v12(frame_metadata::v12::RuntimeMetadataV12, builtin_index: yes));
+from_historic!(pub fn from_v11(frame_metadata::v11::RuntimeMetadataV11));
+from_historic!(pub fn from_v10(frame_metadata::v10::RuntimeMetadataV10));
+from_historic!(pub fn from_v9(frame_metadata::v9::RuntimeMetadataV9));
+from_historic!(pub fn from_v8(frame_metadata::v8::RuntimeMetadataV8));
 
 fn as_decoded<A, B>(item: &frame_metadata::decode_different::DecodeDifferent<A, B>) -> &B {
     match item {
@@ -316,8 +316,8 @@ fn as_decoded<A, B>(item: &frame_metadata::decode_different::DecodeDifferent<A, 
 
 // Obtain Runtime API information from some type registry.
 pub fn type_registry_to_runtime_apis(
-    types: &TypeRegistrySet<'_>, 
-    portable_registry_builder: &mut PortableRegistryBuilder
+    types: &TypeRegistrySet<'_>,
+    portable_registry_builder: &mut PortableRegistryBuilder,
 ) -> Result<OrderedMap<String, crate::RuntimeApiMetadataInner>, Error> {
     let mut apis = OrderedMap::new();
     let mut trait_name = "";
@@ -327,34 +327,38 @@ pub fn type_registry_to_runtime_apis(
         match api {
             RuntimeApiName::Trait(name) => {
                 if !trait_methods.is_empty() {
-                    apis.push_insert(trait_name.into(), crate::RuntimeApiMetadataInner {
-                        name: trait_name.into(),
-                        methods: trait_methods,
-                        docs: Vec::new()
-                    });
+                    apis.push_insert(
+                        trait_name.into(),
+                        crate::RuntimeApiMetadataInner {
+                            name: trait_name.into(),
+                            methods: trait_methods,
+                            docs: Vec::new(),
+                        },
+                    );
                 }
                 trait_methods = OrderedMap::new();
                 trait_name = name;
-            },
+            }
             RuntimeApiName::Method(name) => {
                 let info = types
                     .runtime_api_info(trait_name, name)
                     .map_err(|e| Error::RuntimeApiInfoError(e.into_owned()))?;
 
                 let info = info.map_ids(|id| {
-                    portable_registry_builder
-                        .add_type(id)
-                        .map_err(|e| {
-                            let c = format!("converting type for runtime API {trait_name}.{name}");
-                            Error::add_type(c, e)
-                        })
+                    portable_registry_builder.add_type(id).map_err(|e| {
+                        let c = format!("converting type for runtime API {trait_name}.{name}");
+                        Error::add_type(c, e)
+                    })
                 })?;
 
-                trait_methods.push_insert(name.to_owned(), crate::RuntimeApiMethodMetadataInner {
-                    name: name.into(),
-                    info,
-                    docs: Vec::new(),
-                });
+                trait_methods.push_insert(
+                    name.to_owned(),
+                    crate::RuntimeApiMethodMetadataInner {
+                        name: name.into(),
+                        info,
+                        docs: Vec::new(),
+                    },
+                );
             }
         }
     }
@@ -370,7 +374,7 @@ pub enum Error {
     #[error("Cannot add type ({context}): {error}")]
     AddTypeError {
         context: String,
-        error: portable_registry_builder::PortableRegistryAddTypeError
+        error: portable_registry_builder::PortableRegistryAddTypeError,
     },
     #[error("Cannot enhance the types with information from metadata: {0}")]
     CannotEnhanceTypesFromMetadata(scale_info_legacy::lookup_name::ParseError),
@@ -378,7 +382,9 @@ pub enum Error {
     CannotFindAddressType,
     #[error("Cannot find 'hardcoded::ExtrinsicSignature' type in legacy types")]
     CannotFindSignatureType,
-    #[error("Cannot find 'builtin::Call' type in legacy types (this should have been automatically added)")]
+    #[error(
+        "Cannot find 'builtin::Call' type in legacy types (this should have been automatically added)"
+    )]
     CannotFindCallType,
     #[error("Cannot obtain the storage information we need to convert storage entries")]
     StorageInfoError(frame_decode::storage::StorageInfoError<'static>),
@@ -392,7 +398,13 @@ pub enum Error {
 
 impl Error {
     /// A shorthand for the [`Error::AddTypeError`] variant.
-    fn add_type(context: impl Into<String>, error: impl Into<portable_registry_builder::PortableRegistryAddTypeError>) -> Self {
-        Error::AddTypeError { context: context.into(), error: error.into() }
+    fn add_type(
+        context: impl Into<String>,
+        error: impl Into<portable_registry_builder::PortableRegistryAddTypeError>,
+    ) -> Self {
+        Error::AddTypeError {
+            context: context.into(),
+            error: error.into(),
+        }
     }
 }

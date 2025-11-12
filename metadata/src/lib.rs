@@ -66,7 +66,7 @@ pub struct Metadata {
     /// Find the pallet for a given call index.
     pallets_by_call_index: HashMap<u8, usize>,
     /// Find the pallet for a given event index.
-    /// 
+    ///
     /// for modern metadatas, this is the same as pallets_by_call_index,
     /// but for old metadatas this can vary.
     pallets_by_event_index: HashMap<u8, usize>,
@@ -368,7 +368,7 @@ impl Metadata {
     /// Convert V13 metadata into [`Metadata`], given the necessary extra type information.
     #[cfg(feature = "legacy")]
     pub fn from_v13(
-        metadata: &frame_metadata::v13::RuntimeMetadataV13, 
+        metadata: &frame_metadata::v13::RuntimeMetadataV13,
         types: scale_info_legacy::TypeRegistrySet<'_>,
     ) -> Result<Self, LegacyFromError> {
         from::legacy::from_v13(metadata, types)
@@ -377,7 +377,7 @@ impl Metadata {
     /// Convert V12 metadata into [`Metadata`], given the necessary extra type information.
     #[cfg(feature = "legacy")]
     pub fn from_v12(
-        metadata: &frame_metadata::v12::RuntimeMetadataV12, 
+        metadata: &frame_metadata::v12::RuntimeMetadataV12,
         types: scale_info_legacy::TypeRegistrySet<'_>,
     ) -> Result<Self, LegacyFromError> {
         from::legacy::from_v12(metadata, types)
@@ -386,7 +386,7 @@ impl Metadata {
     /// Convert V13 metadata into [`Metadata`], given the necessary extra type information.
     #[cfg(feature = "legacy")]
     pub fn from_v11(
-        metadata: &frame_metadata::v11::RuntimeMetadataV11, 
+        metadata: &frame_metadata::v11::RuntimeMetadataV11,
         types: scale_info_legacy::TypeRegistrySet<'_>,
     ) -> Result<Self, LegacyFromError> {
         from::legacy::from_v11(metadata, types)
@@ -719,12 +719,12 @@ struct PalletMetadataInner {
     /// The index for calls in the pallet.
     call_index: u8,
     /// The index for events in the pallet.
-    /// 
+    ///
     /// This is the same as `call_index` for modern metadatas,
     /// but can be different for older metadatas (pre-V12).
     event_index: u8,
     /// The index for errors in the pallet.
-    /// 
+    ///
     /// This is the same as `call_index` for modern metadatas,
     /// but can be different for older metadatas (pre-V12).
     error_index: u8,

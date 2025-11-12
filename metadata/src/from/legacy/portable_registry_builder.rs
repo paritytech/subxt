@@ -1,28 +1,22 @@
-use alloc::vec::Vec;
-use alloc::collections::BTreeMap;
-use scale_info::PortableRegistry;
-use scale_info_legacy::{ TypeRegistrySet, LookupName };
-use scale_type_resolver::{
-    ResolvedTypeVisitor,
-    UnhandledKind,
-    PathIter,
-    FieldIter,
-    VariantIter,
-    Primitive,
-    BitsOrderFormat,
-    BitsStoreFormat,
-};
-use scale_info::{ PortableType, form::PortableForm };
-use scale_info_legacy::type_registry::TypeRegistryResolveError;
-use alloc::string::ToString;
 use alloc::borrow::ToOwned;
+use alloc::collections::BTreeMap;
+use alloc::string::ToString;
+use alloc::vec::Vec;
+use scale_info::PortableRegistry;
+use scale_info::{PortableType, form::PortableForm};
+use scale_info_legacy::type_registry::TypeRegistryResolveError;
+use scale_info_legacy::{LookupName, TypeRegistrySet};
+use scale_type_resolver::{
+    BitsOrderFormat, BitsStoreFormat, FieldIter, PathIter, Primitive, ResolvedTypeVisitor,
+    UnhandledKind, VariantIter,
+};
 
 #[derive(thiserror::Error, Debug)]
 pub enum PortableRegistryAddTypeError {
     #[error("Error resolving type: {0}")]
     ResolveError(#[from] TypeRegistryResolveError),
     #[error("Cannot find type '{0}'")]
-    TypeNotFound(LookupName)
+    TypeNotFound(LookupName),
 }
 
 /// the purpose of this is to convert a (subset of) [`scale_info_legacy::TypeRegistrySet`]
@@ -32,25 +26,36 @@ pub enum PortableRegistryAddTypeError {
 pub struct PortableRegistryBuilder<'info> {
     legacy_types: &'info TypeRegistrySet<'info>,
     scale_info_types: PortableRegistry,
-    old_to_new: BTreeMap<LookupName, u32>
+    old_to_new: BTreeMap<LookupName, u32>,
 }
 
-impl <'info> PortableRegistryBuilder<'info> {
+impl<'info> PortableRegistryBuilder<'info> {
     /// Instantiate a new [`PortableRegistryBuilder`], providing the set of
     /// legacy types you wish to use to construct modern types from.
     pub fn new(legacy_types: &'info TypeRegistrySet<'info>) -> Self {
-        PortableRegistryBuilder { 
-            legacy_types, 
-            scale_info_types: PortableRegistry { types: Default::default() }, 
-            old_to_new: Default::default() 
+        PortableRegistryBuilder {
+            legacy_types,
+            scale_info_types: PortableRegistry {
+                types: Default::default(),
+            },
+            old_to_new: Default::default(),
         }
     }
 
     /// Try adding a type, given its string name and optionally the pallet it's scoped to.
-    pub fn try_add_type_str(&mut self, id: &str, pallet: Option<&str>) -> Option<Result<u32, TypeRegistryResolveError>>  {
+    pub fn try_add_type_str(
+        &mut self,
+        id: &str,
+        pallet: Option<&str>,
+    ) -> Option<Result<u32, TypeRegistryResolveError>> {
         let mut id = match LookupName::parse(id) {
             Ok(id) => id,
-            Err(e) => return Some(Err(TypeRegistryResolveError::LookupNameInvalid(id.to_owned(), e)))
+            Err(e) => {
+                return Some(Err(TypeRegistryResolveError::LookupNameInvalid(
+                    id.to_owned(),
+                    e,
+                )));
+            }
         };
 
         if let Some(pallet) = pallet {
@@ -61,17 +66,24 @@ impl <'info> PortableRegistryBuilder<'info> {
     }
 
     /// Try adding a type, returning `None` if the type doesn't exist.
-    pub fn try_add_type(&mut self, id: LookupName) -> Option<Result<u32, TypeRegistryResolveError>> {
+    pub fn try_add_type(
+        &mut self,
+        id: LookupName,
+    ) -> Option<Result<u32, TypeRegistryResolveError>> {
         match self.add_type(id) {
             Ok(id) => Some(Ok(id)),
             Err(PortableRegistryAddTypeError::TypeNotFound(_)) => None,
-            Err(PortableRegistryAddTypeError::ResolveError(e)) => Some(Err(e))
+            Err(PortableRegistryAddTypeError::ResolveError(e)) => Some(Err(e)),
         }
     }
 
-    /// Add a new legacy type, giving its string ID/name and, if applicable, the pallet that it's seen in, 
+    /// Add a new legacy type, giving its string ID/name and, if applicable, the pallet that it's seen in,
     /// returning the corresponding "modern" type ID to use in its place, or an error if something does wrong.
-    pub fn add_type_str(&mut self, id: &str, pallet: Option<&str>) -> Result<u32, PortableRegistryAddTypeError> {
+    pub fn add_type_str(
+        &mut self,
+        id: &str,
+        pallet: Option<&str>,
+    ) -> Result<u32, PortableRegistryAddTypeError> {
         let mut id = LookupName::parse(id)
             .map_err(|e| TypeRegistryResolveError::LookupNameInvalid(id.to_owned(), e))?;
 
@@ -86,21 +98,25 @@ impl <'info> PortableRegistryBuilder<'info> {
     /// its place, or an error if something does wrong.
     pub fn add_type(&mut self, id: LookupName) -> Result<u32, PortableRegistryAddTypeError> {
         if let Some(new_id) = self.old_to_new.get(&id) {
-            return Ok(*new_id)
+            return Ok(*new_id);
         }
 
         let visitor = PortableRegistryVisitor {
             builder: &mut *self,
-            current_type: &id
+            current_type: &id,
         };
 
-        match visitor.builder.legacy_types.resolve_type(id.clone(), visitor) {
+        match visitor
+            .builder
+            .legacy_types
+            .resolve_type(id.clone(), visitor)
+        {
             Ok(Ok(new_id)) => {
                 self.old_to_new.insert(id, new_id);
-                Ok(new_id)   
-            },
+                Ok(new_id)
+            }
             Ok(Err(e)) => Err(e),
-            Err(e) => Err(e.into())
+            Err(e) => Err(e.into()),
         }
     }
 
@@ -126,7 +142,7 @@ struct PortableRegistryVisitor<'a, 'info> {
     current_type: &'a LookupName,
 }
 
-impl <'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info> {
+impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info> {
     type TypeId = LookupName;
     type Value = Result<u32, PortableRegistryAddTypeError>;
 
@@ -135,7 +151,9 @@ impl <'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'inf
     }
 
     fn visit_not_found(self) -> Self::Value {
-        Err(PortableRegistryAddTypeError::TypeNotFound(self.current_type.clone()))
+        Err(PortableRegistryAddTypeError::TypeNotFound(
+            self.current_type.clone(),
+        ))
     }
 
     fn visit_primitive(self, primitive: Primitive) -> Self::Value {
@@ -167,45 +185,57 @@ impl <'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'inf
         Ok(self.builder.push_type(primitive_type))
     }
 
-    fn visit_sequence<Path: PathIter<'info>>(self, path: Path, inner_type_id: Self::TypeId) -> Self::Value {
+    fn visit_sequence<Path: PathIter<'info>>(
+        self,
+        path: Path,
+        inner_type_id: Self::TypeId,
+    ) -> Self::Value {
         let inner_id = self.builder.add_type(inner_type_id)?;
-        let path = scale_info::Path { segments: path.map(Into::into).collect() };
+        let path = scale_info::Path {
+            segments: path.map(Into::into).collect(),
+        };
         let sequence_type = scale_info::Type::new(
             path,
-            core::iter::empty(), 
-            scale_info::TypeDef::Sequence(scale_info::TypeDefSequence { type_param: inner_id.into() }), 
+            core::iter::empty(),
+            scale_info::TypeDef::Sequence(scale_info::TypeDefSequence {
+                type_param: inner_id.into(),
+            }),
             Default::default(),
         );
 
-       Ok(self.builder.push_type(sequence_type))
+        Ok(self.builder.push_type(sequence_type))
     }
 
     fn visit_composite<Path, Fields>(self, path: Path, fields: Fields) -> Self::Value
     where
         Path: PathIter<'info>,
-        Fields: FieldIter<'info, Self::TypeId>
+        Fields: FieldIter<'info, Self::TypeId>,
     {
-        let path = scale_info::Path { segments: path.map(Into::into).collect() };
+        let path = scale_info::Path {
+            segments: path.map(Into::into).collect(),
+        };
 
         let mut scale_info_fields = Vec::<scale_info::Field<_>>::new();
         for field in fields {
             let type_name = field.id.to_string();
             let id = self.builder.add_type(field.id)?;
-            scale_info_fields.push(scale_info::Field { 
-                name: field.name.map(Into::into), 
-                ty: id.into(), 
-                type_name: Some(type_name), 
-                docs: Default::default()
+            scale_info_fields.push(scale_info::Field {
+                name: field.name.map(Into::into),
+                ty: id.into(),
+                type_name: Some(type_name),
+                docs: Default::default(),
             });
         }
 
         let composite_type = scale_info::Type::new(
             path,
-            core::iter::empty(), 
-            scale_info::TypeDef::Composite(scale_info::TypeDefComposite { fields: scale_info_fields }), 
+            core::iter::empty(),
+            scale_info::TypeDef::Composite(scale_info::TypeDefComposite {
+                fields: scale_info_fields,
+            }),
             Default::default(),
         );
-       
+
         Ok(self.builder.push_type(composite_type))
     }
 
@@ -213,17 +243,20 @@ impl <'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'inf
         let inner_id = self.builder.add_type(inner_type_id)?;
         let array_type = scale_info::Type::new(
             Default::default(),
-            core::iter::empty(), 
-            scale_info::TypeDef::Array(scale_info::TypeDefArray { len: len as u32, type_param: inner_id.into() }), 
+            core::iter::empty(),
+            scale_info::TypeDef::Array(scale_info::TypeDefArray {
+                len: len as u32,
+                type_param: inner_id.into(),
+            }),
             Default::default(),
         );
 
-       Ok(self.builder.push_type(array_type))
+        Ok(self.builder.push_type(array_type))
     }
 
     fn visit_tuple<TypeIds>(self, type_ids: TypeIds) -> Self::Value
     where
-        TypeIds: ExactSizeIterator<Item = Self::TypeId>
+        TypeIds: ExactSizeIterator<Item = Self::TypeId>,
     {
         let mut scale_info_fields = Vec::new();
         for old_id in type_ids {
@@ -233,21 +266,25 @@ impl <'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'inf
 
         let tuple_type = scale_info::Type::new(
             Default::default(),
-            core::iter::empty(), 
-            scale_info::TypeDef::Tuple(scale_info::TypeDefTuple { fields: scale_info_fields }), 
+            core::iter::empty(),
+            scale_info::TypeDef::Tuple(scale_info::TypeDefTuple {
+                fields: scale_info_fields,
+            }),
             Default::default(),
         );
 
-       Ok(self.builder.push_type(tuple_type))
+        Ok(self.builder.push_type(tuple_type))
     }
 
     fn visit_variant<Path, Fields, Var>(self, path: Path, variants: Var) -> Self::Value
     where
         Path: PathIter<'info>,
         Fields: FieldIter<'info, Self::TypeId>,
-        Var: VariantIter<'info, Fields>
+        Var: VariantIter<'info, Fields>,
     {
-        let path = scale_info::Path { segments: path.map(Into::into).collect() };
+        let path = scale_info::Path {
+            segments: path.map(Into::into).collect(),
+        };
 
         let mut scale_info_variants = Vec::new();
         for variant in variants {
@@ -255,11 +292,11 @@ impl <'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'inf
             for field in variant.fields {
                 let type_name = field.id.to_string();
                 let id = self.builder.add_type(field.id)?;
-                scale_info_variant_fields.push(scale_info::Field { 
-                    name: field.name.map(Into::into), 
-                    ty: id.into(), 
-                    type_name: Some(type_name), 
-                    docs: Default::default()
+                scale_info_variant_fields.push(scale_info::Field {
+                    name: field.name.map(Into::into),
+                    ty: id.into(),
+                    type_name: Some(type_name),
+                    docs: Default::default(),
                 });
             }
 
@@ -267,44 +304,53 @@ impl <'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'inf
                 name: variant.name.to_owned(),
                 index: variant.index,
                 fields: scale_info_variant_fields,
-                docs: Default::default()
+                docs: Default::default(),
             })
         }
 
         let variant_type = scale_info::Type::new(
             path,
-            core::iter::empty(), 
-            scale_info::TypeDef::Variant(scale_info::TypeDefVariant { variants: scale_info_variants }), 
+            core::iter::empty(),
+            scale_info::TypeDef::Variant(scale_info::TypeDefVariant {
+                variants: scale_info_variants,
+            }),
             Default::default(),
         );
 
-       Ok(self.builder.push_type(variant_type))
+        Ok(self.builder.push_type(variant_type))
     }
 
     fn visit_compact(self, inner_type_id: Self::TypeId) -> Self::Value {
         let inner_id = self.builder.add_type(inner_type_id)?;
 
         // Configure the path and type params to maximise compat.
-        let path = ["parity_scale_codec", "Compact"].into_iter().map(ToOwned::to_owned).collect();
-        let type_params = [
-            scale_info::TypeParameter { 
-                name: "T".to_owned(),
-                ty: Some(inner_id.into())
-            },
-        ];
+        let path = ["parity_scale_codec", "Compact"]
+            .into_iter()
+            .map(ToOwned::to_owned)
+            .collect();
+        let type_params = [scale_info::TypeParameter {
+            name: "T".to_owned(),
+            ty: Some(inner_id.into()),
+        }];
 
         let compact_type = scale_info::Type::new(
             scale_info::Path { segments: path },
-            type_params, 
-            scale_info::TypeDef::Compact(scale_info::TypeDefCompact { type_param: inner_id.into() }), 
+            type_params,
+            scale_info::TypeDef::Compact(scale_info::TypeDefCompact {
+                type_param: inner_id.into(),
+            }),
             Default::default(),
         );
 
-       Ok(self.builder.push_type(compact_type))
+        Ok(self.builder.push_type(compact_type))
     }
 
-    fn visit_bit_sequence(self, store_format: BitsStoreFormat, order_format: BitsOrderFormat) -> Self::Value {
-        // These order types are added by default into a `TypeRegistry`, so we 
+    fn visit_bit_sequence(
+        self,
+        store_format: BitsStoreFormat,
+        order_format: BitsOrderFormat,
+    ) -> Self::Value {
+        // These order types are added by default into a `TypeRegistry`, so we
         // expect them to exist. Parsing should always succeed.
         let order_ty_str = match order_format {
             BitsOrderFormat::Lsb0 => "bitvec::order::Lsb0",
@@ -325,28 +371,31 @@ impl <'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'inf
 
         // Configure the path and type params to look like BitVec's to try
         // and maximise compatibility.
-        let path = ["bitvec", "vec", "BitVec"].into_iter().map(ToOwned::to_owned).collect();
+        let path = ["bitvec", "vec", "BitVec"]
+            .into_iter()
+            .map(ToOwned::to_owned)
+            .collect();
         let type_params = [
-            scale_info::TypeParameter { 
+            scale_info::TypeParameter {
                 name: "Store".to_owned(),
-                ty: Some(new_store_ty.into())
+                ty: Some(new_store_ty.into()),
             },
             scale_info::TypeParameter {
                 name: "Order".to_owned(),
-                ty: Some(new_order_ty.into())
-            }
+                ty: Some(new_order_ty.into()),
+            },
         ];
 
         let bitseq_type = scale_info::Type::new(
             scale_info::Path { segments: path },
-            type_params, 
-            scale_info::TypeDef::BitSequence(scale_info::TypeDefBitSequence { 
+            type_params,
+            scale_info::TypeDef::BitSequence(scale_info::TypeDefBitSequence {
                 bit_order_type: new_order_ty.into(),
                 bit_store_type: new_store_ty.into(),
-            }), 
+            }),
             Default::default(),
         );
 
-       Ok(self.builder.push_type(bitseq_type))
+        Ok(self.builder.push_type(bitseq_type))
     }
 }
