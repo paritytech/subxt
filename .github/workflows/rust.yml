@@ -181,42 +181,29 @@ jobs:
       - name: Cargo check all targets.
         run: cargo check --all-targets
 
-      # Next, check subxt features.
+      # Next, check each subxt feature in isolation.
       # - `native` feature must always be enabled
       # - `web` feature is always ignored.
-      # - This means, don't check --no-default-features and don't try enabling --all-features; both will fail
       - name: Cargo hack; check each subxt feature
-        run: cargo hack -p subxt --each-feature check --exclude-no-default-features --exclude-all-features --exclude-features web --features native
+        run: cargo hack -p subxt --each-feature check --exclude-features web --features native
 
       # Same with subxt-historic
       - name: Cargo hack; check each subxt feature
-        run: cargo hack -p subxt-historic --each-feature check --exclude-no-default-features --exclude-all-features --exclude-features web --features native
+        run: cargo hack -p subxt-historic --each-feature check --exclude-features web --features native
 
-      # Subxt-signer has the "subxt" features enabled in the "check all targets" test. Run it on its own to
-      # check it without. We can't enable subxt or web features here, so no cargo hack.
-      - name: Cargo check subxt-signer
-        run: |
-          cargo check -p subxt-signer
-          cargo check -p subxt-signer --no-default-features --features sr25519
-          cargo check -p subxt-signer --no-default-features --features ecdsa
-          cargo check -p subxt-signer --no-default-features --features unstable-eth
+      # And with subxt-rpcs
+      - name: Cargo hack; check each subxt-rpcs feature
+        run: cargo hack -p subxt-rpcs --each-feature check --exclude-features web --features native
 
-      # Subxt-rpcs has a bunch of clients that can be exposed. Check that they all stand on their own.
-      - name: Cargo check subxt-rpcs
-        run: |
-          cargo check -p subxt-rpcs
-          cargo check -p subxt-rpcs --no-default-features --features native
-          cargo check -p subxt-rpcs --no-default-features --features native,subxt
-          cargo check -p subxt-rpcs --no-default-features --features native,jsonrpsee
-          cargo check -p subxt-rpcs --no-default-features --features native,reconnecting-rpc-client
-          cargo check -p subxt-rpcs --no-default-features --features native,mock-rpc-client
-          cargo check -p subxt-rpcs --no-default-features --features native,unstable-light-client
+      # And with subxt-signer (seems to work with a more basic check here; disable web if it becomes an issue).
+      - name: Cargo hack; check each subxt-signer feature
+        run: cargo hack -p subxt-signer --each-feature check
 
-      # We can't enable web features here, so no cargo hack.
+      # And for subxt-lightclient.
       - name: Cargo check subxt-lightclient
-        run: cargo check -p subxt-lightclient
+        run: cargo hack -p subxt-lightclient --each-feature check --exclude-features web --features native
 
-      # Next, check each other package in isolation.
+      # Next, check all  other crates.
       - name: Cargo hack; check each feature/crate on its own
         run: cargo hack --exclude subxt --exclude subxt-historic --exclude subxt-signer --exclude subxt-lightclient --exclude subxt-rpcs --exclude-all-features --each-feature check --workspace
 

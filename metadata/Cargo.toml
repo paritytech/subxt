@@ -18,7 +18,9 @@ default = ["std", "legacy"]
 std = ["scale-info/std", "frame-metadata/std"]
 
 # Enable decoding of legacy metadata, too.
+# std required by frame-metadata to decode <V14.
 legacy = [
+    "std",
     "dep:scale-info-legacy", 
     "dep:scale-type-resolver",
     "frame-decode/legacy",
