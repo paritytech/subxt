@@ -188,6 +188,7 @@ jobs:
       - name: Cargo hack; check each subxt feature
         run: cargo hack -p subxt --each-feature check --exclude-no-default-features --exclude-all-features --exclude-features web --features native
 
+      # Same with subxt-historic
       - name: Cargo hack; check each subxt feature
         run: cargo hack -p subxt-historic --each-feature check --exclude-no-default-features --exclude-all-features --exclude-features web --features native
 

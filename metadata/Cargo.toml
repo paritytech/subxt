@@ -18,7 +18,12 @@ default = ["std", "legacy"]
 std = ["scale-info/std", "frame-metadata/std"]
 
 # Enable decoding of legacy metadata, too.
-legacy = ["dep:scale-info-legacy", "dep:scale-type-resolver"]
+legacy = [
+    "dep:scale-info-legacy", 
+    "dep:scale-type-resolver",
+    "frame-decode/legacy",
+    "frame-metadata/legacy"
+]
 
 [dependencies]
 scale-info = { workspace = true, default-features = false }
