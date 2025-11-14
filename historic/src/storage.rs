@@ -2,6 +2,7 @@ mod storage_entry;
 mod storage_info;
 mod storage_key;
 mod storage_value;
+mod list_storage_entries_any;
 
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::Config;
@@ -71,14 +72,14 @@ where
         let metadata = client.metadata();
 
         let mut pallet_name = Cow::Borrowed("");
-        frame_decode::helpers::list_storage_entries_any(metadata).filter_map(move |entry| {
+        list_storage_entries_any::list_storage_entries_any(metadata).filter_map(move |entry| {
             match entry {
-                frame_decode::storage::Entry::In(name) => {
+                frame_decode::storage::StorageEntry::In(name) => {
                     // Set the pallet name for upcoming entries:
                     pallet_name = name;
                     None
                 }
-                frame_decode::storage::Entry::Name(entry_name) => {
+                frame_decode::storage::StorageEntry::Name(entry_name) => {
                     // Output each entry with the last seen pallet name:
                     Some(StorageEntriesItem {
                         pallet_name: pallet_name.clone(),

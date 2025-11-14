@@ -1,4 +1,6 @@
 mod portable_registry_builder;
+#[cfg(test)]
+mod tests;
 
 use crate::Metadata;
 use crate::utils::ordered_map::OrderedMap;
@@ -8,10 +10,10 @@ use alloc::collections::BTreeMap;
 use alloc::format;
 use alloc::string::ToString;
 use alloc::vec::Vec;
-use frame_decode::constants::ConstantTypeInfo;
+use frame_decode::constants::{ConstantEntryInfo,ConstantTypeInfo};
 use frame_decode::extrinsics::ExtrinsicTypeInfo;
 use frame_decode::runtime_apis::RuntimeApiTypeInfo;
-use frame_decode::storage::StorageTypeInfo;
+use frame_decode::storage::{StorageEntryInfo,StorageTypeInfo};
 use frame_metadata::v15;
 use portable_registry_builder::PortableRegistryBuilder;
 use scale_info_legacy::TypeRegistrySet;
@@ -19,16 +21,10 @@ use scale_info_legacy::type_registry::RuntimeApiName;
 
 macro_rules! from_historic {
     ($vis:vis fn $fn_name:ident($metadata:path $(, builtin_index: $builtin_index:ident)? )) => {
-        $vis fn $fn_name(metadata: &$metadata, mut types: TypeRegistrySet<'_>) -> Result<Metadata, Error> {
-            // Extend the types with important information from the metadata:
-            {
-                let builtin_types = frame_decode::helpers::type_registry_from_metadata(metadata)
-                    .map_err(Error::CannotEnhanceTypesFromMetadata)?;
-                types.prepend(builtin_types);
-            }
-
+        $vis fn $fn_name(metadata: &$metadata, types: &TypeRegistrySet<'_>) -> Result<Metadata, Error> {
             // This will be used to construct our `PortableRegistry` from old-style types.
             let mut portable_registry_builder = PortableRegistryBuilder::new(&types);
+            portable_registry_builder.ignore_not_found(true);
 
             // We use this type in a few places to denote that we don't know how to decode it.
             let unknown_type_id = portable_registry_builder.add_type_str("special::Unknown", None)
@@ -76,7 +72,7 @@ macro_rules! from_historic {
                 let storage = pallet.storage.as_ref().map(|s| {
                     let storage = as_decoded(s);
                     let prefix = as_decoded(&storage.prefix);
-                    let entries = metadata.storage_entries_in_pallet(&pallet_name).map(|entry_name| {
+                    let entries = metadata.storage_in_pallet(&pallet_name).map(|entry_name| {
                         let info = metadata
                             .storage_info(&pallet_name, &entry_name)
                             .map_err(|e| Error::StorageInfoError(e.into_owned()))?;
@@ -98,7 +94,6 @@ macro_rules! from_historic {
 
                         Ok((entry_name, entry))
                     }).collect::<Result<OrderedMap<_, _>, _>>()?;
-
                     Ok(crate::StorageMetadata {
                         prefix: prefix.clone(),
                         entries,
@@ -376,8 +371,6 @@ pub enum Error {
         context: String,
         error: portable_registry_builder::PortableRegistryAddTypeError,
     },
-    #[error("Cannot enhance the types with information from metadata: {0}")]
-    CannotEnhanceTypesFromMetadata(scale_info_legacy::lookup_name::ParseError),
     #[error("Cannot find 'hardcoded::ExtrinsicAddress' type in legacy types")]
     CannotFindAddressType,
     #[error("Cannot find 'hardcoded::ExtrinsicSignature' type in legacy types")]

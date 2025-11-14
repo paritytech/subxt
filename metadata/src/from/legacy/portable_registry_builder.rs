@@ -27,6 +27,7 @@ pub struct PortableRegistryBuilder<'info> {
     legacy_types: &'info TypeRegistrySet<'info>,
     scale_info_types: PortableRegistry,
     old_to_new: BTreeMap<LookupName, u32>,
+    ignore_not_found: bool,
 }
 
 impl<'info> PortableRegistryBuilder<'info> {
@@ -39,7 +40,14 @@ impl<'info> PortableRegistryBuilder<'info> {
                 types: Default::default(),
             },
             old_to_new: Default::default(),
+            ignore_not_found: false,
         }
+    }
+
+    /// If this is enabled, any type that isn't found will be replaced by a "special::Unknown" type
+    /// instead of a "type not found" error being emitted.
+    pub fn ignore_not_found(&mut self, ignore: bool) {
+        self.ignore_not_found = ignore;
     }
 
     /// Try adding a type, given its string name and optionally the pallet it's scoped to.
@@ -101,6 +109,25 @@ impl<'info> PortableRegistryBuilder<'info> {
             return Ok(*new_id);
         }
 
+        // Assign a new ID immediately to prevent any recursion. If we don't do this, then
+        // recursive types (ie types that contain themselves) will lead to a stack overflow.
+        // with this, we assign IDs up front, so the ID is returned immediately on recursing.
+        let new_id = self.scale_info_types.types.len() as u32;
+
+        // Add a placeholder type to "reserve" this ID.
+        self.scale_info_types.types.push(PortableType { 
+            id: new_id, 
+            ty: scale_info::Type::new(
+                scale_info::Path { segments: vec![] },
+                core::iter::empty(),
+                scale_info::TypeDef::Variant(scale_info::TypeDefVariant { variants: vec![] }),
+                Default::default(),
+            ),
+        });
+
+        // Cache the ID so that recursing calls bail early.
+        self.old_to_new.insert(id.clone(), new_id);
+
         let visitor = PortableRegistryVisitor {
             builder: &mut *self,
             current_type: &id,
@@ -111,12 +138,18 @@ impl<'info> PortableRegistryBuilder<'info> {
             .legacy_types
             .resolve_type(id.clone(), visitor)
         {
-            Ok(Ok(new_id)) => {
-                self.old_to_new.insert(id, new_id);
+            Ok(Ok(ty)) => {
+                self.scale_info_types.types[new_id as usize].ty = ty;
                 Ok(new_id)
-            }
-            Ok(Err(e)) => Err(e),
-            Err(e) => Err(e.into()),
+            },
+            Ok(Err(e)) => {
+                self.old_to_new.remove(&id);
+                Err(e)
+            },
+            Err(e) => {
+                self.old_to_new.remove(&id);
+                Err(e.into())
+            },
         }
     }
 
@@ -129,12 +162,6 @@ impl<'info> PortableRegistryBuilder<'info> {
     pub fn finish(self) -> PortableRegistry {
         self.scale_info_types
     }
-
-    fn push_type(&mut self, ty: scale_info::Type<PortableForm>) -> u32 {
-        let id = self.scale_info_types.types.len() as u32;
-        self.scale_info_types.types.push(PortableType { id, ty });
-        id
-    }
 }
 
 struct PortableRegistryVisitor<'a, 'info> {
@@ -144,16 +171,22 @@ struct PortableRegistryVisitor<'a, 'info> {
 
 impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info> {
     type TypeId = LookupName;
-    type Value = Result<u32, PortableRegistryAddTypeError>;
+    type Value = Result<scale_info::Type<PortableForm>, PortableRegistryAddTypeError>;
 
     fn visit_unhandled(self, kind: UnhandledKind) -> Self::Value {
         panic!("A handler exists for every type, but visit_unhandled({kind:?}) was called");
     }
 
     fn visit_not_found(self) -> Self::Value {
-        Err(PortableRegistryAddTypeError::TypeNotFound(
-            self.current_type.clone(),
-        ))
+        if self.builder.ignore_not_found {
+            // Return the "unknown" type if we're ignoring not found types:
+            Ok(unknown_type())
+        } else {
+            // Otherwise just return an error at this point:
+            Err(PortableRegistryAddTypeError::TypeNotFound(
+                self.current_type.clone(),
+            ))
+        }
     }
 
     fn visit_primitive(self, primitive: Primitive) -> Self::Value {
@@ -175,14 +208,12 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
             Primitive::I256 => scale_info::TypeDefPrimitive::I256,
         };
 
-        let primitive_type = scale_info::Type::new(
+        Ok(scale_info::Type::new(
             Default::default(),
             core::iter::empty(),
             scale_info::TypeDef::Primitive(p),
             Default::default(),
-        );
-
-        Ok(self.builder.push_type(primitive_type))
+        ))
     }
 
     fn visit_sequence<Path: PathIter<'info>>(
@@ -194,16 +225,15 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
         let path = scale_info::Path {
             segments: path.map(Into::into).collect(),
         };
-        let sequence_type = scale_info::Type::new(
+
+        Ok(scale_info::Type::new(
             path,
             core::iter::empty(),
             scale_info::TypeDef::Sequence(scale_info::TypeDefSequence {
                 type_param: inner_id.into(),
             }),
             Default::default(),
-        );
-
-        Ok(self.builder.push_type(sequence_type))
+        ))
     }
 
     fn visit_composite<Path, Fields>(self, path: Path, fields: Fields) -> Self::Value
@@ -227,21 +257,20 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
             });
         }
 
-        let composite_type = scale_info::Type::new(
+        Ok(scale_info::Type::new(
             path,
             core::iter::empty(),
             scale_info::TypeDef::Composite(scale_info::TypeDefComposite {
                 fields: scale_info_fields,
             }),
             Default::default(),
-        );
-
-        Ok(self.builder.push_type(composite_type))
+        ))
     }
 
     fn visit_array(self, inner_type_id: LookupName, len: usize) -> Self::Value {
         let inner_id = self.builder.add_type(inner_type_id)?;
-        let array_type = scale_info::Type::new(
+
+        Ok(scale_info::Type::new(
             Default::default(),
             core::iter::empty(),
             scale_info::TypeDef::Array(scale_info::TypeDefArray {
@@ -249,9 +278,7 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
                 type_param: inner_id.into(),
             }),
             Default::default(),
-        );
-
-        Ok(self.builder.push_type(array_type))
+        ))
     }
 
     fn visit_tuple<TypeIds>(self, type_ids: TypeIds) -> Self::Value
@@ -264,16 +291,14 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
             scale_info_fields.push(new_id.into());
         }
 
-        let tuple_type = scale_info::Type::new(
+        Ok(scale_info::Type::new(
             Default::default(),
             core::iter::empty(),
             scale_info::TypeDef::Tuple(scale_info::TypeDefTuple {
                 fields: scale_info_fields,
             }),
             Default::default(),
-        );
-
-        Ok(self.builder.push_type(tuple_type))
+        ))
     }
 
     fn visit_variant<Path, Fields, Var>(self, path: Path, variants: Var) -> Self::Value
@@ -308,16 +333,14 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
             })
         }
 
-        let variant_type = scale_info::Type::new(
+        Ok(scale_info::Type::new(
             path,
             core::iter::empty(),
             scale_info::TypeDef::Variant(scale_info::TypeDefVariant {
                 variants: scale_info_variants,
             }),
             Default::default(),
-        );
-
-        Ok(self.builder.push_type(variant_type))
+        ))
     }
 
     fn visit_compact(self, inner_type_id: Self::TypeId) -> Self::Value {
@@ -333,16 +356,14 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
             ty: Some(inner_id.into()),
         }];
 
-        let compact_type = scale_info::Type::new(
+        Ok(scale_info::Type::new(
             scale_info::Path { segments: path },
             type_params,
             scale_info::TypeDef::Compact(scale_info::TypeDefCompact {
                 type_param: inner_id.into(),
             }),
             Default::default(),
-        );
-
-        Ok(self.builder.push_type(compact_type))
+        ))
     }
 
     fn visit_bit_sequence(
@@ -386,7 +407,7 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
             },
         ];
 
-        let bitseq_type = scale_info::Type::new(
+        Ok(scale_info::Type::new(
             scale_info::Path { segments: path },
             type_params,
             scale_info::TypeDef::BitSequence(scale_info::TypeDefBitSequence {
@@ -394,8 +415,22 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
                 bit_store_type: new_store_ty.into(),
             }),
             Default::default(),
-        );
-
-        Ok(self.builder.push_type(bitseq_type))
+        ))
     }
+}
+
+fn unknown_type() -> scale_info::Type<PortableForm> {
+    scale_info::Type::new(
+        scale_info::Path { 
+            segments: Vec::from_iter([
+                "special".to_owned(), 
+                "Unknown".to_owned()
+            ]) 
+        },
+        core::iter::empty(),
+        scale_info::TypeDef::Variant(scale_info::TypeDefVariant {
+            variants: Vec::new(),
+        }),
+        Default::default(),
+    )
 }
