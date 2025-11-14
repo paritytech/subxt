@@ -494,7 +494,7 @@ mod tests {
         let metadata = metadata();
 
         // Except our metadata to contain the registered types.
-        let pallet = metadata.pallet_by_index(0).expect("pallet exists");
+        let pallet = metadata.pallet_by_call_index(0).expect("pallet exists");
         let extrinsic = pallet
             .call_variant_by_index(2)
             .expect("metadata contains the RuntimeCall enum with this pallet");

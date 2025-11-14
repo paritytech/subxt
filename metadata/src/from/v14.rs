@@ -73,7 +73,9 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
                 name.clone(),
                 PalletMetadataInner {
                     name: name.clone(),
-                    index: p.index,
+                    call_index: p.index,
+                    event_index: p.index,
+                    error_index: p.index,
                     storage,
                     call_ty: p.calls.as_ref().map(|c| c.ty.id),
                     call_variant_index,
@@ -99,7 +101,9 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
         Ok(Metadata {
             types: m.types,
             pallets,
-            pallets_by_index,
+            pallets_by_call_index: pallets_by_index.clone(),
+            pallets_by_error_index: pallets_by_index.clone(),
+            pallets_by_event_index: pallets_by_index,
             extrinsic: from_extrinsic_metadata(m.extrinsic, missing_extrinsic_type_ids),
             dispatch_error_ty,
             outer_enums: OuterEnumsMetadata {

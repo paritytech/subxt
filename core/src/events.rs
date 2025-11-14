@@ -262,7 +262,7 @@ impl<T: Config> EventDetails<T> {
 
         // Get metadata for the event:
         let event_pallet = metadata
-            .pallet_by_index(pallet_index)
+            .pallet_by_event_index(pallet_index)
             .ok_or_else(|| EventsError::CannotFindPalletWithIndex(pallet_index))?;
         let event_variant = event_pallet
             .event_variant_by_index(variant_index)
@@ -359,7 +359,7 @@ impl<T: Config> EventDetails<T> {
     pub fn event_metadata(&self) -> EventMetadataDetails<'_> {
         let pallet = self
             .metadata
-            .pallet_by_index(self.pallet_index())
+            .pallet_by_event_index(self.pallet_index())
             .expect("event pallet to be found; we did this already during decoding");
         let variant = pallet
             .event_variant_by_index(self.variant_index())
