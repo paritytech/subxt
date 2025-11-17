@@ -1,12 +1,12 @@
 use super::*;
+use alloc::collections::BTreeSet;
 use codec::Decode;
-use frame_metadata::RuntimeMetadata;
-use scale_info_legacy::LookupName;
 use core::str::FromStr;
-use scale_type_resolver::TypeResolver;
 use frame_decode::constants::ConstantTypeInfo;
 use frame_decode::runtime_apis::RuntimeApiEntryInfo;
-use alloc::collections::BTreeSet;
+use frame_metadata::RuntimeMetadata;
+use scale_info_legacy::LookupName;
+use scale_type_resolver::TypeResolver;
 
 /// Load some legacy kusama metadata from our artifacts.
 fn legacy_kusama_metadata(version: u8) -> (u64, RuntimeMetadata) {
@@ -26,7 +26,7 @@ fn legacy_kusama_metadata(version: u8) -> (u64, RuntimeMetadata) {
 
     let mut path = std::path::PathBuf::from_str("../artifacts/kusama/").unwrap();
     path.push(filename);
-    
+
     let bytes = std::fs::read(path).expect("Could not read file");
     let metadata = RuntimeMetadata::decode(&mut &*bytes).expect("Could not SCALE decode metadata");
 
@@ -47,7 +47,8 @@ fn metadata_pair(version: u8) -> (TypeRegistrySet<'static>, RuntimeMetadata, cra
     // Extend the types with builtins.
     let types_for_spec = {
         let mut types_for_spec = types.for_spec_version(spec_version).to_owned();
-        let extended_types = frame_decode::helpers::type_registry_from_metadata_any(&metadata).unwrap();
+        let extended_types =
+            frame_decode::helpers::type_registry_from_metadata_any(&metadata).unwrap();
         types_for_spec.prepend(extended_types);
         types_for_spec
     };
@@ -58,8 +59,9 @@ fn metadata_pair(version: u8) -> (TypeRegistrySet<'static>, RuntimeMetadata, cra
         RuntimeMetadata::V11(m) => crate::Metadata::from_v11(m, &types_for_spec),
         RuntimeMetadata::V12(m) => crate::Metadata::from_v12(m, &types_for_spec),
         RuntimeMetadata::V13(m) => crate::Metadata::from_v13(m, &types_for_spec),
-        _ => panic!("Metadata version {} not expected", metadata.version())
-    }.expect("Could not convert to subxt_metadata::Metadata");
+        _ => panic!("Metadata version {} not expected", metadata.version()),
+    }
+    .expect("Could not convert to subxt_metadata::Metadata");
 
     (types_for_spec, metadata, subxt_metadata)
 }
@@ -68,7 +70,10 @@ fn metadata_pair(version: u8) -> (TypeRegistrySet<'static>, RuntimeMetadata, cra
 #[derive(PartialEq, Debug, Clone)]
 enum Shape {
     Array(Box<Shape>, usize),
-    BitSequence(scale_type_resolver::BitsStoreFormat, scale_type_resolver::BitsOrderFormat),
+    BitSequence(
+        scale_type_resolver::BitsStoreFormat,
+        scale_type_resolver::BitsOrderFormat,
+    ),
     Compact(Box<Shape>),
     Composite(Vec<String>, Vec<(Option<String>, Shape)>),
     Primitive(scale_type_resolver::Primitive),
@@ -85,7 +90,7 @@ enum Shape {
 struct Variant {
     index: u8,
     name: String,
-    fields: Vec<(Option<String>, Shape)>
+    fields: Vec<(Option<String>, Shape)>,
 }
 
 impl Shape {
@@ -95,136 +100,162 @@ impl Shape {
         Shape::from_modern_type_inner(id, &mut seen_variants, types)
     }
 
-    fn from_modern_type_inner(id: u32, seen_variants: &mut BTreeSet<Vec<String>>, types: &scale_info::PortableRegistry) -> Shape {
-        let visitor = scale_type_resolver::visitor::new((seen_variants, types), |_, _| panic!("Unhandled"))
-            .visit_array(|(seen_variants, types), type_id, len| {
-                let inner = Shape::from_modern_type_inner(type_id, seen_variants, types);
-                Shape::Array(Box::new(inner), len)
-            })
-            .visit_bit_sequence(|_, store, order| {
-                Shape::BitSequence(store, order)
-            })
-            .visit_compact(|(seen_variants, types), type_id| {
-                let inner = Shape::from_modern_type_inner(type_id, seen_variants, types);
-                Shape::Compact(Box::new(inner))
-            })
-            .visit_composite(|(seen_variants, types), path, fields| {
-                let path = path.map(|p| p.to_owned()).collect();
-                let inners = fields.map(|field| {
-                    let name = field.name.map(|n| n.to_owned());
-                    let inner = Shape::from_modern_type_inner(field.id, seen_variants, types);
-                    (name, inner)
-                }).collect();
-                Shape::Composite(path, inners)
-            })
-            .visit_primitive(|_types, prim| {
-                Shape::Primitive(prim)
-            })
-            .visit_sequence(|(seen_variants, types), path, type_id| {
-                let path = path.map(|p| p.to_owned()).collect();
-                let inner = Shape::from_modern_type_inner(type_id, seen_variants, types);
-                Shape::Sequence(path, Box::new(inner))
-            })
-            .visit_tuple(|(seen_variants, types), fields| {
-                let inners = fields.map(|field| {
-                     Shape::from_modern_type_inner(field, seen_variants, types)
-                }).collect();
-                Shape::Tuple(inners)
-            })
-            .visit_variant(|(seen_variants, types), path, variants| {
-                let path: Vec<String> = path.map(|p| p.to_owned()).collect();
-                // very important to avoid recursion and performance costs:
-                if !seen_variants.insert(path.clone()) {
-                    return Shape::SeenVariant(path);
-                }
-                let variants = variants.map(|v| {
-                    Variant {
-                        index: v.index,
-                        name: v.name.to_owned(),
-                        fields: v.fields.map(|field| {
+    fn from_modern_type_inner(
+        id: u32,
+        seen_variants: &mut BTreeSet<Vec<String>>,
+        types: &scale_info::PortableRegistry,
+    ) -> Shape {
+        let visitor =
+            scale_type_resolver::visitor::new((seen_variants, types), |_, _| panic!("Unhandled"))
+                .visit_array(|(seen_variants, types), type_id, len| {
+                    let inner = Shape::from_modern_type_inner(type_id, seen_variants, types);
+                    Shape::Array(Box::new(inner), len)
+                })
+                .visit_bit_sequence(|_, store, order| Shape::BitSequence(store, order))
+                .visit_compact(|(seen_variants, types), type_id| {
+                    let inner = Shape::from_modern_type_inner(type_id, seen_variants, types);
+                    Shape::Compact(Box::new(inner))
+                })
+                .visit_composite(|(seen_variants, types), path, fields| {
+                    let path = path.map(|p| p.to_owned()).collect();
+                    let inners = fields
+                        .map(|field| {
                             let name = field.name.map(|n| n.to_owned());
-                            let inner = Shape::from_modern_type_inner(field.id, seen_variants, types);
+                            let inner =
+                                Shape::from_modern_type_inner(field.id, seen_variants, types);
                             (name, inner)
-                        }).collect()
+                        })
+                        .collect();
+                    Shape::Composite(path, inners)
+                })
+                .visit_primitive(|_types, prim| Shape::Primitive(prim))
+                .visit_sequence(|(seen_variants, types), path, type_id| {
+                    let path = path.map(|p| p.to_owned()).collect();
+                    let inner = Shape::from_modern_type_inner(type_id, seen_variants, types);
+                    Shape::Sequence(path, Box::new(inner))
+                })
+                .visit_tuple(|(seen_variants, types), fields| {
+                    let inners = fields
+                        .map(|field| Shape::from_modern_type_inner(field, seen_variants, types))
+                        .collect();
+                    Shape::Tuple(inners)
+                })
+                .visit_variant(|(seen_variants, types), path, variants| {
+                    let path: Vec<String> = path.map(|p| p.to_owned()).collect();
+                    // very important to avoid recursion and performance costs:
+                    if !seen_variants.insert(path.clone()) {
+                        return Shape::SeenVariant(path);
                     }
-                }).collect();
-                Shape::Variant(path, variants)
-            })
-            .visit_not_found(|_types| {
-                panic!("PortableRegistry should not have a type which can't be found")
-            });
-    
+                    let variants = variants
+                        .map(|v| Variant {
+                            index: v.index,
+                            name: v.name.to_owned(),
+                            fields: v
+                                .fields
+                                .map(|field| {
+                                    let name = field.name.map(|n| n.to_owned());
+                                    let inner = Shape::from_modern_type_inner(
+                                        field.id,
+                                        seen_variants,
+                                        types,
+                                    );
+                                    (name, inner)
+                                })
+                                .collect(),
+                        })
+                        .collect();
+                    Shape::Variant(path, variants)
+                })
+                .visit_not_found(|_types| {
+                    panic!("PortableRegistry should not have a type which can't be found")
+                });
+
         types.resolve_type(id, visitor).unwrap()
     }
-    
+
     /// convert some historic type definition into a [`Shape`].
     fn from_legacy_type(name: &LookupName, types: &TypeRegistrySet<'_>) -> Shape {
         let mut seen_variants = BTreeSet::new();
         Shape::from_legacy_type_inner(name.clone(), &mut seen_variants, types)
     }
 
-    fn from_legacy_type_inner(id: LookupName, seen_variants: &mut BTreeSet<Vec<String>>, types: &TypeRegistrySet<'_>) -> Shape {
-        let visitor = scale_type_resolver::visitor::new((seen_variants, types), |_, _| panic!("Unhandled"))
-            .visit_array(|(seen_variants, types), type_id, len| {
-                let inner = Shape::from_legacy_type_inner(type_id, seen_variants, types);
-                Shape::Array(Box::new(inner), len)
-            })
-            .visit_bit_sequence(|_types, store, order| {
-                Shape::BitSequence(store, order)
-            })
-            .visit_compact(|(seen_variants, types), type_id| {
-                let inner = Shape::from_legacy_type_inner(type_id, seen_variants, types);
-                Shape::Compact(Box::new(inner))
-            })
-            .visit_composite(|(seen_variants, types), path, fields| {
-                let path = path.map(|p| p.to_owned()).collect();
-                let inners = fields.map(|field| {
-                    let name = field.name.map(|n| n.to_owned());
-                    let inner = Shape::from_legacy_type_inner(field.id, seen_variants, types);
-                    (name, inner)
-                }).collect();
-                Shape::Composite(path, inners)
-            })
-            .visit_primitive(|_types, prim| {
-                Shape::Primitive(prim)
-            })
-            .visit_sequence(|(seen_variants, types), path, type_id| {
-                let path = path.map(|p| p.to_owned()).collect();
-                let inner = Shape::from_legacy_type_inner(type_id, seen_variants, types);
-                Shape::Sequence(path, Box::new(inner))
-            })
-            .visit_tuple(|(seen_variants, types), fields| {
-                let inners = fields.map(|field| {
-                     Shape::from_legacy_type_inner(field, seen_variants, types)
-                }).collect();
-                Shape::Tuple(inners)
-            })
-            .visit_variant(|(seen_variants, types), path, variants| {
-                let path: Vec<String> = path.map(|p| p.to_owned()).collect();
-                // very important to avoid recursion and performance costs:
-                if !seen_variants.insert(path.clone()) {
-                    return Shape::SeenVariant(path);
-                }
-                let variants = variants.map(|v| {
-                    Variant {
-                        index: v.index,
-                        name: v.name.to_owned(),
-                        fields: v.fields.map(|field| {
+    fn from_legacy_type_inner(
+        id: LookupName,
+        seen_variants: &mut BTreeSet<Vec<String>>,
+        types: &TypeRegistrySet<'_>,
+    ) -> Shape {
+        let visitor =
+            scale_type_resolver::visitor::new((seen_variants, types), |_, _| panic!("Unhandled"))
+                .visit_array(|(seen_variants, types), type_id, len| {
+                    let inner = Shape::from_legacy_type_inner(type_id, seen_variants, types);
+                    Shape::Array(Box::new(inner), len)
+                })
+                .visit_bit_sequence(|_types, store, order| Shape::BitSequence(store, order))
+                .visit_compact(|(seen_variants, types), type_id| {
+                    let inner = Shape::from_legacy_type_inner(type_id, seen_variants, types);
+                    Shape::Compact(Box::new(inner))
+                })
+                .visit_composite(|(seen_variants, types), path, fields| {
+                    let path = path.map(|p| p.to_owned()).collect();
+                    let inners = fields
+                        .map(|field| {
                             let name = field.name.map(|n| n.to_owned());
-                            let inner = Shape::from_legacy_type_inner(field.id, seen_variants, types);
+                            let inner =
+                                Shape::from_legacy_type_inner(field.id, seen_variants, types);
                             (name, inner)
-                        }).collect()
+                        })
+                        .collect();
+                    Shape::Composite(path, inners)
+                })
+                .visit_primitive(|_types, prim| Shape::Primitive(prim))
+                .visit_sequence(|(seen_variants, types), path, type_id| {
+                    let path = path.map(|p| p.to_owned()).collect();
+                    let inner = Shape::from_legacy_type_inner(type_id, seen_variants, types);
+                    Shape::Sequence(path, Box::new(inner))
+                })
+                .visit_tuple(|(seen_variants, types), fields| {
+                    let inners = fields
+                        .map(|field| Shape::from_legacy_type_inner(field, seen_variants, types))
+                        .collect();
+                    Shape::Tuple(inners)
+                })
+                .visit_variant(|(seen_variants, types), path, variants| {
+                    let path: Vec<String> = path.map(|p| p.to_owned()).collect();
+                    // very important to avoid recursion and performance costs:
+                    if !seen_variants.insert(path.clone()) {
+                        return Shape::SeenVariant(path);
                     }
-                }).collect();
-                Shape::Variant(path, variants)
-            })
-            .visit_not_found(|(seen_variants,_)| {
-                // When we convert legacy to modern types, any types we don't find
-                // are replaced with empty variants (since we can't have dangling types
-                // in our new PortableRegistry). Do the same here so they compare equal.
-                Shape::from_legacy_type_inner(LookupName::parse("special::Unknown").unwrap(), seen_variants, types)
-            });
-    
+                    let variants = variants
+                        .map(|v| Variant {
+                            index: v.index,
+                            name: v.name.to_owned(),
+                            fields: v
+                                .fields
+                                .map(|field| {
+                                    let name = field.name.map(|n| n.to_owned());
+                                    let inner = Shape::from_legacy_type_inner(
+                                        field.id,
+                                        seen_variants,
+                                        types,
+                                    );
+                                    (name, inner)
+                                })
+                                .collect(),
+                        })
+                        .collect();
+                    Shape::Variant(path, variants)
+                })
+                .visit_not_found(|(seen_variants, _)| {
+                    // When we convert legacy to modern types, any types we don't find
+                    // are replaced with empty variants (since we can't have dangling types
+                    // in our new PortableRegistry). Do the same here so they compare equal.
+                    Shape::from_legacy_type_inner(
+                        LookupName::parse("special::Unknown").unwrap(),
+                        seen_variants,
+                        types,
+                    )
+                });
+
         types.resolve_type(id, visitor).unwrap()
     }
 }
@@ -236,28 +267,34 @@ macro_rules! constants_eq {
         #[test]
         fn $name() {
             let (old_types, old_md, new_md) = metadata_pair($version);
-            let RuntimeMetadata::$version_path(old_md) = old_md else { panic!("Wrong version") };
+            let RuntimeMetadata::$version_path(old_md) = old_md else {
+                panic!("Wrong version")
+            };
 
-            let old: Vec<_> = old_md.constant_tuples()
-                .map(|(p,n)| {
-                    old_md.constant_info(&p, &n).unwrap()
-                })
+            let old: Vec<_> = old_md
+                .constant_tuples()
+                .map(|(p, n)| old_md.constant_info(&p, &n).unwrap())
                 .map(|c| {
-                    (c.bytes.to_owned(), Shape::from_legacy_type(&c.type_id, &old_types))
+                    (
+                        c.bytes.to_owned(),
+                        Shape::from_legacy_type(&c.type_id, &old_types),
+                    )
                 })
                 .collect();
-            let new: Vec<_> = new_md.constant_tuples()
-                .map(|(p,n)| {
-                    new_md.constant_info(&p, &n).unwrap()
-                })
+            let new: Vec<_> = new_md
+                .constant_tuples()
+                .map(|(p, n)| new_md.constant_info(&p, &n).unwrap())
                 .map(|c| {
-                    (c.bytes.to_owned(), Shape::from_modern_type(c.type_id, new_md.types()))
+                    (
+                        c.bytes.to_owned(),
+                        Shape::from_modern_type(c.type_id, new_md.types()),
+                    )
                 })
                 .collect();
 
             assert_eq!(old, new);
         }
-    }
+    };
 }
 
 constants_eq!(v9_constants_eq, 9, V9);
@@ -271,22 +308,28 @@ constants_eq!(v13_constants_eq, 13, V13);
 fn runtime_apis() {
     for version in 9..=13 {
         let (old_types, _old_md, new_md) = metadata_pair(version);
-    
-        let old: Vec<_> = old_types.runtime_api_tuples()
-            .map(|(p,n)| {
-                old_types.runtime_api_info(&p, &n).unwrap().map_ids(|id| {
-                    Ok::<_,()>(Shape::from_legacy_type(&id, &old_types))
-                }).unwrap()
+
+        let old: Vec<_> = old_types
+            .runtime_api_tuples()
+            .map(|(p, n)| {
+                old_types
+                    .runtime_api_info(&p, &n)
+                    .unwrap()
+                    .map_ids(|id| Ok::<_, ()>(Shape::from_legacy_type(&id, &old_types)))
+                    .unwrap()
             })
             .collect();
-        let new: Vec<_> = new_md.runtime_api_tuples()
-            .map(|(p,n)| {
-                new_md.runtime_api_info(&p, &n).unwrap().map_ids(|id| {
-                    Ok::<_,()>(Shape::from_modern_type(id, new_md.types()))
-                }).unwrap()
+        let new: Vec<_> = new_md
+            .runtime_api_tuples()
+            .map(|(p, n)| {
+                new_md
+                    .runtime_api_info(&p, &n)
+                    .unwrap()
+                    .map_ids(|id| Ok::<_, ()>(Shape::from_modern_type(id, new_md.types())))
+                    .unwrap()
             })
             .collect();
-    
+
         assert_eq!(old, new);
     }
 }
@@ -296,22 +339,30 @@ macro_rules! storage_eq {
         #[test]
         fn $name() {
             let (old_types, old_md, new_md) = metadata_pair($version);
-            let RuntimeMetadata::$version_path(old_md) = old_md else { panic!("Wrong version") };
+            let RuntimeMetadata::$version_path(old_md) = old_md else {
+                panic!("Wrong version")
+            };
 
-            let old: Vec<_> = old_md.storage_tuples()
-                .map(|(p,n)| {
-                    let info = old_md.storage_info(&p, &n).unwrap().map_ids(|id| {
-                        Ok::<_,()>(Shape::from_legacy_type(&id, &old_types))
-                    }).unwrap();
+            let old: Vec<_> = old_md
+                .storage_tuples()
+                .map(|(p, n)| {
+                    let info = old_md
+                        .storage_info(&p, &n)
+                        .unwrap()
+                        .map_ids(|id| Ok::<_, ()>(Shape::from_legacy_type(&id, &old_types)))
+                        .unwrap();
                     (p.into_owned(), n.into_owned(), info)
                 })
                 .collect();
 
-            let new: Vec<_> = new_md.storage_tuples()
-                .map(|(p,n)| {
-                    let info = new_md.storage_info(&p, &n).unwrap().map_ids(|id| {
-                        Ok::<_,()>(Shape::from_modern_type(id, new_md.types()))
-                    }).unwrap();
+            let new: Vec<_> = new_md
+                .storage_tuples()
+                .map(|(p, n)| {
+                    let info = new_md
+                        .storage_info(&p, &n)
+                        .unwrap()
+                        .map_ids(|id| Ok::<_, ()>(Shape::from_modern_type(id, new_md.types())))
+                        .unwrap();
                     (p.into_owned(), n.into_owned(), info)
                 })
                 .collect();
@@ -322,10 +373,14 @@ macro_rules! storage_eq {
 
             for (old, new) in old.into_iter().zip(new.into_iter()) {
                 assert_eq!((&old.0, &old.1), (&new.0, &new.1), "Storage entry mismatch");
-                assert_eq!(old.2, new.2, "Storage entry {}.{} does not match!", old.0, old.1);
+                assert_eq!(
+                    old.2, new.2,
+                    "Storage entry {}.{} does not match!",
+                    old.0, old.1
+                );
             }
         }
-    }
+    };
 }
 
 storage_eq!(v9_storage_eq, 9, V9);
@@ -338,7 +393,7 @@ storage_eq!(v13_storage_eq, 13, V13);
 fn builtin_call() {
     for version in 9..=13 {
         let (old_types, _old_md, new_md) = metadata_pair(version);
-    
+
         let old = Shape::from_legacy_type(&LookupName::parse("builtin::Call").unwrap(), &old_types);
         let new = Shape::from_modern_type(new_md.outer_enums.call_enum_ty, new_md.types());
         assert_eq!(old, new, "Call types do not match in metadata V{version}!");
@@ -349,8 +404,9 @@ fn builtin_call() {
 fn builtin_error() {
     for version in 9..=13 {
         let (old_types, _old_md, new_md) = metadata_pair(version);
-    
-        let old = Shape::from_legacy_type(&LookupName::parse("builtin::Error").unwrap(), &old_types);
+
+        let old =
+            Shape::from_legacy_type(&LookupName::parse("builtin::Error").unwrap(), &old_types);
         let new = Shape::from_modern_type(new_md.outer_enums.error_enum_ty, new_md.types());
         assert_eq!(old, new, "Error types do not match in metadata V{version}!");
     }
@@ -360,8 +416,9 @@ fn builtin_error() {
 fn builtin_event() {
     for version in 9..=13 {
         let (old_types, _old_md, new_md) = metadata_pair(version);
-        
-        let old = Shape::from_legacy_type(&LookupName::parse("builtin::Event").unwrap(), &old_types);
+
+        let old =
+            Shape::from_legacy_type(&LookupName::parse("builtin::Event").unwrap(), &old_types);
         let new = Shape::from_modern_type(new_md.outer_enums.event_enum_ty, new_md.types());
         assert_eq!(old, new, "Event types do not match in metadata V{version}!");
     }

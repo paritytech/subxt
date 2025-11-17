@@ -115,8 +115,8 @@ impl<'info> PortableRegistryBuilder<'info> {
         let new_id = self.scale_info_types.types.len() as u32;
 
         // Add a placeholder type to "reserve" this ID.
-        self.scale_info_types.types.push(PortableType { 
-            id: new_id, 
+        self.scale_info_types.types.push(PortableType {
+            id: new_id,
             ty: scale_info::Type::new(
                 scale_info::Path { segments: vec![] },
                 core::iter::empty(),
@@ -141,15 +141,15 @@ impl<'info> PortableRegistryBuilder<'info> {
             Ok(Ok(ty)) => {
                 self.scale_info_types.types[new_id as usize].ty = ty;
                 Ok(new_id)
-            },
+            }
             Ok(Err(e)) => {
                 self.old_to_new.remove(&id);
                 Err(e)
-            },
+            }
             Err(e) => {
                 self.old_to_new.remove(&id);
                 Err(e.into())
-            },
+            }
         }
     }
 
@@ -421,11 +421,8 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
 
 fn unknown_type() -> scale_info::Type<PortableForm> {
     scale_info::Type::new(
-        scale_info::Path { 
-            segments: Vec::from_iter([
-                "special".to_owned(), 
-                "Unknown".to_owned()
-            ]) 
+        scale_info::Path {
+            segments: Vec::from_iter(["special".to_owned(), "Unknown".to_owned()]),
         },
         core::iter::empty(),
         scale_info::TypeDef::Variant(scale_info::TypeDefVariant {
