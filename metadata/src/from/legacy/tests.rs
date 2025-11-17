@@ -10,7 +10,7 @@ use scale_type_resolver::TypeResolver;
 
 /// Load some legacy kusama metadata from our artifacts.
 fn legacy_kusama_metadata(version: u8) -> (u64, RuntimeMetadata) {
-    const VERSIONS: [(u8, u64, &'static str); 5] = [
+    const VERSIONS: [(u8, u64, &str); 5] = [
         (9, 1021, "metadata_v9_1021.scale"),
         (10, 1038, "metadata_v10_1038.scale"),
         (11, 1045, "metadata_v11_1045.scale"),
