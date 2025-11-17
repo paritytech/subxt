@@ -1,8 +1,8 @@
+mod list_storage_entries_any;
 mod storage_entry;
 mod storage_info;
 mod storage_key;
 mod storage_value;
-mod list_storage_entries_any;
 
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::Config;
