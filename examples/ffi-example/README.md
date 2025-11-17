@@ -45,7 +45,7 @@ which does a single balance transfer and returns 0 on success, –1 on error.
 ## Prerequisites
 - Rust toolchain (with cargo)
 - Python 3
-- Node.js (for the JS example. Version 19 worked on my M2 Mac, but version 22 did not, so YMMY).
+- Node.js (for the JS example. Version 19 worked on my M2 Mac, but version 22 did not, so YMMV).
 - A running Substrate node (Polkadot) on ws://127.0.0.1:8000. One can use Chopsticks for a quick local Polkadot node:
 
   ```shell

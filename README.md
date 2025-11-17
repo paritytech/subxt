@@ -7,7 +7,7 @@ Subxt is a library for interacting with [Substrate](https://github.com/paritytec
 - Read and iterate over storage values.
 - Read constants and custom values from the metadata.
 - Call runtime APIs, returning the results.
-- Do all of the above via a safe, statically types interface or via a dynamic one when you need the flexibility.
+- Do all of the above via a safe, statically typed interface or via a dynamic one when you need the flexibility.
 - Compile to WASM and run entirely in the browser.
 - Do a bunch of things in a `#[no_std]` environment via the `subxt-core` crate.
 - Use a built-in light client (`smoldot`) to interact with chains.
