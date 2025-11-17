@@ -5,7 +5,7 @@ pub use frame_decode::storage::StorageEntry;
 
 /// Returns an iterator listing the available storage entries in some metadata.
 ///
-/// This basically calls [`StorageTypeInfo::storage_entries()`] for each metadata version,
+/// This basically calls [`StorageEntryInfo::storage_entries()`] for each metadata version,
 /// returning an empty iterator where applicable (ie when passing legacy metadata and the
 /// `legacy` features flag is not enabled).
 pub fn list_storage_entries_any(
