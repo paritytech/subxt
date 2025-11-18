@@ -18427,7 +18427,7 @@ pub mod api {
                 #[doc = "May be called from any origin except `None`."]
                 #[doc = ""]
                 #[doc = "This function first attempts to dispatch the `main` call."]
-                #[doc = "If the `main` call fails, the `fallback` is attemted."]
+                #[doc = "If the `main` call fails, the `fallback` is attempted."]
                 #[doc = "if the fallback is successfully dispatched, the weights of both calls"]
                 #[doc = "are accumulated and an event containing the main call error is deposited."]
                 #[doc = ""]
@@ -18676,7 +18676,7 @@ pub mod api {
                 #[doc = "May be called from any origin except `None`."]
                 #[doc = ""]
                 #[doc = "This function first attempts to dispatch the `main` call."]
-                #[doc = "If the `main` call fails, the `fallback` is attemted."]
+                #[doc = "If the `main` call fails, the `fallback` is attempted."]
                 #[doc = "if the fallback is successfully dispatched, the weights of both calls"]
                 #[doc = "are accumulated and an event containing the main call error is deposited."]
                 #[doc = ""]
@@ -29992,7 +29992,7 @@ pub mod api {
                 #[encode_as_type(
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
-                #[doc = "Approve bountry and propose a curator simultaneously."]
+                #[doc = "Approve boundary and propose a curator simultaneously."]
                 #[doc = "This call is a shortcut to calling `approve_bounty` and `propose_curator` separately."]
                 #[doc = ""]
                 #[doc = "May only be called from `T::SpendOrigin`."]
@@ -30310,7 +30310,7 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = "Approve bountry and propose a curator simultaneously."]
+                #[doc = "Approve boundary and propose a curator simultaneously."]
                 #[doc = "This call is a shortcut to calling `approve_bounty` and `propose_curator` separately."]
                 #[doc = ""]
                 #[doc = "May only be called from `T::SpendOrigin`."]
@@ -55019,7 +55019,7 @@ pub mod api {
                         remark: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 9)]
-                    #[doc = "Approve bountry and propose a curator simultaneously."]
+                    #[doc = "Approve boundary and propose a curator simultaneously."]
                     #[doc = "This call is a shortcut to calling `approve_bounty` and `propose_curator` separately."]
                     #[doc = ""]
                     #[doc = "May only be called from `T::SpendOrigin`."]
@@ -62064,7 +62064,7 @@ pub mod api {
                     #[doc = "May be called from any origin except `None`."]
                     #[doc = ""]
                     #[doc = "This function first attempts to dispatch the `main` call."]
-                    #[doc = "If the `main` call fails, the `fallback` is attemted."]
+                    #[doc = "If the `main` call fails, the `fallback` is attempted."]
                     #[doc = "if the fallback is successfully dispatched, the weights of both calls"]
                     #[doc = "are accumulated and an event containing the main call error is deposited."]
                     #[doc = ""]
