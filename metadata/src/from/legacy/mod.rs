@@ -19,12 +19,30 @@ use portable_registry_builder::PortableRegistryBuilder;
 use scale_info_legacy::TypeRegistrySet;
 use scale_info_legacy::type_registry::RuntimeApiName;
 
+/// Options to configure the legacy translating.
+pub(crate) struct Opts {
+    pub sanitize_paths: bool,
+    pub ignore_not_found: bool,
+}
+
+impl Opts {
+    /// Opts tuned for best compatibility translating.
+    pub(crate) fn compat() -> Self {
+        Opts {
+            sanitize_paths: true,
+            ignore_not_found: true,
+        }
+    }
+}
+
 macro_rules! from_historic {
     ($vis:vis fn $fn_name:ident($metadata:path $(, builtin_index: $builtin_index:ident)? )) => {
-        $vis fn $fn_name(metadata: &$metadata, types: &TypeRegistrySet<'_>) -> Result<Metadata, Error> {
+        $vis fn $fn_name(metadata: &$metadata, types: &TypeRegistrySet<'_>, opts: Opts) -> Result<Metadata, Error> {
             // This will be used to construct our `PortableRegistry` from old-style types.
             let mut portable_registry_builder = PortableRegistryBuilder::new(&types);
-            portable_registry_builder.ignore_not_found(true);
+            portable_registry_builder.ignore_not_found(opts.ignore_not_found);
+            portable_registry_builder.sanitize_paths(opts.sanitize_paths);
+
 
             // We use this type in a few places to denote that we don't know how to decode it.
             let unknown_type_id = portable_registry_builder.add_type_str("special::Unknown", None)

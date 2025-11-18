@@ -1,5 +1,5 @@
 use alloc::borrow::ToOwned;
-use alloc::collections::BTreeMap;
+use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::string::ToString;
 use alloc::vec::Vec;
 use scale_info::PortableRegistry;
@@ -28,6 +28,8 @@ pub struct PortableRegistryBuilder<'info> {
     scale_info_types: PortableRegistry,
     old_to_new: BTreeMap<LookupName, u32>,
     ignore_not_found: bool,
+    sanitize_paths: bool,
+    seen_names_in_default_path: BTreeSet<String>,
 }
 
 impl<'info> PortableRegistryBuilder<'info> {
@@ -41,13 +43,24 @@ impl<'info> PortableRegistryBuilder<'info> {
             },
             old_to_new: Default::default(),
             ignore_not_found: false,
+            sanitize_paths: false,
+            seen_names_in_default_path: Default::default(),
         }
     }
 
     /// If this is enabled, any type that isn't found will be replaced by a "special::Unknown" type
     /// instead of a "type not found" error being emitted.
+    ///
+    /// Default: false
     pub fn ignore_not_found(&mut self, ignore: bool) {
         self.ignore_not_found = ignore;
+    }
+
+    /// Should type paths be sanitized to make them more amenable to things like codegen?
+    ///
+    /// Default: false
+    pub fn sanitize_paths(&mut self, sanitize: bool) {
+        self.sanitize_paths = sanitize;
     }
 
     /// Try adding a type, given its string name and optionally the pallet it's scoped to.
@@ -223,7 +236,7 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
     ) -> Self::Value {
         let inner_id = self.builder.add_type(inner_type_id)?;
         let path = scale_info::Path {
-            segments: path.map(Into::into).collect(),
+            segments: prepare_path(path, self.builder),
         };
 
         Ok(scale_info::Type::new(
@@ -242,7 +255,7 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
         Fields: FieldIter<'info, Self::TypeId>,
     {
         let path = scale_info::Path {
-            segments: path.map(Into::into).collect(),
+            segments: prepare_path(path, self.builder),
         };
 
         let mut scale_info_fields = Vec::<scale_info::Field<_>>::new();
@@ -308,7 +321,7 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
         Var: VariantIter<'info, Fields>,
     {
         let path = scale_info::Path {
-            segments: path.map(Into::into).collect(),
+            segments: prepare_path(path, self.builder),
         };
 
         let mut scale_info_variants = Vec::new();
@@ -417,6 +430,101 @@ impl<'a, 'info> ResolvedTypeVisitor<'info> for PortableRegistryVisitor<'a, 'info
             Default::default(),
         ))
     }
+}
+
+fn prepare_path<'info, Path: PathIter<'info>>(
+    path: Path,
+    builder: &mut PortableRegistryBuilder<'_>,
+) -> Vec<String> {
+    // If no sanitizint, just return the path as-is.
+    if !builder.sanitize_paths {
+        return path.map(|p| p.to_owned()).collect();
+    }
+
+    /// Names of prelude types. For codegen to work, any type that _isn't_ one of these must
+    /// have a path that is sensible and can be converted to module names.
+    static PRELUDE_TYPE_NAMES: [&str; 24] = [
+        "Vec",
+        "Option",
+        "Result",
+        "Cow",
+        "BTreeMap",
+        "BTreeSet",
+        "BinaryHeap",
+        "VecDeque",
+        "LinkedList",
+        "Range",
+        "RangeInclusive",
+        "NonZeroI8",
+        "NonZeroU8",
+        "NonZeroI16",
+        "NonZeroU16",
+        "NonZeroI32",
+        "NonZeroU32",
+        "NonZeroI64",
+        "NonZeroU64",
+        "NonZeroI128",
+        "NonZeroU128",
+        "NonZeroIsize",
+        "NonZeroUsize",
+        "Duration",
+    ];
+
+    let path: Vec<&str> = path.collect();
+
+    // No path should be empty; at least the type name should be present.
+    if path.is_empty() {
+        panic!(
+            "Empty path is not expected when converting legacy type; type name expected at least"
+        );
+    }
+
+    // The special::Unknown type can be returned as is; dupe paths allowed.
+    if path.len() == 2 && path[0] == "special" && path[1] == "Unknown" {
+        return vec!["special".to_owned(), "Unknown".to_owned()];
+    }
+
+    // If non-prelude type has no path, give it one.
+    if path.len() == 1 && !PRELUDE_TYPE_NAMES.contains(&path[0]) {
+        return vec![
+            "other".to_owned(),
+            prepare_ident(path[0], &mut builder.seen_names_in_default_path),
+        ];
+    }
+
+    // Non-compliant paths are converted to our default path
+    let non_compliant_path = path[0..path.len() - 1].iter().any(|&p| {
+        p.is_empty()
+            || p.starts_with(|c: char| !c.is_ascii_alphabetic())
+            || p.contains(|c: char| !c.is_ascii_alphanumeric() || c.is_ascii_uppercase())
+    });
+    if non_compliant_path {
+        let last = *path.last().unwrap();
+        return vec![
+            "other".to_owned(),
+            prepare_ident(last, &mut builder.seen_names_in_default_path),
+        ];
+    }
+
+    // If path happens by chance to be ["other", Foo] then ensure Foo isn't duped
+    if path.len() == 2 && path[0] == "other" {
+        return vec![
+            "other".to_owned(),
+            prepare_ident(path[1], &mut builder.seen_names_in_default_path),
+        ];
+    }
+
+    path.iter().map(|&p| p.to_owned()).collect()
+}
+
+fn prepare_ident(base_ident: &str, seen: &mut BTreeSet<String>) -> String {
+    let mut n = 1;
+    let mut ident = base_ident.to_owned();
+    while !seen.insert(ident.clone()) {
+        ident = format!("{base_ident}{n}");
+        n += 1;
+    }
+    ident
 }
 
 fn unknown_type() -> scale_info::Type<PortableForm> {

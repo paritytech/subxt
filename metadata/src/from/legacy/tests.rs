@@ -39,8 +39,22 @@ fn kusama_types() -> scale_info_legacy::ChainTypeRegistry {
     frame_decode::legacy_types::polkadot::relay_chain()
 }
 
+/// Sanitizing paths changes things between old and new, so disable this in tests by default
+/// so that we can compare paths and check that by default things translate identically.
+/// Tests assume that ignore_not_found is enabled, which converts not found types to
+/// special::Unknown instead of returning an error.
+fn test_opts() -> super::Opts {
+    super::Opts {
+        sanitize_paths: false,
+        ignore_not_found: true,
+    }
+}
+
 /// Return a pair of original metadata + converted subxt_metadata::Metadata
-fn metadata_pair(version: u8) -> (TypeRegistrySet<'static>, RuntimeMetadata, crate::Metadata) {
+fn metadata_pair(
+    version: u8,
+    opts: super::Opts,
+) -> (TypeRegistrySet<'static>, RuntimeMetadata, crate::Metadata) {
     let (spec_version, metadata) = legacy_kusama_metadata(version);
     let types = kusama_types();
 
@@ -54,11 +68,11 @@ fn metadata_pair(version: u8) -> (TypeRegistrySet<'static>, RuntimeMetadata, cra
     };
 
     let subxt_metadata = match &metadata {
-        RuntimeMetadata::V9(m) => crate::Metadata::from_v9(m, &types_for_spec),
-        RuntimeMetadata::V10(m) => crate::Metadata::from_v10(m, &types_for_spec),
-        RuntimeMetadata::V11(m) => crate::Metadata::from_v11(m, &types_for_spec),
-        RuntimeMetadata::V12(m) => crate::Metadata::from_v12(m, &types_for_spec),
-        RuntimeMetadata::V13(m) => crate::Metadata::from_v13(m, &types_for_spec),
+        RuntimeMetadata::V9(m) => super::from_v9(m, &types_for_spec, opts),
+        RuntimeMetadata::V10(m) => super::from_v10(m, &types_for_spec, opts),
+        RuntimeMetadata::V11(m) => super::from_v11(m, &types_for_spec, opts),
+        RuntimeMetadata::V12(m) => super::from_v12(m, &types_for_spec, opts),
+        RuntimeMetadata::V13(m) => super::from_v13(m, &types_for_spec, opts),
         _ => panic!("Metadata version {} not expected", metadata.version()),
     }
     .expect("Could not convert to subxt_metadata::Metadata");
@@ -266,7 +280,7 @@ macro_rules! constants_eq {
     ($name:ident, $version:literal, $version_path:ident) => {
         #[test]
         fn $name() {
-            let (old_types, old_md, new_md) = metadata_pair($version);
+            let (old_types, old_md, new_md) = metadata_pair($version, test_opts());
             let RuntimeMetadata::$version_path(old_md) = old_md else {
                 panic!("Wrong version")
             };
@@ -307,7 +321,7 @@ constants_eq!(v13_constants_eq, 13, V13);
 #[test]
 fn runtime_apis() {
     for version in 9..=13 {
-        let (old_types, _old_md, new_md) = metadata_pair(version);
+        let (old_types, _old_md, new_md) = metadata_pair(version, test_opts());
 
         let old: Vec<_> = old_types
             .runtime_api_tuples()
@@ -338,7 +352,7 @@ macro_rules! storage_eq {
     ($name:ident, $version:literal, $version_path:ident) => {
         #[test]
         fn $name() {
-            let (old_types, old_md, new_md) = metadata_pair($version);
+            let (old_types, old_md, new_md) = metadata_pair($version, test_opts());
             let RuntimeMetadata::$version_path(old_md) = old_md else {
                 panic!("Wrong version")
             };
@@ -392,7 +406,7 @@ storage_eq!(v13_storage_eq, 13, V13);
 #[test]
 fn builtin_call() {
     for version in 9..=13 {
-        let (old_types, _old_md, new_md) = metadata_pair(version);
+        let (old_types, _old_md, new_md) = metadata_pair(version, test_opts());
 
         let old = Shape::from_legacy_type(&LookupName::parse("builtin::Call").unwrap(), &old_types);
         let new = Shape::from_modern_type(new_md.outer_enums.call_enum_ty, new_md.types());
@@ -403,7 +417,7 @@ fn builtin_call() {
 #[test]
 fn builtin_error() {
     for version in 9..=13 {
-        let (old_types, _old_md, new_md) = metadata_pair(version);
+        let (old_types, _old_md, new_md) = metadata_pair(version, test_opts());
 
         let old =
             Shape::from_legacy_type(&LookupName::parse("builtin::Error").unwrap(), &old_types);
@@ -415,11 +429,49 @@ fn builtin_error() {
 #[test]
 fn builtin_event() {
     for version in 9..=13 {
-        let (old_types, _old_md, new_md) = metadata_pair(version);
+        let (old_types, _old_md, new_md) = metadata_pair(version, test_opts());
 
         let old =
             Shape::from_legacy_type(&LookupName::parse("builtin::Event").unwrap(), &old_types);
         let new = Shape::from_modern_type(new_md.outer_enums.event_enum_ty, new_md.types());
         assert_eq!(old, new, "Event types do not match in metadata V{version}!");
+    }
+}
+
+#[test]
+fn codegen_works() {
+    for version in 9..=13 {
+        // We need to do this against `subxt_codegen::Metadata` and so cannot re-use our
+        // test functions for it. This is because the compiler sees some difference between
+        // `subxct_codegen::Metadata` and `crate::Metadata` even though they should be identical.
+        let new_md = {
+            let (spec_version, metadata) = legacy_kusama_metadata(version);
+            let types = kusama_types();
+
+            let types_for_spec = {
+                let mut types_for_spec = types.for_spec_version(spec_version).to_owned();
+                let extended_types =
+                    frame_decode::helpers::type_registry_from_metadata_any(&metadata).unwrap();
+                types_for_spec.prepend(extended_types);
+                types_for_spec
+            };
+
+            match &metadata {
+                RuntimeMetadata::V9(m) => subxt_codegen::Metadata::from_v9(m, &types_for_spec),
+                RuntimeMetadata::V10(m) => subxt_codegen::Metadata::from_v10(m, &types_for_spec),
+                RuntimeMetadata::V11(m) => subxt_codegen::Metadata::from_v11(m, &types_for_spec),
+                RuntimeMetadata::V12(m) => subxt_codegen::Metadata::from_v12(m, &types_for_spec),
+                RuntimeMetadata::V13(m) => subxt_codegen::Metadata::from_v13(m, &types_for_spec),
+                _ => panic!("Metadata version {} not expected", metadata.version()),
+            }
+            .expect("Could not convert to subxt_metadata::Metadata")
+        };
+
+        // We only test that generation succeeds without any errors, not necessarily that it's 100% useful:
+        let codegen = subxt_codegen::CodegenBuilder::new();
+        let _ = codegen
+            .generate(new_md)
+            .map_err(|e| e.into_compile_error())
+            .unwrap_or_else(|e| panic!("Codegen failed for metadata V{version}: {e}"));
     }
 }

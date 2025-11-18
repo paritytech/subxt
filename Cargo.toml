@@ -103,8 +103,8 @@ scale-bits = { version = "0.7.0", default-features = false }
 scale-decode = { version = "0.16.0", default-features = false }
 scale-encode = { version = "0.10.0", default-features = false }
 scale-type-resolver = { version = "0.2.0" }
-scale-info-legacy = { version = "0.3.1", default-features = false }
-scale-typegen = "0.11.1"
+scale-info-legacy = { version = "0.3.2", default-features = false }
+scale-typegen = "0.12.0"
 scale-typegen-description = "0.11.0"
 serde = { version = "1.0.210", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.128", default-features = false }
@@ -192,3 +192,6 @@ opt-level = 2
 opt-level = 2
 [profile.test.package.smoldot]
 opt-level = 2
+
+[patch.crates-io]
+frame-decode = { path = "../frame-decode" }

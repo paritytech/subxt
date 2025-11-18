@@ -380,7 +380,7 @@ impl Metadata {
         metadata: &frame_metadata::v13::RuntimeMetadataV13,
         types: &scale_info_legacy::TypeRegistrySet<'_>,
     ) -> Result<Self, LegacyFromError> {
-        from::legacy::from_v13(metadata, types)
+        from::legacy::from_v13(metadata, types, from::legacy::Opts::compat())
     }
 
     /// Convert V12 metadata into [`Metadata`], given the necessary extra type information.
@@ -389,7 +389,7 @@ impl Metadata {
         metadata: &frame_metadata::v12::RuntimeMetadataV12,
         types: &scale_info_legacy::TypeRegistrySet<'_>,
     ) -> Result<Self, LegacyFromError> {
-        from::legacy::from_v12(metadata, types)
+        from::legacy::from_v12(metadata, types, from::legacy::Opts::compat())
     }
 
     /// Convert V13 metadata into [`Metadata`], given the necessary extra type information.
@@ -398,7 +398,7 @@ impl Metadata {
         metadata: &frame_metadata::v11::RuntimeMetadataV11,
         types: &scale_info_legacy::TypeRegistrySet<'_>,
     ) -> Result<Self, LegacyFromError> {
-        from::legacy::from_v11(metadata, types)
+        from::legacy::from_v11(metadata, types, from::legacy::Opts::compat())
     }
 
     /// Convert V13 metadata into [`Metadata`], given the necessary extra type information.
@@ -407,7 +407,7 @@ impl Metadata {
         metadata: &frame_metadata::v10::RuntimeMetadataV10,
         types: &scale_info_legacy::TypeRegistrySet<'_>,
     ) -> Result<Self, LegacyFromError> {
-        from::legacy::from_v10(metadata, types)
+        from::legacy::from_v10(metadata, types, from::legacy::Opts::compat())
     }
 
     /// Convert V9 metadata into [`Metadata`], given the necessary extra type information.
@@ -416,7 +416,7 @@ impl Metadata {
         metadata: &frame_metadata::v9::RuntimeMetadataV9,
         types: &scale_info_legacy::TypeRegistrySet<'_>,
     ) -> Result<Self, LegacyFromError> {
-        from::legacy::from_v9(metadata, types)
+        from::legacy::from_v9(metadata, types, from::legacy::Opts::compat())
     }
 
     /// Convert V8 metadata into [`Metadata`], given the necessary extra type information.
@@ -425,7 +425,7 @@ impl Metadata {
         metadata: &frame_metadata::v8::RuntimeMetadataV8,
         types: &scale_info_legacy::TypeRegistrySet<'_>,
     ) -> Result<Self, LegacyFromError> {
-        from::legacy::from_v8(metadata, types)
+        from::legacy::from_v8(metadata, types, from::legacy::Opts::compat())
     }
 
     /// Access the underlying type registry.

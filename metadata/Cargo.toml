@@ -21,7 +21,7 @@ std = ["scale-info/std", "frame-metadata/std"]
 # std required by frame-metadata to decode <V14.
 legacy = [
     "std",
-    "dep:scale-info-legacy", 
+    "dep:scale-info-legacy",
     "dep:scale-type-resolver",
     "frame-decode/legacy",
     "frame-metadata/legacy"
@@ -44,6 +44,7 @@ criterion = { workspace = true }
 scale-info = { workspace = true, features = ["bit-vec"] }
 subxt-utils-stripmetadata = { workspace = true }
 frame-decode = { workspace = true, features = ["legacy-types"] }
+subxt-codegen = { workspace = true }
 
 [lib]
 # Without this, libtest cli opts interfere with criterion benches:
