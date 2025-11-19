@@ -1953,9 +1953,9 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e5c3badfabd704dda4ddc7fafcd09127e8661d1cca2f16556c6826166932c87"
+checksum = "73d29c7f2987ea24ab2eaea315aadb9ba598188823181cdf0476049b625a5844"
 dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
@@ -4464,9 +4464,9 @@ dependencies = [
 
 [[package]]
 name = "scale-info-legacy"
-version = "0.3.0"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9d7e3c60aa5e479fe4cfba98a8e74f93b329f4ce0628f7a52f41768489bc418"
+checksum = "06423f0d7ea951547143aff4695c4c3e821e66c9b80729a3ff55fa93d23e93e6"
 dependencies = [
  "hashbrown 0.15.3",
  "scale-type-resolver",
@@ -4501,6 +4501,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "scale-typegen"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "642d2f13f3fc9a34ea2c1e36142984eba78cd2405a61632492f8b52993e98879"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "scale-info",
+ "syn 2.0.101",
+ "thiserror 2.0.12",
+]
+
+[[package]]
 name = "scale-typegen-description"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4513,7 +4526,7 @@ dependencies = [
  "rand",
  "rand_chacha",
  "scale-info",
- "scale-typegen",
+ "scale-typegen 0.11.1",
  "scale-value",
  "smallvec",
 ]
@@ -5654,7 +5667,7 @@ dependencies = [
  "pretty_assertions",
  "quote",
  "scale-info",
- "scale-typegen",
+ "scale-typegen 0.12.0",
  "scale-typegen-description",
  "scale-value",
  "serde",
@@ -5682,7 +5695,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "scale-info",
- "scale-typegen",
+ "scale-typegen 0.12.0",
  "subxt-metadata",
  "syn 2.0.101",
  "thiserror 2.0.12",
@@ -5779,7 +5792,7 @@ dependencies = [
  "quote",
  "sc-executor",
  "sc-executor-common",
- "scale-typegen",
+ "scale-typegen 0.12.0",
  "sp-io",
  "sp-maybe-compressed-blob",
  "sp-state-machine",
@@ -5800,7 +5813,10 @@ dependencies = [
  "hashbrown 0.14.5",
  "parity-scale-codec",
  "scale-info",
+ "scale-info-legacy",
+ "scale-type-resolver",
  "sp-crypto-hashing",
+ "subxt-codegen",
  "subxt-utils-stripmetadata",
  "thiserror 2.0.12",
 ]

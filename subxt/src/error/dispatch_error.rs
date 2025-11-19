@@ -169,11 +169,12 @@ impl std::fmt::Display for ModuleError {
 impl ModuleError {
     /// Return more details about this error.
     pub fn details(&self) -> Result<ModuleErrorDetails<'_>, ModuleErrorDetailsError> {
-        let pallet = self.metadata.pallet_by_index(self.pallet_index()).ok_or(
-            ModuleErrorDetailsError::PalletNotFound {
+        let pallet = self
+            .metadata
+            .pallet_by_error_index(self.pallet_index())
+            .ok_or(ModuleErrorDetailsError::PalletNotFound {
                 pallet_index: self.pallet_index(),
-            },
-        )?;
+            })?;
 
         let variant = pallet
             .error_variant_by_index(self.error_index())
