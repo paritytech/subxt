@@ -45,7 +45,7 @@ jsonrpsee = [
 subxt-rpcs = { workspace = true }
 frame-decode = { workspace = true, features = ["legacy", "legacy-types"] }
 frame-metadata = { workspace = true, features = ["std", "legacy"] }
-scale-type-resolver = { workspace = true }
+scale-type-resolver = { workspace = true, features = ["scale-info"] }
 codec = { workspace = true }
 primitive-types = { workspace = true }
 scale-info = { workspace = true }
