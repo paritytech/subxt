@@ -8,6 +8,10 @@ mod v14;
 mod v15;
 mod v16;
 
+/// Legacy translation hidden behind the corresponding feature flag.
+#[cfg(feature = "legacy")]
+pub mod legacy;
+
 /// The metadata versions that we support converting into [`crate::Metadata`].
 /// These are ordest from highest to lowest, so that the metadata we'd want to
 /// pick first is first in the array.

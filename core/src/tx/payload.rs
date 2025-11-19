@@ -182,7 +182,7 @@ impl<CallData: EncodeAsFields> Payload for DefaultPayload<CallData> {
                 call_name: self.call_name.to_string(),
             })?;
 
-        let pallet_index = pallet.index();
+        let pallet_index = pallet.call_index();
         let call_index = call.index;
 
         pallet_index.encode_to(out);

@@ -26,15 +26,19 @@ use alloc::borrow::Cow;
 use alloc::collections::BTreeMap;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
-use frame_decode::constants::{ConstantInfo, ConstantInfoError, Entry};
+use frame_decode::constants::{ConstantEntry, ConstantInfo, ConstantInfoError};
 use frame_decode::custom_values::{CustomValue, CustomValueInfo, CustomValueInfoError};
 use frame_decode::extrinsics::{
     ExtrinsicCallInfo, ExtrinsicExtensionInfo, ExtrinsicInfoArg, ExtrinsicInfoError,
     ExtrinsicSignatureInfo,
 };
-use frame_decode::runtime_apis::{RuntimeApiInfo, RuntimeApiInfoError, RuntimeApiInput};
-use frame_decode::storage::{StorageInfo, StorageInfoError, StorageKeyInfo};
-use frame_decode::view_functions::{ViewFunctionInfo, ViewFunctionInfoError, ViewFunctionInput};
+use frame_decode::runtime_apis::{
+    RuntimeApiEntry, RuntimeApiInfo, RuntimeApiInfoError, RuntimeApiInput,
+};
+use frame_decode::storage::{StorageEntry, StorageInfo, StorageInfoError, StorageKeyInfo};
+use frame_decode::view_functions::{
+    ViewFunctionEntry, ViewFunctionInfo, ViewFunctionInfoError, ViewFunctionInput,
+};
 
 use hashbrown::HashMap;
 use scale_info::{PortableRegistry, Variant, form::PortableForm};
@@ -49,6 +53,9 @@ pub use from::SUPPORTED_METADATA_VERSIONS;
 pub use from::TryFromError;
 pub use utils::validation::MetadataHasher;
 
+#[cfg(feature = "legacy")]
+pub use from::legacy::Error as LegacyFromError;
+
 type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;
 
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
@@ -60,8 +67,18 @@ pub struct Metadata {
     types: PortableRegistry,
     /// Metadata of all the pallets.
     pallets: OrderedMap<String, PalletMetadataInner>,
-    /// Find the location in the pallet Vec by pallet index.
-    pallets_by_index: HashMap<u8, usize>,
+    /// Find the pallet for a given call index.
+    pallets_by_call_index: HashMap<u8, usize>,
+    /// Find the pallet for a given event index.
+    ///
+    /// for modern metadatas, this is the same as pallets_by_call_index,
+    /// but for old metadatas this can vary.
+    pallets_by_event_index: HashMap<u8, usize>,
+    /// Find the pallet for a given error index.
+    ///
+    /// for modern metadatas, this is the same as pallets_by_call_index,
+    /// but for old metadatas this can vary.
+    pallets_by_error_index: HashMap<u8, usize>,
     /// Metadata of the extrinsic.
     extrinsic: ExtrinsicMetadata,
     /// The types of the outer enums.
@@ -84,7 +101,7 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         pallet_index: u8,
         call_index: u8,
     ) -> Result<ExtrinsicCallInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
-        let pallet = self.pallet_by_index(pallet_index).ok_or({
+        let pallet = self.pallet_by_call_index(pallet_index).ok_or({
             ExtrinsicInfoError::PalletNotFound {
                 index: pallet_index,
             }
@@ -179,16 +196,17 @@ impl frame_decode::storage::StorageTypeInfo for Metadata {
 
         Ok(info)
     }
-
-    fn storage_entries(&self) -> impl Iterator<Item = Entry<'_>> {
+}
+impl frame_decode::storage::StorageEntryInfo for Metadata {
+    fn storage_entries(&self) -> impl Iterator<Item = StorageEntry<'_>> {
         self.pallets().flat_map(|pallet| {
             let pallet_name = pallet.name();
-            let pallet_iter = core::iter::once(Entry::In(pallet_name.into()));
+            let pallet_iter = core::iter::once(StorageEntry::In(pallet_name.into()));
             let entries_iter = pallet.storage().into_iter().flat_map(|storage| {
                 storage
                     .entries()
                     .iter()
-                    .map(|entry| Entry::Name(entry.name().into()))
+                    .map(|entry| StorageEntry::Name(entry.name().into()))
             });
 
             pallet_iter.chain(entries_iter)
@@ -223,14 +241,15 @@ impl frame_decode::runtime_apis::RuntimeApiTypeInfo for Metadata {
 
         Ok(info)
     }
-
-    fn runtime_apis(&self) -> impl Iterator<Item = Entry<'_>> {
+}
+impl frame_decode::runtime_apis::RuntimeApiEntryInfo for Metadata {
+    fn runtime_api_entries(&self) -> impl Iterator<Item = RuntimeApiEntry<'_>> {
         self.runtime_api_traits().flat_map(|api_trait| {
             let trait_name = api_trait.name();
-            let trait_iter = core::iter::once(Entry::In(trait_name.into()));
+            let trait_iter = core::iter::once(RuntimeApiEntry::In(trait_name.into()));
             let method_iter = api_trait
                 .methods()
-                .map(|method| Entry::Name(method.name().into()));
+                .map(|method| RuntimeApiEntry::Name(method.name().into()));
 
             trait_iter.chain(method_iter)
         })
@@ -264,14 +283,15 @@ impl frame_decode::view_functions::ViewFunctionTypeInfo for Metadata {
 
         Ok(info)
     }
-
-    fn view_functions(&self) -> impl Iterator<Item = Entry<'_>> {
+}
+impl frame_decode::view_functions::ViewFunctionEntryInfo for Metadata {
+    fn view_function_entries(&self) -> impl Iterator<Item = ViewFunctionEntry<'_>> {
         self.pallets().flat_map(|pallet| {
             let pallet_name = pallet.name();
-            let pallet_iter = core::iter::once(Entry::In(pallet_name.into()));
+            let pallet_iter = core::iter::once(ViewFunctionEntry::In(pallet_name.into()));
             let fn_iter = pallet
                 .view_functions()
-                .map(|function| Entry::Name(function.name().into()));
+                .map(|function| ViewFunctionEntry::Name(function.name().into()));
 
             pallet_iter.chain(fn_iter)
         })
@@ -304,14 +324,15 @@ impl frame_decode::constants::ConstantTypeInfo for Metadata {
 
         Ok(info)
     }
-
-    fn constants(&self) -> impl Iterator<Item = Entry<'_>> {
+}
+impl frame_decode::constants::ConstantEntryInfo for Metadata {
+    fn constant_entries(&self) -> impl Iterator<Item = ConstantEntry<'_>> {
         self.pallets().flat_map(|pallet| {
             let pallet_name = pallet.name();
-            let pallet_iter = core::iter::once(Entry::In(pallet_name.into()));
+            let pallet_iter = core::iter::once(ConstantEntry::In(pallet_name.into()));
             let constant_iter = pallet
                 .constants()
-                .map(|constant| Entry::Name(constant.name().into()));
+                .map(|constant| ConstantEntry::Name(constant.name().into()));
 
             pallet_iter.chain(constant_iter)
         })
@@ -338,7 +359,8 @@ impl frame_decode::custom_values::CustomValueTypeInfo for Metadata {
 
         Ok(info)
     }
-
+}
+impl frame_decode::custom_values::CustomValueEntryInfo for Metadata {
     fn custom_values(&self) -> impl Iterator<Item = CustomValue<'_>> {
         self.custom.map.keys().map(|name| CustomValue {
             name: Cow::Borrowed(name),
@@ -347,9 +369,63 @@ impl frame_decode::custom_values::CustomValueTypeInfo for Metadata {
 }
 
 impl Metadata {
-    /// This is essentiall an alias for `<Metadata as codec::Decode>::decode(&mut bytes)`
+    /// This is essentially an alias for `<Metadata as codec::Decode>::decode(&mut bytes)`
     pub fn decode_from(mut bytes: &[u8]) -> Result<Self, codec::Error> {
         <Self as codec::Decode>::decode(&mut bytes)
+    }
+
+    /// Convert V13 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v13(
+        metadata: &frame_metadata::v13::RuntimeMetadataV13,
+        types: &scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v13(metadata, types, from::legacy::Opts::compat())
+    }
+
+    /// Convert V12 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v12(
+        metadata: &frame_metadata::v12::RuntimeMetadataV12,
+        types: &scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v12(metadata, types, from::legacy::Opts::compat())
+    }
+
+    /// Convert V13 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v11(
+        metadata: &frame_metadata::v11::RuntimeMetadataV11,
+        types: &scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v11(metadata, types, from::legacy::Opts::compat())
+    }
+
+    /// Convert V13 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v10(
+        metadata: &frame_metadata::v10::RuntimeMetadataV10,
+        types: &scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v10(metadata, types, from::legacy::Opts::compat())
+    }
+
+    /// Convert V9 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v9(
+        metadata: &frame_metadata::v9::RuntimeMetadataV9,
+        types: &scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v9(metadata, types, from::legacy::Opts::compat())
+    }
+
+    /// Convert V8 metadata into [`Metadata`], given the necessary extra type information.
+    #[cfg(feature = "legacy")]
+    pub fn from_v8(
+        metadata: &frame_metadata::v8::RuntimeMetadataV8,
+        types: &scale_info_legacy::TypeRegistrySet<'_>,
+    ) -> Result<Self, LegacyFromError> {
+        from::legacy::from_v8(metadata, types, from::legacy::Opts::compat())
     }
 
     /// Access the underlying type registry.
@@ -385,10 +461,36 @@ impl Metadata {
         })
     }
 
-    /// Access a pallet given its encoded variant index.
-    pub fn pallet_by_index(&self, variant_index: u8) -> Option<PalletMetadata<'_>> {
+    /// Access a pallet given some call/extrinsic pallet index byte
+    pub fn pallet_by_call_index(&self, variant_index: u8) -> Option<PalletMetadata<'_>> {
         let inner = self
-            .pallets_by_index
+            .pallets_by_call_index
+            .get(&variant_index)
+            .and_then(|i| self.pallets.get_by_index(*i))?;
+
+        Some(PalletMetadata {
+            inner,
+            types: self.types(),
+        })
+    }
+
+    /// Access a pallet given some event pallet index byte
+    pub fn pallet_by_event_index(&self, variant_index: u8) -> Option<PalletMetadata<'_>> {
+        let inner = self
+            .pallets_by_event_index
+            .get(&variant_index)
+            .and_then(|i| self.pallets.get_by_index(*i))?;
+
+        Some(PalletMetadata {
+            inner,
+            types: self.types(),
+        })
+    }
+
+    /// Access a pallet given some error pallet index byte
+    pub fn pallet_by_error_index(&self, variant_index: u8) -> Option<PalletMetadata<'_>> {
+        let inner = self
+            .pallets_by_error_index
             .get(&variant_index)
             .and_then(|i| self.pallets.get_by_index(*i))?;
 
@@ -458,9 +560,19 @@ impl<'a> PalletMetadata<'a> {
         &self.inner.name
     }
 
-    /// The pallet index.
-    pub fn index(&self) -> u8 {
-        self.inner.index
+    /// The index to use for calls in this pallet.
+    pub fn call_index(&self) -> u8 {
+        self.inner.call_index
+    }
+
+    /// The index to use for events in this pallet.
+    pub fn event_index(&self) -> u8 {
+        self.inner.event_index
+    }
+
+    /// The index to use for errors in this pallet.
+    pub fn error_index(&self) -> u8 {
+        self.inner.error_index
     }
 
     /// The pallet docs.
@@ -613,8 +725,18 @@ impl<'a> PalletMetadata<'a> {
 struct PalletMetadataInner {
     /// Pallet name.
     name: String,
-    /// Pallet index.
-    index: u8,
+    /// The index for calls in the pallet.
+    call_index: u8,
+    /// The index for events in the pallet.
+    ///
+    /// This is the same as `call_index` for modern metadatas,
+    /// but can be different for older metadatas (pre-V12).
+    event_index: u8,
+    /// The index for errors in the pallet.
+    ///
+    /// This is the same as `call_index` for modern metadatas,
+    /// but can be different for older metadatas (pre-V12).
+    error_index: u8,
     /// Pallet storage metadata.
     storage: Option<StorageMetadata>,
     /// Type ID for the pallet Call enum.
