@@ -52,8 +52,8 @@ impl<'atblock> Extrinsics<'atblock> {
             .enumerate()
             .map(|(idx, (bytes, info))| {
                 let resolver = match info {
-                    AnyExtrinsicInfo::Legacy(info) => AnyResolver::B(&info.resolver),
-                    AnyExtrinsicInfo::Current(info) => AnyResolver::A(&info.resolver),
+                    AnyExtrinsicInfo::Legacy(info) => AnyResolver::B(info.resolver),
+                    AnyExtrinsicInfo::Current(info) => AnyResolver::A(info.resolver),
                 };
                 Extrinsic {
                     idx,
@@ -123,6 +123,3 @@ impl<'extrinsics, 'atblock> Extrinsic<'extrinsics, 'atblock> {
         ExtrinsicTransactionParams::new(self.bytes, self.info)
     }
 }
-
-// TODO add extrinsic.call() with .bytes, and .decode function to make it easy to decode call fields into Value or whatever.
-// Then add this to the example. Make sure we can do everything that dot-block-decoder does easily.

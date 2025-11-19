@@ -27,7 +27,7 @@ impl std::fmt::Debug for AnyTypeId {
 impl Clone for AnyTypeId {
     fn clone(&self) -> Self {
         match self {
-            Self::A(arg0) => Self::A(arg0.clone()),
+            Self::A(arg0) => Self::A(*arg0),
             Self::B(arg0) => Self::B(arg0.clone()),
         }
     }
