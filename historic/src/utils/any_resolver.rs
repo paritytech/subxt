@@ -3,11 +3,10 @@ use scale_info_legacy::LookupName;
 use scale_type_resolver::ResolvedTypeVisitor;
 
 /// A type resolver which could either be for modern or historic resolving.
-pub type AnyResolver<'resolver> =
-    Either<
-        &'resolver scale_info::PortableRegistry, 
-        &'resolver scale_info_legacy::TypeRegistrySet<'resolver>
-    >;
+pub type AnyResolver<'resolver> = Either<
+    &'resolver scale_info::PortableRegistry,
+    &'resolver scale_info_legacy::TypeRegistrySet<'resolver>,
+>;
 
 /// A type ID which is either a modern or historic ID.
 pub type AnyTypeId = Either<u32, scale_info_legacy::LookupName>;
@@ -76,7 +75,7 @@ pub enum AnyResolverError {
     ScaleInfoLegacy(scale_info_legacy::type_registry::TypeRegistryResolveError),
 }
 
-impl <'resolver> scale_type_resolver::TypeResolver for AnyResolver<'resolver> {
+impl<'resolver> scale_type_resolver::TypeResolver for AnyResolver<'resolver> {
     type TypeId = AnyTypeId;
     type Error = AnyResolverError;
 
@@ -86,18 +85,20 @@ impl <'resolver> scale_type_resolver::TypeResolver for AnyResolver<'resolver> {
         visitor: V,
     ) -> Result<V::Value, Self::Error> {
         match (self, type_id) {
-            (Either::A(resolver), Either::A(id)) => {
-                resolver.resolve_type(id, ModernVisitor(visitor)).map_err(AnyResolverError::ScaleInfo)
-            },
-            (Either::B(resolver), Either::B(id)) => {
-                resolver.resolve_type(id, LegacyVisitor(visitor)).map_err(AnyResolverError::ScaleInfoLegacy)
-            },
-            (Either::A(_), Either::B(_)) => {
-                Err(AnyResolverError::TypeIdMismatch { got: "LookupName", expected: "u32" })
-            },
-            (Either::B(_), Either::A(_)) => {
-                Err(AnyResolverError::TypeIdMismatch { got: "u32", expected: "LookupName" })
-            }
+            (Either::A(resolver), Either::A(id)) => resolver
+                .resolve_type(id, ModernVisitor(visitor))
+                .map_err(AnyResolverError::ScaleInfo),
+            (Either::B(resolver), Either::B(id)) => resolver
+                .resolve_type(id, LegacyVisitor(visitor))
+                .map_err(AnyResolverError::ScaleInfoLegacy),
+            (Either::A(_), Either::B(_)) => Err(AnyResolverError::TypeIdMismatch {
+                got: "LookupName",
+                expected: "u32",
+            }),
+            (Either::B(_), Either::A(_)) => Err(AnyResolverError::TypeIdMismatch {
+                got: "u32",
+                expected: "LookupName",
+            }),
         }
     }
 }
@@ -109,20 +110,20 @@ struct LegacyVisitor<V>(V);
 struct ModernVisitor<V>(V);
 
 mod impls {
-    use super::{ LegacyVisitor, ModernVisitor, AnyTypeId, LookupName };
+    use super::{AnyTypeId, LegacyVisitor, LookupName, ModernVisitor};
     use scale_type_resolver::*;
 
     // An ugly implementation which maps from modern or legacy types into our AnyTypeId,
     // to make LegacyVisitor and ModernVisitor valid visitors when wrapping a generic "any" visitor.
     macro_rules! impl_visitor_mapper {
         ($struc:ident, $type_id_ty:ident, $variant:ident) => {
-            impl <'this, V> ResolvedTypeVisitor<'this> for $struc<V> 
+            impl<'this, V> ResolvedTypeVisitor<'this> for $struc<V>
             where
-                V: ResolvedTypeVisitor<'this, TypeId = AnyTypeId>
+                V: ResolvedTypeVisitor<'this, TypeId = AnyTypeId>,
             {
                 type TypeId = $type_id_ty;
                 type Value = V::Value;
-            
+
                 fn visit_unhandled(self, kind: UnhandledKind) -> Self::Value {
                     self.0.visit_unhandled(kind)
                 }
@@ -137,12 +138,13 @@ mod impls {
                     Path: PathIter<'this>,
                     Fields: FieldIter<'this, Self::TypeId>,
                 {
-                    self.0.visit_composite(path, fields.map(|field| {
-                        Field {
+                    self.0.visit_composite(
+                        path,
+                        fields.map(|field| Field {
                             name: field.name,
-                            id: AnyTypeId::$variant(field.id)
-                        }
-                    }))
+                            id: AnyTypeId::$variant(field.id),
+                        }),
+                    )
                 }
                 fn visit_variant<Path, Fields, Var>(self, path: Path, variants: Var) -> Self::Value
                 where
@@ -150,18 +152,17 @@ mod impls {
                     Fields: FieldIter<'this, Self::TypeId>,
                     Var: VariantIter<'this, Fields>,
                 {
-                    self.0.visit_variant(path, variants.map(|variant| {
-                        Variant {
+                    self.0.visit_variant(
+                        path,
+                        variants.map(|variant| Variant {
                             index: variant.index,
                             name: variant.name,
-                            fields: variant.fields.map(|field| {
-                                Field {
-                                    name: field.name,
-                                    id: AnyTypeId::$variant(field.id)
-                                }
-                            })
-                        }
-                    }))
+                            fields: variant.fields.map(|field| Field {
+                                name: field.name,
+                                id: AnyTypeId::$variant(field.id),
+                            }),
+                        }),
+                    )
                 }
                 fn visit_sequence<Path>(self, path: Path, type_id: Self::TypeId) -> Self::Value
                 where
@@ -169,22 +170,23 @@ mod impls {
                 {
                     self.0.visit_sequence(path, AnyTypeId::$variant(type_id))
                 }
-                
+
                 fn visit_tuple<TypeIds>(self, type_ids: TypeIds) -> Self::Value
                 where
                     TypeIds: ExactSizeIterator<Item = Self::TypeId>,
                 {
-                    self.0.visit_tuple(type_ids.map(|id| AnyTypeId::$variant(id)))
+                    self.0
+                        .visit_tuple(type_ids.map(|id| AnyTypeId::$variant(id)))
                 }
-                
+
                 fn visit_primitive(self, primitive: Primitive) -> Self::Value {
                     self.0.visit_primitive(primitive)
                 }
-                
+
                 fn visit_compact(self, type_id: Self::TypeId) -> Self::Value {
                     self.0.visit_compact(AnyTypeId::$variant(type_id))
                 }
-                
+
                 fn visit_bit_sequence(
                     self,
                     store_format: BitsStoreFormat,
@@ -192,9 +194,8 @@ mod impls {
                 ) -> Self::Value {
                     self.0.visit_bit_sequence(store_format, order_format)
                 }
-                
             }
-        }
+        };
     }
 
     impl_visitor_mapper!(ModernVisitor, u32, A);

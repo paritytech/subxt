@@ -40,7 +40,6 @@ async fn main() -> Result<(), Box<dyn core::error::Error + Send + Sync + 'static
             // scale_value::Value type, which can represent any SCALE encoded data, but if you
             // have an idea of the type then you can try to decode into that type instead):
             for field in extrinsic.call().fields().iter() {
-                
                 // We can visit fields, which gives us the ability to inspect and decode information
                 // from them selectively, returning whatever we like from it. Here we demo our
                 // type name visitor which is defined below:
@@ -55,7 +54,11 @@ async fn main() -> Result<(), Box<dyn core::error::Error + Send + Sync + 'static
                     "    {}: {} {}",
                     field.name(),
                     field.decode_as::<scale_value::Value>().unwrap(),
-                    if tn.is_empty() { String::new() } else { format!("(type name: {tn})") },
+                    if tn.is_empty() {
+                        String::new()
+                    } else {
+                        format!("(type name: {tn})")
+                    },
                 );
             }
 
@@ -99,12 +102,8 @@ async fn main() -> Result<(), Box<dyn core::error::Error + Send + Sync + 'static
 mod type_name {
     use scale_decode::{
         Visitor,
-        visitor::{ TypeIdFor, Unexpected, DecodeAsTypeResult }, 
-        visitor::types::{
-            Composite,
-            Variant,
-            Sequence,
-        }
+        visitor::types::{Composite, Sequence, Variant},
+        visitor::{DecodeAsTypeResult, TypeIdFor, Unexpected},
     };
     use scale_info_legacy::LookupName;
     use scale_type_resolver::TypeResolver;
@@ -112,25 +111,27 @@ mod type_name {
 
     /// This is a visitor which obtains type names.
     pub struct GetTypeName<R> {
-        marker: core::marker::PhantomData<R>
+        marker: core::marker::PhantomData<R>,
     }
 
-    impl <R> GetTypeName<R> {
+    impl<R> GetTypeName<R> {
         /// Construct our TypeName visitor.
         pub fn new() -> Self {
-            GetTypeName { marker: core::marker::PhantomData }
+            GetTypeName {
+                marker: core::marker::PhantomData,
+            }
         }
     }
-    
-    impl <R> Visitor for GetTypeName<R> 
+
+    impl<R> Visitor for GetTypeName<R>
     where
         R: TypeResolver,
-        R::TypeId: TryInto<LookupName>
+        R::TypeId: TryInto<LookupName>,
     {
         type Value<'scale, 'resolver> = Option<Cow<'resolver, str>>;
         type Error = scale_decode::Error;
         type TypeResolver = R;
-    
+
         // If we can convert the Type ID into `LookupName` then we return that type name
         fn unchecked_decode_as_type<'scale, 'resolver>(
             self,
@@ -139,7 +140,7 @@ mod type_name {
             _types: &'resolver Self::TypeResolver,
         ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'resolver>, Self::Error>> {
             let Some(id) = type_id.try_into().ok() else {
-                return DecodeAsTypeResult::Skipped(self)
+                return DecodeAsTypeResult::Skipped(self);
             };
             DecodeAsTypeResult::Decoded(Ok(Some(Cow::Owned(id.to_string()))))
         }

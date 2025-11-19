@@ -55,7 +55,12 @@ impl<'atblock> Extrinsics<'atblock> {
                     AnyExtrinsicInfo::Legacy(info) => AnyResolver::B(&info.resolver),
                     AnyExtrinsicInfo::Current(info) => AnyResolver::A(&info.resolver),
                 };
-                Extrinsic { idx, bytes, info, resolver }
+                Extrinsic {
+                    idx,
+                    bytes,
+                    info,
+                    resolver,
+                }
             })
     }
 }
