@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn core::error::Error + Send + Sync + 'static
                 let tn = if let Some(tn) = field.visit(type_name::GetTypeName::new())? {
                     tn
                 } else {
-                    "".into()
+                    ""
                 };
 
                 // We can also obtain and decode things without the complexity of the above:
