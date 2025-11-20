@@ -103,11 +103,10 @@ mod type_name {
     use scale_decode::{
         Visitor,
         visitor::types::{Composite, Sequence, Variant},
-        visitor::{DecodeAsTypeResult, TypeIdFor, Unexpected},
+        visitor::{TypeIdFor, Unexpected},
     };
     use scale_info_legacy::LookupName;
     use scale_type_resolver::TypeResolver;
-    use std::borrow::Cow;
 
     /// This is a visitor which obtains type names.
     pub struct GetTypeName<R> {
@@ -128,46 +127,31 @@ mod type_name {
         R: TypeResolver,
         R::TypeId: TryInto<LookupName>,
     {
-        type Value<'scale, 'resolver> = Option<Cow<'resolver, str>>;
+        type Value<'scale, 'resolver> = Option<&'resolver str>;
         type Error = scale_decode::Error;
         type TypeResolver = R;
 
-        // If we can convert the Type ID into `LookupName` then we return that type name
-        fn unchecked_decode_as_type<'scale, 'resolver>(
-            self,
-            _input: &mut &'scale [u8],
-            type_id: TypeIdFor<Self>,
-            _types: &'resolver Self::TypeResolver,
-        ) -> DecodeAsTypeResult<Self, Result<Self::Value<'scale, 'resolver>, Self::Error>> {
-            let Some(id) = type_id.try_into().ok() else {
-                return DecodeAsTypeResult::Skipped(self);
-            };
-            DecodeAsTypeResult::Decoded(Ok(Some(Cow::Owned(id.to_string()))))
-        }
-
-        // Else, we look at the path of types that have paths and return the ident from that.
-        // For modern metadatas this is all that we have to go on, but equally the path information
-        // is a lot better in modern metadata than what we'd get from historic metadata.
+        // Look at the path of types that have paths and return the ident from that.
         fn visit_composite<'scale, 'resolver>(
             self,
             value: &mut Composite<'scale, 'resolver, Self::TypeResolver>,
             _type_id: TypeIdFor<Self>,
         ) -> Result<Self::Value<'scale, 'resolver>, Self::Error> {
-            Ok(value.path().last().map(Cow::Borrowed))
+            Ok(value.path().last())
         }
         fn visit_variant<'scale, 'resolver>(
             self,
             value: &mut Variant<'scale, 'resolver, Self::TypeResolver>,
             _type_id: TypeIdFor<Self>,
         ) -> Result<Self::Value<'scale, 'resolver>, Self::Error> {
-            Ok(value.path().last().map(Cow::Borrowed))
+            Ok(value.path().last())
         }
         fn visit_sequence<'scale, 'resolver>(
             self,
             value: &mut Sequence<'scale, 'resolver, Self::TypeResolver>,
             _type_id: TypeIdFor<Self>,
         ) -> Result<Self::Value<'scale, 'resolver>, Self::Error> {
-            Ok(value.path().last().map(Cow::Borrowed))
+            Ok(value.path().last())
         }
 
         // Else, we return nothing as we can't find a name for the type.

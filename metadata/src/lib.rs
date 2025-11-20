@@ -1289,6 +1289,6 @@ impl codec::Decode for Metadata {
             },
         };
 
-        metadata.map_err(|e| "Metadata::decode failed: Cannot try_into() to Metadata".into())
+        metadata.map_err(|_| "Metadata::decode failed: Cannot try_into() to Metadata".into())
     }
 }
