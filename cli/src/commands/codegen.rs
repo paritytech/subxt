@@ -230,7 +230,7 @@ fn codegen(
     }
 
     let metadata = {
-        let runtime_metadata = subxt_metadata::decode_runtime_metadata(&metadata_bytes)?;
+        let runtime_metadata = subxt_metadata::decode_runtime_metadata(metadata_bytes)?;
         let mut metadata = match runtime_metadata {
             // Too old to work with:
             frame_metadata::RuntimeMetadata::V0(_)
