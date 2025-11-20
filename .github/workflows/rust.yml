@@ -75,7 +75,9 @@ jobs:
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
 
       - name: Install cargo-machete
-        run: cargo install cargo-machete
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cargo-machete
 
       - name: Check unused dependencies
         uses: actions-rs/cargo@v1.0.3
@@ -368,7 +370,9 @@ jobs:
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
 
       - name: Install cargo-nextest
-        run: cargo install cargo-nextest
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cargo-nextest
 
       - name: Run subxt-signer no-std tests
         uses: actions-rs/cargo@v1.0.3
@@ -408,7 +412,9 @@ jobs:
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
 
       - name: Install cargo-nextest
-        run: cargo install cargo-nextest
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cargo-nextest
 
       - name: Run tests
         uses: actions-rs/cargo@v1.0.3
