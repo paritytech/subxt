@@ -4,12 +4,12 @@
 
 use crate::utils::{FileOrUrl, validate_url_security};
 use clap::Parser as ClapParser;
-use codec::Decode;
 use color_eyre::eyre::eyre;
 use scale_typegen_description::scale_typegen::typegen::{
     settings::substitutes::path_segments,
     validation::{registry_contains_type_path, similar_type_paths_in_registry},
 };
+use std::path::PathBuf;
 use subxt_codegen::CodegenBuilder;
 use subxt_metadata::Metadata;
 
@@ -28,6 +28,12 @@ pub struct Opts {
     /// Additional attributes
     #[clap(long = "attribute")]
     attributes: Vec<String>,
+    /// Path to legacy type definitions (required for metadatas pre-V14)
+    #[clap(long)]
+    legacy_types: Option<PathBuf>,
+    /// The spec version of the legacy metadata (required for metadatas pre-V14)
+    #[clap(long)]
+    legacy_spec_version: Option<u64>,
     /// Additional derives for a given type.
     ///
     /// Example 1: `--derive-for-type my_module::my_type=serde::Serialize`.
@@ -145,9 +151,20 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
     validate_url_security(opts.file_or_url.url.as_ref(), opts.allow_insecure)?;
 
     let bytes = opts.file_or_url.fetch().await?;
+    let legacy_types = opts
+        .legacy_types
+        .map(|path| {
+            let bytes = std::fs::read(path).map_err(|e| eyre!("Cannot read legacy_types: {e}"))?;
+            let types = frame_decode::legacy_types::from_bytes(&bytes)
+                .map_err(|e| eyre!("Cannot deserialize legacy_types: {e}"))?;
+            Ok::<_, color_eyre::eyre::Error>(types)
+        })
+        .transpose()?;
 
     codegen(
         &bytes,
+        legacy_types,
+        opts.legacy_spec_version,
         opts.derives,
         opts.attributes,
         opts.derives_for_type,
@@ -175,6 +192,8 @@ impl syn::parse::Parse for OuterAttribute {
 #[allow(clippy::too_many_arguments)]
 fn codegen(
     metadata_bytes: &[u8],
+    legacy_types: Option<scale_info_legacy::ChainTypeRegistry>,
+    legacy_spec_version: Option<u64>,
     raw_derives: Vec<String>,
     raw_attributes: Vec<String>,
     derives_for_type: Vec<DeriveForType>,
@@ -211,8 +230,79 @@ fn codegen(
     }
 
     let metadata = {
-        let mut metadata = subxt_metadata::Metadata::decode(&mut &*metadata_bytes)
-            .map_err(|e| eyre!("Cannot decode the provided metadata: {e}"))?;
+        let runtime_metadata = subxt_metadata::decode_runtime_metadata(&metadata_bytes)?;
+        let mut metadata = match runtime_metadata {
+            // Too old to work with:
+            frame_metadata::RuntimeMetadata::V0(_)
+            | frame_metadata::RuntimeMetadata::V1(_)
+            | frame_metadata::RuntimeMetadata::V2(_)
+            | frame_metadata::RuntimeMetadata::V3(_)
+            | frame_metadata::RuntimeMetadata::V4(_)
+            | frame_metadata::RuntimeMetadata::V5(_)
+            | frame_metadata::RuntimeMetadata::V6(_)
+            | frame_metadata::RuntimeMetadata::V7(_) => {
+                Err(eyre!("Metadata V1-V7 cannot be decoded from"))
+            }
+            // Converting legacy metadatas:
+            frame_metadata::RuntimeMetadata::V8(md) => {
+                let legacy_types = legacy_types
+                    .ok_or_else(|| eyre!("--legacy-types needed to load V8 metadata"))?;
+                let legacy_spec = legacy_spec_version
+                    .ok_or_else(|| eyre!("--legacy-spec-version needed to load V8 metadata"))?;
+                Metadata::from_v8(&md, &legacy_types.for_spec_version(legacy_spec))
+                    .map_err(|e| eyre!("Cannot load V8 metadata: {e}"))
+            }
+            frame_metadata::RuntimeMetadata::V9(md) => {
+                let legacy_types = legacy_types
+                    .ok_or_else(|| eyre!("--legacy-types needed to load V9 metadata"))?;
+                let legacy_spec = legacy_spec_version
+                    .ok_or_else(|| eyre!("--legacy-spec-version needed to load V9 metadata"))?;
+                Metadata::from_v9(&md, &legacy_types.for_spec_version(legacy_spec))
+                    .map_err(|e| eyre!("Cannot load V9 metadata: {e}"))
+            }
+            frame_metadata::RuntimeMetadata::V10(md) => {
+                let legacy_types = legacy_types
+                    .ok_or_else(|| eyre!("--legacy-types needed to load V10 metadata"))?;
+                let legacy_spec = legacy_spec_version
+                    .ok_or_else(|| eyre!("--legacy-spec-version needed to load V10 metadata"))?;
+                Metadata::from_v10(&md, &legacy_types.for_spec_version(legacy_spec))
+                    .map_err(|e| eyre!("Cannot load V10 metadata: {e}"))
+            }
+            frame_metadata::RuntimeMetadata::V11(md) => {
+                let legacy_types = legacy_types
+                    .ok_or_else(|| eyre!("--legacy-types needed to load V11 metadata"))?;
+                let legacy_spec = legacy_spec_version
+                    .ok_or_else(|| eyre!("--legacy-spec-version needed to load V11 metadata"))?;
+                Metadata::from_v11(&md, &legacy_types.for_spec_version(legacy_spec))
+                    .map_err(|e| eyre!("Cannot load V11 metadata: {e}"))
+            }
+            frame_metadata::RuntimeMetadata::V12(md) => {
+                let legacy_types = legacy_types
+                    .ok_or_else(|| eyre!("--legacy-types needed to load V12 metadata"))?;
+                let legacy_spec = legacy_spec_version
+                    .ok_or_else(|| eyre!("--legacy-spec-version needed to load V12 metadata"))?;
+                Metadata::from_v12(&md, &legacy_types.for_spec_version(legacy_spec))
+                    .map_err(|e| eyre!("Cannot load V12 metadata: {e}"))
+            }
+            frame_metadata::RuntimeMetadata::V13(md) => {
+                let legacy_types = legacy_types
+                    .ok_or_else(|| eyre!("--legacy-types needed to load V13 metadata"))?;
+                let legacy_spec = legacy_spec_version
+                    .ok_or_else(|| eyre!("--legacy-spec-version needed to load V13 metadata"))?;
+                Metadata::from_v13(&md, &legacy_types.for_spec_version(legacy_spec))
+                    .map_err(|e| eyre!("Cannot load V13 metadata: {e}"))
+            }
+            // Converting modern metadatas:
+            frame_metadata::RuntimeMetadata::V14(md) => {
+                Metadata::from_v14(md).map_err(|e| eyre!("Cannot load V14 metadata: {e}"))
+            }
+            frame_metadata::RuntimeMetadata::V15(md) => {
+                Metadata::from_v15(md).map_err(|e| eyre!("Cannot load V15 metadata: {e}"))
+            }
+            frame_metadata::RuntimeMetadata::V16(md) => {
+                Metadata::from_v16(md).map_err(|e| eyre!("Cannot load V16 metadata: {e}"))
+            }
+        }?;
 
         // Run this first to ensure type paths are unique (which may result in 1,2,3 suffixes being added
         // to type paths), so that when we validate derives/substitutions below, they are allowed for such

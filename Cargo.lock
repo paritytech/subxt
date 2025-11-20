@@ -1953,9 +1953,9 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.14.0"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc4dc3138dcf45c5476f9d92b01999462db329b3bc2cd495887ccec133ea27fd"
+checksum = "0fb3bfa2988ef40247e0e0eecfb171a01ad6f4e399485503aad4c413a5f236f3"
 dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
@@ -4464,9 +4464,9 @@ dependencies = [
 
 [[package]]
 name = "scale-info-legacy"
-version = "0.3.2"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06423f0d7ea951547143aff4695c4c3e821e66c9b80729a3ff55fa93d23e93e6"
+checksum = "2500adfb429a0ffda37919df92c05d0c1359c10e0444c17253c84b84dfce542f"
 dependencies = [
  "hashbrown 0.15.3",
  "scale-type-resolver",
@@ -5658,6 +5658,7 @@ version = "0.44.0"
 dependencies = [
  "clap",
  "color-eyre",
+ "frame-decode",
  "frame-metadata 23.0.0",
  "heck",
  "hex",
@@ -5667,6 +5668,7 @@ dependencies = [
  "pretty_assertions",
  "quote",
  "scale-info",
+ "scale-info-legacy",
  "scale-typegen 0.12.0",
  "scale-typegen-description",
  "scale-value",

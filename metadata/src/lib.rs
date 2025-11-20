@@ -374,6 +374,27 @@ impl Metadata {
         <Self as codec::Decode>::decode(&mut bytes)
     }
 
+    /// Convert V16 metadata into [`Metadata`].
+    pub fn from_v16(
+        metadata: frame_metadata::v16::RuntimeMetadataV16,
+    ) -> Result<Self, TryFromError> {
+        metadata.try_into()
+    }
+
+    /// Convert V15 metadata into [`Metadata`].
+    pub fn from_v15(
+        metadata: frame_metadata::v15::RuntimeMetadataV15,
+    ) -> Result<Self, TryFromError> {
+        metadata.try_into()
+    }
+
+    /// Convert V14 metadata into [`Metadata`].
+    pub fn from_v14(
+        metadata: frame_metadata::v14::RuntimeMetadataV14,
+    ) -> Result<Self, TryFromError> {
+        metadata.try_into()
+    }
+
     /// Convert V13 metadata into [`Metadata`], given the necessary extra type information.
     #[cfg(feature = "legacy")]
     pub fn from_v13(
@@ -1222,6 +1243,38 @@ impl<'a> CustomValueMetadata<'a> {
     }
 }
 
+/// Decode SCALE encoded metadata.
+///
+/// - The default assumption is that metadata is encoded as [`frame_metadata::RuntimeMetadataPrefixed`]. This is the
+///   expected format that metadata is encoded into.
+/// - if this fails, we also try to decode as [`frame_metadata::RuntimeMetadata`].
+/// - If this all fails, we also try to decode as [`frame_metadata::OpaqueMetadata`].
+pub fn decode_runtime_metadata(
+    input: &[u8],
+) -> Result<frame_metadata::RuntimeMetadata, codec::Error> {
+    use codec::Decode;
+
+    let err = match frame_metadata::RuntimeMetadataPrefixed::decode(&mut &*input) {
+        Ok(md) => return Ok(md.1),
+        Err(e) => e,
+    };
+
+    if let Ok(md) = frame_metadata::RuntimeMetadata::decode(&mut &*input) {
+        return Ok(md);
+    }
+
+    // frame_metadata::OpaqueMetadata is a vec of bytes. If we can decode the length, AND
+    // the length definitely corresponds to the number of remaining bytes, then we try to
+    // decode the inner bytes.
+    if let Ok(len) = codec::Compact::<u64>::decode(&mut &*input) {
+        if input.len() == len.0 as usize {
+            return decode_runtime_metadata(input);
+        }
+    }
+
+    Err(err)
+}
+
 // Support decoding metadata from the "wire" format directly into this.
 // Errors may be lost in the case that the metadata content is somehow invalid.
 impl codec::Decode for Metadata {
@@ -1231,9 +1284,11 @@ impl codec::Decode for Metadata {
             frame_metadata::RuntimeMetadata::V14(md) => md.try_into(),
             frame_metadata::RuntimeMetadata::V15(md) => md.try_into(),
             frame_metadata::RuntimeMetadata::V16(md) => md.try_into(),
-            _ => return Err("Cannot try_into() to Metadata: unsupported metadata version".into()),
+            _ => {
+                return Err("Metadata::decode failed: Cannot try_into() to Metadata: unsupported metadata version".into())
+            },
         };
 
-        metadata.map_err(|_e| "Cannot try_into() to Metadata.".into())
+        metadata.map_err(|e| "Metadata::decode failed: Cannot try_into() to Metadata".into())
     }
 }
