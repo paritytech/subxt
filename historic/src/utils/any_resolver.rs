@@ -13,23 +13,8 @@ pub type AnyTypeId = Either<u32, scale_info_legacy::LookupName>;
 
 impl Default for AnyTypeId {
     fn default() -> Self {
-        todo!()
-    }
-}
-impl std::fmt::Debug for AnyTypeId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::A(arg0) => f.debug_tuple("A").field(arg0).finish(),
-            Self::B(arg0) => f.debug_tuple("B").field(arg0).finish(),
-        }
-    }
-}
-impl Clone for AnyTypeId {
-    fn clone(&self) -> Self {
-        match self {
-            Self::A(arg0) => Self::A(*arg0),
-            Self::B(arg0) => Self::B(arg0.clone()),
-        }
+        // Not a sensible default, but we don't need / can't provide a sensible one.
+        AnyTypeId::A(u32::MAX)
     }
 }
 impl From<u32> for AnyTypeId {

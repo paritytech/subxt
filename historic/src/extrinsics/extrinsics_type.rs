@@ -4,7 +4,6 @@ use super::extrinsic_transaction_extensions::ExtrinsicTransactionParams;
 use crate::client::OfflineClientAtBlockT;
 use crate::config::Config;
 use crate::error::ExtrinsicsError;
-use crate::utils::AnyResolver;
 
 /// This represents some extrinsics in a block, and carries everything that we need to decode information out of them.
 pub struct Extrinsics<'atblock> {
@@ -50,18 +49,7 @@ impl<'atblock> Extrinsics<'atblock> {
             .iter()
             .zip(self.infos.iter())
             .enumerate()
-            .map(|(idx, (bytes, info))| {
-                let resolver = match info {
-                    AnyExtrinsicInfo::Legacy(info) => AnyResolver::B(info.resolver),
-                    AnyExtrinsicInfo::Current(info) => AnyResolver::A(info.resolver),
-                };
-                Extrinsic {
-                    idx,
-                    bytes,
-                    info,
-                    resolver,
-                }
-            })
+            .map(|(idx, (bytes, info))| Extrinsic { idx, bytes, info })
     }
 }
 
@@ -70,7 +58,6 @@ pub struct Extrinsic<'extrinsics, 'atblock> {
     idx: usize,
     bytes: &'extrinsics [u8],
     info: &'extrinsics AnyExtrinsicInfo<'atblock>,
-    resolver: AnyResolver<'atblock>,
 }
 
 impl<'extrinsics, 'atblock> Extrinsic<'extrinsics, 'atblock> {
@@ -90,8 +77,8 @@ impl<'extrinsics, 'atblock> Extrinsic<'extrinsics, 'atblock> {
     }
 
     /// Return information about the call that this extrinsic is making.
-    pub fn call(&self) -> ExtrinsicCall<'_, 'extrinsics, 'atblock> {
-        ExtrinsicCall::new(self.bytes, self.info, &self.resolver)
+    pub fn call(&self) -> ExtrinsicCall<'extrinsics, 'atblock> {
+        ExtrinsicCall::new(self.bytes, self.info)
     }
 
     /// Return only the bytes of the address that signed this extrinsic.
