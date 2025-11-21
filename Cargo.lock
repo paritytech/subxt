@@ -4383,9 +4383,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode"
-version = "0.16.1"
+version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e60e74b30ef53a3b17a126cf9d5cc81333f301c487cbbff3bc285bf094a14dea"
+checksum = "8d6ed61699ad4d54101ab5a817169259b5b0efc08152f8632e61482d8a27ca3d"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -4398,9 +4398,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode-derive"
-version = "0.16.1"
+version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c11c7ba143dc8ac146c78e215f3045ac4bc3bb3733fcac6996055a211ac222c7"
+checksum = "65cb245f7fdb489e7ba43a616cbd34427fe3ba6fe0edc1d0d250085e6c84f3ec"
 dependencies = [
  "darling",
  "proc-macro2",
