@@ -401,7 +401,7 @@ async fn decode_block_mortality() {
     }
 
     // Explicit Mortal:
-    for for_n_blocks in [4, 16, 128] {
+    for for_n_blocks in [16, 64, 128] {
         let tx = submit_extrinsic_and_get_it_back(
             &api,
             DefaultExtrinsicParamsBuilder::new().mortal(for_n_blocks),

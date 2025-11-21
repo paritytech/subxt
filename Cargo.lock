@@ -1953,9 +1953,9 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.13.0"
+version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73d29c7f2987ea24ab2eaea315aadb9ba598188823181cdf0476049b625a5844"
+checksum = "0fb3bfa2988ef40247e0e0eecfb171a01ad6f4e399485503aad4c413a5f236f3"
 dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
@@ -4383,9 +4383,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode"
-version = "0.16.0"
+version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d78196772d25b90a98046794ce0fe2588b39ebdfbdc1e45b4c6c85dd43bebad"
+checksum = "8d6ed61699ad4d54101ab5a817169259b5b0efc08152f8632e61482d8a27ca3d"
 dependencies = [
  "parity-scale-codec",
  "primitive-types",
@@ -4398,9 +4398,9 @@ dependencies = [
 
 [[package]]
 name = "scale-decode-derive"
-version = "0.16.0"
+version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f4b54a1211260718b92832b661025d1f1a4b6930fbadd6908e00edd265fa5f7"
+checksum = "65cb245f7fdb489e7ba43a616cbd34427fe3ba6fe0edc1d0d250085e6c84f3ec"
 dependencies = [
  "darling",
  "proc-macro2",
@@ -4464,9 +4464,9 @@ dependencies = [
 
 [[package]]
 name = "scale-info-legacy"
-version = "0.3.2"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06423f0d7ea951547143aff4695c4c3e821e66c9b80729a3ff55fa93d23e93e6"
+checksum = "2500adfb429a0ffda37919df92c05d0c1359c10e0444c17253c84b84dfce542f"
 dependencies = [
  "hashbrown 0.15.3",
  "scale-type-resolver",
@@ -5658,6 +5658,7 @@ version = "0.44.0"
 dependencies = [
  "clap",
  "color-eyre",
+ "frame-decode",
  "frame-metadata 23.0.0",
  "heck",
  "hex",
@@ -5667,6 +5668,7 @@ dependencies = [
  "pretty_assertions",
  "quote",
  "scale-info",
+ "scale-info-legacy",
  "scale-typegen 0.12.0",
  "scale-typegen-description",
  "scale-value",

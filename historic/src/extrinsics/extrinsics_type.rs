@@ -110,6 +110,3 @@ impl<'extrinsics, 'atblock> Extrinsic<'extrinsics, 'atblock> {
         ExtrinsicTransactionParams::new(self.bytes, self.info)
     }
 }
-
-// TODO add extrinsic.call() with .bytes, and .decode function to make it easy to decode call fields into Value or whatever.
-// Then add this to the example. Make sure we can do everything that dot-block-decoder does easily.

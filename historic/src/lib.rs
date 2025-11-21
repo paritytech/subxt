@@ -20,3 +20,8 @@ pub use error::Error;
 pub mod ext {
     pub use futures::stream::{Stream, StreamExt};
 }
+
+/// Helper types that could be useful.
+pub mod helpers {
+    pub use crate::utils::{AnyResolver, AnyResolverError, AnyTypeId};
+}

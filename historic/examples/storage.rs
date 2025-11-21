@@ -1,8 +1,8 @@
 #![allow(missing_docs)]
-use subxt_historic::{Error, OnlineClient, PolkadotConfig, ext::StreamExt};
+use subxt_historic::{OnlineClient, PolkadotConfig, ext::StreamExt};
 
 #[tokio::main]
-async fn main() -> Result<(), Error> {
+async fn main() -> Result<(), Box<dyn core::error::Error + Send + Sync + 'static>> {
     // Configuration for the Polkadot relay chain.
     let config = PolkadotConfig::new();
 
@@ -36,6 +36,12 @@ async fn main() -> Result<(), Error> {
             // represent any SCALE-encoded value, like so:
             let _balance_info = entry.decode_as::<scale_value::Value>()?;
 
+            // We can visit the value, which is a more advanced use case and allows us to extract more
+            // data from the type, here the name of it, if it exists:
+            let tn = entry
+                .visit(type_name::GetTypeName::new())?
+                .unwrap_or("<unknown>");
+
             // Or, if we know what shape to expect, we can decode the parts of the value that we care
             // about directly into a static type, which is more efficient and allows easy type-safe
             // access, like so:
@@ -53,7 +59,7 @@ async fn main() -> Result<(), Error> {
             let balance_info = entry.decode_as::<BalanceInfo>()?;
 
             println!(
-                "  Single balance info from {account_id_hex} => free: {} reserved: {} misc_frozen: {} fee_frozen: {}",
+                "  Single balance info from {account_id_hex} => free: {} reserved: {} misc_frozen: {} fee_frozen: {} (type name: {tn})",
                 balance_info.data.free,
                 balance_info.data.reserved,
                 balance_info.data.misc_frozen,
@@ -104,4 +110,66 @@ async fn main() -> Result<(), Error> {
     }
 
     Ok(())
+}
+
+/// This module defines an example visitor which retrieves the name of a type.
+/// This is a more advanced use case and can typically be avoided.
+mod type_name {
+    use scale_decode::{
+        Visitor,
+        visitor::types::{Composite, Sequence, Variant},
+        visitor::{TypeIdFor, Unexpected},
+    };
+    use scale_type_resolver::TypeResolver;
+
+    /// This is a visitor which obtains type names.
+    pub struct GetTypeName<R> {
+        marker: core::marker::PhantomData<R>,
+    }
+
+    impl<R> GetTypeName<R> {
+        /// Construct our TypeName visitor.
+        pub fn new() -> Self {
+            GetTypeName {
+                marker: core::marker::PhantomData,
+            }
+        }
+    }
+
+    impl<R: TypeResolver> Visitor for GetTypeName<R> {
+        type Value<'scale, 'resolver> = Option<&'resolver str>;
+        type Error = scale_decode::Error;
+        type TypeResolver = R;
+
+        // Look at the path of types that have paths and return the ident from that.
+        fn visit_composite<'scale, 'resolver>(
+            self,
+            value: &mut Composite<'scale, 'resolver, Self::TypeResolver>,
+            _type_id: TypeIdFor<Self>,
+        ) -> Result<Self::Value<'scale, 'resolver>, Self::Error> {
+            Ok(value.path().last())
+        }
+        fn visit_variant<'scale, 'resolver>(
+            self,
+            value: &mut Variant<'scale, 'resolver, Self::TypeResolver>,
+            _type_id: TypeIdFor<Self>,
+        ) -> Result<Self::Value<'scale, 'resolver>, Self::Error> {
+            Ok(value.path().last())
+        }
+        fn visit_sequence<'scale, 'resolver>(
+            self,
+            value: &mut Sequence<'scale, 'resolver, Self::TypeResolver>,
+            _type_id: TypeIdFor<Self>,
+        ) -> Result<Self::Value<'scale, 'resolver>, Self::Error> {
+            Ok(value.path().last())
+        }
+
+        // Else, we return nothing as we can't find a name for the type.
+        fn visit_unexpected<'scale, 'resolver>(
+            self,
+            _unexpected: Unexpected,
+        ) -> Result<Self::Value<'scale, 'resolver>, Self::Error> {
+            Ok(None)
+        }
+    }
 }
