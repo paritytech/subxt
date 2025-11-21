@@ -120,7 +120,6 @@ mod type_name {
         visitor::types::{Composite, Sequence, Variant},
         visitor::{TypeIdFor, Unexpected},
     };
-    use scale_info_legacy::LookupName;
     use scale_type_resolver::TypeResolver;
 
     /// This is a visitor which obtains type names.
@@ -137,11 +136,7 @@ mod type_name {
         }
     }
 
-    impl<R> Visitor for GetTypeName<R>
-    where
-        R: TypeResolver,
-        R::TypeId: TryInto<LookupName>,
-    {
+    impl<R: TypeResolver> Visitor for GetTypeName<R> {
         type Value<'scale, 'resolver> = Option<&'resolver str>;
         type Error = scale_decode::Error;
         type TypeResolver = R;

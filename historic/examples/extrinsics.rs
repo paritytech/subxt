@@ -106,7 +106,6 @@ mod type_name {
         visitor::types::{Composite, Sequence, Variant},
         visitor::{TypeIdFor, Unexpected},
     };
-    use scale_info_legacy::LookupName;
     use scale_type_resolver::TypeResolver;
 
     /// This is a visitor which obtains type names.
@@ -123,11 +122,7 @@ mod type_name {
         }
     }
 
-    impl<R> Visitor for GetTypeName<R>
-    where
-        R: TypeResolver,
-        R::TypeId: TryInto<LookupName>,
-    {
+    impl<R: TypeResolver> Visitor for GetTypeName<R> {
         type Value<'scale, 'resolver> = Option<&'resolver str>;
         type Error = scale_decode::Error;
         type TypeResolver = R;
@@ -172,7 +167,6 @@ mod value {
         visitor::TypeIdFor,
         visitor::types::{Array, BitSequence, Composite, Sequence, Str, Tuple, Variant},
     };
-    use scale_info_legacy::LookupName;
     use scale_type_resolver::TypeResolver;
     use std::collections::HashMap;
 
@@ -220,11 +214,7 @@ mod value {
         }
     }
 
-    impl<R> Visitor for GetValue<R>
-    where
-        R: TypeResolver,
-        R::TypeId: TryInto<LookupName>,
-    {
+    impl<R: TypeResolver> Visitor for GetValue<R> {
         type Value<'scale, 'resolver> = Value;
         type Error = ValueError;
         type TypeResolver = R;
@@ -428,13 +418,9 @@ mod value {
         }
     }
 
-    fn to_variant_fieldish<'scale, 'resolver, R>(
+    fn to_variant_fieldish<'scale, 'resolver, R: TypeResolver>(
         value: &mut Composite<'scale, 'resolver, R>,
-    ) -> Result<VariantFields, ValueError>
-    where
-        R: TypeResolver,
-        R::TypeId: TryInto<LookupName>,
-    {
+    ) -> Result<VariantFields, ValueError> {
         // If fields are unnamed, treat as array:
         if value.fields().iter().all(|f| f.name.is_none()) {
             return Ok(VariantFields::Unnamed(to_array(value.remaining(), value)?));
@@ -451,14 +437,10 @@ mod value {
         Ok(VariantFields::Named(out))
     }
 
-    fn to_array<'scale, 'resolver, R>(
+    fn to_array<'scale, 'resolver, R: TypeResolver>(
         len: usize,
         mut values: impl scale_decode::visitor::DecodeItemIterator<'scale, 'resolver, R>,
-    ) -> Result<Vec<Value>, ValueError>
-    where
-        R: TypeResolver,
-        R::TypeId: TryInto<LookupName>,
-    {
+    ) -> Result<Vec<Value>, ValueError> {
         let mut out = Vec::with_capacity(len);
         while let Some(value) = values.decode_item(GetValue::new()) {
             out.push(value?);
