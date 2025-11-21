@@ -408,7 +408,6 @@ mod value {
                 && value.bytes_from_start().len() == 32
             {
                 return Ok(Value::Address(value.bytes_from_start().to_vec()));
-            } else {
             }
 
             // Reuse logic for decoding variant fields:
