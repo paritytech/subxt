@@ -8,7 +8,7 @@ use crate::{
     backend::BlockRef,
     client::OnlineClientT,
     config::{Config, HashFor},
-    error::Error,
+    error::RuntimeApiError,
 };
 use derive_where::derive_where;
 use std::{future::Future, marker::PhantomData};
@@ -43,13 +43,17 @@ where
     /// Obtain a runtime API interface at the latest finalized block.
     pub fn at_latest(
         &self,
-    ) -> impl Future<Output = Result<RuntimeApi<T, Client>, Error>> + Send + 'static {
+    ) -> impl Future<Output = Result<RuntimeApi<T, Client>, RuntimeApiError>> + Send + 'static {
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
         async move {
             // get the ref for the latest finalized block and use that.
-            let block_ref = client.backend().latest_finalized_block_ref().await?;
+            let block_ref = client
+                .backend()
+                .latest_finalized_block_ref()
+                .await
+                .map_err(RuntimeApiError::CannotGetLatestFinalizedBlock)?;
 
             Ok(RuntimeApi::new(client, block_ref))
         }

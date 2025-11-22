@@ -22,23 +22,22 @@
 //! let constant_query = polkadot::constants().system().block_length();
 //! ```
 //!
-//! Alternately, we can dynamically construct a constant query:
+//! Alternately, we can dynamically construct a constant query. A dynamic query needs the return
+//! type to be specified, where we can use [`crate::dynamic::Value`] if unsure:
 //!
 //! ```rust,no_run,standalone_crate
 //! use subxt::dynamic::Value;
 //!
-//! let storage_query = subxt::dynamic::constant("System", "BlockLength");
+//! let storage_query = subxt::dynamic::constant::<Value>("System", "BlockLength");
 //! ```
-//!
-//! Static queries also have a static return type, so the constant is decoded appropriately. In
-//! addition, they are validated at runtime to ensure that they align with the current node state.
-//! Dynamic queries must be decoded into some static type manually, or into the dynamic
-//! [`crate::dynamic::Value`] type.
 //!
 //! ## Submitting it
 //!
-//! Constant queries are handed to Subxt via [`crate::constants::ConstantsClient::at()`]. It's worth
-//! noting that constant values are pulled directly out of the node metadata which Subxt has
+//! Call [`crate::constants::ConstantsClient::at()`] to return and decode the constant into the
+//! type given by the address, or [`crate::constants::ConstantsClient::bytes_at()`] to return the
+//! raw bytes for some constant.
+//!
+//! Constant values are pulled directly out of the node metadata which Subxt has
 //! already acquired, and so this function requires no network access and is available from a
 //! [`crate::OfflineClient`].
 //!

@@ -6,8 +6,7 @@
 
 use crate::{
     CustomMetadata, CustomValueMetadata, ExtrinsicMetadata, Metadata, PalletMetadata,
-    RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, StorageEntryType,
-    ViewFunctionMetadata,
+    RuntimeApiMetadata, RuntimeApiMethodMetadata, StorageEntryMetadata, ViewFunctionMetadata,
 };
 use alloc::vec::Vec;
 use hashbrown::HashMap;
@@ -290,29 +289,19 @@ fn get_extrinsic_hash(registry: &PortableRegistry, extrinsic: &ExtrinsicMetadata
 fn get_storage_entry_hash(registry: &PortableRegistry, entry: &StorageEntryMetadata) -> Hash {
     let mut bytes = concat_and_hash3(
         &hash(entry.name.as_bytes()),
-        // Cloning 'entry.modifier' should essentially be a copy.
-        &[entry.modifier as u8; HASH_LEN],
-        &hash(&entry.default),
+        &get_type_hash(registry, entry.info.value_id),
+        &hash(entry.info.default_value.as_deref().unwrap_or_default()),
     );
 
-    match &entry.entry_type {
-        StorageEntryType::Plain(ty) => concat_and_hash2(&bytes, &get_type_hash(registry, *ty)),
-        StorageEntryType::Map {
-            hashers,
-            key_ty,
-            value_ty,
-        } => {
-            for hasher in hashers {
-                // Cloning the hasher should essentially be a copy.
-                bytes = concat_and_hash2(&bytes, &[*hasher as u8; HASH_LEN]);
-            }
-            concat_and_hash3(
-                &bytes,
-                &get_type_hash(registry, *key_ty),
-                &get_type_hash(registry, *value_ty),
-            )
-        }
+    for key in &*entry.info.keys {
+        bytes = concat_and_hash3(
+            &bytes,
+            &[key.hasher as u8; HASH_LEN],
+            &get_type_hash(registry, key.key_id),
+        )
     }
+
+    bytes
 }
 
 fn get_custom_metadata_hash(custom_metadata: &CustomMetadata) -> Hash {
@@ -382,7 +371,7 @@ pub fn get_runtime_api_hash(runtime_api: &RuntimeApiMethodMetadata) -> Hash {
         bytes = concat_and_hash3(
             &bytes,
             &hash(input.name.as_bytes()),
-            &get_type_hash(registry, input.ty),
+            &get_type_hash(registry, input.id),
         );
     }
 
@@ -419,7 +408,7 @@ pub fn get_view_function_hash(view_function: &ViewFunctionMetadata) -> Hash {
         bytes = concat_and_hash3(
             &bytes,
             &hash(input.name.as_bytes()),
-            &get_type_hash(registry, input.ty),
+            &get_type_hash(registry, input.id),
         );
     }
 

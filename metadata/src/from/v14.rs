@@ -6,9 +6,8 @@ use super::TryFromError;
 
 use crate::utils::variant_index::VariantIndex;
 use crate::{
-    ArcStr, ConstantMetadata, CustomMetadataInner, ExtrinsicMetadata, Metadata, OuterEnumsMetadata,
-    PalletMetadataInner, StorageEntryMetadata, StorageEntryModifier, StorageEntryType,
-    StorageHasher, StorageMetadata, TransactionExtensionMetadataInner,
+    ConstantMetadata, CustomMetadataInner, ExtrinsicMetadata, Metadata, OuterEnumsMetadata,
+    PalletMetadataInner, StorageEntryMetadata, StorageMetadata, TransactionExtensionMetadataInner,
     utils::ordered_map::OrderedMap,
 };
 use alloc::borrow::ToOwned;
@@ -16,6 +15,7 @@ use alloc::collections::BTreeMap;
 use alloc::string::String;
 use alloc::vec::Vec;
 use alloc::{format, vec};
+use frame_decode::storage::StorageTypeInfo;
 use frame_metadata::v14;
 use hashbrown::HashMap;
 use scale_info::form::PortableForm;
@@ -28,23 +28,37 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
 
         let mut pallets = OrderedMap::new();
         let mut pallets_by_index = HashMap::new();
-        for (pos, p) in m.pallets.into_iter().enumerate() {
-            let name: ArcStr = p.name.into();
+        for (pos, p) in m.pallets.iter().enumerate() {
+            let name: String = p.name.clone();
 
-            let storage = p.storage.map(|s| StorageMetadata {
-                prefix: s.prefix,
-                entries: s
-                    .entries
-                    .into_iter()
-                    .map(|s| {
-                        let name: ArcStr = s.name.clone().into();
-                        (name.clone(), from_storage_entry_metadata(name, s))
-                    })
-                    .collect(),
-            });
-            let constants = p.constants.into_iter().map(|c| {
-                let name: ArcStr = c.name.clone().into();
-                (name.clone(), from_constant_metadata(name, c))
+            let storage = match &p.storage {
+                None => None,
+                Some(s) => Some(StorageMetadata {
+                    prefix: s.prefix.clone(),
+                    entries: s
+                        .entries
+                        .iter()
+                        .map(|s| {
+                            let entry_name: String = s.name.clone();
+                            let storage_info = m
+                                .storage_info(&name, &entry_name)
+                                .map_err(|e| e.into_owned())?
+                                .into_owned();
+                            let storage_entry = StorageEntryMetadata {
+                                name: entry_name.clone(),
+                                info: storage_info,
+                                docs: s.docs.clone(),
+                            };
+
+                            Ok::<_, TryFromError>((entry_name, storage_entry))
+                        })
+                        .collect::<Result<_, TryFromError>>()?,
+                }),
+            };
+
+            let constants = p.constants.iter().map(|c| {
+                let name = c.name.clone();
+                (name, from_constant_metadata(c.clone()))
             });
 
             let call_variant_index =
@@ -58,14 +72,16 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
             pallets.push_insert(
                 name.clone(),
                 PalletMetadataInner {
-                    name,
-                    index: p.index,
+                    name: name.clone(),
+                    call_index: p.index,
+                    event_index: p.index,
+                    error_index: p.index,
                     storage,
-                    call_ty: p.calls.map(|c| c.ty.id),
+                    call_ty: p.calls.as_ref().map(|c| c.ty.id),
                     call_variant_index,
-                    event_ty: p.event.map(|e| e.ty.id),
+                    event_ty: p.event.as_ref().map(|e| e.ty.id),
                     event_variant_index,
-                    error_ty: p.error.map(|e| e.ty.id),
+                    error_ty: p.error.as_ref().map(|e| e.ty.id),
                     error_variant_index,
                     constants: constants.collect(),
                     view_functions: Default::default(),
@@ -85,7 +101,9 @@ impl TryFrom<v14::RuntimeMetadataV14> for Metadata {
         Ok(Metadata {
             types: m.types,
             pallets,
-            pallets_by_index,
+            pallets_by_call_index: pallets_by_index.clone(),
+            pallets_by_error_index: pallets_by_index.clone(),
+            pallets_by_event_index: pallets_by_index,
             extrinsic: from_extrinsic_metadata(m.extrinsic, missing_extrinsic_type_ids),
             dispatch_error_ty,
             outer_enums: OuterEnumsMetadata {
@@ -135,59 +153,9 @@ fn from_extrinsic_metadata(
     }
 }
 
-fn from_storage_hasher(value: v14::StorageHasher) -> StorageHasher {
-    match value {
-        v14::StorageHasher::Blake2_128 => StorageHasher::Blake2_128,
-        v14::StorageHasher::Blake2_256 => StorageHasher::Blake2_256,
-        v14::StorageHasher::Blake2_128Concat => StorageHasher::Blake2_128Concat,
-        v14::StorageHasher::Twox128 => StorageHasher::Twox128,
-        v14::StorageHasher::Twox256 => StorageHasher::Twox256,
-        v14::StorageHasher::Twox64Concat => StorageHasher::Twox64Concat,
-        v14::StorageHasher::Identity => StorageHasher::Identity,
-    }
-}
-
-fn from_storage_entry_type(value: v14::StorageEntryType<PortableForm>) -> StorageEntryType {
-    match value {
-        v14::StorageEntryType::Plain(ty) => StorageEntryType::Plain(ty.id),
-        v14::StorageEntryType::Map {
-            hashers,
-            key,
-            value,
-        } => StorageEntryType::Map {
-            hashers: hashers.into_iter().map(from_storage_hasher).collect(),
-            key_ty: key.id,
-            value_ty: value.id,
-        },
-    }
-}
-
-fn from_storage_entry_modifier(value: v14::StorageEntryModifier) -> StorageEntryModifier {
-    match value {
-        v14::StorageEntryModifier::Optional => StorageEntryModifier::Optional,
-        v14::StorageEntryModifier::Default => StorageEntryModifier::Default,
-    }
-}
-
-fn from_storage_entry_metadata(
-    name: ArcStr,
-    s: v14::StorageEntryMetadata<PortableForm>,
-) -> StorageEntryMetadata {
-    StorageEntryMetadata {
-        name,
-        modifier: from_storage_entry_modifier(s.modifier),
-        entry_type: from_storage_entry_type(s.ty),
-        default: s.default,
-        docs: s.docs,
-    }
-}
-
-fn from_constant_metadata(
-    name: ArcStr,
-    s: v14::PalletConstantMetadata<PortableForm>,
-) -> ConstantMetadata {
+fn from_constant_metadata(s: v14::PalletConstantMetadata<PortableForm>) -> ConstantMetadata {
     ConstantMetadata {
-        name,
+        name: s.name,
         ty: s.ty.id,
         value: s.value,
         docs: s.docs,

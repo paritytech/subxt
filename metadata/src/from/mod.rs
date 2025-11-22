@@ -8,6 +8,10 @@ mod v14;
 mod v15;
 mod v16;
 
+/// Legacy translation hidden behind the corresponding feature flag.
+#[cfg(feature = "legacy")]
+pub mod legacy;
+
 /// The metadata versions that we support converting into [`crate::Metadata`].
 /// These are ordest from highest to lowest, so that the metadata we'd want to
 /// pick first is first in the array.
@@ -33,6 +37,15 @@ pub enum TryFromError {
     /// Invalid type path.
     #[error("Type has an invalid path {0}")]
     InvalidTypePath(String),
+    /// Cannot decode storage entry information.
+    #[error("Error decoding storage entry information: {0}")]
+    StorageInfoError(#[from] frame_decode::storage::StorageInfoError<'static>),
+    /// Cannot decode Runtime API information.
+    #[error("Error decoding Runtime API information: {0}")]
+    RuntimeInfoError(#[from] frame_decode::runtime_apis::RuntimeApiInfoError<'static>),
+    /// Cannot decode View Function information.
+    #[error("Error decoding View Function information: {0}")]
+    ViewFunctionInfoError(#[from] frame_decode::view_functions::ViewFunctionInfoError<'static>),
 }
 
 impl TryFrom<frame_metadata::RuntimeMetadataPrefixed> for crate::Metadata {

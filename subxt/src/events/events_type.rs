@@ -1,9 +1,10 @@
 use crate::{
-    Error, Metadata,
+    Metadata,
     config::{Config, HashFor},
+    error::EventsError,
 };
 use derive_where::derive_where;
-use scale_decode::DecodeAsType;
+use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_core::events::{EventDetails as CoreEventDetails, Events as CoreEvents};
 
 pub use subxt_core::events::{EventMetadataDetails, Phase, StaticEvent};
@@ -49,7 +50,7 @@ impl<T: Config> Events<T> {
     // use of it with our `FilterEvents` stuff.
     pub fn iter(
         &self,
-    ) -> impl Iterator<Item = Result<EventDetails<T>, Error>> + Send + Sync + 'static {
+    ) -> impl Iterator<Item = Result<EventDetails<T>, EventsError>> + Send + Sync + 'static {
         self.inner
             .iter()
             .map(|item| item.map(|e| EventDetails { inner: e }).map_err(Into::into))
@@ -58,24 +59,24 @@ impl<T: Config> Events<T> {
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return only those which should decode to the provided `Ev` type.
     /// If an error occurs, all subsequent iterations return `None`.
-    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> {
+    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, EventsError>> {
         self.inner.find::<Ev>().map(|item| item.map_err(Into::into))
     }
 
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return the first event found which decodes to the provided `Ev` type.
-    pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, Error> {
+    pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, EventsError> {
         self.inner.find_first::<Ev>().map_err(Into::into)
     }
 
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return the last event found which decodes to the provided `Ev` type.
-    pub fn find_last<Ev: StaticEvent>(&self) -> Result<Option<Ev>, Error> {
+    pub fn find_last<Ev: StaticEvent>(&self) -> Result<Option<Ev>, EventsError> {
         self.inner.find_last::<Ev>().map_err(Into::into)
     }
 
     /// Find an event that decodes to the type provided. Returns true if it was found.
-    pub fn has<Ev: StaticEvent>(&self) -> Result<bool, Error> {
+    pub fn has<Ev: StaticEvent>(&self) -> Result<bool, EventsError> {
         self.inner.has::<Ev>().map_err(Into::into)
     }
 }
@@ -138,20 +139,20 @@ impl<T: Config> EventDetails<T> {
 
     /// Decode and provide the event fields back in the form of a [`scale_value::Composite`]
     /// type which represents the named or unnamed fields that were present in the event.
-    pub fn field_values(&self) -> Result<scale_value::Composite<u32>, Error> {
-        self.inner.field_values().map_err(Into::into)
+    pub fn decode_as_fields<E: DecodeAsFields>(&self) -> Result<E, EventsError> {
+        self.inner.decode_as_fields().map_err(Into::into)
     }
 
     /// Attempt to decode these [`EventDetails`] into a type representing the event fields.
     /// Such types are exposed in the codegen as `pallet_name::events::EventName` types.
-    pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, Error> {
+    pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, EventsError> {
         self.inner.as_event::<E>().map_err(Into::into)
     }
 
     /// Attempt to decode these [`EventDetails`] into a root event type (which includes
     /// the pallet and event enum variants as well as the event fields). A compatible
     /// type for this is exposed via static codegen as a root level `Event` type.
-    pub fn as_root_event<E: DecodeAsType>(&self) -> Result<E, Error> {
+    pub fn as_root_event<E: DecodeAsType>(&self) -> Result<E, EventsError> {
         self.inner.as_root_event::<E>().map_err(Into::into)
     }
 

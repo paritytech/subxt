@@ -11,10 +11,8 @@ use crate::backend::{
     Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
     TransactionStatus,
 };
-use crate::{
-    Error,
-    config::{Config, HashFor, Header},
-};
+use crate::config::{Config, HashFor, Header};
+use crate::error::BackendError;
 use async_trait::async_trait;
 use futures::TryStreamExt;
 use futures::{Future, FutureExt, Stream, StreamExt, future, future::Either, stream};
@@ -101,12 +99,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         &self,
         keys: Vec<Vec<u8>>,
         at: HashFor<T>,
-    ) -> Result<StreamOfResults<StorageResponse>, Error> {
+    ) -> Result<StreamOfResults<StorageResponse>, BackendError> {
         fn get_entry<T: Config>(
             key: Vec<u8>,
             at: HashFor<T>,
             methods: LegacyRpcMethods<T>,
-        ) -> impl Future<Output = Result<Option<StorageResponse>, Error>> {
+        ) -> impl Future<Output = Result<Option<StorageResponse>, BackendError>> {
             retry(move || {
                 let methods = methods.clone();
                 let key = key.clone();
@@ -138,7 +136,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         &self,
         key: Vec<u8>,
         at: HashFor<T>,
-    ) -> Result<StreamOfResults<Vec<u8>>, Error> {
+    ) -> Result<StreamOfResults<Vec<u8>>, BackendError> {
         let keys = StorageFetchDescendantKeysStream {
             at,
             key,
@@ -169,7 +167,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         &self,
         key: Vec<u8>,
         at: HashFor<T>,
-    ) -> Result<StreamOfResults<StorageResponse>, Error> {
+    ) -> Result<StreamOfResults<StorageResponse>, BackendError> {
         let keys_stream = StorageFetchDescendantKeysStream {
             at,
             key,
@@ -187,7 +185,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         })))
     }
 
-    async fn genesis_hash(&self) -> Result<HashFor<T>, Error> {
+    async fn genesis_hash(&self) -> Result<HashFor<T>, BackendError> {
         retry(|| async {
             let hash = self.methods.genesis_hash().await?;
             Ok(hash)
@@ -195,7 +193,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         .await
     }
 
-    async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, Error> {
+    async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, BackendError> {
         retry(|| async {
             let header = self.methods.chain_get_header(Some(at)).await?;
             Ok(header)
@@ -203,7 +201,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         .await
     }
 
-    async fn block_body(&self, at: HashFor<T>) -> Result<Option<Vec<Vec<u8>>>, Error> {
+    async fn block_body(&self, at: HashFor<T>) -> Result<Option<Vec<Vec<u8>>>, BackendError> {
         retry(|| async {
             let Some(details) = self.methods.chain_get_block(Some(at)).await? else {
                 return Ok(None);
@@ -215,7 +213,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         .await
     }
 
-    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<HashFor<T>>, Error> {
+    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<HashFor<T>>, BackendError> {
         retry(|| async {
             let hash = self.methods.chain_get_finalized_head().await?;
             Ok(BlockRef::from_hash(hash))
@@ -223,7 +221,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         .await
     }
 
-    async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
+    async fn current_runtime_version(&self) -> Result<RuntimeVersion, BackendError> {
         retry(|| async {
             let details = self.methods.state_get_runtime_version(None).await?;
             Ok(RuntimeVersion {
@@ -234,7 +232,9 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         .await
     }
 
-    async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
+    async fn stream_runtime_version(
+        &self,
+    ) -> Result<StreamOfResults<RuntimeVersion>, BackendError> {
         let methods = self.methods.clone();
 
         let retry_sub = retry_stream(move || {
@@ -274,7 +274,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_all_block_headers(
         &self,
         hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
         let methods = self.methods.clone();
         let retry_sub = retry_stream(move || {
             let methods = methods.clone();
@@ -297,7 +297,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_best_block_headers(
         &self,
         hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
         let methods = self.methods.clone();
 
         let retry_sub = retry_stream(move || {
@@ -321,7 +321,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn stream_finalized_block_headers(
         &self,
         hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
         let this = self.clone();
 
         let retry_sub = retry_stream(move || {
@@ -361,7 +361,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
     async fn submit_transaction(
         &self,
         extrinsic: &[u8],
-    ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, Error> {
+    ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, BackendError> {
         let sub = self
             .methods
             .author_submit_and_watch_extrinsic(extrinsic)
@@ -423,7 +423,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         method: &str,
         call_parameters: Option<&[u8]>,
         at: HashFor<T>,
-    ) -> Result<Vec<u8>, Error> {
+    ) -> Result<Vec<u8>, BackendError> {
         retry(|| async {
             let res = self
                 .methods
@@ -442,11 +442,11 @@ pub fn subscribe_to_block_headers_filling_in_gaps<T, S, E>(
     methods: LegacyRpcMethods<T>,
     sub: S,
     mut last_block_num: Option<u64>,
-) -> impl Stream<Item = Result<T::Header, Error>> + Send
+) -> impl Stream<Item = Result<T::Header, BackendError>> + Send
 where
     T: Config,
     S: Stream<Item = Result<T::Header, E>> + Send,
-    E: Into<Error> + Send + 'static,
+    E: Into<BackendError> + Send + 'static,
 {
     sub.flat_map(move |s| {
         // Get the header, or return a stream containing just the error.
@@ -470,7 +470,7 @@ where
                 async move {
                     let hash = methods.chain_get_block_hash(Some(n.into())).await?;
                     let header = methods.chain_get_header(hash).await?;
-                    Ok::<_, Error>(header)
+                    Ok::<_, BackendError>(header)
                 }
             })
             .filter_map(async |h| h.transpose());
@@ -495,7 +495,8 @@ pub struct StorageFetchDescendantKeysStream<T: Config> {
     // What key do we start paginating from? None = from the beginning.
     pagination_start_key: Option<Vec<u8>>,
     // Keys, future and cached:
-    keys_fut: Option<Pin<Box<dyn Future<Output = Result<Vec<Vec<u8>>, Error>> + Send + 'static>>>,
+    keys_fut:
+        Option<Pin<Box<dyn Future<Output = Result<Vec<Vec<u8>>, BackendError>> + Send + 'static>>>,
     // Set to true when we're done:
     done: bool,
 }
@@ -503,7 +504,7 @@ pub struct StorageFetchDescendantKeysStream<T: Config> {
 impl<T: Config> std::marker::Unpin for StorageFetchDescendantKeysStream<T> {}
 
 impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
-    type Item = Result<Vec<Vec<u8>>, Error>;
+    type Item = Result<Vec<Vec<u8>>, BackendError>;
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let mut this = self.as_mut();
         loop {
@@ -584,7 +585,7 @@ pub struct StorageFetchDescendantValuesStream<T: Config> {
     results_fut: Option<
         Pin<
             Box<
-                dyn Future<Output = Result<Option<VecDeque<(Vec<u8>, Vec<u8>)>>, Error>>
+                dyn Future<Output = Result<Option<VecDeque<(Vec<u8>, Vec<u8>)>>, BackendError>>
                     + Send
                     + 'static,
             >,
@@ -595,7 +596,7 @@ pub struct StorageFetchDescendantValuesStream<T: Config> {
 }
 
 impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
-    type Item = Result<StorageResponse, Error>;
+    type Item = Result<StorageResponse, BackendError>;
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let mut this = self.as_mut();
         loop {

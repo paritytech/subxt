@@ -10,7 +10,8 @@
 //! use subxt_macro::subxt;
 //! use subxt_core::config::PolkadotConfig;
 //! use subxt_core::events;
-//! use subxt_core::metadata;
+//! use subxt_core::Metadata;
+//! use subxt_core::dynamic::Value;
 //!
 //! // If we generate types without `subxt`, we need to point to `::subxt_core`:
 //! #[subxt(
@@ -21,7 +22,7 @@
 //!
 //! // Some metadata we'll use to work with storage entries:
 //! let metadata_bytes = include_bytes!("../../artifacts/polkadot_metadata_full.scale");
-//! let metadata = metadata::decode_from(&metadata_bytes[..]).unwrap();
+//! let metadata = Metadata::decode_from(&metadata_bytes[..]).unwrap();
 //!
 //! // Some bytes representing events (located in System.Events storage):
 //! let event_bytes = hex::decode("1c00000000000000a2e9b53d5517020000000100000000000310c96d901d0102000000020000000408d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27dbeea5a030000000000000000000000000000020000000402d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48102700000000000000000000000000000000020000000407be5ddb1579b72e84524fc29e78609e3caf42e85aa118ebfe0b0ad404b5bdd25fbeea5a030000000000000000000000000000020000002100d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27dbeea5a03000000000000000000000000000000000000000000000000000000000000020000000000426df03e00000000").unwrap();
@@ -34,10 +35,11 @@
 //!     let ev = ev.unwrap();
 //!     println!("Index: {}", ev.index());
 //!     println!("Name: {}.{}", ev.pallet_name(), ev.variant_name());
-//!     println!("Fields: {:?}", ev.field_values().unwrap());
+//!     println!("Fields: {:?}", ev.decode_as_fields::<Value>().unwrap());
 //! }
 //! ```
 
+use alloc::string::ToString;
 use alloc::sync::Arc;
 use alloc::vec::Vec;
 use codec::{Compact, Decode, Encode};
@@ -46,9 +48,9 @@ use scale_decode::{DecodeAsFields, DecodeAsType};
 use subxt_metadata::PalletMetadata;
 
 use crate::{
-    Error, Metadata,
+    Metadata,
     config::{Config, HashFor},
-    error::MetadataError,
+    error::EventsError,
 };
 
 /// Create a new [`Events`] instance from the given bytes.
@@ -148,7 +150,7 @@ impl<T: Config> Events<T> {
     // use of it with our `FilterEvents` stuff.
     pub fn iter(
         &self,
-    ) -> impl Iterator<Item = Result<EventDetails<T>, Error>> + Send + Sync + 'static {
+    ) -> impl Iterator<Item = Result<EventDetails<T>, EventsError>> + Send + Sync + 'static {
         // The event bytes ignoring the compact encoded length on the front:
         let event_bytes = self.event_bytes.clone();
         let metadata = self.metadata.clone();
@@ -184,25 +186,25 @@ impl<T: Config> Events<T> {
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return only those which should decode to the provided `Ev` type.
     /// If an error occurs, all subsequent iterations return `None`.
-    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, Error>> {
+    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, EventsError>> {
         self.iter()
             .filter_map(|ev| ev.and_then(|ev| ev.as_event::<Ev>()).transpose())
     }
 
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return the first event found which decodes to the provided `Ev` type.
-    pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, Error> {
+    pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, EventsError> {
         self.find::<Ev>().next().transpose()
     }
 
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return the last event found which decodes to the provided `Ev` type.
-    pub fn find_last<Ev: StaticEvent>(&self) -> Result<Option<Ev>, Error> {
+    pub fn find_last<Ev: StaticEvent>(&self) -> Result<Option<Ev>, EventsError> {
         self.find::<Ev>().last().transpose()
     }
 
     /// Find an event that decodes to the type provided. Returns true if it was found.
-    pub fn has<Ev: StaticEvent>(&self) -> Result<bool, Error> {
+    pub fn has<Ev: StaticEvent>(&self) -> Result<bool, EventsError> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
 }
@@ -246,23 +248,29 @@ impl<T: Config> EventDetails<T> {
         all_bytes: Arc<[u8]>,
         start_idx: usize,
         index: u32,
-    ) -> Result<EventDetails<T>, Error> {
+    ) -> Result<EventDetails<T>, EventsError> {
         let input = &mut &all_bytes[start_idx..];
 
-        let phase = Phase::decode(input)?;
+        let phase = Phase::decode(input).map_err(EventsError::CannotDecodePhase)?;
 
         let event_start_idx = all_bytes.len() - input.len();
 
-        let pallet_index = u8::decode(input)?;
-        let variant_index = u8::decode(input)?;
+        let pallet_index = u8::decode(input).map_err(EventsError::CannotDecodePalletIndex)?;
+        let variant_index = u8::decode(input).map_err(EventsError::CannotDecodeVariantIndex)?;
 
         let event_fields_start_idx = all_bytes.len() - input.len();
 
         // Get metadata for the event:
-        let event_pallet = metadata.pallet_by_index_err(pallet_index)?;
+        let event_pallet = metadata
+            .pallet_by_event_index(pallet_index)
+            .ok_or_else(|| EventsError::CannotFindPalletWithIndex(pallet_index))?;
         let event_variant = event_pallet
             .event_variant_by_index(variant_index)
-            .ok_or(MetadataError::VariantIndexNotFound(variant_index))?;
+            .ok_or_else(|| EventsError::CannotFindVariantWithIndex {
+                pallet_name: event_pallet.name().to_string(),
+                variant_index,
+            })?;
+
         tracing::debug!(
             "Decoding Event '{}::{}'",
             event_pallet.name(),
@@ -278,14 +286,23 @@ impl<T: Config> EventDetails<T> {
                 metadata.types(),
                 scale_decode::visitor::IgnoreVisitor::new(),
             )
-            .map_err(scale_decode::Error::from)?;
+            .map_err(|e| EventsError::CannotDecodeFieldInEvent {
+                pallet_name: event_pallet.name().to_string(),
+                event_name: event_variant.name.clone(),
+                field_name: field_metadata
+                    .name
+                    .clone()
+                    .unwrap_or("<unknown>".to_string()),
+                reason: e,
+            })?;
         }
 
         // the end of the field bytes.
         let event_fields_end_idx = all_bytes.len() - input.len();
 
         // topics come after the event data in EventRecord.
-        let topics = Vec::<HashFor<T>>::decode(input)?;
+        let topics =
+            Vec::<HashFor<T>>::decode(input).map_err(EventsError::CannotDecodeEventTopics)?;
 
         // what bytes did we skip over in total, including topics.
         let end_idx = all_bytes.len() - input.len();
@@ -342,7 +359,7 @@ impl<T: Config> EventDetails<T> {
     pub fn event_metadata(&self) -> EventMetadataDetails<'_> {
         let pallet = self
             .metadata
-            .pallet_by_index(self.pallet_index())
+            .pallet_by_event_index(self.pallet_index())
             .expect("event pallet to be found; we did this already during decoding");
         let variant = pallet
             .event_variant_by_index(self.variant_index())
@@ -367,7 +384,7 @@ impl<T: Config> EventDetails<T> {
 
     /// Decode and provide the event fields back in the form of a [`scale_value::Composite`]
     /// type which represents the named or unnamed fields that were present in the event.
-    pub fn field_values(&self) -> Result<scale_value::Composite<u32>, Error> {
+    pub fn decode_as_fields<E: DecodeAsFields>(&self) -> Result<E, EventsError> {
         let bytes = &mut self.field_bytes();
         let event_metadata = self.event_metadata();
 
@@ -378,14 +395,20 @@ impl<T: Config> EventDetails<T> {
             .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
 
         let decoded =
-            scale_value::scale::decode_as_fields(bytes, &mut fields, self.metadata.types())?;
+            E::decode_as_fields(bytes, &mut fields, self.metadata.types()).map_err(|e| {
+                EventsError::CannotDecodeEventFields {
+                    pallet_name: event_metadata.pallet.name().to_string(),
+                    event_name: event_metadata.variant.name.clone(),
+                    reason: e,
+                }
+            })?;
 
         Ok(decoded)
     }
 
     /// Attempt to decode these [`EventDetails`] into a type representing the event fields.
     /// Such types are exposed in the codegen as `pallet_name::events::EventName` types.
-    pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, Error> {
+    pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, EventsError> {
         let ev_metadata = self.event_metadata();
         if ev_metadata.pallet.name() == E::PALLET && ev_metadata.variant.name == E::EVENT {
             let mut fields = ev_metadata
@@ -394,7 +417,12 @@ impl<T: Config> EventDetails<T> {
                 .iter()
                 .map(|f| scale_decode::Field::new(f.ty.id, f.name.as_deref()));
             let decoded =
-                E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())?;
+                E::decode_as_fields(&mut self.field_bytes(), &mut fields, self.metadata.types())
+                    .map_err(|e| EventsError::CannotDecodeEventFields {
+                        pallet_name: E::PALLET.to_string(),
+                        event_name: E::EVENT.to_string(),
+                        reason: e,
+                    })?;
             Ok(Some(decoded))
         } else {
             Ok(None)
@@ -404,14 +432,22 @@ impl<T: Config> EventDetails<T> {
     /// Attempt to decode these [`EventDetails`] into a root event type (which includes
     /// the pallet and event enum variants as well as the event fields). A compatible
     /// type for this is exposed via static codegen as a root level `Event` type.
-    pub fn as_root_event<E: DecodeAsType>(&self) -> Result<E, Error> {
+    pub fn as_root_event<E: DecodeAsType>(&self) -> Result<E, EventsError> {
         let bytes = &self.all_bytes[self.event_start_idx..self.event_fields_end_idx];
 
         let decoded = E::decode_as_type(
             &mut &bytes[..],
             self.metadata.outer_enums().event_enum_ty(),
             self.metadata.types(),
-        )?;
+        )
+        .map_err(|e| {
+            let md = self.event_metadata();
+            EventsError::CannotDecodeEventEnum {
+                pallet_name: md.pallet.name().to_string(),
+                event_name: md.variant.name.clone(),
+                reason: e,
+            }
+        })?;
 
         Ok(decoded)
     }
@@ -553,7 +589,7 @@ pub(crate) mod test_utils {
         let runtime_metadata: RuntimeMetadataPrefixed = meta.into();
         let metadata: subxt_metadata::Metadata = runtime_metadata.try_into().unwrap();
 
-        Metadata::from(metadata)
+        metadata
     }
 
     /// Build an `Events` object for test purposes, based on the details provided,
@@ -623,7 +659,7 @@ mod tests {
         expected: TestRawEventDetails,
     ) {
         let actual_fields_no_context: Vec<_> = actual
-            .field_values()
+            .decode_as_fields::<scale_value::Composite<()>>()
             .expect("can decode field values (2)")
             .into_values()
             .map(|value| value.remove_context())

@@ -3,6 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, subxt_test, test_context, utils::wait_for_blocks};
+use futures::StreamExt;
 
 #[cfg(fullclient)]
 use subxt::utils::AccountId32;
@@ -23,8 +24,9 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error> {
         .storage()
         .at_latest()
         .await?
-        .fetch_or_default(&addr)
-        .await?;
+        .fetch(addr, ())
+        .await?
+        .decode()?;
     assert!(entry > 0);
 
     Ok(())
@@ -48,13 +50,14 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
         .await?;
 
     // Look up the nonce for the user (we expect it to be 1).
-    let nonce_addr = node_runtime::storage().system().account(alice);
+    let nonce_addr = node_runtime::storage().system().account();
     let entry = api
         .storage()
         .at_latest()
         .await?
-        .fetch_or_default(&nonce_addr)
-        .await?;
+        .fetch(nonce_addr, (alice,))
+        .await?
+        .decode()?;
     assert_eq!(entry.nonce, 1);
 
     Ok(())
@@ -70,10 +73,13 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
     let api = ctx.client();
 
     // This is what the generated code hashes a `session().key_owner(..)` key into:
-    let actual_key = node_runtime::storage()
-        .session()
-        .key_owner((KeyTypeId([1, 2, 3, 4]), vec![5, 6, 7, 8]));
-    let actual_key_bytes = api.storage().address_bytes(&actual_key)?;
+    let storage_addr = node_runtime::storage().session().key_owner();
+    let actual_key_bytes = api
+        .storage()
+        .at_latest()
+        .await?
+        .entry(storage_addr)?
+        .key(((KeyTypeId([1, 2, 3, 4]), vec![5, 6, 7, 8]),))?;
 
     // Let's manually hash to what we assume it should be and compare:
     let expected_key_bytes = {
@@ -124,9 +130,15 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
         .await?;
 
     // The actual test; look up this approval in storage:
-    let addr = node_runtime::storage().assets().approvals(99, alice, bob);
-    let entry = api.storage().at_latest().await?.fetch(&addr).await?;
-    assert_eq!(entry.map(|a| a.amount), Some(123));
+    let addr = node_runtime::storage().assets().approvals();
+    let entry = api
+        .storage()
+        .at_latest()
+        .await?
+        .fetch(addr, (99, alice, bob))
+        .await?
+        .decode()?;
+    assert_eq!(entry.amount, 123);
     Ok(())
 }
 
@@ -168,14 +180,18 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     }
 
     // Check all approvals.
-    let addr = node_runtime::storage().assets().approvals_iter();
-    let addr_bytes = api.storage().address_bytes(&addr)?;
-    let mut results = api.storage().at_latest().await?.iter(addr).await?;
+    let approvals_addr = node_runtime::storage().assets().approvals();
+    let storage_at = api.storage().at_latest().await?;
+    let approvals_entry = storage_at.entry(approvals_addr)?;
+
+    let mut results = approvals_entry.iter(()).await?;
     let mut approvals = Vec::new();
-    while let Some(Ok(kv)) = results.next().await {
-        assert!(kv.key_bytes.starts_with(&addr_bytes));
-        approvals.push(kv.value);
+    while let Some(kv) = results.next().await {
+        let kv = kv?;
+        assert!(kv.key_bytes().starts_with(&approvals_entry.key_prefix()));
+        approvals.push(kv.value().decode()?);
     }
+
     assert_eq!(approvals.len(), assets.len());
     let mut amounts = approvals.iter().map(|a| a.amount).collect::<Vec<_>>();
     amounts.sort();
@@ -185,17 +201,13 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
 
     // Check all assets starting with ID 99.
     for (asset_id, _, _, amount) in assets.clone() {
-        let addr = node_runtime::storage().assets().approvals_iter1(asset_id);
-        let second_addr_bytes = api.storage().address_bytes(&addr)?;
-        // Keys must be different, since we are adding to the root key.
-        assert_ne!(addr_bytes, second_addr_bytes);
-
-        let mut results = api.storage().at_latest().await?.iter(addr).await?;
+        let mut results = approvals_entry.iter((asset_id,)).await?;
 
         let mut approvals = Vec::new();
-        while let Some(Ok(kv)) = results.next().await {
-            assert!(kv.key_bytes.starts_with(&addr_bytes));
-            approvals.push(kv.value);
+        while let Some(kv) = results.next().await {
+            let kv = kv?;
+            assert!(kv.key_bytes().starts_with(&approvals_entry.key_prefix()));
+            approvals.push(kv.value().decode()?);
         }
         assert_eq!(approvals.len(), 1);
         assert_eq!(approvals[0].amount, amount);
@@ -241,21 +253,14 @@ async fn storage_iter_decode_keys() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let storage_static = node_runtime::storage().system().account_iter();
-    let results_static = api
-        .storage()
-        .at_latest()
-        .await?
-        .iter(storage_static)
-        .await?;
+    let storage_static = node_runtime::storage().system().account();
+    let storage_at_static = api.storage().at_latest().await?;
+    let results_static = storage_at_static.iter(storage_static, ()).await?;
 
-    let storage_dynamic = subxt::dynamic::storage("System", "Account", vec![]);
-    let results_dynamic = api
-        .storage()
-        .at_latest()
-        .await?
-        .iter(storage_dynamic)
-        .await?;
+    let storage_dynamic =
+        subxt::dynamic::storage::<(scale_value::Value,), scale_value::Value>("System", "Account");
+    let storage_at_dynamic = api.storage().at_latest().await?;
+    let results_dynamic = storage_at_dynamic.iter(storage_dynamic, ()).await?;
 
     // Even the testing node should have more than 3 accounts registered.
     let results_static = results_static.take(3).collect::<Vec<_>>().await;
@@ -272,9 +277,9 @@ async fn storage_iter_decode_keys() -> Result<(), subxt::Error> {
         let dynamic_kv = dynamic_kv?;
 
         // We only care about the underlying key bytes.
-        assert_eq!(static_kv.key_bytes, dynamic_kv.key_bytes);
+        assert_eq!(static_kv.key_bytes(), dynamic_kv.key_bytes());
 
-        let bytes = static_kv.key_bytes;
+        let bytes = static_kv.key_bytes();
         assert!(bytes.len() > 32);
 
         // The first 16 bytes should be the twox hash of "System" and the next 16 bytes should be the twox hash of "Account".

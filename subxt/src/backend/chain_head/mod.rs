@@ -22,7 +22,7 @@ use crate::backend::{
     TransactionStatus, utils::retry,
 };
 use crate::config::{Config, Hash, HashFor};
-use crate::error::{Error, RpcError};
+use crate::error::{BackendError, RpcError};
 use async_trait::async_trait;
 use follow_stream_driver::{FollowStreamDriver, FollowStreamDriverHandle};
 use futures::future::Either;
@@ -229,7 +229,7 @@ impl<T: Config> ChainHeadBackend<T> {
     async fn stream_headers<F>(
         &self,
         f: F,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error>
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError>
     where
         F: Fn(
                 FollowEvent<follow_stream_unpin::BlockRef<HashFor<T>>>,
@@ -290,7 +290,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         &self,
         keys: Vec<Vec<u8>>,
         at: HashFor<T>,
-    ) -> Result<StreamOfResults<StorageResponse>, Error> {
+    ) -> Result<StreamOfResults<StorageResponse>, BackendError> {
         retry(|| async {
             let queries = keys.iter().map(|key| StorageQuery {
                 key: &**key,
@@ -325,7 +325,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         &self,
         key: Vec<u8>,
         at: HashFor<T>,
-    ) -> Result<StreamOfResults<Vec<u8>>, Error> {
+    ) -> Result<StreamOfResults<Vec<u8>>, BackendError> {
         retry(|| async {
             // Ask for hashes, and then just ignore them and return the keys that come back.
             let query = StorageQuery {
@@ -351,7 +351,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         &self,
         key: Vec<u8>,
         at: HashFor<T>,
-    ) -> Result<StreamOfResults<StorageResponse>, Error> {
+    ) -> Result<StreamOfResults<StorageResponse>, BackendError> {
         retry(|| async {
             let query = StorageQuery {
                 key: &*key,
@@ -386,7 +386,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         .await
     }
 
-    async fn genesis_hash(&self) -> Result<HashFor<T>, Error> {
+    async fn genesis_hash(&self) -> Result<HashFor<T>, BackendError> {
         retry(|| async {
             let genesis_hash = self.methods.chainspec_v1_genesis_hash().await?;
             Ok(genesis_hash)
@@ -394,7 +394,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         .await
     }
 
-    async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, Error> {
+    async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, BackendError> {
         retry(|| async {
             let sub_id = get_subscription_id(&self.follow_handle).await?;
             let header = self.methods.chainhead_v1_header(&sub_id, at).await?;
@@ -403,7 +403,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         .await
     }
 
-    async fn block_body(&self, at: HashFor<T>) -> Result<Option<Vec<Vec<u8>>>, Error> {
+    async fn block_body(&self, at: HashFor<T>) -> Result<Option<Vec<Vec<u8>>>, BackendError> {
         retry(|| async {
             let sub_id = get_subscription_id(&self.follow_handle).await?;
 
@@ -432,7 +432,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         .await
     }
 
-    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<HashFor<T>>, Error> {
+    async fn latest_finalized_block_ref(&self) -> Result<BlockRef<HashFor<T>>, BackendError> {
         let next_ref: Option<BlockRef<HashFor<T>>> = self
             .follow_handle
             .subscribe()
@@ -452,17 +452,19 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         next_ref.ok_or_else(|| RpcError::SubscriptionDropped.into())
     }
 
-    async fn current_runtime_version(&self) -> Result<RuntimeVersion, Error> {
+    async fn current_runtime_version(&self) -> Result<RuntimeVersion, BackendError> {
         // Just start a stream of version infos, and return the first value we get from it.
         let runtime_version = self.stream_runtime_version().await?.next().await;
         match runtime_version {
-            None => Err(Error::Rpc(RpcError::SubscriptionDropped)),
+            None => Err(BackendError::Rpc(RpcError::SubscriptionDropped)),
             Some(Err(e)) => Err(e),
             Some(Ok(version)) => Ok(version),
         }
     }
 
-    async fn stream_runtime_version(&self) -> Result<StreamOfResults<RuntimeVersion>, Error> {
+    async fn stream_runtime_version(
+        &self,
+    ) -> Result<StreamOfResults<RuntimeVersion>, BackendError> {
         // Keep track of runtime details announced in new blocks, and then when blocks
         // are finalized, find the latest of these that has runtime details, and clear the rest.
         let mut runtimes = HashMap::new();
@@ -526,7 +528,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
 
                 let runtime_details = match runtime_event {
                     RuntimeEvent::Invalid(err) => {
-                        return std::future::ready(Some(Err(Error::Other(err.error))))
+                        return std::future::ready(Some(Err(BackendError::Other(format!("Invalid runtime error using chainHead RPCs: {}", err.error)))))
                     }
                     RuntimeEvent::Valid(ev) => ev,
                 };
@@ -544,7 +546,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
     async fn stream_all_block_headers(
         &self,
         _hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
         // TODO: https://github.com/paritytech/subxt/issues/1568
         //
         // It's possible that blocks may be silently missed if
@@ -562,7 +564,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
     async fn stream_best_block_headers(
         &self,
         _hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
         // TODO: https://github.com/paritytech/subxt/issues/1568
         //
         // It's possible that blocks may be silently missed if
@@ -578,7 +580,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
     async fn stream_finalized_block_headers(
         &self,
         _hasher: T::Hasher,
-    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, Error> {
+    ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
         self.stream_headers(|ev| match ev {
             FollowEvent::Initialized(init) => init.finalized_block_hashes,
             FollowEvent::Finalized(ev) => ev.finalized_block_hashes,
@@ -590,12 +592,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
     async fn submit_transaction(
         &self,
         extrinsic: &[u8],
-    ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, Error> {
+    ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, BackendError> {
         // Submit a transaction. This makes no attempt to sync with follow events,
         async fn submit_transaction_ignoring_follow_events<T: Config>(
             extrinsic: &[u8],
             methods: &ChainHeadRpcMethods<T>,
-        ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, Error> {
+        ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, BackendError> {
             let tx_progress = methods
                 .transactionwatch_v1_submit_and_watch(extrinsic)
                 .await?
@@ -637,7 +639,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
             transaction_timeout_secs: u64,
             methods: &ChainHeadRpcMethods<T>,
             follow_handle: &FollowStreamDriverHandle<HashFor<T>>,
-        ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, Error> {
+        ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, BackendError> {
             // We care about new and finalized block hashes.
             enum SeenBlockMarker {
                 New,
@@ -664,7 +666,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
             let start_instant = web_time::Instant::now();
 
             // A quick helper to return a generic error.
-            let err_other = |s: &str| Some(Err(Error::Other(s.into())));
+            let err_other = |s: &str| Some(Err(BackendError::Other(s.into())));
 
             // Now we can attempt to associate tx events with pinned blocks.
             let tx_stream = futures::stream::poll_fn(move |cx| {
@@ -828,7 +830,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
         method: &str,
         call_parameters: Option<&[u8]>,
         at: HashFor<T>,
-    ) -> Result<Vec<u8>, Error> {
+    ) -> Result<Vec<u8>, BackendError> {
         retry(|| async {
             let sub_id = get_subscription_id(&self.follow_handle).await?;
 
@@ -867,7 +869,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for ChainHeadBackend<T> {
 /// A helper to obtain a subscription ID.
 async fn get_subscription_id<H: Hash>(
     follow_handle: &FollowStreamDriverHandle<H>,
-) -> Result<String, Error> {
+) -> Result<String, BackendError> {
     let Some(sub_id) = follow_handle.subscribe().subscription_id().await else {
         return Err(RpcError::SubscriptionDropped.into());
     };

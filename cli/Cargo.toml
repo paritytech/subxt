@@ -30,16 +30,18 @@ subxt-codegen = { workspace = true }
 scale-typegen = { workspace = true }
 subxt-utils-fetchmetadata = { workspace = true, features = ["url"] }
 subxt-utils-stripmetadata = { workspace = true }
-subxt-metadata = { workspace = true }
+subxt-metadata = { workspace = true, features = ["legacy"] }
 subxt = { workspace = true, features = ["default"] }
 clap = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 color-eyre = { workspace = true }
 serde_json = { workspace = true }
 hex = { workspace = true }
+frame-decode = { workspace = true, features = ["legacy-types"] }
 frame-metadata = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true }
 scale-info = { workspace = true }
+scale-info-legacy = { workspace = true }
 scale-value = { workspace = true }
 syn = { workspace = true }
 quote = { workspace = true }

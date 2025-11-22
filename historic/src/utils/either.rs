@@ -1,5 +1,6 @@
 macro_rules! either {
     ($name:ident( $fst:ident, $($variant:ident),* )) => {
+        #[derive(Clone, Copy, Debug)]
         pub enum $name<$fst, $($variant),*> {
             $fst($fst),
             $($variant($variant),)*

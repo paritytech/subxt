@@ -13,7 +13,7 @@
 //! use subxt_core::config::DefaultExtrinsicParamsBuilder as Params;
 //! use subxt_core::tx;
 //! use subxt_core::utils::H256;
-//! use subxt_core::metadata;
+//! use subxt_core::Metadata;
 //!
 //! // If we generate types without `subxt`, we need to point to `::subxt_core`:
 //! #[subxt(
@@ -26,7 +26,7 @@
 //! let state = tx::ClientState::<PolkadotConfig> {
 //!     metadata: {
 //!         let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
-//!         metadata::decode_from(&metadata_bytes[..]).unwrap()
+//!         Metadata::decode_from(&metadata_bytes[..]).unwrap()
 //!     },
 //!     genesis_hash: {
 //!         let h = "91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3";
@@ -59,11 +59,12 @@
 pub mod payload;
 pub mod signer;
 
+use crate::Metadata;
 use crate::config::{Config, ExtrinsicParams, ExtrinsicParamsEncoder, HashFor, Hasher};
-use crate::error::{Error, ExtrinsicError, MetadataError};
-use crate::metadata::Metadata;
+use crate::error::ExtrinsicError;
 use crate::utils::Encoded;
-use alloc::borrow::{Cow, ToOwned};
+use alloc::borrow::Cow;
+use alloc::string::ToString;
 use alloc::vec::Vec;
 use codec::{Compact, Encode};
 use payload::Payload;
@@ -77,18 +78,28 @@ pub use crate::client::{ClientState, RuntimeVersion};
 /// if the call is valid (or if it's not possible to check since the call has no validation hash).
 /// Return an error if the call was not valid or something went wrong trying to validate it (ie
 /// the pallet or call in question do not exist at all).
-pub fn validate<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<(), Error> {
-    if let Some(details) = call.validation_details() {
-        let expected_hash = metadata
-            .pallet_by_name_err(details.pallet_name)?
-            .call_hash(details.call_name)
-            .ok_or_else(|| MetadataError::CallNameNotFound(details.call_name.to_owned()))?;
+pub fn validate<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<(), ExtrinsicError> {
+    let Some(details) = call.validation_details() else {
+        return Ok(());
+    };
 
-        if details.hash != expected_hash {
-            return Err(MetadataError::IncompatibleCodegen.into());
-        }
+    let pallet_name = details.pallet_name;
+    let call_name = details.call_name;
+
+    let expected_hash = metadata
+        .pallet_by_name(pallet_name)
+        .ok_or_else(|| ExtrinsicError::PalletNameNotFound(pallet_name.to_string()))?
+        .call_hash(call_name)
+        .ok_or_else(|| ExtrinsicError::CallNameNotFound {
+            pallet_name: pallet_name.to_string(),
+            call_name: call_name.to_string(),
+        })?;
+
+    if details.hash != expected_hash {
+        Err(ExtrinsicError::IncompatibleCodegen)
+    } else {
+        Ok(())
     }
-    Ok(())
 }
 
 /// Returns the suggested transaction versions to build for a given chain, or an error
@@ -96,7 +107,7 @@ pub fn validate<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<(), E
 ///
 /// If the result is [`TransactionVersion::V4`], use the `v4` methods in this module. If it's
 /// [`TransactionVersion::V5`], use the `v5` ones.
-pub fn suggested_version(metadata: &Metadata) -> Result<TransactionVersion, Error> {
+pub fn suggested_version(metadata: &Metadata) -> Result<TransactionVersion, ExtrinsicError> {
     let versions = metadata.extrinsic().supported_versions();
 
     if versions.contains(&4) {
@@ -104,7 +115,7 @@ pub fn suggested_version(metadata: &Metadata) -> Result<TransactionVersion, Erro
     } else if versions.contains(&5) {
         Ok(TransactionVersion::V5)
     } else {
-        Err(ExtrinsicError::UnsupportedVersion.into())
+        Err(ExtrinsicError::UnsupportedVersion)
     }
 }
 
@@ -118,7 +129,10 @@ pub enum TransactionVersion {
 }
 
 /// Return the SCALE encoded bytes representing the call data of the transaction.
-pub fn call_data<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<Vec<u8>, Error> {
+pub fn call_data<Call: Payload>(
+    call: &Call,
+    metadata: &Metadata,
+) -> Result<Vec<u8>, ExtrinsicError> {
     let mut bytes = Vec::new();
     call.encode_call_data_to(metadata, &mut bytes)?;
     Ok(bytes)
@@ -128,7 +142,7 @@ pub fn call_data<Call: Payload>(call: &Call, metadata: &Metadata) -> Result<Vec<
 pub fn create_v4_unsigned<T: Config, Call: Payload>(
     call: &Call,
     metadata: &Metadata,
-) -> Result<Transaction<T>, Error> {
+) -> Result<Transaction<T>, ExtrinsicError> {
     create_unsigned_at_version(call, 4, metadata)
 }
 
@@ -136,7 +150,7 @@ pub fn create_v4_unsigned<T: Config, Call: Payload>(
 pub fn create_v5_bare<T: Config, Call: Payload>(
     call: &Call,
     metadata: &Metadata,
-) -> Result<Transaction<T>, Error> {
+) -> Result<Transaction<T>, ExtrinsicError> {
     create_unsigned_at_version(call, 5, metadata)
 }
 
@@ -145,7 +159,7 @@ fn create_unsigned_at_version<T: Config, Call: Payload>(
     call: &Call,
     tx_version: u8,
     metadata: &Metadata,
-) -> Result<Transaction<T>, Error> {
+) -> Result<Transaction<T>, ExtrinsicError> {
     // 1. Validate this call against the current node metadata if the call comes
     // with a hash allowing us to do so.
     validate(call, metadata)?;
@@ -176,7 +190,7 @@ pub fn create_v4_signed<T: Config, Call: Payload>(
     call: &Call,
     client_state: &ClientState<T>,
     params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-) -> Result<PartialTransactionV4<T>, Error> {
+) -> Result<PartialTransactionV4<T>, ExtrinsicError> {
     // 1. Validate this call against the current node metadata if the call comes
     // with a hash allowing us to do so.
     validate(call, &client_state.metadata)?;
@@ -200,7 +214,7 @@ pub fn create_v5_general<T: Config, Call: Payload>(
     call: &Call,
     client_state: &ClientState<T>,
     params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-) -> Result<PartialTransactionV5<T>, Error> {
+) -> Result<PartialTransactionV5<T>, ExtrinsicError> {
     // 1. Validate this call against the current node metadata if the call comes
     // with a hash allowing us to do so.
     validate(call, &client_state.metadata)?;

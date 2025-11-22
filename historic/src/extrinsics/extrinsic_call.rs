@@ -1,6 +1,7 @@
 use super::extrinsic_info::{AnyExtrinsicInfo, with_info};
 use crate::error::ExtrinsicCallError;
 use crate::utils::Either;
+use crate::utils::{AnyResolver, AnyTypeId};
 use scale_info_legacy::{LookupName, TypeRegistrySet};
 
 /// This represents the call data in the extrinsic.
@@ -53,6 +54,7 @@ impl<'extrinsics, 'atblock> ExtrinsicCall<'extrinsics, 'atblock> {
 pub struct ExtrinsicCallFields<'extrinsics, 'atblock> {
     all_bytes: &'extrinsics [u8],
     info: &'extrinsics AnyExtrinsicInfo<'atblock>,
+    resolver: AnyResolver<'atblock>,
 }
 
 impl<'extrinsics, 'atblock> ExtrinsicCallFields<'extrinsics, 'atblock> {
@@ -60,7 +62,16 @@ impl<'extrinsics, 'atblock> ExtrinsicCallFields<'extrinsics, 'atblock> {
         all_bytes: &'extrinsics [u8],
         info: &'extrinsics AnyExtrinsicInfo<'atblock>,
     ) -> Self {
-        Self { all_bytes, info }
+        let resolver = match info {
+            AnyExtrinsicInfo::Legacy(info) => AnyResolver::B(info.resolver),
+            AnyExtrinsicInfo::Current(info) => AnyResolver::A(info.resolver),
+        };
+
+        Self {
+            all_bytes,
+            info,
+            resolver,
+        }
     }
 
     /// Return the bytes representing the fields stored in this extrinsic.
@@ -74,11 +85,12 @@ impl<'extrinsics, 'atblock> ExtrinsicCallFields<'extrinsics, 'atblock> {
     }
 
     /// Iterate over each of the fields of the extrinsic call data.
-    pub fn iter(&self) -> impl Iterator<Item = ExtrinsicCallField<'extrinsics, 'atblock>> {
+    pub fn iter(&self) -> impl Iterator<Item = ExtrinsicCallField<'_, 'extrinsics, 'atblock>> {
         match &self.info {
             AnyExtrinsicInfo::Legacy(info) => {
                 Either::A(info.info.call_data().map(|named_arg| ExtrinsicCallField {
                     field_bytes: &self.all_bytes[named_arg.range()],
+                    resolver: &self.resolver,
                     info: AnyExtrinsicCallFieldInfo::Legacy(ExtrinsicCallFieldInfo {
                         info: named_arg,
                         resolver: info.resolver,
@@ -88,6 +100,7 @@ impl<'extrinsics, 'atblock> ExtrinsicCallFields<'extrinsics, 'atblock> {
             AnyExtrinsicInfo::Current(info) => {
                 Either::B(info.info.call_data().map(|named_arg| ExtrinsicCallField {
                     field_bytes: &self.all_bytes[named_arg.range()],
+                    resolver: &self.resolver,
                     info: AnyExtrinsicCallFieldInfo::Current(ExtrinsicCallFieldInfo {
                         info: named_arg,
                         resolver: info.resolver,
@@ -98,7 +111,7 @@ impl<'extrinsics, 'atblock> ExtrinsicCallFields<'extrinsics, 'atblock> {
     }
 
     /// Attempt to decode the fields into the given type.
-    pub fn decode<T: scale_decode::DecodeAsFields>(&self) -> Result<T, ExtrinsicCallError> {
+    pub fn decode_as<T: scale_decode::DecodeAsFields>(&self) -> Result<T, ExtrinsicCallError> {
         with_info!(&self.info => {
             let cursor = &mut self.bytes();
             let mut fields = &mut info.info.call_data().map(|named_arg| {
@@ -119,9 +132,10 @@ impl<'extrinsics, 'atblock> ExtrinsicCallFields<'extrinsics, 'atblock> {
     }
 }
 
-pub struct ExtrinsicCallField<'extrinsics, 'atblock> {
+pub struct ExtrinsicCallField<'fields, 'extrinsics, 'atblock> {
     field_bytes: &'extrinsics [u8],
     info: AnyExtrinsicCallFieldInfo<'extrinsics, 'atblock>,
+    resolver: &'fields AnyResolver<'atblock>,
 }
 
 enum AnyExtrinsicCallFieldInfo<'extrinsics, 'atblock> {
@@ -144,7 +158,7 @@ macro_rules! with_call_field_info {
     };
 }
 
-impl<'extrinsics, 'atblock> ExtrinsicCallField<'extrinsics, 'atblock> {
+impl<'fields, 'extrinsics, 'atblock> ExtrinsicCallField<'fields, 'extrinsics, 'atblock> {
     /// Get the raw bytes for this field.
     pub fn bytes(&self) -> &'extrinsics [u8] {
         self.field_bytes
@@ -155,8 +169,24 @@ impl<'extrinsics, 'atblock> ExtrinsicCallField<'extrinsics, 'atblock> {
         with_call_field_info!(&self.info => info.info.name())
     }
 
+    /// Visit the given field with a [`scale_decode::visitor::Visitor`]. This is like a lower level
+    /// version of [`ExtrinsicCallField::decode_as`], as the visitor is able to preserve lifetimes
+    /// and has access to more type information than is available via [`ExtrinsicCallField::decode_as`].
+    pub fn visit<V: scale_decode::visitor::Visitor<TypeResolver = AnyResolver<'atblock>>>(
+        &self,
+        visitor: V,
+    ) -> Result<V::Value<'extrinsics, 'fields>, V::Error> {
+        let type_id = match &self.info {
+            AnyExtrinsicCallFieldInfo::Current(info) => AnyTypeId::A(*info.info.ty()),
+            AnyExtrinsicCallFieldInfo::Legacy(info) => AnyTypeId::B(info.info.ty().clone()),
+        };
+        let cursor = &mut self.bytes();
+
+        scale_decode::visitor::decode_with_visitor(cursor, type_id, self.resolver, visitor)
+    }
+
     /// Attempt to decode the value of this field into the given type.
-    pub fn decode<T: scale_decode::DecodeAsType>(&self) -> Result<T, ExtrinsicCallError> {
+    pub fn decode_as<T: scale_decode::DecodeAsType>(&self) -> Result<T, ExtrinsicCallError> {
         with_call_field_info!(&self.info => {
             let cursor = &mut &*self.field_bytes;
             let decoded = T::decode_as_type(cursor, info.info.ty().clone(), info.resolver)

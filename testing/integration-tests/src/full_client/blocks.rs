@@ -158,7 +158,7 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     let mut sub = api.blocks().subscribe_best().await?;
 
     let block = sub.next().await.unwrap()?;
-    let rt = block.runtime_api().await?;
+    let rt = block.runtime_api().await;
 
     // get metadata via raw state_call.
     let meta_bytes = rt.call_raw("Metadata_metadata", None).await?;
@@ -401,7 +401,7 @@ async fn decode_block_mortality() {
     }
 
     // Explicit Mortal:
-    for for_n_blocks in [4, 16, 128] {
+    for for_n_blocks in [16, 64, 128] {
         let tx = submit_extrinsic_and_get_it_back(
             &api,
             DefaultExtrinsicParamsBuilder::new().mortal(for_n_blocks),

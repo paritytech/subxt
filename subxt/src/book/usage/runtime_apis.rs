@@ -28,15 +28,17 @@
 //! let runtime_call = polkadot::apis().metadata().metadata_versions();
 //! ```
 //!
-//! Alternately, we can dynamically construct a runtime call:
+//! Alternately, we can dynamically construct a runtime call. The input type can be a tuple or
+//! vec or valid types implementing [`scale_encode::EncodeAsType`], and the output can be anything
+//! implementing [`scale_decode::DecodeAsType`]:
 //!
 //! ```rust,no_run
 //! use subxt::dynamic::Value;
 //!
-//! let runtime_call = subxt::dynamic::runtime_api_call(
+//! let runtime_call = subxt::dynamic::runtime_api_call::<(), Vec<u32>>(
 //!     "Metadata",
 //!     "metadata_versions",
-//!     Vec::<Value<()>>::new()
+//!     ()
 //! );
 //! ```
 //!
