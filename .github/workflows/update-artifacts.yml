@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       # We run this (up-to-date) node locally to fetch metadata from it for the artifacts
       - name: Use substrate and polkadot node binaries
         uses: ./.github/workflows/actions/use-nodes
