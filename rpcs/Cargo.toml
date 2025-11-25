@@ -97,7 +97,6 @@ jsonrpsee = { workspace = true, features = ["server"] }
 
 [package.metadata.docs.rs]
 default-features = true
-rustdoc-args = ["--cfg", "docsrs"]
 
 [lints]
 workspace = true

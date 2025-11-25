@@ -1,0 +1,24 @@
+#![allow(missing_docs)]
+use subxt::{OnlineClient, PolkadotConfig};
+
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
+pub mod polkadot {}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Create a client to use:
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+    // A query to obtain some constant:
+    let constant_query = polkadot::constants().system().block_length();
+
+    // Obtain the value:
+    let value = api.constants().at(&constant_query)?;
+
+    // Or obtain the bytes:
+    let bytes = api.constants().bytes_at(&constant_query)?;
+
+    println!("Encoded block length: {bytes:?}");
+    println!("Block length: {value:?}");
+    Ok(())
+}

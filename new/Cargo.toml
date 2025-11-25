@@ -1,5 +1,5 @@
 [package]
-name = "subxt"
+name = "subxt-new"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
@@ -21,6 +21,14 @@ workspace = true
 # For dev and documentation reasons we enable more features than are often desired.
 # it's recommended to use `--no-default-features` and then select what you need.
 default = ["jsonrpsee", "native"]
+
+# Features that we expect to be enabled for documentation.
+docs = [
+    "default", 
+    "unstable-light-client",
+    "runtime",
+    "reconnecting-rpc-client",
+]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
@@ -75,21 +83,27 @@ runtime-wasm-path = ["subxt-macro/runtime-wasm-path"]
 
 [dependencies]
 async-trait = { workspace = true }
+base58 = { workspace = true }
+blake2 = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 derive-where = { workspace = true }
 scale-info = { workspace = true, features = ["default"] }
+scale-info-legacy = { workspace = true }
 scale-value = { workspace = true, features = ["default"] }
 scale-bits = { workspace = true, features = ["default"] }
 scale-decode = { workspace = true, features = ["default"] }
 scale-encode = { workspace = true, features = ["default"] }
 futures = { workspace = true }
 hex = { workspace = true }
+impl-serde = { workspace = true, default-features = false }
+keccak-hash = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, features = ["default", "raw_value"] }
 sp-crypto-hashing = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
+frame-decode = { workspace = true, features = ["legacy-types"] }
 either = { workspace = true }
 web-time = { workspace = true }
 
@@ -101,10 +115,9 @@ jsonrpsee = { workspace = true, optional = true, features = ["jsonrpsee-types"] 
 
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
-subxt-core = { workspace = true, features = ["std"] }
 subxt-metadata = { workspace = true, features = ["std"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
-subxt-rpcs = { workspace = true, features = ["subxt"] }
+subxt-rpcs = { workspace = true }
 
 # For parsing urls to disallow insecure schemes
 url = { workspace = true }
@@ -156,7 +169,7 @@ path = "examples/setup_reconnecting_rpc_client.rs"
 required-features = ["reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]
-features = ["default", "unstable-light-client"]
+features = ["docs"]
 
 [package.metadata.playground]
 features = ["default", "unstable-light-client"]
