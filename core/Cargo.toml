@@ -74,7 +74,6 @@ hex = { workspace = true }
 
 [package.metadata.docs.rs]
 default-features = true
-rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 default-features = true

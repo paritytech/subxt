@@ -5824,6 +5824,56 @@ dependencies = [
 ]
 
 [[package]]
+name = "subxt-new"
+version = "0.44.0"
+dependencies = [
+ "assert_matches",
+ "async-trait",
+ "base58",
+ "bitvec",
+ "blake2",
+ "derive-where",
+ "either",
+ "frame-decode",
+ "frame-metadata 23.0.0",
+ "futures",
+ "hex",
+ "http-body",
+ "hyper",
+ "impl-serde",
+ "jsonrpsee",
+ "keccak-hash",
+ "parity-scale-codec",
+ "primitive-types",
+ "scale-bits",
+ "scale-decode",
+ "scale-encode",
+ "scale-info",
+ "scale-info-legacy",
+ "scale-value",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "sp-crypto-hashing",
+ "sp-keyring",
+ "sp-runtime",
+ "subxt-lightclient",
+ "subxt-macro",
+ "subxt-metadata",
+ "subxt-rpcs",
+ "subxt-signer",
+ "thiserror 2.0.12",
+ "tokio",
+ "tokio-util",
+ "tower",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "wasm-bindgen-futures",
+ "web-time",
+]
+
+[[package]]
 name = "subxt-rpcs"
 version = "0.44.0"
 dependencies = [

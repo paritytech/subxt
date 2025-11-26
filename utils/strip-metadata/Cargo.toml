@@ -21,7 +21,6 @@ either = { workspace = true }
 
 [package.metadata.docs.rs]
 features = ["url"]
-rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 default-features = true

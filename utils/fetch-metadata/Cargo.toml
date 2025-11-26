@@ -29,7 +29,6 @@ frame-metadata = { workspace = true, optional = true, features = ["std"] }
 
 [package.metadata.docs.rs]
 features = ["url"]
-rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 default-features = true
