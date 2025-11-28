@@ -31,6 +31,12 @@ pub use subxt_metadata::TryFromError as MetadataTryFromError;
 #[allow(missing_docs)]
 pub enum Error {
     #[error(transparent)]
+    OnlineClientError(#[from] OnlineClientError),
+    #[error(transparent)]
+    OfflineClientAtBlockError(#[from] OfflineClientAtBlockError),
+    #[error(transparent)]
+    OnlineClientAtBlockError(#[from] OnlineClientAtBlockError),
+    #[error(transparent)]
     ExtrinsicDecodeErrorAt(#[from] ExtrinsicDecodeErrorAt),
     #[error(transparent)]
     ConstantError(#[from] ConstantError),
@@ -46,8 +52,6 @@ pub enum Error {
     BlockError(#[from] BlockError),
     #[error(transparent)]
     AccountNonceError(#[from] AccountNonceError),
-    #[error(transparent)]
-    OnlineClientError(#[from] OnlineClientError),
     #[error(transparent)]
     RuntimeUpdaterError(#[from] RuntimeUpdaterError),
     #[error(transparent)]
@@ -154,6 +158,108 @@ impl Error {
             _ => None,
         }
     }
+}
+
+/// Errors constructing an offline client at a specific block number.
+#[allow(missing_docs)]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum OfflineClientAtBlockError {
+    #[error(
+        "Cannot construct OfflineClientAtBlock: spec version not found for block number {block_number}"
+    )]
+    SpecVersionNotFound {
+        /// The block number for which the spec version was not found.
+        block_number: u32,
+    },
+    #[error(
+        "Cannot construct OfflineClientAtBlock: metadata not found for spec version {spec_version}"
+    )]
+    MetadataNotFound {
+        /// The spec version for which the metadata was not found.
+        spec_version: u32,
+    },
+}
+
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum OnlineClientError {
+    #[error("Cannot construct OnlineClient: The URL provided is invalid: {url}")]
+    InvalidUrl {
+        /// The URL that was invalid.
+        url: String,
+    },
+    #[error("Cannot construct OnlineClient: {0}")]
+    RpcError(#[from] subxt_rpcs::Error),
+    #[error(
+        "Cannot construct OnlineClient: Cannot fetch latest finalized block to obtain init details from: {0}"
+    )]
+    CannotGetLatestFinalizedBlock(BackendError),
+    #[error("Cannot construct OnlineClient: Cannot fetch genesis hash: {0}")]
+    CannotGetGenesisHash(BackendError),
+    #[error("Cannot construct OnlineClient: Cannot fetch current runtime version: {0}")]
+    CannotGetCurrentRuntimeVersion(BackendError),
+    #[error("Cannot construct OnlineClient: Cannot fetch metadata: {0}")]
+    CannotFetchMetadata(BackendError),
+}
+
+impl OnlineClientError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            OnlineClientError::CannotGetLatestFinalizedBlock(e)
+            | OnlineClientError::CannotGetGenesisHash(e)
+            | OnlineClientError::CannotGetCurrentRuntimeVersion(e)
+            | OnlineClientError::CannotFetchMetadata(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
+/// Errors constructing an online client at a specific block number.
+#[allow(missing_docs)]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum OnlineClientAtBlockError {
+    #[error(
+        "Cannot construct OnlineClientAtBlock: failed to get block hash from node for block {block_number}: {reason}"
+    )]
+    CannotGetBlockHash {
+        /// Block number we failed to get the hash for.
+        block_number: u64,
+        /// The error we encountered.
+        reason: subxt_rpcs::Error,
+    },
+    #[error("Cannot construct OnlineClientAtBlock: block number {block_number} not found")]
+    BlockNotFound {
+        /// The block number for which a block was not found.
+        block_number: u64,
+    },
+    #[error(
+        "Cannot construct OnlineClientAtBlock: failed to get spec version for block hash {block_hash}: {reason}"
+    )]
+    CannotGetSpecVersion {
+        /// The block hash for which we failed to get the spec version.
+        block_hash: String,
+        /// The error we encountered.
+        reason: String,
+    },
+    #[error(
+        "Cannot construct OnlineClientAtBlock: failed to get metadata for block hash {block_hash}: {reason}"
+    )]
+    CannotGetMetadata {
+        /// The block hash for which we failed to get the metadata.
+        block_hash: String,
+        /// The error we encountered.
+        reason: String,
+    },
+    #[error(
+        "Cannot inject types from metadata: failure to parse a type found in the metadata: {parse_error}"
+    )]
+    CannotInjectMetadataTypes {
+        /// Error parsing a type found in the metadata.
+        parse_error: scale_info_legacy::lookup_name::ParseError,
+    },
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -272,36 +378,6 @@ impl AccountNonceError {
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
             AccountNonceError::CouldNotRetrieve(e) => Some(e),
-            _ => None,
-        }
-    }
-}
-
-#[derive(Debug, thiserror::Error)]
-#[non_exhaustive]
-#[allow(missing_docs)]
-pub enum OnlineClientError {
-    #[error("Cannot construct OnlineClient: {0}")]
-    RpcError(#[from] subxt_rpcs::Error),
-    #[error(
-        "Cannot construct OnlineClient: Cannot fetch latest finalized block to obtain init details from: {0}"
-    )]
-    CannotGetLatestFinalizedBlock(BackendError),
-    #[error("Cannot construct OnlineClient: Cannot fetch genesis hash: {0}")]
-    CannotGetGenesisHash(BackendError),
-    #[error("Cannot construct OnlineClient: Cannot fetch current runtime version: {0}")]
-    CannotGetCurrentRuntimeVersion(BackendError),
-    #[error("Cannot construct OnlineClient: Cannot fetch metadata: {0}")]
-    CannotFetchMetadata(BackendError),
-}
-
-impl OnlineClientError {
-    fn backend_error(&self) -> Option<&BackendError> {
-        match self {
-            OnlineClientError::CannotGetLatestFinalizedBlock(e)
-            | OnlineClientError::CannotGetGenesisHash(e)
-            | OnlineClientError::CannotGetCurrentRuntimeVersion(e)
-            | OnlineClientError::CannotFetchMetadata(e) => Some(e),
             _ => None,
         }
     }

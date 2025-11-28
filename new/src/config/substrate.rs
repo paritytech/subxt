@@ -22,6 +22,7 @@ pub struct SubstrateConfigBuilder {
     legacy_types: Option<ChainTypeRegistry>,
     spec_version_for_block_number: RangeMap<u32, u32>,
     metadata_for_spec_version: Mutex<HashMap<u32, Arc<Metadata>>>,
+    use_old_v9_hashers_before_spec_version: u32,
 }
 
 impl Default for SubstrateConfigBuilder {
@@ -37,6 +38,7 @@ impl SubstrateConfigBuilder {
             legacy_types: None,
             spec_version_for_block_number: RangeMap::empty(),
             metadata_for_spec_version: Mutex::new(HashMap::new()),
+            use_old_v9_hashers_before_spec_version: 0,
         }
     }
 
@@ -74,6 +76,16 @@ impl SubstrateConfigBuilder {
             m = m.add_range(start, end, spec_version);
         }
         self.spec_version_for_block_number = m.build();
+        self
+    }
+
+    /// The storage hasher encoding/decoding changed during V9 metadata. By default we support the "new" version
+    /// of things. We can use this option to support the old version of things prior to a given spec version.
+    pub fn use_old_v9_hashers_before_spec_version(
+        mut self,
+        spec_version: u32
+    ) -> Self {
+        self.use_old_v9_hashers_before_spec_version = spec_version;
         self
     }
 

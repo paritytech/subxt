@@ -21,7 +21,7 @@ use scale_decode::DecodeAsType;
 use scale_encode::EncodeAsType;
 use serde::{Serialize, de::DeserializeOwned};
 use subxt_metadata::Metadata;
-use std::{marker::PhantomData, sync::Arc};
+use std::{fmt::Display, marker::PhantomData, sync::Arc};
 use scale_info_legacy::TypeRegistrySet;
 use subxt_rpcs::RpcConfig;
 
@@ -63,7 +63,9 @@ pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     ///
     /// The [`crate::client::OnlineClient`] will look this up on chain if it's not available here,
     /// but the [`crate::client::OfflineClient`] will error if this is not available for the required block number.
-    fn spec_version_for_block_number(&self, block_number: u32) -> Option<u32>;
+    fn spec_version_for_block_number(&self, _block_number: u32) -> Option<u32> {
+        None
+    }
 
     /// Return the metadata for a given spec version, if available.
     ///
@@ -72,17 +74,19 @@ pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     /// The [`crate::client::OfflineClient`] will error if this is not available for the required spec version.
     fn metadata_for_spec_version(
         &self,
-        spec_version: u32,
-    ) -> Option<Arc<Metadata>>;
+        _spec_version: u32,
+    ) -> Option<Arc<Metadata>> {
+        None
+    }
 
     /// Set some metadata for a given spec version. the [`crate::client::OnlineClient`] will call this if it has
     /// to retrieve metadata from the chain, to give this the opportunity to cache it. The configuration can
     /// do nothing if it prefers.
     fn set_metadata_for_spec_version(
         &self,
-        spec_version: u32,
-        metadata: Arc<Metadata>,
-    );
+        _spec_version: u32,
+        _metadata: Arc<Metadata>,
+    ) {}
 
     /// Return legacy types (ie types to use with Runtimes that return pre-V14 metadata) for a given spec version.
     /// If this returns `None`, [`subxt`] will return an error if type definitions are needed to access some older 
@@ -92,8 +96,10 @@ pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     /// into our [`Metadata`] type, which will then be used.
     fn legacy_types_for_spec_version<'this>(
         &'this self,
-        spec_version: u32,
-    ) -> Option<TypeRegistrySet<'this>>;
+        _spec_version: u32,
+    ) -> Option<TypeRegistrySet<'this>> {
+        None
+    }
 }
 
 /// `RpcConfigFor<Config>` can be used anywhere which requires an implementation of [`subxt_rpcs::RpcConfig`].
@@ -117,6 +123,7 @@ pub type ParamsFor<T> = <<T as Config>::ExtrinsicParams as ExtrinsicParams<T>>::
 /// Block hashes must conform to a bunch of things to be used in Subxt.
 pub trait Hash:
     Debug
+    + Display
     + Copy
     + Send
     + Sync
@@ -132,6 +139,7 @@ pub trait Hash:
 }
 impl<T> Hash for T where
     T: Debug
+        + Display
         + Copy
         + Send
         + Sync
