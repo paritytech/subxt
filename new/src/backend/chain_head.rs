@@ -7,11 +7,6 @@
 //! [`rpc_methods`] for the raw API calls.
 //! 
 //! Specifically, the focus here is on the `chainHead` methods.
-//!
-//! # Warning
-//!
-//! Everything in this module is **unstable**, meaning that it could change without
-//! warning at any time.
 
 mod follow_stream;
 mod follow_stream_driver;
@@ -36,11 +31,6 @@ use subxt_rpcs::RpcClient;
 use subxt_rpcs::methods::chain_head::{
     FollowEvent, MethodResponse, StorageQuery, StorageQueryType, StorageResultType,
 };
-
-/// Re-export RPC types and methods from [`subxt_rpcs::methods::chain_head`].
-pub mod rpc_methods {
-    pub use subxt_rpcs::methods::chain_head::*;
-}
 
 // Expose the RPC methods.
 pub use subxt_rpcs::methods::chain_head::ChainHeadRpcMethods;
@@ -162,19 +152,9 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
     /// - On wasm targets, this will spawn the driver on `wasm-bindgen-futures`.
     #[cfg(feature = "runtime")]
     pub fn build_with_background_driver(self, client: impl Into<RpcClient>) -> ChainHeadBackend<T> {
-        fn spawn<F: std::future::Future + Send + 'static>(future: F) {
-            #[cfg(not(target_family = "wasm"))]
-            tokio::spawn(async move {
-                future.await;
-            });
-            #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
-            wasm_bindgen_futures::spawn_local(async move {
-                future.await;
-            });
-        }
-
         let (backend, mut driver) = self.build(client);
-        spawn(async move {
+        
+        super::utils::spawn(async move {
             // NOTE: we need to poll the driver until it's done i.e returns None
             // to ensure that the backend is shutdown properly.
             while let Some(res) = driver.next().await {
@@ -642,7 +622,7 @@ async fn submit_transaction_tracking_follow_events<T: Config>(
     let start_instant = web_time::Instant::now();
 
     // A quick helper to return a generic error.
-    let err_other = |s: &str| Some(Err(BackendError::Other(s.into())));
+    let err_other = |s: &'static str| Some(Err(BackendError::other(s)));
 
     // Now we can attempt to associate tx events with pinned blocks.
     let tx_stream = futures::stream::poll_fn(move |cx| {

@@ -9,11 +9,6 @@
 //! Specifically, the focus here is on the `archive` methods. These can only be used
 //! to interact with archive nodes, but are less restrictive than the `chainHead` methods
 //! in terms of the allowed operations.
-//! 
-//! # Warning
-//!
-//! Everything in this module is **unstable**, meaning that it could change without
-//! warning at any time.
 
 mod storage_stream;
 
@@ -30,11 +25,6 @@ use subxt_rpcs::methods::chain_head::{
     ArchiveStorageQuery, ArchiveCallResult, StorageQueryType,
 };
 use storage_stream::ArchiveStorageStream;
-
-/// Re-export RPC types and methods from [`subxt_rpcs::methods::chain_head`].
-pub mod rpc_methods {
-    pub use subxt_rpcs::methods::chain_head::*;
-}
 
 // Expose the RPC methods.
 pub use subxt_rpcs::methods::chain_head::ChainHeadRpcMethods as ArchiveRpcMethods;
@@ -203,7 +193,7 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
         let res = self.methods.archive_v1_call(at, method, call_parameters.unwrap_or(&[])).await?;
         match res {
             ArchiveCallResult::Success(bytes) => Ok(bytes.0),
-            ArchiveCallResult::Error(e) => Err(BackendError::Other(e)),
+            ArchiveCallResult::Error(e) => Err(BackendError::other(e)),
         }
     }
 }

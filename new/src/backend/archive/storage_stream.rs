@@ -143,7 +143,7 @@ impl<T: Config> Stream for ArchiveStorageStream<T> {
                                 },
                                 ArchiveStorageEvent::Error(e) => {
                                     this.state = None;
-                                    return Poll::Ready(Some(Err(BackendError::Other(e.error))))
+                                    return Poll::Ready(Some(Err(BackendError::other(e.error))))
                                 },
                                 ArchiveStorageEvent::Done => {
                                     this.state = None;

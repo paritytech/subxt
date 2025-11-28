@@ -8,6 +8,7 @@ mod dispatch_error;
 mod hex;
 
 use thiserror::Error as DeriveError;
+use std::borrow::Cow;
 
 #[cfg(feature = "unstable-light-client")]
 pub use subxt_lightclient::LightClientError;
@@ -276,7 +277,7 @@ pub enum BackendError {
     CouldNotDecodeMetadata(codec::Error),
     // This is for errors in `Backend` implementations which aren't any of the "pre-defined" set above:
     #[error("Custom backend error: {0}")]
-    Other(String),
+    Other(Cow<'static, str>),
 }
 
 impl BackendError {
@@ -293,6 +294,11 @@ impl BackendError {
     /// Checks whether the error was caused by a RPC request being rejected.
     pub fn is_rpc_limit_reached(&self) -> bool {
         matches!(self, BackendError::Rpc(RpcError::LimitReached))
+    }
+
+    /// Create a [`BackendError::Other`] given a message.
+    pub fn other(message: impl Into<Cow<'static, str>>) -> Self {
+        BackendError::Other(message.into())
     }
 }
 

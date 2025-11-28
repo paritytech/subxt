@@ -112,9 +112,8 @@ impl<Hash> FollowStream<Hash> {
                     let stream = methods.chainhead_v1_follow(true).await?;
                     // Extract the subscription ID:
                     let Some(sub_id) = stream.subscription_id().map(ToOwned::to_owned) else {
-                        return Err(BackendError::Other(
+                        return Err(BackendError::other(
                             "Subscription ID expected for chainHead_follow response, but not given"
-                                .to_owned(),
                         ));
                     };
                     // Map stream errors into the higher level subxt one:
@@ -311,7 +310,7 @@ pub mod test {
                 Ok(FollowEvent::Stop),
                 Ok(ev_new_block(1, 2)),
                 // Nothing should be emitted after an error:
-                Err(BackendError::Other("ended".to_owned())),
+                Err(BackendError::other("ended")),
                 Ok(ev_new_block(2, 3)),
             ]
         });

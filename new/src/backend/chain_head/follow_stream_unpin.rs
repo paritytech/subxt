@@ -567,7 +567,7 @@ mod test {
                     Ok(ev_new_block(0, 1)),
                     Ok(ev_new_block(1, 2)),
                     Ok(ev_new_block(2, 3)),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             10,
@@ -593,7 +593,7 @@ mod test {
                 [
                     Ok(ev_initialized(0)),
                     Ok(ev_finalized([1], [])),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             3,
@@ -624,7 +624,7 @@ mod test {
                     Ok(ev_finalized([3], [])),
                     Ok(ev_finalized([4], [])),
                     Ok(ev_finalized([5], [])),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             3,
@@ -663,7 +663,7 @@ mod test {
                     Ok(ev_new_block(1, 2)),
                     Ok(ev_finalized([1], [])),
                     Ok(ev_finalized([2], [])),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             10,
@@ -711,7 +711,7 @@ mod test {
                     Ok(ev_finalized([1], [])),
                     Ok(ev_finalized([2], [3])),
                     Ok(ev_finalized([4], [])),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             10,
@@ -771,7 +771,7 @@ mod test {
                     Ok(ev_best_block(1)),
                     Ok(ev_finalized([1], [])),
                     Ok(ev_finalized([2], [])),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             10,

@@ -157,7 +157,7 @@ impl<T: Config> Stream for StorageItems<T> {
                 FollowEvent::OperationError(err) if err.operation_id == *self.operation_id => {
                     // Something went wrong obtaining storage items; mark as done and return the error.
                     self.done = true;
-                    return Poll::Ready(Some(Err(BackendError::Other(err.error))));
+                    return Poll::Ready(Some(Err(BackendError::other(err.error))));
                 }
                 _ => {
                     // We don't care about this event; wait for the next.
