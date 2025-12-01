@@ -63,7 +63,7 @@ pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     ///
     /// The [`crate::client::OnlineClient`] will look this up on chain if it's not available here,
     /// but the [`crate::client::OfflineClient`] will error if this is not available for the required block number.
-    fn spec_version_for_block_number(&self, _block_number: u32) -> Option<u32> {
+    fn spec_version_for_block_number(&self, _block_number: u64) -> Option<u32> {
         None
     }
 
@@ -170,5 +170,5 @@ pub trait Hasher: Debug + Clone + Send + Sync + 'static {
 /// This represents the block header type used by a node.
 pub trait Header: Sized + Encode + Decode + Debug + Sync + Send + DeserializeOwned + Clone {
     /// Return the block number of this header.
-    fn number(&self) -> u32;
+    fn number(&self) -> u64;
 }

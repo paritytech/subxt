@@ -75,7 +75,7 @@ impl Config for PolkadotConfig {
         self.0.legacy_types_for_spec_version(spec_version)
     }
 
-    fn spec_version_for_block_number(&self, block_number: u32) -> Option<u32> {
+    fn spec_version_for_block_number(&self, block_number: u64) -> Option<u32> {
         self.0.spec_version_for_block_number(block_number)
     }
 

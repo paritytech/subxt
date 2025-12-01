@@ -12,6 +12,7 @@
 
 mod storage_stream;
 
+use subxt_rpcs::methods::ChainHeadRpcMethods;
 use crate::backend::{
     Backend, BlockRef, StorageResponse, StreamOf, StreamOfResults,
     TransactionStatus, utils::retry,
@@ -26,20 +27,17 @@ use subxt_rpcs::methods::chain_head::{
 };
 use storage_stream::ArchiveStorageStream;
 
-// Expose the RPC methods.
-pub use subxt_rpcs::methods::chain_head::ChainHeadRpcMethods as ArchiveRpcMethods;
-
 /// The archive backend.
 #[derive(Debug, Clone)]
 pub struct ArchiveBackend<T: Config> {
     // RPC methods we'll want to call:
-    methods: ArchiveRpcMethods<RpcConfigFor<T>>,
+    methods: ChainHeadRpcMethods<RpcConfigFor<T>>,
 }
 
 impl<T: Config> ArchiveBackend<T> {
     /// Configure and construct an [`ArchiveBackend`] and the associated [`ChainHeadBackendDriver`].
     pub fn new(client: impl Into<RpcClient>,) -> ArchiveBackend<T> {
-        let methods = ArchiveRpcMethods::new(client.into());
+        let methods = ChainHeadRpcMethods::new(client.into());
 
         ArchiveBackend { methods }
     }
@@ -121,6 +119,19 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
             Ok(hash)
         })
         .await
+    }
+
+    async fn block_number_to_hash(&self, number: u64) -> Result<Option<BlockRef<HashFor<T>>>, BackendError> {
+        retry(|| async {
+            let mut hashes = self.methods.archive_v1_hash_by_height(number as usize).await?;
+            if let (Some(hash), None) = (hashes.pop(), hashes.pop()) {
+                // One hash; return it.
+                Ok(Some(BlockRef::from_hash(hash)))
+            } else {
+                // More than one; return None.
+                Ok(None)
+            }
+        }).await
     }
 
     async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, BackendError> {

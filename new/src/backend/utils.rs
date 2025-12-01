@@ -118,13 +118,6 @@ where
     })))
 }
 
-/// Resubscribe callback.
-type ResubscribeGetter<T> = Box<dyn FnMut() -> ResubscribeFuture<T> + Send>;
-
-/// Future that resolves to a subscription stream.
-type ResubscribeFuture<T> =
-    Pin<Box<dyn Future<Output = Result<StreamOfResults<T>, BackendError>> + Send>>;
-
 /// Retry subscription.
 struct RetrySubscription<F, R, T> {
     resubscribe: F,
@@ -164,6 +157,7 @@ where
                         return Poll::Ready(Some(Err(err)));
                     }
                     Poll::Ready(None) => {
+                        self.state = RetrySubscriptionState::Done;
                         return Poll::Ready(None)
                     }
                     Poll::Ready(Some(Ok(val))) => {

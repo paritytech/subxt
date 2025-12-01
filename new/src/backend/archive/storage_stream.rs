@@ -7,11 +7,11 @@ use futures::{FutureExt, Stream, StreamExt};
 use std::task::{Context, Poll};
 use crate::error::BackendError;
 use crate::config::{Config, HashFor, RpcConfigFor};
-use super::ArchiveRpcMethods;
+use subxt_rpcs::methods::ChainHeadRpcMethods;
 
 pub struct ArchiveStorageStream<T: Config> {
     at: HashFor<T>,
-    methods: ArchiveRpcMethods<RpcConfigFor<T>>,
+    methods: ChainHeadRpcMethods<RpcConfigFor<T>>,
     query_queue: VecDeque<ArchiveStorageQuery<Vec<u8>>>,
     state: Option<StreamState<T>>,
 }
@@ -31,7 +31,7 @@ impl <T: Config> ArchiveStorageStream<T> {
     /// Fetch descendant keys.
     pub fn new(
         at: HashFor<T>,
-        methods: ArchiveRpcMethods<RpcConfigFor<T>>,
+        methods: ChainHeadRpcMethods<RpcConfigFor<T>>,
         query_queue: VecDeque<ArchiveStorageQuery<Vec<u8>>>,
     ) -> Self {
         Self {

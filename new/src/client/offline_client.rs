@@ -22,8 +22,9 @@ impl<T: Config> OfflineClient<T> {
     /// [`OfflineClient`] it's called on, and so cannot outlive it.
     pub fn at(
         &self,
-        block_number: u32,
+        block_number: impl Into<u64>,
     ) -> Result<ClientAtBlock<OfflineClientAtBlock, T>, OfflineClientAtBlockError> {
+        let block_number = block_number.into();
         let spec_version = self
             .config
             .spec_version_for_block_number(block_number)

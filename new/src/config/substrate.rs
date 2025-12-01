@@ -20,7 +20,7 @@ use std::sync::Mutex;
 /// Construct a [`SubstrateConfig`] using this.
 pub struct SubstrateConfigBuilder {
     legacy_types: Option<ChainTypeRegistry>,
-    spec_version_for_block_number: RangeMap<u32, u32>,
+    spec_version_for_block_number: RangeMap<u64, u32>,
     metadata_for_spec_version: Mutex<HashMap<u32, Arc<Metadata>>>,
     use_old_v9_hashers_before_spec_version: u32,
 }
@@ -107,7 +107,7 @@ impl SubstrateConfigBuilder {
 pub struct SpecVersionForRange {
     /// The block range that this spec version applies to. Inclusive of the start
     /// and exclusive of the enc.
-    pub block_range: std::ops::Range<u32>,
+    pub block_range: std::ops::Range<u64>,
     /// The spec version at this block range.
     pub spec_version: u32,
 }
@@ -122,7 +122,7 @@ pub struct SubstrateConfig {
 #[derive(Debug)]
 struct SubstrateConfigInner {
     legacy_types: Option<ChainTypeRegistry>,
-    spec_version_for_block_number: RangeMap<u32, u32>,
+    spec_version_for_block_number: RangeMap<u64, u32>,
     metadata_for_spec_version: Mutex<HashMap<u32, Arc<Metadata>>>,
 }
 
@@ -149,7 +149,7 @@ impl Config for SubstrateConfig {
             .map(|types| types.for_spec_version(spec_version as u64))
     }
 
-    fn spec_version_for_block_number(&self, block_number: u32) -> Option<u32> {
+    fn spec_version_for_block_number(&self, block_number: u64) -> Option<u32> {
         self.inner.spec_version_for_block_number
             .get(block_number)
             .copied()
@@ -268,7 +268,7 @@ pub struct SubstrateHeader<Hash> {
         deserialize_with = "deserialize_number"
     )]
     #[codec(compact)]
-    pub number: u32,
+    pub number: u64,
     /// The state trie merkle root
     pub state_root: Hash,
     /// The merkle root of the extrinsics.
@@ -282,7 +282,7 @@ where
     H: Hash,
     SubstrateHeader<H>: Encode + Decode,
 {
-    fn number(&self) -> u32 {
+    fn number(&self) -> u64 {
         self.number.into()
     }
 }

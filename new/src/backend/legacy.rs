@@ -7,7 +7,7 @@
 
 mod descendant_streams;
 
-use self::rpc_methods::TransactionStatus as RpcTransactionStatus;
+use subxt_rpcs::methods::legacy::{ TransactionStatus as RpcTransactionStatus, LegacyRpcMethods };
 use crate::backend::utils::{retry, retry_stream};
 use crate::backend::{
     Backend, BlockRef, StorageResponse, StreamOf, StreamOfResults,
@@ -19,16 +19,9 @@ use async_trait::async_trait;
 use futures::TryStreamExt;
 use futures::{Future, Stream, StreamExt, future, future::Either, stream};
 use subxt_rpcs::RpcClient;
+use subxt_rpcs::methods::legacy::NumberOrHex;
 use codec::Encode;
 use descendant_streams::{StorageFetchDescendantKeysStream, StorageFetchDescendantValuesStream};
-
-/// Re-export legacy RPC types and methods from [`subxt_rpcs::methods::legacy`].
-pub mod rpc_methods {
-    pub use subxt_rpcs::methods::legacy::*;
-}
-
-// Expose the RPC methods.
-pub use rpc_methods::LegacyRpcMethods;
 
 /// Configure and build an [`LegacyBackend`].
 pub struct LegacyBackendBuilder<T> {
@@ -182,6 +175,18 @@ impl<T: Config> Backend<T> for LegacyBackend<T> {
             Ok(hash)
         })
         .await
+    }
+
+    async fn block_number_to_hash(&self, number: u64) -> Result<Option<BlockRef<HashFor<T>>>, BackendError> {
+        retry(|| async {
+            let number_or_hash = NumberOrHex::Number(number);
+            let hash = self
+                .methods
+                .chain_get_block_hash(Some(number_or_hash))
+                .await?
+                .map(BlockRef::from_hash);
+            Ok(hash)
+        }).await
     }
 
     async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, BackendError> {

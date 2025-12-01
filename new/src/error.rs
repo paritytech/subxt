@@ -171,7 +171,7 @@ pub enum OfflineClientAtBlockError {
     )]
     SpecVersionNotFound {
         /// The block number for which the spec version was not found.
-        block_number: u32,
+        block_number: u64,
     },
     #[error(
         "Cannot construct OfflineClientAtBlock: metadata not found for spec version {spec_version}"
@@ -193,6 +193,8 @@ pub enum OnlineClientError {
     },
     #[error("Cannot construct OnlineClient: {0}")]
     RpcError(#[from] subxt_rpcs::Error),
+    #[error("Could not construct the CombinedBackend: {0}")]
+    CannotBuildCombinedBackend(CombinedBackendError),
     #[error(
         "Cannot construct OnlineClient: Cannot fetch latest finalized block to obtain init details from: {0}"
     )]
@@ -229,38 +231,57 @@ pub enum OnlineClientAtBlockError {
         /// Block number we failed to get the hash for.
         block_number: u64,
         /// The error we encountered.
-        reason: subxt_rpcs::Error,
+        reason: BackendError,
     },
     #[error("Cannot construct OnlineClientAtBlock: block number {block_number} not found")]
     BlockNotFound {
         /// The block number for which a block was not found.
         block_number: u64,
     },
-    #[error(
-        "Cannot construct OnlineClientAtBlock: failed to get spec version for block hash {block_hash}: {reason}"
-    )]
+    #[error("Cannot construct OnlineClientAtBlock: cannot get the block header for block {block_hash}: {reason}")]
+    CannotGetBlockHeader {
+        /// Block hash that we failed to fetch the header for. 
+        block_hash: Hex,
+        /// The error we encountered.
+        reason: BackendError,
+    },
+    #[error("Cannot construct OnlineClientAtBlock: cannot find the block header for block {block_hash}")]
+    BlockHeaderNotFound {
+        /// Block hash that we failed to find the header for. 
+        block_hash: Hex,
+    },
+    #[error("Cannot construct OnlineClientAtBlock: failed to obtain spec version for block {block_hash}: {reason}")]
     CannotGetSpecVersion {
-        /// The block hash for which we failed to get the spec version.
-        block_hash: String,
+        /// The block hash for which we failed to obtain the spec version.
+        block_hash: Hex,
         /// The error we encountered.
-        reason: String,
+        reason: BackendError,
     },
     #[error(
-        "Cannot construct OnlineClientAtBlock: failed to get metadata for block hash {block_hash}: {reason}"
+        "Cannot construct OnlineClientAtBlock: failed to decode spec version for block {block_hash}: {reason}"
     )]
-    CannotGetMetadata {
-        /// The block hash for which we failed to get the metadata.
-        block_hash: String,
+    CannotDecodeSpecVersion {
+        /// The block hash for which we failed to decode the spec version.
+        block_hash: Hex,
         /// The error we encountered.
-        reason: String,
+        reason: codec::Error,
     },
-    #[error(
-        "Cannot inject types from metadata: failure to parse a type found in the metadata: {parse_error}"
-    )]
-    CannotInjectMetadataTypes {
-        /// Error parsing a type found in the metadata.
-        parse_error: scale_info_legacy::lookup_name::ParseError,
-    },
+    // #[error(
+    //     "Cannot construct OnlineClientAtBlock: failed to get metadata for block {block_hash}: {reason}"
+    // )]
+    // CannotGetMetadata {
+    //     /// The block hash for which we failed to get the metadata.
+    //     block_hash: Hex,
+    //     /// The error we encountered.
+    //     reason: String,
+    // },
+    // #[error(
+    //     "Cannot construct OnlineClientAtBlock: cannot inject types from metadata: failure to parse a type found in the metadata: {parse_error}"
+    // )]
+    // CannotInjectMetadataTypes {
+    //     /// Error parsing a type found in the metadata.
+    //     parse_error: scale_info_legacy::lookup_name::ParseError,
+    // },
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -306,6 +327,14 @@ impl From<subxt_rpcs::Error> for BackendError {
     fn from(value: subxt_rpcs::Error) -> Self {
         BackendError::Rpc(RpcError::ClientError(value))
     }
+}
+
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum CombinedBackendError {
+    #[error("Could not obtain the list of RPC methods to determine which backends can be used")]
+    CouldNotObtainRpcMethodList(subxt_rpcs::Error)
 }
 
 /// An RPC error. Since we are generic over the RPC client that is used,

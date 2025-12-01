@@ -13,6 +13,7 @@ mod follow_stream_driver;
 mod follow_stream_unpin;
 mod storage_items;
 
+use subxt_rpcs::methods::ChainHeadRpcMethods;
 use self::follow_stream_driver::FollowStreamFinalizedHeads;
 use crate::backend::{
     Backend, BlockRef, BlockRefT, StorageResponse, StreamOf, StreamOfResults,
@@ -31,9 +32,6 @@ use subxt_rpcs::RpcClient;
 use subxt_rpcs::methods::chain_head::{
     FollowEvent, MethodResponse, StorageQuery, StorageQueryType, StorageResultType,
 };
-
-// Expose the RPC methods.
-pub use subxt_rpcs::methods::chain_head::ChainHeadRpcMethods;
 
 /// Configure and build an [`ChainHeadBackend`].
 pub struct ChainHeadBackendBuilder<T> {
@@ -373,6 +371,10 @@ impl<T: Config> Backend<T> for ChainHeadBackend<T> {
             Ok(genesis_hash)
         })
         .await
+    }
+
+    async fn block_number_to_hash(&self, _number: u64) -> Result<Option<BlockRef<HashFor<T>>>, BackendError> {
+        Err(BackendError::other("The ChainHead V1 RPCs do not support obtaining a block hash from a number."))
     }
 
     async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, BackendError> {

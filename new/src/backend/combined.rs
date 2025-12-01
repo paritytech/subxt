@@ -8,19 +8,16 @@
 use crate::backend::chain_head::ChainHeadBackendDriver;
 use crate::backend::{
     legacy::LegacyBackend,
-    chain_head::{ChainHeadBackend, },
+    chain_head::ChainHeadBackend,
     archive::ArchiveBackend,
-    Backend, BlockRef, StorageResponse, StreamOf, StreamOfResults,
-    TransactionStatus, utils::retry,
+    Backend, BlockRef, StorageResponse, StreamOfResults,
+    TransactionStatus,
 };
-use crate::config::{Config, HashFor, RpcConfigFor};
-use crate::error::BackendError;
+use crate::config::{Config, HashFor};
+use crate::error::{BackendError, CombinedBackendError};
 use async_trait::async_trait;
 use futures::StreamExt;
 use subxt_rpcs::RpcClient;
-use subxt_rpcs::methods::chain_head::{
-    ArchiveStorageQuery, ArchiveCallResult, StorageQueryType,
-};
 use futures::Stream;
 use std::task::Poll;
 
@@ -89,13 +86,14 @@ impl <T: Config> CombinedBackendBuilder<T> {
     ///
     /// If you just want to run the driver in the background until completion in on the default runtime,
     /// use [`CombinedBackendBuilder::build_with_background_driver`] instead.
-    pub async fn build(self, rpc_client: impl Into<RpcClient>) -> Result<(CombinedBackend<T>, CombinedBackendDriver<T>), BackendError> {
+    pub async fn build(self, rpc_client: impl Into<RpcClient>) -> Result<(CombinedBackend<T>, CombinedBackendDriver<T>), CombinedBackendError> {
         let rpc_client = rpc_client.into();
     
         // What does the thing wer're talking to actually know about?
         let methods: Vec<String> = rpc_client
             .request("rpc_methods", subxt_rpcs::rpc_params![])
-            .await?;
+            .await
+            .map_err(CombinedBackendError::CouldNotObtainRpcMethodList)?;
 
         let has_archive_methods = methods.iter().any(|m| m.starts_with("archive_v1_"));
         let has_chainhead_methods = methods.iter().any(|m| m.starts_with("chainHead_v1"));
@@ -143,8 +141,10 @@ impl <T: Config> CombinedBackendBuilder<T> {
     /// - On non-wasm targets, this will spawn the driver on `tokio`.
     /// - On wasm targets, this will spawn the driver on `wasm-bindgen-futures`.
     #[cfg(feature = "runtime")]
-    pub async fn build_with_background_driver(self, client: impl Into<RpcClient>) -> Result<CombinedBackend<T>, BackendError> {
-        let (backend, mut driver) = self.build(client).await?;
+    pub async fn build_with_background_driver(self, client: impl Into<RpcClient>) -> Result<CombinedBackend<T>, CombinedBackendError> {
+        let (backend, mut driver) = self
+            .build(client)
+            .await?;
 
         super::utils::spawn(async move {
             // NOTE: we need to poll the driver until it's done i.e returns None
@@ -201,29 +201,41 @@ impl <T: Config> CombinedBackend<T> {
     pub fn builder() -> CombinedBackendBuilder<T> {
         CombinedBackendBuilder::new()
     }
+
+    fn archive(&self) -> Option<&dyn Backend<T>> {
+        self.archive.as_ref().map(|a| {
+            let a: &dyn Backend<T> = a;
+            a
+        })
+    }
+
+    fn chainhead(&self) -> Option<&dyn Backend<T>> {
+        self.chainhead.as_ref().map(|a| {
+            let a: &dyn Backend<T> = a;
+            a
+        })
+    }
+
+    fn legacy(&self) -> Option<&dyn Backend<T>> {
+        self.legacy.as_ref().map(|a| {
+            let a: &dyn Backend<T> = a;
+            a
+        })
+    }
 }
 
 impl<T: Config> super::sealed::Sealed for CombinedBackend<T> {}
 
-static NO_AVAILABLE_BACKEND: &str = "No available RPC methods to use. `no_default_backends` was used, but no applicable backends were then provided.";
-
-macro_rules! call_backends {
-    ({$($backend_name:ident)|+}. $method_name:ident ( $($arg:expr),* )) => {{
-        let mut err = BackendError::other(NO_AVAILABLE_BACKEND);
-        
-        $(
-            if let Some(backend) = &self.$backend_name {
-                err = match backend.$method_name($( $arg, )*).await {
-                    Ok(res) => return Ok(res),
-                    Err(e) => e
-                }
-            }
-        )+
-
-        return Err(err)
-    }}
-}
-
+// Our default behaviour:
+// - Try the archive backend first if it's available. Why? It has all block headers/bodies
+//   etc so it's mroe likely to succeed than chainHead backend and give back things that won't
+//   expire.
+// - If archive calls aren't available, fall back to the chainHead backend. Blocks given back
+//   by this are more likely to expire.
+// - If neither exists / works, we fall back to the legacy methods. These have some limits on
+//   what is available (often fewer limits than chainHead though) but tend to do the job. We'd
+//   rather not use these as they are old and should go away, but until then they are a good 
+//   fallback.
 #[async_trait]
 impl<T: Config> Backend<T> for CombinedBackend<T> {
     async fn storage_fetch_values(
@@ -231,7 +243,13 @@ impl<T: Config> Backend<T> for CombinedBackend<T> {
         keys: Vec<Vec<u8>>,
         at: HashFor<T>,
     ) -> Result<StreamOfResults<StorageResponse>, BackendError> {
-        call_backends!({archive|chainhead|legacy}.storage_fetch_values(keys, at))
+        try_backends(&[
+            self.archive(),
+            self.chainhead(),
+            self.legacy()
+        ], async |b: &dyn Backend<T>| {
+            b.storage_fetch_values(keys.clone(), at).await
+        }).await
     }
 
     async fn storage_fetch_descendant_keys(
@@ -239,7 +257,13 @@ impl<T: Config> Backend<T> for CombinedBackend<T> {
         key: Vec<u8>,
         at: HashFor<T>,
     ) -> Result<StreamOfResults<Vec<u8>>, BackendError> {
-
+        try_backends(&[
+            self.archive(),
+            self.chainhead(),
+            self.legacy()
+        ], async |b: &dyn Backend<T>| {
+            b.storage_fetch_descendant_keys(key.clone(), at).await
+        }).await
     }
 
     async fn storage_fetch_descendant_values(
@@ -247,51 +271,123 @@ impl<T: Config> Backend<T> for CombinedBackend<T> {
         key: Vec<u8>,
         at: HashFor<T>,
     ) -> Result<StreamOfResults<StorageResponse>, BackendError> {
-
+        try_backends(&[
+            self.archive(),
+            self.chainhead(),
+            self.legacy()
+        ], async |b: &dyn Backend<T>| {
+            b.storage_fetch_descendant_values(key.clone(), at).await
+        }).await
     }
 
     async fn genesis_hash(&self) -> Result<HashFor<T>, BackendError> {
+        try_backends(&[
+            self.archive(),
+            self.chainhead(),
+            self.legacy()
+        ], async |b: &dyn Backend<T>| {
+            b.genesis_hash().await
+        }).await
+    }
 
+    async fn block_number_to_hash(&self, number: u64) -> Result<Option<BlockRef<HashFor<T>>>, BackendError> {
+        try_backends(&[
+            self.archive(),
+            self.legacy(),
+            // chainHead last as it cannot handle this request and will fail, so it's here
+            // just to hand back a more relevant error in case the above two backends aren't
+            // enabled or have some issue.
+            self.chainhead()
+        ], async |b: &dyn Backend<T>| {
+            b.block_number_to_hash(number).await
+        }).await
     }
 
     async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, BackendError> {
-
+        try_backends(&[
+            self.archive(),
+            self.chainhead(),
+            self.legacy()
+        ], async |b: &dyn Backend<T>| {
+            b.block_header(at).await
+        }).await
     }
 
     async fn block_body(&self, at: HashFor<T>) -> Result<Option<Vec<Vec<u8>>>, BackendError> {
-
+        try_backends(&[
+            self.archive(),
+            self.chainhead(),
+            self.legacy()
+        ], async |b: &dyn Backend<T>| {
+            b.block_body(at).await
+        }).await
     }
 
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<HashFor<T>>, BackendError> {
-
+        try_backends(&[
+            // Prioritize chainHead backend since it's streaming these things; save another call.
+            self.chainhead(),
+            self.archive(),
+            self.legacy()
+        ], async |b: &dyn Backend<T>| {
+            b.latest_finalized_block_ref().await
+        }).await
     }
 
     async fn stream_all_block_headers(
         &self,
-        _hasher: T::Hasher,
+        hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
-
+        try_backends(&[
+            // Ignore archive backend; it doesn't support this.
+            self.chainhead(),
+            self.legacy()
+        ], async |b: &dyn Backend<T>| {
+            b.stream_all_block_headers(hasher.clone()).await
+        }).await
     }
 
     async fn stream_best_block_headers(
         &self,
-        _hasher: T::Hasher,
+        hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
-
+        try_backends(&[
+            // Ignore archive backend; it doesn't support this.
+            self.chainhead(),
+            self.legacy()
+        ], async |b: &dyn Backend<T>| {
+            b.stream_best_block_headers(hasher.clone()).await
+        }).await
     }
 
     async fn stream_finalized_block_headers(
         &self,
-        _hasher: T::Hasher,
+        hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
-    
+        try_backends(&[
+            // Ignore archive backend; it doesn't support this.
+            self.chainhead(),
+            self.legacy()
+        ], async |b: &dyn Backend<T>| {
+            b.stream_finalized_block_headers(hasher.clone()).await
+        }).await
     }
 
     async fn submit_transaction(
         &self,
         extrinsic: &[u8],
     ) -> Result<StreamOfResults<TransactionStatus<HashFor<T>>>, BackendError> {
-
+        try_backends(&[
+            // chainHead first as it does the same as the archive backend, but with better
+            // guarantees around the block handed back being pinned & ready to access.
+            self.chainhead(),
+            self.legacy(),
+            // archive last just incase chainHead & legacy fail or aren't provided for some 
+            // reason.
+            self.archive(),
+        ], async |b: &dyn Backend<T>| {
+            b.submit_transaction(extrinsic).await
+        }).await
     }
 
     async fn call(
@@ -300,6 +396,36 @@ impl<T: Config> Backend<T> for CombinedBackend<T> {
         call_parameters: Option<&[u8]>,
         at: HashFor<T>,
     ) -> Result<Vec<u8>, BackendError> {
-
+        try_backends(&[
+            self.archive(),
+            self.chainhead(),
+            self.legacy()
+        ], async |b: &dyn Backend<T>| {
+            b.call(method, call_parameters, at).await
+        }).await
     }
+}
+
+/// Call one backend after the other in the list until we get a successful result back.
+async fn try_backends<'s, 'b, T, Func, Fut, O>(
+    backends: &'s [Option<&'b dyn Backend<T>>],
+    mut f: Func
+) -> Result<O, BackendError>
+where
+    'b: 's,
+    T: Config,
+    Func: FnMut(&'b dyn Backend<T>) -> Fut,
+    Fut: Future<Output = Result<O, BackendError>> + 'b,
+{
+    static NO_AVAILABLE_BACKEND: &str = "None of the configured backends are capable of handling this request";
+    let mut err = BackendError::other(NO_AVAILABLE_BACKEND);
+
+    for backend in backends.into_iter().filter_map(|b| *b) {
+        match f(backend).await {
+            Ok(res) => return Ok(res),
+            Err(e) => { err = e }
+        }
+    }
+
+    Err(err)
 }
