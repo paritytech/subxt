@@ -4,6 +4,7 @@ mod online_client;
 use crate::config::Config;
 use crate::extrinsics::ExtrinsicsClient;
 use crate::storage::StorageClient;
+use frame_metadata::RuntimeMetadata;
 use std::marker::PhantomData;
 
 // We keep these traits internal, so that we can mess with them later if needed,
@@ -43,5 +44,10 @@ where
     /// Work with storage.
     pub fn storage(&'_ self) -> StorageClient<'_, Client, T> {
         StorageClient::new(&self.client)
+    }
+
+    /// Return the metadata in use at this block.
+    pub fn metadata(&self) -> &RuntimeMetadata {
+        self.client.metadata()
     }
 }
