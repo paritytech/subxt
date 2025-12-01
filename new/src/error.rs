@@ -266,15 +266,43 @@ pub enum OnlineClientAtBlockError {
         /// The error we encountered.
         reason: codec::Error,
     },
-    // #[error(
-    //     "Cannot construct OnlineClientAtBlock: failed to get metadata for block {block_hash}: {reason}"
-    // )]
-    // CannotGetMetadata {
-    //     /// The block hash for which we failed to get the metadata.
-    //     block_hash: Hex,
-    //     /// The error we encountered.
-    //     reason: String,
-    // },
+    #[error(
+        "Cannot construct OnlineClientAtBlock: failed to get metadata for block {block_hash}: {reason}"
+    )]
+    CannotGetMetadata {
+        /// The block hash for which we failed to get the metadata.
+        block_hash: Hex,
+        /// The error we encountered.
+        reason: String,
+    },
+    #[error("Cannot construct OnlineClientAtBlock: Metadata V{version} (required at block {block_hash} is not supported.")]
+    UnsupportedMetadataVersion {
+        /// The block hash that requires the unsupported version.
+        block_hash: Hex,
+        /// The unsupported metadata version.
+        version: u32,
+    },
+    #[error("Cannot construct OnlineClientAtBlock: No legacy types were provided but we're trying to access a block that requires them.")]
+    MissingLegacyTypes,
+    #[error("Cannot construct OnlineClientAtBlock: unable to convert legacy metadata (required at block {block_hash}): {reason}")]
+    CannotConvertLegacyMetadata {
+        /// The block hash that requires legacy types.
+        block_hash: Hex,
+        /// The metadata version.
+        metadata_version: u32,
+        /// Reason the conversion failed.
+        reason: subxt_metadata::LegacyFromError
+    },
+    #[error("Cannot construct OnlineClientAtBlock: unable to convert modern metadata (required at block {block_hash}): {reason}")]
+    CannotConvertModernMetadata {
+        /// The block hash that requires legacy types.
+        block_hash: Hex,
+        /// The metadata version.
+        metadata_version: u32,
+        /// Reason the conversion failed.
+        reason: subxt_metadata::TryFromError
+    }
+
     // #[error(
     //     "Cannot construct OnlineClientAtBlock: cannot inject types from metadata: failure to parse a type found in the metadata: {parse_error}"
     // )]

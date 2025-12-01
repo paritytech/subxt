@@ -20,7 +20,7 @@ impl<T: Config> OfflineClient<T> {
 
     /// Pick the block height at which to operate. This references data from the
     /// [`OfflineClient`] it's called on, and so cannot outlive it.
-    pub fn at(
+    pub fn at_block(
         &self,
         block_number: impl Into<u64>,
     ) -> Result<ClientAtBlock<OfflineClientAtBlock, T>, OfflineClientAtBlockError> {
