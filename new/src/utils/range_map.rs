@@ -106,11 +106,11 @@ pub enum RangeMapError<K: Display> {
     EmptyRange(K),
     /// An error indicating that the proposed block range overlaps with an existing one.
     #[error("Overlapping block ranges are not allowed: proposed range is {}..{}, but we already have {}..{}", proposed.0, proposed.1, existing.0, existing.1)]
-    OverlappingRanges { 
+    OverlappingRanges {
         /// The range being proposed / added.
-        proposed: (K, K), 
+        proposed: (K, K),
         /// The existing range which overlaps.
-        existing: (K, K) 
+        existing: (K, K),
     },
 }
 

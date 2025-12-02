@@ -11,9 +11,9 @@ use crate::{
     config::{Config, HashFor},
     error::ExtrinsicParamsError,
 };
-use subxt_metadata::Metadata;
-use std::sync::Arc;
 use core::any::Any;
+use std::sync::Arc;
+use subxt_metadata::Metadata;
 
 /// This provides access to some relevant client state in transaction extensions,
 /// and is just a combination of some of the available properties.

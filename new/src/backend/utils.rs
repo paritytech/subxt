@@ -6,7 +6,7 @@ use futures::{FutureExt, Stream, StreamExt};
 use std::{future::Future, pin::Pin, task::Poll};
 
 /// Spawn a task.
-/// 
+///
 /// - On non-wasm targets, this will spawn a task via [`tokio::spawn`].
 /// - On wasm targets, this will spawn a task via [`wasm_bindgen_futures::spawn_local`].
 #[cfg(feature = "runtime")]
@@ -133,7 +133,7 @@ enum RetrySubscriptionState<R, T> {
 
 impl<F, R, T> std::marker::Unpin for RetrySubscription<F, R, T> {}
 
-impl<F, R, T> Stream for RetrySubscription<F, R, T> 
+impl<F, R, T> Stream for RetrySubscription<F, R, T>
 where
     F: FnMut() -> R,
     R: Future<Output = Result<StreamOfResults<T>, BackendError>> + Unpin,
@@ -148,7 +148,7 @@ where
             match &mut self.state {
                 RetrySubscriptionState::Init => {
                     self.state = RetrySubscriptionState::Pending((self.resubscribe)());
-                },
+                }
                 RetrySubscriptionState::Stream(s) => match s.poll_next_unpin(cx) {
                     Poll::Ready(Some(Err(err))) => {
                         if err.is_disconnected_will_reconnect() {
@@ -158,7 +158,7 @@ where
                     }
                     Poll::Ready(None) => {
                         self.state = RetrySubscriptionState::Done;
-                        return Poll::Ready(None)
+                        return Poll::Ready(None);
                     }
                     Poll::Ready(Some(Ok(val))) => {
                         return Poll::Ready(Some(Ok(val)));
@@ -182,9 +182,7 @@ where
                         return Poll::Pending;
                     }
                 },
-                RetrySubscriptionState::Done => {
-                    return Poll::Ready(None)
-                }
+                RetrySubscriptionState::Done => return Poll::Ready(None),
             };
         }
     }

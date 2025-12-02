@@ -19,10 +19,10 @@ use codec::{Decode, Encode};
 use core::fmt::Debug;
 use scale_decode::DecodeAsType;
 use scale_encode::EncodeAsType;
-use serde::{Serialize, de::DeserializeOwned};
-use subxt_metadata::Metadata;
-use std::{fmt::Display, marker::PhantomData, sync::Arc};
 use scale_info_legacy::TypeRegistrySet;
+use serde::{Serialize, de::DeserializeOwned};
+use std::{fmt::Display, marker::PhantomData, sync::Arc};
+use subxt_metadata::Metadata;
 use subxt_rpcs::RpcConfig;
 
 pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
@@ -32,7 +32,7 @@ pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsi
 pub use transaction_extensions::TransactionExtension;
 
 /// Configuration for a given chain and the runtimes within. This consists of the
-/// type information needed to work at the head of the chain (namely submitting 
+/// type information needed to work at the head of the chain (namely submitting
 /// transactions), as well as functionality which we might wish to customize for a
 /// given chain.
 pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
@@ -72,27 +72,20 @@ pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     /// The [`crate::client::OnlineClient`] will look this up on chain if it's not available here, and then
     /// call [`Config::set_metadata_for_spec_version`] to give the configuration the opportunity to cache it.
     /// The [`crate::client::OfflineClient`] will error if this is not available for the required spec version.
-    fn metadata_for_spec_version(
-        &self,
-        _spec_version: u32,
-    ) -> Option<Arc<Metadata>> {
+    fn metadata_for_spec_version(&self, _spec_version: u32) -> Option<Arc<Metadata>> {
         None
     }
 
     /// Set some metadata for a given spec version. the [`crate::client::OnlineClient`] will call this if it has
     /// to retrieve metadata from the chain, to give this the opportunity to cache it. The configuration can
     /// do nothing if it prefers.
-    fn set_metadata_for_spec_version(
-        &self,
-        _spec_version: u32,
-        _metadata: Arc<Metadata>,
-    ) {}
+    fn set_metadata_for_spec_version(&self, _spec_version: u32, _metadata: Arc<Metadata>) {}
 
     /// Return legacy types (ie types to use with Runtimes that return pre-V14 metadata) for a given spec version.
-    /// If this returns `None`, [`subxt`] will return an error if type definitions are needed to access some older 
+    /// If this returns `None`, [`subxt`] will return an error if type definitions are needed to access some older
     /// block.
-    /// 
-    /// This doesn't need to live for long; it will be used to translate any older metadata returned from the node 
+    ///
+    /// This doesn't need to live for long; it will be used to translate any older metadata returned from the node
     /// into our [`Metadata`] type, which will then be used.
     fn legacy_types_for_spec_version<'this>(
         &'this self,
@@ -105,14 +98,14 @@ pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
 /// `RpcConfigFor<Config>` can be used anywhere which requires an implementation of [`subxt_rpcs::RpcConfig`].
 /// This is only needed at the type level, and so there is no way to construct this.
 pub struct RpcConfigFor<T> {
-    marker: PhantomData<T>
+    marker: PhantomData<T>,
 }
 
-impl <T: Config> RpcConfig for RpcConfigFor<T> {
+impl<T: Config> RpcConfig for RpcConfigFor<T> {
     type Hash = HashFor<T>;
     type Header = T::Header;
     type AccountId = T::AccountId;
-} 
+}
 
 /// Given some [`Config`], this returns the type of hash used.
 pub type HashFor<T> = <<T as Config>::Hasher as Hasher>::Hash;

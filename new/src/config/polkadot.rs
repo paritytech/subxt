@@ -7,11 +7,11 @@
 use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
 
 use crate::config::substrate::{SubstrateConfig, SubstrateConfigBuilder};
-use std::sync::Arc;
 use scale_info_legacy::TypeRegistrySet;
+use std::sync::Arc;
 use subxt_metadata::Metadata;
 
-pub use crate::config::substrate::{ SpecVersionForRange, SubstrateHeader };
+pub use crate::config::substrate::{SpecVersionForRange, SubstrateHeader};
 pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
 pub use primitive_types::{H256, U256};
 
@@ -79,18 +79,11 @@ impl Config for PolkadotConfig {
         self.0.spec_version_for_block_number(block_number)
     }
 
-    fn metadata_for_spec_version(
-        &self,
-        spec_version: u32,
-    ) -> Option<Arc<Metadata>> {
+    fn metadata_for_spec_version(&self, spec_version: u32) -> Option<Arc<Metadata>> {
         self.0.metadata_for_spec_version(spec_version)
     }
 
-    fn set_metadata_for_spec_version(
-        &self,
-        spec_version: u32,
-        metadata: Arc<Metadata>,
-    ) {
+    fn set_metadata_for_spec_version(&self, spec_version: u32, metadata: Arc<Metadata>) {
         self.0.set_metadata_for_spec_version(spec_version, metadata)
     }
 }

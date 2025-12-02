@@ -5,7 +5,7 @@
 //! This module exposes a backend implementation based on the new APIs
 //! described at <https://github.com/paritytech/json-rpc-interface-spec/>. See
 //! [`rpc_methods`] for the raw API calls.
-//! 
+//!
 //! Specifically, the focus here is on the `chainHead` methods.
 
 mod follow_stream;
@@ -13,11 +13,10 @@ mod follow_stream_driver;
 mod follow_stream_unpin;
 mod storage_items;
 
-use subxt_rpcs::methods::ChainHeadRpcMethods;
 use self::follow_stream_driver::FollowStreamFinalizedHeads;
 use crate::backend::{
-    Backend, BlockRef, BlockRefT, StorageResponse, StreamOf, StreamOfResults,
-    TransactionStatus, utils::retry,
+    Backend, BlockRef, BlockRefT, StorageResponse, StreamOf, StreamOfResults, TransactionStatus,
+    utils::retry,
 };
 use crate::config::{Config, Hash, HashFor, RpcConfigFor};
 use crate::error::{BackendError, RpcError};
@@ -29,6 +28,7 @@ use std::collections::HashMap;
 use std::task::Poll;
 use storage_items::StorageItems;
 use subxt_rpcs::RpcClient;
+use subxt_rpcs::methods::ChainHeadRpcMethods;
 use subxt_rpcs::methods::chain_head::{
     FollowEvent, MethodResponse, StorageQuery, StorageQueryType, StorageResultType,
 };
@@ -151,7 +151,7 @@ impl<T: Config> ChainHeadBackendBuilder<T> {
     #[cfg(feature = "runtime")]
     pub fn build_with_background_driver(self, client: impl Into<RpcClient>) -> ChainHeadBackend<T> {
         let (backend, mut driver) = self.build(client);
-        
+
         super::utils::spawn(async move {
             // NOTE: we need to poll the driver until it's done i.e returns None
             // to ensure that the backend is shutdown properly.
@@ -373,8 +373,13 @@ impl<T: Config> Backend<T> for ChainHeadBackend<T> {
         .await
     }
 
-    async fn block_number_to_hash(&self, _number: u64) -> Result<Option<BlockRef<HashFor<T>>>, BackendError> {
-        Err(BackendError::other("The ChainHead V1 RPCs do not support obtaining a block hash from a number."))
+    async fn block_number_to_hash(
+        &self,
+        _number: u64,
+    ) -> Result<Option<BlockRef<HashFor<T>>>, BackendError> {
+        Err(BackendError::other(
+            "The ChainHead V1 RPCs do not support obtaining a block hash from a number.",
+        ))
     }
 
     async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, BackendError> {
@@ -567,24 +572,29 @@ pub(crate) async fn submit_transaction_ignoring_follow_events<T: Config>(
                     RpcTransactionStatus::Broadcasted => TransactionStatus::Broadcasted,
                     RpcTransactionStatus::BestChainBlockIncluded { block: None } => {
                         TransactionStatus::NoLongerInBestBlock
-                    },
+                    }
                     RpcTransactionStatus::BestChainBlockIncluded { block: Some(block) } => {
-                        TransactionStatus::InBestBlock { hash: BlockRef::from_hash(block.hash) }
-                    },
+                        TransactionStatus::InBestBlock {
+                            hash: BlockRef::from_hash(block.hash),
+                        }
+                    }
                     RpcTransactionStatus::Finalized { block } => {
-                        TransactionStatus::InFinalizedBlock { hash: BlockRef::from_hash(block.hash) }
-                    },
+                        TransactionStatus::InFinalizedBlock {
+                            hash: BlockRef::from_hash(block.hash),
+                        }
+                    }
                     RpcTransactionStatus::Error { error } => {
                         TransactionStatus::Error { message: error }
-                    },
+                    }
                     RpcTransactionStatus::Invalid { error } => {
                         TransactionStatus::Invalid { message: error }
-                    },
+                    }
                     RpcTransactionStatus::Dropped { error } => {
                         TransactionStatus::Dropped { message: error }
-                    },
+                    }
                 }
-            }).map_err(Into::into)
+            })
+            .map_err(Into::into)
         });
 
     Ok(StreamOf(Box::pin(tx_progress)))
@@ -644,9 +654,7 @@ async fn submit_transaction_tracking_follow_events<T: Config>(
             // Poll for a follow event, and error if the stream has unexpectedly ended.
             let follow_ev_poll = match seen_blocks_sub.poll_next_unpin(cx) {
                 Poll::Ready(None) => {
-                    return Poll::Ready(err_other(
-                        "chainHead_follow stream ended unexpectedly",
-                    ));
+                    return Poll::Ready(err_other("chainHead_follow stream ended unexpectedly"));
                 }
                 Poll::Ready(Some(follow_ev)) => Poll::Ready(follow_ev),
                 Poll::Pending => Poll::Pending,
@@ -671,10 +679,8 @@ async fn submit_transaction_tracking_follow_events<T: Config>(
                     }
                     FollowEvent::Finalized(ev) => {
                         for block_ref in ev.finalized_block_hashes {
-                            seen_blocks.insert(
-                                block_ref.hash(),
-                                (SeenBlockMarker::Finalized, block_ref),
-                            );
+                            seen_blocks
+                                .insert(block_ref.hash(), (SeenBlockMarker::Finalized, block_ref));
                         }
                     }
                     FollowEvent::Stop => {
@@ -694,9 +700,7 @@ async fn submit_transaction_tracking_follow_events<T: Config>(
             // If we have a finalized hash, we are done looking for tx events and we are just waiting
             // for a pinned block with a matching hash (which must appear eventually given it's finalized).
             if let Some(hash) = &finalized_hash {
-                if let Some((SeenBlockMarker::Finalized, block_ref)) =
-                    seen_blocks.remove(hash)
-                {
+                if let Some((SeenBlockMarker::Finalized, block_ref)) = seen_blocks.remove(hash) {
                     // Found it! Hand back the event with a pinned block. We're done.
                     done = true;
                     let ev = TransactionStatus::InFinalizedBlock {

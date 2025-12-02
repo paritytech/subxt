@@ -9,10 +9,10 @@
 //! runtime APIs. Deriving `EncodeAsType` would lead to the inner
 //! bytes to be re-encoded (length prefixed).
 
-use core::marker::PhantomData;
-use codec::{Decode, Encode};
-use scale_decode::{DecodeAsType, IntoVisitor, TypeResolver, Visitor, visitor::DecodeAsTypeResult};
 use super::{Encoded, Static};
+use codec::{Decode, Encode};
+use core::marker::PhantomData;
+use scale_decode::{DecodeAsType, IntoVisitor, TypeResolver, Visitor, visitor::DecodeAsTypeResult};
 
 /// The unchecked extrinsic from substrate.
 #[derive(Clone, Debug, Eq, PartialEq, Encode)]

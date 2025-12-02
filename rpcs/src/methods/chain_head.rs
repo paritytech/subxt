@@ -15,8 +15,8 @@ use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::{HashMap, VecDeque};
 use std::task::Poll;
 
-/// An interface to call the new ["chainHead" RPC methods](https://paritytech.github.io/json-rpc-interface-spec/). 
-/// This interface is instantiated with some `T: RpcConfig` trait which determines some of the types that 
+/// An interface to call the new ["chainHead" RPC methods](https://paritytech.github.io/json-rpc-interface-spec/).
+/// This interface is instantiated with some `T: RpcConfig` trait which determines some of the types that
 /// the RPC methods will take or hand back.
 #[derive_where(Clone, Debug)]
 pub struct ChainHeadRpcMethods<T> {
@@ -730,8 +730,8 @@ pub struct ArchiveStorageQuery<Key> {
     /// The type of the storage query.
     #[serde(rename = "type")]
     pub query_type: StorageQueryType,
-    /// This parameter is optional and should be a string containing the hexadecimal-encoded key 
-    /// from which the storage iteration should resume. This parameter is only valid in the context 
+    /// This parameter is optional and should be a string containing the hexadecimal-encoded key
+    /// from which the storage iteration should resume. This parameter is only valid in the context
     /// of `descendantsValues` and `descendantsHashes`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pagination_start_key: Option<Key>,

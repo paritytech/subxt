@@ -7,21 +7,20 @@
 
 mod descendant_streams;
 
-use subxt_rpcs::methods::legacy::{ TransactionStatus as RpcTransactionStatus, LegacyRpcMethods };
 use crate::backend::utils::{retry, retry_stream};
 use crate::backend::{
-    Backend, BlockRef, StorageResponse, StreamOf, StreamOfResults,
-    TransactionStatus,
+    Backend, BlockRef, StorageResponse, StreamOf, StreamOfResults, TransactionStatus,
 };
 use crate::config::{Config, HashFor, Hasher, Header, RpcConfigFor};
 use crate::error::BackendError;
 use async_trait::async_trait;
+use codec::Encode;
+use descendant_streams::{StorageFetchDescendantKeysStream, StorageFetchDescendantValuesStream};
 use futures::TryStreamExt;
 use futures::{Future, Stream, StreamExt, future, future::Either, stream};
 use subxt_rpcs::RpcClient;
 use subxt_rpcs::methods::legacy::NumberOrHex;
-use codec::Encode;
-use descendant_streams::{StorageFetchDescendantKeysStream, StorageFetchDescendantValuesStream};
+use subxt_rpcs::methods::legacy::{LegacyRpcMethods, TransactionStatus as RpcTransactionStatus};
 
 /// Configure and build an [`LegacyBackend`].
 pub struct LegacyBackendBuilder<T> {
@@ -135,7 +134,7 @@ impl<T: Config> Backend<T> for LegacyBackend<T> {
             self.methods.clone(),
             key,
             at,
-            self.storage_page_size
+            self.storage_page_size,
         );
 
         let keys = keys.flat_map(|keys| {
@@ -163,7 +162,7 @@ impl<T: Config> Backend<T> for LegacyBackend<T> {
             self.methods.clone(),
             key,
             at,
-            self.storage_page_size
+            self.storage_page_size,
         );
 
         Ok(StreamOf(Box::pin(values_stream)))
@@ -177,7 +176,10 @@ impl<T: Config> Backend<T> for LegacyBackend<T> {
         .await
     }
 
-    async fn block_number_to_hash(&self, number: u64) -> Result<Option<BlockRef<HashFor<T>>>, BackendError> {
+    async fn block_number_to_hash(
+        &self,
+        number: u64,
+    ) -> Result<Option<BlockRef<HashFor<T>>>, BackendError> {
         retry(|| async {
             let number_or_hash = NumberOrHex::Number(number);
             let hash = self
@@ -186,7 +188,8 @@ impl<T: Config> Backend<T> for LegacyBackend<T> {
                 .await?
                 .map(BlockRef::from_hash);
             Ok(hash)
-        }).await
+        })
+        .await
     }
 
     async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, BackendError> {

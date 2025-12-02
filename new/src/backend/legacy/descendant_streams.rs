@@ -1,12 +1,12 @@
-use crate::backend::utils::retry;
+use super::LegacyRpcMethods;
 use crate::backend::StorageResponse;
+use crate::backend::utils::retry;
 use crate::config::{Config, HashFor, RpcConfigFor};
 use crate::error::BackendError;
 use futures::{Future, FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use super::LegacyRpcMethods;
 
 /// This provides a stream of values given some prefix `key`. It
 /// internally manages pagination and such.
@@ -26,7 +26,7 @@ pub struct StorageFetchDescendantKeysStream<T: Config> {
     done: bool,
 }
 
-impl <T: Config> StorageFetchDescendantKeysStream<T> {
+impl<T: Config> StorageFetchDescendantKeysStream<T> {
     /// Fetch descendant keys.
     pub fn new(
         methods: LegacyRpcMethods<RpcConfigFor<T>>,
@@ -91,7 +91,7 @@ impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
 
                         // Error getting keys? Return it.
                         return Poll::Ready(Some(Err(e)));
-                    },
+                    }
                     Poll::Pending => {
                         this.keys_fut = Some(keys_fut);
                         return Poll::Pending;
@@ -142,7 +142,7 @@ pub struct StorageFetchDescendantValuesStream<T: Config> {
     results: VecDeque<(Vec<u8>, Vec<u8>)>,
 }
 
-impl <T: Config> StorageFetchDescendantValuesStream<T> {
+impl<T: Config> StorageFetchDescendantValuesStream<T> {
     /// Fetch descendant values.
     pub fn new(
         methods: LegacyRpcMethods<RpcConfigFor<T>>,
@@ -201,7 +201,7 @@ impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
                             continue;
                         }
 
-                        return Poll::Ready(Some(Err(e)))
+                        return Poll::Ready(Some(Err(e)));
                     }
                     Poll::Pending => {
                         this.results_fut = Some(results_fut);

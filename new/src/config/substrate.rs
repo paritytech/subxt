@@ -6,16 +6,16 @@
 
 use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, Hasher, Header};
 use crate::config::Hash;
+use crate::utils::RangeMap;
 pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
 use codec::{Decode, Encode};
 pub use primitive_types::{H256, U256};
-use serde::{Deserialize, Serialize};
-use subxt_metadata::Metadata;
-use crate::utils::RangeMap;
 use scale_info_legacy::{ChainTypeRegistry, TypeRegistrySet};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::Mutex;
+use subxt_metadata::Metadata;
 
 /// Construct a [`SubstrateConfig`] using this.
 pub struct SubstrateConfigBuilder {
@@ -81,22 +81,19 @@ impl SubstrateConfigBuilder {
 
     /// The storage hasher encoding/decoding changed during V9 metadata. By default we support the "new" version
     /// of things. We can use this option to support the old version of things prior to a given spec version.
-    pub fn use_old_v9_hashers_before_spec_version(
-        mut self,
-        spec_version: u32
-    ) -> Self {
+    pub fn use_old_v9_hashers_before_spec_version(mut self, spec_version: u32) -> Self {
         self.use_old_v9_hashers_before_spec_version = spec_version;
         self
     }
 
     /// Construct the [`SubstrateConfig`] from this builder.
     pub fn build(self) -> SubstrateConfig {
-        SubstrateConfig { 
+        SubstrateConfig {
             inner: Arc::new(SubstrateConfigInner {
                 legacy_types: self.legacy_types,
                 spec_version_for_block_number: self.spec_version_for_block_number,
                 metadata_for_spec_version: self.metadata_for_spec_version,
-            })
+            }),
         }
     }
 }
@@ -116,7 +113,7 @@ pub struct SpecVersionForRange {
 /// that have not customized the block hash type).
 #[derive(Debug, Clone)]
 pub struct SubstrateConfig {
-    inner: Arc<SubstrateConfigInner>
+    inner: Arc<SubstrateConfigInner>,
 }
 
 #[derive(Debug)]
@@ -150,15 +147,13 @@ impl Config for SubstrateConfig {
     }
 
     fn spec_version_for_block_number(&self, block_number: u64) -> Option<u32> {
-        self.inner.spec_version_for_block_number
+        self.inner
+            .spec_version_for_block_number
             .get(block_number)
             .copied()
     }
 
-    fn metadata_for_spec_version(
-        &self,
-        spec_version: u32,
-    ) -> Option<Arc<Metadata>> {
+    fn metadata_for_spec_version(&self, spec_version: u32) -> Option<Arc<Metadata>> {
         self.inner
             .metadata_for_spec_version
             .lock()
@@ -167,11 +162,7 @@ impl Config for SubstrateConfig {
             .cloned()
     }
 
-    fn set_metadata_for_spec_version(
-        &self,
-        spec_version: u32,
-        metadata: Arc<Metadata>,
-    ) {
+    fn set_metadata_for_spec_version(&self, spec_version: u32, metadata: Arc<Metadata>) {
         self.inner
             .metadata_for_spec_version
             .lock()

@@ -103,7 +103,9 @@ impl<Hash> FollowStream<Hash> {
     }
 
     /// Create a new [`FollowStream`] given the RPC methods.
-    pub fn from_methods<T: Config>(methods: ChainHeadRpcMethods<RpcConfigFor<T>>) -> FollowStream<HashFor<T>> {
+    pub fn from_methods<T: Config>(
+        methods: ChainHeadRpcMethods<RpcConfigFor<T>>,
+    ) -> FollowStream<HashFor<T>> {
         FollowStream {
             stream_getter: Box::new(move || {
                 let methods = methods.clone();
@@ -113,7 +115,7 @@ impl<Hash> FollowStream<Hash> {
                     // Extract the subscription ID:
                     let Some(sub_id) = stream.subscription_id().map(ToOwned::to_owned) else {
                         return Err(BackendError::other(
-                            "Subscription ID expected for chainHead_follow response, but not given"
+                            "Subscription ID expected for chainHead_follow response, but not given",
                         ));
                     };
                     // Map stream errors into the higher level subxt one:

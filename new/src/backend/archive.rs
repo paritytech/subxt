@@ -12,20 +12,17 @@
 
 mod storage_stream;
 
-use subxt_rpcs::methods::ChainHeadRpcMethods;
 use crate::backend::{
-    Backend, BlockRef, StorageResponse, StreamOf, StreamOfResults,
-    TransactionStatus, utils::retry,
+    Backend, BlockRef, StorageResponse, StreamOf, StreamOfResults, TransactionStatus, utils::retry,
 };
 use crate::config::{Config, HashFor, RpcConfigFor};
 use crate::error::BackendError;
 use async_trait::async_trait;
 use futures::StreamExt;
-use subxt_rpcs::RpcClient;
-use subxt_rpcs::methods::chain_head::{
-    ArchiveStorageQuery, ArchiveCallResult, StorageQueryType,
-};
 use storage_stream::ArchiveStorageStream;
+use subxt_rpcs::RpcClient;
+use subxt_rpcs::methods::ChainHeadRpcMethods;
+use subxt_rpcs::methods::chain_head::{ArchiveCallResult, ArchiveStorageQuery, StorageQueryType};
 
 /// The archive backend.
 #[derive(Debug, Clone)]
@@ -36,7 +33,7 @@ pub struct ArchiveBackend<T: Config> {
 
 impl<T: Config> ArchiveBackend<T> {
     /// Configure and construct an [`ArchiveBackend`] and the associated [`ChainHeadBackendDriver`].
-    pub fn new(client: impl Into<RpcClient>,) -> ArchiveBackend<T> {
+    pub fn new(client: impl Into<RpcClient>) -> ArchiveBackend<T> {
         let methods = ChainHeadRpcMethods::new(client.into());
 
         ArchiveBackend { methods }
@@ -50,7 +47,8 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
         keys: Vec<Vec<u8>>,
         at: HashFor<T>,
     ) -> Result<StreamOfResults<StorageResponse>, BackendError> {
-        let queries = keys.into_iter()
+        let queries = keys
+            .into_iter()
             .map(|key| ArchiveStorageQuery {
                 key: key,
                 query_type: StorageQueryType::Value,
@@ -58,12 +56,17 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
             })
             .collect();
 
-        let stream = ArchiveStorageStream::new(at, self.methods.clone(), queries).map(|item| {
-            match item {
+        let stream = ArchiveStorageStream::new(at, self.methods.clone(), queries)
+            .map(|item| match item {
                 Err(e) => Some(Err(e)),
-                Ok(item) => item.value.map(|val| Ok(StorageResponse { key: item.key.0, value: val.0 }))
-            }
-        }).filter_map(async |item| item);
+                Ok(item) => item.value.map(|val| {
+                    Ok(StorageResponse {
+                        key: item.key.0,
+                        value: val.0,
+                    })
+                }),
+            })
+            .filter_map(async |item| item);
 
         Ok(StreamOf(Box::pin(stream)))
     }
@@ -74,19 +77,18 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
         at: HashFor<T>,
     ) -> Result<StreamOfResults<Vec<u8>>, BackendError> {
         let queries = std::iter::once(ArchiveStorageQuery {
-                key: key,
-                // Just ask for the hash and then ignore it and return keys
-                query_type: StorageQueryType::DescendantsHashes,
-                pagination_start_key: None,
-            })
-            .collect();
+            key: key,
+            // Just ask for the hash and then ignore it and return keys
+            query_type: StorageQueryType::DescendantsHashes,
+            pagination_start_key: None,
+        })
+        .collect();
 
-        let stream = ArchiveStorageStream::new(at, self.methods.clone(), queries).map(|item| {
-            match item {
+        let stream =
+            ArchiveStorageStream::new(at, self.methods.clone(), queries).map(|item| match item {
                 Err(e) => Err(e),
-                Ok(item) => Ok(item.key.0)
-            }
-        });
+                Ok(item) => Ok(item.key.0),
+            });
 
         Ok(StreamOf(Box::pin(stream)))
     }
@@ -97,18 +99,23 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
         at: HashFor<T>,
     ) -> Result<StreamOfResults<StorageResponse>, BackendError> {
         let queries = std::iter::once(ArchiveStorageQuery {
-                key: key,
-                query_type: StorageQueryType::DescendantsValues,
-                pagination_start_key: None,
-            })
-            .collect();
+            key: key,
+            query_type: StorageQueryType::DescendantsValues,
+            pagination_start_key: None,
+        })
+        .collect();
 
-        let stream = ArchiveStorageStream::new(at, self.methods.clone(), queries).map(|item| {
-            match item {
+        let stream = ArchiveStorageStream::new(at, self.methods.clone(), queries)
+            .map(|item| match item {
                 Err(e) => Some(Err(e)),
-                Ok(item) => item.value.map(|val| Ok(StorageResponse { key: item.key.0, value: val.0 }))
-            }
-        }).filter_map(async |item| item);
+                Ok(item) => item.value.map(|val| {
+                    Ok(StorageResponse {
+                        key: item.key.0,
+                        value: val.0,
+                    })
+                }),
+            })
+            .filter_map(async |item| item);
 
         Ok(StreamOf(Box::pin(stream)))
     }
@@ -121,9 +128,15 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
         .await
     }
 
-    async fn block_number_to_hash(&self, number: u64) -> Result<Option<BlockRef<HashFor<T>>>, BackendError> {
+    async fn block_number_to_hash(
+        &self,
+        number: u64,
+    ) -> Result<Option<BlockRef<HashFor<T>>>, BackendError> {
         retry(|| async {
-            let mut hashes = self.methods.archive_v1_hash_by_height(number as usize).await?;
+            let mut hashes = self
+                .methods
+                .archive_v1_hash_by_height(number as usize)
+                .await?;
             if let (Some(hash), None) = (hashes.pop(), hashes.pop()) {
                 // One hash; return it.
                 Ok(Some(BlockRef::from_hash(hash)))
@@ -131,7 +144,8 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
                 // More than one; return None.
                 Ok(None)
             }
-        }).await
+        })
+        .await
     }
 
     async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, BackendError> {
@@ -147,9 +161,7 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
             let Some(exts) = self.methods.archive_v1_body(at).await? else {
                 return Ok(None);
             };
-            Ok(Some(
-                exts.into_iter().map(|ext| ext.0).collect()
-            ))
+            Ok(Some(exts.into_iter().map(|ext| ext.0).collect()))
         })
         .await
     }
@@ -159,7 +171,9 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
             let height = self.methods.archive_v1_finalized_height().await?;
             let mut hashes = self.methods.archive_v1_hash_by_height(height).await?;
             let Some(hash) = hashes.pop() else {
-                return Err(BackendError::Other("Multiple hashes not expected at a finalized height".into()))
+                return Err(BackendError::Other(
+                    "Multiple hashes not expected at a finalized height".into(),
+                ));
             };
             Ok(BlockRef::from_hash(hash))
         })
@@ -170,21 +184,27 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
         &self,
         _hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
-        Err(BackendError::Other("The archive backend cannot stream block headers".into()))
+        Err(BackendError::Other(
+            "The archive backend cannot stream block headers".into(),
+        ))
     }
 
     async fn stream_best_block_headers(
         &self,
         _hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
-        Err(BackendError::Other("The archive backend cannot stream block headers".into()))
+        Err(BackendError::Other(
+            "The archive backend cannot stream block headers".into(),
+        ))
     }
 
     async fn stream_finalized_block_headers(
         &self,
         _hasher: T::Hasher,
     ) -> Result<StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>, BackendError> {
-        Err(BackendError::Other("The archive backend cannot stream block headers".into()))
+        Err(BackendError::Other(
+            "The archive backend cannot stream block headers".into(),
+        ))
     }
 
     async fn submit_transaction(
@@ -201,7 +221,10 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
         call_parameters: Option<&[u8]>,
         at: HashFor<T>,
     ) -> Result<Vec<u8>, BackendError> {
-        let res = self.methods.archive_v1_call(at, method, call_parameters.unwrap_or(&[])).await?;
+        let res = self
+            .methods
+            .archive_v1_call(at, method, call_parameters.unwrap_or(&[]))
+            .await?;
         match res {
             ArchiveCallResult::Success(bytes) => Ok(bytes.0),
             ArchiveCallResult::Error(e) => Err(BackendError::other(e)),
@@ -209,5 +232,4 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
     }
 }
 
- impl<T: Config> crate::backend::sealed::Sealed for ArchiveBackend<T> {}
-
+impl<T: Config> crate::backend::sealed::Sealed for ArchiveBackend<T> {}

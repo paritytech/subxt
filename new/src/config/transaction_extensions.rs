@@ -7,7 +7,7 @@
 //! [`AnyOf`] to configure the set of transaction extensions which are known about
 //! when interacting with a chain.
 
-use super::extrinsic_params::{ ExtrinsicParams, ClientState };
+use super::extrinsic_params::{ClientState, ExtrinsicParams};
 use crate::config::ExtrinsicParamsEncoder;
 use crate::config::{Config, HashFor};
 use crate::error::ExtrinsicParamsError;
@@ -16,9 +16,9 @@ use codec::{Compact, Encode};
 use core::any::Any;
 use core::fmt::Debug;
 use derive_where::derive_where;
-use std::collections::HashMap;
 use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
+use std::collections::HashMap;
 
 // Re-export this here; it's a bit generically named to be re-exported from ::config.
 pub use super::extrinsic_params::Params;

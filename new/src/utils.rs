@@ -10,22 +10,22 @@ pub mod bits;
 mod era;
 mod multi_address;
 mod multi_signature;
+mod range_map;
 mod static_type;
 mod unchecked_extrinsic;
 mod wrapper_opaque;
 mod yesnomaybe;
-mod range_map;
 
 use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
 
-pub use range_map::{ RangeMap, RangeMapBuilder, RangeMapError };
 pub use account_id::AccountId32;
 pub use account_id20::AccountId20;
 pub use era::Era;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;
 pub use primitive_types::{H160, H256, H512};
+pub use range_map::{RangeMap, RangeMapBuilder, RangeMapError};
 pub use static_type::Static;
 pub use unchecked_extrinsic::UncheckedExtrinsic;
 pub use wrapper_opaque::WrapperKeepOpaque;

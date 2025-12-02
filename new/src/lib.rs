@@ -32,11 +32,11 @@ mod only_used_in_docs_or_tests {
 // #[macro_use]
 // mod macros;
 
-pub mod config;
+pub mod backend;
 pub mod client;
+pub mod config;
 pub mod error;
 pub mod utils;
-pub mod backend;
 // pub mod book;
 // pub mod blocks;
 // pub mod constants;

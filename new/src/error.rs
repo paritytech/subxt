@@ -7,8 +7,8 @@
 mod dispatch_error;
 mod hex;
 
-use thiserror::Error as DeriveError;
 use std::borrow::Cow;
+use thiserror::Error as DeriveError;
 
 #[cfg(feature = "unstable-light-client")]
 pub use subxt_lightclient::LightClientError;
@@ -19,10 +19,10 @@ pub use dispatch_error::{
 };
 
 // Re-expose the errors we use from other crates here:
-pub use subxt_metadata::Metadata;
 pub use hex::Hex;
 pub use scale_decode::Error as DecodeError;
 pub use scale_encode::Error as EncodeError;
+pub use subxt_metadata::Metadata;
 pub use subxt_metadata::TryFromError as MetadataTryFromError;
 
 /// A global error type. Any of the errors exposed here can convert into this
@@ -50,13 +50,9 @@ pub enum Error {
     #[error(transparent)]
     BackendError(#[from] BackendError),
     #[error(transparent)]
-    BlockError(#[from] BlockError),
+    BlocksError(#[from] BlocksError),
     #[error(transparent)]
     AccountNonceError(#[from] AccountNonceError),
-    #[error(transparent)]
-    RuntimeUpdaterError(#[from] RuntimeUpdaterError),
-    #[error(transparent)]
-    RuntimeUpdateeApplyError(#[from] RuntimeUpdateeApplyError),
     #[error(transparent)]
     RuntimeApiError(#[from] RuntimeApiError),
     #[error(transparent)]
@@ -143,10 +139,12 @@ impl Error {
 
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
-            Error::BlockError(e) => e.backend_error(),
+            // Many of these contain no backend error, but keep the checks next to
+            // the actual error types to make it harder to miss adding any, and be exhaustive
+            // here so new error variants are not missed as easily.
+            Error::BlocksError(e) => e.backend_error(),
             Error::AccountNonceError(e) => e.backend_error(),
             Error::OnlineClientError(e) => e.backend_error(),
-            Error::RuntimeUpdaterError(e) => e.backend_error(),
             Error::RuntimeApiError(e) => e.backend_error(),
             Error::EventsError(e) => e.backend_error(),
             Error::ExtrinsicError(e) => e.backend_error(),
@@ -155,8 +153,23 @@ impl Error {
             Error::TransactionEventsError(e) => e.backend_error(),
             Error::TransactionFinalizedSuccessError(e) => e.backend_error(),
             Error::StorageError(e) => e.backend_error(),
-            // Any errors that **don't** return a BackendError anywhere will return None:
-            _ => None,
+            Error::OfflineClientAtBlockError(e) => e.backend_error(),
+            Error::OnlineClientAtBlockError(e) => e.backend_error(),
+            Error::ExtrinsicDecodeErrorAt(e) => e.backend_error(),
+            Error::ConstantError(e) => e.backend_error(),
+            Error::CustomValueError(e) => e.backend_error(),
+            Error::StorageKeyError(e) => e.backend_error(),
+            Error::StorageValueError(e) => e.backend_error(),
+            Error::TransactionStatusError(e) => e.backend_error(),
+            Error::ModuleErrorDetailsError(e) => e.backend_error(),
+            Error::ModuleErrorDecodeError(e) => e.backend_error(),
+            Error::DispatchErrorDecodeError(e) => e.backend_error(),
+            // BackendError is always a BackendError:
+            Error::BackendError(e) => Some(e),
+            // Other errors come from different crates so can never contain a BackendError:
+            Error::OtherRpcClientError(_) => None,
+            Error::OtherCodecError(_) => None,
+            Error::Other(_) => None,
         }
     }
 }
@@ -180,6 +193,12 @@ pub enum OfflineClientAtBlockError {
         /// The spec version for which the metadata was not found.
         spec_version: u32,
     },
+}
+
+impl OfflineClientAtBlockError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        None
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -219,11 +238,39 @@ impl OnlineClientError {
     }
 }
 
+/// Errors constructing streams of blocks.
+#[allow(missing_docs)]
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum BlocksError {
+    #[error("Cannot construct block stream: cannot get the current block: {0}")]
+    CannotGetCurrentBlock(OnlineClientAtBlockError),
+    #[error("Cannot construct block stream: cannot get block header stream: {0}")]
+    CannotGetBlockHeaderStream(BackendError),
+    #[error("Error streaming blocks: cannot get the next block header: {0}")]
+    CannotGetBlockHeader(BackendError),
+}
+
+impl BlocksError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            BlocksError::CannotGetCurrentBlock(e) => e.backend_error(),
+            BlocksError::CannotGetBlockHeaderStream(e) => Some(e),
+            BlocksError::CannotGetBlockHeader(e) => Some(e),
+        }
+    }
+}
+
 /// Errors constructing an online client at a specific block number.
 #[allow(missing_docs)]
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum OnlineClientAtBlockError {
+    #[error("Cannot construct OnlineClientAtBlock: cannot get the current block: {reason}")]
+    CannotGetCurrentBlock {
+        /// The error we encountered.
+        reason: BackendError,
+    },
     #[error(
         "Cannot construct OnlineClientAtBlock: failed to get block hash from node for block {block_number}: {reason}"
     )]
@@ -238,19 +285,25 @@ pub enum OnlineClientAtBlockError {
         /// The block number for which a block was not found.
         block_number: u64,
     },
-    #[error("Cannot construct OnlineClientAtBlock: cannot get the block header for block {block_hash}: {reason}")]
+    #[error(
+        "Cannot construct OnlineClientAtBlock: cannot get the block header for block {block_hash}: {reason}"
+    )]
     CannotGetBlockHeader {
-        /// Block hash that we failed to fetch the header for. 
+        /// Block hash that we failed to fetch the header for.
         block_hash: Hex,
         /// The error we encountered.
         reason: BackendError,
     },
-    #[error("Cannot construct OnlineClientAtBlock: cannot find the block header for block {block_hash}")]
+    #[error(
+        "Cannot construct OnlineClientAtBlock: cannot find the block header for block {block_hash}"
+    )]
     BlockHeaderNotFound {
-        /// Block hash that we failed to find the header for. 
+        /// Block hash that we failed to find the header for.
         block_hash: Hex,
     },
-    #[error("Cannot construct OnlineClientAtBlock: failed to obtain spec version for block {block_hash}: {reason}")]
+    #[error(
+        "Cannot construct OnlineClientAtBlock: failed to obtain spec version for block {block_hash}: {reason}"
+    )]
     CannotGetSpecVersion {
         /// The block hash for which we failed to obtain the spec version.
         block_hash: Hex,
@@ -275,41 +328,59 @@ pub enum OnlineClientAtBlockError {
         /// The error we encountered.
         reason: String,
     },
-    #[error("Cannot construct OnlineClientAtBlock: Metadata V{version} (required at block {block_hash} is not supported.")]
+    #[error(
+        "Cannot construct OnlineClientAtBlock: Metadata V{version} (required at block {block_hash} is not supported."
+    )]
     UnsupportedMetadataVersion {
         /// The block hash that requires the unsupported version.
         block_hash: Hex,
         /// The unsupported metadata version.
         version: u32,
     },
-    #[error("Cannot construct OnlineClientAtBlock: No legacy types were provided but we're trying to access a block that requires them.")]
+    #[error(
+        "Cannot construct OnlineClientAtBlock: No legacy types were provided but we're trying to access a block that requires them."
+    )]
     MissingLegacyTypes,
-    #[error("Cannot construct OnlineClientAtBlock: unable to convert legacy metadata (required at block {block_hash}): {reason}")]
+    #[error(
+        "Cannot construct OnlineClientAtBlock: unable to convert legacy metadata (required at block {block_hash}): {reason}"
+    )]
     CannotConvertLegacyMetadata {
         /// The block hash that requires legacy types.
         block_hash: Hex,
         /// The metadata version.
         metadata_version: u32,
         /// Reason the conversion failed.
-        reason: subxt_metadata::LegacyFromError
+        reason: subxt_metadata::LegacyFromError,
     },
-    #[error("Cannot construct OnlineClientAtBlock: unable to convert modern metadata (required at block {block_hash}): {reason}")]
+    #[error(
+        "Cannot construct OnlineClientAtBlock: unable to convert modern metadata (required at block {block_hash}): {reason}"
+    )]
     CannotConvertModernMetadata {
         /// The block hash that requires legacy types.
         block_hash: Hex,
         /// The metadata version.
         metadata_version: u32,
         /// Reason the conversion failed.
-        reason: subxt_metadata::TryFromError
-    }
+        reason: subxt_metadata::TryFromError,
+    }, // #[error(
+       //     "Cannot construct OnlineClientAtBlock: cannot inject types from metadata: failure to parse a type found in the metadata: {parse_error}"
+       // )]
+       // CannotInjectMetadataTypes {
+       //     /// Error parsing a type found in the metadata.
+       //     parse_error: scale_info_legacy::lookup_name::ParseError,
+       // },
+}
 
-    // #[error(
-    //     "Cannot construct OnlineClientAtBlock: cannot inject types from metadata: failure to parse a type found in the metadata: {parse_error}"
-    // )]
-    // CannotInjectMetadataTypes {
-    //     /// Error parsing a type found in the metadata.
-    //     parse_error: scale_info_legacy::lookup_name::ParseError,
-    // },
+impl OnlineClientAtBlockError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            OnlineClientAtBlockError::CannotGetCurrentBlock { reason }
+            | OnlineClientAtBlockError::CannotGetBlockHash { reason, .. }
+            | OnlineClientAtBlockError::CannotGetBlockHeader { reason, .. }
+            | OnlineClientAtBlockError::CannotGetSpecVersion { reason, .. } => Some(reason),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -362,7 +433,7 @@ impl From<subxt_rpcs::Error> for BackendError {
 #[allow(missing_docs)]
 pub enum CombinedBackendError {
     #[error("Could not obtain the list of RPC methods to determine which backends can be used")]
-    CouldNotObtainRpcMethodList(subxt_rpcs::Error)
+    CouldNotObtainRpcMethodList(subxt_rpcs::Error),
 }
 
 /// An RPC error. Since we are generic over the RPC client that is used,
@@ -380,49 +451,6 @@ pub enum RpcError {
     /// The RPC subscription was dropped.
     #[error("RPC error: subscription dropped.")]
     SubscriptionDropped,
-}
-
-/// Block error
-#[derive(Debug, thiserror::Error)]
-#[non_exhaustive]
-#[allow(missing_docs)]
-pub enum BlockError {
-    #[error(
-        "Could not find the block body with hash {block_hash} (perhaps it was on a non-finalized fork?)"
-    )]
-    BlockNotFound { block_hash: Hex },
-    #[error("Could not download the block header with hash {block_hash}: {reason}")]
-    CouldNotGetBlockHeader {
-        block_hash: Hex,
-        reason: BackendError,
-    },
-    #[error("Could not download the latest block header: {0}")]
-    CouldNotGetLatestBlock(BackendError),
-    #[error("Could not subscribe to all blocks: {0}")]
-    CouldNotSubscribeToAllBlocks(BackendError),
-    #[error("Could not subscribe to best blocks: {0}")]
-    CouldNotSubscribeToBestBlocks(BackendError),
-    #[error("Could not subscribe to finalized blocks: {0}")]
-    CouldNotSubscribeToFinalizedBlocks(BackendError),
-    #[error("Error getting account nonce at block {block_hash}")]
-    AccountNonceError {
-        block_hash: Hex,
-        account_id: Hex,
-        reason: AccountNonceError,
-    },
-}
-
-impl BlockError {
-    fn backend_error(&self) -> Option<&BackendError> {
-        match self {
-            BlockError::CouldNotGetBlockHeader { reason: e, .. }
-            | BlockError::CouldNotGetLatestBlock(e)
-            | BlockError::CouldNotSubscribeToAllBlocks(e)
-            | BlockError::CouldNotSubscribeToBestBlocks(e)
-            | BlockError::CouldNotSubscribeToFinalizedBlocks(e) => Some(e),
-            _ => None,
-        }
-    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -444,56 +472,6 @@ impl AccountNonceError {
             _ => None,
         }
     }
-}
-
-#[derive(Debug, thiserror::Error)]
-#[non_exhaustive]
-#[allow(missing_docs)]
-pub enum RuntimeUpdaterError {
-    #[error("Error subscribing to runtime updates: The update stream ended unexpectedly")]
-    UnexpectedEndOfUpdateStream,
-    #[error("Error subscribing to runtime updates: The finalized block stream ended unexpectedly")]
-    UnexpectedEndOfBlockStream,
-    #[error("Error subscribing to runtime updates: Can't stream runtime version: {0}")]
-    CannotStreamRuntimeVersion(BackendError),
-    #[error("Error subscribing to runtime updates: Can't get next runtime version in stream: {0}")]
-    CannotGetNextRuntimeVersion(BackendError),
-    #[error("Error subscribing to runtime updates: Cannot stream finalized blocks: {0}")]
-    CannotStreamFinalizedBlocks(BackendError),
-    #[error("Error subscribing to runtime updates: Cannot get next finalized block in stream: {0}")]
-    CannotGetNextFinalizedBlock(BackendError),
-    #[error("Cannot fetch new metadata for runtime update: {0}")]
-    CannotFetchNewMetadata(BackendError),
-    #[error(
-        "Error subscribing to runtime updates: Cannot find the System.LastRuntimeUpgrade storage entry"
-    )]
-    CantFindSystemLastRuntimeUpgrade,
-    #[error("Error subscribing to runtime updates: Cannot fetch last runtime upgrade: {0}")]
-    CantFetchLastRuntimeUpgrade(StorageError),
-    #[error("Error subscribing to runtime updates: Cannot decode last runtime upgrade: {0}")]
-    CannotDecodeLastRuntimeUpgrade(StorageValueError),
-}
-
-impl RuntimeUpdaterError {
-    fn backend_error(&self) -> Option<&BackendError> {
-        match self {
-            RuntimeUpdaterError::CannotStreamRuntimeVersion(e)
-            | RuntimeUpdaterError::CannotGetNextRuntimeVersion(e)
-            | RuntimeUpdaterError::CannotStreamFinalizedBlocks(e)
-            | RuntimeUpdaterError::CannotGetNextFinalizedBlock(e)
-            | RuntimeUpdaterError::CannotFetchNewMetadata(e) => Some(e),
-            _ => None,
-        }
-    }
-}
-
-/// Error that can occur during upgrade.
-#[non_exhaustive]
-#[derive(Debug, thiserror::Error)]
-#[allow(missing_docs)]
-pub enum RuntimeUpdateeApplyError {
-    #[error("The proposed runtime update is the same as the current version")]
-    SameVersion,
 }
 
 /// Error working with Runtime APIs
@@ -704,6 +682,12 @@ pub enum CustomValueError {
     CouldNotDecodeCustomValue(frame_decode::custom_values::CustomValueDecodeError<u32>),
 }
 
+impl CustomValueError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        None
+    }
+}
+
 /// Error working with View Functions.
 #[non_exhaustive]
 #[derive(Debug, thiserror::Error)]
@@ -779,6 +763,12 @@ pub enum TransactionStatusError {
     /// The transaction was dropped.
     #[error("The transaction was dropped: {0}")]
     Dropped(String),
+}
+
+impl TransactionStatusError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        None
+    }
 }
 
 /// Error fetching events for a just-submitted transaction
@@ -876,12 +866,24 @@ pub enum ModuleErrorDetailsError {
     },
 }
 
+impl ModuleErrorDetailsError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        None
+    }
+}
+
 /// Error decoding the [`ModuleError`]
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 #[allow(missing_docs)]
 #[error("Could not decode the DispatchError::Module payload into the given type: {0}")]
 pub struct ModuleErrorDecodeError(scale_decode::Error);
+
+impl ModuleErrorDecodeError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        None
+    }
+}
 
 /// Error decoding the [`DispatchError`]
 #[derive(Debug, thiserror::Error)]
@@ -899,6 +901,12 @@ pub enum DispatchErrorDecodeError {
         /// The bytes corresponding to the Module variant we were unable to decode:
         bytes: Vec<u8>,
     },
+}
+
+impl DispatchErrorDecodeError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        None
+    }
 }
 
 /// Error working with storage.
@@ -984,6 +992,12 @@ pub enum ConstantError {
     ConstantInfoError(frame_decode::constants::ConstantInfoError<'static>),
 }
 
+impl ConstantError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        None
+    }
+}
+
 #[derive(Debug, DeriveError)]
 #[non_exhaustive]
 #[allow(missing_docs)]
@@ -1006,6 +1020,12 @@ pub enum StorageKeyError {
     },
 }
 
+impl StorageKeyError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        None
+    }
+}
+
 #[derive(Debug, DeriveError)]
 #[non_exhaustive]
 #[allow(missing_docs)]
@@ -1018,6 +1038,12 @@ pub enum StorageValueError {
     LeftoverBytes { bytes: Vec<u8> },
 }
 
+impl StorageValueError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        None
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 #[allow(missing_docs)]
@@ -1025,6 +1051,12 @@ pub enum StorageValueError {
 pub struct ExtrinsicDecodeErrorAt {
     pub extrinsic_index: usize,
     pub error: ExtrinsicDecodeErrorAtReason,
+}
+
+impl ExtrinsicDecodeErrorAt {
+    fn backend_error(&self) -> Option<&BackendError> {
+        None
+    }
 }
 
 #[derive(Debug, thiserror::Error)]

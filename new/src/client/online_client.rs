@@ -1,17 +1,19 @@
 mod block_number_or_ref;
+mod blocks;
 
-use core::marker::PhantomData;
 use super::ClientAtBlock;
 use super::OfflineClientAtBlockT;
-use crate::config::{ Config, HashFor, Header, Hasher };
-use crate::error::OnlineClientAtBlockError;
-use crate::backend::{ Backend, CombinedBackend, BlockRef };
+use crate::backend::{Backend, BlockRef, CombinedBackend};
+use crate::config::{Config, HashFor, Hasher, Header};
+use crate::error::{BlocksError, OnlineClientAtBlockError};
+use blocks::Blocks;
 use codec::{Compact, Decode, Encode};
+use core::marker::PhantomData;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use scale_info_legacy::TypeRegistrySet;
 use std::sync::Arc;
-use subxt_rpcs::RpcClient;
 use subxt_metadata::Metadata;
+use subxt_rpcs::RpcClient;
 
 #[cfg(feature = "jsonrpsee")]
 #[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
@@ -32,7 +34,7 @@ struct OnlineClientInner<T: Config> {
     backend: Arc<dyn Backend<T>>,
 }
 
-impl <T: Config> std::fmt::Debug for OnlineClientInner<T> {
+impl<T: Config> std::fmt::Debug for OnlineClientInner<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("OnlineClientInner")
             .field("config", &"<config>")
@@ -63,9 +65,9 @@ impl<T: Config> OnlineClient<T> {
             url: url_str.to_string(),
         })?;
         if !Self::is_url_secure(&url) {
-            return Err(OnlineClientError::RpcError(
-                subxt_rpcs::Error::InsecureUrl(url_str.to_string()),
-            ));
+            return Err(OnlineClientError::RpcError(subxt_rpcs::Error::InsecureUrl(
+                url_str.to_string(),
+            )));
         }
         OnlineClient::from_insecure_url(config, url).await
     }
@@ -110,16 +112,96 @@ impl<T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
     /// implementation to power it.
-    pub fn from_backend(
-        config: T,
-        backend: impl Into<Arc<dyn Backend<T>>>,
-    ) -> OnlineClient<T> {
+    pub fn from_backend(config: T, backend: impl Into<Arc<dyn Backend<T>>>) -> OnlineClient<T> {
         OnlineClient {
             inner: Arc::new(OnlineClientInner {
                 config,
-                backend: backend.into()
-            })
+                backend: backend.into(),
+            }),
         }
+    }
+
+    /// Obtain a stream of all blocks imported by the node.
+    ///
+    /// **Note:** You probably want to use [`Self::stream_blocks()`] most of
+    /// the time. Blocks returned here may be pruned at any time and become inaccessible,
+    /// leading to errors when trying to work with them.
+    pub async fn stream_all_blocks(&self) -> Result<Blocks<T>, BlocksError> {
+        // We need a hasher to know how to hash things. Thus, we need metadata to instantiate
+        // the hasher, so let's use the current block.
+        let current_block = self
+            .at_current_block()
+            .await
+            .map_err(BlocksError::CannotGetCurrentBlock)?;
+        let hasher = current_block.client.hasher.clone();
+
+        let stream = self
+            .inner
+            .backend
+            .stream_all_block_headers(hasher)
+            .await
+            .map_err(BlocksError::CannotGetBlockHeaderStream)?;
+
+        Ok(Blocks::from_headers_stream(self.clone(), stream))
+    }
+
+    /// Obtain a stream of blocks imported by the node onto the current best fork.
+    ///
+    /// **Note:** You probably want to use [`Self::stream_blocks()`] most of
+    /// the time. Blocks returned here may be pruned at any time and become inaccessible,
+    /// leading to errors when trying to work with them.
+    pub async fn stream_best_blocks(&self) -> Result<Blocks<T>, BlocksError> {
+        // We need a hasher to know how to hash things. Thus, we need metadata to instantiate
+        // the hasher, so let's use the current block.
+        let current_block = self
+            .at_current_block()
+            .await
+            .map_err(BlocksError::CannotGetCurrentBlock)?;
+        let hasher = current_block.client.hasher.clone();
+
+        let stream = self
+            .inner
+            .backend
+            .stream_best_block_headers(hasher)
+            .await
+            .map_err(BlocksError::CannotGetBlockHeaderStream)?;
+
+        Ok(Blocks::from_headers_stream(self.clone(), stream))
+    }
+
+    /// Obtain a stream of finalized blocks.
+    pub async fn stream_blocks(&self) -> Result<Blocks<T>, BlocksError> {
+        // We need a hasher to know how to hash things. Thus, we need metadata to instantiate
+        // the hasher, so let's use the current block.
+        let current_block = self
+            .at_current_block()
+            .await
+            .map_err(BlocksError::CannotGetCurrentBlock)?;
+        let hasher = current_block.client.hasher.clone();
+
+        let stream = self
+            .inner
+            .backend
+            .stream_finalized_block_headers(hasher)
+            .await
+            .map_err(BlocksError::CannotGetBlockHeaderStream)?;
+
+        Ok(Blocks::from_headers_stream(self.clone(), stream))
+    }
+
+    /// Instantiate a client to work at the current finalized block _at the time of instantiation_.
+    /// This does not track new blocks.
+    pub async fn at_current_block(
+        &self,
+    ) -> Result<ClientAtBlock<OnlineClientAtBlock<T>, T>, OnlineClientAtBlockError> {
+        let latest_block = self
+            .inner
+            .backend
+            .latest_finalized_block_ref()
+            .await
+            .map_err(|e| OnlineClientAtBlockError::CannotGetCurrentBlock { reason: e })?;
+
+        self.at_block(latest_block).await
     }
 
     /// Instantiate a client for working at a specific block.
@@ -138,27 +220,27 @@ impl<T: Config> OnlineClient<T> {
                     .backend
                     .block_header(block_hash)
                     .await
-                    .map_err(|e| OnlineClientAtBlockError::CannotGetBlockHeader { 
-                        block_hash: block_hash.into(), 
-                        reason: e
+                    .map_err(|e| OnlineClientAtBlockError::CannotGetBlockHeader {
+                        block_hash: block_hash.into(),
+                        reason: e,
                     })?
-                    .ok_or(OnlineClientAtBlockError::BlockHeaderNotFound { 
-                        block_hash: block_hash.into()
+                    .ok_or(OnlineClientAtBlockError::BlockHeaderNotFound {
+                        block_hash: block_hash.into(),
                     })?;
                 (block_ref, block_header.number())
-            },
+            }
             BlockNumberOrRef::Number(block_num) => {
                 let block_ref = self
                     .inner
                     .backend
                     .block_number_to_hash(block_num)
                     .await
-                    .map_err(|e| OnlineClientAtBlockError::CannotGetBlockHash { 
-                        block_number: block_num, 
-                        reason: e 
+                    .map_err(|e| OnlineClientAtBlockError::CannotGetBlockHash {
+                        block_number: block_num,
+                        reason: e,
                     })?
-                    .ok_or(OnlineClientAtBlockError::BlockNotFound { 
-                        block_number: block_num
+                    .ok_or(OnlineClientAtBlockError::BlockNotFound {
+                        block_number: block_num,
                     })?;
                 (block_ref, block_num)
             }
@@ -174,9 +256,9 @@ impl<T: Config> OnlineClient<T> {
                     .backend
                     .call("Core_version", None, block_hash)
                     .await
-                    .map_err(|e| OnlineClientAtBlockError::CannotGetSpecVersion { 
-                        block_hash: block_hash.into(), 
-                        reason: e 
+                    .map_err(|e| OnlineClientAtBlockError::CannotGetSpecVersion {
+                        block_hash: block_hash.into(),
+                        reason: e,
                     })?;
 
                 #[derive(codec::Decode)]
@@ -199,101 +281,107 @@ impl<T: Config> OnlineClient<T> {
         let metadata = match self.inner.config.metadata_for_spec_version(spec_version) {
             Some(metadata) => metadata,
             None => {
-                let metadata: Metadata = match get_metadata(&*self.inner.backend, block_hash).await? {
-                    m @ RuntimeMetadata::V0(_) |
-                    m @ RuntimeMetadata::V1(_) |
-                    m @ RuntimeMetadata::V2(_) |
-                    m @ RuntimeMetadata::V3(_) |
-                    m @ RuntimeMetadata::V4(_) |
-                    m @ RuntimeMetadata::V5(_) |
-                    m @ RuntimeMetadata::V6(_) |
-                    m @ RuntimeMetadata::V7(_) => {
-                        return Err(OnlineClientAtBlockError::UnsupportedMetadataVersion {
-                            block_hash: block_hash.into(),
-                            version: m.version()
-                        })
-                    },
-                    RuntimeMetadata::V8(m) => {
-                        let types = get_legacy_types(self, spec_version)?;
-                        Metadata::from_v8(&m, &types)
-                            .map_err(|e| OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                let metadata: Metadata =
+                    match get_metadata(&*self.inner.backend, block_hash).await? {
+                        m @ RuntimeMetadata::V0(_)
+                        | m @ RuntimeMetadata::V1(_)
+                        | m @ RuntimeMetadata::V2(_)
+                        | m @ RuntimeMetadata::V3(_)
+                        | m @ RuntimeMetadata::V4(_)
+                        | m @ RuntimeMetadata::V5(_)
+                        | m @ RuntimeMetadata::V6(_)
+                        | m @ RuntimeMetadata::V7(_) => {
+                            return Err(OnlineClientAtBlockError::UnsupportedMetadataVersion {
                                 block_hash: block_hash.into(),
-                                metadata_version: 8,
-                                reason: e
+                                version: m.version(),
+                            });
+                        }
+                        RuntimeMetadata::V8(m) => {
+                            let types = get_legacy_types(self, spec_version)?;
+                            Metadata::from_v8(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 8,
+                                    reason: e,
+                                }
                             })?
-                    },
-                    RuntimeMetadata::V9(m) => {
-                        let types = get_legacy_types(self, spec_version)?;
-                        Metadata::from_v9(&m, &types)
-                            .map_err(|e| OnlineClientAtBlockError::CannotConvertLegacyMetadata {
-                                block_hash: block_hash.into(),
-                                metadata_version: 9,
-                                reason: e
+                        }
+                        RuntimeMetadata::V9(m) => {
+                            let types = get_legacy_types(self, spec_version)?;
+                            Metadata::from_v9(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 9,
+                                    reason: e,
+                                }
                             })?
-                    },
-                    RuntimeMetadata::V10(m) => {
-                        let types = get_legacy_types(self, spec_version)?;
-                        Metadata::from_v10(&m, &types)
-                            .map_err(|e| OnlineClientAtBlockError::CannotConvertLegacyMetadata {
-                                block_hash: block_hash.into(),
-                                metadata_version: 10,
-                                reason: e
+                        }
+                        RuntimeMetadata::V10(m) => {
+                            let types = get_legacy_types(self, spec_version)?;
+                            Metadata::from_v10(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 10,
+                                    reason: e,
+                                }
                             })?
-                    },
-                    RuntimeMetadata::V11(m) => {
-                        let types = get_legacy_types(self, spec_version)?;
-                        Metadata::from_v11(&m, &types)
-                            .map_err(|e| OnlineClientAtBlockError::CannotConvertLegacyMetadata {
-                                block_hash: block_hash.into(),
-                                metadata_version: 11,
-                                reason: e
+                        }
+                        RuntimeMetadata::V11(m) => {
+                            let types = get_legacy_types(self, spec_version)?;
+                            Metadata::from_v11(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 11,
+                                    reason: e,
+                                }
                             })?
-                    },
-                    RuntimeMetadata::V12(m) => {
-                        let types = get_legacy_types(self, spec_version)?;
-                        Metadata::from_v12(&m, &types)
-                            .map_err(|e| OnlineClientAtBlockError::CannotConvertLegacyMetadata {
-                                block_hash: block_hash.into(),
-                                metadata_version: 12,
-                                reason: e
+                        }
+                        RuntimeMetadata::V12(m) => {
+                            let types = get_legacy_types(self, spec_version)?;
+                            Metadata::from_v12(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 12,
+                                    reason: e,
+                                }
                             })?
-                    },
-                    RuntimeMetadata::V13(m) => {
-                        let types = get_legacy_types(self, spec_version)?;
-                        Metadata::from_v13(&m, &types)
-                            .map_err(|e| OnlineClientAtBlockError::CannotConvertLegacyMetadata {
-                                block_hash: block_hash.into(),
-                                metadata_version: 13,
-                                reason: e
+                        }
+                        RuntimeMetadata::V13(m) => {
+                            let types = get_legacy_types(self, spec_version)?;
+                            Metadata::from_v13(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 13,
+                                    reason: e,
+                                }
                             })?
-                    },
-                    RuntimeMetadata::V14(m) => {
-                        Metadata::from_v14(m)
-                            .map_err(|e| OnlineClientAtBlockError::CannotConvertModernMetadata {
+                        }
+                        RuntimeMetadata::V14(m) => Metadata::from_v14(m).map_err(|e| {
+                            OnlineClientAtBlockError::CannotConvertModernMetadata {
                                 block_hash: block_hash.into(),
                                 metadata_version: 14,
-                                reason: e
-                            })?
-                    },
-                    RuntimeMetadata::V15(m) => {
-                        Metadata::from_v15(m)
-                            .map_err(|e| OnlineClientAtBlockError::CannotConvertModernMetadata {
+                                reason: e,
+                            }
+                        })?,
+                        RuntimeMetadata::V15(m) => Metadata::from_v15(m).map_err(|e| {
+                            OnlineClientAtBlockError::CannotConvertModernMetadata {
                                 block_hash: block_hash.into(),
                                 metadata_version: 15,
-                                reason: e
-                            })?
-                    },
-                    RuntimeMetadata::V16(m) => {
-                        Metadata::from_v16(m)
-                            .map_err(|e| OnlineClientAtBlockError::CannotConvertModernMetadata {
+                                reason: e,
+                            }
+                        })?,
+                        RuntimeMetadata::V16(m) => Metadata::from_v16(m).map_err(|e| {
+                            OnlineClientAtBlockError::CannotConvertModernMetadata {
                                 block_hash: block_hash.into(),
                                 metadata_version: 16,
-                                reason: e
-                            })?
-                    },
-                };
+                                reason: e,
+                            }
+                        })?,
+                    };
                 let metadata = Arc::new(metadata);
-                self.inner.config.set_metadata_for_spec_version(spec_version, metadata.clone());
+                self.inner
+                    .config
+                    .set_metadata_for_spec_version(spec_version, metadata.clone());
                 metadata
             }
         };
@@ -305,17 +393,16 @@ impl<T: Config> OnlineClient<T> {
             block_ref,
         };
 
-        Ok(ClientAtBlock { 
-            client: online_client_at_block, 
-            marker: PhantomData 
+        Ok(ClientAtBlock {
+            client: online_client_at_block,
+            marker: PhantomData,
         })
     }
 }
 
 /// This represents an online client at a specific block.
 #[doc(hidden)]
-pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT
-{
+pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT {
     /// Return the RPC methods we'll use to interact with the node.
     fn backend(&self) -> &dyn Backend<T>;
     /// Return the block hash for the current block.
@@ -325,6 +412,7 @@ pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT
 }
 
 /// The inner type providing the necessary data to work online at a specific block.
+#[derive(Clone)]
 pub struct OnlineClientAtBlock<T: Config> {
     metadata: Arc<Metadata>,
     backend: Arc<dyn Backend<T>>,
@@ -345,12 +433,18 @@ impl<T: Config> OnlineClientAtBlockT<T> for OnlineClientAtBlock<T> {
 }
 
 impl<T: Config> OfflineClientAtBlockT for OnlineClientAtBlock<T> {
-    fn metadata(&self) -> &Metadata {
+    fn metadata_ref(&self) -> &Metadata {
         &self.metadata
+    }
+    fn metadata(&self) -> Arc<Metadata> {
+        self.metadata.clone()
     }
 }
 
-fn get_legacy_types<T: Config>(client: &OnlineClient<T>, spec_version: u32) -> Result<TypeRegistrySet<'_>, OnlineClientAtBlockError> {
+fn get_legacy_types<T: Config>(
+    client: &OnlineClient<T>,
+    spec_version: u32,
+) -> Result<TypeRegistrySet<'_>, OnlineClientAtBlockError> {
     client
         .inner
         .config
@@ -377,7 +471,11 @@ async fn get_metadata<T: Config>(
     if let Some(version_to_get) = version_to_get {
         let version_bytes = version_to_get.encode();
         let rpc_response = backend
-            .call("Metadata_metadata_at_version", Some(&version_bytes), block_hash)
+            .call(
+                "Metadata_metadata_at_version",
+                Some(&version_bytes),
+                block_hash,
+            )
             .await
             .map_err(|e| OnlineClientAtBlockError::CannotGetMetadata {
                 block_hash: block_hash.into(),

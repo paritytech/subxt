@@ -6,10 +6,10 @@
 //! the necessary information (probably from a JSON-RPC API, but that's up to the
 //! implementation).
 
-mod chain_head;
 mod archive;
-mod legacy;
+mod chain_head;
 mod combined;
+mod legacy;
 mod utils;
 
 use crate::config::{Config, HashFor};
@@ -22,23 +22,10 @@ use std::sync::Arc;
 use subxt_metadata::Metadata;
 
 // Expose our various backends.
-pub use chain_head::{
-    ChainHeadBackend,
-    ChainHeadBackendBuilder,
-    ChainHeadBackendDriver,
-};
-pub use archive::{
-    ArchiveBackend
-};
-pub use legacy::{
-    LegacyBackend,
-    LegacyBackendBuilder
-};
-pub use combined::{
-    CombinedBackend,
-    CombinedBackendBuilder,
-    CombinedBackendDriver
-};
+pub use archive::ArchiveBackend;
+pub use chain_head::{ChainHeadBackend, ChainHeadBackendBuilder, ChainHeadBackendDriver};
+pub use combined::{CombinedBackend, CombinedBackendBuilder, CombinedBackendDriver};
+pub use legacy::{LegacyBackend, LegacyBackendBuilder};
 
 /// Prevent the backend trait being implemented externally.
 #[doc(hidden)]
@@ -77,8 +64,11 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     /// Convert a block number to a hash. This should return `None` in the event that
     /// multiple block hashes correspond to the given number (ie if the number is greater
     /// than that of the latest finalized block and some forks exist). Nevertheless, it could
-    /// still return the hash to a block on some fork that is pruned. 
-    async fn block_number_to_hash(&self, number: u64) -> Result<Option<BlockRef<HashFor<T>>>, BackendError>;
+    /// still return the hash to a block on some fork that is pruned.
+    async fn block_number_to_hash(
+        &self,
+        number: u64,
+    ) -> Result<Option<BlockRef<HashFor<T>>>, BackendError>;
 
     /// Get a block header.
     async fn block_header(&self, at: HashFor<T>) -> Result<Option<T::Header>, BackendError>;

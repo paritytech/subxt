@@ -1,8 +1,8 @@
-use crate::config::Config;
 use crate::client::ClientAtBlock;
+use crate::config::Config;
 use crate::error::OfflineClientAtBlockError;
-use subxt_metadata::Metadata;
 use std::sync::Arc;
+use subxt_metadata::Metadata;
 
 #[derive(Clone, Debug)]
 pub struct OfflineClient<T: Config> {
@@ -13,9 +13,7 @@ pub struct OfflineClient<T: Config> {
 impl<T: Config> OfflineClient<T> {
     /// Create a new [`OfflineClient`] with the given configuration.
     pub fn new(config: T) -> Self {
-        OfflineClient {
-            config,
-        }
+        OfflineClient { config }
     }
 
     /// Pick the block height at which to operate. This references data from the
@@ -35,25 +33,29 @@ impl<T: Config> OfflineClient<T> {
             .metadata_for_spec_version(spec_version)
             .ok_or(OfflineClientAtBlockError::MetadataNotFound { spec_version })?;
 
-        Ok(ClientAtBlock::new(OfflineClientAtBlock {
-            metadata,
-        }))
+        Ok(ClientAtBlock::new(OfflineClientAtBlock { metadata }))
     }
 }
 
+#[derive(Clone)]
 pub struct OfflineClientAtBlock {
     metadata: Arc<Metadata>,
 }
 
 /// This represents an offline-only client at a specific block.
 #[doc(hidden)]
-pub trait OfflineClientAtBlockT {
-    /// Get the metadata appropriate for this block.
-    fn metadata(&self) -> &Metadata;
+pub trait OfflineClientAtBlockT: Clone {
+    /// Get a reference to the metadata appropriate for this block.
+    fn metadata_ref(&self) -> &Metadata;
+    /// Get a clone of the metadata appropriate for this block.
+    fn metadata(&self) -> Arc<Metadata>;
 }
 
 impl OfflineClientAtBlockT for OfflineClientAtBlock {
-    fn metadata(&self) -> &Metadata {
+    fn metadata_ref(&self) -> &Metadata {
         &self.metadata
+    }
+    fn metadata(&self) -> Arc<Metadata> {
+        self.metadata.clone()
     }
 }
