@@ -21,29 +21,12 @@ use subxt_metadata::Metadata;
 pub struct ClientState<T: Config> {
     /// Genesis hash.
     pub genesis_hash: HashFor<T>,
-    /// Runtime version.
-    pub runtime_version: RuntimeVersion,
+    /// Spec version.
+    pub spec_version: u32,
+    /// Transaction version.
+    pub transaction_version: u32,
     /// Metadata.
     pub metadata: Arc<Metadata>,
-}
-
-/// Runtime version information needed to submit transactions.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct RuntimeVersion {
-    /// Version of the runtime specification. A full-node will not attempt to use its native
-    /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
-    /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    pub spec_version: u32,
-    /// All existing dispatches are fully compatible when this number doesn't change. If this
-    /// number changes, then `spec_version` must change, also.
-    ///
-    /// This number must change when an existing dispatchable (module ID, dispatch ID) is changed,
-    /// either through an alteration in its user-level semantics, a parameter
-    /// added/removed/changed, a dispatchable being removed, a module being removed, or a
-    /// dispatchable/module changing its index.
-    ///
-    /// It need *not* change when a new module is added or when a dispatchable is added.
-    pub transaction_version: u32,
 }
 
 /// This trait allows you to configure the "signed extra" and

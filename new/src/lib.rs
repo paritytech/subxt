@@ -36,6 +36,7 @@ pub mod backend;
 pub mod client;
 pub mod config;
 pub mod error;
+pub mod transactions;
 pub mod utils;
 // pub mod book;
 // pub mod blocks;

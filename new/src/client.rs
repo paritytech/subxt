@@ -2,6 +2,7 @@ mod offline_client;
 mod online_client;
 
 use crate::config::{Config, HashFor};
+use crate::transactions::Transactions;
 use core::marker::PhantomData;
 use subxt_metadata::Metadata;
 
@@ -33,10 +34,21 @@ impl<Client, T> ClientAtBlock<Client, T> {
 impl<Client, T> ClientAtBlock<Client, T>
 where
     T: Config,
-    Client: OfflineClientAtBlockT,
+    Client: OfflineClientAtBlockT<T>,
 {
+    /// Construct transactions.
+    pub fn tx(&self) -> Transactions<'_, T, Client> {
+        Transactions::new(&self.client)
+    }
+
+    /// Obtain a reference to the metadata.
     pub fn metadata_ref(&self) -> &Metadata {
         self.client.metadata_ref()
+    }
+
+    /// The current block number.
+    pub fn block_number(&self) -> u64 {
+        self.client.block_number()
     }
 }
 
@@ -45,6 +57,7 @@ where
     T: Config,
     Client: OnlineClientAtBlockT<T>,
 {
+    /// The current block hash.
     pub fn block_hash(&self) -> HashFor<T> {
         self.client.block_hash()
     }

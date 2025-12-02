@@ -30,6 +30,9 @@ pub struct OnlineClient<T: Config> {
 struct OnlineClientInner<T: Config> {
     /// The configuration for this client.
     config: T,
+    /// Chain genesis hash. Needed to construct transactions,
+    /// so we obtain it up front on constructing this.
+    genesis_hash: HashFor<T>,
     /// The RPC methods used to communicate with the node.
     backend: Arc<dyn Backend<T>>,
 }
@@ -107,18 +110,31 @@ impl<T: Config> OnlineClient<T> {
             .await
             .map_err(OnlineClientError::CannotBuildCombinedBackend)?;
         let backend: Arc<dyn Backend<T>> = Arc::new(backend);
-        Ok(OnlineClient::from_backend(config, backend))
+        OnlineClient::from_backend(config, backend).await
     }
 
     /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
     /// implementation to power it.
-    pub fn from_backend(config: T, backend: impl Into<Arc<dyn Backend<T>>>) -> OnlineClient<T> {
-        OnlineClient {
+    pub async fn from_backend(
+        config: T,
+        backend: impl Into<Arc<dyn Backend<T>>>,
+    ) -> Result<OnlineClient<T>, OnlineClientError> {
+        let backend = backend.into();
+        let genesis_hash = match config.genesis_hash() {
+            Some(hash) => hash,
+            None => backend
+                .genesis_hash()
+                .await
+                .map_err(OnlineClientError::CannotGetGenesisHash)?,
+        };
+
+        Ok(OnlineClient {
             inner: Arc::new(OnlineClientInner {
                 config,
+                genesis_hash,
                 backend: backend.into(),
             }),
-        }
+        })
     }
 
     /// Obtain a stream of all blocks imported by the node.
@@ -212,7 +228,7 @@ impl<T: Config> OnlineClient<T> {
         let number_or_hash = number_or_hash.into();
 
         // We are given either a block hash or number. We need both.
-        let (block_ref, block_num) = match number_or_hash {
+        let (block_ref, block_number) = match number_or_hash {
             BlockNumberOrRef::BlockRef(block_ref) => {
                 let block_hash = block_ref.hash();
                 let block_header = self
@@ -229,26 +245,29 @@ impl<T: Config> OnlineClient<T> {
                     })?;
                 (block_ref, block_header.number())
             }
-            BlockNumberOrRef::Number(block_num) => {
+            BlockNumberOrRef::Number(block_number) => {
                 let block_ref = self
                     .inner
                     .backend
-                    .block_number_to_hash(block_num)
+                    .block_number_to_hash(block_number)
                     .await
                     .map_err(|e| OnlineClientAtBlockError::CannotGetBlockHash {
-                        block_number: block_num,
+                        block_number,
                         reason: e,
                     })?
-                    .ok_or(OnlineClientAtBlockError::BlockNotFound {
-                        block_number: block_num,
-                    })?;
-                (block_ref, block_num)
+                    .ok_or(OnlineClientAtBlockError::BlockNotFound { block_number })?;
+                (block_ref, block_number)
             }
         };
         let block_hash = block_ref.hash();
 
         // Obtain the spec version so that we know which metadata to use at this block.
-        let spec_version = match self.inner.config.spec_version_for_block_number(block_num) {
+        // Obtain the transaction version because it's required for constructing extrinsics.
+        let (spec_version, transaction_version) = match self
+            .inner
+            .config
+            .spec_and_transaction_version_for_block_number(block_number)
+        {
             Some(version) => version,
             None => {
                 let spec_version_bytes = self
@@ -267,13 +286,18 @@ impl<T: Config> OnlineClient<T> {
                     _impl_name: String,
                     _authoring_version: u32,
                     spec_version: u32,
+                    _impl_version: u32,
+                    _apis: Vec<([u8; 8], u32)>,
+                    transaction_version: u32,
                 }
-                SpecVersionHeader::decode(&mut &spec_version_bytes[..])
-                    .map_err(|e| OnlineClientAtBlockError::CannotDecodeSpecVersion {
-                        block_hash: block_hash.into(),
-                        reason: e,
-                    })?
-                    .spec_version
+                let version =
+                    SpecVersionHeader::decode(&mut &spec_version_bytes[..]).map_err(|e| {
+                        OnlineClientAtBlockError::CannotDecodeSpecVersion {
+                            block_hash: block_hash.into(),
+                            reason: e,
+                        }
+                    })?;
+                (version.spec_version, version.transaction_version)
             }
         };
 
@@ -391,6 +415,10 @@ impl<T: Config> OnlineClient<T> {
             metadata,
             backend: self.inner.backend.clone(),
             block_ref,
+            block_number,
+            spec_version,
+            genesis_hash: self.inner.genesis_hash,
+            transaction_version,
         };
 
         Ok(ClientAtBlock {
@@ -402,7 +430,7 @@ impl<T: Config> OnlineClient<T> {
 
 /// This represents an online client at a specific block.
 #[doc(hidden)]
-pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT {
+pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT<T> {
     /// Return the RPC methods we'll use to interact with the node.
     fn backend(&self) -> &dyn Backend<T>;
     /// Return the block hash for the current block.
@@ -418,6 +446,10 @@ pub struct OnlineClientAtBlock<T: Config> {
     backend: Arc<dyn Backend<T>>,
     hasher: T::Hasher,
     block_ref: BlockRef<HashFor<T>>,
+    block_number: u64,
+    spec_version: u32,
+    genesis_hash: HashFor<T>,
+    transaction_version: u32,
 }
 
 impl<T: Config> OnlineClientAtBlockT<T> for OnlineClientAtBlock<T> {
@@ -432,12 +464,24 @@ impl<T: Config> OnlineClientAtBlockT<T> for OnlineClientAtBlock<T> {
     }
 }
 
-impl<T: Config> OfflineClientAtBlockT for OnlineClientAtBlock<T> {
+impl<T: Config> OfflineClientAtBlockT<T> for OnlineClientAtBlock<T> {
     fn metadata_ref(&self) -> &Metadata {
         &self.metadata
     }
     fn metadata(&self) -> Arc<Metadata> {
         self.metadata.clone()
+    }
+    fn block_number(&self) -> u64 {
+        self.block_number
+    }
+    fn genesis_hash(&self) -> Option<HashFor<T>> {
+        Some(self.genesis_hash)
+    }
+    fn spec_version(&self) -> u32 {
+        self.spec_version
+    }
+    fn transaction_version(&self) -> u32 {
+        self.transaction_version
     }
 }
 

@@ -26,7 +26,7 @@ use subxt_metadata::Metadata;
 use subxt_rpcs::RpcConfig;
 
 pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
-pub use extrinsic_params::{ExtrinsicParams, ExtrinsicParamsEncoder};
+pub use extrinsic_params::{ClientState, ExtrinsicParams, ExtrinsicParamsEncoder};
 pub use polkadot::{PolkadotConfig, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder};
 pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder};
 pub use transaction_extensions::TransactionExtension;
@@ -59,11 +59,23 @@ pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     /// can then be used to hash things at that block.
     type Hasher: Hasher;
 
-    /// Return the spec version for a given block number, if available.
+    /// The starting hash for the chain we're connecting to. This is required for constructing transactions.
+    ///
+    /// If not provided by the config implementation, it will be obtained from the chain in the case of the
+    /// [`crate::client::OnlineClient`]. It must be provided to construct transactions via the
+    /// [`crate::client::OfflineClient`], else an error will be returned.
+    fn genesis_hash(&self) -> Option<HashFor<Self>> {
+        None
+    }
+
+    /// Return a tuple of the spec version and then transaction version for a given block number, if available.
     ///
     /// The [`crate::client::OnlineClient`] will look this up on chain if it's not available here,
     /// but the [`crate::client::OfflineClient`] will error if this is not available for the required block number.
-    fn spec_version_for_block_number(&self, _block_number: u64) -> Option<u32> {
+    fn spec_and_transaction_version_for_block_number(
+        &self,
+        _block_number: u64,
+    ) -> Option<(u32, u32)> {
         None
     }
 

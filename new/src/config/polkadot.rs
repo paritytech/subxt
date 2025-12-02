@@ -71,12 +71,20 @@ impl Config for PolkadotConfig {
     // because we need to pass the PolkadotConfig trait as a param.
     type ExtrinsicParams = PolkadotExtrinsicParams<Self>;
 
+    fn genesis_hash(&self) -> Option<super::HashFor<Self>> {
+        self.0.genesis_hash()
+    }
+
     fn legacy_types_for_spec_version(&'_ self, spec_version: u32) -> Option<TypeRegistrySet<'_>> {
         self.0.legacy_types_for_spec_version(spec_version)
     }
 
-    fn spec_version_for_block_number(&self, block_number: u64) -> Option<u32> {
-        self.0.spec_version_for_block_number(block_number)
+    fn spec_and_transaction_version_for_block_number(
+        &self,
+        block_number: u64,
+    ) -> Option<(u32, u32)> {
+        self.0
+            .spec_and_transaction_version_for_block_number(block_number)
     }
 
     fn metadata_for_spec_version(&self, spec_version: u32) -> Option<Arc<Metadata>> {

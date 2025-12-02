@@ -20,7 +20,8 @@ use subxt_metadata::Metadata;
 /// Construct a [`SubstrateConfig`] using this.
 pub struct SubstrateConfigBuilder {
     legacy_types: Option<ChainTypeRegistry>,
-    spec_version_for_block_number: RangeMap<u64, u32>,
+    spec_and_transaction_version_for_block_number: RangeMap<u64, (u32, u32)>,
+    genesis_hash: Option<H256>,
     metadata_for_spec_version: Mutex<HashMap<u32, Arc<Metadata>>>,
     use_old_v9_hashers_before_spec_version: u32,
 }
@@ -36,10 +37,17 @@ impl SubstrateConfigBuilder {
     pub fn new() -> Self {
         SubstrateConfigBuilder {
             legacy_types: None,
-            spec_version_for_block_number: RangeMap::empty(),
+            genesis_hash: None,
+            spec_and_transaction_version_for_block_number: RangeMap::empty(),
             metadata_for_spec_version: Mutex::new(HashMap::new()),
             use_old_v9_hashers_before_spec_version: 0,
         }
+    }
+
+    /// Set the genesis hash for this chain.
+    pub fn set_genesis_hash(mut self, genesis_hash: H256) -> Self {
+        self.genesis_hash = Some(genesis_hash);
+        self
     }
 
     /// Set the legacy types to use for this configuration. This enables support for
@@ -73,9 +81,10 @@ impl SubstrateConfigBuilder {
             let start = version_for_range.block_range.start;
             let end = version_for_range.block_range.end;
             let spec_version = version_for_range.spec_version;
-            m = m.add_range(start, end, spec_version);
+            let transaction_version = version_for_range.transaction_version;
+            m = m.add_range(start, end, (spec_version, transaction_version));
         }
-        self.spec_version_for_block_number = m.build();
+        self.spec_and_transaction_version_for_block_number = m.build();
         self
     }
 
@@ -91,7 +100,8 @@ impl SubstrateConfigBuilder {
         SubstrateConfig {
             inner: Arc::new(SubstrateConfigInner {
                 legacy_types: self.legacy_types,
-                spec_version_for_block_number: self.spec_version_for_block_number,
+                spec_and_transaction_version_for_block_number: self
+                    .spec_and_transaction_version_for_block_number,
                 metadata_for_spec_version: self.metadata_for_spec_version,
             }),
         }
@@ -107,6 +117,8 @@ pub struct SpecVersionForRange {
     pub block_range: std::ops::Range<u64>,
     /// The spec version at this block range.
     pub spec_version: u32,
+    /// The transaction version at this block range.
+    pub transaction_version: u32,
 }
 
 /// Configuration that's suitable for standard Substrate chains (ie those
@@ -119,7 +131,7 @@ pub struct SubstrateConfig {
 #[derive(Debug)]
 struct SubstrateConfigInner {
     legacy_types: Option<ChainTypeRegistry>,
-    spec_version_for_block_number: RangeMap<u64, u32>,
+    spec_and_transaction_version_for_block_number: RangeMap<u64, (u32, u32)>,
     metadata_for_spec_version: Mutex<HashMap<u32, Arc<Metadata>>>,
 }
 
@@ -146,9 +158,12 @@ impl Config for SubstrateConfig {
             .map(|types| types.for_spec_version(spec_version as u64))
     }
 
-    fn spec_version_for_block_number(&self, block_number: u64) -> Option<u32> {
+    fn spec_and_transaction_version_for_block_number(
+        &self,
+        block_number: u64,
+    ) -> Option<(u32, u32)> {
         self.inner
-            .spec_version_for_block_number
+            .spec_and_transaction_version_for_block_number
             .get(block_number)
             .copied()
     }
