@@ -204,7 +204,6 @@ impl<T: Config> OnlineClient<T> {
 }
 
 /// This represents an online client at a specific block.
-#[doc(hidden)]
 pub trait OnlineClientAtBlockT<'client, T: Config + 'client>:
     OfflineClientAtBlockT<'client, T>
 {
@@ -217,7 +216,6 @@ pub trait OnlineClientAtBlockT<'client, T: Config + 'client>:
 // Dev note: this shouldn't need to be exposed unless there is some
 // need to explicitly name the ClientAAtBlock type. Rather keep it
 // private to allow changes if possible.
-#[doc(hidden)]
 pub struct OnlineClientAtBlock<'client, T: Config + 'client> {
     /// The configuration for this chain.
     config: &'client T,
