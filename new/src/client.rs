@@ -6,13 +6,8 @@ use crate::transactions::Transactions;
 use core::marker::PhantomData;
 use subxt_metadata::Metadata;
 
-// We keep these traits internal, so that we can mess with them later if needed,
-// and instead only the concrete types are public which wrap these trait impls.
-pub(crate) use offline_client::OfflineClientAtBlockT;
-pub(crate) use online_client::OnlineClientAtBlockT;
-
-pub use offline_client::{OfflineClient, OfflineClientAtBlock};
-pub use online_client::{OnlineClient, OnlineClientAtBlock};
+pub use offline_client::{OfflineClient, OfflineClientAtBlock, OfflineClientAtBlockT};
+pub use online_client::{OnlineClient, OnlineClientAtBlock, OnlineClientAtBlockT};
 
 /// This represents a client at a specific block number.
 #[derive(Clone, Debug)]

@@ -362,7 +362,7 @@ pub enum OnlineClientAtBlockError {
         metadata_version: u32,
         /// Reason the conversion failed.
         reason: subxt_metadata::TryFromError,
-    }, 
+    },
     #[error(
         "Cannot construct OnlineClientAtBlock: cannot inject types from metadata: failure to parse a type found in the metadata: {parse_error}"
     )]

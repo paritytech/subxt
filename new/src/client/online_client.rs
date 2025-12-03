@@ -9,8 +9,8 @@ use crate::error::{BlocksError, OnlineClientAtBlockError};
 use blocks::Blocks;
 use codec::{Compact, Decode, Encode};
 use core::marker::PhantomData;
-use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use frame_decode::helpers::ToTypeRegistry;
+use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use scale_info_legacy::TypeRegistrySet;
 use std::sync::Arc;
 use subxt_metadata::Metadata;
@@ -260,6 +260,22 @@ impl<T: Config> OnlineClient<T> {
                 (block_ref, block_number)
             }
         };
+
+        self.at_block_hash_and_number(block_ref, block_number).await
+    }
+
+    /// Instantiate a client for working at a specific block. This takes a block hash/ref _and_ the
+    /// corresponding block number. When both are available, this saves an RPC call to obtain one from
+    /// the other.
+    ///
+    /// **Warning:** If the block hash and number do not align, then things will go wrong. Prefer to
+    /// use [`Self::at_block`] if in any doubt.
+    pub async fn at_block_hash_and_number(
+        &self,
+        block_ref: impl Into<BlockRef<HashFor<T>>>,
+        block_number: u64,
+    ) -> Result<ClientAtBlock<OnlineClientAtBlock<T>, T>, OnlineClientAtBlockError> {
+        let block_ref = block_ref.into();
         let block_hash = block_ref.hash();
 
         // Obtain the spec version so that we know which metadata to use at this block.
