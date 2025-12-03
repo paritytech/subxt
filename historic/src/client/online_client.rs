@@ -148,6 +148,59 @@ impl<T: Config> OnlineClient<T> {
             block_hash,
         }))
     }
+
+    /// Pick the block hash at which to operate. This is useful when you already have
+    /// the block hash and want to avoid the extra RPC call to look it up from a block number.
+    ///
+    /// If `block_number` is provided, the spec version cache (keyed by block number) can be used,
+    /// which avoids an additional RPC call to fetch the spec version. This is the most efficient
+    /// option when you have both the block number and hash available.
+    ///
+    /// This references data from the [`OnlineClient`] it's called on, and so cannot outlive it.
+    pub async fn at_hash(
+        &'_ self,
+        block_hash: <T as Config>::Hash,
+        block_number: Option<u64>,
+    ) -> Result<ClientAtBlock<OnlineClientAtBlock<'_, T>, T>, OnlineClientAtBlockError> {
+        let config = &self.inner.config;
+        let rpc_methods = &self.inner.rpc_methods;
+
+        // Try to use cached spec version if block_number is provided, otherwise fetch it
+        let spec_version = if let Some(number) = block_number {
+            if let Some(cached_spec) = config.spec_version_for_block_number(number) {
+                cached_spec
+            } else {
+                get_spec_version(rpc_methods, block_hash).await?
+            }
+        } else {
+            get_spec_version(rpc_methods, block_hash).await?
+        };
+
+        // Use cached metadata if available, otherwise fetch it
+        let metadata = if let Some(metadata) = config.metadata_for_spec_version(spec_version) {
+            metadata
+        } else {
+            let metadata = get_metadata(rpc_methods, block_hash).await?;
+            let metadata = Arc::new(metadata);
+            config.set_metadata_for_spec_version(spec_version, metadata.clone());
+            metadata
+        };
+
+        let mut historic_types = config.legacy_types_for_spec_version(spec_version);
+        let types_from_metadata = frame_decode::helpers::type_registry_from_metadata_any(&metadata)
+            .map_err(
+                |parse_error| OnlineClientAtBlockError::CannotInjectMetadataTypes { parse_error },
+            )?;
+        historic_types.prepend(types_from_metadata);
+
+        Ok(ClientAtBlock::new(OnlineClientAtBlock {
+            config,
+            historic_types,
+            metadata,
+            rpc_methods,
+            block_hash,
+        }))
+    }
 }
 
 /// This represents an online client at a specific block.
