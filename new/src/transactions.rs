@@ -129,7 +129,7 @@ impl<'atblock, T: Config, C: OfflineClientAtBlockT<T>> Transactions<'atblock, T,
             metadata: self.client.metadata(),
         };
 
-        let tx = match self.default_transaction_version(&metadata)? {
+        let tx = match self.default_transaction_version()? {
             TransactionVersion::V4 => {
                 PartialTransactionInner::V4(self.create_v4_signed(call, &client_state, params)?)
             }

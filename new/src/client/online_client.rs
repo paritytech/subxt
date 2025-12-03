@@ -10,6 +10,7 @@ use blocks::Blocks;
 use codec::{Compact, Decode, Encode};
 use core::marker::PhantomData;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
+use frame_decode::helpers::ToTypeRegistry;
 use scale_info_legacy::TypeRegistrySet;
 use std::sync::Arc;
 use subxt_metadata::Metadata;
@@ -321,7 +322,7 @@ impl<T: Config> OnlineClient<T> {
                             });
                         }
                         RuntimeMetadata::V8(m) => {
-                            let types = get_legacy_types(self, spec_version)?;
+                            let types = get_legacy_types(self, &m, spec_version)?;
                             Metadata::from_v8(&m, &types).map_err(|e| {
                                 OnlineClientAtBlockError::CannotConvertLegacyMetadata {
                                     block_hash: block_hash.into(),
@@ -331,7 +332,7 @@ impl<T: Config> OnlineClient<T> {
                             })?
                         }
                         RuntimeMetadata::V9(m) => {
-                            let types = get_legacy_types(self, spec_version)?;
+                            let types = get_legacy_types(self, &m, spec_version)?;
                             Metadata::from_v9(&m, &types).map_err(|e| {
                                 OnlineClientAtBlockError::CannotConvertLegacyMetadata {
                                     block_hash: block_hash.into(),
@@ -341,7 +342,7 @@ impl<T: Config> OnlineClient<T> {
                             })?
                         }
                         RuntimeMetadata::V10(m) => {
-                            let types = get_legacy_types(self, spec_version)?;
+                            let types = get_legacy_types(self, &m, spec_version)?;
                             Metadata::from_v10(&m, &types).map_err(|e| {
                                 OnlineClientAtBlockError::CannotConvertLegacyMetadata {
                                     block_hash: block_hash.into(),
@@ -351,7 +352,7 @@ impl<T: Config> OnlineClient<T> {
                             })?
                         }
                         RuntimeMetadata::V11(m) => {
-                            let types = get_legacy_types(self, spec_version)?;
+                            let types = get_legacy_types(self, &m, spec_version)?;
                             Metadata::from_v11(&m, &types).map_err(|e| {
                                 OnlineClientAtBlockError::CannotConvertLegacyMetadata {
                                     block_hash: block_hash.into(),
@@ -361,7 +362,7 @@ impl<T: Config> OnlineClient<T> {
                             })?
                         }
                         RuntimeMetadata::V12(m) => {
-                            let types = get_legacy_types(self, spec_version)?;
+                            let types = get_legacy_types(self, &m, spec_version)?;
                             Metadata::from_v12(&m, &types).map_err(|e| {
                                 OnlineClientAtBlockError::CannotConvertLegacyMetadata {
                                     block_hash: block_hash.into(),
@@ -371,7 +372,7 @@ impl<T: Config> OnlineClient<T> {
                             })?
                         }
                         RuntimeMetadata::V13(m) => {
-                            let types = get_legacy_types(self, spec_version)?;
+                            let types = get_legacy_types(self, &m, spec_version)?;
                             Metadata::from_v13(&m, &types).map_err(|e| {
                                 OnlineClientAtBlockError::CannotConvertLegacyMetadata {
                                     block_hash: block_hash.into(),
@@ -485,15 +486,23 @@ impl<T: Config> OfflineClientAtBlockT<T> for OnlineClientAtBlock<T> {
     }
 }
 
-fn get_legacy_types<T: Config>(
-    client: &OnlineClient<T>,
+fn get_legacy_types<'a, T: Config, Md: ToTypeRegistry>(
+    client: &'a OnlineClient<T>,
+    metadata: &Md,
     spec_version: u32,
-) -> Result<TypeRegistrySet<'_>, OnlineClientAtBlockError> {
-    client
+) -> Result<TypeRegistrySet<'a>, OnlineClientAtBlockError> {
+    let mut types = client
         .inner
         .config
         .legacy_types_for_spec_version(spec_version)
-        .ok_or(OnlineClientAtBlockError::MissingLegacyTypes)
+        .ok_or(OnlineClientAtBlockError::MissingLegacyTypes)?;
+
+    // Extend the types with information from the metadata (ie event/error/call enums):
+    let additional_types = frame_decode::helpers::type_registry_from_metadata(metadata)
+        .map_err(|e| OnlineClientAtBlockError::CannotInjectMetadataTypes { parse_error: e })?;
+    types.prepend(additional_types);
+
+    Ok(types)
 }
 
 async fn get_metadata<T: Config>(
