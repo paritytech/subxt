@@ -7,13 +7,8 @@ use crate::storage::StorageClient;
 use frame_metadata::RuntimeMetadata;
 use std::marker::PhantomData;
 
-// We keep these traits internal, so that we can mess with them later if needed,
-// and instead only the concrete types are public which wrap these trait impls.
-pub(crate) use offline_client::OfflineClientAtBlockT;
-pub(crate) use online_client::OnlineClientAtBlockT;
-
-pub use offline_client::OfflineClient;
-pub use online_client::OnlineClient;
+pub use offline_client::{OfflineClient, OfflineClientAtBlock, OfflineClientAtBlockT};
+pub use online_client::{OnlineClient, OnlineClientAtBlock, OnlineClientAtBlockT};
 
 /// This represents a client at a specific block number.
 pub struct ClientAtBlock<Client, T> {
