@@ -210,7 +210,7 @@ impl<T: Config> OnlineClient<T> {
     /// This does not track new blocks.
     pub async fn at_current_block(
         &self,
-    ) -> Result<ClientAtBlock<OnlineClientAtBlock<T>, T>, OnlineClientAtBlockError> {
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlock<T>>, OnlineClientAtBlockError> {
         let latest_block = self
             .inner
             .backend
@@ -225,7 +225,7 @@ impl<T: Config> OnlineClient<T> {
     pub async fn at_block(
         &self,
         number_or_hash: impl Into<BlockNumberOrRef<T>>,
-    ) -> Result<ClientAtBlock<OnlineClientAtBlock<T>, T>, OnlineClientAtBlockError> {
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlock<T>>, OnlineClientAtBlockError> {
         let number_or_hash = number_or_hash.into();
 
         // We are given either a block hash or number. We need both.
@@ -274,7 +274,7 @@ impl<T: Config> OnlineClient<T> {
         &self,
         block_ref: impl Into<BlockRef<HashFor<T>>>,
         block_number: u64,
-    ) -> Result<ClientAtBlock<OnlineClientAtBlock<T>, T>, OnlineClientAtBlockError> {
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlock<T>>, OnlineClientAtBlockError> {
         let block_ref = block_ref.into();
         let block_hash = block_ref.hash();
 
@@ -452,8 +452,6 @@ pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT<T> {
     fn backend(&self) -> &dyn Backend<T>;
     /// Return the block hash for the current block.
     fn block_hash(&self) -> HashFor<T>;
-    /// Return a hasher that works at the current block.
-    fn hasher(&self) -> &T::Hasher;
 }
 
 /// The inner type providing the necessary data to work online at a specific block.
@@ -476,9 +474,6 @@ impl<T: Config> OnlineClientAtBlockT<T> for OnlineClientAtBlock<T> {
     fn block_hash(&self) -> HashFor<T> {
         self.block_ref.hash()
     }
-    fn hasher(&self) -> &T::Hasher {
-        &self.hasher
-    }
 }
 
 impl<T: Config> OfflineClientAtBlockT<T> for OnlineClientAtBlock<T> {
@@ -499,6 +494,9 @@ impl<T: Config> OfflineClientAtBlockT<T> for OnlineClientAtBlock<T> {
     }
     fn transaction_version(&self) -> u32 {
         self.transaction_version
+    }
+    fn hasher(&self) -> &T::Hasher {
+        &self.hasher
     }
 }
 

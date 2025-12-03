@@ -70,7 +70,7 @@ impl<T: Config> Block<T> {
     /// Instantiate a client at this block.
     pub async fn client(
         &self,
-    ) -> Result<ClientAtBlock<OnlineClientAtBlock<T>, T>, OnlineClientAtBlockError> {
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlock<T>>, OnlineClientAtBlockError> {
         self.client.at_block(self.block_ref.clone()).await
     }
 }

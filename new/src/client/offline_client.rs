@@ -1,5 +1,5 @@
 use crate::client::ClientAtBlock;
-use crate::config::{Config, HashFor};
+use crate::config::{Config, HashFor, Hasher};
 use crate::error::OfflineClientAtBlockError;
 use std::sync::Arc;
 use subxt_metadata::Metadata;
@@ -21,7 +21,7 @@ impl<T: Config> OfflineClient<T> {
     pub fn at_block(
         &self,
         block_number: impl Into<u64>,
-    ) -> Result<ClientAtBlock<OfflineClientAtBlock<T>, T>, OfflineClientAtBlockError> {
+    ) -> Result<ClientAtBlock<T, OfflineClientAtBlock<T>>, OfflineClientAtBlockError> {
         let block_number = block_number.into();
         let (spec_version, transaction_version) = self
             .config
@@ -35,11 +35,14 @@ impl<T: Config> OfflineClient<T> {
 
         let genesis_hash = self.config.genesis_hash();
 
+        let hasher = <T::Hasher as Hasher>::new(&metadata);
+
         let offline_client_at_block = OfflineClientAtBlock {
             metadata,
             block_number,
             genesis_hash,
             spec_version,
+            hasher,
             transaction_version,
         };
 
@@ -53,6 +56,7 @@ pub struct OfflineClientAtBlock<T: Config> {
     block_number: u64,
     genesis_hash: Option<HashFor<T>>,
     spec_version: u32,
+    hasher: T::Hasher,
     transaction_version: u32,
 }
 
@@ -69,6 +73,8 @@ pub trait OfflineClientAtBlockT<T: Config>: Clone {
     fn genesis_hash(&self) -> Option<HashFor<T>>;
     /// The spec version at the current block.
     fn spec_version(&self) -> u32;
+    /// Return a hasher that works at the current block.
+    fn hasher(&self) -> &T::Hasher;
     /// The transaction version at the current block.
     ///
     /// Note: This is _not_ the same as the transaction version that
@@ -94,5 +100,8 @@ impl<T: Config> OfflineClientAtBlockT<T> for OfflineClientAtBlock<T> {
     }
     fn transaction_version(&self) -> u32 {
         self.transaction_version
+    }
+    fn hasher(&self) -> &T::Hasher {
+        &self.hasher
     }
 }

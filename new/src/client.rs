@@ -11,12 +11,12 @@ pub use online_client::{OnlineClient, OnlineClientAtBlock, OnlineClientAtBlockT}
 
 /// This represents a client at a specific block number.
 #[derive(Clone, Debug)]
-pub struct ClientAtBlock<Client, T> {
+pub struct ClientAtBlock<T, Client> {
     client: Client,
     marker: PhantomData<T>,
 }
 
-impl<Client, T> ClientAtBlock<Client, T> {
+impl<T, Client> ClientAtBlock<T, Client> {
     /// Construct a new client at some block.
     pub(crate) fn new(client: Client) -> Self {
         Self {
@@ -26,14 +26,14 @@ impl<Client, T> ClientAtBlock<Client, T> {
     }
 }
 
-impl<Client, T> ClientAtBlock<Client, T>
+impl<T, Client> ClientAtBlock<T, Client>
 where
     T: Config,
     Client: OfflineClientAtBlockT<T>,
 {
     /// Construct transactions.
-    pub fn tx(&self) -> Transactions<'_, T, Client> {
-        Transactions::new(&self.client)
+    pub fn tx(&self) -> Transactions<T, Client> {
+        Transactions::new(self.client.clone())
     }
 
     /// Obtain a reference to the metadata.
@@ -47,7 +47,7 @@ where
     }
 }
 
-impl<Client, T> ClientAtBlock<Client, T>
+impl<T, Client> ClientAtBlock<T, Client>
 where
     T: Config,
     Client: OnlineClientAtBlockT<T>,

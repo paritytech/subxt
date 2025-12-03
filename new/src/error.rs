@@ -582,6 +582,8 @@ pub enum ExtrinsicError {
     },
     #[error("Can't encode the extrinsic call data: {0}")]
     CannotEncodeCallData(scale_encode::Error),
+    #[error("Failed to encode an extrinsic: the genesis hash was not provided")]
+    GenesisHashNotProvided,
     #[error("Subxt does not support the extrinsic versions expected by the chain")]
     UnsupportedVersion,
     #[error("Cannot construct the required transaction extensions: {0}")]

@@ -9,8 +9,8 @@
 //! Polkadot node.
 
 mod default_extrinsic_params;
-mod extrinsic_params;
 
+pub mod extrinsic_params;
 pub mod polkadot;
 pub mod substrate;
 pub mod transaction_extensions;
@@ -40,7 +40,7 @@ pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     type AccountId: Debug + Clone + Encode + Decode + Serialize + Send;
 
     /// The address type; required for constructing extrinsics.
-    type Address: Debug + Encode + From<<Self as Config>::AccountId>;
+    type Address: Debug + Encode + From<Self::AccountId>;
 
     /// The signature type.
     type Signature: Debug + Clone + Encode + Decode + Send;
