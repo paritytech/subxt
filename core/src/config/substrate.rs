@@ -40,7 +40,7 @@ pub type SubstrateExtrinsicParams<T> = DefaultExtrinsicParams<T>;
 pub type SubstrateExtrinsicParamsBuilder<T> = DefaultExtrinsicParamsBuilder<T>;
 
 /// A hasher (ie implements [`Hasher`]) which hashes values using the blaks2_256 algorithm.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash)]
 pub struct BlakeTwo256;
 
 impl Hasher for BlakeTwo256 {
@@ -59,10 +59,10 @@ impl Hasher for BlakeTwo256 {
 /// hash types, falling back to blake2_256 if the hasher information is not available.
 ///
 /// Currently this hasher supports only `BlakeTwo256` and `Keccak256` hashing methods.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct DynamicHasher256(HashType);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum HashType {
     // Most chains use this:
     BlakeTwo256,
@@ -108,7 +108,7 @@ impl Hasher for DynamicHasher256 {
 
 /// A generic Substrate header type, adapted from `sp_runtime::generic::Header`.
 /// The block number and hasher can be configured to adapt this for other nodes.
-#[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
+#[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubstrateHeader<N: Copy + Into<U256> + TryFrom<U256>, H: Hasher> {
     /// The parent hash.
@@ -143,7 +143,7 @@ where
 }
 
 /// Generic header digest. From `sp_runtime::generic::digest`.
-#[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, Serialize, Deserialize, Default)]
+#[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, Hash, Serialize, Deserialize, Default)]
 pub struct Digest {
     /// A list of digest items.
     pub logs: Vec<DigestItem>,
@@ -151,7 +151,7 @@ pub struct Digest {
 
 /// Digest item that is able to encode/decode 'system' digest items and
 /// provide opaque access to other items. From `sp_runtime::generic::digest`.
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub enum DigestItem {
     /// A pre-runtime digest.
     ///

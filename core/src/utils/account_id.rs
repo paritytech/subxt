@@ -19,6 +19,7 @@ use thiserror::Error as DeriveError;
 /// that type.
 #[derive(
     Clone,
+    Copy,
     Eq,
     PartialEq,
     Ord,
@@ -26,6 +27,7 @@ use thiserror::Error as DeriveError;
     Encode,
     Decode,
     Debug,
+    Hash,
     scale_encode::EncodeAsType,
     scale_decode::DecodeAsType,
     scale_info::TypeInfo,
