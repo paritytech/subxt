@@ -47,7 +47,6 @@ impl<T: Config> OfflineClient<T> {
 }
 
 /// This represents an offline-only client at a specific block.
-#[doc(hidden)]
 pub trait OfflineClientAtBlockT<'client, T: Config + 'client> {
     /// Get the configuration for this client.
     fn config(&self) -> &'client T;
@@ -60,7 +59,6 @@ pub trait OfflineClientAtBlockT<'client, T: Config + 'client> {
 // Dev note: this shouldn't need to be exposed unless there is some
 // need to explicitly name the ClientAAtBlock type. Rather keep it
 // private to allow changes if possible.
-#[doc(hidden)]
 pub struct OfflineClientAtBlock<'client, T: Config + 'client> {
     /// The configuration for this chain.
     config: &'client T,
