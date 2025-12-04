@@ -54,7 +54,7 @@ impl<'extrinsics, 'atblock> ExtrinsicCall<'extrinsics, 'atblock> {
 pub struct ExtrinsicCallFields<'extrinsics, 'atblock> {
     all_bytes: &'extrinsics [u8],
     info: &'extrinsics AnyExtrinsicInfo<'atblock>,
-    resolver: AnyResolver<'atblock>,
+    resolver: AnyResolver<'atblock, 'atblock>,
 }
 
 impl<'extrinsics, 'atblock> ExtrinsicCallFields<'extrinsics, 'atblock> {
@@ -135,7 +135,7 @@ impl<'extrinsics, 'atblock> ExtrinsicCallFields<'extrinsics, 'atblock> {
 pub struct ExtrinsicCallField<'fields, 'extrinsics, 'atblock> {
     field_bytes: &'extrinsics [u8],
     info: AnyExtrinsicCallFieldInfo<'extrinsics, 'atblock>,
-    resolver: &'fields AnyResolver<'atblock>,
+    resolver: &'fields AnyResolver<'atblock, 'atblock>,
 }
 
 enum AnyExtrinsicCallFieldInfo<'extrinsics, 'atblock> {
@@ -172,7 +172,9 @@ impl<'fields, 'extrinsics, 'atblock> ExtrinsicCallField<'fields, 'extrinsics, 'a
     /// Visit the given field with a [`scale_decode::visitor::Visitor`]. This is like a lower level
     /// version of [`ExtrinsicCallField::decode_as`], as the visitor is able to preserve lifetimes
     /// and has access to more type information than is available via [`ExtrinsicCallField::decode_as`].
-    pub fn visit<V: scale_decode::visitor::Visitor<TypeResolver = AnyResolver<'atblock>>>(
+    pub fn visit<
+        V: scale_decode::visitor::Visitor<TypeResolver = AnyResolver<'atblock, 'atblock>>,
+    >(
         &self,
         visitor: V,
     ) -> Result<V::Value<'extrinsics, 'fields>, V::Error> {
