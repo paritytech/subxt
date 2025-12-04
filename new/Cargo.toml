@@ -115,7 +115,7 @@ jsonrpsee = { workspace = true, optional = true, features = ["jsonrpsee-types"] 
 
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
-subxt-metadata = { workspace = true, features = ["std"] }
+subxt-metadata = { workspace = true, features = ["std", "legacy"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 subxt-rpcs = { workspace = true }
 

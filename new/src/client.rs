@@ -2,6 +2,9 @@ mod offline_client;
 mod online_client;
 
 use crate::config::{Config, HashFor};
+use crate::error::{EventsError, ExtrinsicError};
+use crate::events::Events;
+use crate::extrinsics::Extrinsics;
 use crate::transactions::Transactions;
 use core::marker::PhantomData;
 use subxt_metadata::Metadata;
@@ -31,7 +34,7 @@ where
     T: Config,
     Client: OfflineClientAtBlockT<T>,
 {
-    /// Construct transactions.
+    /// Construct and submit transactions.
     pub fn tx(&self) -> Transactions<T, Client> {
         Transactions::new(self.client.clone())
     }
@@ -52,6 +55,16 @@ where
     T: Config,
     Client: OnlineClientAtBlockT<T>,
 {
+    /// Obtain the extrinsics in this block.
+    pub async fn extrinsics(&self) -> Result<Extrinsics<T, Client>, ExtrinsicError> {
+        Extrinsics::fetch(self.client.clone()).await
+    }
+
+    /// Obtain the extrinsic events at this block.
+    pub async fn events(&self) -> Result<Events<T>, EventsError> {
+        Events::fetch(self.client.clone()).await
+    }
+
     /// The current block hash.
     pub fn block_hash(&self) -> HashFor<T> {
         self.client.block_hash()

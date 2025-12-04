@@ -1,16 +1,18 @@
 mod account_nonce;
 mod default_params;
-mod payload;
 mod signer;
+mod transaction_progress;
 mod validation_result;
 
-use crate::backend::BackendExt;
+pub mod payload;
+
+use crate::backend::{BackendExt, TransactionStatus as BackendTransactionStatus};
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::extrinsic_params::Params;
 use crate::config::{
     ClientState, Config, ExtrinsicParams, ExtrinsicParamsEncoder, HashFor, Hasher, Header,
 };
-use crate::error::ExtrinsicError;
+use crate::error::{ExtrinsicError, TransactionStatusError};
 use codec::{Compact, Encode};
 use core::marker::PhantomData;
 use futures::{TryFutureExt, future::try_join};
@@ -20,6 +22,7 @@ use std::borrow::Cow;
 pub use default_params::DefaultParams;
 pub use payload::Payload;
 pub use signer::Signer;
+pub use transaction_progress::{TransactionProgress, TransactionStatus};
 pub use validation_result::{
     TransactionInvalid, TransactionUnknown, TransactionValid, ValidationResult,
 };
@@ -700,20 +703,20 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> SubmittableTransaction<T, Clien
         // If we get a bad status or error back straight away then error, else return the hash.
         match sub.next().await {
             Some(Ok(status)) => match status {
-                TransactionStatus::Validated
-                | TransactionStatus::Broadcasted
-                | TransactionStatus::InBestBlock { .. }
-                | TransactionStatus::NoLongerInBestBlock
-                | TransactionStatus::InFinalizedBlock { .. } => Ok(ext_hash),
-                TransactionStatus::Error { message } => Err(
+                BackendTransactionStatus::Validated
+                | BackendTransactionStatus::Broadcasted
+                | BackendTransactionStatus::InBestBlock { .. }
+                | BackendTransactionStatus::NoLongerInBestBlock
+                | BackendTransactionStatus::InFinalizedBlock { .. } => Ok(ext_hash),
+                BackendTransactionStatus::Error { message } => Err(
                     ExtrinsicError::TransactionStatusError(TransactionStatusError::Error(message)),
                 ),
-                TransactionStatus::Invalid { message } => {
+                BackendTransactionStatus::Invalid { message } => {
                     Err(ExtrinsicError::TransactionStatusError(
                         TransactionStatusError::Invalid(message),
                     ))
                 }
-                TransactionStatus::Dropped { message } => {
+                BackendTransactionStatus::Dropped { message } => {
                     Err(ExtrinsicError::TransactionStatusError(
                         TransactionStatusError::Dropped(message),
                     ))

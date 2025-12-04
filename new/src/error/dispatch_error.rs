@@ -8,6 +8,7 @@
 use super::{DispatchErrorDecodeError, ModuleErrorDecodeError, ModuleErrorDetailsError};
 use core::fmt::Debug;
 use scale_decode::{DecodeAsType, TypeResolver, visitor::DecodeAsTypeResult};
+use std::sync::Arc;
 use std::{borrow::Cow, marker::PhantomData};
 use subxt_metadata::Metadata;
 
@@ -133,7 +134,7 @@ pub enum TransactionalError {
 #[derive(Clone, thiserror::Error)]
 #[non_exhaustive]
 pub struct ModuleError {
-    metadata: Metadata,
+    metadata: Arc<Metadata>,
     /// Bytes representation:
     ///  - `bytes[0]`:   pallet index
     ///  - `bytes[1]`:   error index
@@ -242,7 +243,7 @@ impl DispatchError {
     #[doc(hidden)]
     pub fn decode_from<'a>(
         bytes: impl Into<Cow<'a, [u8]>>,
-        metadata: Metadata,
+        metadata: Arc<Metadata>,
     ) -> Result<Self, DispatchErrorDecodeError> {
         let bytes = bytes.into();
         let dispatch_error_ty_id = metadata

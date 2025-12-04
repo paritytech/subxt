@@ -12,6 +12,7 @@ use core::marker::PhantomData;
 use frame_decode::helpers::ToTypeRegistry;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use scale_info_legacy::TypeRegistrySet;
+use std::future::Future;
 use std::sync::Arc;
 use subxt_metadata::Metadata;
 use subxt_rpcs::RpcClient;
@@ -428,13 +429,12 @@ impl<T: Config> OnlineClient<T> {
         };
 
         let online_client_at_block = OnlineClientAtBlock {
+            client: self.clone(),
             hasher: <T::Hasher as Hasher>::new(&metadata),
             metadata,
-            backend: self.inner.backend.clone(),
             block_ref,
             block_number,
             spec_version,
-            genesis_hash: self.inner.genesis_hash,
             transaction_version,
         };
 
@@ -448,31 +448,44 @@ impl<T: Config> OnlineClient<T> {
 /// This represents an online client at a specific block.
 #[doc(hidden)]
 pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT<T> {
+    type AtBlockError: std::error::Error;
     /// Return the RPC methods we'll use to interact with the node.
     fn backend(&self) -> &dyn Backend<T>;
     /// Return the block hash for the current block.
     fn block_hash(&self) -> HashFor<T>;
+    /// Point at a new block.
+    fn at_block(
+        &self,
+        number_or_hash: BlockNumberOrRef<T>,
+    ) -> impl Future<Output = Result<ClientAtBlock<T, Self>, Self::AtBlockError>>;
 }
 
 /// The inner type providing the necessary data to work online at a specific block.
 #[derive(Clone)]
 pub struct OnlineClientAtBlock<T: Config> {
+    client: OnlineClient<T>,
     metadata: Arc<Metadata>,
-    backend: Arc<dyn Backend<T>>,
     hasher: T::Hasher,
     block_ref: BlockRef<HashFor<T>>,
     block_number: u64,
     spec_version: u32,
-    genesis_hash: HashFor<T>,
     transaction_version: u32,
 }
 
 impl<T: Config> OnlineClientAtBlockT<T> for OnlineClientAtBlock<T> {
+    type AtBlockError = OnlineClientAtBlockError;
+
     fn backend(&self) -> &dyn Backend<T> {
-        &*self.backend
+        &*self.client.inner.backend
     }
     fn block_hash(&self) -> HashFor<T> {
         self.block_ref.hash()
+    }
+    async fn at_block(
+        &self,
+        number_or_hash: BlockNumberOrRef<T>,
+    ) -> Result<ClientAtBlock<T, Self>, Self::AtBlockError> {
+        self.client.at_block(number_or_hash).await
     }
 }
 
@@ -487,7 +500,7 @@ impl<T: Config> OfflineClientAtBlockT<T> for OnlineClientAtBlock<T> {
         self.block_number
     }
     fn genesis_hash(&self) -> Option<HashFor<T>> {
-        Some(self.genesis_hash)
+        Some(self.client.inner.genesis_hash)
     }
     fn spec_version(&self) -> u32 {
         self.spec_version
