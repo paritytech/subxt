@@ -432,7 +432,7 @@ mod value {
             let has_data_visitor = scale_type_resolver::visitor::new((), |_, _| false)
                 .visit_variant(|_, _, variants| {
                     for variant in variants {
-                        for _ in variant.fields {
+                        if variant.fields.next().is_some() {
                             return true;
                         }
                     }
