@@ -157,7 +157,6 @@ required-features = ["reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]
 features = ["default", "unstable-light-client"]
-rustdoc-args = ["--cfg", "docsrs"]
 
 [package.metadata.playground]
 features = ["default", "unstable-light-client"]

@@ -1953,9 +1953,9 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.15.0"
+version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fb3bfa2988ef40247e0e0eecfb171a01ad6f4e399485503aad4c413a5f236f3"
+checksum = "e63257bb5f8d7a707d626aa1b4e464c3b9720edd168b73cee98f48f0dd6386e4"
 dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
@@ -5821,6 +5821,56 @@ dependencies = [
  "subxt-codegen",
  "subxt-utils-stripmetadata",
  "thiserror 2.0.12",
+]
+
+[[package]]
+name = "subxt-new"
+version = "0.44.0"
+dependencies = [
+ "assert_matches",
+ "async-trait",
+ "base58",
+ "bitvec",
+ "blake2",
+ "derive-where",
+ "either",
+ "frame-decode",
+ "frame-metadata 23.0.0",
+ "futures",
+ "hex",
+ "http-body",
+ "hyper",
+ "impl-serde",
+ "jsonrpsee",
+ "keccak-hash",
+ "parity-scale-codec",
+ "primitive-types",
+ "scale-bits",
+ "scale-decode",
+ "scale-encode",
+ "scale-info",
+ "scale-info-legacy",
+ "scale-value",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "sp-crypto-hashing",
+ "sp-keyring",
+ "sp-runtime",
+ "subxt-lightclient",
+ "subxt-macro",
+ "subxt-metadata",
+ "subxt-rpcs",
+ "subxt-signer",
+ "thiserror 2.0.12",
+ "tokio",
+ "tokio-util",
+ "tower",
+ "tracing",
+ "tracing-subscriber",
+ "url",
+ "wasm-bindgen-futures",
+ "web-time",
 ]
 
 [[package]]

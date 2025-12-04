@@ -192,6 +192,7 @@ impl frame_decode::storage::StorageTypeInfo for Metadata {
                 .default_value
                 .as_ref()
                 .map(|def| Cow::Borrowed(&**def)),
+            use_old_v9_storage_hashers: false,
         };
 
         Ok(info)

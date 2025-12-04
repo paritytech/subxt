@@ -216,7 +216,7 @@ where
     > {
         use futures::stream::StreamExt;
         use subxt_rpcs::methods::chain_head::{
-            ArchiveStorageEvent, StorageQuery, StorageQueryType,
+            ArchiveStorageEvent, ArchiveStorageQuery, StorageQueryType,
         };
 
         let expected_num_keys = with_info!(info = &*self.info => {
@@ -235,9 +235,10 @@ where
         let block_hash = self.client.block_hash();
         let key_bytes = self.key(keys)?;
 
-        let items = std::iter::once(StorageQuery {
+        let items = std::iter::once(ArchiveStorageQuery {
             key: &*key_bytes,
             query_type: StorageQueryType::DescendantsValues,
+            pagination_start_key: None,
         });
 
         let sub = self
@@ -297,11 +298,14 @@ where
     T: Config + 'atblock,
     Client: OnlineClientAtBlockT<'atblock, T>,
 {
-    use subxt_rpcs::methods::chain_head::{ArchiveStorageEvent, StorageQuery, StorageQueryType};
+    use subxt_rpcs::methods::chain_head::{
+        ArchiveStorageEvent, ArchiveStorageQuery, StorageQueryType,
+    };
 
-    let query = StorageQuery {
+    let query = ArchiveStorageQuery {
         key: key_bytes,
         query_type: StorageQueryType::Value,
+        pagination_start_key: None,
     };
 
     let mut response_stream = client
