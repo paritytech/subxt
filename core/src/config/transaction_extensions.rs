@@ -112,6 +112,7 @@ pub enum VerifySignatureDetails<T: Config> {
 }
 
 /// The [`CheckMetadataHash`] transaction extension.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct CheckMetadataHash {
     // Eventually we might provide or calculate the metadata hash here,
     // but for now we never provide a hash and so this is empty.
@@ -167,6 +168,7 @@ impl CheckMetadataHashMode {
 }
 
 /// The [`CheckSpecVersion`] transaction extension.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct CheckSpecVersion(u32);
 
 impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
@@ -191,6 +193,7 @@ impl<T: Config> TransactionExtension<T> for CheckSpecVersion {
 }
 
 /// The [`CheckNonce`] transaction extension.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct CheckNonce(u64);
 
 impl<T: Config> ExtrinsicParams<T> for CheckNonce {
@@ -215,7 +218,7 @@ impl<T: Config> TransactionExtension<T> for CheckNonce {
 }
 
 /// Configure the nonce used.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Eq, PartialEq)]
 pub struct CheckNonceParams(Option<u64>);
 
 impl CheckNonceParams {
@@ -238,6 +241,7 @@ impl<T: Config> Params<T> for CheckNonceParams {
 }
 
 /// The [`CheckTxVersion`] transaction extension.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct CheckTxVersion(u32);
 
 impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
@@ -262,6 +266,7 @@ impl<T: Config> TransactionExtension<T> for CheckTxVersion {
 }
 
 /// The [`CheckGenesis`] transaction extension.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct CheckGenesis<T: Config>(HashFor<T>);
 
 impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
@@ -286,6 +291,7 @@ impl<T: Config> TransactionExtension<T> for CheckGenesis<T> {
 }
 
 /// The [`CheckMortality`] transaction extension.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CheckMortality<T: Config> {
     params: CheckMortalityParamsInner<T>,
     genesis_hash: HashFor<T>,
@@ -353,8 +359,10 @@ impl<T: Config> TransactionExtension<T> for CheckMortality<T> {
 }
 
 /// Parameters to configure the [`CheckMortality`] transaction extension.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CheckMortalityParams<T: Config>(CheckMortalityParamsInner<T>);
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 enum CheckMortalityParamsInner<T: Config> {
     /// The transaction will be immortal.
     Immortal,
@@ -469,6 +477,7 @@ impl<T: Config> TransactionExtension<T> for ChargeAssetTxPayment<T> {
 }
 
 /// Parameters to configure the [`ChargeAssetTxPayment`] transaction extension.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ChargeAssetTxPaymentParams<T: Config> {
     tip: u128,
     asset_id: Option<T::AssetId>,
@@ -546,7 +555,7 @@ impl<T: Config> TransactionExtension<T> for ChargeTransactionPayment {
 }
 
 /// Parameters to configure the [`ChargeTransactionPayment`] transaction extension.
-#[derive(Default)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
 pub struct ChargeTransactionPaymentParams {
     tip: u128,
 }
