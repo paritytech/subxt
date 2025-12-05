@@ -3,10 +3,8 @@ use scale_info_legacy::LookupName;
 use scale_type_resolver::ResolvedTypeVisitor;
 
 /// A type resolver which could either be for modern or historic resolving.
-pub type AnyResolver<'resolver> = Either<
-    &'resolver scale_info::PortableRegistry,
-    &'resolver scale_info_legacy::TypeRegistrySet<'resolver>,
->;
+pub type AnyResolver<'a, 'b> =
+    Either<&'a scale_info::PortableRegistry, &'a scale_info_legacy::TypeRegistrySet<'b>>;
 
 /// A type ID which is either a modern or historic ID.
 pub type AnyTypeId = Either<u32, scale_info_legacy::LookupName>;
@@ -60,7 +58,7 @@ pub enum AnyResolverError {
     ScaleInfoLegacy(scale_info_legacy::type_registry::TypeRegistryResolveError),
 }
 
-impl<'resolver> scale_type_resolver::TypeResolver for AnyResolver<'resolver> {
+impl<'a, 'b> scale_type_resolver::TypeResolver for AnyResolver<'a, 'b> {
     type TypeId = AnyTypeId;
     type Error = AnyResolverError;
 
