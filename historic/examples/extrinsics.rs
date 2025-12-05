@@ -431,7 +431,7 @@ mod value {
             // on them. here we see whether the enum type has any data attached:
             let has_data_visitor = scale_type_resolver::visitor::new((), |_, _| false)
                 .visit_variant(|_, _, variants| {
-                    for variant in variants {
+                    for mut variant in variants {
                         if variant.fields.next().is_some() {
                             return true;
                         }
