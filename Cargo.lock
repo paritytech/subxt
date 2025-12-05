@@ -5739,7 +5739,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-historic"
-version = "0.0.7"
+version = "0.0.8"
 dependencies = [
  "frame-decode",
  "frame-metadata 23.0.0",
