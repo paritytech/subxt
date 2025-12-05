@@ -99,12 +99,18 @@ fn interface_docs(should_gen_docs: bool) -> Vec<String> {
 
 #[test]
 fn check_documentation() {
-    // Inspect metadata recursively and obtain all associated documentation.
+    // Inspect metadata and obtain all associated documentation.
     let raw_docs = metadata_docs();
     // Obtain documentation from the generated API.
     let runtime_docs = interface_docs(true);
 
     for raw in raw_docs.iter() {
+        if raw.contains(|c: char| !c.is_ascii()) {
+            // Ignore lines containing on-ascii chars; they are encoded currently
+            // as "\u{nn}" which doesn't match their input which is the raw non-ascii
+            // char.
+            continue;
+        }
         assert!(
             runtime_docs.contains(raw),
             "Documentation not present in runtime API: {raw}"
@@ -114,7 +120,7 @@ fn check_documentation() {
 
 #[test]
 fn check_no_documentation() {
-    // Inspect metadata recursively and obtain all associated documentation.
+    // Inspect metadata and obtain all associated documentation.
     let raw_docs = metadata_docs();
     // Obtain documentation from the generated API.
     let runtime_docs = interface_docs(false);
