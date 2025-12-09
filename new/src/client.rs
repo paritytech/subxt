@@ -2,11 +2,15 @@ mod offline_client;
 mod online_client;
 
 use crate::config::{Config, HashFor};
+use crate::constants::ConstantsClient;
+use crate::custom_values::CustomValuesClient;
 use crate::error::{EventsError, ExtrinsicError};
 use crate::events::Events;
 use crate::extrinsics::Extrinsics;
+use crate::runtime_apis::RuntimeApisClient;
 use crate::storage::StorageClient;
 use crate::transactions::TransactionsClient;
+use crate::view_functions::ViewFunctionsClient;
 use core::marker::PhantomData;
 use subxt_metadata::Metadata;
 
@@ -43,6 +47,24 @@ where
     /// Access storage at this block.
     pub fn storage(&self) -> StorageClient<T, Client> {
         StorageClient::new(self.client.clone())
+    }
+
+    /// Access constants at this block.
+    pub fn constants(&self) -> ConstantsClient<T, Client> {
+        ConstantsClient::new(self.client.clone())
+    }
+
+    pub fn custom_values(&self) -> CustomValuesClient<T, Client> {
+        CustomValuesClient::new(self.client.clone())
+    }
+
+    /// Access runtime APIs at this block.
+    pub fn runtime_apis(&self) -> RuntimeApisClient<T, Client> {
+        RuntimeApisClient::new(self.client.clone())
+    }
+
+    pub fn view_functions(&self) -> ViewFunctionsClient<T, Client> {
+        ViewFunctionsClient::new(self.client.clone())
     }
 
     /// Obtain a reference to the metadata.

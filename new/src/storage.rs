@@ -21,7 +21,7 @@ pub use storage_key_value::StorageKeyValue;
 pub use storage_value::StorageValue;
 pub mod address;
 
-/// A client for working with transactions.
+/// A client for working with storage entries.
 #[derive(Clone)]
 pub struct StorageClient<T, Client> {
     client: Client,
@@ -81,7 +81,7 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> StorageClient<T, Client> {
 
     /// Iterate over all of the storage entries listed in the metadata for the current block. This does **not** include well known
     /// storage entries like `:code` which are not listed in the metadata.
-    pub fn entries(&self) -> impl Iterator<Item = StorageEntryRef<'_, Client, T>> {
+    pub fn entries(&self) -> impl Iterator<Item = StorageEntryRef<'_, T, Client>> {
         let metadata = self.client.metadata_ref();
         Entry::tuples_of(metadata.storage_entries()).map(|(pallet_name, entry_name)| {
             StorageEntryRef {
@@ -173,14 +173,14 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<T, Client> {
 }
 
 /// Working with a specific storage entry.
-pub struct StorageEntryRef<'atblock, Client, T> {
+pub struct StorageEntryRef<'atblock, T, Client> {
     pallet_name: Cow<'atblock, str>,
     entry_name: Cow<'atblock, str>,
     client: &'atblock Client,
     marker: std::marker::PhantomData<T>,
 }
 
-impl<'atblock, Client, T> StorageEntryRef<'atblock, Client, T>
+impl<'atblock, Client, T> StorageEntryRef<'atblock, T, Client>
 where
     T: Config,
     Client: OfflineClientAtBlockT<T>,

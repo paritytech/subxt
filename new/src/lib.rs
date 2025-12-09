@@ -35,20 +35,18 @@ mod only_used_in_docs_or_tests {
 pub mod backend;
 pub mod client;
 pub mod config;
+pub mod constants;
+pub mod custom_values;
 pub mod error;
 pub mod events;
 pub mod extrinsics;
+pub mod runtime_apis;
 pub mod storage;
 pub mod transactions;
 pub mod utils;
+pub mod view_functions;
 // pub mod book;
 // pub mod blocks;
-// pub mod constants;
-// pub mod custom_values;
-// pub mod runtime_api;
-// pub mod storage;
-// pub mod tx;
-// pub mod view_functions;
 
 // /// This module provides a [`Config`] type, which is used to define various
 // /// types that are important in order to speak to a particular chain.
