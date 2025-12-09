@@ -1,8 +1,9 @@
 mod decode_as_event;
 
+use crate::backend::BackendExt;
+use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::{Config, HashFor};
 use crate::error::EventsError;
-use crate::{backend::BackendExt, client::OnlineClientAtBlockT};
 use codec::{Compact, Decode, Encode};
 use scale_decode::{DecodeAsFields, DecodeAsType};
 use std::marker::PhantomData;
@@ -10,6 +11,67 @@ use std::sync::Arc;
 use subxt_metadata::Metadata;
 
 pub use decode_as_event::DecodeAsEvent;
+
+/// A client for working with events.
+pub struct EventsClient<T, Client> {
+    client: Client,
+    marker: PhantomData<T>,
+}
+
+impl<T, Client> EventsClient<T, Client> {
+    pub(crate) fn new(client: Client) -> Self {
+        EventsClient {
+            client,
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<T: Config, Client: OfflineClientAtBlockT<T>> EventsClient<T, Client> {
+    /// Work with the block event bytes given.
+    ///
+    /// No attempt to validate the provided bytes is made here; if invalid bytes are
+    /// provided then attempting to iterate and decode them will fail.
+    pub fn from_bytes(&self, event_bytes: Vec<u8>) -> Events<T> {
+        // event_bytes is a SCALE encoded vector of events. So, pluck the
+        // compact encoded length from the front, leaving the remaining bytes
+        // for our iterating to decode.
+        //
+        // Note: if we get no bytes back, avoid an error reading vec length
+        // and default to 0 events.
+        let cursor = &mut &*event_bytes;
+        let num_events = <Compact<u32>>::decode(cursor).unwrap_or(Compact(0)).0;
+
+        // Start decoding after the compact encoded bytes.
+        let start_idx = event_bytes.len() - cursor.len();
+
+        Events {
+            metadata: self.client.metadata(),
+            event_bytes,
+            start_idx,
+            num_events,
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<T: Config, Client: OnlineClientAtBlockT<T>> EventsClient<T, Client> {
+    /// Fetch the events at this block.
+    pub async fn fetch(&self) -> Result<Events<T>, EventsError> {
+        let client = &self.client;
+
+        // Fetch the bytes. Ensure things work if we get 0 bytes back.
+        let block_hash = client.block_hash();
+        let event_bytes = client
+            .backend()
+            .storage_fetch_value(system_events_key().to_vec(), block_hash)
+            .await
+            .map_err(EventsError::CannotFetchEventBytes)?
+            .unwrap_or_default();
+
+        Ok(self.from_bytes(event_bytes))
+    }
+}
 
 /// The events at some block.
 #[derive(Debug)]
@@ -25,37 +87,6 @@ pub struct Events<T> {
 }
 
 impl<T: Config> Events<T> {
-    pub(crate) async fn fetch(client: impl OnlineClientAtBlockT<T>) -> Result<Self, EventsError> {
-        // Fetch the bytes. Ensure things work if we get 0 bytes back.
-        let block_hash = client.block_hash();
-        let event_bytes = client
-            .backend()
-            .storage_fetch_value(system_events_key().to_vec(), block_hash)
-            .await
-            .map_err(EventsError::CannotFetchEventBytes)?
-            .unwrap_or_default();
-
-        // event_bytes is a SCALE encoded vector of events. So, pluck the
-        // compact encoded length from the front, leaving the remaining bytes
-        // for our iterating to decode.
-        //
-        // Note: if we get no bytes back, avoid an error reading vec length
-        // and default to 0 events.
-        let cursor = &mut &*event_bytes;
-        let num_events = <Compact<u32>>::decode(cursor).unwrap_or(Compact(0)).0;
-
-        // Start decoding after the compact encoded bytes.
-        let start_idx = event_bytes.len() - cursor.len();
-
-        Ok(Self {
-            metadata: client.metadata(),
-            event_bytes,
-            start_idx,
-            num_events,
-            marker: PhantomData,
-        })
-    }
-
     /// The number of events.
     pub fn len(&self) -> u32 {
         self.num_events

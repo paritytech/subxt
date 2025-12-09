@@ -4,9 +4,8 @@ mod online_client;
 use crate::config::{Config, HashFor};
 use crate::constants::ConstantsClient;
 use crate::custom_values::CustomValuesClient;
-use crate::error::{EventsError, ExtrinsicError};
-use crate::events::Events;
-use crate::extrinsics::Extrinsics;
+use crate::events::EventsClient;
+use crate::extrinsics::ExtrinsicsClient;
 use crate::runtime_apis::RuntimeApisClient;
 use crate::storage::StorageClient;
 use crate::transactions::TransactionsClient;
@@ -54,8 +53,19 @@ where
         ConstantsClient::new(self.client.clone())
     }
 
+    /// Access custom values at this block.
     pub fn custom_values(&self) -> CustomValuesClient<T, Client> {
         CustomValuesClient::new(self.client.clone())
+    }
+
+    /// Work with the extrinsics in this block.
+    pub fn extrinsics(&self) -> ExtrinsicsClient<T, Client> {
+        ExtrinsicsClient::new(self.client.clone())
+    }
+
+    /// Work with the events at this block.
+    pub fn events(&self) -> EventsClient<T, Client> {
+        EventsClient::new(self.client.clone())
     }
 
     /// Access runtime APIs at this block.
@@ -83,16 +93,6 @@ where
     T: Config,
     Client: OnlineClientAtBlockT<T>,
 {
-    /// Obtain the extrinsics in this block.
-    pub async fn extrinsics(&self) -> Result<Extrinsics<T, Client>, ExtrinsicError> {
-        Extrinsics::fetch(self.client.clone()).await
-    }
-
-    /// Obtain the extrinsic events at this block.
-    pub async fn events(&self) -> Result<Events<T>, EventsError> {
-        Events::fetch(self.client.clone()).await
-    }
-
     /// The current block hash.
     pub fn block_hash(&self) -> HashFor<T> {
         self.client.block_hash()

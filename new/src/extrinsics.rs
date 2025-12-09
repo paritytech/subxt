@@ -18,16 +18,39 @@ pub use extrinsic_transaction_extensions::{
     ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions,
 };
 
-/// The extrinsics in a block.
-#[derive(Debug, Clone)]
-pub struct Extrinsics<T, C> {
-    client: C,
-    extrinsics: Arc<Vec<Vec<u8>>>,
+/// A client for working with extrinsics.
+pub struct ExtrinsicsClient<T, Client> {
+    client: Client,
     marker: PhantomData<T>,
 }
 
-impl<T: Config, C: OnlineClientAtBlockT<T>> Extrinsics<T, C> {
-    pub(crate) async fn fetch(client: C) -> Result<Self, ExtrinsicError> {
+impl<T, Client> ExtrinsicsClient<T, Client> {
+    pub(crate) fn new(client: Client) -> Self {
+        ExtrinsicsClient {
+            client,
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<T: Config, Client: OfflineClientAtBlockT<T>> ExtrinsicsClient<T, Client> {
+    /// Work with the block body bytes given.
+    ///
+    /// No attempt to validate the provided bytes is made here; if invalid bytes are
+    /// provided then attempting to iterate and decode them will fail.
+    pub async fn from_bytes(&self, extrinsics: Vec<Vec<u8>>) -> Extrinsics<T, Client> {
+        Extrinsics {
+            client: self.client.clone(),
+            extrinsics: Arc::new(extrinsics),
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<T: Config, Client: OnlineClientAtBlockT<T>> ExtrinsicsClient<T, Client> {
+    /// Fetch the extrinsics at this block.
+    pub async fn fetch(&self) -> Result<Extrinsics<T, Client>, ExtrinsicError> {
+        let client = &self.client;
         let block_hash = client.block_hash();
         let extrinsics = client
             .backend()
@@ -37,11 +60,19 @@ impl<T: Config, C: OnlineClientAtBlockT<T>> Extrinsics<T, C> {
             .ok_or_else(|| ExtrinsicError::BlockNotFound(block_hash.into()))?;
 
         Ok(Extrinsics {
-            client,
+            client: client.clone(),
             extrinsics: Arc::new(extrinsics),
             marker: PhantomData,
         })
     }
+}
+
+/// The extrinsics in a block.
+#[derive(Debug, Clone)]
+pub struct Extrinsics<T, C> {
+    client: C,
+    extrinsics: Arc<Vec<Vec<u8>>>,
+    marker: PhantomData<T>,
 }
 
 impl<T: Config, C: OfflineClientAtBlockT<T>> Extrinsics<T, C> {
@@ -334,7 +365,10 @@ impl<T: Config> ExtrinsicEvents<T> {
         extrinsic_hash: HashFor<T>,
         extrinsic_index: usize,
     ) -> Result<Self, EventsError> {
-        let events = crate::client::ClientAtBlock::new(client).events().await?;
+        let events = crate::client::ClientAtBlock::new(client)
+            .events()
+            .fetch()
+            .await?;
         Ok(ExtrinsicEvents {
             extrinsic_hash,
             extrinsic_index,
