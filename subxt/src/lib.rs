@@ -153,7 +153,7 @@ pub mod ext {
 ///
 /// You can use the `$OUT_DIR` placeholder in the path to reference metadata generated at build time:
 ///
-/// ```rust,no_run
+/// ```rust,ignore
 /// #[subxt::subxt(
 ///     runtime_metadata_path = "$OUT_DIR/metadata.scale",
 /// )]
@@ -175,7 +175,7 @@ pub mod ext {
 ///
 /// You can also use the `$OUT_DIR` placeholder in the path to reference WASM files generated at build time:
 ///
-/// ```rust,no_run
+/// ```rust,ignore
 /// #[subxt::subxt(
 ///     runtime_path = "$OUT_DIR/runtime.wasm",
 /// )]
