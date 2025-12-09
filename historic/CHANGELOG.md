@@ -4,6 +4,10 @@ This is separate from the Subxt changelog as subxt-historic is currently releasa
 
 Eventually this project will merge with Subxt and no longer exist, but until then it's being maintained and updated where needed.
 
+## 0.0.8 (2025-12-04)
+
+Expose `ClientAtBlock::resolver()`. This hands back a type resolver which is capable of resolving type IDs given by the `.visit()` methods on extrinsic fields and storage values. The extrinsics example has been modified to show how this can be used.
+
 ## 0.0.7 (2025-12-03)
 
 Expose `OfflineClientAtBlock`, `OfflineClientAtBlockT`, `OnlinelientAtBlock`, `OnlineClientAtBlockT`.

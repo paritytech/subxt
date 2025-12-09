@@ -10,7 +10,7 @@ use std::sync::Arc;
 pub struct StorageValue<'atblock> {
     pub(crate) info: Arc<AnyStorageInfo<'atblock>>,
     bytes: Cow<'atblock, [u8]>,
-    resolver: AnyResolver<'atblock>,
+    resolver: AnyResolver<'atblock, 'atblock>,
 }
 
 impl<'atblock> StorageValue<'atblock> {
@@ -41,7 +41,9 @@ impl<'atblock> StorageValue<'atblock> {
     /// Visit the given field with a [`scale_decode::visitor::Visitor`]. This is like a lower level
     /// version of [`StorageValue::decode_as`], as the visitor is able to preserve lifetimes
     /// and has access to more type information than is available via [`StorageValue::decode_as`].
-    pub fn visit<V: scale_decode::visitor::Visitor<TypeResolver = AnyResolver<'atblock>>>(
+    pub fn visit<
+        V: scale_decode::visitor::Visitor<TypeResolver = AnyResolver<'atblock, 'atblock>>,
+    >(
         &self,
         visitor: V,
     ) -> Result<V::Value<'_, '_>, V::Error> {
