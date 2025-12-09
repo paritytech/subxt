@@ -146,6 +146,15 @@ pub mod ext {
 /// mod polkadot {}
 /// ```
 ///
+/// You can use the `$OUT_DIR` placeholder in the path to reference metadata generated at build time:
+///
+/// ```rust,ignore
+/// #[subxt::subxt(
+///     runtime_metadata_path = "$OUT_DIR/metadata.scale",
+/// )]
+/// mod polkadot {}
+/// ```
+///
 /// ## Using a WASM runtime via `runtime_path = "..."`
 ///
 /// This requires the `runtime-wasm-path` feature flag.
@@ -155,6 +164,15 @@ pub mod ext {
 /// ```rust,ignore
 /// #[subxt::subxt(
 ///     runtime_path = "../artifacts/westend_runtime.wasm",
+/// )]
+/// mod polkadot {}
+/// ```
+///
+/// You can also use the `$OUT_DIR` placeholder in the path to reference WASM files generated at build time:
+///
+/// ```rust,ignore
+/// #[subxt::subxt(
+///     runtime_path = "$OUT_DIR/runtime.wasm",
 /// )]
 /// mod polkadot {}
 /// ```
