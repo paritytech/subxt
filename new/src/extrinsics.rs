@@ -10,6 +10,7 @@ use crate::events::{self, DecodeAsEvent};
 use frame_decode::extrinsics::Extrinsic as ExtrinsicInfo;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 use std::marker::PhantomData;
+use std::sync::Arc;
 use subxt_metadata::Metadata;
 
 pub use decode_as_extrinsic::DecodeAsExtrinsic;
@@ -18,9 +19,10 @@ pub use extrinsic_transaction_extensions::{
 };
 
 /// The extrinsics in a block.
+#[derive(Debug, Clone)]
 pub struct Extrinsics<T, C> {
     client: C,
-    extrinsics: Vec<Vec<u8>>,
+    extrinsics: Arc<Vec<Vec<u8>>>,
     marker: PhantomData<T>,
 }
 
@@ -36,7 +38,7 @@ impl<T: Config, C: OnlineClientAtBlockT<T>> Extrinsics<T, C> {
 
         Ok(Extrinsics {
             client,
-            extrinsics,
+            extrinsics: Arc::new(extrinsics),
             marker: PhantomData,
         })
     }

@@ -38,6 +38,7 @@ pub mod config;
 pub mod error;
 pub mod events;
 pub mod extrinsics;
+pub mod storage;
 pub mod transactions;
 pub mod utils;
 // pub mod book;

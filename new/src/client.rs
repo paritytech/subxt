@@ -5,7 +5,8 @@ use crate::config::{Config, HashFor};
 use crate::error::{EventsError, ExtrinsicError};
 use crate::events::Events;
 use crate::extrinsics::Extrinsics;
-use crate::transactions::Transactions;
+use crate::storage::StorageClient;
+use crate::transactions::TransactionsClient;
 use core::marker::PhantomData;
 use subxt_metadata::Metadata;
 
@@ -35,8 +36,13 @@ where
     Client: OfflineClientAtBlockT<T>,
 {
     /// Construct and submit transactions.
-    pub fn tx(&self) -> Transactions<T, Client> {
-        Transactions::new(self.client.clone())
+    pub fn tx(&self) -> TransactionsClient<T, Client> {
+        TransactionsClient::new(self.client.clone())
+    }
+
+    /// Access storage at this block.
+    pub fn storage(&self) -> StorageClient<T, Client> {
+        StorageClient::new(self.client.clone())
     }
 
     /// Obtain a reference to the metadata.

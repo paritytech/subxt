@@ -29,21 +29,21 @@ pub use validation_result::{
 
 /// A client for working with transactions.
 #[derive(Clone)]
-pub struct Transactions<T, Client> {
+pub struct TransactionsClient<T, Client> {
     client: Client,
     marker: PhantomData<T>,
 }
 
-impl<T, Client> Transactions<T, Client> {
+impl<T, Client> TransactionsClient<T, Client> {
     pub(crate) fn new(client: Client) -> Self {
-        Transactions {
+        TransactionsClient {
             client,
             marker: PhantomData,
         }
     }
 }
 
-impl<T: Config, Client: OfflineClientAtBlockT<T>> Transactions<T, Client> {
+impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> {
     /// Run the validation logic against some transaction you'd like to submit. Returns `Ok(())`
     /// if the call is valid (or if it's not possible to check since the call has no validation hash).
     /// Return an error if the call was not valid or something went wrong trying to validate it (ie
@@ -294,7 +294,7 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> Transactions<T, Client> {
     }
 }
 
-impl<T: Config, Client: OnlineClientAtBlockT<T>> Transactions<T, Client> {
+impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
     /// Get the account nonce for a given account ID.
     pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, ExtrinsicError> {
         account_nonce::get_account_nonce(&self.client, account_id)
