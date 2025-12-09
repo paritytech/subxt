@@ -10,13 +10,13 @@ pub mod address;
 
 /// A client for working with storage entries.
 #[derive(Clone)]
-pub struct ConstantsClient<T, Client> {
-    client: Client,
+pub struct ConstantsClient<'atblock, T, Client> {
+    client: &'atblock Client,
     marker: PhantomData<T>,
 }
 
-impl<T, Client> ConstantsClient<T, Client> {
-    pub(crate) fn new(client: Client) -> Self {
+impl<'atblock, T, Client> ConstantsClient<'atblock, T, Client> {
+    pub(crate) fn new(client: &'atblock Client) -> Self {
         ConstantsClient {
             client,
             marker: PhantomData,
@@ -24,7 +24,7 @@ impl<T, Client> ConstantsClient<T, Client> {
     }
 }
 
-impl<T: Config, Client: OfflineClientAtBlockT<T>> ConstantsClient<T, Client> {
+impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>> ConstantsClient<'atblock, T, Client> {
     /// Run the validation logic against some constant address you'd like to access. Returns `Ok(())`
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie

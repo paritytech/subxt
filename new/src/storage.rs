@@ -23,13 +23,13 @@ pub mod address;
 
 /// A client for working with storage entries.
 #[derive(Clone)]
-pub struct StorageClient<T, Client> {
-    client: Client,
+pub struct StorageClient<'atblock, T, Client> {
+    client: &'atblock Client,
     marker: PhantomData<T>,
 }
 
-impl<T, Client> StorageClient<T, Client> {
-    pub(crate) fn new(client: Client) -> Self {
+impl<'atblock, T, Client> StorageClient<'atblock, T, Client> {
+    pub(crate) fn new(client: &'atblock Client) -> Self {
         StorageClient {
             client,
             marker: PhantomData,
@@ -37,7 +37,7 @@ impl<T, Client> StorageClient<T, Client> {
     }
 }
 
-impl<T: Config, Client: OfflineClientAtBlockT<T>> StorageClient<T, Client> {
+impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>> StorageClient<'atblock, T, Client> {
     /// When the provided `address` is statically generated via the `#[subxt]` macro, this validates
     /// that the shape of the storage value is the same as the shape expected by the static address.
     ///
@@ -74,27 +74,27 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> StorageClient<T, Client> {
     pub fn entry<Addr: Address>(
         &self,
         address: Addr,
-    ) -> Result<StorageEntry<'_, T, Client, Addr>, StorageError> {
+    ) -> Result<StorageEntry<'atblock, T, Client, Addr>, StorageError> {
         self.validate(&address)?;
-        StorageEntry::new(&self.client, address)
+        StorageEntry::new(self.client, address)
     }
 
     /// Iterate over all of the storage entries listed in the metadata for the current block. This does **not** include well known
     /// storage entries like `:code` which are not listed in the metadata.
-    pub fn entries(&self) -> impl Iterator<Item = StorageEntryRef<'_, T, Client>> {
+    pub fn entries(&self) -> impl Iterator<Item = StorageEntryRef<'atblock, T, Client>> {
         let metadata = self.client.metadata_ref();
         Entry::tuples_of(metadata.storage_entries()).map(|(pallet_name, entry_name)| {
             StorageEntryRef {
                 pallet_name: pallet_name.clone(),
                 entry_name,
-                client: &self.client,
+                client: self.client,
                 marker: std::marker::PhantomData,
             }
         })
     }
 }
 
-impl<T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<T, Client> {
+impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<'atblock, T, Client> {
     /// This is essentially a shorthand for `client.entry(addr)?.fetch(key_parts)`. See [`StorageEntry::fetch()`].
     pub async fn fetch<Addr: Address>(
         &self,

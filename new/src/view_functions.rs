@@ -17,14 +17,14 @@ const CALL_NAME: &str = "RuntimeViewFunction_execute_view_function";
 
 /// Execute View Function calls.
 #[derive_where(Clone; Client)]
-pub struct ViewFunctionsClient<T: Config, Client> {
-    client: Client,
+pub struct ViewFunctionsClient<'atblock, T: Config, Client> {
+    client: &'atblock Client,
     marker: PhantomData<T>,
 }
 
-impl<T: Config, Client> ViewFunctionsClient<T, Client> {
+impl<'atblock, T: Config, Client> ViewFunctionsClient<'atblock, T, Client> {
     /// Create a new [`ViewFunctionsClient`]
-    pub(crate) fn new(client: Client) -> Self {
+    pub(crate) fn new(client: &'atblock Client) -> Self {
         Self {
             client,
             marker: PhantomData,
@@ -32,7 +32,7 @@ impl<T: Config, Client> ViewFunctionsClient<T, Client> {
     }
 }
 
-impl<T, Client> ViewFunctionsClient<T, Client>
+impl<'atblock, T, Client> ViewFunctionsClient<'atblock, T, Client>
 where
     T: Config,
     Client: OfflineClientAtBlockT<T>,
@@ -83,7 +83,7 @@ where
     }
 }
 
-impl<T, Client> ViewFunctionsClient<T, Client>
+impl<'atblock, T, Client> ViewFunctionsClient<'atblock, T, Client>
 where
     T: Config,
     Client: OnlineClientAtBlockT<T>,

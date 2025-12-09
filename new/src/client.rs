@@ -39,42 +39,42 @@ where
     Client: OfflineClientAtBlockT<T>,
 {
     /// Construct and submit transactions.
-    pub fn tx(&self) -> TransactionsClient<T, Client> {
-        TransactionsClient::new(self.client.clone())
+    pub fn tx(&self) -> TransactionsClient<'_, T, Client> {
+        TransactionsClient::new(&self.client)
     }
 
     /// Access storage at this block.
-    pub fn storage(&self) -> StorageClient<T, Client> {
-        StorageClient::new(self.client.clone())
+    pub fn storage(&self) -> StorageClient<'_, T, Client> {
+        StorageClient::new(&self.client)
     }
 
     /// Access constants at this block.
-    pub fn constants(&self) -> ConstantsClient<T, Client> {
-        ConstantsClient::new(self.client.clone())
+    pub fn constants(&self) -> ConstantsClient<'_, T, Client> {
+        ConstantsClient::new(&self.client)
     }
 
     /// Access custom values at this block.
-    pub fn custom_values(&self) -> CustomValuesClient<T, Client> {
-        CustomValuesClient::new(self.client.clone())
+    pub fn custom_values(&self) -> CustomValuesClient<'_, T, Client> {
+        CustomValuesClient::new(&self.client)
     }
 
     /// Work with the extrinsics in this block.
-    pub fn extrinsics(&self) -> ExtrinsicsClient<T, Client> {
-        ExtrinsicsClient::new(self.client.clone())
+    pub fn extrinsics(&self) -> ExtrinsicsClient<'_, T, Client> {
+        ExtrinsicsClient::new(&self.client)
     }
 
     /// Work with the events at this block.
-    pub fn events(&self) -> EventsClient<T, Client> {
-        EventsClient::new(self.client.clone())
+    pub fn events(&self) -> EventsClient<'_, T, Client> {
+        EventsClient::new(&self.client)
     }
 
     /// Access runtime APIs at this block.
-    pub fn runtime_apis(&self) -> RuntimeApisClient<T, Client> {
-        RuntimeApisClient::new(self.client.clone())
+    pub fn runtime_apis(&self) -> RuntimeApisClient<'_, T, Client> {
+        RuntimeApisClient::new(&self.client)
     }
 
-    pub fn view_functions(&self) -> ViewFunctionsClient<T, Client> {
-        ViewFunctionsClient::new(self.client.clone())
+    pub fn view_functions(&self) -> ViewFunctionsClient<'_, T, Client> {
+        ViewFunctionsClient::new(&self.client)
     }
 
     /// Obtain a reference to the metadata.

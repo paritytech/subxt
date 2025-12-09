@@ -13,13 +13,13 @@ use subxt_metadata::Metadata;
 pub use decode_as_event::DecodeAsEvent;
 
 /// A client for working with events.
-pub struct EventsClient<T, Client> {
-    client: Client,
+pub struct EventsClient<'atblock, T, Client> {
+    client: &'atblock Client,
     marker: PhantomData<T>,
 }
 
-impl<T, Client> EventsClient<T, Client> {
-    pub(crate) fn new(client: Client) -> Self {
+impl<'atblock, T, Client> EventsClient<'atblock, T, Client> {
+    pub(crate) fn new(client: &'atblock Client) -> Self {
         EventsClient {
             client,
             marker: PhantomData,
@@ -27,12 +27,12 @@ impl<T, Client> EventsClient<T, Client> {
     }
 }
 
-impl<T: Config, Client: OfflineClientAtBlockT<T>> EventsClient<T, Client> {
+impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>> EventsClient<'atblock, T, Client> {
     /// Work with the block event bytes given.
     ///
     /// No attempt to validate the provided bytes is made here; if invalid bytes are
     /// provided then attempting to iterate and decode them will fail.
-    pub fn from_bytes(&self, event_bytes: Vec<u8>) -> Events<T> {
+    pub fn from_bytes(&self, event_bytes: Vec<u8>) -> Events<'atblock, T> {
         // event_bytes is a SCALE encoded vector of events. So, pluck the
         // compact encoded length from the front, leaving the remaining bytes
         // for our iterating to decode.
@@ -46,8 +46,8 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> EventsClient<T, Client> {
         let start_idx = event_bytes.len() - cursor.len();
 
         Events {
-            metadata: self.client.metadata(),
-            event_bytes,
+            metadata: self.client.metadata_ref(),
+            event_bytes: event_bytes.into(),
             start_idx,
             num_events,
             marker: PhantomData,
@@ -55,10 +55,10 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> EventsClient<T, Client> {
     }
 }
 
-impl<T: Config, Client: OnlineClientAtBlockT<T>> EventsClient<T, Client> {
+impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> EventsClient<'atblock, T, Client> {
     /// Fetch the events at this block.
-    pub async fn fetch(&self) -> Result<Events<T>, EventsError> {
-        let client = &self.client;
+    pub async fn fetch(&self) -> Result<Events<'atblock, T>, EventsError> {
+        let client = self.client;
 
         // Fetch the bytes. Ensure things work if we get 0 bytes back.
         let block_hash = client.block_hash();
@@ -75,18 +75,18 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> EventsClient<T, Client> {
 
 /// The events at some block.
 #[derive(Debug)]
-pub struct Events<T> {
-    metadata: Arc<Metadata>,
+pub struct Events<'atblock, T> {
+    metadata: &'atblock Metadata,
     // Note; raw event bytes are prefixed with a Compact<u32> containing
     // the number of events to be decoded. The start_idx reflects that, so
     // that we can skip over those bytes when decoding them
-    event_bytes: Vec<u8>,
+    event_bytes: Arc<[u8]>,
     start_idx: usize,
     num_events: u32,
     marker: core::marker::PhantomData<T>,
 }
 
-impl<T: Config> Events<T> {
+impl<'atblock, T: Config> Events<'atblock, T> {
     /// The number of events.
     pub fn len(&self) -> u32 {
         self.num_events
@@ -108,9 +108,11 @@ impl<T: Config> Events<T> {
     /// details. If an error occurs, all subsequent iterations return `None`.
     // Dev note: The returned iterator is 'static + Send so that we can box it up and make
     // use of it with our `FilterEvents` stuff.
-    pub fn iter(&'_ self) -> impl Iterator<Item = Result<Event<'_, T>, EventsError>> + Send + Sync {
+    pub fn iter(
+        &'_ self,
+    ) -> impl Iterator<Item = Result<Event<'atblock, T>, EventsError>> + Send + Sync {
         // The event bytes ignoring the compact encoded length on the front:
-        let event_bytes = &*self.event_bytes;
+        let event_bytes = self.event_bytes.clone();
         let metadata = &*self.metadata;
         let num_events = self.num_events;
 
@@ -120,7 +122,7 @@ impl<T: Config> Events<T> {
             if event_bytes.len() <= pos || num_events == index {
                 None
             } else {
-                match Event::decode_from(metadata, event_bytes, pos, index) {
+                match Event::decode_from(metadata, event_bytes.clone(), pos, index) {
                     Ok(event_details) => {
                         // Skip over decoded bytes in next iteration:
                         pos += event_details.bytes().len();
@@ -171,12 +173,12 @@ pub enum Phase {
 
 /// The event details.
 #[derive(Debug, Clone)]
-pub struct Event<'events, T: Config> {
-    pallet_name: &'events str,
-    event_name: &'events str,
-    metadata: &'events Metadata,
+pub struct Event<'atblock, T: Config> {
+    pallet_name: &'atblock str,
+    event_name: &'atblock str,
+    metadata: &'atblock Metadata,
     // all of the event bytes (not just this one).
-    all_bytes: &'events [u8],
+    all_bytes: Arc<[u8]>,
     // event phase.
     phase: Phase,
     /// The index of the event in the list of events in a given block.
@@ -195,14 +197,14 @@ pub struct Event<'events, T: Config> {
     topics: Vec<HashFor<T>>,
 }
 
-impl<'events, T: Config> Event<'events, T> {
+impl<'atblock, T: Config> Event<'atblock, T> {
     /// Attempt to dynamically decode a single event from our events input.
     fn decode_from(
-        metadata: &'events Metadata,
-        all_bytes: &'events [u8],
+        metadata: &'atblock Metadata,
+        all_bytes: Arc<[u8]>,
         start_idx: usize,
         index: u32,
-    ) -> Result<Event<'events, T>, EventsError> {
+    ) -> Result<Event<'atblock, T>, EventsError> {
         let input = &mut &all_bytes[start_idx..];
 
         let phase = Phase::decode(input).map_err(EventsError::CannotDecodePhase)?;

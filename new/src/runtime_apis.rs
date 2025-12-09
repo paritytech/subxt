@@ -14,14 +14,14 @@ pub mod payload;
 
 /// Execute runtime API calls.
 #[derive_where(Clone; Client)]
-pub struct RuntimeApisClient<T: Config, Client> {
-    client: Client,
+pub struct RuntimeApisClient<'atblock, T: Config, Client> {
+    client: &'atblock Client,
     marker: PhantomData<T>,
 }
 
-impl<T: Config, Client> RuntimeApisClient<T, Client> {
+impl<'atblock, T: Config, Client> RuntimeApisClient<'atblock, T, Client> {
     /// Create a new [`RuntimeApi`]
-    pub(crate) fn new(client: Client) -> Self {
+    pub(crate) fn new(client: &'atblock Client) -> Self {
         Self {
             client,
             marker: PhantomData,
@@ -29,7 +29,7 @@ impl<T: Config, Client> RuntimeApisClient<T, Client> {
     }
 }
 
-impl<T, Client> RuntimeApisClient<T, Client>
+impl<'atblock, T, Client> RuntimeApisClient<'atblock, T, Client>
 where
     T: Config,
     Client: OfflineClientAtBlockT<T>,
@@ -85,7 +85,7 @@ where
     }
 }
 
-impl<T, Client> RuntimeApisClient<T, Client>
+impl<'atblock, T, Client> RuntimeApisClient<'atblock, T, Client>
 where
     T: Config,
     Client: OnlineClientAtBlockT<T>,

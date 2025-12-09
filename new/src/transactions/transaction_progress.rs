@@ -12,22 +12,22 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 #[derive(Debug)]
-pub struct TransactionProgress<T: Config, C> {
+pub struct TransactionProgress<'atblock, T: Config, C> {
     sub: Option<StreamOfResults<BackendTransactionStatus<HashFor<T>>>>,
     ext_hash: HashFor<T>,
-    client: C,
+    client: &'atblock C,
 }
 
 // The above type is not `Unpin` by default unless the generic param `T` is,
 // so we manually make it clear that Unpin is actually fine regardless of `T`
 // (we don't care if this moves around in memory while it's "pinned").
-impl<T: Config, C> Unpin for TransactionProgress<T, C> {}
+impl<'atblock, T: Config, C> Unpin for TransactionProgress<'atblock, T, C> {}
 
-impl<T: Config, C> TransactionProgress<T, C> {
+impl<'atblock, T: Config, C> TransactionProgress<'atblock, T, C> {
     /// Instantiate a new [`TransactionProgress`] from a custom subscription.
     pub fn new(
         sub: StreamOfResults<BackendTransactionStatus<HashFor<T>>>,
-        client: C,
+        client: &'atblock C,
         ext_hash: HashFor<T>,
     ) -> Self {
         Self {
@@ -43,7 +43,7 @@ impl<T: Config, C> TransactionProgress<T, C> {
     }
 }
 
-impl<T, C> TransactionProgress<T, C>
+impl<'atblock, T, C> TransactionProgress<'atblock, T, C>
 where
     T: Config,
     C: OnlineClientAtBlockT<T>,
@@ -53,7 +53,7 @@ where
     /// avoid importing that trait if you don't otherwise need it.
     pub async fn next(
         &mut self,
-    ) -> Option<Result<TransactionStatus<T, C>, TransactionProgressError>> {
+    ) -> Option<Result<TransactionStatus<'atblock, T, C>, TransactionProgressError>> {
         StreamExt::next(self).await
     }
 
@@ -69,7 +69,7 @@ where
     /// out if they finally made it into a block or not.
     pub async fn wait_for_finalized(
         mut self,
-    ) -> Result<TransactionInBlock<T, C>, TransactionProgressError> {
+    ) -> Result<TransactionInBlock<'atblock, T, C>, TransactionProgressError> {
         while let Some(status) = self.next().await {
             match status? {
                 // Finalized! Return.
@@ -104,15 +104,15 @@ where
     /// out if they finally made it into a block or not.
     pub async fn wait_for_finalized_success(
         self,
-    ) -> Result<ExtrinsicEvents<T>, TransactionFinalizedSuccessError> {
+    ) -> Result<ExtrinsicEvents<'atblock, T>, TransactionFinalizedSuccessError> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
 }
 
 // TransactionProgress is a stream of transaction events
-impl<T: Config, C: Clone> Stream for TransactionProgress<T, C> {
-    type Item = Result<TransactionStatus<T, C>, TransactionProgressError>;
+impl<'atblock, T: Config, C: Clone> Stream for TransactionProgress<'atblock, T, C> {
+    type Item = Result<TransactionStatus<'atblock, T, C>, TransactionProgressError>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let sub = match self.sub.as_mut() {
@@ -133,7 +133,7 @@ impl<T: Config, C: Clone> Stream for TransactionProgress<T, C> {
                         TransactionStatus::InBestBlock(TransactionInBlock::new(
                             hash,
                             self.ext_hash,
-                            self.client.clone(),
+                            self.client,
                         ))
                     }
                     // These stream events mean that nothing further will be sent:
@@ -142,7 +142,7 @@ impl<T: Config, C: Clone> Stream for TransactionProgress<T, C> {
                         TransactionStatus::InFinalizedBlock(TransactionInBlock::new(
                             hash,
                             self.ext_hash,
-                            self.client.clone(),
+                            self.client,
                         ))
                     }
                     BackendTransactionStatus::Error { message } => {
@@ -164,7 +164,7 @@ impl<T: Config, C: Clone> Stream for TransactionProgress<T, C> {
 
 /// Possible transaction statuses returned from our [`TransactionProgress::next()`] call.
 #[derive(Debug)]
-pub enum TransactionStatus<T: Config, C> {
+pub enum TransactionStatus<'atblock, T: Config, C> {
     /// Transaction is part of the future queue.
     Validated,
     /// The transaction has been broadcast to other nodes.
@@ -172,9 +172,9 @@ pub enum TransactionStatus<T: Config, C> {
     /// Transaction is no longer in a best block.
     NoLongerInBestBlock,
     /// Transaction has been included in block with given hash.
-    InBestBlock(TransactionInBlock<T, C>),
+    InBestBlock(TransactionInBlock<'atblock, T, C>),
     /// Transaction has been finalized by a finality-gadget, e.g GRANDPA
-    InFinalizedBlock(TransactionInBlock<T, C>),
+    InFinalizedBlock(TransactionInBlock<'atblock, T, C>),
     /// Something went wrong in the node.
     Error {
         /// Human readable message; what went wrong.
@@ -192,10 +192,10 @@ pub enum TransactionStatus<T: Config, C> {
     },
 }
 
-impl<T: Config, C> TransactionStatus<T, C> {
+impl<'atblock, T: Config, C> TransactionStatus<'atblock, T, C> {
     /// A convenience method to return the finalized details. Returns
     /// [`None`] if the enum variant is not [`TxStatus::InFinalizedBlock`].
-    pub fn as_finalized(&self) -> Option<&TransactionInBlock<T, C>> {
+    pub fn as_finalized(&self) -> Option<&TransactionInBlock<'atblock, T, C>> {
         match self {
             Self::InFinalizedBlock(val) => Some(val),
             _ => None,
@@ -204,7 +204,7 @@ impl<T: Config, C> TransactionStatus<T, C> {
 
     /// A convenience method to return the best block details. Returns
     /// [`None`] if the enum variant is not [`TxStatus::InBestBlock`].
-    pub fn as_in_block(&self) -> Option<&TransactionInBlock<T, C>> {
+    pub fn as_in_block(&self) -> Option<&TransactionInBlock<'atblock, T, C>> {
         match self {
             Self::InBestBlock(val) => Some(val),
             _ => None,
@@ -214,14 +214,18 @@ impl<T: Config, C> TransactionStatus<T, C> {
 
 /// This struct represents a transaction that has made it into a block.
 #[derive(Debug)]
-pub struct TransactionInBlock<T: Config, C> {
+pub struct TransactionInBlock<'atblock, T: Config, C> {
     block_ref: BlockRef<HashFor<T>>,
     ext_hash: HashFor<T>,
-    client: C,
+    client: &'atblock C,
 }
 
-impl<T: Config, C> TransactionInBlock<T, C> {
-    pub(crate) fn new(block_ref: BlockRef<HashFor<T>>, ext_hash: HashFor<T>, client: C) -> Self {
+impl<'atblock, T: Config, C> TransactionInBlock<'atblock, T, C> {
+    pub(crate) fn new(
+        block_ref: BlockRef<HashFor<T>>,
+        ext_hash: HashFor<T>,
+        client: &'atblock C,
+    ) -> Self {
         Self {
             block_ref,
             ext_hash,
@@ -240,7 +244,7 @@ impl<T: Config, C> TransactionInBlock<T, C> {
     }
 }
 
-impl<T: Config, C: OnlineClientAtBlockT<T>> TransactionInBlock<T, C> {
+impl<'atblock, T: Config, C: OnlineClientAtBlockT<T>> TransactionInBlock<'atblock, T, C> {
     /// Fetch the events associated with this transaction. If the transaction
     /// was successful (ie no `ExtrinsicFailed`) events were found, then we return
     /// the events associated with it. If the transaction was not successful, or
@@ -254,7 +258,9 @@ impl<T: Config, C: OnlineClientAtBlockT<T>> TransactionInBlock<T, C> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(&self) -> Result<ExtrinsicEvents<T>, TransactionEventsError> {
+    pub async fn wait_for_success(
+        &self,
+    ) -> Result<ExtrinsicEvents<'atblock, T>, TransactionEventsError> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
@@ -286,7 +292,9 @@ impl<T: Config, C: OnlineClientAtBlockT<T>> TransactionInBlock<T, C> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn fetch_events(&self) -> Result<ExtrinsicEvents<T>, TransactionEventsError> {
+    pub async fn fetch_events(
+        &self,
+    ) -> Result<ExtrinsicEvents<'atblock, T>, TransactionEventsError> {
         let hasher = self.client.hasher();
 
         let block_body = self
@@ -316,16 +324,15 @@ impl<T: Config, C: OnlineClientAtBlockT<T>> TransactionInBlock<T, C> {
                 transaction_hash: self.ext_hash.into(),
             })?;
 
-        let events =
-            ExtrinsicEvents::fetch(self.client.clone(), self.extrinsic_hash(), extrinsic_index)
-                .await
-                .map_err(
-                    |e| TransactionEventsError::CannotFetchEventsForTransaction {
-                        block_hash: self.block_hash().into(),
-                        transaction_hash: self.ext_hash.into(),
-                        error: e,
-                    },
-                )?;
+        let events = ExtrinsicEvents::fetch(self.client, self.extrinsic_hash(), extrinsic_index)
+            .await
+            .map_err(
+                |e| TransactionEventsError::CannotFetchEventsForTransaction {
+                    block_hash: self.block_hash().into(),
+                    transaction_hash: self.ext_hash.into(),
+                    error: e,
+                },
+            )?;
 
         Ok(events)
     }

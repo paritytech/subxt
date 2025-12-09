@@ -11,14 +11,14 @@ pub mod address;
 
 /// A client for accessing custom values stored in the metadata.
 #[derive_where(Clone; Client)]
-pub struct CustomValuesClient<T, Client> {
-    client: Client,
+pub struct CustomValuesClient<'atblock, T, Client> {
+    client: &'atblock Client,
     marker: std::marker::PhantomData<T>,
 }
 
-impl<T, Client> CustomValuesClient<T, Client> {
+impl<'atblock, T, Client> CustomValuesClient<'atblock, T, Client> {
     /// Create a new [`CustomValuesClient`].
-    pub(crate) fn new(client: Client) -> Self {
+    pub(crate) fn new(client: &'atblock Client) -> Self {
         Self {
             client,
             marker: std::marker::PhantomData,
@@ -26,7 +26,9 @@ impl<T, Client> CustomValuesClient<T, Client> {
     }
 }
 
-impl<T: Config, Client: OfflineClientAtBlockT<T>> CustomValuesClient<T, Client> {
+impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
+    CustomValuesClient<'atblock, T, Client>
+{
     /// Run the validation logic against some custom value address you'd like to access. Returns `Ok(())`
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Returns an error if the address was not valid (wrong name, type or raw bytes)

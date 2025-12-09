@@ -10,20 +10,18 @@ use subxt_metadata::Metadata;
 
 /// The signed extensions of an extrinsic.
 #[derive(Debug, Clone)]
-pub struct ExtrinsicTransactionExtensions<'extrinsics, 'extrinsic, T: Config> {
-    bytes: &'extrinsics [u8],
-    metadata: &'extrinsics Metadata,
-    decoded_info: &'extrinsic ExtrinsicExtensionsInfo<'extrinsics, u32>,
+pub struct ExtrinsicTransactionExtensions<'atblock, 'extrinsic, T: Config> {
+    bytes: &'extrinsic [u8],
+    metadata: &'atblock Metadata,
+    decoded_info: &'extrinsic ExtrinsicExtensionsInfo<'atblock, u32>,
     marker: core::marker::PhantomData<T>,
 }
 
-impl<'extrinsics, 'extrinsic, T: Config>
-    ExtrinsicTransactionExtensions<'extrinsics, 'extrinsic, T>
-{
+impl<'atblock, 'extrinsic, T: Config> ExtrinsicTransactionExtensions<'atblock, 'extrinsic, T> {
     pub(crate) fn new(
-        bytes: &'extrinsics [u8],
-        metadata: &'extrinsics Metadata,
-        decoded_info: &'extrinsic ExtrinsicExtensionsInfo<'extrinsics, u32>,
+        bytes: &'extrinsic [u8],
+        metadata: &'atblock Metadata,
+        decoded_info: &'extrinsic ExtrinsicExtensionsInfo<'atblock, u32>,
     ) -> Self {
         Self {
             bytes,
@@ -36,10 +34,10 @@ impl<'extrinsics, 'extrinsic, T: Config>
     /// Returns an iterator over each of the signed extension details of the extrinsic.
     pub fn iter(
         &self,
-    ) -> impl Iterator<Item = ExtrinsicTransactionExtension<'extrinsics, 'extrinsic, T>> {
+    ) -> impl Iterator<Item = ExtrinsicTransactionExtension<'atblock, 'extrinsic, T>> {
         self.decoded_info
             .iter()
-            .map(|s| ExtrinsicTransactionExtension {
+            .map(move |s| ExtrinsicTransactionExtension {
                 bytes: &self.bytes[s.range()],
                 ty_id: *s.ty(),
                 identifier: s.name(),
@@ -85,17 +83,17 @@ impl<'extrinsics, 'extrinsic, T: Config>
 
 /// A single signed extension
 #[derive(Debug, Clone)]
-pub struct ExtrinsicTransactionExtension<'extrinsics, 'extrinsic, T: Config> {
-    bytes: &'extrinsics [u8],
+pub struct ExtrinsicTransactionExtension<'atblock, 'extrinsic, T: Config> {
+    bytes: &'extrinsic [u8],
     ty_id: u32,
     identifier: &'extrinsic str,
-    metadata: &'extrinsics Metadata,
+    metadata: &'atblock Metadata,
     _marker: core::marker::PhantomData<T>,
 }
 
-impl<'extrinsics, 'extrinsic, T: Config> ExtrinsicTransactionExtension<'extrinsics, 'extrinsic, T> {
+impl<'atblock, 'extrinsic, T: Config> ExtrinsicTransactionExtension<'atblock, 'extrinsic, T> {
     /// The bytes representing this signed extension.
-    pub fn bytes(&self) -> &'extrinsics [u8] {
+    pub fn bytes(&self) -> &'extrinsic [u8] {
         self.bytes
     }
 
