@@ -233,18 +233,18 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
             }
 
             // Replace $OUT_DIR with the actual OUT_DIR environment variable
-            let expanded_path = if rest_of_path.contains("$OUT_DIR") {
+            let path = if rest_of_path.contains("$OUT_DIR") {
                 let out_dir = std::env::var("OUT_DIR").unwrap_or_else(|_| {
                     abort_call_site!("$OUT_DIR is used in runtime_metadata_path but OUT_DIR environment variable is not set")
                 });
-                std::path::Path::new(&rest_of_path.replace("$OUT_DIR", &out_dir))
+                std::path::Path::new(&rest_of_path.replace("$OUT_DIR", &out_dir)).into()
             } else {
                 let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
                 let root_path = std::path::Path::new(&root);
                 root_path.join(rest_of_path)
             };
 
-            subxt_utils_fetchmetadata::from_file_blocking(path)
+            subxt_utils_fetchmetadata::from_file_blocking(&path)
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .map_err(|e| CodegenError::Other(e.to_string()).into_compile_error())?
         }
