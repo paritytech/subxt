@@ -1,6 +1,6 @@
 [package]
 name = "subxt-macro"
-version.workspace = true
+version = "0.43.1"
 authors.workspace = true
 edition.workspace = true
 rust-version.workspace = true

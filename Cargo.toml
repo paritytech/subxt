@@ -155,7 +155,7 @@ sp-runtime = { version = "41.1.0", default-features = false }
 # Subxt workspace crates:
 subxt = { version = "0.43.0", path = "subxt", default-features = false }
 subxt-core = { version = "0.43.0", path = "core", default-features = false }
-subxt-macro = { version = "0.43.0", path = "macro" }
+subxt-macro = { version = "0.43.1", path = "macro" }
 subxt-metadata = { version = "0.43.0", path = "metadata", default-features = false }
 subxt-codegen = { version = "0.43.0", path = "codegen" }
 subxt-signer = { version = "0.43.0", path = "signer", default-features = false }
