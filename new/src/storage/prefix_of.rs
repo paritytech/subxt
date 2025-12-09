@@ -76,46 +76,6 @@ array_impl!(4: 3 2 1 0);
 array_impl!(5: 4 3 2 1 0);
 array_impl!(6: 5 4 3 2 1 0);
 
-/// This is much like [`PrefixOf`] except that it also includes `Self` as an allowed type,
-/// where `Self` must impl [`IntoEncodableValues`] just as every [`PrefixOf<Self>`] does.
-pub trait EqualOrPrefixOf<K>: IntoEncodableValues {}
-
-// Tuples
-macro_rules! tuple_impl_eq {
-    ($($t:ident)+) => {
-        // Any T that is a PrefixOf<Keys> impls EqualOrPrefixOf<keys> too
-        impl <$($t,)+ T: PrefixOf<($($t,)+)>> EqualOrPrefixOf<($($t,)+)> for T {}
-        // Keys impls EqualOrPrefixOf<Keys>
-        impl <$($t),+> EqualOrPrefixOf<($($t,)+)> for ($($t,)+) where ($($t,)+): IntoEncodableValues {}
-        // &'a Keys impls EqualOrPrefixOf<Keys>
-        impl <'a, $($t),+> EqualOrPrefixOf<($($t,)+)> for &'a ($($t,)+) where ($($t,)+): IntoEncodableValues {}
-    }
-}
-
-tuple_impl_eq!(A);
-tuple_impl_eq!(A B);
-tuple_impl_eq!(A B C);
-tuple_impl_eq!(A B C D);
-tuple_impl_eq!(A B C D E);
-tuple_impl_eq!(A B C D E F);
-
-// Vec
-impl<T: EncodeAsType> EqualOrPrefixOf<Vec<T>> for Vec<T> {}
-impl<T: EncodeAsType> EqualOrPrefixOf<Vec<T>> for &Vec<T> {}
-
-// Arrays
-macro_rules! array_impl_eq {
-    ($($n:literal)+) => {
-        $(
-            impl <A: EncodeAsType> EqualOrPrefixOf<[A; $n]> for [A; $n] {}
-            impl <'a, A: EncodeAsType> EqualOrPrefixOf<[A; $n]> for &'a [A; $n] {}
-        )+
-    }
-}
-
-impl<const N: usize, A, T> EqualOrPrefixOf<[A; N]> for T where T: PrefixOf<[A; N]> {}
-array_impl_eq!(1 2 3 4 5 6);
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -127,9 +87,6 @@ mod test {
             Test(core::marker::PhantomData)
         }
         fn accepts_prefix_of<P: PrefixOf<Keys>>(&self, keys: P) {
-            let _encoder = keys.into_encodable_values();
-        }
-        fn accepts_eq_or_prefix_of<P: EqualOrPrefixOf<Keys>>(&self, keys: P) {
             let _encoder = keys.into_encodable_values();
         }
     }
@@ -157,38 +114,5 @@ mod test {
         t.accepts_prefix_of([0, 1]);
         t.accepts_prefix_of([0]);
         t.accepts_prefix_of([]);
-    }
-
-    #[test]
-    fn test_eq_or_prefix_of() {
-        // In real life we'd have a struct a bit like this:
-        let t = Test::<(bool, String, u64)>::new();
-
-        // And we'd want to be able to call some method like this:
-        t.accepts_eq_or_prefix_of(&(true, String::from("hi"), 0));
-        t.accepts_eq_or_prefix_of(&(true, String::from("hi")));
-        t.accepts_eq_or_prefix_of((true,));
-        t.accepts_eq_or_prefix_of(());
-
-        t.accepts_eq_or_prefix_of((true, String::from("hi"), 0));
-        t.accepts_eq_or_prefix_of((true, String::from("hi")));
-        t.accepts_eq_or_prefix_of((true,));
-        t.accepts_eq_or_prefix_of(());
-
-        let t = Test::<[u64; 5]>::new();
-
-        t.accepts_eq_or_prefix_of([0, 1, 2, 3, 4]);
-        t.accepts_eq_or_prefix_of([0, 1, 2, 3]);
-        t.accepts_eq_or_prefix_of([0, 1, 2]);
-        t.accepts_eq_or_prefix_of([0, 1]);
-        t.accepts_eq_or_prefix_of([0]);
-        t.accepts_eq_or_prefix_of([]);
-
-        t.accepts_eq_or_prefix_of([0, 1, 2, 3, 4]);
-        t.accepts_eq_or_prefix_of([0, 1, 2, 3]);
-        t.accepts_eq_or_prefix_of([0, 1, 2]);
-        t.accepts_eq_or_prefix_of([0, 1]);
-        t.accepts_eq_or_prefix_of([0]);
-        t.accepts_eq_or_prefix_of([]);
     }
 }

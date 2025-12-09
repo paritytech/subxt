@@ -74,17 +74,17 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> StorageClient<T, Client> {
     pub fn entry<Addr: Address>(
         &self,
         address: Addr,
-    ) -> Result<StorageEntry<'_, T, Client, Addr, Addr::IsPlain>, StorageError> {
+    ) -> Result<StorageEntry<'_, T, Client, Addr>, StorageError> {
         self.validate(&address)?;
         StorageEntry::new(&self.client, address)
     }
 
     /// Iterate over all of the storage entries listed in the metadata for the current block. This does **not** include well known
     /// storage entries like `:code` which are not listed in the metadata.
-    pub fn entries(&self) -> impl Iterator<Item = StorageEntries<'_, Client, T>> {
+    pub fn entries(&self) -> impl Iterator<Item = StorageEntryRef<'_, Client, T>> {
         let metadata = self.client.metadata_ref();
         Entry::tuples_of(metadata.storage_entries()).map(|(pallet_name, entry_name)| {
-            StorageEntries {
+            StorageEntryRef {
                 pallet_name: pallet_name.clone(),
                 entry_name,
                 client: &self.client,
@@ -102,7 +102,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<T, Client> {
         key_parts: Addr::KeyParts,
     ) -> Result<StorageValue<'_, Addr::Value>, StorageError> {
         let entry = self.entry(addr)?;
-        entry.internal_fetch(key_parts).await
+        entry.fetch(key_parts).await
     }
 
     /// This is essentially a shorthand for `client.entry(addr)?.try_fetch(key_parts)`. See [`StorageEntry::try_fetch()`].
@@ -112,7 +112,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<T, Client> {
         key_parts: Addr::KeyParts,
     ) -> Result<Option<StorageValue<'_, Addr::Value>>, StorageError> {
         let entry = self.entry(addr)?;
-        entry.internal_try_fetch(key_parts).await
+        entry.try_fetch(key_parts).await
     }
 
     /// This is essentially a shorthand for `client.entry(addr)?.iter(key_parts)`. See [`StorageEntry::iter()`].
@@ -126,7 +126,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<T, Client> {
         StorageError,
     > {
         let entry = self.entry(addr)?;
-        entry.internal_iter(key_parts).await
+        entry.iter(key_parts).await
     }
 
     /// In rare cases, you may wish to fetch a storage value that does not live at a typical address. This method
@@ -152,11 +152,11 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<T, Client> {
     pub async fn storage_version(&self, pallet_name: impl AsRef<str>) -> Result<u16, StorageError> {
         // construct the storage key. This is done similarly in
         // `frame_support::traits::metadata::StorageVersion::storage_key()`:
-        let mut key_bytes: Vec<u8> = vec![];
-        key_bytes.extend(&sp_crypto_hashing::twox_128(
-            pallet_name.as_ref().as_bytes(),
-        ));
-        key_bytes.extend(&sp_crypto_hashing::twox_128(b":__STORAGE_VERSION__:"));
+        let key_bytes = frame_decode::storage::encode_storage_key_prefix(
+            pallet_name.as_ref(),
+            ":__STORAGE_VERSION__:",
+        )
+        .to_vec();
 
         // fetch the raw bytes and decode them into the StorageVersion struct:
         let storage_version_bytes = self.fetch_raw(key_bytes).await?;
@@ -173,14 +173,14 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<T, Client> {
 }
 
 /// Working with a specific storage entry.
-pub struct StorageEntries<'atblock, Client, T> {
+pub struct StorageEntryRef<'atblock, Client, T> {
     pallet_name: Cow<'atblock, str>,
     entry_name: Cow<'atblock, str>,
     client: &'atblock Client,
     marker: std::marker::PhantomData<T>,
 }
 
-impl<'atblock, Client, T> StorageEntries<'atblock, Client, T>
+impl<'atblock, Client, T> StorageEntryRef<'atblock, Client, T>
 where
     T: Config,
     Client: OfflineClientAtBlockT<T>,
@@ -198,10 +198,7 @@ where
     /// Extract the relevant storage information so that we can work with this entry.
     pub fn entry(
         &self,
-    ) -> Result<
-        StorageEntry<'_, T, Client, address::DynamicAddress, crate::utils::Maybe>,
-        StorageError,
-    > {
+    ) -> Result<StorageEntry<'atblock, T, Client, address::DynamicAddress>, StorageError> {
         let addr = address::dynamic(self.pallet_name.to_owned(), self.entry_name.to_owned());
         StorageEntry::new(self.client, addr)
     }
