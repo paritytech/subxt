@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::config::{Config, HashFor};
+use crate::config::{Config, HashFor, RpcConfigFor};
 use crate::error::BackendError;
 use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
 use std::future::Future;
@@ -103,7 +103,9 @@ impl<Hash> FollowStream<Hash> {
     }
 
     /// Create a new [`FollowStream`] given the RPC methods.
-    pub fn from_methods<T: Config>(methods: ChainHeadRpcMethods<T>) -> FollowStream<HashFor<T>> {
+    pub fn from_methods<T: Config>(
+        methods: ChainHeadRpcMethods<RpcConfigFor<T>>,
+    ) -> FollowStream<HashFor<T>> {
         FollowStream {
             stream_getter: Box::new(move || {
                 let methods = methods.clone();
@@ -112,9 +114,8 @@ impl<Hash> FollowStream<Hash> {
                     let stream = methods.chainhead_v1_follow(true).await?;
                     // Extract the subscription ID:
                     let Some(sub_id) = stream.subscription_id().map(ToOwned::to_owned) else {
-                        return Err(BackendError::Other(
-                            "Subscription ID expected for chainHead_follow response, but not given"
-                                .to_owned(),
+                        return Err(BackendError::other(
+                            "Subscription ID expected for chainHead_follow response, but not given",
                         ));
                     };
                     // Map stream errors into the higher level subxt one:
@@ -311,7 +312,7 @@ pub mod test {
                 Ok(FollowEvent::Stop),
                 Ok(ev_new_block(1, 2)),
                 // Nothing should be emitted after an error:
-                Err(BackendError::Other("ended".to_owned())),
+                Err(BackendError::other("ended")),
                 Ok(ev_new_block(2, 3)),
             ]
         });

@@ -287,11 +287,16 @@ impl RuntimeGenerator {
                     StorageApi
                 }
 
+                /// This is an alias to [`Self::transactions()`].
                 pub fn tx() -> TransactionApi {
                     TransactionApi
                 }
 
-                pub fn apis() -> runtime_apis::RuntimeApi {
+                pub fn transactions() -> TransactionApi {
+                    TransactionApi
+                }
+
+                pub fn runtime_apis() -> runtime_apis::RuntimeApi {
                     runtime_apis::RuntimeApi
                 }
 
@@ -301,7 +306,7 @@ impl RuntimeGenerator {
                     ViewFunctionsApi
                 }
 
-                pub fn custom() -> CustomValuesApi {
+                pub fn custom_values() -> CustomValuesApi {
                     CustomValuesApi
                 }
 

@@ -76,6 +76,9 @@ struct KeyringPairJson {
     address: AccountId32,
 }
 
+// Re-export this type which is used above.
+pub use subxt_utils_accountid32::AccountId32;
+
 // This can be removed once split_array is stabilized.
 fn slice_to_u32(slice: &[u8]) -> u32 {
     u32::from_le_bytes(slice.try_into().expect("Slice should be 4 bytes."))

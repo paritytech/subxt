@@ -4,7 +4,7 @@
 
 use super::follow_stream_driver::FollowStreamDriverHandle;
 use super::follow_stream_unpin::BlockRef;
-use crate::config::{Config, HashFor};
+use crate::config::{Config, HashFor, RpcConfigFor};
 use crate::error::{BackendError, RpcError};
 use futures::{FutureExt, Stream, StreamExt};
 use std::collections::VecDeque;
@@ -35,7 +35,7 @@ impl<T: Config> StorageItems<T> {
         queries: impl Iterator<Item = StorageQuery<&[u8]>>,
         at: HashFor<T>,
         follow_handle: &FollowStreamDriverHandle<HashFor<T>>,
-        methods: ChainHeadRpcMethods<T>,
+        methods: ChainHeadRpcMethods<RpcConfigFor<T>>,
     ) -> Result<Self, BackendError> {
         let sub_id = super::get_subscription_id(follow_handle).await?;
 
@@ -157,7 +157,7 @@ impl<T: Config> Stream for StorageItems<T> {
                 FollowEvent::OperationError(err) if err.operation_id == *self.operation_id => {
                     // Something went wrong obtaining storage items; mark as done and return the error.
                     self.done = true;
-                    return Poll::Ready(Some(Err(BackendError::Other(err.error))));
+                    return Poll::Ready(Some(Err(BackendError::other(err.error))));
                 }
                 _ => {
                     // We don't care about this event; wait for the next.

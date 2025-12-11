@@ -4,17 +4,12 @@
 
 //! Subxt utils fetch metadata.
 
-#![cfg_attr(docsrs, feature(doc_cfg))]
-
-// Internal helper macros
-#[macro_use]
-mod macros;
 mod error;
 
-cfg_fetch_from_url! {
-    mod url;
-    pub use url::{from_url, from_url_blocking, MetadataVersion, Url};
-}
+#[cfg(feature = "url")]
+mod url;
+#[cfg(feature = "url")]
+pub use url::{from_url, from_url_blocking, MetadataVersion, Url};
 
 pub use error::Error;
 

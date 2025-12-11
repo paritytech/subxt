@@ -1,203 +1,106 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
-// This file is dual-licensed as Apache-2.0 or GPL-3.0.
-// see LICENSE for license details.
+use crate::client::ClientAtBlock;
+use crate::config::{Config, HashFor, Hasher};
+use crate::error::OfflineClientAtBlockError;
+use crate::metadata::{ArcMetadata, Metadata};
 
-use crate::custom_values::CustomValuesClient;
-use crate::{
-    Metadata,
-    blocks::BlocksClient,
-    config::{Config, HashFor},
-    constants::ConstantsClient,
-    events::EventsClient,
-    runtime_api::RuntimeApiClient,
-    storage::StorageClient,
-    tx::TxClient,
-    view_functions::ViewFunctionsClient,
-};
-
-use derive_where::derive_where;
-use std::sync::Arc;
-use subxt_core::client::{ClientState, RuntimeVersion};
-
-/// A trait representing a client that can perform
-/// offline-only actions.
-pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
-    /// Return the provided [`Metadata`].
-    fn metadata(&self) -> Metadata;
-
-    /// Return the provided genesis hash.
-    fn genesis_hash(&self) -> HashFor<T>;
-
-    /// Return the provided [`RuntimeVersion`].
-    fn runtime_version(&self) -> RuntimeVersion;
-
-    /// Return the hasher used on the chain.
-    fn hasher(&self) -> T::Hasher;
-
-    /// Return the [subxt_core::client::ClientState] (metadata, runtime version and genesis hash).
-    fn client_state(&self) -> ClientState<T> {
-        ClientState {
-            genesis_hash: self.genesis_hash(),
-            runtime_version: self.runtime_version(),
-            metadata: self.metadata(),
-        }
-    }
-
-    /// Work with transactions.
-    fn tx(&self) -> TxClient<T, Self> {
-        TxClient::new(self.clone())
-    }
-
-    /// Work with events.
-    fn events(&self) -> EventsClient<T, Self> {
-        EventsClient::new(self.clone())
-    }
-
-    /// Work with storage.
-    fn storage(&self) -> StorageClient<T, Self> {
-        StorageClient::new(self.clone())
-    }
-
-    /// Access constants.
-    fn constants(&self) -> ConstantsClient<T, Self> {
-        ConstantsClient::new(self.clone())
-    }
-
-    /// Work with blocks.
-    fn blocks(&self) -> BlocksClient<T, Self> {
-        BlocksClient::new(self.clone())
-    }
-
-    /// Work with runtime APIs.
-    fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
-        RuntimeApiClient::new(self.clone())
-    }
-
-    /// Work with View Functions.
-    fn view_functions(&self) -> ViewFunctionsClient<T, Self> {
-        ViewFunctionsClient::new(self.clone())
-    }
-
-    /// Work this custom types.
-    fn custom_values(&self) -> CustomValuesClient<T, Self> {
-        CustomValuesClient::new(self.clone())
-    }
-}
-
-/// A client that is capable of performing offline-only operations.
-/// Can be constructed as long as you can populate the required fields.
-#[derive_where(Debug, Clone)]
+#[derive(Clone, Debug)]
 pub struct OfflineClient<T: Config> {
-    inner: Arc<ClientState<T>>,
-    hasher: T::Hasher,
+    /// The configuration for this client.
+    config: T,
 }
 
 impl<T: Config> OfflineClient<T> {
-    /// Construct a new [`OfflineClient`], providing
-    /// the necessary runtime and compile-time arguments.
-    pub fn new(
-        genesis_hash: HashFor<T>,
-        runtime_version: RuntimeVersion,
-        metadata: impl Into<Metadata>,
-    ) -> OfflineClient<T> {
-        let metadata = metadata.into();
-        let hasher = <T::Hasher as subxt_core::config::Hasher>::new(&metadata);
+    /// Create a new [`OfflineClient`] with the given configuration.
+    pub fn new(config: T) -> Self {
+        OfflineClient { config }
+    }
 
-        OfflineClient {
+    /// Pick the block height at which to operate. This references data from the
+    /// [`OfflineClient`] it's called on, and so cannot outlive it.
+    pub fn at_block(
+        &self,
+        block_number: impl Into<u64>,
+    ) -> Result<ClientAtBlock<T, OfflineClientAtBlock<T>>, OfflineClientAtBlockError> {
+        let block_number = block_number.into();
+        let (spec_version, transaction_version) = self
+            .config
+            .spec_and_transaction_version_for_block_number(block_number)
+            .ok_or(OfflineClientAtBlockError::SpecVersionNotFound { block_number })?;
+
+        let metadata = self
+            .config
+            .metadata_for_spec_version(spec_version)
+            .ok_or(OfflineClientAtBlockError::MetadataNotFound { spec_version })?;
+
+        let genesis_hash = self.config.genesis_hash();
+
+        let hasher = <T::Hasher as Hasher>::new(&metadata);
+
+        let offline_client_at_block = OfflineClientAtBlock {
+            metadata,
+            block_number,
+            genesis_hash,
+            spec_version,
             hasher,
-            inner: Arc::new(ClientState {
-                genesis_hash,
-                runtime_version,
-                metadata,
-            }),
-        }
-    }
+            transaction_version,
+        };
 
-    /// Return the genesis hash.
-    pub fn genesis_hash(&self) -> HashFor<T> {
-        self.inner.genesis_hash
-    }
-
-    /// Return the runtime version.
-    pub fn runtime_version(&self) -> RuntimeVersion {
-        self.inner.runtime_version
-    }
-
-    /// Return the [`Metadata`] used in this client.
-    pub fn metadata(&self) -> Metadata {
-        self.inner.metadata.clone()
-    }
-
-    /// Return the hasher used for the chain.
-    pub fn hasher(&self) -> T::Hasher {
-        self.hasher
-    }
-
-    // Just a copy of the most important trait methods so that people
-    // don't need to import the trait for most things:
-
-    /// Work with transactions.
-    pub fn tx(&self) -> TxClient<T, Self> {
-        <Self as OfflineClientT<T>>::tx(self)
-    }
-
-    /// Work with events.
-    pub fn events(&self) -> EventsClient<T, Self> {
-        <Self as OfflineClientT<T>>::events(self)
-    }
-
-    /// Work with storage.
-    pub fn storage(&self) -> StorageClient<T, Self> {
-        <Self as OfflineClientT<T>>::storage(self)
-    }
-
-    /// Access constants.
-    pub fn constants(&self) -> ConstantsClient<T, Self> {
-        <Self as OfflineClientT<T>>::constants(self)
-    }
-
-    /// Work with blocks.
-    pub fn blocks(&self) -> BlocksClient<T, Self> {
-        <Self as OfflineClientT<T>>::blocks(self)
-    }
-
-    /// Work with runtime APIs.
-    pub fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
-        <Self as OfflineClientT<T>>::runtime_api(self)
-    }
-
-    /// Work with View Functions.
-    pub fn view_functions(&self) -> ViewFunctionsClient<T, Self> {
-        <Self as OfflineClientT<T>>::view_functions(self)
-    }
-
-    /// Access custom types
-    pub fn custom_values(&self) -> CustomValuesClient<T, Self> {
-        <Self as OfflineClientT<T>>::custom_values(self)
+        Ok(ClientAtBlock::new(offline_client_at_block))
     }
 }
 
-impl<T: Config> OfflineClientT<T> for OfflineClient<T> {
-    fn genesis_hash(&self) -> HashFor<T> {
-        self.genesis_hash()
-    }
-    fn runtime_version(&self) -> RuntimeVersion {
-        self.runtime_version()
-    }
-    fn metadata(&self) -> Metadata {
-        self.metadata()
-    }
-    fn hasher(&self) -> T::Hasher {
-        self.hasher()
-    }
+#[derive(Clone)]
+pub struct OfflineClientAtBlock<T: Config> {
+    metadata: ArcMetadata,
+    block_number: u64,
+    genesis_hash: Option<HashFor<T>>,
+    spec_version: u32,
+    hasher: T::Hasher,
+    transaction_version: u32,
 }
 
-// For ergonomics; cloning a client is deliberately fairly cheap (via Arc),
-// so this allows users to pass references to a client rather than explicitly
-// cloning. This is partly for consistency with OnlineClient, which can be
-// easily converted into an OfflineClient for ergonomics.
-impl<'a, T: Config> From<&'a OfflineClient<T>> for OfflineClient<T> {
-    fn from(c: &'a OfflineClient<T>) -> Self {
-        c.clone()
+/// This represents an offline-only client at a specific block.
+#[doc(hidden)]
+pub trait OfflineClientAtBlockT<T: Config>: Clone {
+    /// Get a reference to the metadata appropriate for this block.
+    fn metadata_ref(&self) -> &Metadata;
+    /// Get a clone of the metadata appropriate for this block.
+    fn metadata(&self) -> ArcMetadata;
+    /// The block number we're operating at.
+    fn block_number(&self) -> u64;
+    /// Return the genesis hash for the chain if it is known.
+    fn genesis_hash(&self) -> Option<HashFor<T>>;
+    /// The spec version at the current block.
+    fn spec_version(&self) -> u32;
+    /// Return a hasher that works at the current block.
+    fn hasher(&self) -> &T::Hasher;
+    /// The transaction version at the current block.
+    ///
+    /// Note: This is _not_ the same as the transaction version that
+    /// is encoded at the beginning of transactions (ie 4 or 5).
+    fn transaction_version(&self) -> u32;
+}
+
+impl<T: Config> OfflineClientAtBlockT<T> for OfflineClientAtBlock<T> {
+    fn metadata_ref(&self) -> &Metadata {
+        &self.metadata
+    }
+    fn metadata(&self) -> ArcMetadata {
+        self.metadata.clone()
+    }
+    fn block_number(&self) -> u64 {
+        self.block_number
+    }
+    fn genesis_hash(&self) -> Option<HashFor<T>> {
+        self.genesis_hash
+    }
+    fn spec_version(&self) -> u32 {
+        self.spec_version
+    }
+    fn transaction_version(&self) -> u32 {
+        self.transaction_version
+    }
+    fn hasher(&self) -> &T::Hasher {
+        &self.hasher
     }
 }

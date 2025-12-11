@@ -464,7 +464,7 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "artifacts"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "substrate-runner",
 ]
@@ -2132,7 +2132,7 @@ dependencies = [
 
 [[package]]
 name = "generate-custom-metadata"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
@@ -2753,7 +2753,7 @@ dependencies = [
 
 [[package]]
 name = "integration-tests"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
@@ -5599,7 +5599,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-runner"
-version = "0.44.0"
+version = "0.50.0"
 
 [[package]]
 name = "subtle"
@@ -5609,25 +5609,31 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "subxt"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "assert_matches",
  "async-trait",
+ "base58",
  "bitvec",
+ "blake2",
  "derive-where",
  "either",
+ "frame-decode",
  "frame-metadata 23.0.0",
  "futures",
  "hex",
  "http-body",
  "hyper",
+ "impl-serde",
  "jsonrpsee",
+ "keccak-hash",
  "parity-scale-codec",
  "primitive-types",
  "scale-bits",
  "scale-decode",
  "scale-encode",
  "scale-info",
+ "scale-info-legacy",
  "scale-value",
  "serde",
  "serde_json",
@@ -5635,12 +5641,12 @@ dependencies = [
  "sp-crypto-hashing",
  "sp-keyring",
  "sp-runtime",
- "subxt-core",
  "subxt-lightclient",
  "subxt-macro",
  "subxt-metadata",
  "subxt-rpcs",
  "subxt-signer",
+ "subxt-utils-accountid32",
  "thiserror 2.0.12",
  "tokio",
  "tokio-util",
@@ -5654,7 +5660,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-cli"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "clap",
  "color-eyre",
@@ -5688,7 +5694,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "frame-metadata 23.0.0",
  "getrandom 0.2.16",
@@ -5704,64 +5710,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "subxt-core"
-version = "0.44.0"
-dependencies = [
- "assert_matches",
- "base58",
- "bitvec",
- "blake2",
- "derive-where",
- "frame-decode",
- "frame-metadata 23.0.0",
- "hashbrown 0.14.5",
- "hex",
- "impl-serde",
- "keccak-hash",
- "parity-scale-codec",
- "primitive-types",
- "scale-bits",
- "scale-decode",
- "scale-encode",
- "scale-info",
- "scale-value",
- "serde",
- "serde_json",
- "sp-core",
- "sp-crypto-hashing",
- "sp-keyring",
- "subxt-macro",
- "subxt-metadata",
- "subxt-signer",
- "thiserror 2.0.12",
- "tracing",
-]
-
-[[package]]
-name = "subxt-historic"
-version = "0.0.8"
-dependencies = [
- "frame-decode",
- "frame-metadata 23.0.0",
- "futures",
- "hex",
- "parity-scale-codec",
- "primitive-types",
- "scale-decode",
- "scale-info",
- "scale-info-legacy",
- "scale-type-resolver",
- "scale-value",
- "sp-crypto-hashing",
- "subxt-rpcs",
- "thiserror 2.0.12",
- "tokio",
- "url",
-]
-
-[[package]]
 name = "subxt-lightclient"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "futures",
  "futures-timer",
@@ -5786,7 +5736,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "darling",
  "parity-scale-codec",
@@ -5806,7 +5756,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "bitvec",
  "criterion",
@@ -5824,58 +5774,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "subxt-new"
-version = "0.44.0"
-dependencies = [
- "assert_matches",
- "async-trait",
- "base58",
- "bitvec",
- "blake2",
- "derive-where",
- "either",
- "frame-decode",
- "frame-metadata 23.0.0",
- "futures",
- "hex",
- "http-body",
- "hyper",
- "impl-serde",
- "jsonrpsee",
- "keccak-hash",
- "parity-scale-codec",
- "primitive-types",
- "scale-bits",
- "scale-decode",
- "scale-encode",
- "scale-info",
- "scale-info-legacy",
- "scale-value",
- "serde",
- "serde_json",
- "sp-core",
- "sp-crypto-hashing",
- "sp-keyring",
- "sp-runtime",
- "subxt-lightclient",
- "subxt-macro",
- "subxt-metadata",
- "subxt-rpcs",
- "subxt-signer",
- "thiserror 2.0.12",
- "tokio",
- "tokio-util",
- "tower",
- "tracing",
- "tracing-subscriber",
- "url",
- "wasm-bindgen-futures",
- "web-time",
-]
-
-[[package]]
 name = "subxt-rpcs"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "derive-where",
  "finito",
@@ -5891,7 +5791,6 @@ dependencies = [
  "primitive-types",
  "serde",
  "serde_json",
- "subxt-core",
  "subxt-lightclient",
  "thiserror 2.0.12",
  "tokio",
@@ -5904,7 +5803,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "base64 0.22.1",
  "bip32",
@@ -5930,22 +5829,39 @@ dependencies = [
  "sp-core",
  "sp-crypto-hashing",
  "sp-keyring",
- "subxt-core",
+ "subxt",
+ "subxt-utils-accountid32",
  "thiserror 2.0.12",
  "zeroize",
 ]
 
 [[package]]
 name = "subxt-test-macro"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "quote",
  "syn 2.0.101",
 ]
 
 [[package]]
+name = "subxt-utils-accountid32"
+version = "0.50.0"
+dependencies = [
+ "base58",
+ "blake2",
+ "parity-scale-codec",
+ "scale-decode",
+ "scale-encode",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-keyring",
+ "thiserror 2.0.12",
+]
+
+[[package]]
 name = "subxt-utils-fetchmetadata"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "frame-metadata 23.0.0",
  "hex",
@@ -5958,7 +5874,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-utils-stripmetadata"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "either",
  "frame-metadata 23.0.0",
@@ -6041,7 +5957,7 @@ dependencies = [
 
 [[package]]
 name = "test-runtime"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "hex",
  "impl-serde",
@@ -6190,9 +6106,7 @@ dependencies = [
  "bytes",
  "libc",
  "mio",
- "parking_lot",
  "pin-project-lite",
- "signal-hook-registry",
  "socket2",
  "tokio-macros",
  "windows-sys 0.52.0",
@@ -6469,7 +6383,7 @@ checksum = "1dccffe3ce07af9386bfd29e80c0ab1a8205a2fc34e4bcd40364df902cfa8f3f"
 
 [[package]]
 name = "ui-tests"
-version = "0.44.0"
+version = "0.50.0"
 dependencies = [
  "frame-metadata 23.0.0",
  "generate-custom-metadata",

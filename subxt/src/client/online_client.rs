@@ -1,580 +1,593 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
-// This file is dual-licensed as Apache-2.0 or GPL-3.0.
-// see LICENSE for license details.
+mod block_number_or_ref;
+mod blocks;
 
-use super::{OfflineClient, OfflineClientT};
-use crate::custom_values::CustomValuesClient;
-use crate::{
-    Metadata,
-    backend::{Backend, BackendExt, StreamOfResults, legacy::LegacyBackend, rpc::RpcClient},
-    blocks::{BlockRef, BlocksClient},
-    config::{Config, HashFor},
-    constants::ConstantsClient,
-    error::{BackendError, OnlineClientError, RuntimeUpdateeApplyError, RuntimeUpdaterError},
-    events::EventsClient,
-    runtime_api::RuntimeApiClient,
-    storage::StorageClient,
-    tx::TxClient,
-    view_functions::ViewFunctionsClient,
-};
-use derive_where::derive_where;
-use futures::TryFutureExt;
-use futures::future;
-use std::sync::{Arc, RwLock};
-use subxt_core::client::{ClientState, RuntimeVersion};
+use super::ClientAtBlock;
+use super::OfflineClientAtBlockT;
+use crate::backend::{Backend, BlockRef, CombinedBackend};
+use crate::config::{Config, HashFor, Hasher, Header};
+use crate::error::{BlocksError, OnlineClientAtBlockError};
+use crate::metadata::{ArcMetadata, Metadata};
+use blocks::Blocks;
+use codec::{Compact, Decode, Encode};
+use core::marker::PhantomData;
+use frame_decode::helpers::ToTypeRegistry;
+use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
+use scale_info_legacy::TypeRegistrySet;
+use std::future::Future;
+use std::sync::Arc;
+use subxt_rpcs::RpcClient;
 
-/// A trait representing a client that can perform
-/// online actions.
-pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
-    /// Return a backend that can be used to communicate with a node.
-    fn backend(&self) -> &dyn Backend<T>;
+#[cfg(feature = "jsonrpsee")]
+use crate::error::OnlineClientError;
+
+pub use block_number_or_ref::BlockNumberOrRef;
+
+/// A client which exposes the means to decode historic data on a chain online.
+#[derive(Clone, Debug)]
+pub struct OnlineClient<T: Config> {
+    inner: Arc<OnlineClientInner<T>>,
 }
 
-/// A client that can be used to perform API calls (that is, either those
-/// requiring an [`OfflineClientT`] or those requiring an [`OnlineClientT`]).
-#[derive_where(Clone)]
-pub struct OnlineClient<T: Config> {
-    inner: Arc<RwLock<Inner<T>>>,
+struct OnlineClientInner<T: Config> {
+    /// The configuration for this client.
+    config: T,
+    /// Chain genesis hash. Needed to construct transactions,
+    /// so we obtain it up front on constructing this.
+    genesis_hash: HashFor<T>,
+    /// The RPC methods used to communicate with the node.
     backend: Arc<dyn Backend<T>>,
 }
 
-#[derive_where(Debug)]
-struct Inner<T: Config> {
-    genesis_hash: HashFor<T>,
-    runtime_version: RuntimeVersion,
-    metadata: Metadata,
-    hasher: T::Hasher,
-}
-
-impl<T: Config> std::fmt::Debug for OnlineClient<T> {
+impl<T: Config> std::fmt::Debug for OnlineClientInner<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Client")
-            .field("rpc", &"RpcClient")
-            .field("inner", &self.inner)
+        f.debug_struct("OnlineClientInner")
+            .field("config", &"<config>")
+            .field("backend", &"Arc<backend impl>")
             .finish()
     }
 }
 
-// The default constructors assume Jsonrpsee.
-#[cfg(feature = "jsonrpsee")]
-#[cfg_attr(docsrs, doc(cfg(feature = "jsonrpsee")))]
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
-    pub async fn new() -> Result<OnlineClient<T>, OnlineClientError> {
+    ///
+    /// **Note:** This will only work if the local node is an archive node.
+    #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
+    pub async fn new(config: T) -> Result<OnlineClient<T>, OnlineClientError> {
         let url = "ws://127.0.0.1:9944";
-        OnlineClient::from_url(url).await
+        OnlineClient::from_url(config, url).await
     }
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
-    pub async fn from_url(url: impl AsRef<str>) -> Result<OnlineClient<T>, OnlineClientError> {
-        subxt_rpcs::utils::validate_url_is_secure(url.as_ref())?;
-        OnlineClient::from_insecure_url(url).await
+    #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
+    pub async fn from_url(
+        config: T,
+        url: impl AsRef<str>,
+    ) -> Result<OnlineClient<T>, OnlineClientError> {
+        let url_str = url.as_ref();
+        let url = url::Url::parse(url_str).map_err(|_| OnlineClientError::InvalidUrl {
+            url: url_str.to_string(),
+        })?;
+        if !Self::is_url_secure(&url) {
+            return Err(OnlineClientError::RpcError(subxt_rpcs::Error::InsecureUrl(
+                url_str.to_string(),
+            )));
+        }
+        OnlineClient::from_insecure_url(config, url).await
     }
 
     /// Construct a new [`OnlineClient`], providing a URL to connect to.
     ///
     /// Allows insecure URLs without SSL encryption, e.g. (http:// and ws:// URLs).
+    #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
     pub async fn from_insecure_url(
+        config: T,
         url: impl AsRef<str>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
-        let client = RpcClient::from_insecure_url(url).await?;
-        let backend = LegacyBackend::builder().build(client);
-        OnlineClient::from_backend(Arc::new(backend)).await
+        let rpc_client = RpcClient::from_insecure_url(url).await?;
+        OnlineClient::from_rpc_client(config, rpc_client).await
     }
-}
 
-impl<T: Config> OnlineClient<T> {
+    fn is_url_secure(url: &url::Url) -> bool {
+        let secure_scheme = url.scheme() == "https" || url.scheme() == "wss";
+        let is_localhost = url.host().is_some_and(|e| match e {
+            url::Host::Domain(e) => e == "localhost",
+            url::Host::Ipv4(e) => e.is_loopback(),
+            url::Host::Ipv6(e) => e.is_loopback(),
+        });
+        secure_scheme || is_localhost
+    }
+
     /// Construct a new [`OnlineClient`] by providing an [`RpcClient`] to drive the connection.
     /// This will use the current default [`Backend`], which may change in future releases.
+    #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
     pub async fn from_rpc_client(
+        config: T,
         rpc_client: impl Into<RpcClient>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
         let rpc_client = rpc_client.into();
-        let backend = Arc::new(LegacyBackend::builder().build(rpc_client));
-        OnlineClient::from_backend(backend).await
-    }
-
-    /// Construct a new [`OnlineClient`] by providing an RPC client along with the other
-    /// necessary details. This will use the current default [`Backend`], which may change
-    /// in future releases.
-    ///
-    /// # Warning
-    ///
-    /// This is considered the most primitive and also error prone way to
-    /// instantiate a client; the genesis hash, metadata and runtime version provided will
-    /// entirely determine which node and blocks this client will be able to interact with,
-    /// and whether it will be able to successfully do things like submit transactions.
-    ///
-    /// If you're unsure what you're doing, prefer one of the alternate methods to instantiate
-    /// a client.
-    pub fn from_rpc_client_with(
-        genesis_hash: HashFor<T>,
-        runtime_version: RuntimeVersion,
-        metadata: impl Into<Metadata>,
-        rpc_client: impl Into<RpcClient>,
-    ) -> Result<OnlineClient<T>, OnlineClientError> {
-        let rpc_client = rpc_client.into();
-        let backend = Arc::new(LegacyBackend::builder().build(rpc_client));
-        OnlineClient::from_backend_with(genesis_hash, runtime_version, metadata, backend)
+        let backend = CombinedBackend::builder()
+            .build_with_background_driver(rpc_client)
+            .await
+            .map_err(OnlineClientError::CannotBuildCombinedBackend)?;
+        let backend: Arc<dyn Backend<T>> = Arc::new(backend);
+        OnlineClient::from_backend(config, backend).await
     }
 
     /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
-    /// implementation to power it. Other details will be obtained from the chain.
-    pub async fn from_backend<B: Backend<T>>(
-        backend: Arc<B>,
+    /// implementation to power it.
+    pub async fn from_backend(
+        config: T,
+        backend: impl Into<Arc<dyn Backend<T>>>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
-        let latest_block = backend
-            .latest_finalized_block_ref()
-            .await
-            .map_err(OnlineClientError::CannotGetLatestFinalizedBlock)?;
-
-        let (genesis_hash, runtime_version, metadata) = future::join3(
-            backend
+        let backend = backend.into();
+        let genesis_hash = match config.genesis_hash() {
+            Some(hash) => hash,
+            None => backend
                 .genesis_hash()
-                .map_err(OnlineClientError::CannotGetGenesisHash),
-            backend
-                .current_runtime_version()
-                .map_err(OnlineClientError::CannotGetCurrentRuntimeVersion),
-            OnlineClient::fetch_metadata(&*backend, latest_block.hash())
-                .map_err(OnlineClientError::CannotFetchMetadata),
-        )
-        .await;
-
-        OnlineClient::from_backend_with(genesis_hash?, runtime_version?, metadata?, backend)
-    }
-
-    /// Construct a new [`OnlineClient`] by providing all of the underlying details needed
-    /// to make it work.
-    ///
-    /// # Warning
-    ///
-    /// This is considered the most primitive and also error prone way to
-    /// instantiate a client; the genesis hash, metadata and runtime version provided will
-    /// entirely determine which node and blocks this client will be able to interact with,
-    /// and whether it will be able to successfully do things like submit transactions.
-    ///
-    /// If you're unsure what you're doing, prefer one of the alternate methods to instantiate
-    /// a client.
-    pub fn from_backend_with<B: Backend<T>>(
-        genesis_hash: HashFor<T>,
-        runtime_version: RuntimeVersion,
-        metadata: impl Into<Metadata>,
-        backend: Arc<B>,
-    ) -> Result<OnlineClient<T>, OnlineClientError> {
-        use subxt_core::config::Hasher;
-
-        let metadata = metadata.into();
-        let hasher = T::Hasher::new(&metadata);
+                .await
+                .map_err(OnlineClientError::CannotGetGenesisHash)?,
+        };
 
         Ok(OnlineClient {
-            inner: Arc::new(RwLock::new(Inner {
+            inner: Arc::new(OnlineClientInner {
+                config,
                 genesis_hash,
-                runtime_version,
-                metadata,
-                hasher,
-            })),
-            backend,
+                backend: backend.into(),
+            }),
         })
     }
 
-    /// Fetch the metadata from substrate using the runtime API.
-    async fn fetch_metadata(
-        backend: &dyn Backend<T>,
-        block_hash: HashFor<T>,
-    ) -> Result<Metadata, BackendError> {
-        #[cfg(feature = "unstable-metadata")]
-        {
-            /// The unstable metadata version number.
-            const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
-
-            // Try to fetch the latest unstable metadata, if that fails fall back to
-            // fetching the latest stable metadata.
-            match backend
-                .metadata_at_version(UNSTABLE_METADATA_VERSION, block_hash)
-                .await
-            {
-                Ok(bytes) => Ok(bytes),
-                Err(_) => OnlineClient::fetch_latest_stable_metadata(backend, block_hash).await,
-            }
-        }
-
-        #[cfg(not(feature = "unstable-metadata"))]
-        OnlineClient::fetch_latest_stable_metadata(backend, block_hash).await
-    }
-
-    /// Fetch the latest stable metadata from the node.
-    async fn fetch_latest_stable_metadata(
-        backend: &dyn Backend<T>,
-        block_hash: HashFor<T>,
-    ) -> Result<Metadata, BackendError> {
-        // The metadata versions we support in Subxt, from newest to oldest.
-        use subxt_metadata::SUPPORTED_METADATA_VERSIONS;
-
-        // Try to fetch each version that we support in order from newest to oldest.
-        for version in SUPPORTED_METADATA_VERSIONS {
-            if let Ok(bytes) = backend.metadata_at_version(version, block_hash).await {
-                return Ok(bytes);
-            }
-        }
-
-        // If that fails, fetch the metadata V14 using the old API.
-        backend.legacy_metadata(block_hash).await
-    }
-
-    /// Create an object which can be used to keep the runtime up to date
-    /// in a separate thread.
+    /// Obtain a stream of all blocks imported by the node.
     ///
-    /// # Example
-    ///
-    /// ```rust,no_run,standalone_crate
-    /// # #[tokio::main]
-    /// # async fn main() {
-    /// use subxt::{ OnlineClient, PolkadotConfig };
-    ///
-    /// let client = OnlineClient::<PolkadotConfig>::new().await.unwrap();
-    ///
-    /// // high level API.
-    ///
-    /// let update_task = client.updater();
-    /// tokio::spawn(async move {
-    ///     update_task.perform_runtime_updates().await;
-    /// });
-    ///
-    ///
-    /// // low level API.
-    ///
-    /// let updater = client.updater();
-    /// tokio::spawn(async move {
-    ///     let mut update_stream = updater.runtime_updates().await.unwrap();
-    ///
-    ///     while let Ok(update) = update_stream.next().await {
-    ///         let version = update.runtime_version().spec_version;
-    ///
-    ///         match updater.apply_update(update) {
-    ///             Ok(()) => {
-    ///                 println!("Upgrade to version: {} successful", version)
-    ///             }
-    ///             Err(e) => {
-    ///                println!("Upgrade to version {} failed {:?}", version, e);
-    ///             }
-    ///        };
-    ///     }
-    /// });
-    /// # }
-    /// ```
-    pub fn updater(&self) -> ClientRuntimeUpdater<T> {
-        ClientRuntimeUpdater(self.clone())
-    }
+    /// **Note:** You probably want to use [`Self::stream_blocks()`] most of
+    /// the time. Blocks returned here may be pruned at any time and become inaccessible,
+    /// leading to errors when trying to work with them.
+    pub async fn stream_all_blocks(&self) -> Result<Blocks<T>, BlocksError> {
+        // We need a hasher to know how to hash things. Thus, we need metadata to instantiate
+        // the hasher, so let's use the current block.
+        let current_block = self
+            .at_current_block()
+            .await
+            .map_err(BlocksError::CannotGetCurrentBlock)?;
+        let hasher = current_block.client.hasher.clone();
 
-    /// Return the hasher configured for hashing blocks and extrinsics.
-    pub fn hasher(&self) -> T::Hasher {
-        self.inner.read().expect("shouldn't be poisoned").hasher
-    }
-
-    /// Return the [`Metadata`] used in this client.
-    pub fn metadata(&self) -> Metadata {
-        let inner = self.inner.read().expect("shouldn't be poisoned");
-        inner.metadata.clone()
-    }
-
-    /// Change the [`Metadata`] used in this client.
-    ///
-    /// # Warning
-    ///
-    /// Setting custom metadata may leave Subxt unable to work with certain blocks,
-    /// subscribe to latest blocks or submit valid transactions.
-    pub fn set_metadata(&self, metadata: impl Into<Metadata>) {
-        let mut inner = self.inner.write().expect("shouldn't be poisoned");
-        inner.metadata = metadata.into();
-    }
-
-    /// Return the genesis hash.
-    pub fn genesis_hash(&self) -> HashFor<T> {
-        let inner = self.inner.read().expect("shouldn't be poisoned");
-        inner.genesis_hash
-    }
-
-    /// Change the genesis hash used in this client.
-    ///
-    /// # Warning
-    ///
-    /// Setting a custom genesis hash may leave Subxt unable to
-    /// submit valid transactions.
-    pub fn set_genesis_hash(&self, genesis_hash: HashFor<T>) {
-        let mut inner = self.inner.write().expect("shouldn't be poisoned");
-        inner.genesis_hash = genesis_hash;
-    }
-
-    /// Return the runtime version.
-    pub fn runtime_version(&self) -> RuntimeVersion {
-        let inner = self.inner.read().expect("shouldn't be poisoned");
-        inner.runtime_version
-    }
-
-    /// Change the [`RuntimeVersion`] used in this client.
-    ///
-    /// # Warning
-    ///
-    /// Setting a custom runtime version may leave Subxt unable to
-    /// submit valid transactions.
-    pub fn set_runtime_version(&self, runtime_version: RuntimeVersion) {
-        let mut inner = self.inner.write().expect("shouldn't be poisoned");
-        inner.runtime_version = runtime_version;
-    }
-
-    /// Return an RPC client to make raw requests with.
-    pub fn backend(&self) -> &dyn Backend<T> {
-        &*self.backend
-    }
-
-    /// Return an offline client with the same configuration as this.
-    pub fn offline(&self) -> OfflineClient<T> {
-        let inner = self.inner.read().expect("shouldn't be poisoned");
-        OfflineClient::new(
-            inner.genesis_hash,
-            inner.runtime_version,
-            inner.metadata.clone(),
-        )
-    }
-
-    // Just a copy of the most important trait methods so that people
-    // don't need to import the trait for most things:
-
-    /// Work with transactions.
-    pub fn tx(&self) -> TxClient<T, Self> {
-        <Self as OfflineClientT<T>>::tx(self)
-    }
-
-    /// Work with events.
-    pub fn events(&self) -> EventsClient<T, Self> {
-        <Self as OfflineClientT<T>>::events(self)
-    }
-
-    /// Work with storage.
-    pub fn storage(&self) -> StorageClient<T, Self> {
-        <Self as OfflineClientT<T>>::storage(self)
-    }
-
-    /// Access constants.
-    pub fn constants(&self) -> ConstantsClient<T, Self> {
-        <Self as OfflineClientT<T>>::constants(self)
-    }
-
-    /// Work with blocks.
-    pub fn blocks(&self) -> BlocksClient<T, Self> {
-        <Self as OfflineClientT<T>>::blocks(self)
-    }
-
-    /// Work with runtime API.
-    pub fn runtime_api(&self) -> RuntimeApiClient<T, Self> {
-        <Self as OfflineClientT<T>>::runtime_api(self)
-    }
-
-    /// Work with View Functions.
-    pub fn view_functions(&self) -> ViewFunctionsClient<T, Self> {
-        <Self as OfflineClientT<T>>::view_functions(self)
-    }
-
-    /// Access custom types.
-    pub fn custom_values(&self) -> CustomValuesClient<T, Self> {
-        <Self as OfflineClientT<T>>::custom_values(self)
-    }
-}
-
-impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
-    fn metadata(&self) -> Metadata {
-        self.metadata()
-    }
-    fn genesis_hash(&self) -> HashFor<T> {
-        self.genesis_hash()
-    }
-    fn runtime_version(&self) -> RuntimeVersion {
-        self.runtime_version()
-    }
-    fn hasher(&self) -> T::Hasher {
-        self.hasher()
-    }
-    // This is provided by default, but we can optimise here and only lock once:
-    fn client_state(&self) -> ClientState<T> {
-        let inner = self.inner.read().expect("shouldn't be poisoned");
-        ClientState {
-            genesis_hash: inner.genesis_hash,
-            runtime_version: inner.runtime_version,
-            metadata: inner.metadata.clone(),
-        }
-    }
-}
-
-impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
-    fn backend(&self) -> &dyn Backend<T> {
-        &*self.backend
-    }
-}
-
-/// Client wrapper for performing runtime updates. See [`OnlineClient::updater()`]
-/// for example usage.
-pub struct ClientRuntimeUpdater<T: Config>(OnlineClient<T>);
-
-impl<T: Config> ClientRuntimeUpdater<T> {
-    fn is_runtime_version_different(&self, new: &RuntimeVersion) -> bool {
-        let curr = self.0.inner.read().expect("shouldn't be poisoned");
-        &curr.runtime_version != new
-    }
-
-    fn do_update(&self, update: Update) {
-        let mut writable = self.0.inner.write().expect("shouldn't be poisoned");
-        writable.metadata = update.metadata;
-        writable.runtime_version = update.runtime_version;
-    }
-
-    /// Tries to apply a new update.
-    pub fn apply_update(&self, update: Update) -> Result<(), RuntimeUpdateeApplyError> {
-        if !self.is_runtime_version_different(&update.runtime_version) {
-            return Err(RuntimeUpdateeApplyError::SameVersion);
-        }
-
-        self.do_update(update);
-
-        Ok(())
-    }
-
-    /// Performs runtime updates indefinitely unless encountering an error.
-    ///
-    /// *Note:* This will run indefinitely until it errors, so the typical usage
-    /// would be to run it in a separate background task.
-    pub async fn perform_runtime_updates(&self) -> Result<(), RuntimeUpdaterError> {
-        // Obtain an update subscription to further detect changes in the runtime version of the node.
-        let mut runtime_version_stream = self.runtime_updates().await?;
-
-        loop {
-            let update = runtime_version_stream.next().await?;
-
-            // This only fails if received the runtime version is the same the current runtime version
-            // which might occur because that runtime subscriptions in substrate sends out the initial
-            // value when they created and not only when runtime upgrades occurs.
-            // Thus, fine to ignore here as it strictly speaking isn't really an error
-            let _ = self.apply_update(update);
-        }
-    }
-
-    /// Low-level API to get runtime updates as a stream but it's doesn't check if the
-    /// runtime version is newer or updates the runtime.
-    ///
-    /// Instead that's up to the user of this API to decide when to update and
-    /// to perform the actual updating.
-    pub async fn runtime_updates(&self) -> Result<RuntimeUpdaterStream<T>, RuntimeUpdaterError> {
         let stream = self
-            .0
-            .backend()
-            .stream_runtime_version()
+            .inner
+            .backend
+            .stream_all_block_headers(hasher)
             .await
-            .map_err(RuntimeUpdaterError::CannotStreamRuntimeVersion)?;
+            .map_err(BlocksError::CannotGetBlockHeaderStream)?;
 
-        Ok(RuntimeUpdaterStream {
-            stream,
-            client: self.0.clone(),
-        })
+        Ok(Blocks::from_headers_stream(self.clone(), stream))
     }
-}
 
-/// Stream to perform runtime upgrades.
-pub struct RuntimeUpdaterStream<T: Config> {
-    stream: StreamOfResults<RuntimeVersion>,
-    client: OnlineClient<T>,
-}
-
-impl<T: Config> RuntimeUpdaterStream<T> {
-    /// Wait for the next runtime update.
-    pub async fn next(&mut self) -> Result<Update, RuntimeUpdaterError> {
-        let runtime_version = self
-            .stream
-            .next()
+    /// Obtain a stream of blocks imported by the node onto the current best fork.
+    ///
+    /// **Note:** You probably want to use [`Self::stream_blocks()`] most of
+    /// the time. Blocks returned here may be pruned at any time and become inaccessible,
+    /// leading to errors when trying to work with them.
+    pub async fn stream_best_blocks(&self) -> Result<Blocks<T>, BlocksError> {
+        // We need a hasher to know how to hash things. Thus, we need metadata to instantiate
+        // the hasher, so let's use the current block.
+        let current_block = self
+            .at_current_block()
             .await
-            .ok_or(RuntimeUpdaterError::UnexpectedEndOfUpdateStream)?
-            .map_err(RuntimeUpdaterError::CannotGetNextRuntimeVersion)?;
+            .map_err(BlocksError::CannotGetCurrentBlock)?;
+        let hasher = current_block.client.hasher.clone();
 
-        let at = wait_runtime_upgrade_in_finalized_block(&self.client, &runtime_version).await?;
-
-        let metadata = OnlineClient::fetch_metadata(self.client.backend(), at.hash())
+        let stream = self
+            .inner
+            .backend
+            .stream_best_block_headers(hasher)
             .await
-            .map_err(RuntimeUpdaterError::CannotFetchNewMetadata)?;
+            .map_err(BlocksError::CannotGetBlockHeaderStream)?;
 
-        Ok(Update {
+        Ok(Blocks::from_headers_stream(self.clone(), stream))
+    }
+
+    /// Obtain a stream of finalized blocks.
+    pub async fn stream_blocks(&self) -> Result<Blocks<T>, BlocksError> {
+        // We need a hasher to know how to hash things. Thus, we need metadata to instantiate
+        // the hasher, so let's use the current block.
+        let current_block = self
+            .at_current_block()
+            .await
+            .map_err(BlocksError::CannotGetCurrentBlock)?;
+        let hasher = current_block.client.hasher.clone();
+
+        let stream = self
+            .inner
+            .backend
+            .stream_finalized_block_headers(hasher)
+            .await
+            .map_err(BlocksError::CannotGetBlockHeaderStream)?;
+
+        Ok(Blocks::from_headers_stream(self.clone(), stream))
+    }
+
+    /// Instantiate a client to work at the current finalized block _at the time of instantiation_.
+    /// This does not track new blocks.
+    pub async fn at_current_block(
+        &self,
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlock<T>>, OnlineClientAtBlockError> {
+        let latest_block = self
+            .inner
+            .backend
+            .latest_finalized_block_ref()
+            .await
+            .map_err(|e| OnlineClientAtBlockError::CannotGetCurrentBlock { reason: e })?;
+
+        self.at_block(latest_block).await
+    }
+
+    /// Instantiate a client for working at a specific block.
+    pub async fn at_block(
+        &self,
+        number_or_hash: impl Into<BlockNumberOrRef<T>>,
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlock<T>>, OnlineClientAtBlockError> {
+        let number_or_hash = number_or_hash.into();
+
+        // We are given either a block hash or number. We need both.
+        let (block_ref, block_number) = match number_or_hash {
+            BlockNumberOrRef::BlockRef(block_ref) => {
+                let block_hash = block_ref.hash();
+                let block_header = self
+                    .inner
+                    .backend
+                    .block_header(block_hash)
+                    .await
+                    .map_err(|e| OnlineClientAtBlockError::CannotGetBlockHeader {
+                        block_hash: block_hash.into(),
+                        reason: e,
+                    })?
+                    .ok_or(OnlineClientAtBlockError::BlockHeaderNotFound {
+                        block_hash: block_hash.into(),
+                    })?;
+                (block_ref, block_header.number())
+            }
+            BlockNumberOrRef::Number(block_number) => {
+                let block_ref = self
+                    .inner
+                    .backend
+                    .block_number_to_hash(block_number)
+                    .await
+                    .map_err(|e| OnlineClientAtBlockError::CannotGetBlockHash {
+                        block_number,
+                        reason: e,
+                    })?
+                    .ok_or(OnlineClientAtBlockError::BlockNotFound { block_number })?;
+                (block_ref, block_number)
+            }
+        };
+
+        self.at_block_hash_and_number(block_ref, block_number).await
+    }
+
+    /// Instantiate a client for working at a specific block. This takes a block hash/ref _and_ the
+    /// corresponding block number. When both are available, this saves an RPC call to obtain one from
+    /// the other.
+    ///
+    /// **Warning:** If the block hash and number do not align, then things will go wrong. Prefer to
+    /// use [`Self::at_block`] if in any doubt.
+    pub async fn at_block_hash_and_number(
+        &self,
+        block_ref: impl Into<BlockRef<HashFor<T>>>,
+        block_number: u64,
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlock<T>>, OnlineClientAtBlockError> {
+        let block_ref = block_ref.into();
+        let block_hash = block_ref.hash();
+
+        // Obtain the spec version so that we know which metadata to use at this block.
+        // Obtain the transaction version because it's required for constructing extrinsics.
+        let (spec_version, transaction_version) = match self
+            .inner
+            .config
+            .spec_and_transaction_version_for_block_number(block_number)
+        {
+            Some(version) => version,
+            None => {
+                let spec_version_bytes = self
+                    .inner
+                    .backend
+                    .call("Core_version", None, block_hash)
+                    .await
+                    .map_err(|e| OnlineClientAtBlockError::CannotGetSpecVersion {
+                        block_hash: block_hash.into(),
+                        reason: e,
+                    })?;
+
+                #[derive(codec::Decode)]
+                struct SpecVersionHeader {
+                    _spec_name: String,
+                    _impl_name: String,
+                    _authoring_version: u32,
+                    spec_version: u32,
+                    _impl_version: u32,
+                    _apis: Vec<([u8; 8], u32)>,
+                    transaction_version: u32,
+                }
+                let version =
+                    SpecVersionHeader::decode(&mut &spec_version_bytes[..]).map_err(|e| {
+                        OnlineClientAtBlockError::CannotDecodeSpecVersion {
+                            block_hash: block_hash.into(),
+                            reason: e,
+                        }
+                    })?;
+                (version.spec_version, version.transaction_version)
+            }
+        };
+
+        // Obtain the metadata for the block. Allow our config to cache it.
+        let metadata = match self.inner.config.metadata_for_spec_version(spec_version) {
+            Some(metadata) => metadata,
+            None => {
+                let metadata: Metadata =
+                    match get_metadata(&*self.inner.backend, block_hash).await? {
+                        m @ RuntimeMetadata::V0(_)
+                        | m @ RuntimeMetadata::V1(_)
+                        | m @ RuntimeMetadata::V2(_)
+                        | m @ RuntimeMetadata::V3(_)
+                        | m @ RuntimeMetadata::V4(_)
+                        | m @ RuntimeMetadata::V5(_)
+                        | m @ RuntimeMetadata::V6(_)
+                        | m @ RuntimeMetadata::V7(_) => {
+                            return Err(OnlineClientAtBlockError::UnsupportedMetadataVersion {
+                                block_hash: block_hash.into(),
+                                version: m.version(),
+                            });
+                        }
+                        RuntimeMetadata::V8(m) => {
+                            let types = get_legacy_types(self, &m, spec_version)?;
+                            Metadata::from_v8(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 8,
+                                    reason: e,
+                                }
+                            })?
+                        }
+                        RuntimeMetadata::V9(m) => {
+                            let types = get_legacy_types(self, &m, spec_version)?;
+                            Metadata::from_v9(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 9,
+                                    reason: e,
+                                }
+                            })?
+                        }
+                        RuntimeMetadata::V10(m) => {
+                            let types = get_legacy_types(self, &m, spec_version)?;
+                            Metadata::from_v10(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 10,
+                                    reason: e,
+                                }
+                            })?
+                        }
+                        RuntimeMetadata::V11(m) => {
+                            let types = get_legacy_types(self, &m, spec_version)?;
+                            Metadata::from_v11(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 11,
+                                    reason: e,
+                                }
+                            })?
+                        }
+                        RuntimeMetadata::V12(m) => {
+                            let types = get_legacy_types(self, &m, spec_version)?;
+                            Metadata::from_v12(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 12,
+                                    reason: e,
+                                }
+                            })?
+                        }
+                        RuntimeMetadata::V13(m) => {
+                            let types = get_legacy_types(self, &m, spec_version)?;
+                            Metadata::from_v13(&m, &types).map_err(|e| {
+                                OnlineClientAtBlockError::CannotConvertLegacyMetadata {
+                                    block_hash: block_hash.into(),
+                                    metadata_version: 13,
+                                    reason: e,
+                                }
+                            })?
+                        }
+                        RuntimeMetadata::V14(m) => Metadata::from_v14(m).map_err(|e| {
+                            OnlineClientAtBlockError::CannotConvertModernMetadata {
+                                block_hash: block_hash.into(),
+                                metadata_version: 14,
+                                reason: e,
+                            }
+                        })?,
+                        RuntimeMetadata::V15(m) => Metadata::from_v15(m).map_err(|e| {
+                            OnlineClientAtBlockError::CannotConvertModernMetadata {
+                                block_hash: block_hash.into(),
+                                metadata_version: 15,
+                                reason: e,
+                            }
+                        })?,
+                        RuntimeMetadata::V16(m) => Metadata::from_v16(m).map_err(|e| {
+                            OnlineClientAtBlockError::CannotConvertModernMetadata {
+                                block_hash: block_hash.into(),
+                                metadata_version: 16,
+                                reason: e,
+                            }
+                        })?,
+                    };
+                let metadata = Arc::new(metadata);
+                self.inner
+                    .config
+                    .set_metadata_for_spec_version(spec_version, metadata.clone());
+                metadata
+            }
+        };
+
+        let online_client_at_block = OnlineClientAtBlock {
+            client: self.clone(),
+            hasher: <T::Hasher as Hasher>::new(&metadata),
             metadata,
-            runtime_version,
+            block_ref,
+            block_number,
+            spec_version,
+            transaction_version,
+        };
+
+        Ok(ClientAtBlock {
+            client: online_client_at_block,
+            marker: PhantomData,
         })
     }
 }
 
-/// Represents the state when a runtime upgrade occurred.
-pub struct Update {
-    runtime_version: RuntimeVersion,
-    metadata: Metadata,
+/// This represents an online client at a specific block.
+#[doc(hidden)]
+pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT<T> {
+    /// Return the RPC methods we'll use to interact with the node.
+    fn backend(&self) -> &dyn Backend<T>;
+    /// Return the block hash for the current block.
+    fn block_hash(&self) -> HashFor<T>;
+    /// Point at a new block.
+    fn at_block(
+        &self,
+        number_or_hash: BlockNumberOrRef<T>,
+    ) -> impl Future<Output = Result<ClientAtBlock<T, Self>, OnlineClientAtBlockError>>;
 }
 
-impl Update {
-    /// Get the runtime version.
-    pub fn runtime_version(&self) -> &RuntimeVersion {
-        &self.runtime_version
-    }
+/// The inner type providing the necessary data to work online at a specific block.
+#[derive(Clone)]
+pub struct OnlineClientAtBlock<T: Config> {
+    client: OnlineClient<T>,
+    metadata: ArcMetadata,
+    hasher: T::Hasher,
+    block_ref: BlockRef<HashFor<T>>,
+    block_number: u64,
+    spec_version: u32,
+    transaction_version: u32,
+}
 
-    /// Get the metadata.
-    pub fn metadata(&self) -> &Metadata {
+impl<T: Config> OnlineClientAtBlockT<T> for OnlineClientAtBlock<T> {
+    fn backend(&self) -> &dyn Backend<T> {
+        &*self.client.inner.backend
+    }
+    fn block_hash(&self) -> HashFor<T> {
+        self.block_ref.hash()
+    }
+    async fn at_block(
+        &self,
+        number_or_hash: BlockNumberOrRef<T>,
+    ) -> Result<ClientAtBlock<T, Self>, OnlineClientAtBlockError> {
+        self.client.at_block(number_or_hash).await
+    }
+}
+
+impl<T: Config> OfflineClientAtBlockT<T> for OnlineClientAtBlock<T> {
+    fn metadata_ref(&self) -> &Metadata {
         &self.metadata
     }
+    fn metadata(&self) -> ArcMetadata {
+        self.metadata.clone()
+    }
+    fn block_number(&self) -> u64 {
+        self.block_number
+    }
+    fn genesis_hash(&self) -> Option<HashFor<T>> {
+        Some(self.client.inner.genesis_hash)
+    }
+    fn spec_version(&self) -> u32 {
+        self.spec_version
+    }
+    fn transaction_version(&self) -> u32 {
+        self.transaction_version
+    }
+    fn hasher(&self) -> &T::Hasher {
+        &self.hasher
+    }
 }
 
-/// Helper to wait until the runtime upgrade is applied on at finalized block.
-async fn wait_runtime_upgrade_in_finalized_block<T: Config>(
-    client: &OnlineClient<T>,
-    runtime_version: &RuntimeVersion,
-) -> Result<BlockRef<HashFor<T>>, RuntimeUpdaterError> {
-    let hasher = client
+fn get_legacy_types<'a, T: Config, Md: ToTypeRegistry>(
+    client: &'a OnlineClient<T>,
+    metadata: &Md,
+    spec_version: u32,
+) -> Result<TypeRegistrySet<'a>, OnlineClientAtBlockError> {
+    let mut types = client
         .inner
-        .read()
-        .expect("Lock shouldn't be poisoned")
-        .hasher;
+        .config
+        .legacy_types_for_spec_version(spec_version)
+        .ok_or(OnlineClientAtBlockError::MissingLegacyTypes)?;
 
-    let mut block_sub = client
-        .backend()
-        .stream_finalized_block_headers(hasher)
+    // Extend the types with information from the metadata (ie event/error/call enums):
+    let additional_types = frame_decode::helpers::type_registry_from_metadata(metadata)
+        .map_err(|e| OnlineClientAtBlockError::CannotInjectMetadataTypes { parse_error: e })?;
+    types.prepend(additional_types);
+
+    Ok(types)
+}
+
+async fn get_metadata<T: Config>(
+    backend: &dyn Backend<T>,
+    block_hash: HashFor<T>,
+) -> Result<RuntimeMetadata, OnlineClientAtBlockError> {
+    // First, try to use the "modern" metadata APIs to get the most recent version we can.
+    let version_to_get = backend
+        .call("Metadata_metadata_versions", None, block_hash)
         .await
-        .map_err(RuntimeUpdaterError::CannotStreamFinalizedBlocks)?;
+        .ok()
+        .and_then(|res| <Vec<u32>>::decode(&mut &res[..]).ok())
+        .and_then(|versions| {
+            // We want to filter out the "unstable" version, which is represented by u32::MAX.
+            versions.into_iter().filter(|v| *v != u32::MAX).max()
+        });
 
-    let block_ref = loop {
-        let (_, block_ref) = block_sub
-            .next()
+    // We had success calling the above API, so we expect the "modern" metadata API to work.
+    if let Some(version_to_get) = version_to_get {
+        let version_bytes = version_to_get.encode();
+        let rpc_response = backend
+            .call(
+                "Metadata_metadata_at_version",
+                Some(&version_bytes),
+                block_hash,
+            )
             .await
-            .ok_or(RuntimeUpdaterError::UnexpectedEndOfBlockStream)?
-            .map_err(RuntimeUpdaterError::CannotGetNextFinalizedBlock)?;
+            .map_err(|e| OnlineClientAtBlockError::CannotGetMetadata {
+                block_hash: block_hash.into(),
+                reason: format!("Error calling Metadata_metadata_at_version: {e}"),
+            })?;
 
-        let addr =
-            crate::dynamic::storage::<(), scale_value::Value>("System", "LastRuntimeUpgrade");
+        // Option because we may have asked for a version that doesn't exist. Compact because we get back a Vec<u8>
+        // of the metadata bytes, and the Vec is preceded by it's compact encoded length. The actual bytes are then
+        // decoded as a `RuntimeMetadataPrefixed`, after this.
+        let (_, metadata) = <Option<(Compact<u32>, RuntimeMetadataPrefixed)>>::decode(&mut &rpc_response[..])
+            .map_err(|e| OnlineClientAtBlockError::CannotGetMetadata {
+                block_hash: block_hash.into(),
+                reason: format!("Error decoding response for Metadata_metadata_at_version: {e}"),
+            })?
+            .ok_or_else(|| OnlineClientAtBlockError::CannotGetMetadata {
+                block_hash: block_hash.into(),
+                reason: format!("No metadata returned for the latest version from Metadata_metadata_versions ({version_to_get})"),
+            })?;
 
-        let client_at = client.storage().at(block_ref.hash());
-        let value = client_at
-            .entry(addr)
-            // The storage `system::lastRuntimeUpgrade` should always exist.
-            // <https://github.com/paritytech/polkadot-sdk/blob/master/substrate/frame/system/src/lib.rs#L958>
-            .map_err(|_| RuntimeUpdaterError::CantFindSystemLastRuntimeUpgrade)?
-            .fetch(())
-            .await
-            .map_err(RuntimeUpdaterError::CantFetchLastRuntimeUpgrade)?
-            .decode_as::<LastRuntimeUpgrade>()
-            .map_err(RuntimeUpdaterError::CannotDecodeLastRuntimeUpgrade)?;
+        return Ok(metadata.1);
+    }
 
-        #[derive(scale_decode::DecodeAsType)]
-        struct LastRuntimeUpgrade {
-            spec_version: u32,
-        }
+    // We didn't get a version from Metadata_metadata_versions, so fall back to the "old" API.
+    let metadata_bytes = backend
+        .call("Metadata_metadata", None, block_hash)
+        .await
+        .map_err(|e| OnlineClientAtBlockError::CannotGetMetadata {
+            block_hash: block_hash.into(),
+            reason: format!("Error calling Metadata_metadata: {e}"),
+        })?;
 
-        // We are waiting for the chain to have the same spec version
-        // as sent out via the runtime subscription.
-        if value.spec_version == runtime_version.spec_version {
-            break block_ref;
-        }
-    };
+    let (_, metadata) = <(Compact<u32>, RuntimeMetadataPrefixed)>::decode(&mut &metadata_bytes[..])
+        .map_err(|e| OnlineClientAtBlockError::CannotGetMetadata {
+            block_hash: block_hash.into(),
+            reason: format!("Error decoding response for Metadata_metadata: {e}"),
+        })?;
 
-    Ok(block_ref)
+    Ok(metadata.1)
 }

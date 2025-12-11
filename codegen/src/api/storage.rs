@@ -19,7 +19,7 @@ use scale_typegen::typegen::ir::ToTokensWithSettings;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the storage items are generated.
-/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt` crate is located, e.g. `::subxt` when using subxt as a dependency.
 pub fn generate_storage(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,

@@ -309,10 +309,10 @@ pub mod dev {
 #[cfg(feature = "subxt")]
 mod subxt_compat {
     use super::*;
-    use subxt_core::config::Config;
-    use subxt_core::tx::signer::Signer as SignerT;
-    use subxt_core::utils::AccountId20;
-    use subxt_core::utils::MultiAddress;
+    use subxt::config::Config;
+    use subxt::transactions::Signer as SignerT;
+    use subxt::utils::AccountId20;
+    use subxt::utils::MultiAddress;
 
     impl<T: Config> SignerT<T> for Keypair
     where
@@ -365,21 +365,22 @@ mod test {
     use bip39::Mnemonic;
     use proptest::prelude::*;
     use secp256k1::Secp256k1;
-    use subxt_core::utils::AccountId20;
-
-    use subxt_core::{config::*, tx::signer::Signer as SignerT};
+    use subxt::utils::AccountId20;
+    use subxt::transactions::Signer as SignerT;
+    use subxt::config::{Config, HashFor, substrate};
 
     use super::*;
 
-    enum StubEthRuntimeConfig {}
+    #[derive(Debug, Clone)]
+    struct StubEthRuntimeConfig;
 
     impl Config for StubEthRuntimeConfig {
         type AccountId = AccountId20;
         type Address = AccountId20;
         type Signature = Signature;
         type Hasher = substrate::BlakeTwo256;
-        type Header = substrate::SubstrateHeader<u32, substrate::BlakeTwo256>;
-        type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
+        type Header = substrate::SubstrateHeader<HashFor<Self>>;
+        type ExtrinsicParams = substrate::SubstrateExtrinsicParams<Self>;
         type AssetId = u32;
     }
 

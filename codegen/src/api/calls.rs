@@ -17,7 +17,7 @@ use subxt_metadata::PalletMetadata;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the calls are generated.
-/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt` crate is located, e.g. `::subxt` when using subxt as a dependency.
 pub fn generate_calls(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -81,9 +81,9 @@ pub fn generate_calls(
                 #struct_def
                 #alias_mod
 
-                impl #crate_path::blocks::StaticExtrinsic for #struct_name {
-                    const PALLET: &'static str = #pallet_name;
-                    const CALL: &'static str = #call_name;
+                impl #crate_path::extrinsics::DecodeAsExtrinsic for #struct_name {
+                    const PALLET_NAME: &'static str = #pallet_name;
+                    const CALL_NAME: &'static str = #call_name;
                 }
             };
 
@@ -92,8 +92,8 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> #crate_path::tx::payload::StaticPayload<types::#struct_name> {
-                    #crate_path::tx::payload::StaticPayload::new_static(
+                ) -> #crate_path::transactions::payload::StaticPayload<types::#struct_name> {
+                    #crate_path::transactions::payload::StaticPayload::new_static(
                         #pallet_name,
                         #call_name,
                         types::#struct_name { #( #call_args, )* },

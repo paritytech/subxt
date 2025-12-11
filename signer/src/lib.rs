@@ -13,7 +13,6 @@
 //! Enable the `subxt` feature to enable use of this [`sr25519::Keypair`] in signing
 //! subxt transactions for chains supporting sr25519 signatures.
 
-#![cfg_attr(docsrs, feature(doc_cfg))]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 extern crate alloc;
@@ -24,22 +23,18 @@ mod crypto;
 
 // An sr25519 key pair implementation.
 #[cfg(feature = "sr25519")]
-#[cfg_attr(docsrs, doc(cfg(feature = "sr25519")))]
 pub mod sr25519;
 
 // An ecdsa key pair implementation.
 #[cfg(feature = "ecdsa")]
-#[cfg_attr(docsrs, doc(cfg(feature = "ecdsa")))]
 pub mod ecdsa;
 
 // An ethereum signer implementation.
 #[cfg(feature = "unstable-eth")]
-#[cfg_attr(docsrs, doc(cfg(feature = "unstable-eth")))]
 pub mod eth;
 
 /// A polkadot-js account json loader.
 #[cfg(feature = "polkadot-js-compat")]
-#[cfg_attr(docsrs, doc(cfg(feature = "polkadot-js-compat")))]
 pub mod polkadot_js_compat;
 
 // Re-export useful bits and pieces for generating a Pair from a phrase,
