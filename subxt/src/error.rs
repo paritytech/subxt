@@ -40,6 +40,8 @@ pub enum Error {
     #[error(transparent)]
     ExtrinsicDecodeErrorAt(#[from] ExtrinsicDecodeErrorAt),
     #[error(transparent)]
+    BlockError(#[from] BlockError),
+    #[error(transparent)]
     ConstantError(#[from] ConstantError),
     #[error(transparent)]
     CustomValueError(#[from] CustomValueError),
@@ -147,6 +149,7 @@ impl Error {
             Error::OnlineClientError(e) => e.backend_error(),
             Error::RuntimeApiError(e) => e.backend_error(),
             Error::EventsError(e) => e.backend_error(),
+            Error::BlockError(e) => e.backend_error(),
             Error::ExtrinsicError(e) => e.backend_error(),
             Error::ViewFunctionError(e) => e.backend_error(),
             Error::TransactionProgressError(e) => e.backend_error(),
@@ -379,6 +382,28 @@ impl OnlineClientAtBlockError {
             | OnlineClientAtBlockError::CannotGetBlockHash { reason, .. }
             | OnlineClientAtBlockError::CannotGetBlockHeader { reason, .. }
             | OnlineClientAtBlockError::CannotGetSpecVersion { reason, .. } => Some(reason),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+#[allow(missing_docs)]
+pub enum BlockError {
+    #[error("Could not find the block with hash {block_hash}")]
+    BlockNotFound { block_hash: Hex },
+    #[error("Could not download the block header with hash {block_hash}: {reason}")]
+    CouldNotDownloadBlockHeader {
+        block_hash: Hex,
+        reason: BackendError,
+    },
+}
+
+impl BlockError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        match self {
+            BlockError::CouldNotDownloadBlockHeader { reason, .. } => Some(reason),
             _ => None,
         }
     }

@@ -4,6 +4,7 @@ mod online_client;
 use crate::config::{Config, HashFor};
 use crate::constants::ConstantsClient;
 use crate::custom_values::CustomValuesClient;
+use crate::error::BlockError;
 use crate::events::EventsClient;
 use crate::extrinsics::ExtrinsicsClient;
 use crate::runtime_apis::RuntimeApisClient;
@@ -104,5 +105,23 @@ where
     /// The current block hash.
     pub fn block_hash(&self) -> HashFor<T> {
         self.client.block_hash()
+    }
+
+    /// The header for this block.
+    pub async fn block_header(&self) -> Result<T::Header, BlockError> {
+        let block_hash = self.block_hash();
+        let header = self
+            .client
+            .backend()
+            .block_header(block_hash)
+            .await
+            .map_err(|e| BlockError::CouldNotDownloadBlockHeader {
+                block_hash: block_hash.into(),
+                reason: e,
+            })?
+            .ok_or_else(|| BlockError::BlockNotFound {
+                block_hash: block_hash.into(),
+            })?;
+        Ok(header)
     }
 }
