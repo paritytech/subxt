@@ -16,8 +16,6 @@
 //! The provided RPC client implementations can be used natively (with the default `native` feature
 //! flag) or in WASM based web apps (with the `web` feature flag).
 
-#![cfg_attr(docsrs, feature(doc_cfg))]
-
 #[cfg(any(
     all(feature = "web", feature = "native"),
     not(any(feature = "web", feature = "native"))
@@ -61,23 +59,6 @@ impl<T> Hash for T where T: serde::de::DeserializeOwned + serde::Serialize {}
 /// A trait which is applied to any type that is a valid Account ID.
 pub trait AccountId: serde::Serialize {}
 impl<T> AccountId for T where T: serde::Serialize {}
-
-// When the subxt feature is enabled, ensure that any valid `subxt::Config`
-// is also a valid `RpcConfig`.
-#[cfg(feature = "subxt")]
-mod impl_config {
-    use super::*;
-    use subxt_core::config::HashFor;
-
-    impl<T> RpcConfig for T
-    where
-        T: subxt_core::Config,
-    {
-        type Header = T::Header;
-        type Hash = HashFor<T>;
-        type AccountId = T::AccountId;
-    }
-}
 
 /// This encapsulates any errors that could be emitted in this crate.
 #[derive(Debug, thiserror::Error)]

@@ -1,0 +1,31 @@
+[package]
+name = "subxt-utils-accountid32"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish = true
+autotests = false
+
+license.workspace = true
+repository.workspace = true
+documentation.workspace = true
+homepage.workspace = true
+description = "Subxt's AccountId32 representation"
+
+[dependencies]
+codec = { workspace = true }
+serde = { workspace = true, features = ["alloc"] }
+thiserror = { workspace = true }
+base58 = { workspace = true }
+scale-encode = { workspace = true, features = ["default"] }
+scale-decode = { workspace = true, features = ["default"] }
+scale-info = { workspace = true, features = ["derive"] }
+blake2 = { workspace = true }
+
+[dev-dependencies]
+sp-core = { workspace = true }
+sp-keyring = { workspace = true }
+
+[lints]
+workspace = true

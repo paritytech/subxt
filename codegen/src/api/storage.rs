@@ -19,7 +19,7 @@ use scale_typegen::typegen::ir::ToTokensWithSettings;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the storage items are generated.
-/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt` crate is located, e.g. `::subxt` when using subxt as a dependency.
 pub fn generate_storage(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -153,12 +153,12 @@ fn generate_storage_entry_fns(
 
     let storage_entry_method = quote!(
         #docs
-        pub fn #storage_entry_snake_case_ident(&self) -> #crate_path::storage::address::StaticAddress<
+        pub fn #storage_entry_snake_case_ident(&self) -> #crate_path::storage::StaticAddress<
             (#(#storage_key_tuple_types,)*),
             #storage_entry_snake_case_ident::output::Output,
             #is_plain
         > {
-            #crate_path::storage::address::StaticAddress::new_static(
+            #crate_path::storage::StaticAddress::new_static(
                 #pallet_name,
                 #storage_entry_name_str,
                 [#(#validation_hash,)*],

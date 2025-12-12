@@ -232,9 +232,10 @@ impl<T: Display> Indent for T {}
 pub async fn create_client(
     file_or_url: &FileOrUrl,
 ) -> color_eyre::Result<OnlineClient<PolkadotConfig>> {
+    let config = PolkadotConfig::new();
     let client = match &file_or_url.url {
-        Some(url) => OnlineClient::<PolkadotConfig>::from_url(url).await?,
-        None => OnlineClient::<PolkadotConfig>::new().await?,
+        Some(url) => OnlineClient::<PolkadotConfig>::from_url(config, url).await?,
+        None => OnlineClient::<PolkadotConfig>::new(config).await?,
     };
     Ok(client)
 }
@@ -326,7 +327,7 @@ pub fn validate_url_security(url: Option<&Url>, allow_insecure: bool) -> color_e
     let Some(url) = url else {
         return Ok(());
     };
-    match subxt::utils::url_is_secure(url.as_str()) {
+    match subxt::ext::subxt_rpcs::utils::url_is_secure(url.as_str()) {
         Ok(is_secure) => {
             if !allow_insecure && !is_secure {
                 bail!(

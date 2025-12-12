@@ -1,89 +1,24 @@
-//! RPC utils.
+//! Backend utils.
 
 use super::{StreamOf, StreamOfResults};
 use crate::error::BackendError;
-use futures::future::BoxFuture;
 use futures::{FutureExt, Stream, StreamExt};
 use std::{future::Future, pin::Pin, task::Poll};
 
-/// Resubscribe callback.
-type ResubscribeGetter<T> = Box<dyn FnMut() -> ResubscribeFuture<T> + Send>;
-
-/// Future that resolves to a subscription stream.
-type ResubscribeFuture<T> =
-    Pin<Box<dyn Future<Output = Result<StreamOfResults<T>, BackendError>> + Send>>;
-
-pub(crate) enum PendingOrStream<T> {
-    Pending(BoxFuture<'static, Result<StreamOfResults<T>, BackendError>>),
-    Stream(StreamOfResults<T>),
-}
-
-impl<T> std::fmt::Debug for PendingOrStream<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            PendingOrStream::Pending(_) => write!(f, "Pending"),
-            PendingOrStream::Stream(_) => write!(f, "Stream"),
-        }
-    }
-}
-
-/// Retry subscription.
-struct RetrySubscription<T> {
-    resubscribe: ResubscribeGetter<T>,
-    state: Option<PendingOrStream<T>>,
-}
-
-impl<T> std::marker::Unpin for RetrySubscription<T> {}
-
-impl<T> Stream for RetrySubscription<T> {
-    type Item = Result<T, BackendError>;
-
-    fn poll_next(
-        mut self: Pin<&mut Self>,
-        cx: &mut std::task::Context<'_>,
-    ) -> Poll<Option<Self::Item>> {
-        loop {
-            let Some(mut this) = self.state.take() else {
-                return Poll::Ready(None);
-            };
-
-            match this {
-                PendingOrStream::Stream(ref mut s) => match s.poll_next_unpin(cx) {
-                    Poll::Ready(Some(Err(err))) => {
-                        if err.is_disconnected_will_reconnect() {
-                            self.state = Some(PendingOrStream::Pending((self.resubscribe)()));
-                        }
-                        return Poll::Ready(Some(Err(err)));
-                    }
-                    Poll::Ready(None) => return Poll::Ready(None),
-                    Poll::Ready(Some(Ok(val))) => {
-                        self.state = Some(this);
-                        return Poll::Ready(Some(Ok(val)));
-                    }
-                    Poll::Pending => {
-                        self.state = Some(this);
-                        return Poll::Pending;
-                    }
-                },
-                PendingOrStream::Pending(mut fut) => match fut.poll_unpin(cx) {
-                    Poll::Ready(Ok(stream)) => {
-                        self.state = Some(PendingOrStream::Stream(stream));
-                        continue;
-                    }
-                    Poll::Ready(Err(err)) => {
-                        if err.is_disconnected_will_reconnect() {
-                            self.state = Some(PendingOrStream::Pending((self.resubscribe)()));
-                        }
-                        return Poll::Ready(Some(Err(err)));
-                    }
-                    Poll::Pending => {
-                        self.state = Some(PendingOrStream::Pending(fut));
-                        return Poll::Pending;
-                    }
-                },
-            };
-        }
-    }
+/// Spawn a task.
+///
+/// - On non-wasm targets, this will spawn a task via [`tokio::spawn`].
+/// - On wasm targets, this will spawn a task via [`wasm_bindgen_futures::spawn_local`].
+#[cfg(feature = "runtime")]
+pub(crate) fn spawn<F: std::future::Future + Send + 'static>(future: F) {
+    #[cfg(not(target_family = "wasm"))]
+    tokio::spawn(async move {
+        future.await;
+    });
+    #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+    wasm_bindgen_futures::spawn_local(async move {
+        future.await;
+    });
 }
 
 /// Retry a future until it doesn't return a disconnected error.
@@ -164,23 +99,93 @@ where
 ///    }).await;
 /// }
 /// ```
-pub async fn retry_stream<F, R>(sub_stream: F) -> Result<StreamOfResults<R>, BackendError>
+pub async fn retry_stream<F, Fut, R>(get_stream: F) -> Result<StreamOfResults<R>, BackendError>
 where
-    F: FnMut() -> ResubscribeFuture<R> + Send + 'static + Clone,
+    F: Clone + Send + 'static + FnMut() -> Fut,
+    Fut: Future<Output = Result<StreamOfResults<R>, BackendError>> + Send,
     R: Send + 'static,
 {
-    let stream = retry(sub_stream.clone()).await?;
-
-    let resubscribe = Box::new(move || {
-        let sub_stream = sub_stream.clone();
-        async move { retry(sub_stream).await }.boxed()
-    });
+    // This returns the stream. On disconnect this is called again.
+    let get_stream_with_retry = move || {
+        let get_stream = get_stream.clone();
+        async move { retry(get_stream).await }.boxed()
+    };
 
     // The extra Box is to encapsulate the retry subscription type
     Ok(StreamOf::new(Box::pin(RetrySubscription {
-        state: Some(PendingOrStream::Stream(stream)),
-        resubscribe,
+        state: RetrySubscriptionState::Init,
+        resubscribe: get_stream_with_retry,
     })))
+}
+
+/// Retry subscription.
+struct RetrySubscription<F, R, T> {
+    resubscribe: F,
+    state: RetrySubscriptionState<R, T>,
+}
+
+enum RetrySubscriptionState<R, T> {
+    Init,
+    Pending(R),
+    Stream(StreamOfResults<T>),
+    Done,
+}
+
+impl<F, R, T> std::marker::Unpin for RetrySubscription<F, R, T> {}
+
+impl<F, R, T> Stream for RetrySubscription<F, R, T>
+where
+    F: FnMut() -> R,
+    R: Future<Output = Result<StreamOfResults<T>, BackendError>> + Unpin,
+{
+    type Item = Result<T, BackendError>;
+
+    fn poll_next(
+        mut self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> Poll<Option<Self::Item>> {
+        loop {
+            match &mut self.state {
+                RetrySubscriptionState::Init => {
+                    self.state = RetrySubscriptionState::Pending((self.resubscribe)());
+                }
+                RetrySubscriptionState::Stream(s) => match s.poll_next_unpin(cx) {
+                    Poll::Ready(Some(Err(err))) => {
+                        if err.is_disconnected_will_reconnect() {
+                            self.state = RetrySubscriptionState::Init;
+                        }
+                        return Poll::Ready(Some(Err(err)));
+                    }
+                    Poll::Ready(None) => {
+                        self.state = RetrySubscriptionState::Done;
+                        return Poll::Ready(None);
+                    }
+                    Poll::Ready(Some(Ok(val))) => {
+                        return Poll::Ready(Some(Ok(val)));
+                    }
+                    Poll::Pending => {
+                        return Poll::Pending;
+                    }
+                },
+                RetrySubscriptionState::Pending(fut) => match fut.poll_unpin(cx) {
+                    Poll::Ready(Err(err)) => {
+                        if err.is_disconnected_will_reconnect() {
+                            self.state = RetrySubscriptionState::Init;
+                        }
+                        return Poll::Ready(Some(Err(err)));
+                    }
+                    Poll::Ready(Ok(stream)) => {
+                        self.state = RetrySubscriptionState::Stream(stream);
+                        continue;
+                    }
+                    Poll::Pending => {
+                        return Poll::Pending;
+                    }
+                },
+                RetrySubscriptionState::Done => return Poll::Ready(None),
+            };
+        }
+    }
 }
 
 #[cfg(test)]
@@ -193,7 +198,7 @@ mod tests {
     }
 
     fn custom_err() -> BackendError {
-        BackendError::Other(String::new())
+        BackendError::other("")
     }
 
     #[tokio::test]
@@ -233,7 +238,7 @@ mod tests {
         });
 
         let retry_stream = RetrySubscription {
-            state: Some(PendingOrStream::Stream(StreamOf::new(Box::pin(stream)))),
+            state: RetrySubscriptionState::Stream(StreamOf::new(Box::pin(stream))),
             resubscribe,
         };
 
@@ -250,7 +255,7 @@ mod tests {
         let resubscribe = Box::new(|| async move { Err(custom_err()) }.boxed());
 
         let retry_stream = RetrySubscription {
-            state: Some(PendingOrStream::Stream(StreamOf::new(Box::pin(stream)))),
+            state: RetrySubscriptionState::Stream(StreamOf::new(Box::pin(stream))),
             resubscribe,
         };
 
@@ -263,7 +268,7 @@ mod tests {
         let resubscribe = Box::new(|| async move { Err(custom_err()) }.boxed());
 
         let retry_stream = RetrySubscription {
-            state: Some(PendingOrStream::Stream(StreamOf::new(Box::pin(stream)))),
+            state: RetrySubscriptionState::Stream(StreamOf::new(Box::pin(stream))),
             resubscribe,
         };
 

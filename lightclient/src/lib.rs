@@ -6,7 +6,6 @@
 //! to Substrate based chains.
 
 #![deny(missing_docs)]
-#![cfg_attr(docsrs, feature(doc_cfg))]
 
 #[cfg(any(
     all(feature = "web", feature = "native"),

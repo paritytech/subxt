@@ -25,6 +25,7 @@ mod utils;
 use alloc::borrow::Cow;
 use alloc::collections::BTreeMap;
 use alloc::string::{String, ToString};
+use alloc::sync::Arc;
 use alloc::vec::Vec;
 use frame_decode::constants::{ConstantEntry, ConstantInfo, ConstantInfoError};
 use frame_decode::custom_values::{CustomValue, CustomValueInfo, CustomValueInfoError};
@@ -57,6 +58,9 @@ pub use utils::validation::MetadataHasher;
 pub use from::legacy::Error as LegacyFromError;
 
 type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;
+
+/// Metadata is often passed around wrapped in an [`Arc`] so that it can be cheaply cloned.
+pub type ArcMetadata = Arc<Metadata>;
 
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
 /// which is then decoded into this. We aim to preserve all of the existing information in
@@ -192,6 +196,7 @@ impl frame_decode::storage::StorageTypeInfo for Metadata {
                 .default_value
                 .as_ref()
                 .map(|def| Cow::Borrowed(&**def)),
+            use_old_v9_storage_hashers: false,
         };
 
         Ok(info)
@@ -369,6 +374,12 @@ impl frame_decode::custom_values::CustomValueEntryInfo for Metadata {
 }
 
 impl Metadata {
+    /// Metadata tends to be passed around wrapped in an [`Arc`] so that it can be
+    /// cheaply cloned. This is a shorthand to return that.
+    pub fn arc(self) -> ArcMetadata {
+        Arc::new(self)
+    }
+
     /// This is essentially an alias for `<Metadata as codec::Decode>::decode(&mut bytes)`
     pub fn decode_from(mut bytes: &[u8]) -> Result<Self, codec::Error> {
         <Self as codec::Decode>::decode(&mut bytes)

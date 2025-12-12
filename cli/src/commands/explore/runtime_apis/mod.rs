@@ -172,9 +172,9 @@ pub async fn run<'a>(
         subxt::dynamic::runtime_api_call::<_, Value>(api_name, method.name(), args_data);
     let client = create_client(&file_or_url).await?;
     let output_value = client
-        .runtime_api()
-        .at_latest()
+        .at_current_block()
         .await?
+        .runtime_apis()
         .call(method_call)
         .await?;
 

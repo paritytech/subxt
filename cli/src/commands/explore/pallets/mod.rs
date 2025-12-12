@@ -1,7 +1,7 @@
 use clap::Subcommand;
 
 use indoc::writedoc;
-use subxt::Metadata;
+use subxt::ArcMetadata;
 use subxt_metadata::PalletMetadata;
 
 use crate::utils::{FileOrUrl, Indent, first_paragraph_of_docs};
@@ -33,7 +33,7 @@ pub enum PalletSubcommand {
 pub async fn run<'a>(
     subcommand: Option<PalletSubcommand>,
     pallet_metadata: PalletMetadata<'a>,
-    metadata: &'a Metadata,
+    metadata: ArcMetadata,
     file_or_url: FileOrUrl,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {

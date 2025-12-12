@@ -7,7 +7,6 @@
 //! be used directly if preferable.
 
 #![deny(missing_docs)]
-#![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod api;
 pub mod error;
@@ -71,7 +70,7 @@ pub struct CodegenBuilder {
 impl Default for CodegenBuilder {
     fn default() -> Self {
         CodegenBuilder {
-            crate_path: syn::parse_quote!(::subxt::ext::subxt_core),
+            crate_path: syn::parse_quote!(::subxt),
             use_default_derives: true,
             use_default_substitutions: true,
             generate_docs: true,
@@ -216,7 +215,7 @@ impl CodegenBuilder {
         self.item_mod = item_mod;
     }
 
-    /// Set the path to the `subxt` crate. By default, we expect it to be at `::subxt::ext::subxt_core`.
+    /// Set the path to the `subxt` crate. By default, we expect it to be at `::subxt`.
     ///
     /// # Panics
     ///
@@ -232,9 +231,9 @@ impl CodegenBuilder {
         self.crate_path = crate_path;
     }
 
-    /// Generate an interface, assuming that the default path to the `subxt` crate is `::subxt::ext::subxt_core`.
+    /// Generate an interface, assuming that the default path to the `subxt` crate is `::subxt`.
     /// If the `subxt` crate is not available as a top level dependency, use `generate` and provide
-    /// a valid path to the `subxt¦ crate.
+    /// a valid path to the `subxt` crate.
     pub fn generate(self, metadata: Metadata) -> Result<TokenStream2, CodegenError> {
         let crate_path = self.crate_path;
 
@@ -300,7 +299,7 @@ impl CodegenBuilder {
 /// The default [`scale_typegen::TypeGeneratorSettings`], subxt is using for generating code.
 /// Useful for emulating subxt's code generation settings from e.g. subxt-explorer.
 pub fn default_subxt_type_gen_settings() -> TypeGeneratorSettings {
-    let crate_path: syn::Path = parse_quote!(::subxt::ext::subxt_core);
+    let crate_path: syn::Path = parse_quote!(::subxt);
     let derives = default_derives(&crate_path);
     let substitutes = default_substitutes(&crate_path);
     subxt_type_gen_settings(derives, substitutes, &crate_path, true)

@@ -4,7 +4,7 @@
 
 use super::ChainHeadRpcMethods;
 use super::follow_stream::FollowStream;
-use crate::config::{Config, Hash, HashFor};
+use crate::config::{Config, Hash, HashFor, RpcConfigFor};
 use crate::error::BackendError;
 use futures::stream::{FuturesUnordered, Stream, StreamExt};
 use subxt_rpcs::methods::chain_head::{
@@ -275,7 +275,7 @@ impl<H: Hash> FollowStreamUnpin<H> {
     /// Create a new [`FollowStreamUnpin`] given the RPC methods.
     pub fn from_methods<T: Config>(
         follow_stream: FollowStream<HashFor<T>>,
-        methods: ChainHeadRpcMethods<T>,
+        methods: ChainHeadRpcMethods<RpcConfigFor<T>>,
         max_block_life: usize,
     ) -> FollowStreamUnpin<HashFor<T>> {
         let unpin_method = Box::new(move |hash: HashFor<T>, sub_id: Arc<str>| {
@@ -567,7 +567,7 @@ mod test {
                     Ok(ev_new_block(0, 1)),
                     Ok(ev_new_block(1, 2)),
                     Ok(ev_new_block(2, 3)),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             10,
@@ -593,7 +593,7 @@ mod test {
                 [
                     Ok(ev_initialized(0)),
                     Ok(ev_finalized([1], [])),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             3,
@@ -624,7 +624,7 @@ mod test {
                     Ok(ev_finalized([3], [])),
                     Ok(ev_finalized([4], [])),
                     Ok(ev_finalized([5], [])),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             3,
@@ -663,7 +663,7 @@ mod test {
                     Ok(ev_new_block(1, 2)),
                     Ok(ev_finalized([1], [])),
                     Ok(ev_finalized([2], [])),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             10,
@@ -711,7 +711,7 @@ mod test {
                     Ok(ev_finalized([1], [])),
                     Ok(ev_finalized([2], [3])),
                     Ok(ev_finalized([4], [])),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             10,
@@ -771,7 +771,7 @@ mod test {
                     Ok(ev_best_block(1)),
                     Ok(ev_finalized([1], [])),
                     Ok(ev_finalized([2], [])),
-                    Err(BackendError::Other("ended".to_owned())),
+                    Err(BackendError::other("ended")),
                 ]
             },
             10,

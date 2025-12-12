@@ -2,7 +2,7 @@ use clap::Args;
 use color_eyre::eyre::eyre;
 use indoc::{formatdoc, writedoc};
 use scale_info::{Variant, form::PortableForm};
-use subxt::metadata::{Metadata, PalletMetadata};
+use subxt::metadata::{ArcMetadata, PalletMetadata};
 
 use crate::utils::{Indent, fields_description, first_paragraph_of_docs};
 
@@ -14,7 +14,7 @@ pub struct EventsSubcommand {
 pub fn explore_events(
     command: EventsSubcommand,
     pallet_metadata: PalletMetadata,
-    metadata: &Metadata,
+    metadata: ArcMetadata,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();

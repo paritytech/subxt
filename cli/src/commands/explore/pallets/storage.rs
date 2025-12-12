@@ -5,7 +5,7 @@ use scale_typegen_description::type_description;
 use scale_value::Value;
 use std::fmt::Write;
 use std::write;
-use subxt::metadata::{Metadata, PalletMetadata, StorageMetadata};
+use subxt::metadata::{ArcMetadata, PalletMetadata, StorageMetadata};
 
 use crate::utils::{
     FileOrUrl, Indent, SyntaxHighlight, create_client, first_paragraph_of_docs,
@@ -24,7 +24,7 @@ pub struct StorageSubcommand {
 pub async fn explore_storage(
     command: StorageSubcommand,
     pallet_metadata: PalletMetadata<'_>,
-    metadata: &Metadata,
+    metadata: ArcMetadata,
     file_or_url: FileOrUrl,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
@@ -197,9 +197,9 @@ pub async fn explore_storage(
 
     // Fetch the value:
     let storage_value = client
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await?
+        .storage()
         .fetch((pallet_name, storage.name()), storage_entry_keys)
         .await?
         .decode()?;
