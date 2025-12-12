@@ -1,3 +1,4 @@
+mod address;
 mod prefix_of;
 mod storage_entry;
 mod storage_key;
@@ -8,18 +9,17 @@ use crate::backend::BackendExt;
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::Config;
 use crate::error::StorageError;
-use address::Address;
 use core::marker::PhantomData;
 use frame_decode::helpers::Entry;
 use frame_decode::storage::StorageEntryInfo;
 use std::borrow::Cow;
 
+pub use address::{Address, DynamicAddress, StaticAddress, dynamic};
 pub use prefix_of::PrefixOf;
 pub use storage_entry::StorageEntry;
 pub use storage_key::{StorageKey, StorageKeyPart};
 pub use storage_key_value::StorageKeyValue;
 pub use storage_value::StorageValue;
-pub mod address;
 
 /// A client for working with storage entries.
 #[derive(Clone)]

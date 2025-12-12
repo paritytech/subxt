@@ -183,11 +183,11 @@ fn generate_runtime_api(
                 pub fn #method_name(
                     &self,
                     #(#input_args),*
-                ) -> #crate_path::runtime_apis::payload::StaticPayload<
+                ) -> #crate_path::runtime_apis::StaticPayload<
                     (#(#input_tuple_types,)*),
                     #method_name::output::Output
                 > {
-                    #crate_path::runtime_apis::payload::StaticPayload::new_static(
+                    #crate_path::runtime_apis::StaticPayload::new_static(
                         #trait_name_str,
                         #method_name_str,
                         (#(#input_param_names,)*),

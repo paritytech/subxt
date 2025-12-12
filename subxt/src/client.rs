@@ -14,12 +14,15 @@ use crate::view_functions::ViewFunctionsClient;
 use core::marker::PhantomData;
 use subxt_metadata::Metadata;
 
-pub use offline_client::{OfflineClient, OfflineClientAtBlock, OfflineClientAtBlockT};
+pub use offline_client::{OfflineClient, OfflineClientAtBlockImpl, OfflineClientAtBlockT};
 pub use online_client::{
-    BlockNumberOrRef, OnlineClient, OnlineClientAtBlock, OnlineClientAtBlockT,
+    BlockNumberOrRef, OnlineClient, OnlineClientAtBlockImpl, OnlineClientAtBlockT,
 };
 
-/// This represents a client at a specific block number.
+/// This represents a client at a specific block number. This wraps a client impl
+/// which will either be [`OfflineClientAtBlockImpl`] or [`OnlineClientAtBlockImpl`].
+/// Prefer to use the type aliases [`OfflineClientAtBlock`] and [`OnlineClientAtBlock`]
+/// if you need to refer to the concrete instances of this.
 #[derive(Clone, Debug)]
 pub struct ClientAtBlock<T, Client> {
     pub(crate) client: Client,
@@ -125,3 +128,9 @@ where
         Ok(header)
     }
 }
+
+/// An offline client at a specific block.
+pub type OfflineClientAtBlock<T> = ClientAtBlock<T, OfflineClientAtBlockImpl<T>>;
+
+/// An online client at a specific block.
+pub type OnlineClientAtBlock<T> = ClientAtBlock<T, OnlineClientAtBlockImpl<T>>;

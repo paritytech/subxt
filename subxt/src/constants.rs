@@ -1,12 +1,13 @@
+mod address;
+
 use crate::client::OfflineClientAtBlockT;
 use crate::config::Config;
 use crate::error::ConstantError;
-use address::Address;
 use frame_decode::constants::ConstantTypeInfo;
 use scale_decode::IntoVisitor;
 use std::marker::PhantomData;
 
-pub mod address;
+pub use address::{Address, DynamicAddress, StaticAddress, dynamic};
 
 /// A client for working with storage entries.
 #[derive(Clone)]

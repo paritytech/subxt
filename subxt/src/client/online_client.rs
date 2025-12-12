@@ -65,10 +65,7 @@ impl<T: Config> OnlineClient<T> {
         url: impl AsRef<str>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
         let url_str = url.as_ref();
-        let url = url::Url::parse(url_str).map_err(|_| OnlineClientError::InvalidUrl {
-            url: url_str.to_string(),
-        })?;
-        if !Self::is_url_secure(&url) {
+        if !subxt_rpcs::utils::url_is_secure(url_str).map_err(OnlineClientError::RpcError)? {
             return Err(OnlineClientError::RpcError(subxt_rpcs::Error::InsecureUrl(
                 url_str.to_string(),
             )));
@@ -86,16 +83,6 @@ impl<T: Config> OnlineClient<T> {
     ) -> Result<OnlineClient<T>, OnlineClientError> {
         let rpc_client = RpcClient::from_insecure_url(url).await?;
         OnlineClient::from_rpc_client(config, rpc_client).await
-    }
-
-    fn is_url_secure(url: &url::Url) -> bool {
-        let secure_scheme = url.scheme() == "https" || url.scheme() == "wss";
-        let is_localhost = url.host().is_some_and(|e| match e {
-            url::Host::Domain(e) => e == "localhost",
-            url::Host::Ipv4(e) => e.is_loopback(),
-            url::Host::Ipv6(e) => e.is_loopback(),
-        });
-        secure_scheme || is_localhost
     }
 
     /// Construct a new [`OnlineClient`] by providing an [`RpcClient`] to drive the connection.
@@ -210,7 +197,7 @@ impl<T: Config> OnlineClient<T> {
     /// This does not track new blocks.
     pub async fn at_current_block(
         &self,
-    ) -> Result<ClientAtBlock<T, OnlineClientAtBlock<T>>, OnlineClientAtBlockError> {
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
         let latest_block = self
             .inner
             .backend
@@ -225,7 +212,7 @@ impl<T: Config> OnlineClient<T> {
     pub async fn at_block(
         &self,
         number_or_hash: impl Into<BlockNumberOrRef<T>>,
-    ) -> Result<ClientAtBlock<T, OnlineClientAtBlock<T>>, OnlineClientAtBlockError> {
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
         let number_or_hash = number_or_hash.into();
 
         // We are given either a block hash or number. We need both.
@@ -274,7 +261,7 @@ impl<T: Config> OnlineClient<T> {
         &self,
         block_ref: impl Into<BlockRef<HashFor<T>>>,
         block_number: u64,
-    ) -> Result<ClientAtBlock<T, OnlineClientAtBlock<T>>, OnlineClientAtBlockError> {
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
         let block_ref = block_ref.into();
         let block_hash = block_ref.hash();
 
@@ -427,7 +414,7 @@ impl<T: Config> OnlineClient<T> {
             }
         };
 
-        let online_client_at_block = OnlineClientAtBlock {
+        let online_client_at_block = OnlineClientAtBlockImpl {
             client: self.clone(),
             hasher: <T::Hasher as Hasher>::new(&metadata),
             metadata,
@@ -458,9 +445,11 @@ pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT<T> {
     ) -> impl Future<Output = Result<ClientAtBlock<T, Self>, OnlineClientAtBlockError>>;
 }
 
-/// The inner type providing the necessary data to work online at a specific block.
+/// An implementation of the [`OnlineClientAtBlockImpl`] trait, which is used in conjunction
+/// with [`crate::client::ClientAtBlock`] to provide a working client. You won't tend to need this
+/// type and instead should prefer to refer to [`crate::client::OnlineClientAtBlock`].
 #[derive(Clone)]
-pub struct OnlineClientAtBlock<T: Config> {
+pub struct OnlineClientAtBlockImpl<T: Config> {
     client: OnlineClient<T>,
     metadata: ArcMetadata,
     hasher: T::Hasher,
@@ -470,7 +459,7 @@ pub struct OnlineClientAtBlock<T: Config> {
     transaction_version: u32,
 }
 
-impl<T: Config> OnlineClientAtBlockT<T> for OnlineClientAtBlock<T> {
+impl<T: Config> OnlineClientAtBlockT<T> for OnlineClientAtBlockImpl<T> {
     fn backend(&self) -> &dyn Backend<T> {
         &*self.client.inner.backend
     }
@@ -485,7 +474,7 @@ impl<T: Config> OnlineClientAtBlockT<T> for OnlineClientAtBlock<T> {
     }
 }
 
-impl<T: Config> OfflineClientAtBlockT<T> for OnlineClientAtBlock<T> {
+impl<T: Config> OfflineClientAtBlockT<T> for OnlineClientAtBlockImpl<T> {
     fn metadata_ref(&self) -> &Metadata {
         &self.metadata
     }

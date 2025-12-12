@@ -35,7 +35,7 @@ impl PolkadotConfigBuilder {
     /// Set the metadata to be used for decoding blocks at the given spec versions.
     pub fn set_metadata_for_spec_versions(
         mut self,
-        ranges: impl Iterator<Item = (u32, ArcMetadata)>,
+        ranges: impl IntoIterator<Item = (u32, ArcMetadata)>,
     ) -> Self {
         self = Self(self.0.set_metadata_for_spec_versions(ranges));
         self
@@ -45,7 +45,7 @@ impl PolkadotConfigBuilder {
     /// to this configuration.
     pub fn set_spec_version_for_block_ranges(
         mut self,
-        ranges: impl Iterator<Item = SpecVersionForRange>,
+        ranges: impl IntoIterator<Item = SpecVersionForRange>,
     ) -> Self {
         self = Self(self.0.set_spec_version_for_block_ranges(ranges));
         self

@@ -1,13 +1,14 @@
+mod address;
+
 use crate::client::OfflineClientAtBlockT;
 use crate::config::Config;
 use crate::error::CustomValueError;
 use crate::utils::Maybe;
-use address::Address;
 use derive_where::derive_where;
 use frame_decode::custom_values::CustomValueTypeInfo;
 use scale_decode::IntoVisitor;
 
-pub mod address;
+pub use address::{Address, DynamicAddress, StaticAddress, dynamic};
 
 /// A client for accessing custom values stored in the metadata.
 #[derive_where(Clone; Client)]

@@ -20,7 +20,7 @@ impl<T: Config> OfflineClient<T> {
     pub fn at_block(
         &self,
         block_number: impl Into<u64>,
-    ) -> Result<ClientAtBlock<T, OfflineClientAtBlock<T>>, OfflineClientAtBlockError> {
+    ) -> Result<ClientAtBlock<T, OfflineClientAtBlockImpl<T>>, OfflineClientAtBlockError> {
         let block_number = block_number.into();
         let (spec_version, transaction_version) = self
             .config
@@ -36,7 +36,7 @@ impl<T: Config> OfflineClient<T> {
 
         let hasher = <T::Hasher as Hasher>::new(&metadata);
 
-        let offline_client_at_block = OfflineClientAtBlock {
+        let offline_client_at_block = OfflineClientAtBlockImpl {
             metadata,
             block_number,
             genesis_hash,
@@ -49,8 +49,11 @@ impl<T: Config> OfflineClient<T> {
     }
 }
 
+/// An implementation of the [`OfflineClientAtBlockT`] trait, which is used in conjunction
+/// with [`crate::client::ClientAtBlock`] to provide a working client. You won't tend to need this
+/// type and instead should prefer to refer to [`crate::client::OfflineClientAtBlock`].
 #[derive(Clone)]
-pub struct OfflineClientAtBlock<T: Config> {
+pub struct OfflineClientAtBlockImpl<T: Config> {
     metadata: ArcMetadata,
     block_number: u64,
     genesis_hash: Option<HashFor<T>>,
@@ -81,7 +84,7 @@ pub trait OfflineClientAtBlockT<T: Config>: Clone {
     fn transaction_version(&self) -> u32;
 }
 
-impl<T: Config> OfflineClientAtBlockT<T> for OfflineClientAtBlock<T> {
+impl<T: Config> OfflineClientAtBlockT<T> for OfflineClientAtBlockImpl<T> {
     fn metadata_ref(&self) -> &Metadata {
         &self.metadata
     }

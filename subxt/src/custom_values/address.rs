@@ -4,12 +4,10 @@
 
 //! Construct addresses to access custom values with.
 
+use crate::utils::{Maybe, NoMaybe};
 use derive_where::derive_where;
 use scale_decode::DecodeAsType;
 use std::borrow::Cow;
-
-/// Use this with [`Address::IsDecodable`].
-pub use crate::utils::{Maybe, No, NoMaybe};
 
 /// This represents the address of a custom value in the metadata.
 /// Anything that implements it can be used to fetch custom values from the metadata.

@@ -365,9 +365,9 @@ mod test {
     use bip39::Mnemonic;
     use proptest::prelude::*;
     use secp256k1::Secp256k1;
-    use subxt::utils::AccountId20;
-    use subxt::transactions::Signer as SignerT;
     use subxt::config::{Config, HashFor, substrate};
+    use subxt::transactions::Signer as SignerT;
+    use subxt::utils::AccountId20;
 
     use super::*;
 

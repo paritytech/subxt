@@ -1,5 +1,5 @@
 use crate::backend::{BlockRef, StreamOfResults};
-use crate::client::{ClientAtBlock, OnlineClient, OnlineClientAtBlock};
+use crate::client::{ClientAtBlock, OnlineClient, OnlineClientAtBlockImpl};
 use crate::config::{Config, HashFor, Header};
 use crate::error::{BlocksError, OnlineClientAtBlockError};
 use futures::{Stream, StreamExt};
@@ -70,7 +70,7 @@ impl<T: Config> Block<T> {
     /// Instantiate a client at this block.
     pub async fn client(
         &self,
-    ) -> Result<ClientAtBlock<T, OnlineClientAtBlock<T>>, OnlineClientAtBlockError> {
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
         self.client.at_block(self.block_ref.clone()).await
     }
 }

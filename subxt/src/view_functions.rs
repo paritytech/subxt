@@ -2,15 +2,16 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+mod payload;
+
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::Config;
 use crate::error::ViewFunctionError;
 use derive_where::derive_where;
-use payload::Payload;
 use scale_decode::IntoVisitor;
 use std::marker::PhantomData;
 
-pub mod payload;
+pub use payload::{DynamicPayload, Payload, StaticPayload, dynamic};
 
 /// The name of the Runtime API call which can execute
 const CALL_NAME: &str = "RuntimeViewFunction_execute_view_function";

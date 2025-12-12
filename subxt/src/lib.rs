@@ -47,17 +47,23 @@ pub mod dynamic;
 pub mod error;
 pub mod events;
 pub mod extrinsics;
-pub mod metadata;
 pub mod runtime_apis;
 pub mod storage;
 pub mod transactions;
 pub mod utils;
 pub mod view_functions;
 
+// Re-export the [`subxt_metadata`] crate.
+pub use subxt_metadata as metadata;
+
+// A shorthand to match previous versions and the
+// tx shorthand in other places.
+pub use transactions as tx;
+
 // Expose a few of the most common types at root,
 // but leave most types behind their respective modules.
 pub use crate::{
-    client::{OfflineClient, OnlineClient},
+    client::{OfflineClient, OfflineClientAtBlock, OnlineClient, OnlineClientAtBlock},
     config::{Config, PolkadotConfig, SubstrateConfig},
     error::Error,
     metadata::{ArcMetadata, Metadata},

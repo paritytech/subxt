@@ -60,10 +60,10 @@ impl SubstrateConfigBuilder {
     /// Set the metadata to be used for decoding blocks at the given spec versions.
     pub fn set_metadata_for_spec_versions(
         self,
-        ranges: impl Iterator<Item = (u32, ArcMetadata)>,
+        ranges: impl IntoIterator<Item = (u32, ArcMetadata)>,
     ) -> Self {
         let mut map = self.metadata_for_spec_version.lock().unwrap();
-        for (spec_version, metadata) in ranges {
+        for (spec_version, metadata) in ranges.into_iter() {
             map.insert(spec_version, metadata);
         }
         drop(map);
@@ -74,10 +74,10 @@ impl SubstrateConfigBuilder {
     /// to this configuration.
     pub fn set_spec_version_for_block_ranges(
         mut self,
-        ranges: impl Iterator<Item = SpecVersionForRange>,
+        ranges: impl IntoIterator<Item = SpecVersionForRange>,
     ) -> Self {
         let mut m = RangeMap::builder();
-        for version_for_range in ranges {
+        for version_for_range in ranges.into_iter() {
             let start = version_for_range.block_range.start;
             let end = version_for_range.block_range.end;
             let spec_version = version_for_range.spec_version;

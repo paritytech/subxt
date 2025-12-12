@@ -1,10 +1,9 @@
 mod account_nonce;
 mod default_params;
+mod payload;
 mod signer;
 mod transaction_progress;
 mod validation_result;
-
-pub mod payload;
 
 use crate::backend::{BackendExt, TransactionStatus as BackendTransactionStatus};
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
@@ -20,7 +19,7 @@ use sp_crypto_hashing::blake2_256;
 use std::borrow::Cow;
 
 pub use default_params::DefaultParams;
-pub use payload::Payload;
+pub use payload::{DynamicPayload, Payload, StaticPayload, dynamic};
 pub use signer::Signer;
 pub use transaction_progress::{TransactionProgress, TransactionStatus};
 pub use validation_result::{

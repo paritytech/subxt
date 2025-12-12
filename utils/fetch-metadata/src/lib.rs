@@ -9,7 +9,7 @@ mod error;
 #[cfg(feature = "url")]
 mod url;
 #[cfg(feature = "url")]
-pub use url::{from_url, from_url_blocking, MetadataVersion, Url};
+pub use url::{MetadataVersion, Url, from_url, from_url_blocking};
 
 pub use error::Error;
 

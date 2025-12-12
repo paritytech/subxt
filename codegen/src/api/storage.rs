@@ -153,12 +153,12 @@ fn generate_storage_entry_fns(
 
     let storage_entry_method = quote!(
         #docs
-        pub fn #storage_entry_snake_case_ident(&self) -> #crate_path::storage::address::StaticAddress<
+        pub fn #storage_entry_snake_case_ident(&self) -> #crate_path::storage::StaticAddress<
             (#(#storage_key_tuple_types,)*),
             #storage_entry_snake_case_ident::output::Output,
             #is_plain
         > {
-            #crate_path::storage::address::StaticAddress::new_static(
+            #crate_path::storage::StaticAddress::new_static(
                 #pallet_name,
                 #storage_entry_name_str,
                 [#(#validation_hash,)*],

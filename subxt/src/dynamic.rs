@@ -7,19 +7,20 @@
 pub use scale_value::{At, Value, value};
 
 // Submit dynamic transactions.
-pub use crate::transactions::payload::dynamic as transaction;
+pub use crate::transactions::dynamic as transaction;
+pub use crate::transactions::dynamic as tx;
 
 // Lookup constants dynamically.
-pub use crate::constants::address::dynamic as constant;
+pub use crate::constants::dynamic as constant;
 
 // Lookup storage values dynamically.
-pub use crate::storage::address::dynamic as storage;
+pub use crate::storage::dynamic as storage;
 
 // Execute runtime API function call dynamically.
-pub use crate::runtime_apis::payload::dynamic as runtime_api_call;
+pub use crate::runtime_apis::dynamic as runtime_api_call;
 
 // Execute View Function API function call dynamically.
-pub use crate::view_functions::payload::dynamic as view_function_call;
+pub use crate::view_functions::dynamic as view_function_call;
 
 /// Obtain a custom value from the metadata.
-pub use crate::custom_values::address::dynamic as custom_value;
+pub use crate::custom_values::dynamic as custom_value;
