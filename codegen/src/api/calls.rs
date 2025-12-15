@@ -81,9 +81,14 @@ pub fn generate_calls(
                 #struct_def
                 #alias_mod
 
-                impl #crate_path::extrinsics::DecodeAsExtrinsic for #struct_name {
+                impl #struct_name {
                     const PALLET_NAME: &'static str = #pallet_name;
                     const CALL_NAME: &'static str = #call_name;
+                }
+                impl #crate_path::extrinsics::DecodeAsExtrinsic for #struct_name {
+                    fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                        pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                    }
                 }
             };
 

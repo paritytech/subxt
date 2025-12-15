@@ -63,9 +63,14 @@ pub fn generate_events(
             #struct_def
             #alias_mod
 
-            impl #crate_path::events::DecodeAsEvent for #event_struct_name {
+            impl #event_struct_name {
                 const PALLET_NAME: &'static str = #pallet_name;
                 const EVENT_NAME: &'static str = #event_name;
+            }
+            impl #crate_path::events::DecodeAsEvent for #event_struct_name {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
             }
         }
     });
