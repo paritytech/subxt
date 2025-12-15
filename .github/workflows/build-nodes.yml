@@ -49,7 +49,7 @@ jobs:
           cargo strip
 
       - name: upload substrate binary
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: nightly-substrate-binary
           path: target/release/substrate-node
@@ -62,7 +62,7 @@ jobs:
           tar -zcvf target/release/polkadot.tar.gz target/release/polkadot
 
       - name: upload polkadot binary
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: nightly-polkadot-binary
           path: |
