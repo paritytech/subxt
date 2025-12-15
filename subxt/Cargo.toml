@@ -35,7 +35,6 @@ docs = [
 native = [
     "subxt-lightclient?/native",
     "subxt-rpcs/native",
-    "tokio-util",
     "tokio?/sync",
     "sp-crypto-hashing/std",
 ]
@@ -83,8 +82,6 @@ runtime-wasm-path = ["subxt-macro/runtime-wasm-path"]
 
 [dependencies]
 async-trait = { workspace = true }
-base58 = { workspace = true }
-blake2 = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 derive-where = { workspace = true }
 scale-info = { workspace = true, features = ["default"] }
@@ -120,12 +117,6 @@ subxt-metadata = { workspace = true, features = ["std", "legacy"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 subxt-rpcs = { workspace = true }
 subxt-utils-accountid32 = { workspace = true }
-
-# For parsing urls to disallow insecure schemes
-url = { workspace = true }
-
-# Included if "native" feature is enabled
-tokio-util = { workspace = true, features = ["compat"], optional = true }
 
 # Included if the reconnecting rpc client feature is enabled
 # Only the `tokio/sync` is used in the reconnecting rpc client

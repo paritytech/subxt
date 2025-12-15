@@ -5613,9 +5613,7 @@ version = "0.50.0"
 dependencies = [
  "assert_matches",
  "async-trait",
- "base58",
  "bitvec",
- "blake2",
  "derive-where",
  "either",
  "frame-decode",
@@ -5650,11 +5648,9 @@ dependencies = [
  "subxt-utils-accountid32",
  "thiserror 2.0.12",
  "tokio",
- "tokio-util",
  "tower",
  "tracing",
  "tracing-subscriber",
- "url",
  "wasm-bindgen-futures",
  "web-time",
 ]
