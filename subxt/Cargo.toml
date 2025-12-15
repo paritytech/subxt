@@ -11,7 +11,7 @@ readme = "../README.md"
 repository.workspace = true
 documentation.workspace = true
 homepage.workspace = true
-description = "Submit extrinsics (transactions) to a substrate node via RPC"
+description = "Interact with Substrate based chains on the Polkadot Network"
 keywords = ["parity", "substrate", "blockchain"]
 
 [lints]

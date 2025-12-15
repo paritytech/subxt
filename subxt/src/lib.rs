@@ -2,13 +2,24 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! Subxt is a library for interacting with Substrate based nodes. Using it looks something like this:
+//! Subxt is a library for interacting with Substrate based nodes. Here's what it looks like:
 //!
 //! ```rust,ignore
 #![doc = include_str!("../examples/submit_transaction.rs")]
 //! ```
 //!
-//! Take a look at [the Subxt guide](book) to learn more about how to use Subxt.
+//! Take a look at
+#![doc = concat!("[the examples](https://github.com/paritytech/subxt/tree/", env!("SUBXT_REF"), "/subxt/examples)")]
+//! to get off to a quick start, or check out [the book](book) for a more in depth introduction to Subxt.
+//!
+//! In addition to the single-file examples above, we have a few self contained project examples to show off specific
+//! use cases:
+#![doc = concat!("- [The parachain example](https://github.com/paritytech/subxt/tree/", env!("SUBXT_REF"), "/examples/parachain-example)")]
+//!   is an example which uses Zombienet to spawn a parachain locally, and then connects to it using Subxt.
+#![doc = concat!("- [The WASM example](https://github.com/paritytech/subxt/tree/", env!("SUBXT_REF"), "/examples/wasm-example)")]
+//!   is an example of writing a Rust web application which uses Subxt to interact with a chain entirely in the browser.
+#![doc = concat!("- [The WASM example](https://github.com/paritytech/subxt/tree/", env!("SUBXT_REF"), "/examples/ffi-example)")]
+//!   shows off how Subxt can be called via FFI from Node.JS and Python.
 
 #[cfg(any(
     all(feature = "web", feature = "native"),
@@ -36,6 +47,7 @@ compile_error!("subxt: exactly one of the 'web' and 'native' features should be 
 pub extern crate alloc;
 
 pub mod backend;
+pub mod book;
 pub mod client;
 pub mod config;
 pub mod constants;

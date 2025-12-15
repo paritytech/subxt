@@ -66,7 +66,7 @@ where
     /// instance when it is, or an error if there was a problem waiting for finalization.
     ///
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TxProgress::next()`] instead.
+    /// transaction progresses, use [`TransactionProgress::next()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
@@ -101,7 +101,7 @@ where
     /// as well as a couple of other details (block hash and extrinsic hash).
     ///
     /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
-    /// use [`TxProgress::next()`] instead.
+    /// use [`TransactionProgress::next()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid`/`Usurped`/`Dropped` indicate with some
     /// probability that the transaction will not make it into a block but there is no guarantee
@@ -199,7 +199,7 @@ pub enum TransactionStatus<'atblock, T: Config, C> {
 
 impl<'atblock, T: Config, C> TransactionStatus<'atblock, T, C> {
     /// A convenience method to return the finalized details. Returns
-    /// [`None`] if the enum variant is not [`TxStatus::InFinalizedBlock`].
+    /// [`None`] if the enum variant is not [`TransactionStatus::InFinalizedBlock`].
     pub fn as_finalized(&self) -> Option<&TransactionInBlock<'atblock, T, C>> {
         match self {
             Self::InFinalizedBlock(val) => Some(val),
@@ -208,7 +208,7 @@ impl<'atblock, T: Config, C> TransactionStatus<'atblock, T, C> {
     }
 
     /// A convenience method to return the best block details. Returns
-    /// [`None`] if the enum variant is not [`TxStatus::InBestBlock`].
+    /// [`None`] if the enum variant is not [`TransactionStatus::InBestBlock`].
     pub fn as_in_block(&self) -> Option<&TransactionInBlock<'atblock, T, C>> {
         match self {
             Self::InBestBlock(val) => Some(val),
@@ -258,7 +258,7 @@ impl<'atblock, T: Config, C: OnlineClientAtBlockT<T>> TransactionInBlock<'atbloc
     /// **Note:** If multiple `ExtrinsicFailed` errors are returned (for instance
     /// because a pallet chooses to emit one as an event, which is considered
     /// abnormal behaviour), it is not specified which of the errors is returned here.
-    /// You can use [`TxInBlock::fetch_events`] instead if you'd like to
+    /// You can use [`TransactionInBlock::fetch_events`] instead if you'd like to
     /// work with multiple "error" events.
     ///
     /// **Note:** This has to download block details from the node and decode events

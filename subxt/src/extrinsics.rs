@@ -242,7 +242,7 @@ where
     ///
     /// # Note
     ///
-    /// This is a subset of [`Self::call_bytes`] that does not include the
+    /// This is a subset of [`Self::call_data_bytes`] that does not include the
     /// first two bytes that denote the pallet index and the variant index.
     pub fn call_data_field_bytes(&self) -> &[u8] {
         &self.bytes()[self.info.call_data_args_range()]
@@ -314,7 +314,7 @@ where
 
     /// Decode the extrinsic call data fields into some type which implements [`DecodeAsExtrinsic`].
     ///
-    /// Extrinsic types generated via the [`crate::subxt!`] macro implement this.
+    /// Extrinsic types generated via the [`macro@crate::subxt`] macro implement this.
     pub fn decode_call_data_fields_as<E: DecodeAsExtrinsic>(
         &self,
     ) -> Option<Result<E, ExtrinsicError>> {

@@ -32,7 +32,7 @@ pub struct ArchiveBackend<T: Config> {
 }
 
 impl<T: Config> ArchiveBackend<T> {
-    /// Configure and construct an [`ArchiveBackend`] and the associated [`ChainHeadBackendDriver`].
+    /// Configure and construct an [`ArchiveBackend`].
     pub fn new(client: impl Into<RpcClient>) -> ArchiveBackend<T> {
         let methods = ChainHeadRpcMethods::new(client.into());
 

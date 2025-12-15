@@ -34,7 +34,7 @@ use std::borrow::Cow;
 pub use default_params::DefaultParams;
 pub use payload::{DynamicPayload, Payload, StaticPayload, dynamic};
 pub use signer::Signer;
-pub use transaction_progress::{TransactionProgress, TransactionStatus};
+pub use transaction_progress::{TransactionInBlock, TransactionProgress, TransactionStatus};
 pub use validation_result::{
     TransactionInvalid, TransactionUnknown, TransactionValid, ValidationResult,
 };
@@ -570,10 +570,10 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
         self.sign_with_account_and_signature(&signer.account_id(), &signature)
     }
 
-    /// Convert this [`PartialTransaction`] into a [`SubmittableTransaction`], ready to submit.
+    /// Convert this [`SignableTransaction`] into a [`SubmittableTransaction`], ready to submit.
     /// An address, and something representing a signature that can be SCALE encoded, are both
     /// needed in order to construct it. If you have a `Signer` to hand, you can use
-    /// [`PartialTransaction::sign()`] instead.
+    /// [`SignableTransaction::sign()`] instead.
     pub fn sign_with_account_and_signature(
         &mut self,
         account_id: &T::AccountId,

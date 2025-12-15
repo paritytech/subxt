@@ -1,7 +1,7 @@
 use crate::error::ExtrinsicError;
 use codec::Decode;
 
-/// The result of performing [`SubmittableTransaction::validate()`].
+/// The result of performing [`crate::transactions::SubmittableTransaction::validate()`].
 #[derive(Clone, Debug, PartialEq)]
 pub enum ValidationResult {
     /// The transaction is valid

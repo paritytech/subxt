@@ -160,7 +160,7 @@ impl<T: Config> Events<T> {
 
     /// Iterate through the events, Decoding and returning any that match the given type.
     ///
-    /// This is a convenience function for calling [`Self::iter`] and then [`Event::decode_call_data_fields_as`]
+    /// This is a convenience function for calling [`Events::iter`] and then [`Event::decode_fields_as`]
     /// on each event that we iterate over, filtering those that don't match.
     pub fn find<E: DecodeAsEvent>(&self) -> impl Iterator<Item = Result<E, EventsError>> {
         self.iter()
@@ -381,9 +381,9 @@ impl<'events, T: Config> Event<'events, T> {
         Ok(decoded)
     }
 
-    /// Decode the event call data fields into some type which implements [`DecodeAsEvent`].
+    /// Decode the event fields into some type which implements [`DecodeAsEvent`].
     ///
-    /// Event types generated via the [`crate::subxt!`] macro implement this.
+    /// Event types generated via the [`macro@crate::subxt`] macro implement this.
     pub fn decode_fields_as<E: DecodeAsEvent>(&self) -> Option<Result<E, EventsError>> {
         if self.is::<E>() {
             Some(self.decode_fields_unchecked_as::<E>())
@@ -392,12 +392,12 @@ impl<'events, T: Config> Event<'events, T> {
         }
     }
 
-    /// Decode the event call data fields into some type which implements [`DecodeAsFields`].
+    /// Decode the event fields into some type which implements [`DecodeAsFields`].
     ///
     /// This ignores the pallet and event name information, so you should check those via [`Self::pallet_name()`]
     /// and [`Self::event_name()`] to confirm that this event is the one you are intending to decode.
     ///
-    /// Prefer to use [`Self::decode_call_data_fields_as`] where possible.
+    /// Prefer to use [`Self::decode_fields_as`] where possible.
     pub fn decode_fields_unchecked_as<E: DecodeAsFields>(&self) -> Result<E, EventsError> {
         let bytes = &mut self.field_bytes();
         let event_metadata = self.event_metadata();

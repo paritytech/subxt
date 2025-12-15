@@ -4,8 +4,9 @@
 /// given that we aren't far off having more than 12 transaction extensions already.
 ///
 /// If you have params which are _not_ a tuple and which you'd like to be instantiated automatically
-/// when calling [`TxClient::sign_and_submit_default()`] or [`TxClient::sign_and_submit_then_watch_default()`],
-/// then you'll need to implement this trait for them.
+/// when calling [`crate::transactions::TransactionsClient::sign_and_submit_default()`] or
+/// [`crate::transactions::TransactionsClient::sign_and_submit_then_watch_default()`], then you'll
+/// need to implement this trait for them.
 pub trait DefaultParams: Sized {
     /// Instantiate a default instance of the parameters.
     fn default_params() -> Self;

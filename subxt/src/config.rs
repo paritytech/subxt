@@ -98,7 +98,7 @@ pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     fn set_metadata_for_spec_version(&self, _spec_version: u32, _metadata: ArcMetadata) {}
 
     /// Return legacy types (ie types to use with Runtimes that return pre-V14 metadata) for a given spec version.
-    /// If this returns `None`, [`subxt`] will return an error if type definitions are needed to access some older
+    /// If this returns `None`, [`subxt`](crate) will return an error if type definitions are needed to access some older
     /// block.
     ///
     /// This doesn't need to live for long; it will be used to translate any older metadata returned from the node
