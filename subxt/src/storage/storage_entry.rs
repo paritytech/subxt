@@ -250,19 +250,6 @@ where
             .await
             .map_err(StorageError::CannotIterateValues)?;
 
-        // .map(move |kv| {
-        //     let kv = match kv {
-        //         Ok(kv) => kv,
-        //         Err(e) => return Err(StorageError::StreamFailure(e)),
-        //     };
-        //     Ok(StorageKeyValue::new(
-        //         info.clone(),
-        //         types,
-        //         kv.key.into(),
-        //         kv.value,
-        //     ))
-        // });
-
         Ok(StorageEntries {
             info,
             stream,

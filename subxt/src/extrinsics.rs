@@ -21,6 +21,7 @@ use crate::error::{
 use crate::events::{self, DecodeAsEvent};
 use frame_decode::extrinsics::Extrinsic as ExtrinsicInfo;
 use scale_decode::{DecodeAsFields, DecodeAsType};
+use scale_info::PortableRegistry;
 use std::marker::PhantomData;
 use std::sync::Arc;
 use subxt_metadata::Metadata;
@@ -353,6 +354,19 @@ where
 
         Ok(decoded)
     }
+
+    /// Iterate over each of the fields in the call data.
+    pub fn iter_call_data_fields(
+        &self,
+    ) -> impl Iterator<Item = ExtrinsicCallDataField<'atblock, '_>> {
+        let ext_bytes = self.bytes();
+        self.info.call_data().map(|field| ExtrinsicCallDataField {
+            bytes: &ext_bytes[field.range()],
+            name: field.name(),
+            type_id: *field.ty(),
+            metadata: self.metadata,
+        })
+    }
 }
 
 impl<'atblock, T, C> Extrinsic<'atblock, T, C>
@@ -363,6 +377,49 @@ where
     /// The events associated with the extrinsic.
     pub async fn events(&self) -> Result<ExtrinsicEvents<T>, EventsError> {
         ExtrinsicEvents::fetch(self.client, self.hash(), self.index()).await
+    }
+}
+
+/// A field in the extrinsic call data.
+pub struct ExtrinsicCallDataField<'atblock, 'extrinsic> {
+    bytes: &'extrinsic [u8],
+    name: &'extrinsic str,
+    type_id: u32,
+    metadata: &'atblock Metadata,
+}
+
+impl<'atblock, 'extrinsic> ExtrinsicCallDataField<'atblock, 'extrinsic> {
+    /// The bytes for this field.
+    pub fn bytes(&self) -> &'extrinsic [u8] {
+        self.bytes
+    }
+
+    /// Name of this field.
+    pub fn name(&self) -> &'extrinsic str {
+        self.name
+    }
+
+    /// The type ID for this field.
+    pub fn type_id(&self) -> u32 {
+        self.type_id
+    }
+
+    /// Decode this field into the given type.
+    pub fn decode_as<E: DecodeAsType>(&self) -> Result<E, scale_decode::Error> {
+        E::decode_as_type(&mut &*self.bytes, self.type_id, self.metadata.types())
+    }
+
+    /// Visit this field with the provided visitor, returning the output from it.
+    pub fn visit<V, R>(&self, visitor: V) -> Result<V::Value<'extrinsic, 'atblock>, V::Error>
+    where
+        V: scale_decode::visitor::Visitor<TypeResolver = PortableRegistry>,
+    {
+        scale_decode::visitor::decode_with_visitor(
+            &mut &*self.bytes,
+            self.type_id,
+            self.metadata.types(),
+            visitor,
+        )
     }
 }
 

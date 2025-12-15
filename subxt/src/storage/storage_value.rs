@@ -37,6 +37,11 @@ impl<'info, Value: DecodeAsType> StorageValue<'info, Value> {
         &self.bytes
     }
 
+    /// The type ID for this storage value.
+    pub fn type_id(&self) -> u32 {
+        self.info.value_id
+    }
+
     /// Consume this storage value and return the raw bytes.
     pub fn into_bytes(self) -> Vec<u8> {
         self.bytes.to_vec()
@@ -66,5 +71,18 @@ impl<'info, Value: DecodeAsType> StorageValue<'info, Value> {
         }
 
         Ok(value)
+    }
+
+    /// Visit this storage value with the provided visitor, returning the output from it.
+    pub fn visit<V, R>(&self, visitor: V) -> Result<V::Value<'_, 'info>, V::Error>
+    where
+        V: scale_decode::visitor::Visitor<TypeResolver = PortableRegistry>,
+    {
+        scale_decode::visitor::decode_with_visitor(
+            &mut &*self.bytes,
+            self.type_id(),
+            self.types,
+            visitor,
+        )
     }
 }
