@@ -2,11 +2,15 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! This module provides a [`Config`] type, which is used to define various
-//! types that are important in order to speak to a particular chain.
-//! [`SubstrateConfig`] provides a default set of these types suitable for the
-//! default Substrate node implementation, and [`PolkadotConfig`] for a
-//! Polkadot node.
+//! This module provides a [`Config`] type, which provides a way to configure Subxt to work with a
+//! specific chain.
+//!
+//! - A generic [`SubstrateConfig`] implementation is provided that will work against modern
+//!   blocks with most Substrate based chains automatically, and can be configured to work with
+//!   historic blocks.
+//! - A [`PolkadotConfig`] implementation is provided which is specialized towards the Polkadot
+//!   Relay Chain, and comes pre-configured to work against historic Polkadot RC blocks.
+//!
 
 mod default_extrinsic_params;
 

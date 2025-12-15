@@ -1,14 +1,17 @@
-use crate::backend::BackendExt;
+use crate::backend::{BackendExt, StorageResponse, StreamOf};
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::Config;
-use crate::error::StorageError;
+use crate::error::{BackendError, StorageError};
 use crate::storage::address::Address;
 use crate::storage::{PrefixOf, StorageKeyValue, StorageValue};
 use crate::utils::YesMaybe;
 use core::marker::PhantomData;
 use frame_decode::storage::{IntoEncodableValues, StorageInfo, StorageTypeInfo};
-use futures::StreamExt;
+use futures::{Stream, StreamExt};
+use scale_info::PortableRegistry;
+use std::pin::Pin;
 use std::sync::Arc;
+use std::task::Poll;
 
 /// This represents a single storage entry (be it a plain value or map)
 /// and the operations that can be performed on it.
@@ -99,6 +102,14 @@ where
 
     /// This returns a full key to a single value in this storage entry.
     pub fn fetch_key(&self, key_parts: Addr::KeyParts) -> Result<Vec<u8>, StorageError> {
+        let num_keys = self.inner.info.keys.len();
+        if key_parts.num_encodable_values() != num_keys {
+            return Err(StorageError::WrongNumberOfKeyPartsProvidedForFetching {
+                expected: num_keys,
+                got: key_parts.num_encodable_values(),
+            });
+        }
+
         self.key_from_any_parts(key_parts)
     }
 
@@ -128,24 +139,14 @@ where
         &self,
         key_parts: impl IntoEncodableValues,
     ) -> Result<Vec<u8>, StorageError> {
-        let num_keys = self.inner.info.keys.len();
-        if key_parts.num_encodable_values() != num_keys {
-            return Err(StorageError::WrongNumberOfKeyPartsProvidedForFetching {
-                expected: num_keys,
-                got: key_parts.num_encodable_values(),
-            });
-        }
-
-        let key = frame_decode::storage::encode_storage_key_with_info(
+        frame_decode::storage::encode_storage_key_with_info(
             self.pallet_name(),
             self.entry_name(),
             key_parts,
             &self.inner.info,
             self.inner.client.metadata_ref().types(),
         )
-        .map_err(StorageError::StorageKeyEncodeError)?;
-
-        Ok(key)
+        .map_err(StorageError::StorageKeyEncodeError)
     }
 }
 
@@ -227,11 +228,15 @@ where
     pub async fn iter<KeyParts: PrefixOf<Addr::KeyParts>>(
         &self,
         key_parts: KeyParts,
-    ) -> Result<
-        impl futures::Stream<Item = Result<StorageKeyValue<'atblock, Addr>, StorageError>>
-        + use<'atblock, Addr, Client, T, KeyParts>,
-        StorageError,
-    > {
+    ) -> Result<StorageEntries<'atblock, Addr>, StorageError> {
+        let num_keys = self.inner.info.keys.len();
+        if key_parts.num_encodable_values() >= num_keys {
+            return Err(StorageError::WrongNumberOfKeyPartsProvidedForIterating {
+                max_expected: num_keys - 1,
+                got: key_parts.num_encodable_values(),
+            });
+        }
+
         let info = self.inner.info.clone();
         let types = self.inner.client.metadata_ref().types();
         let key_bytes = self.key_from_any_parts(key_parts)?;
@@ -243,20 +248,66 @@ where
             .backend()
             .storage_fetch_descendant_values(key_bytes, block_hash)
             .await
-            .map_err(StorageError::CannotIterateValues)?
-            .map(move |kv| {
-                let kv = match kv {
-                    Ok(kv) => kv,
-                    Err(e) => return Err(StorageError::StreamFailure(e)),
-                };
-                Ok(StorageKeyValue::new(
-                    info.clone(),
-                    types,
-                    kv.key.into(),
-                    kv.value,
-                ))
-            });
+            .map_err(StorageError::CannotIterateValues)?;
 
-        Ok(Box::pin(stream))
+        // .map(move |kv| {
+        //     let kv = match kv {
+        //         Ok(kv) => kv,
+        //         Err(e) => return Err(StorageError::StreamFailure(e)),
+        //     };
+        //     Ok(StorageKeyValue::new(
+        //         info.clone(),
+        //         types,
+        //         kv.key.into(),
+        //         kv.value,
+        //     ))
+        // });
+
+        Ok(StorageEntries {
+            info,
+            stream,
+            types,
+            marker: PhantomData,
+        })
+    }
+}
+
+/// A stream of storage entries.
+pub struct StorageEntries<'atblock, Addr> {
+    // The raw underlying stream:
+    stream: StreamOf<Result<StorageResponse, BackendError>>,
+    // things we need to convert this into what we want:
+    info: Arc<StorageInfo<'atblock, u32>>,
+    types: &'atblock PortableRegistry,
+    marker: PhantomData<Addr>,
+}
+
+impl<'atblock, Addr: Address> StorageEntries<'atblock, Addr> {
+    /// Get the next storage entry. This is an alias for `futures::StreamExt::next(self)`.
+    pub async fn next(&mut self) -> Option<Result<StorageKeyValue<'atblock, Addr>, StorageError>> {
+        StreamExt::next(self).await
+    }
+}
+
+impl<'atblock, Addr> std::marker::Unpin for StorageEntries<'atblock, Addr> {}
+impl<'atblock, Addr: Address> Stream for StorageEntries<'atblock, Addr> {
+    type Item = Result<StorageKeyValue<'atblock, Addr>, StorageError>;
+
+    fn poll_next(
+        mut self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> Poll<Option<Self::Item>> {
+        let val = match futures::ready!(self.stream.poll_next_unpin(cx)) {
+            Some(Ok(val)) => val,
+            Some(Err(e)) => return Poll::Ready(Some(Err(StorageError::StreamFailure(e)))),
+            None => return Poll::Ready(None),
+        };
+
+        Poll::Ready(Some(Ok(StorageKeyValue::new(
+            self.info.clone(),
+            self.types,
+            val.key.into(),
+            val.value,
+        ))))
     }
 }

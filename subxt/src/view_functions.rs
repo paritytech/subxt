@@ -2,6 +2,18 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! This module exposes [`ViewFunctionsClient`], which has methods for calling View Functions.
+//! It's created by calling [`crate::client::ClientAtBlock::view_functions()`].
+//!
+//! ```rust,no_run
+//! pub use subxt::{OnlineClient, PolkadotConfig};
+//!
+//! let client = OnlineClient::new().await?;
+//! let at_block = client.at_current_block().await?;
+//!
+//! let view_functions = at_block.view_functions();
+//! ```
+
 mod payload;
 
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
@@ -16,7 +28,7 @@ pub use payload::{DynamicPayload, Payload, StaticPayload, dynamic};
 /// The name of the Runtime API call which can execute
 const CALL_NAME: &str = "RuntimeViewFunction_execute_view_function";
 
-/// Execute View Function calls.
+/// A client for working with View Functions. See [the module docs](crate::view_functions) for more.
 #[derive_where(Clone; Client)]
 pub struct ViewFunctionsClient<'atblock, T: Config, Client> {
     client: &'atblock Client,

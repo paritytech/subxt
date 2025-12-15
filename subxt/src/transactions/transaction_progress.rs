@@ -11,6 +11,11 @@ use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
+/// A stream representing the progress of some transaction. Events can be
+/// streamed and acted on using [`TransactionProgress::next()`], or the helper
+/// functions [`TransactionProgress::wait_for_finalized`] and
+/// [`TransactionProgress::wait_for_finalized_success`] can be used to wait
+/// for completion.
 #[derive(Debug)]
 pub struct TransactionProgress<'atblock, T: Config, C> {
     sub: Option<StreamOfResults<BackendTransactionStatus<HashFor<T>>>>,

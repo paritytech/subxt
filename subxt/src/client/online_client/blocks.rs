@@ -19,6 +19,11 @@ impl<T: Config> Blocks<T> {
     ) -> Self {
         Blocks { client, stream }
     }
+
+    /// Return the next block in the stream when it is produced.
+    pub async fn next(&mut self) -> Option<Result<Block<T>, BlocksError>> {
+        StreamExt::next(self).await
+    }
 }
 
 impl<T: Config> Stream for Blocks<T> {
@@ -68,7 +73,7 @@ impl<T: Config> Block<T> {
     }
 
     /// Instantiate a client at this block.
-    pub async fn client(
+    pub async fn at(
         &self,
     ) -> Result<ClientAtBlock<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
         self.client.at_block(self.block_ref.clone()).await

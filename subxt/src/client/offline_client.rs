@@ -3,6 +3,8 @@ use crate::config::{Config, HashFor, Hasher};
 use crate::error::OfflineClientAtBlockError;
 use crate::metadata::{ArcMetadata, Metadata};
 
+/// A client which does not require a connection to a chain, and can perform certain
+/// actions which don't require a network connection.
 #[derive(Clone, Debug)]
 pub struct OfflineClient<T: Config> {
     /// The configuration for this client.

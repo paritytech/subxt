@@ -22,7 +22,7 @@ use crate::error::OnlineClientError;
 
 pub use block_number_or_ref::BlockNumberOrRef;
 
-/// A client which exposes the means to decode historic data on a chain online.
+/// A client which requires a connection to a chain, and allows interacting with it.
 #[derive(Clone, Debug)]
 pub struct OnlineClient<T: Config> {
     inner: Arc<OnlineClientInner<T>>,

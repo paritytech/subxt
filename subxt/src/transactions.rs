@@ -1,3 +1,16 @@
+//! This module exposes [`TransactionsClient`], which has methods for constructing and submitting
+//! transactions. It's created by calling [`crate::client::ClientAtBlock::transactions()`], or
+//! [`crate::client::ClientAtBlock::tx()`] for short.
+//!
+//! ```rust,no_run
+//! pub use subxt::{OnlineClient, PolkadotConfig};
+//!
+//! let client = OnlineClient::new().await?;
+//! let at_block = client.at_current_block().await?;
+//!
+//! let transactions = at_block.transactions();
+//! ```
+
 mod account_nonce;
 mod default_params;
 mod payload;
@@ -26,7 +39,7 @@ pub use validation_result::{
     TransactionInvalid, TransactionUnknown, TransactionValid, ValidationResult,
 };
 
-/// A client for working with transactions.
+/// A client for working with transactions. See [the module docs](crate::transactions) for more.
 #[derive(Clone)]
 pub struct TransactionsClient<'atblock, T, Client> {
     client: &'atblock Client,
@@ -257,7 +270,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
     }
 
     // Create a V4 "signed" or a V5 "general" transaction.
-    pub fn create_signable_at_version<Call>(
+    fn create_signable_at_version<Call>(
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,

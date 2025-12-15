@@ -1,10 +1,10 @@
-#![allow(missing_docs)]
+//! Construct and submit a transaction.
 use subxt::{Error, OnlineClient, PolkadotConfig};
 use subxt_signer::sr25519::dev;
 
 // Generate an interface that we can use from the node's metadata.
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
-pub mod polkadot {}
+mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {

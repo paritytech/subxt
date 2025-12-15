@@ -2,6 +2,18 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! This module exposes [`RuntimeApisClient`], which has methods for calling Runtime APIs.
+//! It's created by calling [`crate::client::ClientAtBlock::runtime_apis()`].
+//!
+//! ```rust,no_run
+//! pub use subxt::{OnlineClient, PolkadotConfig};
+//!
+//! let client = OnlineClient::new().await?;
+//! let at_block = client.at_current_block().await?;
+//!
+//! let runtime_apis = at_block.runtime_apis();
+//! ```
+
 mod payload;
 
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
@@ -13,7 +25,7 @@ use std::marker::PhantomData;
 
 pub use payload::{DynamicPayload, Payload, StaticPayload, dynamic};
 
-/// Execute runtime API calls.
+/// A client for working with Runtime APIs. See [the module docs](crate::runtime_apis) for more.
 #[derive_where(Clone; Client)]
 pub struct RuntimeApisClient<'atblock, T: Config, Client> {
     client: &'atblock Client,

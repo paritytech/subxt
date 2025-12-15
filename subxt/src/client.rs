@@ -1,3 +1,15 @@
+//! This module exposes the entrypoint to connect and interact with chains.
+//!
+//! - See [`OnlineClient`] for instantiating a standard client which is connected to
+//!   a chain and capable of interacting with it.
+//! - See [`OfflineClient`] if you have no network connection but want to perform certain
+//!   actions against some chain.
+//!
+//! After instantiating a client, you'll typically then select a block to work against
+//! via something like [`OnlineClient::at_block`] or [`OfflineClient::at_block`].
+//! These hand back [`OnlineClientAtBlock`] or [`OfflineClientAtBlock`], which expose
+//! various methods available online or offline at the given block.
+
 mod offline_client;
 mod online_client;
 
@@ -19,10 +31,12 @@ pub use online_client::{
     BlockNumberOrRef, OnlineClient, OnlineClientAtBlockImpl, OnlineClientAtBlockT,
 };
 
-/// This represents a client at a specific block number. This wraps a client impl
-/// which will either be [`OfflineClientAtBlockImpl`] or [`OnlineClientAtBlockImpl`].
-/// Prefer to use the type aliases [`OfflineClientAtBlock`] and [`OnlineClientAtBlock`]
-/// if you need to refer to the concrete instances of this.
+/// This represents a client at a specific block number, and is created by calling either
+/// [`OnlineClient::at_block`] or [`OfflineClient::at_block`].
+///
+/// This wraps a client implementation, which will either be [`OfflineClientAtBlockImpl`]
+/// or [`OnlineClientAtBlockImpl`]. Prefer to use the type aliases [`OfflineClientAtBlock`]
+/// and [`OnlineClientAtBlock`] if you need to refer to the concrete instances of this.
 #[derive(Clone, Debug)]
 pub struct ClientAtBlock<T, Client> {
     pub(crate) client: Client,
@@ -85,6 +99,7 @@ where
         RuntimeApisClient::new(&self.client)
     }
 
+    /// Access Pallet View Functions at this block.
     pub fn view_functions(&self) -> ViewFunctionsClient<'_, T, Client> {
         ViewFunctionsClient::new(&self.client)
     }

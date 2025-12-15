@@ -1,3 +1,15 @@
+//! This module exposes [`ExtrinsicsClient`], which has methods for working with extrinsics.
+//! It's created by calling [`crate::client::ClientAtBlock::extrinsics()`].
+//!
+//! ```rust,no_run
+//! pub use subxt::{OnlineClient, PolkadotConfig};
+//!
+//! let client = OnlineClient::new().await?;
+//! let at_block = client.at_current_block().await?;
+//!
+//! let extrinsics = at_block.extrinsics();
+//! ```
+
 mod decode_as_extrinsic;
 mod extrinsic_transaction_extensions;
 
@@ -18,7 +30,7 @@ pub use extrinsic_transaction_extensions::{
     ExtrinsicTransactionExtension, ExtrinsicTransactionExtensions,
 };
 
-/// A client for working with extrinsics.
+/// A client for working with extrinsics. See [the module docs](crate::extrinsics) for more.
 pub struct ExtrinsicsClient<'atblock, T, Client> {
     client: &'atblock Client,
     marker: PhantomData<T>,

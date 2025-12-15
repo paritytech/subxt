@@ -2,13 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-// TODO: REMOVE BEFORE MERGING.
-#![allow(missing_docs)]
-
 //! Subxt is a library for interacting with Substrate based nodes. Using it looks something like this:
 //!
 //! ```rust,ignore
-#![doc = include_str!("../examples/transactions_basic.rs")]
+#![doc = include_str!("../examples/submit_transaction.rs")]
 //! ```
 //!
 //! Take a look at [the Subxt guide](book) to learn more about how to use Subxt.
@@ -76,8 +73,8 @@ pub use subxt_lightclient as lightclient;
 /// Re-export external crates that are made use of in the subxt API.
 pub mod ext {
     pub use codec;
+    pub use frame_decode;
     pub use frame_metadata;
-    pub use futures;
     pub use scale_bits;
     pub use scale_decode;
     pub use scale_encode;

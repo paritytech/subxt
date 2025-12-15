@@ -15,7 +15,10 @@ pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
 pub use primitive_types::{H256, U256};
 
 /// Construct a [`PolkadotConfig`] using this.
-pub struct PolkadotConfigBuilder(SubstrateConfigBuilder);
+pub struct PolkadotConfigBuilder {
+    use_historic_types: bool,
+    inner: SubstrateConfigBuilder,
+}
 
 impl Default for PolkadotConfigBuilder {
     fn default() -> Self {
@@ -26,10 +29,19 @@ impl Default for PolkadotConfigBuilder {
 impl PolkadotConfigBuilder {
     /// Create a new [`PolkadotConfigBuilder`].
     pub fn new() -> Self {
-        let inner = SubstrateConfigBuilder::new()
-            .set_legacy_types(frame_decode::legacy_types::polkadot::relay_chain());
+        let inner = SubstrateConfigBuilder::new();
+        PolkadotConfigBuilder {
+            use_historic_types: true,
+            inner,
+        }
+    }
 
-        PolkadotConfigBuilder(inner)
+    /// Use historic types. These are enabled by default, but can be disabled to avoid
+    /// loading them in if they are not needed (ie you do not need to access any block
+    /// using a runtime which has V14 metadata).
+    pub fn use_historic_types(mut self, b: bool) -> Self {
+        self.use_historic_types = b;
+        self
     }
 
     /// Set the metadata to be used for decoding blocks at the given spec versions.
@@ -37,7 +49,7 @@ impl PolkadotConfigBuilder {
         mut self,
         ranges: impl IntoIterator<Item = (u32, ArcMetadata)>,
     ) -> Self {
-        self = Self(self.0.set_metadata_for_spec_versions(ranges));
+        self.inner = self.inner.set_metadata_for_spec_versions(ranges);
         self
     }
 
@@ -47,17 +59,25 @@ impl PolkadotConfigBuilder {
         mut self,
         ranges: impl IntoIterator<Item = SpecVersionForRange>,
     ) -> Self {
-        self = Self(self.0.set_spec_version_for_block_ranges(ranges));
+        self.inner = self.inner.set_spec_version_for_block_ranges(ranges);
         self
     }
 
     /// Construct the [`PolkadotConfig`] from this builder.
-    pub fn build(self) -> PolkadotConfig {
-        PolkadotConfig(self.0.build())
+    pub fn build(mut self) -> PolkadotConfig {
+        if self.use_historic_types {
+            self.inner = self
+                .inner
+                .set_legacy_types(frame_decode::legacy_types::polkadot::relay_chain());
+        }
+
+        PolkadotConfig(self.inner.build())
     }
 }
 
-/// Configuration that's suitable for the Polkadot Relay Chain.
+/// Configuration for the Polkadot Relay Chain. This should not be used to connect
+/// to any other chain; instead use [`crate::config::SubstrateConfig`] and configure
+/// that as needed to support the chain you're connecting to.
 #[derive(Debug, Clone)]
 pub struct PolkadotConfig(SubstrateConfig);
 
@@ -69,7 +89,7 @@ impl PolkadotConfig {
 
     /// Build a new [`PolkadotConfig`].
     pub fn builder() -> PolkadotConfigBuilder {
-        PolkadotConfigBuilder(SubstrateConfig::builder())
+        PolkadotConfigBuilder::new()
     }
 }
 

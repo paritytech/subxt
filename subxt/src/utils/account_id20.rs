@@ -10,8 +10,8 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error as DeriveError;
 
 #[derive(
-    Copy,
     Clone,
+    Copy,
     Eq,
     PartialEq,
     Ord,

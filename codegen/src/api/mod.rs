@@ -83,7 +83,7 @@ impl RuntimeGenerator {
 
         Ok(quote! {
             #( #item_mod_attrs )*
-            #[allow(dead_code, unused_imports, non_camel_case_types, unreachable_patterns)]
+            #[allow(dead_code, missing_docs, unused_imports, non_camel_case_types, unreachable_patterns)]
             #[allow(clippy::all)]
             #[allow(rustdoc::broken_intra_doc_links)]
             pub mod #mod_ident {
@@ -247,7 +247,7 @@ impl RuntimeGenerator {
 
         Ok(quote! {
             #( #item_mod_attrs )*
-            #[allow(dead_code, unused_imports, non_camel_case_types, unreachable_patterns)]
+            #[allow(dead_code, missing_docs, unused_imports, non_camel_case_types, unreachable_patterns)]
             #[allow(clippy::all)]
             #[allow(rustdoc::broken_intra_doc_links)]
             pub mod #mod_ident {

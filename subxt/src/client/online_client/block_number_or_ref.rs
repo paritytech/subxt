@@ -22,6 +22,12 @@ impl<T: Config> From<u64> for BlockNumberOrRef<T> {
     }
 }
 
+impl<T: Config> From<usize> for BlockNumberOrRef<T> {
+    fn from(value: usize) -> Self {
+        BlockNumberOrRef::Number(value as u64)
+    }
+}
+
 impl<T: Config> From<BlockRef<HashFor<T>>> for BlockNumberOrRef<T> {
     fn from(block_ref: BlockRef<HashFor<T>>) -> Self {
         BlockNumberOrRef::BlockRef(block_ref)

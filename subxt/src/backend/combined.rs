@@ -18,6 +18,7 @@ use futures::StreamExt;
 use std::task::Poll;
 use subxt_rpcs::RpcClient;
 
+/// A builder to  configure and build a [`CombinedBackend`].
 pub struct CombinedBackendBuilder<T: Config> {
     archive: BackendChoice<ArchiveBackend<T>>,
     chainhead: BackendChoice<ChainHeadBackend<T>>,
@@ -183,6 +184,8 @@ pub struct CombinedBackendDriver<T: Config> {
 }
 
 impl<T: Config> CombinedBackendDriver<T> {
+    /// this returns true if this [`CombinedBackendDriver`] needs polling in
+    /// order to drive the [`CombinedBackend`], and false if it does not.
     pub fn needs_polling(&self) -> bool {
         self.chainhead_driver.is_some()
     }

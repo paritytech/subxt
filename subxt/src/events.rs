@@ -1,3 +1,15 @@
+//! This module exposes [`EventsClient`], which has methods for working with eventts.
+//! It's created by calling [`crate::client::ClientAtBlock::events()`].
+//!
+//! ```rust,no_run
+//! pub use subxt::{OnlineClient, PolkadotConfig};
+//!
+//! let client = OnlineClient::new().await?;
+//! let at_block = client.at_current_block().await?;
+//!
+//! let events = at_block.events();
+//! ```
+
 mod decode_as_event;
 
 use crate::backend::BackendExt;
@@ -12,7 +24,7 @@ use std::sync::Arc;
 
 pub use decode_as_event::DecodeAsEvent;
 
-/// A client for working with events.
+/// A client for working with events. See [the module docs](crate::events) for more.
 pub struct EventsClient<'atblock, T, Client> {
     client: &'atblock Client,
     marker: PhantomData<T>,

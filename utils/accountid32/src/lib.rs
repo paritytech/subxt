@@ -23,6 +23,7 @@ use thiserror::Error as DeriveError;
 /// that type.
 #[derive(
     Clone,
+    Copy,
     Eq,
     PartialEq,
     Ord,

@@ -1,3 +1,15 @@
+//! This module exposes [`ConstantsClient`], which has methods for working with constants. It's
+//! created by calling [`crate::client::ClientAtBlock::constants()`].
+//!
+//! ```rust,no_run
+//! pub use subxt::{OnlineClient, PolkadotConfig};
+//!
+//! let client = OnlineClient::new().await?;
+//! let at_block = client.at_current_block().await?;
+//!
+//! let constants = at_block.constants();
+//! ```
+
 mod address;
 
 use crate::client::OfflineClientAtBlockT;
@@ -9,7 +21,7 @@ use std::marker::PhantomData;
 
 pub use address::{Address, DynamicAddress, StaticAddress, dynamic};
 
-/// A client for working with storage entries.
+/// A client for working with constants. See [the module docs](crate::constants) for more.
 #[derive(Clone)]
 pub struct ConstantsClient<'atblock, T, Client> {
     client: &'atblock Client,
