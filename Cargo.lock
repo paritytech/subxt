@@ -5634,6 +5634,7 @@ dependencies = [
  "scale-encode",
  "scale-info",
  "scale-info-legacy",
+ "scale-type-resolver",
  "scale-value",
  "serde",
  "serde_json",

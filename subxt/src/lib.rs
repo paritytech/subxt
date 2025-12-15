@@ -90,6 +90,7 @@ pub mod ext {
     pub use scale_bits;
     pub use scale_decode;
     pub use scale_encode;
+    pub use scale_type_resolver;
     pub use scale_value;
     pub use subxt_rpcs;
 

@@ -333,8 +333,8 @@ impl RuntimeGenerator {
                 pub struct TransactionApi;
                 impl TransactionApi {
                     #(
-                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi {
-                            #pallets_with_calls::calls::TransactionApi
+                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::api::TransactionApi {
+                            #pallets_with_calls::calls::api::TransactionApi
                         }
                     )*
                 }

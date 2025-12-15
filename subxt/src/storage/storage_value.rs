@@ -74,7 +74,7 @@ impl<'info, Value: DecodeAsType> StorageValue<'info, Value> {
     }
 
     /// Visit this storage value with the provided visitor, returning the output from it.
-    pub fn visit<V, R>(&self, visitor: V) -> Result<V::Value<'_, 'info>, V::Error>
+    pub fn visit<V>(&self, visitor: V) -> Result<V::Value<'_, 'info>, V::Error>
     where
         V: scale_decode::visitor::Visitor<TypeResolver = PortableRegistry>,
     {

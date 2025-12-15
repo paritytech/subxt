@@ -114,7 +114,7 @@ fn generate_storage_entry_fns(
         .iter()
         .map(|i| {
             let ty = &i.type_alias;
-            quote!(#storage_entry_snake_case_ident::#ty)
+            quote!(#storage_entry_snake_case_ident::input::#ty)
         })
         .collect::<Vec<_>>();
 
@@ -142,12 +142,12 @@ fn generate_storage_entry_fns(
             use super::root_mod;
             use super::#types_mod_ident;
 
-            #(#storage_key_type_aliases)*
-
-            pub mod output {
+            pub mod input {
                 use super::#types_mod_ident;
-                pub type Output = #storage_value_type_path;
+                #(#storage_key_type_aliases)*
             }
+
+            pub type Output = #storage_value_type_path;
         }
     );
 
@@ -155,7 +155,7 @@ fn generate_storage_entry_fns(
         #docs
         pub fn #storage_entry_snake_case_ident(&self) -> #crate_path::storage::StaticAddress<
             (#(#storage_key_tuple_types,)*),
-            #storage_entry_snake_case_ident::output::Output,
+            #storage_entry_snake_case_ident::Output,
             #is_plain
         > {
             #crate_path::storage::StaticAddress::new_static(

@@ -410,7 +410,7 @@ impl<'atblock, 'extrinsic> ExtrinsicCallDataField<'atblock, 'extrinsic> {
     }
 
     /// Visit this field with the provided visitor, returning the output from it.
-    pub fn visit<V, R>(&self, visitor: V) -> Result<V::Value<'extrinsic, 'atblock>, V::Error>
+    pub fn visit<V>(&self, visitor: V) -> Result<V::Value<'extrinsic, 'atblock>, V::Error>
     where
         V: scale_decode::visitor::Visitor<TypeResolver = PortableRegistry>,
     {

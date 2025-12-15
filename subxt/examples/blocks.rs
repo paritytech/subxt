@@ -29,7 +29,7 @@ async fn main() -> Result<(), Error> {
         // same interface as `api.block(block.hash()).await`.
         let at_block = block.at().await?;
 
-        // Here we'll obtain and display the extrinsics:
+        // Here we'll iterate over the extrinsics and display information about each one:
         let extrinsics = at_block.extrinsics().fetch().await?;
         for ext in extrinsics.iter() {
             let ext = ext?;
@@ -40,7 +40,9 @@ async fn main() -> Result<(), Error> {
             let bytes_hex = format!("0x{}", hex::encode(ext.bytes()));
             let events = ext.events().await?;
 
-            // See the API docs for more ways to decode extrinsics:
+            // See the API docs for more ways to decode extrinsics. Here we decode into
+            // a statically generated type, but any type implementing scale_decode::DecodeAsType
+            // can be used here, for instance subxt::dynamic::Value.
             let decoded_ext = ext.decode_call_data_as::<polkadot::Call>()?;
 
             println!("    #{idx}: {pallet_name}.{call_name}:");
@@ -67,6 +69,16 @@ async fn main() -> Result<(), Error> {
                     println!("        {name}: {value}");
                 }
             }
+        }
+
+        // Instead of iterating, we can also use the static interface to search & decode specific
+        // extrinsics if we know what we are looking for:
+        if let Some(ext) = extrinsics.find_first::<polkadot::para_inherent::calls::Enter>() {
+            let ext = ext?;
+
+            println!("ParaInherent.Enter");
+            println!("  backed_candidated: {:?}", ext.data.backed_candidates);
+            println!("  disputes: {:?}", ext.data.disputes);
         }
     }
 

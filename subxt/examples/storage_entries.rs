@@ -40,7 +40,7 @@ async fn main() -> Result<(), Error> {
     // Or we can decode into a known shape. Any type implementing DecodeAsType can
     // be used here to extract fields you're interested in, or we can use the generated
     // type which already implements this:
-    type AccountInfo = polkadot::system::storage::account::output::Output;
+    type AccountInfo = polkadot::system::storage::account::Output;
     let balance_info = entry.decode_as::<AccountInfo>()?;
 
     println!(
