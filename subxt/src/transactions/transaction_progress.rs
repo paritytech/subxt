@@ -323,7 +323,7 @@ impl<'atblock, T: Config, C: OnlineClientAtBlockT<T>> TransactionInBlock<'atbloc
             .iter()
             .position(|ext| {
                 use crate::config::Hasher;
-                let hash = hasher.hash(&ext);
+                let hash = hasher.hash(ext);
                 hash == self.ext_hash
             })
             // If we successfully obtain the block hash we think contains our

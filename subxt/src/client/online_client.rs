@@ -120,7 +120,7 @@ impl<T: Config> OnlineClient<T> {
             inner: Arc::new(OnlineClientInner {
                 config,
                 genesis_hash,
-                backend: backend.into(),
+                backend,
             }),
         })
     }

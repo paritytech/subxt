@@ -587,7 +587,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
             // "is general" + transaction protocol version (5)
             (0b01000000 + 5u8).encode_to(&mut encoded_inner);
             // Encode versions for the transaction extensions
-            (tx_extensions_version as u8).encode_to(&mut encoded_inner);
+            tx_extensions_version.encode_to(&mut encoded_inner);
             // Encode the actual transaction extensions values
             self.additional_and_extra_params
                 .encode_value_to(&mut encoded_inner);

@@ -50,7 +50,7 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
         let queries = keys
             .into_iter()
             .map(|key| ArchiveStorageQuery {
-                key: key,
+                key,
                 query_type: StorageQueryType::Value,
                 pagination_start_key: None,
             })
@@ -77,7 +77,7 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
         at: HashFor<T>,
     ) -> Result<StreamOfResults<Vec<u8>>, BackendError> {
         let queries = std::iter::once(ArchiveStorageQuery {
-            key: key,
+            key,
             // Just ask for the hash and then ignore it and return keys
             query_type: StorageQueryType::DescendantsHashes,
             pagination_start_key: None,
@@ -99,7 +99,7 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
         at: HashFor<T>,
     ) -> Result<StreamOfResults<StorageResponse>, BackendError> {
         let queries = std::iter::once(ArchiveStorageQuery {
-            key: key,
+            key,
             query_type: StorageQueryType::DescendantsValues,
             pagination_start_key: None,
         })

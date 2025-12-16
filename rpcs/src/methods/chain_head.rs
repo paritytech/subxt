@@ -394,7 +394,7 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
             .map(|item| ArchiveStorageQuery {
                 key: to_hex(item.key),
                 query_type: item.query_type,
-                pagination_start_key: item.pagination_start_key.map(|k| to_hex(k)),
+                pagination_start_key: item.pagination_start_key.map(to_hex),
             })
             .collect();
 

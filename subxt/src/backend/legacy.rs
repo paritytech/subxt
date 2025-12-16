@@ -286,7 +286,7 @@ impl<T: Config> Backend<T> for LegacyBackend<T> {
                 let last_finalized_block_num = this
                     .block_header(last_finalized_block_ref.hash())
                     .await?
-                    .map(|h| h.number().into());
+                    .map(|h| h.number());
 
                 // Fill in any missing blocks, because the backend may not emit every finalized block; just the latest ones which
                 // are finalized each time.
@@ -408,7 +408,7 @@ where
         };
 
         // We want all previous details up to, but not including this current block num.
-        let end_block_num = header.number().into();
+        let end_block_num = header.number();
 
         // This is one after the last block we returned details for last time.
         let start_block_num = last_block_num.map(|n| n + 1).unwrap_or(end_block_num);

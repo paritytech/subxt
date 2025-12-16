@@ -58,7 +58,7 @@ impl From<[u8; 32]> for AccountId32 {
 impl AccountId32 {
     // Return the ss58-check string for this key. Adapted from `sp_core::crypto`. We need this to
     // serialize our account appropriately but otherwise don't care.
-    fn to_ss58check(&self) -> String {
+    fn ss58(&self) -> String {
         // For serializing to a string to obtain the account nonce, we use the default substrate
         // prefix (since we have no way to otherwise pick one). It doesn't really matter, since when
         // it's deserialized back in system_accountNextIndex, we ignore this (so long as it's valid).
@@ -78,7 +78,7 @@ impl AccountId32 {
     // This isn't strictly needed, but to give our AccountId32 a little more usefulness, we also
     // implement the logic needed to decode an AccountId32 from an SS58 encoded string. This is exposed
     // via a `FromStr` impl.
-    fn from_ss58check(s: &str) -> Result<Self, FromSs58Error> {
+    fn from_ss58(s: &str) -> Result<Self, FromSs58Error> {
         const CHECKSUM_LEN: usize = 2;
         let body_len = 32;
 
@@ -123,7 +123,7 @@ pub enum FromSs58Error {
     InvalidPrefix,
 }
 
-// We do this just to get a checksum to help verify the validity of the address in to_ss58check
+// We do this just to get a checksum to help verify the validity of the address in ss58
 fn ss58hash(data: &[u8]) -> Vec<u8> {
     use blake2::{Blake2b512, Digest};
     const PREFIX: &[u8] = b"SS58PRE";
@@ -138,7 +138,7 @@ impl Serialize for AccountId32 {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_str(&self.to_ss58check())
+        serializer.serialize_str(&self.ss58())
     }
 }
 
@@ -147,21 +147,21 @@ impl<'de> Deserialize<'de> for AccountId32 {
     where
         D: serde::Deserializer<'de>,
     {
-        AccountId32::from_ss58check(&String::deserialize(deserializer)?)
+        AccountId32::from_ss58(&String::deserialize(deserializer)?)
             .map_err(|e| serde::de::Error::custom(format!("{e:?}")))
     }
 }
 
 impl core::fmt::Display for AccountId32 {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        write!(f, "{}", self.to_ss58check())
+        write!(f, "{}", self.ss58())
     }
 }
 
 impl core::str::FromStr for AccountId32 {
     type Err = FromSs58Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        AccountId32::from_ss58check(s)
+        AccountId32::from_ss58(s)
     }
 }
 
@@ -180,16 +180,16 @@ mod test {
             let local_account = AccountId32(substrate_account.clone().into());
 
             // Both should encode to ss58 the same way:
-            let substrate_ss58 = substrate_account.to_ss58check();
-            assert_eq!(substrate_ss58, local_account.to_ss58check());
+            let substrate_ss58 = substrate_account.ss58();
+            assert_eq!(substrate_ss58, local_account.ss58());
 
             // Both should decode from ss58 back to the same:
             assert_eq!(
-                sp_core::crypto::AccountId32::from_ss58check(&substrate_ss58).unwrap(),
+                sp_core::crypto::AccountId32::from_ss58(&substrate_ss58).unwrap(),
                 substrate_account
             );
             assert_eq!(
-                AccountId32::from_ss58check(&substrate_ss58).unwrap(),
+                AccountId32::from_ss58(&substrate_ss58).unwrap(),
                 local_account
             );
         }

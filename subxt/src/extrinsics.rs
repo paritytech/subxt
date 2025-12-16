@@ -134,7 +134,7 @@ impl<'atblock, T: Config, C: OfflineClientAtBlockT<T>> Extrinsics<'atblock, T, C
                 }
 
                 Ok(Extrinsic {
-                    client: client,
+                    client,
                     index: extrinsic_index,
                     info: Arc::new(info),
                     extrinsics: Arc::clone(&all_extrinsic_bytes),
@@ -306,7 +306,7 @@ where
             self.metadata.types(),
         )
         .map_err(|e| ExtrinsicError::CannotDecodeIntoRootExtrinsic {
-            extrinsic_index: self.index as usize,
+            extrinsic_index: self.index,
             error: e,
         })?;
 
@@ -347,7 +347,7 @@ where
         let decoded =
             E::decode_as_fields(bytes, &mut fields, self.metadata.types()).map_err(|e| {
                 ExtrinsicError::CannotDecodeFields {
-                    extrinsic_index: self.index as usize,
+                    extrinsic_index: self.index,
                     error: e,
                 }
             })?;

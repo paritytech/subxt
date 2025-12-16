@@ -81,6 +81,12 @@ impl PolkadotConfigBuilder {
 #[derive(Debug, Clone)]
 pub struct PolkadotConfig(SubstrateConfig);
 
+impl Default for PolkadotConfig {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PolkadotConfig {
     /// Create a new, default, [`PolkadotConfig`].
     pub fn new() -> Self {

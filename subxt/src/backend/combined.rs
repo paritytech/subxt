@@ -31,6 +31,12 @@ enum BackendChoice<V> {
     UseDefault,
 }
 
+impl<T: Config> Default for CombinedBackendBuilder<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T: Config> CombinedBackendBuilder<T> {
     /// Create a new [`CombinedBackendBuilder`].
     pub fn new() -> Self {
@@ -438,7 +444,7 @@ where
         "None of the configured backends are capable of handling this request";
     let mut err = BackendError::other(NO_AVAILABLE_BACKEND);
 
-    for backend in backends.into_iter().filter_map(|b| *b) {
+    for backend in backends.iter().filter_map(|b| *b) {
         match f(backend).await {
             Ok(res) => return Ok(res),
             Err(e) => err = e,

@@ -103,9 +103,9 @@ where
 {
     /// Execute a raw View function API call. This returns the raw bytes representing the result
     /// of this call. The caller is responsible for decoding the result.
-    pub async fn call_raw<'a>(
+    pub async fn call_raw(
         &self,
-        call_parameters: Option<&'a [u8]>,
+        call_parameters: Option<&[u8]>,
     ) -> Result<Vec<u8>, ViewFunctionError> {
         let client = &self.client;
         let block_hash = client.block_hash();

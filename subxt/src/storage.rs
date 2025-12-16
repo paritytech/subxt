@@ -211,7 +211,7 @@ where
     pub fn entry(
         &self,
     ) -> Result<StorageEntry<'atblock, T, Client, address::DynamicAddress>, StorageError> {
-        let addr = address::dynamic(self.pallet_name.to_owned(), self.entry_name.to_owned());
+        let addr = address::dynamic(&*self.pallet_name, &*self.entry_name);
         StorageEntry::new(self.client, addr)
     }
 }

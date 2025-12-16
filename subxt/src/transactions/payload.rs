@@ -206,7 +206,7 @@ pub fn dynamic<CallData>(
     call_name: impl Into<String>,
     call_data: CallData,
 ) -> DynamicPayload<CallData> {
-    StaticPayload::new(pallet_name, call_name, call_data.into())
+    StaticPayload::new(pallet_name, call_name, call_data)
 }
 
 #[cfg(test)]

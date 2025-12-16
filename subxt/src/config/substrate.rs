@@ -135,6 +135,12 @@ struct SubstrateConfigInner {
     metadata_for_spec_version: Mutex<HashMap<u32, ArcMetadata>>,
 }
 
+impl Default for SubstrateConfig {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SubstrateConfig {
     /// Create a new, default, [`SubstrateConfig`]. This does not
     /// support working with historic (pre-V14) types. If you want this,
@@ -297,7 +303,7 @@ where
     SubstrateHeader<H>: Encode + Decode,
 {
     fn number(&self) -> u64 {
-        self.number.into()
+        self.number
     }
 }
 
