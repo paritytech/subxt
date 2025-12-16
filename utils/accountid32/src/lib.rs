@@ -180,12 +180,12 @@ mod test {
             let local_account = AccountId32(substrate_account.clone().into());
 
             // Both should encode to ss58 the same way:
-            let substrate_ss58 = substrate_account.ss58();
+            let substrate_ss58 = substrate_account.to_ss58check();
             assert_eq!(substrate_ss58, local_account.ss58());
 
             // Both should decode from ss58 back to the same:
             assert_eq!(
-                sp_core::crypto::AccountId32::from_ss58(&substrate_ss58).unwrap(),
+                sp_core::crypto::AccountId32::from_ss58check(&substrate_ss58).unwrap(),
                 substrate_account
             );
             assert_eq!(

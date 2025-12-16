@@ -60,13 +60,13 @@ where
 {
     /// Construct and submit transactions. This is a
     /// shorthand to [`Self::transactions()`].
-    pub fn tx(&self) -> TransactionsClient<'_, T, Client> {
-        TransactionsClient::new(&self.client)
+    pub fn tx(&self) -> TransactionsClient<T, Client> {
+        self.transactions()
     }
 
     /// Construct and submit transactions.
-    pub fn transactions(&self) -> TransactionsClient<'_, T, Client> {
-        TransactionsClient::new(&self.client)
+    pub fn transactions(&self) -> TransactionsClient<T, Client> {
+        TransactionsClient::new(self.client.clone())
     }
 
     /// Access storage at this block.
@@ -113,6 +113,23 @@ where
     pub fn block_number(&self) -> u64 {
         self.client.block_number()
     }
+
+    /// The spec version at this block.
+    pub fn spec_version(&self) -> u32 {
+        self.client.spec_version()
+    }
+
+    /// The transaction version at this block.
+    /// Note: This is different from the value encoded at the start of extrinsics.
+    pub fn transaction_version(&self) -> u32 {
+        self.client.transaction_version()
+    }
+
+    /// Return the genesis hash, if it is available. if you're using an
+    /// [`OnlineClientAtBlock`], this will always be present.
+    pub fn genesis_hash(&self) -> Option<HashFor<T>> {
+        self.client.genesis_hash()
+    }
 }
 
 impl<T, Client> ClientAtBlock<T, Client>
@@ -120,6 +137,11 @@ where
     T: Config,
     Client: OnlineClientAtBlockT<T>,
 {
+    /// Return the [`OnlineClient`] behind this.
+    pub fn online_client(&self) -> OnlineClient<T> {
+        self.client.client()
+    }
+
     /// The current block hash.
     pub fn block_hash(&self) -> HashFor<T> {
         self.client.block_hash()

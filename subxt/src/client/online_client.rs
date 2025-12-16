@@ -7,13 +7,13 @@ use crate::backend::{Backend, BlockRef, CombinedBackend};
 use crate::config::{Config, HashFor, Hasher, Header};
 use crate::error::{BlocksError, OnlineClientAtBlockError};
 use crate::metadata::{ArcMetadata, Metadata};
+use crate::transactions::TransactionsClient;
 use blocks::Blocks;
 use codec::{Compact, Decode, Encode};
 use core::marker::PhantomData;
 use frame_decode::helpers::ToTypeRegistry;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use scale_info_legacy::TypeRegistrySet;
-use std::future::Future;
 use std::sync::Arc;
 use subxt_rpcs::RpcClient;
 
@@ -123,6 +123,22 @@ impl<T: Config> OnlineClient<T> {
                 backend,
             }),
         })
+    }
+
+    /// Return the genesis hash of the connected chain.
+    pub fn genesis_hash(&self) -> HashFor<T> {
+        self.inner.genesis_hash
+    }
+
+    /// Construct, sign and submit transactions. This is an alias for `self.at_current_block().await?.transactions()`.
+    pub async fn transactions(&self) -> Result<TransactionsClient<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
+        let at_block = self.at_current_block().await?;
+        Ok(at_block.transactions())
+    }
+
+    /// Construct, sign and submit transactions. This is an alias for `self.transactions()`.
+    pub async fn tx(&self) -> Result<TransactionsClient<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
+        self.transactions().await
     }
 
     /// Obtain a stream of all blocks imported by the node.
@@ -438,11 +454,8 @@ pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT<T> {
     fn backend(&self) -> &dyn Backend<T>;
     /// Return the block hash for the current block.
     fn block_hash(&self) -> HashFor<T>;
-    /// Point at a new block.
-    fn at_block(
-        &self,
-        number_or_hash: BlockNumberOrRef<T>,
-    ) -> impl Future<Output = Result<ClientAtBlock<T, Self>, OnlineClientAtBlockError>>;
+    /// Return the inner [`OnlineClient`].
+    fn client(&self) -> OnlineClient<T>;
 }
 
 /// An implementation of the [`OnlineClientAtBlockImpl`] trait, which is used in conjunction
@@ -466,11 +479,8 @@ impl<T: Config> OnlineClientAtBlockT<T> for OnlineClientAtBlockImpl<T> {
     fn block_hash(&self) -> HashFor<T> {
         self.block_ref.hash()
     }
-    async fn at_block(
-        &self,
-        number_or_hash: BlockNumberOrRef<T>,
-    ) -> Result<ClientAtBlock<T, Self>, OnlineClientAtBlockError> {
-        self.client.at_block(number_or_hash).await
+    fn client(&self) -> OnlineClient<T> {
+        self.client.clone()
     }
 }
 

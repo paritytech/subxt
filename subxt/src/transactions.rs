@@ -41,13 +41,13 @@ pub use validation_result::{
 
 /// A client for working with transactions. See [the module docs](crate::transactions) for more.
 #[derive(Clone)]
-pub struct TransactionsClient<'atblock, T, Client> {
-    client: &'atblock Client,
+pub struct TransactionsClient<T, Client> {
+    client: Client,
     marker: PhantomData<T>,
 }
 
-impl<'atblock, T, Client> TransactionsClient<'atblock, T, Client> {
-    pub(crate) fn new(client: &'atblock Client) -> Self {
+impl<T, Client> TransactionsClient<T, Client> {
+    pub(crate) fn new(client: Client) -> Self {
         TransactionsClient {
             client,
             marker: PhantomData,
@@ -55,8 +55,8 @@ impl<'atblock, T, Client> TransactionsClient<'atblock, T, Client> {
     }
 }
 
-impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
-    TransactionsClient<'atblock, T, Client>
+impl<T: Config, Client: OfflineClientAtBlockT<T>>
+    TransactionsClient<T, Client>
 {
     /// Run the validation logic against some transaction you'd like to submit. Returns `Ok(())`
     /// if the call is valid (or if it's not possible to check since the call has no validation hash).
@@ -95,11 +95,11 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
     /// transaction bytes, and some client (anything implementing [`OfflineClientAtBlockT`]
     /// or [`OnlineClientAtBlockT`]).
     pub fn from_bytes(
-        client: &'atblock Client,
+        &self,
         tx_bytes: Vec<u8>,
-    ) -> SubmittableTransaction<'atblock, T, Client> {
+    ) -> SubmittableTransaction<T, Client> {
         SubmittableTransaction {
-            client,
+            client: self.client.clone(),
             encoded: tx_bytes,
             marker: PhantomData,
         }
@@ -122,7 +122,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
     pub fn create_unsigned<Call>(
         &self,
         call: &Call,
-    ) -> Result<SubmittableTransaction<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<SubmittableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -138,7 +138,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
     pub fn create_v4_unsigned<Call>(
         &self,
         call: &Call,
-    ) -> Result<SubmittableTransaction<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<SubmittableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -149,7 +149,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
     pub fn create_v5_unsigned<Call>(
         &self,
         call: &Call,
-    ) -> Result<SubmittableTransaction<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<SubmittableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -166,7 +166,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<SignableTransaction<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<SignableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -187,7 +187,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<SignableTransaction<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<SignableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -205,7 +205,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
         &self,
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<SignableTransaction<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<SignableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -237,7 +237,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
         &self,
         call: &Call,
         tx_version: SupportedTransactionVersion,
-    ) -> Result<SubmittableTransaction<'atblock, T, Client>, ExtrinsicError> {
+    ) -> Result<SubmittableTransaction<T, Client>, ExtrinsicError> {
         let metadata = self.client.metadata_ref();
 
         // 1. Validate this call against the current node metadata if the call comes
@@ -263,7 +263,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
 
         // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
         Ok(SubmittableTransaction {
-            client: self.client,
+            client: self.client.clone(),
             encoded: extrinsic,
             marker: PhantomData,
         })
@@ -275,7 +275,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
         call: &Call,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
         tx_version: SupportedTransactionVersion,
-    ) -> Result<SignableTransaction<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<SignableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -314,7 +314,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
 
         // Return these details, ready to construct a signed extrinsic from.
         Ok(SignableTransaction {
-            client: self.client,
+            client: self.client.clone(),
             call_data,
             additional_and_extra_params,
             tx_extension_version,
@@ -322,10 +322,10 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
     }
 }
 
-impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<'atblock, T, Client> {
+impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
     /// Get the account nonce for a given account ID.
     pub async fn account_nonce(&self, account_id: &T::AccountId) -> Result<u64, ExtrinsicError> {
-        account_nonce::get_account_nonce(self.client, account_id)
+        account_nonce::get_account_nonce(&self.client, account_id)
             .await
             .map_err(|e| ExtrinsicError::AccountNonceError {
                 block_hash: self.client.block_hash().into(),
@@ -340,7 +340,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<'a
         call: &Call,
         account_id: &T::AccountId,
         mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<SignableTransaction<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<SignableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -358,7 +358,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<'a
         call: &Call,
         account_id: &T::AccountId,
         mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<SignableTransaction<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<SignableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -376,7 +376,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<'a
         call: &Call,
         account_id: &T::AccountId,
         mut params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<SignableTransaction<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<SignableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
     {
@@ -391,7 +391,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<'a
         call: &Call,
         signer: &S,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<SubmittableTransaction<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<SubmittableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
         S: Signer<T>,
@@ -412,7 +412,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<'a
         &mut self,
         call: &Call,
         signer: &S,
-    ) -> Result<TransactionProgress<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<TransactionProgress<T, Client>, ExtrinsicError>
     where
         Call: Payload,
         S: Signer<T>,
@@ -431,7 +431,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<'a
         call: &Call,
         signer: &S,
         params: <T::ExtrinsicParams as ExtrinsicParams<T>>::Params,
-    ) -> Result<TransactionProgress<'atblock, T, Client>, ExtrinsicError>
+    ) -> Result<TransactionProgress<T, Client>, ExtrinsicError>
     where
         Call: Payload,
         S: Signer<T>,
@@ -534,16 +534,16 @@ pub enum SupportedTransactionVersion {
 }
 
 /// This is a transaction that requires signing before it can be submitted.
-pub struct SignableTransaction<'atblock, T: Config, Client> {
-    client: &'atblock Client,
+pub struct SignableTransaction<T: Config, Client> {
+    client: Client,
     call_data: Vec<u8>,
     additional_and_extra_params: <T as Config>::ExtrinsicParams,
     // For V4 transactions this doesn't exist, and for V5 it does.
     tx_extension_version: Option<u8>,
 }
 
-impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
-    SignableTransaction<'atblock, T, Client>
+impl<T: Config, Client: OfflineClientAtBlockT<T>>
+    SignableTransaction<T, Client>
 {
     /// Return the bytes representing the call data for this partially constructed
     /// transaction.
@@ -563,7 +563,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
     pub fn sign<S: Signer<T>>(
         &mut self,
         signer: &S,
-    ) -> SubmittableTransaction<'atblock, T, Client> {
+    ) -> SubmittableTransaction<T, Client> {
         // Given our signer, we can sign the payload representing this extrinsic.
         let signature = signer.sign(&self.signer_payload());
         // Now, use the signature and "from" account to build the extrinsic.
@@ -578,7 +578,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
         &mut self,
         account_id: &T::AccountId,
         signature: &T::Signature,
-    ) -> SubmittableTransaction<'atblock, T, Client> {
+    ) -> SubmittableTransaction<T, Client> {
         let encoded = if let Some(tx_extensions_version) = self.tx_extension_version {
             let mut encoded_inner = Vec::new();
             // Pass account and signature to extensions to be added.
@@ -626,7 +626,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
         };
 
         SubmittableTransaction {
-            client: self.client,
+            client: self.client.clone(),
             encoded,
             marker: PhantomData,
         }
@@ -660,13 +660,14 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>>
 }
 
 /// This is a transaction that is ready to submit.
-pub struct SubmittableTransaction<'atblock, T, Client> {
-    client: &'atblock Client,
+#[derive(Debug, Clone)]
+pub struct SubmittableTransaction<T, Client> {
+    client: Client,
     encoded: Vec<u8>,
     marker: PhantomData<T>,
 }
 
-impl<'atblock, T, Client> SubmittableTransaction<'atblock, T, Client>
+impl<T, Client> SubmittableTransaction<T, Client>
 where
     T: Config,
     Client: OfflineClientAtBlockT<T>,
@@ -688,8 +689,8 @@ where
     }
 }
 
-impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>>
-    SubmittableTransaction<'atblock, T, Client>
+impl<T: Config, Client: OnlineClientAtBlockT<T>>
+    SubmittableTransaction<T, Client>
 {
     /// Submits the transaction to the chain.
     ///
@@ -697,7 +698,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>>
     /// and obtain details about it, once it has made it into a block.
     pub async fn submit_and_watch(
         &self,
-    ) -> Result<TransactionProgress<'atblock, T, Client>, ExtrinsicError> {
+    ) -> Result<TransactionProgress<T, Client>, ExtrinsicError> {
         // Get a hash of the transaction (we'll need this later).
         let ext_hash = self.hash();
 
@@ -709,7 +710,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>>
             .await
             .map_err(ExtrinsicError::ErrorSubmittingTransaction)?;
 
-        Ok(TransactionProgress::new(sub, self.client, ext_hash))
+        Ok(TransactionProgress::new(sub, self.client.clone(), ext_hash))
     }
 
     /// Submits the transaction to the chain for block inclusion.

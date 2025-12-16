@@ -1,7 +1,7 @@
 use anyhow::anyhow;
 use futures::FutureExt;
 
-use subxt::{OnlineClient, PolkadotConfig};
+use subxt::{client::OnlineClientAtBlockImpl, OnlineClient, OnlineClientAtBlock, PolkadotConfig};
 
 use subxt::config::DefaultExtrinsicParamsBuilder;
 use subxt::ext::codec::{Decode, Encode};
@@ -16,7 +16,7 @@ use yew::prelude::*;
 pub struct SigningExamplesComponent {
     message: String,
     remark_call_bytes: Vec<u8>,
-    online_client: Option<OnlineClient<PolkadotConfig>>,
+    online_client: Option<OnlineClientAtBlock<PolkadotConfig>>,
     stage: SigningStage,
 }
 
@@ -25,9 +25,9 @@ impl SigningExamplesComponent {
     /// panics if self.online_client is None.
     fn set_message(&mut self, message: String) {
         let remark_call = polkadot::tx().system().remark(message.as_bytes().to_vec());
-        let online_client = self.online_client.as_ref().unwrap();
+        let online_client_at_block = self.online_client.as_ref().unwrap();
         let remark_call_bytes = remark_call
-            .encode_call_data(&online_client.metadata())
+            .encode_call_data(online_client_at_block.metadata_ref())
             .unwrap();
         self.remark_call_bytes = remark_call_bytes;
         self.message = message;
@@ -51,7 +51,8 @@ pub enum SigningStage {
 
 pub enum SubmittingStage {
     Initial {
-        signed_extrinsic: SubmittableTransaction<PolkadotConfig, OnlineClient<PolkadotConfig>>,
+        signed_extrinsic:
+            SubmittableTransaction<PolkadotConfig, OnlineClientAtBlockImpl<PolkadotConfig>>,
     },
     Submitting,
     Success {
@@ -62,7 +63,7 @@ pub enum SubmittingStage {
 
 pub enum Message {
     Error(anyhow::Error),
-    OnlineClientCreated(OnlineClient<PolkadotConfig>),
+    OnlineClientCreated(OnlineClientAtBlock<PolkadotConfig>),
     ChangeMessage(String),
     RequestAccounts,
     ReceivedAccounts(Vec<Account>),
@@ -70,7 +71,7 @@ pub enum Message {
     SignWithAccount(usize),
     ReceivedSignature(
         MultiSignature,
-        SubmittableTransaction<PolkadotConfig, OnlineClient<PolkadotConfig>>,
+        SubmittableTransaction<PolkadotConfig, OnlineClientAtBlockImpl<PolkadotConfig>>,
     ),
     SubmitSigned,
     ExtrinsicFinalized {
@@ -85,12 +86,20 @@ impl Component for SigningExamplesComponent {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-        ctx.link().send_future(OnlineClient::<PolkadotConfig>::new().map(|res| {
-            match res {
-                Ok(online_client) => Message::OnlineClientCreated(online_client),
-                Err(err) => Message::Error(anyhow!("Online Client could not be created. Make sure you have a local node running:\n{err}")),
-            }
-        }));
+        ctx.link().send_future(async {
+            let conf = PolkadotConfig::new();
+            let Ok(client) = OnlineClient::new(conf).await else {
+                return Message::Error(anyhow!(
+                    "OnlineClient could not be created. Make sure you have a local node running\n"
+                ));
+            };
+            let Ok(at_block) = client.at_current_block().await else {
+                return Message::Error(anyhow!(
+                    "OnlineClient could not obtain current block details\n"
+                ));
+            };
+            Message::OnlineClientCreated(at_block)
+        });
         SigningExamplesComponent {
             message: "".to_string(),
             stage: SigningStage::CreatingOnlineClient,
@@ -101,8 +110,8 @@ impl Component for SigningExamplesComponent {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
-            Message::OnlineClientCreated(online_client) => {
-                self.online_client = Some(online_client);
+            Message::OnlineClientCreated(online_client_at_block) => {
+                self.online_client = Some(online_client_at_block);
                 self.stage = SigningStage::EnterMessage;
                 self.set_message("Hello".into());
             }
@@ -135,20 +144,21 @@ impl Component for SigningExamplesComponent {
                         .system()
                         .remark(self.message.as_bytes().to_vec());
 
-                    let api = self.online_client.as_ref().unwrap().clone();
+                    let at_block = self.online_client.clone().unwrap();
 
                     ctx.link().send_future(async move {
-                        let Ok(account_nonce) = api.tx().account_nonce(&account_id).await else {
+                        let Ok(account_nonce) = at_block.tx().account_nonce(&account_id).await
+                        else {
                             return Message::Error(anyhow!("Fetching account nonce failed"));
                         };
 
-                        let Ok(call_data) = api.tx().call_data(&remark_call) else {
+                        let Ok(call_data) = at_block.tx().call_data(&remark_call) else {
                             return Message::Error(anyhow!("could not encode call data"));
                         };
 
                         let Ok(signature) = extension_signature_for_extrinsic(
                             &call_data,
-                            &api,
+                            &at_block,
                             account_nonce,
                             account_source,
                             account_address,
@@ -166,15 +176,15 @@ impl Component for SigningExamplesComponent {
                         let params = DefaultExtrinsicParamsBuilder::new()
                             .nonce(account_nonce)
                             .build();
-                        let Ok(mut partial_signed) =
-                            api.tx().create_partial_offline(&remark_call, params)
+                        let Ok(mut signable) =
+                            at_block.tx().create_signable_offline(&remark_call, params)
                         else {
                             return Message::Error(anyhow!("PartialTransaction creation failed"));
                         };
 
                         // Apply the signature
-                        let signed_extrinsic = partial_signed
-                            .sign_with_account_and_signature(&account_id, &multi_signature);
+                        let signed_extrinsic =
+                            signable.sign_with_account_and_signature(&account_id, &multi_signature);
 
                         // check the TX validity (to debug in the js console if the extrinsic would work)
                         let dry_res = signed_extrinsic.validate().await;
@@ -394,7 +404,7 @@ impl Component for SigningExamplesComponent {
 }
 
 async fn submit_wait_finalized_and_get_extrinsic_success_event(
-    extrinsic: SubmittableTransaction<PolkadotConfig, OnlineClient<PolkadotConfig>>,
+    extrinsic: SubmittableTransaction<PolkadotConfig, OnlineClientAtBlockImpl<PolkadotConfig>>,
 ) -> Result<polkadot::system::events::ExtrinsicSuccess, anyhow::Error> {
     let events = extrinsic
         .submit_and_watch()
@@ -408,6 +418,9 @@ async fn submit_wait_finalized_and_get_extrinsic_success_event(
         web_sys::console::log_1(&format!("{:?}", event).into());
     }
 
-    let success = events.find_first::<polkadot::system::events::ExtrinsicSuccess>()?;
-    success.ok_or(anyhow!("ExtrinsicSuccess not found in events"))
+    let success = events
+        .find_first::<polkadot::system::events::ExtrinsicSuccess>()
+        .ok_or(anyhow!("ExtrinsicSuccess not found in events"))??;
+
+    Ok(success)
 }
