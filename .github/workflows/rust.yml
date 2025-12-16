@@ -109,10 +109,10 @@ jobs:
 
       - name: Run clippy
         run: |
-          cargo clippy --all-targets --features unstable-light-client -- -D warnings
+          cargo clippy --all-targets --features light-client -- -D warnings
           cargo clippy -p subxt-lightclient --no-default-features --features web -- -D warnings
           cargo clippy -p subxt --no-default-features --features web -- -D warnings
-          cargo clippy -p subxt --no-default-features --features web,unstable-light-client -- -D warnings
+          cargo clippy -p subxt --no-default-features --features web,light-client -- -D warnings
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
@@ -144,7 +144,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: -p subxt --no-default-features --features web,unstable-light-client,jsonrpsee --target wasm32-unknown-unknown -- -D warnings
+          args: -p subxt --no-default-features --features web,light-client,jsonrpsee --target wasm32-unknown-unknown -- -D warnings
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
@@ -433,7 +433,7 @@ jobs:
         uses: actions-rs/cargo@v1.0.3
         with:
           command: test
-          args: --release --package integration-tests --features unstable-light-client
+          args: --release --package integration-tests --features light-client
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5

@@ -79,7 +79,7 @@ pub use crate::{
 };
 
 // Expose light client bits
-#[cfg(feature = "unstable-light-client")]
+#[cfg(feature = "light-client")]
 pub use subxt_lightclient as lightclient;
 
 /// Re-export external crates that are made use of in the subxt API.

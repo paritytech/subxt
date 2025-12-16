@@ -25,7 +25,7 @@ default = ["jsonrpsee", "native"]
 # Features that we expect to be enabled for documentation.
 docs = [
     "default", 
-    "unstable-light-client",
+    "light-client",
     "runtime",
     "reconnecting-rpc-client",
 ]
@@ -35,6 +35,7 @@ docs = [
 native = [
     "subxt-lightclient?/native",
     "subxt-rpcs/native",
+    "tokio-util",
     "tokio?/sync",
     "sp-crypto-hashing/std",
 ]
@@ -75,7 +76,7 @@ unstable-metadata = []
 
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
-unstable-light-client = ["subxt-lightclient", "subxt-rpcs/unstable-light-client"]
+light-client = ["subxt-lightclient", "subxt-rpcs/light-client"]
 
 # Activate this to expose the ability to generate metadata from Wasm runtime files.
 runtime-wasm-path = ["subxt-macro/runtime-wasm-path"]
@@ -118,6 +119,9 @@ subxt-lightclient = { workspace = true, optional = true, default-features = fals
 subxt-rpcs = { workspace = true }
 subxt-utils-accountid32 = { workspace = true }
 
+# Included if "native" feature is enabled
+tokio-util = { workspace = true, features = ["compat"], optional = true }
+
 # Included if the reconnecting rpc client feature is enabled
 # Only the `tokio/sync` is used in the reconnecting rpc client
 # and that compiles both for native and web.
@@ -146,23 +150,18 @@ tower = { workspace = true }
 hyper = { workspace = true }
 http-body = { workspace = true }
 
-# [[example]]
-# name = "light_client_basic"
-# path = "examples/light_client_basic.rs"
-# required-features = ["unstable-light-client", "jsonrpsee"]
-# 
-# [[example]]
-# name = "light_client_local_node"
-# path = "examples/light_client_local_node.rs"
-# required-features = ["unstable-light-client", "jsonrpsee", "native"]
-# 
-# [[example]]
-# name = "setup_reconnecting_rpc_client"
-# path = "examples/setup_reconnecting_rpc_client.rs"
-# required-features = ["reconnecting-rpc-client"]
+[[example]]
+name = "light_client"
+path = "examples/light_client.rs"
+required-features = ["light-client", "jsonrpsee"]
+
+[[example]]
+name = "rpc_client"
+path = "examples/rpc_client.rs"
+required-features = ["reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]
 features = ["docs"]
 
 [package.metadata.playground]
-features = ["default", "unstable-light-client"]
+features = ["default", "light-client"]

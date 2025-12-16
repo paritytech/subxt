@@ -16,10 +16,10 @@ description = "Subxt integration tests that rely on the Substrate binary"
 default = []
 
 # Enable to run the tests with Light Client support.
-unstable-light-client = ["subxt/unstable-light-client"]
+light-client = ["subxt/light-client"]
 
 # Enable to run the full-client tests with Light Client support.
-unstable-light-client-long-running = ["subxt/unstable-light-client"]
+light-client-long-running = ["subxt/light-client"]
 
 # Enable this to use the chainhead backend in tests _instead of_
 # the default one which relies on the "old" RPC methods.

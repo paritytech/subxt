@@ -6,6 +6,8 @@
 
 mod account_id20;
 mod era;
+#[cfg(feature = "jsonrpsee")]
+mod fetch_chain_spec;
 mod multi_address;
 mod multi_signature;
 mod range_map;
@@ -31,6 +33,10 @@ pub use wrapper_opaque::WrapperKeepOpaque;
 pub use yesnomaybe::{Maybe, No, NoMaybe, Yes, YesMaybe, YesNo};
 
 pub use subxt_utils_accountid32::AccountId32;
+
+// Lightclient helper to fetch chain spec from a running node.
+#[cfg(feature = "jsonrpsee")]
+pub use fetch_chain_spec::{FetchChainspecError, fetch_chainspec_from_rpc_node};
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload

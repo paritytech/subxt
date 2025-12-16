@@ -14,7 +14,7 @@ macro_rules! cfg_feature {
 
 macro_rules! cfg_unstable_light_client {
 	($($item:item)*) => {
-		crate::macros::cfg_feature!("unstable-light-client", $($item)*);
+		crate::macros::cfg_feature!("light-client", $($item)*);
 	};
 }
 

@@ -5648,6 +5648,7 @@ dependencies = [
  "subxt-utils-accountid32",
  "thiserror 2.0.12",
  "tokio",
+ "tokio-util",
  "tower",
  "tracing",
  "tracing-subscriber",

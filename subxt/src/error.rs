@@ -10,7 +10,7 @@ mod hex;
 use std::borrow::Cow;
 use thiserror::Error as DeriveError;
 
-#[cfg(feature = "unstable-light-client")]
+#[cfg(feature = "light-client")]
 pub use subxt_lightclient::LightClientError;
 
 // Re-export dispatch error types:
@@ -86,10 +86,10 @@ pub enum Error {
     OtherRpcClientError(#[from] subxt_rpcs::Error),
     #[error("Other codec error: {0}")]
     OtherCodecError(#[from] codec::Error),
-    #[cfg(feature = "unstable-light-client")]
+    #[cfg(feature = "light-client")]
     #[error("Other light client error: {0}")]
     OtherLightClientError(#[from] subxt_lightclient::LightClientError),
-    #[cfg(feature = "unstable-light-client")]
+    #[cfg(feature = "light-client")]
     #[error("Other light client RPC error: {0}")]
     OtherLightClientRpcError(#[from] subxt_lightclient::LightClientRpcError),
     // Dev note: Nothing in subxt should ever emit this error. It can instead be used
@@ -167,6 +167,10 @@ impl Error {
             Error::ModuleErrorDetailsError(e) => e.backend_error(),
             Error::ModuleErrorDecodeError(e) => e.backend_error(),
             Error::DispatchErrorDecodeError(e) => e.backend_error(),
+            #[cfg(feature = "light-client")]
+            Error::OtherLightClientError(_) => None,
+            #[cfg(feature = "light-client")]
+            Error::OtherLightClientRpcError(_) => None,
             // BackendError is always a BackendError:
             Error::BackendError(e) => Some(e),
             // Other errors come from different crates so can never contain a BackendError:

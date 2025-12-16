@@ -18,7 +18,7 @@ keywords = ["parity", "subxt", "rpcs"]
 default = ["jsonrpsee", "native"]
 jsonrpsee = ["dep:jsonrpsee", "dep:tokio-util"]
 
-unstable-light-client = [
+light-client = [
     "dep:subxt-lightclient"
 ]
 

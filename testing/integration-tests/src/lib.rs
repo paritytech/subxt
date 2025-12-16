@@ -2,10 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-#[cfg(all(feature = "unstable-light-client", feature = "chainhead-backend"))]
-compile_error!(
-    "The features 'unstable-light-client' and 'chainhead-backend' cannot be used together"
-);
+#[cfg(all(feature = "light-client", feature = "chainhead-backend"))]
+compile_error!("The features 'light-client' and 'chainhead-backend' cannot be used together");
 
 #[cfg(test)]
 pub mod utils;
@@ -15,12 +13,12 @@ pub mod utils;
 use utils::*;
 
 #[cfg(any(
-    all(test, not(feature = "unstable-light-client")),
-    all(test, feature = "unstable-light-client-long-running")
+    all(test, not(feature = "light-client")),
+    all(test, feature = "light-client-long-running")
 ))]
 mod full_client;
 
-#[cfg(all(test, feature = "unstable-light-client"))]
+#[cfg(all(test, feature = "light-client"))]
 mod light_client;
 
 #[cfg(test)]
