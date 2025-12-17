@@ -33,15 +33,10 @@ async fn main() -> Result<(), Error> {
     };
     let entry = account_balances.fetch((account_id,)).await?;
 
-    // We can decode the value into our generic `Value` type, which can
-    // represent any SCALE-encoded value, like so:
+    // We can decode the value into any type implementing DecodeAsType:
     let _balance_info = entry.decode_as::<Value>()?;
-
-    // Or we can decode into a known shape. Any type implementing DecodeAsType can
-    // be used here to extract fields you're interested in, or we can use the generated
-    // type which already implements this:
-    type AccountInfo = polkadot::system::storage::account::Output;
-    let balance_info = entry.decode_as::<AccountInfo>()?;
+    // Or we can decode into the type stored by the static code, since we used a static address:
+    let balance_info = entry.decode()?;
 
     println!(
         "Single balance info from {account_id} => free: {} reserved: {} frozen: {} flags: {:?}",

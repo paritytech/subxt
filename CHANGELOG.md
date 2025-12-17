@@ -4,11 +4,423 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.50.0] - 2025-12-17
+
+This release version is a deliberately large bump up from 0.44.0 to signify the extent of the changes in this release.
+
+The headline changes are as follows:
+- Subxt is no longer _head-of-chain_ only, and can work with historic blocks, all the way back to genesis. **Note:** user-provided type information is required to do this for very old (> ~2year old, ie pre-V14 metadata) blocks.
+- The MVP `subxt-historic` crate has been removed, its functionality having been merged into Subxt.
+- The `subxt-core` crate has been removed for now to make way for the above. Subxt itself continues to support WASM use cases.
+  - For truly `no-std` functionality, the `frame-decode` crate now contains much of the underlying logic used throughout Subxt to encode and decode things, and we would like to expand the functionality here.
+  - We would like feedback from any users of the `subxt-core` crate on how they use it, and will use this feedback to drive future work in this area.
+- No more monitoring for runtime updates is needed; Subxt now works across different runtime versions automatically.
+- Errors are no longer one big `Error` enum; instead different Subxt APIs return different errors, to limit the number of possible errors in any one place. These all convert into `subxt::Error` so this can continue to be used as a catch-all.
+- Storage APIs have been redone, fixing some [issues](https://github.com/paritytech/subxt/issues/1928) and giving much more control over iteration, as well as key and value decoding.
+
+This changes have results in many breaking changes across APIs, which I will try my best to summarize below.
+
+A good place to look for a more holistic understanding of what's changes are the examples, both:
+- The [smaller single-file examples](https://github.com/paritytech/subxt/tree/master/subxt/examples)
+- The [larger project-based examples](https://github.com/paritytech/subxt/tree/master/examples)
+
+For the smaller examples, start with [the basic transaction submission example](https://github.com/paritytech/subxt/blob/jsdw-subxt-new/subxt/examples/submit_transaction.rs) and then have a look at [the blocks example](https://github.com/paritytech/subxt/blob/jsdw-subxt-new/subxt/examples/blocks.rs) and [the storage example](https://github.com/paritytech/subxt/blob/jsdw-subxt-new/subxt/examples/storage_entries.rs) to give the best broad overview of the changes. Pick and choose others next depending on what suits.
+
+A breakdown of the significant changes follows, to aid migration efforts: 
+
+### Configuration 
+
+**Before**
+
+Configuration (`PolkadotConfig` and `SubstrateConfig`) was type-only and didn't exist at the value level, and so you'd provide it to the client like so:
+
+```rust
+use subxt::{OnlineClient, PolkadotConfig};
+
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+```
+
+**After**
+
+Configuration now exists at the value level too. This is because it has been extended with support for historic types and working with historic metadatas and spec versions:
+
+```rust
+use subxt::{OnlineClient, PolkadotConfig};
+
+let config = PolkadotConfig::new();
+let api = OnlineClient::new(config).await?;
+```
+
+The rules for when to use `PolkadotConfig` and `SubstrateConfig` remain the same: 
+- Use `PolkadotConfig` for the **Polkadot Relay Chain**.
+- Use `SubstrateConfig` by default with other chains.
+- You may need to modify the configuration to work with some chains, as before.
+
+See the docs for `PolkadotConfig` and `SubstrateConfig` for more. If you want to work with historic blocks for instance, you'll need to provide historic type information for `SubstrateConfig`.
+
+### Working at specific blocks
+
+**Before**
+
+Previously, you'd be able to select (within a limited range) which block to work at with APIs like so:
+
+```rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+let constants = api.constants();
+
+let storage = api.storage().at(block_hash).await?;
+let storage = api.storage().at_latest().await?;
+
+let events = api.events().at(block_hash).await?;
+let events = api.events().at_latest().await?;
+
+let runtime_apis = api.runtime_api().at(block_hash).await?;
+let runtime_apis = api.runtime_api().at_latest().await?;
+```
+
+**After**
+
+Now, the block is selected first, like so:
+
+```rust
+let config = PolkadotConfig::new();
+let api = OnlineClient::new(config).await?;
+
+let constants = api.at_block(block_hash_or_number).await?.constants();
+let constants = api.at_current_block().await?.constants();
+
+let storage = api.at_block(block_hash_or_number).await?.storage();
+let storage = api.at_current_block().await?.storage();
+
+let events = api.at_block(block_hash_or_number).await?.events();
+let events = api.at_current_block().await?.events();
+
+let runtime_apis = api.at_block(block_hash_or_number).await?.runtime_apis();
+let runtime_apis = api.at_current_block().await?.runtime_apis();
+```
+
+Notes:
+- `at_latest` has been renamed to `at_current_block` and, like before, it fetches the current _finalized_ block at the time of calling.
+- `at_current_block` now accepts a block hahs _or_ block number, and returns a client that works in the context of that block.
+- Constants were not previously retrieved at a given block; Subxt only knew about a single `Metadata` and so it was unnecessary. Now, constants are retrieved at a specific block like everything else (different blocks may have different `Metadata`s).
+- A small thing: `runtime_api()` was renamed to `runtime_apis()` to be consistent with other APIs names.
+- `.tx()` is now callable at a specific block, and uses this block for any account nonce and mortality configuration.
+
+### Working with blocks
+
+**Before**
+
+A `.blocks()` method accessed block-specific APIs for fetching and subscribing to blocks.
+
+```rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+// fetching:
+let block = api.blocks().at(block_hash).await?;
+let block = api.blocks().at_latest().await?;
+
+// subscribing:
+let mut blocks = api.blocks().subscribe_finalized().await?;
+while let Some(block) = blocks_sub.next().await {
+    let block = block?;
+
+    let extrinsics = block.extrinsics().await?;
+    for ext in extrinsics.iter() {
+        // See the blocks example for more.
+    }
+}
+```
+
+**After**
+
+Now that APIs are largely block-specific up front, we don't need separate APIs for block fetching, and move streaming blocks up a level.
+
+```rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+// fetching:
+let block = api.at_block(block_hash_or_number).await?;
+let block = api.at_current_block().await?;
+
+// subscribing:
+let mut blocks = api.stream_blocks().await?;
+while let Some(block) = blocks_sub.next().await {
+    let block = block?;
+
+    // now, we instantiate a client at a given block, which gives back the
+    // same thing as api.at_block() and api.at_current_block() does:
+    let at_block = block.at().await?;
+
+    let extrinsics = at_block.extrinsics().fetch().await?;
+    for ext in extrinsics.iter() {
+        // See the blocks example for more.
+    }
+}
+```
+
+Notes:
+- Working with finalized blocks is always the default now, and API names are shortened to make them the easiest/most obvious to use.
+- Use `.at()` at a given block to hand back a full client which can do anything at that block.
+- `api.blocks().subscribe_finalized()` => `api.stream_blocks()`.
+- `api.blocks().subscribe_best()` => `api.stream_best_blocks()`.
+- `api.blocks().subscribe_all()` => `api.stream_all_blocks()`.
+
+### Transactions
+
+**Before**
+
+Transactions were implicitly created at the latest block, and the APIs were disconnected from any particular block:
+
+```rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+// Submit an extrinsic, waiting for success.
+let events = api
+    .tx()
+    .sign_and_submit_then_watch_default(&balance_transfer_tx, &from)
+    .await?
+    .wait_for_finalized_success()
+    .await?;
+```
+
+**After**
+
+Transactions are anchored to a given block but we continue to provide a `.tx()` method on the client as a shorthand for "create transactions at the current block".
+
+```rust
+let config = PolkadotConfig::new();
+let api = OnlineClient::new(config).await?;
+
+// Work at a specific block:
+let at_block = api.at_current_block().await?;
+
+// Submit the balance transfer extrinsic anchored at this block:
+let events = at_block
+    .tx()
+    .sign_and_submit_then_watch_default(&balance_transfer_tx, &from)
+    .await?
+    .wait_for_finalized_success()
+    .await?;
+
+// A shorthand for the above:
+let events = api
+    .tx()
+    .await? // This is the minimal change from the old APIs.
+    .sign_and_submit_then_watch_default(&balance_transfer_tx, &from)
+    .await?
+    .wait_for_finalized_success()
+    .await?;
+```
+
+Notes:
+- We now use `transactions` instead of `tx` everywhere to align better with other API names, but continue to provide `tx` as a shorthand.
+- The word `partial` is changed to `signable` in transaction APIs. "partial" was always a confusing name, and "signable" makes it much clearer what is being created; something that can be signed.
+  - `tx().create_partial_offline(..)` => `tx().create_signable_offline(..)`
+  - `tx().create_v4_partial_offline(..)` => `tx().create_v4_signable_offline(..)`
+  - `tx().create_v5_partial_offline(..)` => `tx().create_v5_signable_offline(..)`
+  - `tx().create_partial(..)` => `tx().create_signable(..)`
+  - `tx().create_v4_partial(..)` => `tx().create_v4_signable(..)`
+  - `tx().create_v5_partial(..)` => `tx().create_v5_signable(..)`
+- `tx().from_bytes(bytes)` is added as an easy way to hand a pre-constructed transaction to Subxt to be submitted, removing the need for an ugly `SubmittableTransaction::from_bytes` method.
+
+### Storage Entries
+
+**Before**
+
+The codegen dealt with the heavy lifting of iterating storage maps at various depths (albeit with a bug), and on fetching an entry you had little control over how you handled the resulting bytes.
+
+```rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+//// Fetching:
+let result = api
+    .storage()
+    .at_latest()
+    .await?
+    .fetch(&storage_query)
+    .await?;
+
+//// Iterating
+let mut results = api
+    .storage()
+    .at_latest()
+    .await?
+    .iter(storage_query)
+    .await?;
+while let Some(Ok(kv)) = results.next().await {
+    println!("Keys decoded: {:?}", kv.keys); // <- Broken in some cases
+    println!("Key: 0x{}", hex::encode(&kv.key_bytes));
+    println!("Value: {:?}", kv.value);
+}
+```
+
+**After**
+
+A redesign of the Storage APIs makes everything more unified, and allows working at specific storage entries in a much more flexible way than before, while moving logic out of the codegen, simplifying it, and into Subxt proper.
+
+```rust
+let config = PolkadotConfig::new();
+let api = OnlineClient::new(config).await?;
+let at_block = api.at_current_block().await?;
+
+let account_balances = at_block
+    .storage()
+    .entry(storage_query)?;
+
+//// Fetching:
+
+// We can fetch multiple values from an entry:
+let value1 = account_balances.fetch((account_id1,)).await?;
+let value2 = account_balances.fetch((account_id2,)).await?;
+
+// Entries can be decoded into the static type given by the address:
+let result = value1.decode()?;
+// Or they can be decoded into any arbitrary shape:
+let result = value1.decode_as::<scale_value::Value>()?;
+// Or we can "visit" the entry for more control over decoding:
+let result = value1.visit(my_visitor)?;
+// Or we can just get the bytes out and do what we want:
+let result_bytes = value1.bytes();
+
+
+//// Iterating
+
+// We can iterate over the same entry we fetched things from:
+let mut balances = account_balances.iter(()).await?;
+while let Some(Ok(entry)) = all_balances.next().await {
+    let key = entry.key()?;
+    let value = entry.value();
+
+    // Decode the keys that can be decoded:
+    let keys_tuple = key.decode()?;
+    // Value is as above:
+    let value = value.decode()?;
+
+    println!("Keys decoded: {:?}", keys_tuple);
+    println!("Key: 0x{}", hex::encode(key.bytes()));
+    println!("Value: {:?}", value);
+}
+```
+
+This is perhaps the largest change to any specific set of APIs in terms of differences. Take a look at the API docs and [the storage example](https://github.com/paritytech/subxt/blob/jsdw-subxt-new/subxt/examples/storage_entries.rs) and [PR](https://github.com/paritytech/subxt/pull/2100) for more on this.
+
+### Dynamic values
+
+**Before**
+
+Dynamic values were always constructed using and returning `scale_value::Value`s, for instance:
+
+```rust
+let constant_query = subxt::dynamic::constant(
+    "System", 
+    "BlockLength"
+);
+
+let runtime_api_payload = subxt::dynamic::runtime_api_call(
+    "AccountNonceApi",
+    "account_nonce",
+    vec![Value::from_bytes(account)],
+);
+
+let storage_query = subxt::dynamic::storage(
+    "System", 
+    "Account", 
+    vec![Value::from_bytes(account)]
+);
+```
+
+**After**
+
+The dynamic methods have been made more generic, allowing more arbitrary types to be used in their construction, and alloowing the return type to be set. This does however mean that types need to be provided sometimes:
+
+```rust
+let constant_query = subxt::dynamic::constant::<Value>(
+    "System", 
+    "BlockLength"
+);
+
+let runtime_api_payload = subxt::dynamic::runtime_api_call::<_, Value>(
+    "AccountNonceApi",
+    "account_nonce",
+    vec![Value::from_bytes(account)],
+);
+// We can provide more generic input args now, negating the need 
+// to convert to Values unnecessarily:
+let runtime_api_payload = subxt::dynamic::runtime_api_call::<_, Value>(
+    "AccountNonceApi",
+    "account_nonce",
+    (account,),
+);
+
+// We no longer provide the keys up front for storage; we just point
+// to the _entry_ we want and provide the key and return types:
+let storage_query = subxt::dynamic::storage::<Vec<Value>, Value>(
+    "System", 
+    "Account",
+);
+// This allows us to set better key/value types if we know what to expect. Here
+// we know what information we want from account info and the key format:
+#[derive(scale_decode::DecodeAsType)]
+struct MyAccountInfo {
+    nonce: u32,
+    data: MyAccountInfoData
+}
+#[derive(scale_decode::DecodeAsType)]
+struct MyAccountInfoData {
+    free: u128,
+    reserved: u128
+}
+let storage_query = subxt::dynamic::storage::<(AccountId32,), MyAccountInfo>(
+    "System", 
+    "Account",
+);
+```
+
+Notes:
+- As before when `scale_value::Value` was used everywhere, the _actual_ values provided are always checked at runtime against the API and invalid shapes/values will lead to an error.
+- Now, it's possible to provide statically typed values when you know roughly what to expect, or even to just provide your own dynamic value type that isn't `scale_value::Value`. This makes it easier to work against historic blocks where you may not have or want to use the `#[subxt]` codegen, but still want to work with static types as much as possible.
+
+### Metadata
+
+Subxt previously exposed `subxt::Metadata`, which was a wrapped version of `subxt_metadata::Metadata`. The wrapping was removed, and now we have only `subxt_metadata::Metadata`, which is exposed as `subxt::Metadata`. This metadata can be cloned but is not cheap to clone, and so we also expose `subxt::ArcMetadata`, which is used in many places and is the `Arc`-wrapped version of it, for cheap cloning.
+
+`subxt_metadata::Metadata` now exposes helper functions to construct it from various `frame_metadata` versions, to support our historic decoding efforts:
+- `Metadata::from_v16(..)`
+- `Metadata::from_v15(..)`
+- `Metadata::from_v14(..)`
+- `Metadata::from_v13(..)`
+- `Metadata::from_v12(..)`
+- `Metadata::from_v11(..)`
+- `Metadata::from_v10(..)`
+- `Metadata::from_v9(..)`
+- `Metadata::from_v8(..)`
+
+Where the older versions require type information to be provided in addition to the correpsonding `frame_metadata` version.
+
+A list of the main change PRs follows:
 
 ### Added
 
-- Add `system_chain_type()` RPC method to `LegacyRpcMethods`
+- Allow passing $OUT_DIR in the runtime_metadata_path attribute ([#2142](https://github.com/paritytech/subxt/pull/2142))
+- feat: Add `system_chainType` to legacy rpcs ([#2116](https://github.com/paritytech/subxt/pull/2116))
+- Add --at-block option to CLI tool to download metadata at a specific block ([#2079](https://github.com/paritytech/subxt/pull/2079))
+
+### Changed
+
+- [v0.50.0] Implement support for historic blocks in Subxt ([#2131](https://github.com/paritytech/subxt/pull/2131))
+- subxt-historic: 0.0.8 release: expose type resolver that can be used with visitors ([#2140](https://github.com/paritytech/subxt/pull/2140))
+- subxt-historic: 0.0.7 release: expose ClientAtBlock bits ([#2138](https://github.com/paritytech/subxt/pull/2138))
+- subxt-historic: 0.0.6 release: expose metadata at a given block ([#2135](https://github.com/paritytech/subxt/pull/2135))
+- [v0.50.0] Merge preliminary work to master ([#2127](https://github.com/paritytech/subxt/pull/2127))
+  - subxt-historic: 0.0.6 release: visit methods ([#2126](https://github.com/paritytech/subxt/pull/2126))
+  - Allow visiting extrinsic fields in subxt_historic ([#2124](https://github.com/paritytech/subxt/pull/2124))
+  - Convert historic metadata to `subxt::Metadata` ([#2120](https://github.com/paritytech/subxt/pull/2120))
+  - Update scale-info-legacy and frame-decode to latest ([#2119](https://github.com/paritytech/subxt/pull/2119))
+  - Integrate frame-decode, redo storage APIs and break up Error ([#2100](https://github.com/paritytech/subxt/pull/2100))
+- Bump smoldot / smoldot-light to latest ([#2110](https://github.com/paritytech/subxt/pull/2110))
+- [subxt-historic]: extract call and event types from metadata at a block ([#2095](https://github.com/paritytech/subxt/pull/2095))
+- subxt-historic: add support for returning the default values of storage entries ([#2072](https://github.com/paritytech/subxt/pull/2072))
 
 ## [0.44.0] - 2025-08-28
 

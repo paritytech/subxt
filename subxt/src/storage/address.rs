@@ -15,7 +15,7 @@ use std::borrow::Cow;
 pub trait Address {
     /// All of the keys required to get to an individual value at this address.
     /// Keys must always impl [`IntoEncodableValues`], and for iteration must
-    /// also impl [`frame_decode::storage::IntoDecodableValues`].
+    /// also impl [`IntoDecodableValues`].
     type KeyParts: IntoEncodableValues + IntoDecodableValues;
     /// Type of the storage value at this location.
     type Value: DecodeAsType;
