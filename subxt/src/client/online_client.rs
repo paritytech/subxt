@@ -131,13 +131,17 @@ impl<T: Config> OnlineClient<T> {
     }
 
     /// Construct, sign and submit transactions. This is an alias for `self.at_current_block().await?.transactions()`.
-    pub async fn transactions(&self) -> Result<TransactionsClient<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
+    pub async fn transactions(
+        &self,
+    ) -> Result<TransactionsClient<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
         let at_block = self.at_current_block().await?;
         Ok(at_block.transactions())
     }
 
     /// Construct, sign and submit transactions. This is an alias for `self.transactions()`.
-    pub async fn tx(&self) -> Result<TransactionsClient<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
+    pub async fn tx(
+        &self,
+    ) -> Result<TransactionsClient<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
         self.transactions().await
     }
 

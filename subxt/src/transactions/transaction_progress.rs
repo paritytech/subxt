@@ -226,11 +226,7 @@ pub struct TransactionInBlock<T: Config, C> {
 }
 
 impl<T: Config, C> TransactionInBlock<T, C> {
-    pub(crate) fn new(
-        block_ref: BlockRef<HashFor<T>>,
-        ext_hash: HashFor<T>,
-        client: C,
-    ) -> Self {
+    pub(crate) fn new(block_ref: BlockRef<HashFor<T>>, ext_hash: HashFor<T>, client: C) -> Self {
         Self {
             block_ref,
             ext_hash,

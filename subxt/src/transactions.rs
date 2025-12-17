@@ -55,9 +55,7 @@ impl<T, Client> TransactionsClient<T, Client> {
     }
 }
 
-impl<T: Config, Client: OfflineClientAtBlockT<T>>
-    TransactionsClient<T, Client>
-{
+impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> {
     /// Run the validation logic against some transaction you'd like to submit. Returns `Ok(())`
     /// if the call is valid (or if it's not possible to check since the call has no validation hash).
     /// Return an error if the call was not valid or something went wrong trying to validate it (ie
@@ -94,10 +92,7 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>>
     /// Create a [`SubmittableTransaction`] from some already-signed and prepared
     /// transaction bytes, and some client (anything implementing [`OfflineClientAtBlockT`]
     /// or [`OnlineClientAtBlockT`]).
-    pub fn from_bytes(
-        &self,
-        tx_bytes: Vec<u8>,
-    ) -> SubmittableTransaction<T, Client> {
+    pub fn from_bytes(&self, tx_bytes: Vec<u8>) -> SubmittableTransaction<T, Client> {
         SubmittableTransaction {
             client: self.client.clone(),
             encoded: tx_bytes,
@@ -542,9 +537,7 @@ pub struct SignableTransaction<T: Config, Client> {
     tx_extension_version: Option<u8>,
 }
 
-impl<T: Config, Client: OfflineClientAtBlockT<T>>
-    SignableTransaction<T, Client>
-{
+impl<T: Config, Client: OfflineClientAtBlockT<T>> SignableTransaction<T, Client> {
     /// Return the bytes representing the call data for this partially constructed
     /// transaction.
     pub fn call_data(&self) -> &[u8] {
@@ -560,10 +553,7 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>>
     /// Convert this [`SignableTransaction`] into a [`SubmittableTransaction`], ready to submit.
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
-    pub fn sign<S: Signer<T>>(
-        &mut self,
-        signer: &S,
-    ) -> SubmittableTransaction<T, Client> {
+    pub fn sign<S: Signer<T>>(&mut self, signer: &S) -> SubmittableTransaction<T, Client> {
         // Given our signer, we can sign the payload representing this extrinsic.
         let signature = signer.sign(&self.signer_payload());
         // Now, use the signature and "from" account to build the extrinsic.
@@ -689,16 +679,12 @@ where
     }
 }
 
-impl<T: Config, Client: OnlineClientAtBlockT<T>>
-    SubmittableTransaction<T, Client>
-{
+impl<T: Config, Client: OnlineClientAtBlockT<T>> SubmittableTransaction<T, Client> {
     /// Submits the transaction to the chain.
     ///
     /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
-    pub async fn submit_and_watch(
-        &self,
-    ) -> Result<TransactionProgress<T, Client>, ExtrinsicError> {
+    pub async fn submit_and_watch(&self) -> Result<TransactionProgress<T, Client>, ExtrinsicError> {
         // Get a hash of the transaction (we'll need this later).
         let ext_hash = self.hash();
 
