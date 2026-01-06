@@ -20,7 +20,6 @@ use subxt_rpcs::methods::chain_head::{
     FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
     StorageQueryType,
 };
-
 use subxt_signer::sr25519::dev;
 
 #[subxt_test]
