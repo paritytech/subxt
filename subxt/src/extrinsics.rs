@@ -22,9 +22,9 @@ use crate::events::{self, DecodeAsEvent};
 use frame_decode::extrinsics::Extrinsic as ExtrinsicInfo;
 use scale_decode::{DecodeAsFields, DecodeAsType};
 use scale_info::PortableRegistry;
+use std::borrow::Cow;
 use std::marker::PhantomData;
 use std::sync::Arc;
-use std::borrow::Cow;
 use subxt_metadata::ArcMetadata;
 
 pub use decode_as_extrinsic::DecodeAsExtrinsic;
@@ -92,10 +92,10 @@ pub struct Extrinsics<'atblock, T, C: Clone> {
 impl<'atblock, T: Config, C: OfflineClientAtBlockT<T>> Extrinsics<'atblock, T, C> {
     /// Take ownership of the extrinsics, converting lifetimes to static.
     pub fn into_owned(self) -> Extrinsics<'static, T, C> {
-        Extrinsics { 
+        Extrinsics {
             client: Cow::Owned(self.client.into_owned()),
             extrinsics: self.extrinsics,
-            marker: self.marker
+            marker: self.marker,
         }
     }
 
@@ -127,13 +127,16 @@ impl<'atblock, T: Config, C: OfflineClientAtBlockT<T>> Extrinsics<'atblock, T, C
                 let cursor = &mut &**extrinsic_bytes;
 
                 // Try to decode the extrinsic.
-                let info =
-                    frame_decode::extrinsics::decode_extrinsic(cursor, &*metadata, metadata.types())
-                        .map_err(|error| ExtrinsicDecodeErrorAt {
-                            extrinsic_index,
-                            error: ExtrinsicDecodeErrorAtReason::DecodeError(error),
-                        })?
-                        .into_owned();
+                let info = frame_decode::extrinsics::decode_extrinsic(
+                    cursor,
+                    &*metadata,
+                    metadata.types(),
+                )
+                .map_err(|error| ExtrinsicDecodeErrorAt {
+                    extrinsic_index,
+                    error: ExtrinsicDecodeErrorAtReason::DecodeError(error),
+                })?
+                .into_owned();
 
                 // We didn't consume all bytes, so decoding probably failed.
                 if !cursor.is_empty() {
@@ -201,12 +204,12 @@ where
     pub fn into_owned(self) -> Extrinsic<'static, T, C> {
         let info = &*self.info;
 
-        Extrinsic { 
+        Extrinsic {
             client: Cow::Owned(self.client.into_owned()),
-            index: self.index, 
-            info: Arc::new(info.clone().into_owned()), 
-            extrinsics: self.extrinsics.clone(), 
-            hasher: Cow::Owned(self.hasher.into_owned()), 
+            index: self.index,
+            info: Arc::new(info.clone().into_owned()),
+            extrinsics: self.extrinsics.clone(),
+            hasher: Cow::Owned(self.hasher.into_owned()),
             metadata: self.metadata,
         }
     }
@@ -304,9 +307,7 @@ where
     }
 
     /// Returns `None` if the extrinsic is not signed.
-    pub fn transaction_extensions(
-        &self,
-    ) -> Option<ExtrinsicTransactionExtensions<'_, T>> {
+    pub fn transaction_extensions(&self) -> Option<ExtrinsicTransactionExtensions<'_, T>> {
         let bytes = self.bytes();
         let metadata = &self.metadata;
 
@@ -380,9 +381,7 @@ where
     }
 
     /// Iterate over each of the fields in the call data.
-    pub fn iter_call_data_fields(
-        &self,
-    ) -> impl Iterator<Item = ExtrinsicCallDataField<'_>> {
+    pub fn iter_call_data_fields(&self) -> impl Iterator<Item = ExtrinsicCallDataField<'_>> {
         let ext_bytes = self.bytes();
         self.info.call_data().map(|field| ExtrinsicCallDataField {
             bytes: &ext_bytes[field.range()],

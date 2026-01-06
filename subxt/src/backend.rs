@@ -118,10 +118,10 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
 }
 
 /// Utility methods derived from those provided on [`Backend`]. These are not made
-/// public and only exist to help us in Subxt; Users should rely on the high level 
+/// public and only exist to help us in Subxt; Users should rely on the high level
 /// Subxt interface over the backend.
 #[async_trait]
-pub (crate) trait BackendExt<T: Config>: Backend<T> {
+pub(crate) trait BackendExt<T: Config>: Backend<T> {
     /// Fetch a single value from storage.
     async fn storage_fetch_value(
         &self,

@@ -32,16 +32,12 @@ use codec::Compact;
 use std::sync::Arc;
 use subxt::dynamic::Value;
 use subxt::{
-    client::OnlineClient, 
-    config::PolkadotConfig, 
+    backend::{ChainHeadBackend, CombinedBackend, LegacyBackend},
+    client::OnlineClient,
+    config::PolkadotConfig,
     lightclient::LightClient,
     metadata::Metadata,
     rpcs::RpcClient,
-    backend::{
-        ChainHeadBackend,
-        LegacyBackend,
-        CombinedBackend,
-    }
 };
 
 type Client = OnlineClient<PolkadotConfig>;
@@ -78,10 +74,7 @@ async fn finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error
     let header = sub.next().await.unwrap()?;
     tracing::trace!("First block took {:?}", now.elapsed());
 
-    let finalized_hash = api
-        .at_current_block()
-        .await?
-        .block_hash();
+    let finalized_hash = api.at_current_block().await?.block_hash();
 
     tracing::trace!(
         "Finalized hash: {:?} took {:?}",
@@ -205,15 +198,13 @@ async fn run_test(backend: BackendType) -> Result<(), subxt::Error> {
             OnlineClient::from_backend(config, Arc::new(backend)).await?
         }
         BackendType::Legacy => {
-            let backend =
-                LegacyBackend::builder().build(RpcClient::new(rpc));
+            let backend = LegacyBackend::builder().build(RpcClient::new(rpc));
             OnlineClient::from_backend(config, Arc::new(backend)).await?
-        },
+        }
         BackendType::Combined => {
-            let backend =
-                CombinedBackend::builder()
-                    .build_with_background_driver(RpcClient::new(rpc))
-                    .await?;
+            let backend = CombinedBackend::builder()
+                .build_with_background_driver(RpcClient::new(rpc))
+                .await?;
             OnlineClient::from_backend(config, Arc::new(backend)).await?
         }
     };

@@ -25,7 +25,7 @@ use crate::config::{
     ClientState, Config, ExtrinsicParams, ExtrinsicParamsEncoder, HashFor, Hasher, Header,
 };
 use crate::error::{ExtrinsicError, TransactionStatusError};
-use codec::{Compact, Encode, Decode};
+use codec::{Compact, Decode, Encode};
 use core::marker::PhantomData;
 use futures::{TryFutureExt, future::try_join};
 use sp_crypto_hashing::blake2_256;
@@ -792,8 +792,9 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> SubmittableTransaction<T, Clien
             .await
             .map_err(ExtrinsicError::CannotGetFeeInfo)?;
 
-        let (_, _, _, partial_fee) = <(Compact<u64>, Compact<u64>, u8, u128)>::decode(&mut &*response)
-            .map_err(ExtrinsicError::CannotDecodeFeeInfo)?;
+        let (_, _, _, partial_fee) =
+            <(Compact<u64>, Compact<u64>, u8, u128)>::decode(&mut &*response)
+                .map_err(ExtrinsicError::CannotDecodeFeeInfo)?;
 
         Ok(partial_fee)
     }

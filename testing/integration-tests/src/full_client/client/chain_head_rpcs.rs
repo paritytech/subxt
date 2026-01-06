@@ -51,7 +51,6 @@ async fn chainhead_v1_follow() {
     let subxt_transaction_version = at_block.transaction_version();
     let subxt_spec_version = at_block.spec_version();
 
-
     assert_matches!(
         event,
         FollowEvent::Initialized(init) => {
@@ -141,7 +140,12 @@ async fn chainhead_v1_storage() {
     let addr_bytes = {
         let at_block = api.at_current_block().await.unwrap();
         let addr = node_runtime::storage().system().account();
-        at_block.storage().entry(addr).unwrap().fetch_key((alice,)).unwrap()
+        at_block
+            .storage()
+            .entry(addr)
+            .unwrap()
+            .fetch_key((alice,))
+            .unwrap()
     };
 
     let items = vec![StorageQuery {

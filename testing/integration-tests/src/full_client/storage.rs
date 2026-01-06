@@ -217,7 +217,12 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
 async fn storage_runtime_wasm_code() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
-    let wasm_blob = api.at_current_block().await?.storage().runtime_wasm_code().await?;
+    let wasm_blob = api
+        .at_current_block()
+        .await?
+        .storage()
+        .runtime_wasm_code()
+        .await?;
     assert!(wasm_blob.len() > 10_000); // the wasm should be super big
     Ok(())
 }

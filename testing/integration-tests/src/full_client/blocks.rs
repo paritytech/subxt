@@ -2,6 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::utils::node_runtime;
 use crate::{subxt_test, test_context, utils::consume_initial_blocks};
 use codec::{Compact, Decode, Encode};
 use subxt::{
@@ -13,7 +14,6 @@ use subxt::{
     utils::Era,
 };
 use subxt_signer::sr25519::dev;
-use crate::utils::node_runtime;
 
 #[subxt_test]
 async fn block_subscriptions_are_consistent_with_eachother() -> Result<(), subxt::Error> {
@@ -121,8 +121,11 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
         .map(|(_, r)| r);
 
     // This should spot any gaps in the middle and fill them back in.
-    let all_finalized_blocks =
-        subxt::backend::subscribe_to_block_headers_filling_in_gaps(rpc, some_finalized_blocks, None);
+    let all_finalized_blocks = subxt::backend::subscribe_to_block_headers_filling_in_gaps(
+        rpc,
+        some_finalized_blocks,
+        None,
+    );
     futures::pin_mut!(all_finalized_blocks);
 
     // Iterate the block headers, making sure we get them all in order.
@@ -156,7 +159,10 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     let at_block = block.at().await?;
 
     // get metadata via raw state_call.
-    let meta_bytes = at_block.runtime_apis().call_raw("Metadata_metadata", None).await?;
+    let meta_bytes = at_block
+        .runtime_apis()
+        .call_raw("Metadata_metadata", None)
+        .await?;
     let (_, meta1): (Compact<u32>, frame_metadata::RuntimeMetadataPrefixed) =
         Decode::decode(&mut &*meta_bytes)?;
 
@@ -207,10 +213,7 @@ async fn fetch_block_and_decode_extrinsic_details() {
     let extrinsics = at_block.extrinsics().fetch().await.unwrap();
 
     // `.has` should work and find a transfer call.
-    assert!(
-        extrinsics
-            .has::<node_runtime::balances::calls::TransferAllowDeath>()
-    );
+    assert!(extrinsics.has::<node_runtime::balances::calls::TransferAllowDeath>());
 
     // `.find_first` should similarly work to find the transfer call:
     assert!(
@@ -230,15 +233,13 @@ async fn fetch_block_and_decode_extrinsic_details() {
         // We should be able to decode all exts into our root type:
         tx.decode_call_data_as::<node_runtime::Call>().unwrap();
 
-        if let Some(ext) = tx
-            .decode_call_data_fields_as::<node_runtime::timestamp::calls::Set>()
-        {
+        if let Some(ext) = tx.decode_call_data_fields_as::<node_runtime::timestamp::calls::Set>() {
             let ext = ext.unwrap();
             timestamp = Some((ext, tx.is_signed()));
         }
 
-        if let Some(ext) = tx
-            .decode_call_data_fields_as::<node_runtime::balances::calls::TransferAllowDeath>()
+        if let Some(ext) =
+            tx.decode_call_data_fields_as::<node_runtime::balances::calls::TransferAllowDeath>()
         {
             let ext = ext.unwrap();
             balance = Some((ext, tx.is_signed()));
@@ -264,7 +265,8 @@ async fn fetch_block_and_decode_extrinsic_details() {
 async fn submit_extrinsic_and_get_it_back(
     api: &subxt::OnlineClient<SubstrateConfig>,
     params: subxt::config::DefaultExtrinsicParamsBuilder<SubstrateConfig>,
-) -> subxt::extrinsics::Extrinsic<'static, SubstrateConfig, OnlineClientAtBlockImpl<SubstrateConfig>> {
+) -> subxt::extrinsics::Extrinsic<'static, SubstrateConfig, OnlineClientAtBlockImpl<SubstrateConfig>>
+{
     let alice = dev::alice();
     let bob = dev::bob();
 
@@ -295,7 +297,7 @@ async fn submit_extrinsic_and_get_it_back(
         .iter()
         .find_map(|e| match e {
             Ok(e) if e.hash() == ext_hash => Some(e),
-            _ => None
+            _ => None,
         })
         .unwrap();
 

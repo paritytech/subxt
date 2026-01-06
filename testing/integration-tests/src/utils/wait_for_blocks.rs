@@ -4,7 +4,7 @@
 
 use subxt::{
     Config,
-    client::{OnlineClient, Blocks},
+    client::{Blocks, OnlineClient},
 };
 
 /// Wait for blocks to be produced before running tests. Specifically, we
@@ -16,10 +16,7 @@ pub async fn wait_for_blocks<C: Config>(api: &OnlineClient<C>) {
 }
 
 /// Wait for a number of blocks to be produced.
-pub async fn wait_for_number_of_blocks<C: Config>(
-    api: &OnlineClient<C>,
-    number_of_blocks: usize,
-) {
+pub async fn wait_for_number_of_blocks<C: Config>(api: &OnlineClient<C>, number_of_blocks: usize) {
     let mut sub = api.stream_blocks().await.unwrap();
 
     for _ in 0..number_of_blocks {
@@ -31,9 +28,7 @@ pub async fn wait_for_number_of_blocks<C: Config>(
 ///
 /// This may be useful on the unstable backend when the initial blocks may be large
 /// and one relies on something to included in finalized block in ner future.
-pub async fn consume_initial_blocks<C: Config>(
-    blocks: &mut Blocks<C>,
-) {
+pub async fn consume_initial_blocks<C: Config>(blocks: &mut Blocks<C>) {
     use tokio::time::{Duration, Instant, interval_at};
     const MAX_DURATION: Duration = Duration::from_millis(200);
 

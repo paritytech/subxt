@@ -22,12 +22,15 @@ async fn v4_unsigned_encode_decode() -> Result<(), subxt::Error> {
         .balances()
         .transfer_allow_death(dev::bob().public_key().into(), 1000);
 
-    let tx_bytes = at_block.tx().create_v4_unsigned(&call).unwrap().into_encoded();
+    let tx_bytes = at_block
+        .tx()
+        .create_v4_unsigned(&call)
+        .unwrap()
+        .into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
     let decoded =
-        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, md, md.types())
-            .unwrap();
+        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, md, md.types()).unwrap();
 
     assert_eq!(tx_bytes_cursor.len(), 0);
     assert_eq!(decoded.version(), 4);
@@ -50,7 +53,11 @@ async fn v5_bare_encode_decode() -> Result<(), subxt::Error> {
         .balances()
         .transfer_allow_death(dev::bob().public_key().into(), 1000);
 
-    let tx_bytes = at_block.tx().create_v5_unsigned(&call).unwrap().into_encoded();
+    let tx_bytes = at_block
+        .tx()
+        .create_v5_unsigned(&call)
+        .unwrap()
+        .into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
     let decoded =

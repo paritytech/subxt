@@ -88,9 +88,9 @@ pub use subxt_lightclient as lightclient;
 /// Re-export external crates that are made use of in the subxt API.
 pub mod ext {
     pub use codec;
-    pub use futures;
     pub use frame_decode;
     pub use frame_metadata;
+    pub use futures;
     pub use scale_bits;
     pub use scale_decode;
     pub use scale_encode;

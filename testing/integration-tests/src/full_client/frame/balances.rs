@@ -7,11 +7,11 @@ use crate::{
     subxt_test, test_context,
 };
 use codec::Decode;
+use subxt::ext::scale_decode::DecodeAsType;
 use subxt::{
     error::{DispatchError, TokenError, TransactionEventsError, TransactionFinalizedSuccessError},
     utils::{AccountId32, MultiAddress},
 };
-use subxt::ext::scale_decode::DecodeAsType;
 use subxt_signer::sr25519::dev;
 
 #[subxt_test]
@@ -21,9 +21,9 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let bob_address = bob.public_key().to_address();
     let ctx = test_context().await;
     let api = ctx.client();
-    
+
     let account_addr = node_runtime::storage().system().account();
-    
+
     let at_block_pre = api.at_current_block().await.unwrap();
     let account_entry_pre = at_block_pre.storage().entry(&account_addr)?;
     let alice_pre = account_entry_pre
@@ -398,5 +398,8 @@ async fn constant_existential_deposit() {
     let addr = node_runtime::constants().balances().existential_deposit();
 
     // Make sure thetwo are identical:
-    assert_eq!(existential_deposit, at_block.constants().entry(&addr).unwrap());
+    assert_eq!(
+        existential_deposit,
+        at_block.constants().entry(&addr).unwrap()
+    );
 }

@@ -299,7 +299,11 @@ async fn storage_history_depth() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
     let history_depth_addr = node_runtime::constants().staking().history_depth();
-    let history_depth = api.at_current_block().await?.constants().entry(&history_depth_addr)?;
+    let history_depth = api
+        .at_current_block()
+        .await?
+        .constants()
+        .entry(&history_depth_addr)?;
     assert_eq!(history_depth, 84);
     Ok(())
 }

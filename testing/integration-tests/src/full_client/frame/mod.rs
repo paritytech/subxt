@@ -5,8 +5,8 @@
 //! Test interactions with some built-in FRAME pallets.
 
 mod balances;
+mod contracts;
 mod staking;
+mod sudo;
 mod system;
 mod timestamp;
-mod contracts;
-mod sudo;

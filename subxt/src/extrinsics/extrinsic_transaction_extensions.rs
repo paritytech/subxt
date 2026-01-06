@@ -32,9 +32,7 @@ impl<'extrinsic, T: Config> ExtrinsicTransactionExtensions<'extrinsic, T> {
     }
 
     /// Returns an iterator over each of the signed extension details of the extrinsic.
-    pub fn iter(
-        &self,
-    ) -> impl Iterator<Item = ExtrinsicTransactionExtension<'extrinsic, T>> {
+    pub fn iter(&self) -> impl Iterator<Item = ExtrinsicTransactionExtension<'extrinsic, T>> {
         self.decoded_info
             .iter()
             .map(move |s| ExtrinsicTransactionExtension {

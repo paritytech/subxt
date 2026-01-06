@@ -19,9 +19,9 @@ use subxt_signer::sr25519::dev;
 #[cfg(all(default_rpc, default_backend))]
 mod archive_rpcs;
 #[cfg(all(default_rpc, default_backend))]
-mod legacy_rpcs;
-#[cfg(all(default_rpc, default_backend))]
 mod chain_head_rpcs;
+#[cfg(all(default_rpc, default_backend))]
+mod legacy_rpcs;
 
 #[subxt_test]
 async fn storage_iter() -> Result<(), subxt::Error> {
@@ -48,7 +48,12 @@ async fn storage_iter() -> Result<(), subxt::Error> {
 async fn storage_child_values_same_across_backends() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
 
-    let chainhead_client = ctx.chainhead_backend().await.at_current_block().await.unwrap();
+    let chainhead_client = ctx
+        .chainhead_backend()
+        .await
+        .at_current_block()
+        .await
+        .unwrap();
     let legacy_client = ctx.legacy_backend().await.at_current_block().await.unwrap();
     let addr = node_runtime::storage().system().account();
 
@@ -379,7 +384,10 @@ async fn partial_fee_estimate_correct() {
     } = {
         let res = at_block
             .runtime_apis()
-            .call_raw("TransactionPaymentApi_query_fee_details", Some(&encoded_with_len))
+            .call_raw(
+                "TransactionPaymentApi_query_fee_details",
+                Some(&encoded_with_len),
+            )
             .await
             .unwrap();
         FeeDetails::decode(&mut &*res)

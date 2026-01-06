@@ -30,7 +30,7 @@ use subxt_metadata::{ArcMetadata, Metadata};
 
 pub use offline_client::{OfflineClient, OfflineClientAtBlockImpl, OfflineClientAtBlockT};
 pub use online_client::{
-    BlockNumberOrRef, OnlineClient, OnlineClientAtBlockImpl, OnlineClientAtBlockT, Blocks, Block,
+    Block, BlockNumberOrRef, Blocks, OnlineClient, OnlineClientAtBlockImpl, OnlineClientAtBlockT,
 };
 
 /// This represents a client at a specific block number, and is created by calling either
@@ -106,7 +106,7 @@ where
         ViewFunctionsClient::new(&self.client)
     }
 
-    /// Obtain a clone of the metadata. Prefer [`Self::metadata_ref()`] 
+    /// Obtain a clone of the metadata. Prefer [`Self::metadata_ref()`]
     /// unless you need to take ownership of the metadata.
     pub fn metadata(&self) -> ArcMetadata {
         self.client.metadata()
@@ -155,8 +155,8 @@ where
         self.client.client()
     }
 
-    /// A reference to the current block. 
-    /// 
+    /// A reference to the current block.
+    ///
     /// Depending on the backend, holding onto
     /// this encourages the backend to keep the block available until this
     /// is dropped.

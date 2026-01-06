@@ -227,7 +227,7 @@ async fn tx_instantiate() {
 async fn tx_call() {
     let cxt = ContractsTestContext::init().await;
     let (_, contract) = cxt.instantiate_with_code().await.unwrap();
-    let at_block  = cxt.client().at_current_block().await.unwrap();
+    let at_block = cxt.client().at_current_block().await.unwrap();
 
     let contract_info_addr = node_runtime::storage().contracts().contract_info_of();
 
@@ -242,7 +242,11 @@ async fn tx_call() {
         "Contract info is not ok, is: {contract_info:?}"
     );
 
-    let mut iter = at_block.storage().iter(contract_info_addr, ()).await.unwrap();
+    let mut iter = at_block
+        .storage()
+        .iter(contract_info_addr, ())
+        .await
+        .unwrap();
 
     let mut keys_and_values = Vec::new();
     while let Some(kv) = iter.next().await {

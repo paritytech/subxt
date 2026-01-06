@@ -1,10 +1,12 @@
 use crate::backend::BlockRef;
 use crate::backend::{StreamOfResults, TransactionStatus as BackendTransactionStatus};
-use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT, ClientAtBlock, OnlineClientAtBlockImpl};
+use crate::client::{
+    ClientAtBlock, OfflineClientAtBlockT, OnlineClientAtBlockImpl, OnlineClientAtBlockT,
+};
 use crate::config::{Config, HashFor};
 use crate::error::{
-    DispatchError, TransactionEventsError, TransactionFinalizedSuccessError,
-    TransactionProgressError, TransactionStatusError, OnlineClientAtBlockError,
+    DispatchError, OnlineClientAtBlockError, TransactionEventsError,
+    TransactionFinalizedSuccessError, TransactionProgressError, TransactionStatusError,
 };
 use crate::extrinsics::ExtrinsicEvents;
 use futures::{Stream, StreamExt};

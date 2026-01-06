@@ -7,16 +7,12 @@ use std::ffi::{OsStr, OsString};
 use std::sync::Arc;
 use substrate_runner::SubstrateNode;
 use subxt::{
+    backend::{ChainHeadBackend, CombinedBackend, LegacyBackend},
     client::OnlineClient,
     config::{Config, RpcConfigFor},
     rpcs::{
-        methods::{chain_head, legacy},
         client::RpcClient,
-    },
-    backend::{
-        LegacyBackend,
-        ChainHeadBackend,
-        CombinedBackend,
+        methods::{chain_head, legacy},
     },
 };
 
@@ -111,7 +107,9 @@ where
     /// which enables us to run each test against all backends.
     pub async fn legacy_backend(&self) -> OnlineClient<R> {
         if self.legacy_backend.borrow().is_none() {
-            let c = build_legacy_backend(self.config.clone(), self.rpc_client.clone()).await.unwrap();
+            let c = build_legacy_backend(self.config.clone(), self.rpc_client.clone())
+                .await
+                .unwrap();
             self.legacy_backend.replace(Some(c));
         }
         self.legacy_backend.borrow().as_ref().unwrap().clone()
@@ -122,7 +120,9 @@ where
     /// which enables us to run each test against all backends.
     pub async fn combined_backend(&self) -> OnlineClient<R> {
         if self.legacy_backend.borrow().is_none() {
-            let c = build_default_backend(self.config.clone(), self.rpc_client.clone()).await.unwrap();
+            let c = build_default_backend(self.config.clone(), self.rpc_client.clone())
+                .await
+                .unwrap();
             self.combined_backend.replace(Some(c));
         }
         self.combined_backend.borrow().as_ref().unwrap().clone()
@@ -149,7 +149,7 @@ pub struct TestNodeProcessBuilder<T: Config> {
     authority: Option<String>,
 }
 
-impl <T: Config> TestNodeProcessBuilder<T> {
+impl<T: Config> TestNodeProcessBuilder<T> {
     pub fn new<P>(config: T, node_paths: &[P]) -> TestNodeProcessBuilder<T>
     where
         P: AsRef<OsStr>,
@@ -281,8 +281,8 @@ async fn build_default_backend<T: Config>(
 
 #[cfg(reconnecting_rpc)]
 async fn build_reconnecting_rpc_client(ws_url: &str) -> Result<RpcClient, String> {
-    use subxt::rpcs::client::reconnecting_rpc_client::{ExponentialBackoff, RpcClientBuilder};
     use std::time::Duration;
+    use subxt::rpcs::client::reconnecting_rpc_client::{ExponentialBackoff, RpcClientBuilder};
 
     let client = RpcClientBuilder::new()
         .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10)))
@@ -315,7 +315,7 @@ async fn build_light_client_rpc_client<T: Config>(
         let client = OnlineClient::<T>::from_url(config.clone(), ws_url.clone())
             .await
             .map_err(|err| format!("Failed to connect to node rpc at {ws_url}: {err}"))?;
-    
+
         // Wait for at least a few blocks before starting the light client.
         // Otherwise, the lightclient might error with
         // `"Error when retrieving the call proof: No node available for call proof query"`.

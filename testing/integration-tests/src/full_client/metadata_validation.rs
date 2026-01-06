@@ -12,16 +12,21 @@ use frame_metadata::{
         StorageEntryType,
     },
 };
-use std::sync::Arc;
 use scale_info::{
     Path, Type, TypeInfo,
     build::{Fields, Variants},
     meta_type,
 };
-use subxt::{Metadata, OfflineClient, OfflineClientAtBlock, OnlineClient, SubstrateConfig, config::polkadot::SpecVersionForRange};
+use std::sync::Arc;
+use subxt::{
+    Metadata, OfflineClient, OfflineClientAtBlock, OnlineClient, SubstrateConfig,
+    config::polkadot::SpecVersionForRange,
+};
 
 async fn fetch_v15_metadata(client: &OnlineClient<SubstrateConfig>) -> RuntimeMetadataV15 {
-    let payload = node_runtime::runtime_apis().metadata().metadata_at_version(15);
+    let payload = node_runtime::runtime_apis()
+        .metadata()
+        .metadata_at_version(15);
     let runtime_metadata_bytes = client
         .at_current_block()
         .await
@@ -46,13 +51,11 @@ async fn fetch_v15_metadata(client: &OnlineClient<SubstrateConfig>) -> RuntimeMe
 async fn metadata_to_api(metadata: Metadata) -> OfflineClientAtBlock<SubstrateConfig> {
     let config = SubstrateConfig::builder()
         .set_metadata_for_spec_versions([(0, Arc::new(metadata))])
-        .set_spec_version_for_block_ranges([
-            SpecVersionForRange {
-                block_range: 0..u64::MAX,
-                spec_version: 0,
-                transaction_version: 0,
-            }
-        ])
+        .set_spec_version_for_block_ranges([SpecVersionForRange {
+            block_range: 0..u64::MAX,
+            spec_version: 0,
+            transaction_version: 0,
+        }])
         .build();
 
     let offline_client = OfflineClient::new(config);

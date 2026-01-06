@@ -17,7 +17,7 @@ use subxt::{
     utils::AccountId32,
 };
 use subxt_rpcs::methods::chain_head::{
-    ArchiveStorageEventItem, Bytes, ArchiveStorageQuery, StorageQueryType,
+    ArchiveStorageEventItem, ArchiveStorageQuery, Bytes, StorageQueryType,
 };
 
 use subxt_signer::sr25519::dev;
@@ -44,14 +44,8 @@ async fn archive_v1_body() {
     while let Some(block) = blocks.next().await {
         let at_block = block.at().await.unwrap();
 
-        let extrinsics = at_block
-            .extrinsics()
-            .fetch()
-            .await
-            .unwrap();
-        let subxt_block_bodies = extrinsics
-            .iter()
-            .map(|e| e.unwrap().bytes().to_vec());
+        let extrinsics = at_block.extrinsics().fetch().await.unwrap();
+        let subxt_block_bodies = extrinsics.iter().map(|e| e.unwrap().bytes().to_vec());
         let archive_block_bodies = rpc
             .archive_v1_body(block.hash())
             .await
@@ -191,14 +185,8 @@ async fn archive_v1_storage() {
         let addr = node_runtime::storage().system().account();
 
         // Fetch value using Subxt to compare against
-        let storage_entry = at_block
-            .storage()
-            .entry(addr)
-            .unwrap();
-        let subxt_account_info = storage_entry
-            .fetch((alice.clone(),))
-            .await
-            .unwrap();
+        let storage_entry = at_block.storage().entry(addr).unwrap();
+        let subxt_account_info = storage_entry.fetch((alice.clone(),)).await.unwrap();
         let subxt_account_info_bytes = subxt_account_info.bytes();
         let account_info_addr = storage_entry.fetch_key((alice,)).unwrap();
 
