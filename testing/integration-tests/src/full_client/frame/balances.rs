@@ -21,17 +21,15 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let bob_address = bob.public_key().to_address();
     let ctx = test_context().await;
     let api = ctx.client();
-
+    
     let account_addr = node_runtime::storage().system().account();
-
-    let storage_at_pre = api.storage().at_latest().await?;
-    let account_entry_pre = storage_at_pre.entry(&account_addr)?;
-
+    
+    let at_block_pre = api.at_current_block().await.unwrap();
+    let account_entry_pre = at_block_pre.storage().entry(&account_addr)?;
     let alice_pre = account_entry_pre
         .fetch((alice.public_key().to_account_id(),))
         .await?
         .decode()?;
-
     let bob_pre = account_entry_pre
         .fetch((bob.public_key().to_account_id(),))
         .await?
@@ -41,7 +39,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
         .balances()
         .transfer_allow_death(bob_address, 10_000);
 
-    let signed_extrinsic = api
+    let signed_extrinsic = at_block_pre
         .tx()
         .create_signed(&tx, &alice, Default::default())
         .await?;
@@ -69,14 +67,14 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     };
     assert_eq!(event, expected_event);
 
-    let storage_at_post = api.storage().at_latest().await?;
-    let account_entry_post = storage_at_post.entry(&account_addr)?;
+    // Get the new latest block and check some values:
+    let at_block_post = api.at_current_block().await.unwrap();
+    let account_entry_post = at_block_post.storage().entry(&account_addr)?;
 
     let alice_post = account_entry_post
         .fetch((alice.public_key().to_account_id(),))
         .await?
         .decode()?;
-
     let bob_post = account_entry_post
         .fetch((bob.public_key().to_account_id(),))
         .await?
@@ -99,8 +97,8 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 
     let account_addr = subxt::dynamic::storage::<(Value,), Value>("System", "Account");
 
-    let storage_at_pre = api.storage().at_latest().await?;
-    let account_entry_pre = storage_at_pre.entry(&account_addr)?;
+    let at_block_pre = api.at_current_block().await.unwrap();
+    let account_entry_pre = at_block_pre.storage().entry(&account_addr)?;
 
     let alice_pre = account_entry_pre
         .fetch((Value::from_bytes(alice.public_key().to_account_id()),))
@@ -124,7 +122,7 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
         ],
     );
 
-    let events = api
+    let events = at_block_pre
         .tx()
         .sign_and_submit_then_watch_default(&tx, &alice)
         .await?
@@ -134,9 +132,9 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     let actual_transfer_event = events
         .iter()
         .filter_map(|ev| ev.ok())
-        .find(|ev| ev.pallet_name() == "Balances" && ev.variant_name() == "Transfer")
+        .find(|ev| ev.pallet_name() == "Balances" && ev.event_name() == "Transfer")
         .expect("Failed to find Transfer event")
-        .decode_as_fields::<DecodedTransferEvent>()
+        .decode_fields_unchecked_as::<DecodedTransferEvent>()
         .expect("Failed to decode event fields");
 
     #[derive(DecodeAsType, Debug, PartialEq)]
@@ -155,8 +153,8 @@ async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
 
     assert_eq!(actual_transfer_event, expected_transfer_event);
 
-    let storage_at_post = api.storage().at_latest().await?;
-    let account_entry_post = storage_at_post.entry(&account_addr)?;
+    let at_block_post = api.at_current_block().await.unwrap();
+    let account_entry_post = at_block_post.storage().entry(&account_addr)?;
 
     let alice_post = account_entry_post
         .fetch((Value::from_bytes(alice.public_key().to_account_id()),))
@@ -189,9 +187,10 @@ async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
     let api = ctx.client();
 
     let bob_pre = api
+        .at_current_block()
+        .await
+        .unwrap()
         .storage()
-        .at_latest()
-        .await?
         .fetch(
             node_runtime::storage().system().account(),
             (bob.public_key().to_account_id(),),
@@ -207,6 +206,8 @@ async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
     for _ in 0..3 {
         let signed_extrinsic = api
             .tx()
+            .await
+            .unwrap()
             .create_signed(&tx, &alice, Default::default())
             .await?;
 
@@ -218,9 +219,10 @@ async fn multiple_sequential_transfers_work() -> Result<(), subxt::Error> {
     }
 
     let bob_post = api
+        .at_current_block()
+        .await
+        .unwrap()
         .storage()
-        .at_latest()
-        .await?
         .fetch(
             node_runtime::storage().system().account(),
             (bob.public_key().to_account_id(),),
@@ -239,13 +241,13 @@ async fn storage_total_issuance() {
 
     let addr = node_runtime::storage().balances().total_issuance();
     let total_issuance = api
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await
         .unwrap()
+        .storage()
         .entry(addr)
         .unwrap()
-        .fetch()
+        .fetch(())
         .await
         .unwrap()
         .decode()
@@ -260,11 +262,11 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let api = ctx.client();
 
     let holds_addr = node_runtime::storage().balances().holds();
-
     let holds = api
+        .at_current_block()
+        .await
+        .unwrap()
         .storage()
-        .at_latest()
-        .await?
         .fetch(holds_addr, (bob,))
         .await?
         .decode()?
@@ -293,6 +295,8 @@ async fn transfer_error() {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&to_bob_tx, &alice, Default::default())
         .await
         .unwrap();
@@ -308,10 +312,11 @@ async fn transfer_error() {
     // anything left to pay transfer fees, so we hit an error.
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&to_alice_tx, &bob, Default::default())
         .await
         .unwrap();
-
     let res = signed_extrinsic
         .submit_and_watch()
         .await
@@ -348,6 +353,8 @@ async fn transfer_implicit_subscription() {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&to_bob_tx, &alice, Default::default())
         .await
         .unwrap();
@@ -377,9 +384,10 @@ async fn transfer_implicit_subscription() {
 async fn constant_existential_deposit() {
     let ctx = test_context().await;
     let api = ctx.client();
+    let at_block = api.at_current_block().await.unwrap();
 
     // get and decode constant manually via metadata:
-    let metadata = api.metadata();
+    let metadata = at_block.metadata_ref();
     let balances_metadata = metadata.pallet_by_name("Balances").unwrap();
     let constant_metadata = balances_metadata
         .constant_by_name("ExistentialDeposit")
@@ -391,5 +399,5 @@ async fn constant_existential_deposit() {
     let addr = node_runtime::constants().balances().existential_deposit();
 
     // Make sure thetwo are identical:
-    assert_eq!(existential_deposit, api.constants().at(&addr).unwrap());
+    assert_eq!(existential_deposit, at_block.constants().entry(&addr).unwrap());
 }

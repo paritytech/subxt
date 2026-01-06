@@ -111,7 +111,7 @@ where
         call_parameters: Option<&'a [u8]>,
     ) -> Result<Vec<u8>, RuntimeApiError> {
         let client = &self.client;
-        let block_hash = client.block_hash();
+        let block_hash = client.block_ref().hash();
         let data = client
             .backend()
             .call(function, call_parameters, block_hash)
@@ -124,7 +124,7 @@ where
     /// Execute a runtime API call.
     pub async fn call<P: Payload>(&self, payload: P) -> Result<P::ReturnType, RuntimeApiError> {
         let client = &self.client;
-        let block_hash = client.block_hash();
+        let block_hash = client.block_ref().hash();
         let metadata = client.metadata_ref();
 
         // Validate the runtime API payload hash against the compile hash from codegen.

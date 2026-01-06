@@ -27,6 +27,10 @@ pub use chain_head::{ChainHeadBackend, ChainHeadBackendBuilder, ChainHeadBackend
 pub use combined::{CombinedBackend, CombinedBackendBuilder, CombinedBackendDriver};
 pub use legacy::{LegacyBackend, LegacyBackendBuilder};
 
+// Exposed to test but shouldn't be used.
+#[doc(hidden)]
+pub use legacy::subscribe_to_block_headers_filling_in_gaps;
+
 /// Prevent the backend trait being implemented externally.
 #[doc(hidden)]
 pub(crate) mod sealed {

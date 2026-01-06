@@ -8,7 +8,6 @@ use crate::config::{Config, HashFor, Hasher, Header};
 use crate::error::{BlocksError, OnlineClientAtBlockError};
 use crate::metadata::{ArcMetadata, Metadata};
 use crate::transactions::TransactionsClient;
-use blocks::Blocks;
 use codec::{Compact, Decode, Encode};
 use core::marker::PhantomData;
 use frame_decode::helpers::ToTypeRegistry;
@@ -21,6 +20,7 @@ use subxt_rpcs::RpcClient;
 use crate::error::OnlineClientError;
 
 pub use block_number_or_ref::BlockNumberOrRef;
+pub use blocks::{Block, Blocks};
 
 /// A client which requires a connection to a chain, and allows interacting with it.
 #[derive(Clone, Debug)]
@@ -97,17 +97,15 @@ impl<T: Config> OnlineClient<T> {
             .build_with_background_driver(rpc_client)
             .await
             .map_err(OnlineClientError::CannotBuildCombinedBackend)?;
-        let backend: Arc<dyn Backend<T>> = Arc::new(backend);
-        OnlineClient::from_backend(config, backend).await
+        OnlineClient::from_backend(config, Arc::new(backend)).await
     }
 
     /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
     /// implementation to power it.
-    pub async fn from_backend(
+    pub async fn from_backend<B: Backend<T>>(
         config: T,
-        backend: impl Into<Arc<dyn Backend<T>>>,
+        backend: Arc<B>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
-        let backend = backend.into();
         let genesis_hash = match config.genesis_hash() {
             Some(hash) => hash,
             None => backend
@@ -457,7 +455,7 @@ pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT<T> {
     /// Return the RPC methods we'll use to interact with the node.
     fn backend(&self) -> &dyn Backend<T>;
     /// Return the block hash for the current block.
-    fn block_hash(&self) -> HashFor<T>;
+    fn block_ref(&self) -> &BlockRef<HashFor<T>>;
     /// Return the inner [`OnlineClient`].
     fn client(&self) -> OnlineClient<T>;
 }
@@ -465,7 +463,7 @@ pub trait OnlineClientAtBlockT<T: Config>: OfflineClientAtBlockT<T> {
 /// An implementation of the [`OnlineClientAtBlockImpl`] trait, which is used in conjunction
 /// with [`crate::client::ClientAtBlock`] to provide a working client. You won't tend to need this
 /// type and instead should prefer to refer to [`crate::client::OnlineClientAtBlock`].
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct OnlineClientAtBlockImpl<T: Config> {
     client: OnlineClient<T>,
     metadata: ArcMetadata,
@@ -480,8 +478,8 @@ impl<T: Config> OnlineClientAtBlockT<T> for OnlineClientAtBlockImpl<T> {
     fn backend(&self) -> &dyn Backend<T> {
         &*self.client.inner.backend
     }
-    fn block_hash(&self) -> HashFor<T> {
-        self.block_ref.hash()
+    fn block_ref(&self) -> &BlockRef<HashFor<T>> {
+        &self.block_ref
     }
     fn client(&self) -> OnlineClient<T> {
         self.client.clone()

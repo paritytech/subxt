@@ -54,7 +54,7 @@ impl<T: Config> OfflineClient<T> {
 /// An implementation of the [`OfflineClientAtBlockT`] trait, which is used in conjunction
 /// with [`crate::client::ClientAtBlock`] to provide a working client. You won't tend to need this
 /// type and instead should prefer to refer to [`crate::client::OfflineClientAtBlock`].
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct OfflineClientAtBlockImpl<T: Config> {
     metadata: ArcMetadata,
     block_number: u64,

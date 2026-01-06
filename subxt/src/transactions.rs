@@ -323,7 +323,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
         account_nonce::get_account_nonce(&self.client, account_id)
             .await
             .map_err(|e| ExtrinsicError::AccountNonceError {
-                block_hash: self.client.block_hash().into(),
+                block_hash: self.client.block_ref().hash().into(),
                 account_id: account_id.clone().encode().into(),
                 reason: e,
             })
@@ -745,7 +745,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> SubmittableTransaction<T, Clien
     ///
     /// Returns `Ok` with a [`ValidationResult`], which is the result of attempting to dry run the transaction.
     pub async fn validate(&self) -> Result<ValidationResult, ExtrinsicError> {
-        let block_hash = self.client.block_hash();
+        let block_hash = self.client.block_ref().hash();
 
         // Approach taken from https://github.com/paritytech/json-rpc-interface-spec/issues/55.
         let mut params = Vec::with_capacity(8 + self.encoded().len() + 8);

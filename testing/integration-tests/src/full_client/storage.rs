@@ -3,7 +3,6 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, subxt_test, test_context, utils::wait_for_blocks};
-use futures::StreamExt;
 
 #[cfg(fullclient)]
 use subxt::utils::AccountId32;
@@ -21,9 +20,9 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error> {
 
     let addr = node_runtime::storage().timestamp().now();
     let entry = api
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await?
+        .storage()
         .fetch(addr, ())
         .await?
         .decode()?;
@@ -44,6 +43,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
     // Do some transaction to bump the Alice nonce to 1:
     let remark_tx = node_runtime::tx().system().remark(vec![1, 2, 3, 4, 5]);
     api.tx()
+        .await?
         .sign_and_submit_then_watch_default(&remark_tx, &signer)
         .await?
         .wait_for_finalized_success()
@@ -52,9 +52,9 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
     // Look up the nonce for the user (we expect it to be 1).
     let nonce_addr = node_runtime::storage().system().account();
     let entry = api
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await?
+        .storage()
         .fetch(nonce_addr, (alice,))
         .await?
         .decode()?;
@@ -75,11 +75,11 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
     // This is what the generated code hashes a `session().key_owner(..)` key into:
     let storage_addr = node_runtime::storage().session().key_owner();
     let actual_key_bytes = api
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await?
+        .storage()
         .entry(storage_addr)?
-        .key(((KeyTypeId([1, 2, 3, 4]), vec![5, 6, 7, 8]),))?;
+        .fetch_key(((KeyTypeId([1, 2, 3, 4]), vec![5, 6, 7, 8]),))?;
 
     // Let's manually hash to what we assume it should be and compare:
     let expected_key_bytes = {
@@ -119,11 +119,13 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
         .assets()
         .approve_transfer(99, bob.clone().into(), 123);
     api.tx()
+        .await?
         .sign_and_submit_then_watch_default(&tx1, &signer)
         .await?
         .wait_for_finalized_success()
         .await?;
     api.tx()
+        .await?
         .sign_and_submit_then_watch_default(&tx2, &signer)
         .await?
         .wait_for_finalized_success()
@@ -132,9 +134,9 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     // The actual test; look up this approval in storage:
     let addr = node_runtime::storage().assets().approvals();
     let entry = api
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await?
+        .storage()
         .fetch(addr, (99, alice, bob))
         .await?
         .decode()?;
@@ -168,11 +170,13 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
             .assets()
             .approve_transfer(asset_id, delegate.into(), amount);
         api.tx()
+            .await?
             .sign_and_submit_then_watch_default(&tx1, &signer)
             .await?
             .wait_for_finalized_success()
             .await?;
         api.tx()
+            .await?
             .sign_and_submit_then_watch_default(&tx2, &signer)
             .await?
             .wait_for_finalized_success()
@@ -181,8 +185,8 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
 
     // Check all approvals.
     let approvals_addr = node_runtime::storage().assets().approvals();
-    let storage_at = api.storage().at_latest().await?;
-    let approvals_entry = storage_at.entry(approvals_addr)?;
+    let at_block = api.at_current_block().await?;
+    let approvals_entry = at_block.storage().entry(approvals_addr)?;
 
     let mut results = approvals_entry.iter(()).await?;
     let mut approvals = Vec::new();
@@ -220,8 +224,8 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
 async fn storage_runtime_wasm_code() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
-    let wasm_blob = api.storage().at_latest().await?.runtime_wasm_code().await?;
-    assert!(wasm_blob.len() > 1000); // the wasm should be super big
+    let wasm_blob = api.at_current_block().await?.storage().runtime_wasm_code().await?;
+    assert!(wasm_blob.len() > 10_000); // the wasm should be super big
     Ok(())
 }
 
@@ -232,15 +236,15 @@ async fn storage_pallet_storage_version() -> Result<(), subxt::Error> {
 
     // cannot assume anything about version number, but should work to fetch it
     let _version = api
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await?
+        .storage()
         .storage_version("System")
         .await?;
     let _version = api
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await?
+        .storage()
         .storage_version("Balances")
         .await?;
     Ok(())
@@ -252,15 +256,14 @@ async fn storage_iter_decode_keys() -> Result<(), subxt::Error> {
 
     let ctx = test_context().await;
     let api = ctx.client();
+    let at_block = api.at_current_block().await?;
 
     let storage_static = node_runtime::storage().system().account();
-    let storage_at_static = api.storage().at_latest().await?;
-    let results_static = storage_at_static.iter(storage_static, ()).await?;
+    let results_static = at_block.storage().iter(storage_static, ()).await?;
 
     let storage_dynamic =
         subxt::dynamic::storage::<(scale_value::Value,), scale_value::Value>("System", "Account");
-    let storage_at_dynamic = api.storage().at_latest().await?;
-    let results_dynamic = storage_at_dynamic.iter(storage_dynamic, ()).await?;
+    let results_dynamic = at_block.storage().iter(storage_dynamic, ()).await?;
 
     // Even the testing node should have more than 3 accounts registered.
     let results_static = results_static.take(3).collect::<Vec<_>>().await;

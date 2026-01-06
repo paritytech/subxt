@@ -1,10 +1,10 @@
 use crate::backend::BlockRef;
 use crate::backend::{StreamOfResults, TransactionStatus as BackendTransactionStatus};
-use crate::client::{BlockNumberOrRef, OfflineClientAtBlockT, OnlineClientAtBlockT};
+use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT, ClientAtBlock, OnlineClientAtBlockImpl};
 use crate::config::{Config, HashFor};
 use crate::error::{
     DispatchError, TransactionEventsError, TransactionFinalizedSuccessError,
-    TransactionProgressError, TransactionStatusError,
+    TransactionProgressError, TransactionStatusError, OnlineClientAtBlockError,
 };
 use crate::extrinsics::ExtrinsicEvents;
 use futures::{Stream, StreamExt};
@@ -246,6 +246,16 @@ impl<T: Config, C> TransactionInBlock<T, C> {
 }
 
 impl<T: Config, C: OnlineClientAtBlockT<T>> TransactionInBlock<T, C> {
+    /// Instantiate an API client at this block.
+    pub async fn at(
+        &self,
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
+        // Note: the client we carry around is instantiated _at the original block that we
+        // submitted the transaction against_. We need to instantiate a new client at this
+        // block.
+        self.client.client().at_block(self.block_ref.clone()).await
+    }
+
     /// Fetch the events associated with this transaction. If the transaction
     /// was successful (ie no `ExtrinsicFailed`) events were found, then we return
     /// the events associated with it. If the transaction was not successful, or
@@ -293,11 +303,8 @@ impl<T: Config, C: OnlineClientAtBlockT<T>> TransactionInBlock<T, C> {
     /// from them.
     pub async fn fetch_events(&self) -> Result<ExtrinsicEvents<T>, TransactionEventsError> {
         // Create a client at the block the TX made it into:
-        let tx_block_ref = BlockNumberOrRef::BlockRef(self.block_ref.clone());
         let at_tx_block = self
-            .client
-            .client()
-            .at_block(tx_block_ref)
+            .at()
             .await
             .map_err(TransactionEventsError::CannotInstantiateClientAtBlock)?;
 

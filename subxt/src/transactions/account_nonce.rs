@@ -12,7 +12,7 @@ where
     T: Config,
     C: OnlineClientAtBlockT<T>,
 {
-    let block_hash = client.block_hash();
+    let block_hash = client.block_ref().hash();
     let account_nonce_bytes = client
         .backend()
         .call(

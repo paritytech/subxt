@@ -12,13 +12,12 @@ use crate::{
 use codec::Encode;
 use futures::{Stream, StreamExt};
 use subxt::{
-    blocks::Block,
-    client::OnlineClient,
+    client::Block,
     config::{Config, Hasher},
     utils::AccountId32,
 };
 use subxt_rpcs::methods::chain_head::{
-    ArchiveStorageEventItem, Bytes, StorageQuery, StorageQueryType,
+    ArchiveStorageEventItem, Bytes, ArchiveStorageQuery, StorageQueryType,
 };
 
 use subxt_signer::sr25519::dev;
@@ -26,10 +25,9 @@ use subxt_signer::sr25519::dev;
 async fn fetch_finalized_blocks<T: Config>(
     ctx: &TestNodeProcess<T>,
     n: usize,
-) -> impl Stream<Item = Block<T, OnlineClient<T>>> {
+) -> impl Stream<Item = Block<T>> {
     ctx.client()
-        .blocks()
-        .subscribe_finalized()
+        .stream_blocks()
         .await
         .expect("issue subscribing to finalized in fetch_finalized_blocks")
         .skip(1) // <- skip first block in case next is close to being ready already.
@@ -44,12 +42,16 @@ async fn archive_v1_body() {
     let mut blocks = fetch_finalized_blocks(&ctx, 3).await;
 
     while let Some(block) = blocks.next().await {
-        let subxt_block_bodies = block
+        let at_block = block.at().await.unwrap();
+
+        let extrinsics = at_block
             .extrinsics()
+            .fetch()
             .await
-            .unwrap()
+            .unwrap();
+        let subxt_block_bodies = extrinsics
             .iter()
-            .map(|e| e.bytes().to_vec());
+            .map(|e| e.unwrap().bytes().to_vec());
         let archive_block_bodies = rpc
             .archive_v1_body(block.hash())
             .await
@@ -72,10 +74,11 @@ async fn archive_v1_call() {
     let mut blocks = fetch_finalized_blocks(&ctx, 3).await;
 
     while let Some(block) = blocks.next().await {
-        let subxt_metadata_versions = block
-            .runtime_api()
-            .await
-            .call(node_runtime::apis().metadata().metadata_versions())
+        let at_block = block.at().await.unwrap();
+
+        let subxt_metadata_versions = at_block
+            .runtime_apis()
+            .call(node_runtime::runtime_apis().metadata().metadata_versions())
             .await
             .unwrap()
             .encode();
@@ -177,31 +180,39 @@ async fn archive_v1_header() {
 async fn archive_v1_storage() {
     let ctx = test_context().await;
     let rpc = ctx.chainhead_rpc_methods().await;
-    let api = ctx.client();
-    let hasher = api.hasher();
     let mut blocks = fetch_finalized_blocks(&ctx, 3).await;
 
     while let Some(block) = blocks.next().await {
+        let at_block = block.at().await.unwrap();
+
+        let hasher = at_block.hasher();
         let block_hash = block.hash();
         let alice: AccountId32 = dev::alice().public_key().into();
         let addr = node_runtime::storage().system().account();
 
         // Fetch value using Subxt to compare against
-        let storage_at = api.storage().at(block.reference());
-        let storage_entry = storage_at.entry(addr).unwrap();
-        let subxt_account_info = storage_entry.fetch((alice.clone(),)).await.unwrap();
+        let storage_entry = at_block
+            .storage()
+            .entry(addr)
+            .unwrap();
+        let subxt_account_info = storage_entry
+            .fetch((alice.clone(),))
+            .await
+            .unwrap();
         let subxt_account_info_bytes = subxt_account_info.bytes();
-        let account_info_addr = storage_entry.key((alice,)).unwrap();
+        let account_info_addr = storage_entry.fetch_key((alice,)).unwrap();
 
         // Construct archive query; ask for item then hash of item.
         let storage_query = vec![
-            StorageQuery {
+            ArchiveStorageQuery {
                 key: account_info_addr.as_slice(),
                 query_type: StorageQueryType::Value,
+                pagination_start_key: None,
             },
-            StorageQuery {
+            ArchiveStorageQuery {
                 key: account_info_addr.as_slice(),
                 query_type: StorageQueryType::Hash,
+                pagination_start_key: None,
             },
         ];
 

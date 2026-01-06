@@ -17,11 +17,12 @@ pub async fn test_context_with(authority: String, rpc_client_kind: RpcClientKind
     let paths =
         std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| SUBSTRATE_NODE_PATHS.to_string());
     let paths: Vec<_> = paths.split(',').map(|p| p.trim()).collect();
+    let config = SubstrateConfig::new();
 
-    let mut proc = TestContext::build(&paths);
+    let mut proc = TestContext::build(config, &paths);
     proc.with_authority(authority);
     proc.with_rpc_client_kind(rpc_client_kind);
-    proc.spawn::<SubstrateConfig>().await.unwrap()
+    proc.spawn().await.unwrap()
 }
 
 pub type TestConfig = SubstrateConfig;

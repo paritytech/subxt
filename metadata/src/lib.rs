@@ -59,13 +59,13 @@ pub use from::legacy::Error as LegacyFromError;
 
 type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;
 
-/// Metadata is often passed around wrapped in an [`Arc`] so that it can be cheaply cloned.
+/// Metadata is often passed around wrapped in an [`Arc`] so that it can be cloned.
 pub type ArcMetadata = Arc<Metadata>;
 
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
 /// which is then decoded into this. We aim to preserve all of the existing information in
 /// the incoming metadata while optimizing the format a little for Subxt's use cases.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Metadata {
     /// Type registry containing all types used in the metadata.
     types: PortableRegistry,

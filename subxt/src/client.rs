@@ -13,6 +13,7 @@
 mod offline_client;
 mod online_client;
 
+use crate::backend::BlockRef;
 use crate::config::{Config, HashFor};
 use crate::constants::ConstantsClient;
 use crate::custom_values::CustomValuesClient;
@@ -24,11 +25,12 @@ use crate::storage::StorageClient;
 use crate::transactions::TransactionsClient;
 use crate::view_functions::ViewFunctionsClient;
 use core::marker::PhantomData;
-use subxt_metadata::Metadata;
+use std::borrow::Cow;
+use subxt_metadata::{ArcMetadata, Metadata};
 
 pub use offline_client::{OfflineClient, OfflineClientAtBlockImpl, OfflineClientAtBlockT};
 pub use online_client::{
-    BlockNumberOrRef, OnlineClient, OnlineClientAtBlockImpl, OnlineClientAtBlockT,
+    BlockNumberOrRef, OnlineClient, OnlineClientAtBlockImpl, OnlineClientAtBlockT, Blocks, Block,
 };
 
 /// This represents a client at a specific block number, and is created by calling either
@@ -86,7 +88,7 @@ where
 
     /// Work with the extrinsics in this block.
     pub fn extrinsics(&self) -> ExtrinsicsClient<'_, T, Client> {
-        ExtrinsicsClient::new(&self.client)
+        ExtrinsicsClient::new(Cow::Borrowed(&self.client))
     }
 
     /// Work with the events at this block.
@@ -102,6 +104,12 @@ where
     /// Access Pallet View Functions at this block.
     pub fn view_functions(&self) -> ViewFunctionsClient<'_, T, Client> {
         ViewFunctionsClient::new(&self.client)
+    }
+
+    /// Obtain a clone of the metadata. Prefer [`Self::metadata_ref()`] 
+    /// unless you need to take ownership of the metadata.
+    pub fn metadata(&self) -> ArcMetadata {
+        self.client.metadata()
     }
 
     /// Obtain a reference to the metadata.
@@ -130,6 +138,11 @@ where
     pub fn genesis_hash(&self) -> Option<HashFor<T>> {
         self.client.genesis_hash()
     }
+
+    /// Return the hasher that's used at this block.
+    pub fn hasher(&self) -> &T::Hasher {
+        self.client.hasher()
+    }
 }
 
 impl<T, Client> ClientAtBlock<T, Client>
@@ -142,9 +155,18 @@ where
         self.client.client()
     }
 
+    /// A reference to the current block. 
+    /// 
+    /// Depending on the backend, holding onto
+    /// this encourages the backend to keep the block available until this
+    /// is dropped.
+    pub fn block_ref(&self) -> &BlockRef<HashFor<T>> {
+        self.client.block_ref()
+    }
+
     /// The current block hash.
     pub fn block_hash(&self) -> HashFor<T> {
-        self.client.block_hash()
+        self.client.block_ref().hash()
     }
 
     /// The header for this block.

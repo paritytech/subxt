@@ -16,13 +16,13 @@ async fn account_nonce() -> Result<(), subxt::Error> {
     let alice_account_id: AccountId32 = alice.public_key().into();
 
     // Check Alice nonce is starting from 0.
-    let runtime_api_call = node_runtime::apis()
+    let runtime_api_call = node_runtime::runtime_apis()
         .account_nonce_api()
         .account_nonce(alice_account_id.clone());
     let nonce = api
-        .runtime_api()
-        .at_latest()
+        .at_current_block()
         .await?
+        .runtime_apis()
         .call(runtime_api_call)
         .await?;
     assert_eq!(nonce, 0);
@@ -31,6 +31,7 @@ async fn account_nonce() -> Result<(), subxt::Error> {
     let remark_tx = node_runtime::tx().system().remark(vec![1, 2, 3, 4, 5]);
     let signed_extrinsic = api
         .tx()
+        .await?
         .create_signed(&remark_tx, &alice, Default::default())
         .await?;
 
@@ -40,13 +41,13 @@ async fn account_nonce() -> Result<(), subxt::Error> {
         .wait_for_finalized_success()
         .await?;
 
-    let runtime_api_call = node_runtime::apis()
+    let runtime_api_call = node_runtime::runtime_apis()
         .account_nonce_api()
         .account_nonce(alice_account_id);
     let nonce = api
-        .runtime_api()
-        .at_latest()
+        .at_current_block()
         .await?
+        .runtime_apis()
         .call(runtime_api_call)
         .await?;
     assert_eq!(nonce, 1);
@@ -70,6 +71,7 @@ async fn unchecked_extrinsic_encoding() -> Result<(), subxt::Error> {
 
     let signed_extrinsic = api
         .tx()
+        .await?
         .create_signed(&tx, &alice, Default::default())
         .await
         .unwrap();
@@ -84,9 +86,9 @@ async fn unchecked_extrinsic_encoding() -> Result<(), subxt::Error> {
     // Use the raw API to manually build an expected result.
     let expected_result = {
         let expected_result_bytes = api
-            .runtime_api()
-            .at_latest()
+            .at_current_block()
             .await?
+            .runtime_apis()
             .call_raw(
                 "TransactionPaymentApi_query_fee_details",
                 Some(encoded.as_ref()),
@@ -111,14 +113,14 @@ async fn unchecked_extrinsic_encoding() -> Result<(), subxt::Error> {
     };
 
     // Use the generated API to confirm the result with the raw call.
-    let runtime_api_call = node_runtime::apis()
+    let runtime_api_call = node_runtime::runtime_apis()
         .transaction_payment_api()
         .query_fee_details(tx_bytes.into(), len);
 
     let result = api
-        .runtime_api()
-        .at_latest()
+        .at_current_block()
         .await?
+        .runtime_apis()
         .call(runtime_api_call)
         .await?;
 

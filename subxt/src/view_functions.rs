@@ -108,7 +108,7 @@ where
         call_parameters: Option<&[u8]>,
     ) -> Result<Vec<u8>, ViewFunctionError> {
         let client = &self.client;
-        let block_hash = client.block_hash();
+        let block_hash = client.block_ref().hash();
         let data = client
             .backend()
             .call(CALL_NAME, call_parameters, block_hash)
@@ -122,7 +122,7 @@ where
     pub async fn call<P: Payload>(&self, payload: P) -> Result<P::ReturnType, ViewFunctionError> {
         let client = &self.client;
         let metadata = client.metadata_ref();
-        let block_hash = client.block_hash();
+        let block_hash = client.block_ref().hash();
 
         // Validate the View Function payload hash against the compile hash from codegen.
         self.validate(&payload)?;

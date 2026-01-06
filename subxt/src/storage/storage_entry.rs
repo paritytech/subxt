@@ -193,7 +193,7 @@ where
         key_parts: Addr::KeyParts,
     ) -> Result<Option<StorageValue<'atblock, Addr::Value>>, StorageError> {
         let key = self.fetch_key(key_parts)?;
-        let block_hash = self.inner.client.block_hash();
+        let block_hash = self.inner.client.block_ref().hash();
 
         let value = self
             .inner
@@ -240,7 +240,7 @@ where
         let info = self.inner.info.clone();
         let types = self.inner.client.metadata_ref().types();
         let key_bytes = self.key_from_any_parts(key_parts)?;
-        let block_hash = self.inner.client.block_hash();
+        let block_hash = self.inner.client.block_ref().hash();
 
         let stream = self
             .inner

@@ -73,7 +73,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> EventsClient<'atblock
         let client = self.client;
 
         // Fetch the bytes. Ensure things work if we get 0 bytes back.
-        let block_hash = client.block_hash();
+        let block_hash = client.block_ref().hash();
         let event_bytes = client
             .backend()
             .storage_fetch_value(system_events_key().to_vec(), block_hash)

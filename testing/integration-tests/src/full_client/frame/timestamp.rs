@@ -8,13 +8,13 @@ use crate::{node_runtime, subxt_test, test_context};
 async fn storage_get_current_timestamp() {
     let ctx = test_context().await;
     let api = ctx.client();
+    let at_block = api.at_current_block().await.unwrap();
 
-    let storage_at = api.storage().at_latest().await.unwrap();
-
-    let timestamp_value = storage_at
+    let timestamp_value = at_block
+        .storage()
         .entry(node_runtime::storage().timestamp().now())
         .unwrap()
-        .fetch()
+        .fetch(())
         .await
         .unwrap();
 

@@ -12,7 +12,6 @@ use codec::{Decode, Encode};
 use futures::StreamExt;
 
 use subxt::{
-    backend::BackendExt,
     error::{DispatchError, TransactionEventsError, TransactionFinalizedSuccessError},
     tx::{TransactionInvalid, ValidationResult},
 };
@@ -30,10 +29,10 @@ mod chain_head_rpcs;
 async fn storage_iter() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
+    let at_block = api.at_current_block().await.unwrap();
 
     let addr = node_runtime::storage().system().account();
-    let storage = api.storage().at_latest().await.unwrap();
-    let entry = storage.entry(addr)?;
+    let entry = at_block.storage().entry(addr)?;
 
     let len = entry
         .iter(())
@@ -52,27 +51,20 @@ async fn storage_iter() -> Result<(), subxt::Error> {
 async fn storage_child_values_same_across_backends() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
 
-    let chainhead_client = ctx.chainhead_backend().await;
-    let legacy_client = ctx.legacy_backend().await;
-
+    let chainhead_client = ctx.chainhead_backend().await.at_current_block().await.unwrap();
+    let legacy_client = ctx.legacy_backend().await.at_current_block().await.unwrap();
     let addr = node_runtime::storage().system().account();
-    let block_ref = legacy_client
-        .blocks()
-        .at_latest()
-        .await
-        .unwrap()
-        .reference();
 
-    let chainhead_storage = chainhead_client.storage().at(block_ref.clone());
-    let a: Vec<_> = chainhead_storage
+    let a: Vec<_> = chainhead_client
+        .storage()
         .iter(&addr, ())
         .await
         .unwrap()
         .collect()
         .await;
 
-    let legacy_storage = legacy_client.storage().at(block_ref.clone());
-    let b: Vec<_> = legacy_storage
+    let b: Vec<_> = legacy_client
+        .storage()
         .iter(&addr, ())
         .await
         .unwrap()
@@ -105,6 +97,8 @@ async fn transaction_validation() {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&tx, &alice, Default::default())
         .await
         .unwrap();
@@ -143,6 +137,8 @@ async fn validation_fails() {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&tx, &from, Default::default())
         .await
         .unwrap();
@@ -168,7 +164,9 @@ async fn external_signing() {
     let tx = node_runtime::tx().preimage().note_preimage(vec![0u8]);
     let mut partial_extrinsic = api
         .tx()
-        .create_partial(&tx, &alice.public_key().into(), Default::default())
+        .await
+        .unwrap()
+        .create_signable(&tx, &alice.public_key().into(), Default::default())
         .await
         .unwrap();
 
@@ -208,6 +206,8 @@ async fn submit_large_extrinsic() {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&tx, &alice, Default::default())
         .await
         .unwrap();
@@ -237,6 +237,8 @@ async fn decode_a_module_error() {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&freeze_unknown_asset, &alice, Default::default())
         .await
         .unwrap();
@@ -275,7 +277,7 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
         .balances()
         .transfer_allow_death(dev::alice().public_key().into(), 12345000000000000);
 
-    let actual_tx = api.tx().create_unsigned(&tx).unwrap();
+    let actual_tx = api.tx().await.unwrap().create_unsigned(&tx).unwrap();
 
     let actual_tx_bytes = actual_tx.encoded();
 
@@ -306,6 +308,8 @@ async fn extrinsic_hash_is_same_as_returned() {
 
     let tx = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&payload, &dev::bob(), Default::default())
         .await
         .unwrap();
@@ -359,6 +363,8 @@ async fn partial_fee_estimate_correct() {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&tx, &alice, Default::default())
         .await
         .unwrap();
@@ -367,24 +373,24 @@ async fn partial_fee_estimate_correct() {
     let partial_fee_1 = signed_extrinsic.partial_fee_estimate().await.unwrap();
 
     // Method II: TransactionPaymentApi_query_fee_details + calculations
-    let latest_block_ref = api.backend().latest_finalized_block_ref().await.unwrap();
+    let at_block = api.at_current_block().await.unwrap();
     let len_bytes: [u8; 4] = (signed_extrinsic.encoded().len() as u32).to_le_bytes();
     let encoded_with_len = [signed_extrinsic.encoded(), &len_bytes[..]].concat();
     let InclusionFee {
         base_fee,
         len_fee,
         adjusted_weight_fee,
-    } = api
-        .backend()
-        .call_decoding::<FeeDetails>(
-            "TransactionPaymentApi_query_fee_details",
-            Some(&encoded_with_len),
-            latest_block_ref.hash(),
-        )
-        .await
-        .unwrap()
-        .inclusion_fee
-        .unwrap();
+    } = {
+        let res = at_block
+            .runtime_apis()
+            .call_raw("TransactionPaymentApi_query_fee_details", Some(&encoded_with_len))
+            .await
+            .unwrap();
+        FeeDetails::decode(&mut &*res)
+            .unwrap()
+            .inclusion_fee
+            .unwrap()
+    };
     let partial_fee_2 = base_fee + len_fee + adjusted_weight_fee;
 
     // Both methods should yield the same fee

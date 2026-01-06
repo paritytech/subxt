@@ -46,7 +46,7 @@ async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::E
     let now = std::time::Instant::now();
 
     tracing::trace!("Check non_finalized_headers_subscription");
-    let mut sub = api.blocks().subscribe_best().await?;
+    let mut sub = api.stream_best_blocks().await?;
 
     let _block = sub.next().await.unwrap()?;
     tracing::trace!("First block took {:?}", now.elapsed());
@@ -101,7 +101,7 @@ async fn runtime_api_call(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
     tracing::trace!("Check runtime_api_call");
 
-    let mut sub = api.blocks().subscribe_best().await?;
+    let mut sub = api.stream_best_blocks().await?;
 
     let block = sub.next().await.unwrap()?;
     tracing::trace!("First block took {:?}", now.elapsed());

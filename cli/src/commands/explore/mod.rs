@@ -1,6 +1,6 @@
 use crate::utils::FileOrUrl;
 use crate::utils::validate_url_security;
-use clap::{Parser, Subcommand, command};
+use clap::{Parser, Subcommand};
 use codec::Decode;
 use color_eyre::eyre::eyre;
 use color_eyre::owo_colors::OwoColorize;

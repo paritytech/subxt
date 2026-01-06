@@ -6,22 +6,22 @@ use crate::config::transaction_extensions::{
 use crate::error::ExtrinsicError;
 use frame_decode::extrinsics::ExtrinsicExtensions as ExtrinsicExtensionsInfo;
 use scale_decode::DecodeAsType;
-use subxt_metadata::Metadata;
+use subxt_metadata::ArcMetadata;
 
 /// The signed extensions of an extrinsic.
 #[derive(Debug, Clone)]
-pub struct ExtrinsicTransactionExtensions<'atblock, 'extrinsic, T: Config> {
+pub struct ExtrinsicTransactionExtensions<'extrinsic, T: Config> {
     bytes: &'extrinsic [u8],
-    metadata: &'atblock Metadata,
-    decoded_info: &'extrinsic ExtrinsicExtensionsInfo<'atblock, u32>,
+    metadata: ArcMetadata,
+    decoded_info: &'extrinsic ExtrinsicExtensionsInfo<'extrinsic, u32>,
     marker: core::marker::PhantomData<T>,
 }
 
-impl<'atblock, 'extrinsic, T: Config> ExtrinsicTransactionExtensions<'atblock, 'extrinsic, T> {
+impl<'extrinsic, T: Config> ExtrinsicTransactionExtensions<'extrinsic, T> {
     pub(crate) fn new(
         bytes: &'extrinsic [u8],
-        metadata: &'atblock Metadata,
-        decoded_info: &'extrinsic ExtrinsicExtensionsInfo<'atblock, u32>,
+        metadata: ArcMetadata,
+        decoded_info: &'extrinsic ExtrinsicExtensionsInfo<'extrinsic, u32>,
     ) -> Self {
         Self {
             bytes,
@@ -34,14 +34,14 @@ impl<'atblock, 'extrinsic, T: Config> ExtrinsicTransactionExtensions<'atblock, '
     /// Returns an iterator over each of the signed extension details of the extrinsic.
     pub fn iter(
         &self,
-    ) -> impl Iterator<Item = ExtrinsicTransactionExtension<'atblock, 'extrinsic, T>> {
+    ) -> impl Iterator<Item = ExtrinsicTransactionExtension<'extrinsic, T>> {
         self.decoded_info
             .iter()
             .map(move |s| ExtrinsicTransactionExtension {
                 bytes: &self.bytes[s.range()],
                 ty_id: *s.ty(),
                 identifier: s.name(),
-                metadata: self.metadata,
+                metadata: self.metadata.clone(),
                 _marker: core::marker::PhantomData,
             })
     }
@@ -83,15 +83,15 @@ impl<'atblock, 'extrinsic, T: Config> ExtrinsicTransactionExtensions<'atblock, '
 
 /// A single signed extension
 #[derive(Debug, Clone)]
-pub struct ExtrinsicTransactionExtension<'atblock, 'extrinsic, T: Config> {
+pub struct ExtrinsicTransactionExtension<'extrinsic, T: Config> {
     bytes: &'extrinsic [u8],
     ty_id: u32,
     identifier: &'extrinsic str,
-    metadata: &'atblock Metadata,
+    metadata: ArcMetadata,
     _marker: core::marker::PhantomData<T>,
 }
 
-impl<'atblock, 'extrinsic, T: Config> ExtrinsicTransactionExtension<'atblock, 'extrinsic, T> {
+impl<'extrinsic, T: Config> ExtrinsicTransactionExtension<'extrinsic, T> {
     /// The bytes representing this signed extension.
     pub fn bytes(&self) -> &'extrinsic [u8] {
         self.bytes

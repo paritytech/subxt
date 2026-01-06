@@ -24,7 +24,8 @@ use scale_decode::{DecodeAsFields, DecodeAsType};
 use scale_info::PortableRegistry;
 use std::marker::PhantomData;
 use std::sync::Arc;
-use subxt_metadata::Metadata;
+use std::borrow::Cow;
+use subxt_metadata::ArcMetadata;
 
 pub use decode_as_extrinsic::DecodeAsExtrinsic;
 pub use extrinsic_transaction_extensions::{
@@ -32,13 +33,13 @@ pub use extrinsic_transaction_extensions::{
 };
 
 /// A client for working with extrinsics. See [the module docs](crate::extrinsics) for more.
-pub struct ExtrinsicsClient<'atblock, T, Client> {
-    client: &'atblock Client,
+pub struct ExtrinsicsClient<'atblock, T, Client: Clone> {
+    client: Cow<'atblock, Client>,
     marker: PhantomData<T>,
 }
 
-impl<'atblock, T, Client> ExtrinsicsClient<'atblock, T, Client> {
-    pub(crate) fn new(client: &'atblock Client) -> Self {
+impl<'atblock, T, Client: Clone> ExtrinsicsClient<'atblock, T, Client> {
+    pub(crate) fn new(client: Cow<'atblock, Client>) -> Self {
         ExtrinsicsClient {
             client,
             marker: PhantomData,
@@ -53,7 +54,7 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>> ExtrinsicsClient<'at
     /// provided then attempting to iterate and decode them will fail.
     pub async fn from_bytes(&self, extrinsics: Vec<Vec<u8>>) -> Extrinsics<'atblock, T, Client> {
         Extrinsics {
-            client: self.client,
+            client: self.client.clone(),
             extrinsics: Arc::new(extrinsics),
             marker: PhantomData,
         }
@@ -63,8 +64,8 @@ impl<'atblock, T: Config, Client: OfflineClientAtBlockT<T>> ExtrinsicsClient<'at
 impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> ExtrinsicsClient<'atblock, T, Client> {
     /// Fetch the extrinsics at this block.
     pub async fn fetch(&self) -> Result<Extrinsics<'atblock, T, Client>, ExtrinsicError> {
-        let client = self.client;
-        let block_hash = client.block_hash();
+        let client = &self.client;
+        let block_hash = client.block_ref().hash();
         let extrinsics = client
             .backend()
             .block_body(block_hash)
@@ -73,7 +74,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> ExtrinsicsClient<'atb
             .ok_or_else(|| ExtrinsicError::BlockNotFound(block_hash.into()))?;
 
         Ok(Extrinsics {
-            client,
+            client: client.clone(),
             extrinsics: Arc::new(extrinsics),
             marker: PhantomData,
         })
@@ -82,13 +83,22 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> ExtrinsicsClient<'atb
 
 /// The extrinsics in a block.
 #[derive(Debug, Clone)]
-pub struct Extrinsics<'atblock, T, C> {
-    client: &'atblock C,
+pub struct Extrinsics<'atblock, T, C: Clone> {
+    client: Cow<'atblock, C>,
     extrinsics: Arc<Vec<Vec<u8>>>,
     marker: PhantomData<T>,
 }
 
 impl<'atblock, T: Config, C: OfflineClientAtBlockT<T>> Extrinsics<'atblock, T, C> {
+    /// Take ownership of the extrinsics, converting lifetimes to static.
+    pub fn into_owned(self) -> Extrinsics<'static, T, C> {
+        Extrinsics { 
+            client: Cow::Owned(self.client.into_owned()),
+            extrinsics: self.extrinsics,
+            marker: self.marker
+        }
+    }
+
     /// The number of extrinsics.
     pub fn len(&self) -> usize {
         self.extrinsics.len()
@@ -106,8 +116,8 @@ impl<'atblock, T: Config, C: OfflineClientAtBlockT<T>> Extrinsics<'atblock, T, C
         &self,
     ) -> impl Iterator<Item = Result<Extrinsic<'_, T, C>, ExtrinsicDecodeErrorAt>> {
         let hasher = self.client.hasher();
-        let metadata = self.client.metadata_ref();
-        let client = self.client;
+        let metadata = self.client.metadata();
+        let client = self.client.clone();
         let all_extrinsic_bytes = self.extrinsics.clone();
 
         self.extrinsics
@@ -118,7 +128,7 @@ impl<'atblock, T: Config, C: OfflineClientAtBlockT<T>> Extrinsics<'atblock, T, C
 
                 // Try to decode the extrinsic.
                 let info =
-                    frame_decode::extrinsics::decode_extrinsic(cursor, metadata, metadata.types())
+                    frame_decode::extrinsics::decode_extrinsic(cursor, &*metadata, metadata.types())
                         .map_err(|error| ExtrinsicDecodeErrorAt {
                             extrinsic_index,
                             error: ExtrinsicDecodeErrorAtReason::DecodeError(error),
@@ -134,12 +144,12 @@ impl<'atblock, T: Config, C: OfflineClientAtBlockT<T>> Extrinsics<'atblock, T, C
                 }
 
                 Ok(Extrinsic {
-                    client,
+                    client: client.clone(),
                     index: extrinsic_index,
                     info: Arc::new(info),
                     extrinsics: Arc::clone(&all_extrinsic_bytes),
-                    hasher,
-                    metadata,
+                    hasher: Cow::Borrowed(hasher),
+                    metadata: metadata.clone(),
                 })
             })
     }
@@ -168,8 +178,8 @@ impl<'atblock, T: Config, C: OfflineClientAtBlockT<T>> Extrinsics<'atblock, T, C
 }
 
 /// A single extrinsic in a block.
-pub struct Extrinsic<'atblock, T: Config, C> {
-    client: &'atblock C,
+pub struct Extrinsic<'atblock, T: Config, C: Clone> {
+    client: Cow<'atblock, C>,
     /// The index of the extrinsic in the block.
     index: usize,
     /// Information about the extrinsic
@@ -177,9 +187,9 @@ pub struct Extrinsic<'atblock, T: Config, C> {
     /// All extrinsic bytes. use the index to select the correct bytes.
     extrinsics: Arc<Vec<Vec<u8>>>,
     /// Hash the extrinsic if we want.
-    hasher: &'atblock T::Hasher,
+    hasher: Cow<'atblock, T::Hasher>,
     /// Subxt metadata to fetch the extrinsic metadata.
-    metadata: &'atblock Metadata,
+    metadata: ArcMetadata,
 }
 
 impl<'atblock, T, C> Extrinsic<'atblock, T, C>
@@ -187,6 +197,20 @@ where
     T: Config,
     C: OfflineClientAtBlockT<T>,
 {
+    /// Take ownership of the extrinsic, converting lifetimes to static.
+    pub fn into_owned(self) -> Extrinsic<'static, T, C> {
+        let info = &*self.info;
+
+        Extrinsic { 
+            client: Cow::Owned(self.client.into_owned()),
+            index: self.index, 
+            info: Arc::new(info.clone().into_owned()), 
+            extrinsics: self.extrinsics.clone(), 
+            hasher: Cow::Owned(self.hasher.into_owned()), 
+            metadata: self.metadata,
+        }
+    }
+
     /// Calculate and return the hash of the extrinsic, based on the configured hasher.
     pub fn hash(&self) -> HashFor<T> {
         self.hasher.hash(&self.extrinsics[self.index])
@@ -282,13 +306,13 @@ where
     /// Returns `None` if the extrinsic is not signed.
     pub fn transaction_extensions(
         &self,
-    ) -> Option<ExtrinsicTransactionExtensions<'atblock, '_, T>> {
+    ) -> Option<ExtrinsicTransactionExtensions<'_, T>> {
         let bytes = self.bytes();
-        let metadata = self.metadata;
+        let metadata = &self.metadata;
 
         self.info
             .transaction_extension_payload()
-            .map(move |t| ExtrinsicTransactionExtensions::new(bytes, metadata, t))
+            .map(move |t| ExtrinsicTransactionExtensions::new(bytes, metadata.clone(), t))
     }
 
     /// Return true if this [`Extrinsic`] matches the provided type.
@@ -358,13 +382,13 @@ where
     /// Iterate over each of the fields in the call data.
     pub fn iter_call_data_fields(
         &self,
-    ) -> impl Iterator<Item = ExtrinsicCallDataField<'atblock, '_>> {
+    ) -> impl Iterator<Item = ExtrinsicCallDataField<'_>> {
         let ext_bytes = self.bytes();
         self.info.call_data().map(|field| ExtrinsicCallDataField {
             bytes: &ext_bytes[field.range()],
             name: field.name(),
             type_id: *field.ty(),
-            metadata: self.metadata,
+            metadata: self.metadata.clone(),
         })
     }
 }
@@ -376,19 +400,19 @@ where
 {
     /// The events associated with the extrinsic.
     pub async fn events(&self) -> Result<ExtrinsicEvents<T>, EventsError> {
-        ExtrinsicEvents::fetch(self.client, self.hash(), self.index()).await
+        ExtrinsicEvents::fetch(&*self.client, self.hash(), self.index()).await
     }
 }
 
 /// A field in the extrinsic call data.
-pub struct ExtrinsicCallDataField<'atblock, 'extrinsic> {
+pub struct ExtrinsicCallDataField<'extrinsic> {
     bytes: &'extrinsic [u8],
     name: &'extrinsic str,
     type_id: u32,
-    metadata: &'atblock Metadata,
+    metadata: ArcMetadata,
 }
 
-impl<'atblock, 'extrinsic> ExtrinsicCallDataField<'atblock, 'extrinsic> {
+impl<'extrinsic> ExtrinsicCallDataField<'extrinsic> {
     /// The bytes for this field.
     pub fn bytes(&self) -> &'extrinsic [u8] {
         self.bytes
@@ -410,7 +434,7 @@ impl<'atblock, 'extrinsic> ExtrinsicCallDataField<'atblock, 'extrinsic> {
     }
 
     /// Visit this field with the provided visitor, returning the output from it.
-    pub fn visit<V>(&self, visitor: V) -> Result<V::Value<'extrinsic, 'atblock>, V::Error>
+    pub fn visit<V>(&self, visitor: V) -> Result<V::Value<'extrinsic, '_>, V::Error>
     where
         V: scale_decode::visitor::Visitor<TypeResolver = PortableRegistry>,
     {

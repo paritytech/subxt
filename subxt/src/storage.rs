@@ -112,7 +112,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<'atbloc
         &self,
         addr: Addr,
         key_parts: Addr::KeyParts,
-    ) -> Result<StorageValue<'_, Addr::Value>, StorageError> {
+    ) -> Result<StorageValue<'atblock, Addr::Value>, StorageError> {
         let entry = self.entry(addr)?;
         entry.fetch(key_parts).await
     }
@@ -122,7 +122,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<'atbloc
         &self,
         addr: Addr,
         key_parts: Addr::KeyParts,
-    ) -> Result<Option<StorageValue<'_, Addr::Value>>, StorageError> {
+    ) -> Result<Option<StorageValue<'atblock, Addr::Value>>, StorageError> {
         let entry = self.entry(addr)?;
         entry.try_fetch(key_parts).await
     }
@@ -133,8 +133,8 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<'atbloc
         addr: Addr,
         key_parts: KeyParts,
     ) -> Result<
-        impl futures::Stream<Item = Result<StorageKeyValue<'_, Addr>, StorageError>>
-        + use<'_, Addr, Client, T, KeyParts>,
+        impl futures::Stream<Item = Result<StorageKeyValue<'atblock, Addr>, StorageError>>
+        + use<'atblock, Addr, Client, T, KeyParts>,
         StorageError,
     > {
         let entry = self.entry(addr)?;
@@ -147,7 +147,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<'atbloc
     /// otherwise an error. [`StorageError::NoValueFound`] will be returned in the event that the request was valid
     /// but no value lives at the given location).
     pub async fn fetch_raw(&self, key_bytes: Vec<u8>) -> Result<Vec<u8>, StorageError> {
-        let block_hash = self.client.block_hash();
+        let block_hash = self.client.block_ref().hash();
         let value = self
             .client
             .backend()
