@@ -3,10 +3,7 @@
 // see LICENSE for license details.
 
 use crate::{node_runtime, subxt_test, test_context, utils::wait_for_blocks};
-
-#[cfg(fullclient)]
 use subxt::utils::AccountId32;
-#[cfg(fullclient)]
 use subxt_signer::sr25519::dev;
 
 #[subxt_test]
@@ -31,7 +28,6 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn storage_map_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
@@ -63,7 +59,6 @@ async fn storage_map_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> {
     use codec::Encode;
@@ -99,7 +94,6 @@ async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error> 
     Ok(())
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
@@ -144,7 +138,6 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     let ctx = test_context().await;

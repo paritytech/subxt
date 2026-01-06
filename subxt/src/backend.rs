@@ -15,11 +15,9 @@ mod utils;
 use crate::config::{Config, HashFor};
 use crate::error::BackendError;
 use async_trait::async_trait;
-use codec::{Decode, Encode};
 use futures::{Stream, StreamExt};
 use std::pin::Pin;
 use std::sync::Arc;
-use subxt_metadata::Metadata;
 
 // Expose our various backends.
 pub use archive::ArchiveBackend;
@@ -119,9 +117,11 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     ) -> Result<Vec<u8>, BackendError>;
 }
 
-/// helpful utility methods derived from those provided on [`Backend`]
+/// Utility methods derived from those provided on [`Backend`]. These are not made
+/// public and only exist to help us in Subxt; Users should rely on the high level 
+/// Subxt interface over the backend.
 #[async_trait]
-pub trait BackendExt<T: Config>: Backend<T> {
+pub (crate) trait BackendExt<T: Config>: Backend<T> {
     /// Fetch a single value from storage.
     async fn storage_fetch_value(
         &self,
@@ -134,49 +134,6 @@ pub trait BackendExt<T: Config>: Backend<T> {
             .await
             .transpose()
             .map(|o| o.map(|s| s.value))
-    }
-
-    /// The same as a [`Backend::call()`], but it will also attempt to decode the
-    /// result into the given type, which is a fairly common operation.
-    async fn call_decoding<D: codec::Decode>(
-        &self,
-        method: &str,
-        call_parameters: Option<&[u8]>,
-        at: HashFor<T>,
-    ) -> Result<D, BackendError> {
-        let bytes = self.call(method, call_parameters, at).await?;
-        let res =
-            D::decode(&mut &*bytes).map_err(BackendError::CouldNotScaleDecodeRuntimeResponse)?;
-        Ok(res)
-    }
-
-    /// Return the metadata at some version.
-    async fn metadata_at_version(
-        &self,
-        version: u32,
-        at: HashFor<T>,
-    ) -> Result<Metadata, BackendError> {
-        let param = version.encode();
-
-        let opaque: Option<frame_metadata::OpaqueMetadata> = self
-            .call_decoding("Metadata_metadata_at_version", Some(&param), at)
-            .await?;
-        let Some(opaque) = opaque else {
-            return Err(BackendError::MetadataVersionNotFound(version));
-        };
-
-        let metadata: Metadata =
-            Decode::decode(&mut &opaque.0[..]).map_err(BackendError::CouldNotDecodeMetadata)?;
-        Ok(metadata)
-    }
-
-    /// Return V14 metadata from the legacy `Metadata_metadata` call.
-    async fn legacy_metadata(&self, at: HashFor<T>) -> Result<Metadata, BackendError> {
-        let opaque: frame_metadata::OpaqueMetadata =
-            self.call_decoding("Metadata_metadata", None, at).await?;
-        let metadata: Metadata =
-            Decode::decode(&mut &opaque.0[..]).map_err(BackendError::CouldNotDecodeMetadata)?;
-        Ok(metadata)
     }
 }
 

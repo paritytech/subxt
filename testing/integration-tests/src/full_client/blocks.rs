@@ -4,25 +4,17 @@
 
 use crate::{subxt_test, test_context, utils::consume_initial_blocks};
 use codec::{Compact, Decode, Encode};
-use futures::StreamExt;
-use subxt::client::OnlineClientAtBlockImpl;
-
-#[cfg(fullclient)]
-use crate::utils::node_runtime;
-
-#[cfg(fullclient)]
 use subxt::{
+    client::OnlineClientAtBlockImpl,
     config::{
         DefaultExtrinsicParamsBuilder, SubstrateConfig,
         transaction_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce},
     },
     utils::Era,
 };
-
-#[cfg(fullclient)]
 use subxt_signer::sr25519::dev;
+use crate::utils::node_runtime;
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn block_subscriptions_are_consistent_with_eachother() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
@@ -105,8 +97,12 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     Ok(())
 }
 
+// This test only uses legacy RPCs; only run once for default backend + rpc client.
+#[cfg(all(default_backend, default_rpc))]
 #[subxt_test]
 async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
+    use futures::StreamExt;
+
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
 
@@ -173,7 +169,6 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn fetch_block_and_decode_extrinsic_details() {
     let ctx = test_context().await;
@@ -307,7 +302,6 @@ async fn submit_extrinsic_and_get_it_back(
     extrinsic.into_owned()
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn decode_transaction_extensions_from_blocks() {
     let ctx = test_context().await;
@@ -387,7 +381,6 @@ async fn decode_transaction_extensions_from_blocks() {
     }
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn decode_block_mortality() {
     let ctx = test_context().await;

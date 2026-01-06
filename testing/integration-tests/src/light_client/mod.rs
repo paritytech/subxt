@@ -30,11 +30,19 @@
 use crate::utils::node_runtime;
 use codec::Compact;
 use std::sync::Arc;
-use subxt::backend::chain_head::ChainHeadBackend;
-use subxt::backend::rpc::RpcClient;
 use subxt::dynamic::Value;
-use subxt::{client::OnlineClient, config::PolkadotConfig, lightclient::LightClient};
-use subxt_metadata::Metadata;
+use subxt::{
+    client::OnlineClient, 
+    config::PolkadotConfig, 
+    lightclient::LightClient,
+    metadata::Metadata,
+    rpcs::RpcClient,
+    backend::{
+        ChainHeadBackend,
+        LegacyBackend,
+        CombinedBackend,
+    }
+};
 
 type Client = OnlineClient<PolkadotConfig>;
 
@@ -66,16 +74,14 @@ async fn finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error
 
     tracing::trace!("Check finalized_headers_subscription");
 
-    let mut sub = api.blocks().subscribe_finalized().await?;
+    let mut sub = api.stream_blocks().await?;
     let header = sub.next().await.unwrap()?;
     tracing::trace!("First block took {:?}", now.elapsed());
 
     let finalized_hash = api
-        .backend()
-        .latest_finalized_block_ref()
-        .await
-        .unwrap()
-        .hash();
+        .at_current_block()
+        .await?
+        .block_hash();
 
     tracing::trace!(
         "Finalized hash: {:?} took {:?}",
@@ -105,10 +111,14 @@ async fn runtime_api_call(api: &Client) -> Result<(), subxt::Error> {
 
     let block = sub.next().await.unwrap()?;
     tracing::trace!("First block took {:?}", now.elapsed());
-    let rt = block.runtime_api().await;
 
     // get metadata via state_call. if it decodes ok, it's probably all good.
-    let result_bytes = rt.call_raw("Metadata_metadata", None).await?;
+    let result_bytes = block
+        .at()
+        .await?
+        .runtime_apis()
+        .call_raw("Metadata_metadata", None)
+        .await?;
     let (_, _meta): (Compact<u32>, Metadata) = codec::Decode::decode(&mut &*result_bytes)?;
 
     tracing::trace!("Made runtime API call in {:?}\n", now.elapsed());
@@ -121,10 +131,14 @@ async fn storage_plain_lookup(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
     tracing::trace!("Check storage_plain_lookup");
 
-    let storage_at = api.storage().at_latest().await?;
-
     let addr = node_runtime::storage().timestamp().now();
-    let entry = storage_at.fetch(addr, ()).await?.decode()?;
+    let entry = api
+        .at_current_block()
+        .await?
+        .storage()
+        .fetch(addr, ())
+        .await?
+        .decode()?;
 
     tracing::trace!("Storage lookup took {:?}\n", now.elapsed());
 
@@ -139,7 +153,11 @@ async fn dynamic_constant_query(api: &Client) -> Result<(), subxt::Error> {
     tracing::trace!("Check dynamic_constant_query");
 
     let constant_query = subxt::dynamic::constant::<Value>("System", "BlockLength");
-    let _value = api.constants().at(&constant_query)?;
+    let _value = api
+        .at_current_block()
+        .await?
+        .constants()
+        .entry(&constant_query)?;
 
     tracing::trace!("Dynamic constant query took {:?}\n", now.elapsed());
 
@@ -151,7 +169,8 @@ async fn dynamic_events(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
     tracing::trace!("Check dynamic_events");
 
-    let events = api.events().at_latest().await?;
+    let at_block = api.at_current_block().await?;
+    let events = at_block.events().fetch().await?;
 
     for event in events.iter() {
         let _event = event?;
@@ -178,16 +197,25 @@ async fn run_test(backend: BackendType) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
     let (_lc, rpc) = LightClient::relay_chain(POLKADOT_SPEC)?;
 
+    let config = PolkadotConfig::new();
     let api = match backend {
-        BackendType::Unstable => {
+        BackendType::ChainHead => {
             let backend =
                 ChainHeadBackend::builder().build_with_background_driver(RpcClient::new(rpc));
-            let api: OnlineClient<PolkadotConfig> =
-                OnlineClient::from_backend(Arc::new(backend)).await?;
-            api
+            OnlineClient::from_backend(config, Arc::new(backend)).await?
         }
-
-        BackendType::Legacy => Client::from_rpc_client(rpc).await?,
+        BackendType::Legacy => {
+            let backend =
+                LegacyBackend::builder().build(RpcClient::new(rpc));
+            OnlineClient::from_backend(config, Arc::new(backend)).await?
+        },
+        BackendType::Combined => {
+            let backend =
+                CombinedBackend::builder()
+                    .build_with_background_driver(RpcClient::new(rpc))
+                    .await?;
+            OnlineClient::from_backend(config, Arc::new(backend)).await?
+        }
     };
 
     tracing::trace!("Light client initialization took {:?}", now.elapsed());
@@ -206,9 +234,11 @@ async fn run_test(backend: BackendType) -> Result<(), subxt::Error> {
 /// Backend type for light client testing.
 enum BackendType {
     /// Use the unstable backend (ie chainHead).
-    Unstable,
+    ChainHead,
     /// Use the legacy backend.
     Legacy,
+    /// Use the default "combined" backend.
+    Combined,
 }
 
 #[tokio::test]
@@ -216,8 +246,9 @@ async fn light_client_testing() -> Result<(), subxt::Error> {
     tracing_subscriber::fmt::init();
 
     // Run light client test with both backends.
-    run_test(BackendType::Unstable).await?;
+    run_test(BackendType::ChainHead).await?;
     run_test(BackendType::Legacy).await?;
+    run_test(BackendType::Combined).await?;
 
     Ok(())
 }

@@ -7,24 +7,22 @@ use crate::{
     utils::{node_runtime, wait_for_blocks},
 };
 use codec::{Decode, Encode};
-
-#[cfg(fullclient)]
 use futures::StreamExt;
-
 use subxt::{
     error::{DispatchError, TransactionEventsError, TransactionFinalizedSuccessError},
     tx::{TransactionInvalid, ValidationResult},
 };
 use subxt_signer::sr25519::dev;
 
-#[cfg(fullclient)]
+// The RPC tests are looking at RPC methods specifically, so only
+// run them once with the default backend + RPC client tests.
+#[cfg(all(default_rpc, default_backend))]
 mod archive_rpcs;
-#[cfg(fullclient)]
+#[cfg(all(default_rpc, default_backend))]
 mod legacy_rpcs;
-
+#[cfg(all(default_rpc, default_backend))]
 mod chain_head_rpcs;
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn storage_iter() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
@@ -46,7 +44,6 @@ async fn storage_iter() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn storage_child_values_same_across_backends() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
@@ -188,7 +185,6 @@ async fn external_signing() {
         .unwrap();
 }
 
-#[cfg(fullclient)]
 // TODO: Investigate and fix this test failure when using the ChainHeadBackend.
 // (https://github.com/paritytech/subxt/issues/1308)
 #[cfg(legacy_backend)]

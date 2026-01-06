@@ -15,15 +15,15 @@ description = "Subxt integration tests that rely on the Substrate binary"
 [features]
 default = []
 
-# Enable to run the tests with Light Client support.
-light-client = ["subxt/light-client"]
+# Use a light client to provide the RPC methods in the tests.
+light-client-rpc = ["subxt/light-client"]
+# Use a reconnecting client to provide the RPC methods in the tests.
+reconnecting-rpc = ["subxt-rpcs/reconnecting-rpc-client"]
 
-# Enable to run the full-client tests with Light Client support.
-light-client-long-running = ["subxt/light-client"]
-
-# Enable this to use the chainhead backend in tests _instead of_
-# the default one which relies on the "old" RPC methods.
+# Use the chainhead backend by default in the tests.
 chainhead-backend = []
+# Use the legacy backend by default in the tests.
+legacy-backend = []
 
 [dev-dependencies]
 assert_matches = { workspace = true }

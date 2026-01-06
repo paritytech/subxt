@@ -228,7 +228,6 @@ async fn chainhead_v1_unpin() {
     assert!(rpc.chainhead_v1_unpin(sub_id, hash).await.is_err());
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn chainspec_v1_genesishash() {
     let ctx = test_context().await;
@@ -241,7 +240,6 @@ async fn chainspec_v1_genesishash() {
     assert_eq!(a, b);
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn chainspec_v1_chainname() {
     let ctx = test_context().await;
@@ -254,7 +252,6 @@ async fn chainspec_v1_chainname() {
     assert_eq!(a, b);
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn chainspec_v1_properties() {
     let ctx = test_context().await;
@@ -267,7 +264,6 @@ async fn chainspec_v1_properties() {
     assert_eq!(a, b);
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn transactionwatch_v1_submit_and_watch() {
     let ctx = test_context().await;

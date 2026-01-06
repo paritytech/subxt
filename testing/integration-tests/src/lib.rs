@@ -2,8 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-#[cfg(all(feature = "light-client", feature = "chainhead-backend"))]
-compile_error!("The features 'light-client' and 'chainhead-backend' cannot be used together");
+#[cfg(all(legacy_backend, chainhead_backend))]
+compile_error!("The features 'legacy-backend' and 'chainhead-backend' cannot be used together");
+#[cfg(all(lightclient_rpc, reconnecting_rpc))]
+compile_error!("The features 'light-client-rpc' and 'reconnecting-rpc' cannot be used together");
 
 #[cfg(test)]
 pub mod utils;
@@ -12,13 +14,10 @@ pub mod utils;
 #[cfg_attr(test, allow(unused_imports))]
 use utils::*;
 
-#[cfg(any(
-    all(test, not(feature = "light-client")),
-    all(test, feature = "light-client-long-running")
-))]
+#[cfg(all(test, not(lightclient_rpc)))]
 mod full_client;
 
-#[cfg(all(test, feature = "light-client"))]
+#[cfg(all(test, lightclient_rpc))]
 mod light_client;
 
 #[cfg(test)]

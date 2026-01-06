@@ -8,8 +8,5 @@ mod balances;
 mod staking;
 mod system;
 mod timestamp;
-
-#[cfg(fullclient)]
 mod contracts;
-#[cfg(fullclient)]
 mod sudo;

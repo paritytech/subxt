@@ -18,14 +18,14 @@ mod signer;
 mod transaction_progress;
 mod validation_result;
 
-use crate::backend::{BackendExt, TransactionStatus as BackendTransactionStatus};
+use crate::backend::TransactionStatus as BackendTransactionStatus;
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::extrinsic_params::Params;
 use crate::config::{
     ClientState, Config, ExtrinsicParams, ExtrinsicParamsEncoder, HashFor, Hasher, Header,
 };
 use crate::error::{ExtrinsicError, TransactionStatusError};
-use codec::{Compact, Encode};
+use codec::{Compact, Encode, Decode};
 use core::marker::PhantomData;
 use futures::{TryFutureExt, future::try_join};
 use sp_crypto_hashing::blake2_256;
@@ -781,16 +781,19 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> SubmittableTransaction<T, Clien
 
         // destructuring RuntimeDispatchInfo, see type information <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
         // data layout: {weight_ref_time: Compact<u64>, weight_proof_size: Compact<u64>, class: u8, partial_fee: u128}
-        let (_, _, _, partial_fee) = self
+        let response = self
             .client
             .backend()
-            .call_decoding::<(Compact<u64>, Compact<u64>, u8, u128)>(
+            .call(
                 "TransactionPaymentApi_query_info",
                 Some(&params),
                 latest_block_ref.hash(),
             )
             .await
             .map_err(ExtrinsicError::CannotGetFeeInfo)?;
+
+        let (_, _, _, partial_fee) = <(Compact<u64>, Compact<u64>, u8, u128)>::decode(&mut &*response)
+            .map_err(ExtrinsicError::CannotDecodeFeeInfo)?;
 
         Ok(partial_fee)
     }

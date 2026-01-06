@@ -9,9 +9,9 @@ use crate::{
 use codec::Decode;
 use subxt::{
     error::{DispatchError, TokenError, TransactionEventsError, TransactionFinalizedSuccessError},
-    ext::scale_decode::DecodeAsType,
     utils::{AccountId32, MultiAddress},
 };
+use subxt::ext::scale_decode::DecodeAsType;
 use subxt_signer::sr25519::dev;
 
 #[subxt_test]
@@ -85,7 +85,6 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn tx_dynamic_transfer() -> Result<(), subxt::Error> {
     use subxt::ext::scale_value::{At, Value};

@@ -79,6 +79,8 @@ pub enum Error {
     DispatchErrorDecodeError(#[from] DispatchErrorDecodeError),
     #[error(transparent)]
     StorageError(#[from] StorageError),
+    #[error(transparent)]
+    CombinedBackendError(#[from] CombinedBackendError),
     // Dev note: Subxt doesn't directly return Raw* errors. These exist so that when
     // users use common crates (like parity-scale-codec and subxt-rpcs), errors returned
     // there can be handled automatically using ? when the expected error is subxt::Error.
@@ -167,6 +169,7 @@ impl Error {
             Error::ModuleErrorDetailsError(e) => e.backend_error(),
             Error::ModuleErrorDecodeError(e) => e.backend_error(),
             Error::DispatchErrorDecodeError(e) => e.backend_error(),
+            Error::CombinedBackendError(e) => e.backend_error(),
             #[cfg(feature = "light-client")]
             Error::OtherLightClientError(_) => None,
             #[cfg(feature = "light-client")]
@@ -466,6 +469,12 @@ pub enum CombinedBackendError {
     CouldNotObtainRpcMethodList(subxt_rpcs::Error),
 }
 
+impl CombinedBackendError {
+    fn backend_error(&self) -> Option<&BackendError> {
+        None
+    }
+}
+
 /// An RPC error. Since we are generic over the RPC client that is used,
 /// the error is boxed and could be casted.
 #[derive(Debug, thiserror::Error)]
@@ -679,6 +688,8 @@ pub enum ExtrinsicError {
     UnexpectedEndOfTransactionStatusStream,
     #[error("Cannot get fee info from Runtime API: {0}")]
     CannotGetFeeInfo(BackendError),
+    #[error("Cannot decode fee info from Runtime API: {0}")]
+    CannotDecodeFeeInfo(codec::Error),
     #[error("Cannot get validation info from Runtime API: {0}")]
     CannotGetValidationInfo(BackendError),
     #[error("Cannot decode ValidationResult bytes: {0}")]

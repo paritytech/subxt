@@ -65,6 +65,9 @@ pub mod view_functions;
 // Re-export the [`subxt_metadata`] crate.
 pub use subxt_metadata as metadata;
 
+// Re-export the [`subxt_rpcs`] crate.
+pub use subxt_rpcs as rpcs;
+
 // A shorthand to match previous versions and the
 // tx shorthand in other places.
 pub use transactions as tx;
@@ -93,7 +96,6 @@ pub mod ext {
     pub use scale_encode;
     pub use scale_type_resolver;
     pub use scale_value;
-    pub use subxt_rpcs;
 
     #[cfg(feature = "jsonrpsee")]
     pub use jsonrpsee;

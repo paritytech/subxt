@@ -327,7 +327,7 @@ pub fn validate_url_security(url: Option<&Url>, allow_insecure: bool) -> color_e
     let Some(url) = url else {
         return Ok(());
     };
-    match subxt::ext::subxt_rpcs::utils::url_is_secure(url.as_str()) {
+    match subxt::rpcs::utils::url_is_secure(url.as_str()) {
         Ok(is_secure) => {
             if !allow_insecure && !is_secure {
                 bail!(
