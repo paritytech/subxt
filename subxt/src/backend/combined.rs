@@ -36,12 +36,12 @@ enum BackendChoice<V> {
     UseDefault,
 }
 
-impl <V> BackendChoice<V> {
+impl<V> BackendChoice<V> {
     fn use_with_default<F: FnOnce() -> V>(self, default: F) -> Option<V> {
         match self {
             BackendChoice::DontUse => None,
             BackendChoice::Use(b) => Some(b),
-            BackendChoice::UseDefault => Some(default())
+            BackendChoice::UseDefault => Some(default()),
         }
     }
 }
@@ -130,7 +130,8 @@ impl<T: Config> CombinedBackendBuilder<T> {
         };
 
         let archive = if has_archive_methods {
-            self.archive.use_with_default(|| ArchiveBackend::new(rpc_client.clone()))
+            self.archive
+                .use_with_default(|| ArchiveBackend::new(rpc_client.clone()))
         } else {
             None
         };
