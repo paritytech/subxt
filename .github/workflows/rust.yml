@@ -46,16 +46,13 @@ jobs:
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
 
       - name: Cargo fmt
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo fmt --all -- --check
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   machete:
-    name: "Check unused dependencies"
+    name: Check unused dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -78,9 +75,7 @@ jobs:
         run: cargo install cargo-machete
 
       - name: Check unused dependencies
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: machete
+        run: cargo machete
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
@@ -141,10 +136,7 @@ jobs:
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
 
       - name: Run clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -p subxt --no-default-features --features web,light-client,jsonrpsee --target wasm32-unknown-unknown -- -D warnings
+        run: cargo clippy -p subxt --no-default-features --features web,light-client,jsonrpsee --target wasm32-unknown-unknown -- -D warnings
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
@@ -325,16 +317,13 @@ jobs:
         run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc --workspace --no-deps --document-private-items
 
       - name: Run cargo test on documentation
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: test
-          args: --doc --features reconnecting-rpc-client
+        run: cargo test --doc --features reconnecting-rpc-client
 
       - if: "failure()"
         uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
-  tests:
-    name: "Test (Native)"
+  basic_tests:
+    name: Cargo test
     runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 45
@@ -352,32 +341,17 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
-
-      - name: Install cargo-nextest
-        run: cargo install cargo-nextest
-
       - name: Run subxt-signer no-std tests
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: test
-          working-directory: signer/tests/no-std
+        run: cargo test --manifest-path signer/tests/no-std/Cargo.toml
 
-      - name: Run tests
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: nextest
-          args: run --workspace --features reconnecting-rpc-client
+      - name: Run crate tests
+        run: cargo test --exclude integration-tests
 
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
-
-  unstable_backend_tests:
-    name: "Test chainhead backend"
+  integration_tests_default:
+    name: "Integration tests: default RPC and backend"
     runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
@@ -392,26 +366,22 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+      - name: Run crate tests
+        run: cargo test -p integration-tests
 
-      - name: Install cargo-nextest
-        run: cargo install cargo-nextest
-
-      - name: Run tests
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: nextest
-          args: run --workspace --features chainhead-backend
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
-
-  light_client_tests:
-    name: "Test (Light Client)"
-    runs-on: ubuntu-latest
+  integration_tests_alternates:
+    name: "Integration tests: light-client-rpc"
+    runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
-    timeout-minutes: 15
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        # Test each of these features in our integration tests:
+        feature:
+        - light-client-rpc
+        - reconnecting-rpc
+        - legacy-backend
+        - chainhead-backend
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
@@ -426,17 +396,8 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
-
-      - name: Run tests
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: test
-          args: --release --package integration-tests --features light-client
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
+      - name: Run crate tests
+        run: cargo test -p integration-tests --features ${{ matrix.feature }}
 
   wasm_tests:
     name: Test (WASM)
