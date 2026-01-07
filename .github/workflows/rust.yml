@@ -48,9 +48,6 @@ jobs:
       - name: Cargo fmt
         run: cargo fmt --all -- --check
 
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
-
   machete:
     name: Check unused dependencies
     runs-on: ubuntu-latest
@@ -76,9 +73,6 @@ jobs:
 
       - name: Check unused dependencies
         run: cargo machete
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   clippy:
     name: Cargo clippy
@@ -109,9 +103,6 @@ jobs:
           cargo clippy -p subxt --no-default-features --features web -- -D warnings
           cargo clippy -p subxt --no-default-features --features web,light-client -- -D warnings
 
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
-
   wasm_clippy:
     name: Cargo clippy (WASM)
     runs-on: ubuntu-latest
@@ -137,9 +128,6 @@ jobs:
 
       - name: Run clippy
         run: cargo clippy -p subxt --no-default-features --features web,light-client,jsonrpsee --target wasm32-unknown-unknown -- -D warnings
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   check:
     name: Cargo check
@@ -204,9 +192,6 @@ jobs:
         run: cargo check --manifest-path examples/parachain-example/Cargo.toml
       - name: Cargo check ffi-example
         run: cargo check --manifest-path examples/ffi-example/Cargo.toml
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   ffi_example:
     name: Run FFI Example
@@ -288,9 +273,6 @@ jobs:
         run: |
           cargo check --manifest-path examples/wasm-example/Cargo.toml --target wasm32-unknown-unknown
 
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
-
   docs:
     name: Check documentation and run doc tests
     runs-on: parity-large
@@ -318,9 +300,6 @@ jobs:
 
       - name: Run cargo test on documentation
         run: cargo test --doc --features reconnecting-rpc-client
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   basic_tests:
     name: Cargo test
@@ -452,9 +431,6 @@ jobs:
           wasm-pack test --headless --chrome
         working-directory: signer/tests/wasm
 
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
-
   no-std-tests:
     name: "Test (no_std)"
     runs-on: ubuntu-latest
@@ -485,6 +461,3 @@ jobs:
       - name: Compile `no-std-tests` crate to `thumbv7em-none-eabi` target.
         run: cargo build --target thumbv7em-none-eabi
         working-directory: testing/no-std-tests
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
