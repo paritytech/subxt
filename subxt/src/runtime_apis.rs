@@ -33,7 +33,7 @@ pub struct RuntimeApisClient<'atblock, T: Config, Client> {
 }
 
 impl<'atblock, T: Config, Client> RuntimeApisClient<'atblock, T, Client> {
-    /// Create a new [`RuntimeApi`]
+    /// Create a new [`RuntimeApisClient`]
     pub(crate) fn new(client: &'atblock Client) -> Self {
         Self {
             client,

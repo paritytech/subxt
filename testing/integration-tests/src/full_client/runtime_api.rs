@@ -18,7 +18,7 @@ async fn account_nonce() -> Result<(), subxt::Error> {
     // Check Alice nonce is starting from 0.
     let runtime_api_call = node_runtime::runtime_apis()
         .account_nonce_api()
-        .account_nonce(alice_account_id.clone());
+        .account_nonce(alice_account_id);
     let nonce = api
         .at_current_block()
         .await?

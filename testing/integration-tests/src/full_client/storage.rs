@@ -106,12 +106,10 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error> {
     let alice: AccountId32 = dev::alice().public_key().into();
     let bob: AccountId32 = dev::bob().public_key().into();
 
-    let tx1 = node_runtime::tx()
-        .assets()
-        .create(99, alice.clone().into(), 1);
+    let tx1 = node_runtime::tx().assets().create(99, alice.into(), 1);
     let tx2 = node_runtime::tx()
         .assets()
-        .approve_transfer(99, bob.clone().into(), 123);
+        .approve_transfer(99, bob.into(), 123);
     api.tx()
         .await?
         .sign_and_submit_then_watch_default(&tx1, &signer)
@@ -151,11 +149,8 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     let bob: AccountId32 = dev::bob().public_key().into();
 
     // Create two assets; one with ID 99 and one with ID 100.
-    let assets = [
-        (99, alice.clone(), bob.clone(), 123),
-        (100, bob.clone(), alice.clone(), 124),
-    ];
-    for (asset_id, admin, delegate, amount) in assets.clone() {
+    let assets = [(99, alice, bob, 123), (100, bob, alice, 124)];
+    for (asset_id, admin, delegate, amount) in assets {
         let tx1 = node_runtime::tx()
             .assets()
             .create(asset_id, admin.into(), 1);
@@ -197,7 +192,7 @@ async fn storage_partial_lookup() -> Result<(), subxt::Error> {
     assert_eq!(amounts, expected);
 
     // Check all assets starting with ID 99.
-    for (asset_id, _, _, amount) in assets.clone() {
+    for (asset_id, _, _, amount) in assets {
         let mut results = approvals_entry.iter((asset_id,)).await?;
 
         let mut approvals = Vec::new();

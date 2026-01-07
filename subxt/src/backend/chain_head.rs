@@ -4,7 +4,7 @@
 
 //! This module exposes a backend implementation based on the new APIs
 //! described at <https://github.com/paritytech/json-rpc-interface-spec/>. See
-//! [`rpc_methods`] for the raw API calls.
+//! [`crate::rpcs::methods`] for the raw API calls.
 //!
 //! Specifically, the focus here is on the `chainHead` methods.
 

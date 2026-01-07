@@ -348,7 +348,7 @@ async fn transfer_implicit_subscription() {
 
     let to_bob_tx = node_runtime::tx()
         .balances()
-        .transfer_allow_death(bob.clone().into(), 10_000);
+        .transfer_allow_death(bob.into(), 10_000);
 
     let signed_extrinsic = api
         .tx()

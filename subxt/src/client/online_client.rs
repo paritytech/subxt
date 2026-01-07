@@ -3,8 +3,9 @@ mod blocks;
 
 use super::ClientAtBlock;
 use super::OfflineClientAtBlockT;
-use crate::backend::{Backend, BlockRef, CombinedBackend};
+use crate::backend::{Backend, BlockRef};
 use crate::config::{Config, HashFor, Hasher, Header};
+use crate::error::OnlineClientError;
 use crate::error::{BlocksError, OnlineClientAtBlockError};
 use crate::metadata::{ArcMetadata, Metadata};
 use crate::transactions::TransactionsClient;
@@ -14,10 +15,6 @@ use frame_decode::helpers::ToTypeRegistry;
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed};
 use scale_info_legacy::TypeRegistrySet;
 use std::sync::Arc;
-use subxt_rpcs::RpcClient;
-
-#[cfg(feature = "jsonrpsee")]
-use crate::error::OnlineClientError;
 
 pub use block_number_or_ref::BlockNumberOrRef;
 pub use blocks::{Block, Blocks};
@@ -81,7 +78,7 @@ impl<T: Config> OnlineClient<T> {
         config: T,
         url: impl AsRef<str>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
-        let rpc_client = RpcClient::from_insecure_url(url).await?;
+        let rpc_client = subxt_rpcs::RpcClient::from_insecure_url(url).await?;
         OnlineClient::from_rpc_client(config, rpc_client).await
     }
 
@@ -90,10 +87,10 @@ impl<T: Config> OnlineClient<T> {
     #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
     pub async fn from_rpc_client(
         config: T,
-        rpc_client: impl Into<RpcClient>,
+        rpc_client: impl Into<subxt_rpcs::RpcClient>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
         let rpc_client = rpc_client.into();
-        let backend = CombinedBackend::builder()
+        let backend = crate::backend::CombinedBackend::builder()
             .build_with_background_driver(rpc_client)
             .await
             .map_err(OnlineClientError::CannotBuildCombinedBackend)?;

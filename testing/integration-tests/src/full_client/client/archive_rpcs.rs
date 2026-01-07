@@ -186,7 +186,7 @@ async fn archive_v1_storage() {
 
         // Fetch value using Subxt to compare against
         let storage_entry = at_block.storage().entry(addr).unwrap();
-        let subxt_account_info = storage_entry.fetch((alice.clone(),)).await.unwrap();
+        let subxt_account_info = storage_entry.fetch((alice,)).await.unwrap();
         let subxt_account_info_bytes = subxt_account_info.bytes();
         let account_info_addr = storage_entry.fetch_key((alice,)).unwrap();
 

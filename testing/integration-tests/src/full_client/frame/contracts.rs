@@ -233,7 +233,7 @@ async fn tx_call() {
 
     let contract_info = at_block
         .storage()
-        .fetch(&contract_info_addr, (contract.clone(),))
+        .fetch(&contract_info_addr, (contract,))
         .await
         .unwrap();
 
