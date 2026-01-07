@@ -19,16 +19,31 @@ use std::task::Poll;
 use subxt_rpcs::RpcClient;
 
 /// A builder to  configure and build a [`CombinedBackend`].
+#[derive(Debug)]
 pub struct CombinedBackendBuilder<T: Config> {
     archive: BackendChoice<ArchiveBackend<T>>,
     chainhead: BackendChoice<ChainHeadBackend<T>>,
     legacy: BackendChoice<LegacyBackend<T>>,
 }
 
+#[derive(Debug)]
 enum BackendChoice<V> {
+    /// A backend to use has been explicitly provided.
     Use(V),
+    /// This backend should not be used.
     DontUse,
+    /// Use the default instantiation of this backend.
     UseDefault,
+}
+
+impl <V> BackendChoice<V> {
+    fn use_with_default<F: FnOnce() -> V>(self, default: F) -> Option<V> {
+        match self {
+            BackendChoice::DontUse => None,
+            BackendChoice::Use(b) => Some(b),
+            BackendChoice::UseDefault => Some(default())
+        }
+    }
 }
 
 impl<T: Config> Default for CombinedBackendBuilder<T> {
@@ -108,42 +123,32 @@ impl<T: Config> CombinedBackendBuilder<T> {
         let methods = methods.methods;
 
         let has_archive_methods = methods.iter().any(|m| m.starts_with("archive_v1_"));
-        let has_chainhead_methods = methods.iter().any(|m| m.starts_with("chainHead_v1"));
+        let has_chainhead_methods = methods.iter().any(|m| m.starts_with("chainHead_v1_"));
 
         let mut combined_driver = CombinedBackendDriver {
             chainhead_driver: None,
         };
 
         let archive = if has_archive_methods {
-            match self.archive {
-                BackendChoice::Use(b) => Some(b),
-                BackendChoice::UseDefault => Some(ArchiveBackend::new(rpc_client.clone())),
-                BackendChoice::DontUse => None,
-            }
+            self.archive.use_with_default(|| ArchiveBackend::new(rpc_client.clone()))
         } else {
             None
         };
 
         let chainhead = if has_chainhead_methods {
-            match self.chainhead {
-                BackendChoice::Use(b) => Some(b),
-                BackendChoice::UseDefault => {
-                    let (chainhead, chainhead_driver) =
-                        ChainHeadBackend::builder().build(rpc_client.clone());
-                    combined_driver.chainhead_driver = Some(chainhead_driver);
-                    Some(chainhead)
-                }
-                BackendChoice::DontUse => None,
-            }
+            self.chainhead.use_with_default(|| {
+                let (chainhead, chainhead_driver) =
+                    ChainHeadBackend::builder().build(rpc_client.clone());
+                combined_driver.chainhead_driver = Some(chainhead_driver);
+                chainhead
+            })
         } else {
             None
         };
 
-        let legacy = match self.legacy {
-            BackendChoice::Use(b) => Some(b),
-            BackendChoice::UseDefault => Some(LegacyBackend::builder().build(rpc_client.clone())),
-            BackendChoice::DontUse => None,
-        };
+        let legacy = self
+            .legacy
+            .use_with_default(|| LegacyBackend::builder().build(rpc_client.clone()));
 
         let combined = CombinedBackend {
             archive,
@@ -185,6 +190,7 @@ impl<T: Config> CombinedBackendBuilder<T> {
 /// Driver for the [`CombinedBackend`]. This needs to be polled to ensure
 /// that the [`CombinedBackend`] can make progress. It does not need polling
 /// if [`CombinedBackendDriver::needs_polling`] returns `false`.
+#[derive(Debug)]
 pub struct CombinedBackendDriver<T: Config> {
     chainhead_driver: Option<ChainHeadBackendDriver<T>>,
 }
@@ -212,6 +218,7 @@ impl<T: Config> Stream for CombinedBackendDriver<T> {
 
 /// A combined backend. This selects which RPC calls to use based on the `rpc_methods`
 /// available from the given RPC client we're given.
+#[derive(Debug)]
 pub struct CombinedBackend<T: Config> {
     archive: Option<ArchiveBackend<T>>,
     chainhead: Option<ChainHeadBackend<T>>,

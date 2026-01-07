@@ -89,12 +89,12 @@ impl<T: Config> Stream for ArchiveStorageStream<T> {
                 Some(StreamState::GetSubscription {
                     current_query,
                     mut sub_fut,
-                }) => {
+                }) => {       
                     match sub_fut.poll_unpin(cx) {
                         Poll::Ready(Ok(sub)) => {
                             this.state = Some(StreamState::RunSubscription { current_query, sub });
                         }
-                        Poll::Ready(Err(e)) => {
+                        Poll::Ready(Err(e)) => {          
                             if e.is_disconnected_will_reconnect() {
                                 // Push the query back onto the queue to try again
                                 this.query_queue.push_front(current_query);
@@ -174,7 +174,13 @@ impl<T: Config> Stream for ArchiveStorageStream<T> {
                             this.state = None;
                             continue;
                         }
-                        Poll::Pending => return Poll::Pending,
+                        Poll::Pending => {
+                            this.state = Some(StreamState::RunSubscription {
+                                current_query,
+                                sub    
+                            });
+                            return Poll::Pending
+                        }
                     }
                 }
             }
