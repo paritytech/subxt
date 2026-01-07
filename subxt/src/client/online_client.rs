@@ -82,7 +82,7 @@ impl<T: Config> OnlineClient<T> {
         OnlineClient::from_rpc_client(config, rpc_client).await
     }
 
-    /// Construct a new [`OnlineClient`] by providing an [`RpcClient`] to drive the connection.
+    /// Construct a new [`OnlineClient`] by providing a [`subxt_rpcs::RpcClient`] to drive the connection.
     /// This will use the current default [`Backend`], which may change in future releases.
     #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
     pub async fn from_rpc_client(

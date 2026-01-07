@@ -18,6 +18,10 @@ The headline changes are as follows:
 - Errors are no longer one big `Error` enum; instead different Subxt APIs return different errors, to limit the number of possible errors in any one place. These all convert into `subxt::Error` so this can continue to be used as a catch-all.
 - Storage APIs have been redone, fixing some [issues](https://github.com/paritytech/subxt/issues/1928) and giving much more control over iteration, as well as key and value decoding.
 
+There are also a couple of organizational changes which aren't visible:
+- We now follow the `name.rs` + `name/submodule.rs` convention instead of the `name/mod.rs` + `name/submodule.rs` convention.
+- CI and testing updates hopefully ensure better organization and coverage with a greater number of different feature flags being tested.
+
 This changes have results in many breaking changes across APIs, which I will try my best to summarize below.
 
 A good place to look for a more holistic understanding of what's changes are the examples, both:
