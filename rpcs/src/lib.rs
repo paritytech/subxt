@@ -16,11 +16,10 @@
 //! The provided RPC client implementations can be used natively (with the default `native` feature
 //! flag) or in WASM based web apps (with the `web` feature flag).
 
-#[cfg(any(
-    all(feature = "web", feature = "native"),
-    not(any(feature = "web", feature = "native"))
-))]
-compile_error!("subxt-rpcs: exactly one of the 'web' and 'native' features should be used.");
+#[cfg(all(feature = "web", feature = "native"))]
+compile_error!("subxt-rpcs: exactly one of the 'web' and 'native' features should be used, but both have been enabled.");
+#[cfg(not(any(feature = "web", feature = "native")))]
+compile_error!("subxt-rpcs: exactly one of the 'web' and 'native' features should be used, but none have been enabled.");
 
 mod macros;
 

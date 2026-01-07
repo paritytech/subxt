@@ -171,9 +171,9 @@ jobs:
       - name: Cargo hack; check each subxt-rpcs feature
         run: cargo hack -p subxt-rpcs --each-feature check --exclude-features web --features native
 
-      # And with subxt-signer (seems to work with a more basic check here; disable web if it becomes an issue).
+      # And with subxt-signer
       - name: Cargo hack; check each subxt-signer feature
-        run: cargo hack -p subxt-signer --each-feature check
+        run: cargo hack -p subxt-signer --each-feature check --exclude-features web --features native
 
       # And for subxt-lightclient.
       - name: Cargo check subxt-lightclient

@@ -42,6 +42,7 @@ unstable-eth = ["keccak-hash", "ecdsa", "secp256k1", "bip32"]
 # Enable support for loading key pairs from polkadot-js json.
 polkadot-js-compat = [
     "std",
+    "subxt-utils-accountid32",
     "sr25519",
     "base64",
     "scrypt",
@@ -55,8 +56,16 @@ polkadot-js-compat = [
 subxt = ["dep:subxt"]
 
 # The getrandom package is used via schnorrkel. We need to enable the JS
-# feature on it if compiling for the web.
-web = ["getrandom/js"]
+# feature on it if compiling for the web. If subxt is used then this also
+# ebales the same feature there.
+web = [
+    "getrandom/js",
+    "subxt?/web"
+]
+
+# This isn't stricly needed, and can be omitted, but allows us to
+# test the "subxt" feature flag which needs either native or web to be set.
+native = ["subxt?/native"]
 
 [dependencies]
 secrecy = { workspace = true }

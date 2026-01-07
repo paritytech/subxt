@@ -15,6 +15,11 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(all(feature = "web", feature = "native"))]
+compile_error!(
+    "subxt-signer: both 'web' and 'native' features enabled, but only 0 or 1 of these can be enabled at a time."
+);
+
 extern crate alloc;
 
 #[macro_use]

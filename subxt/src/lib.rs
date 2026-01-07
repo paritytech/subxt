@@ -21,11 +21,11 @@
 #![doc = concat!("- [The WASM example](https://github.com/paritytech/subxt/tree/", env!("SUBXT_REF"), "/examples/ffi-example)")]
 //!   shows off how Subxt can be called via FFI from Node.JS and Python.
 
-#[cfg(any(
-    all(feature = "web", feature = "native"),
-    not(any(feature = "web", feature = "native"))
-))]
-compile_error!("subxt: exactly one of the 'web' and 'native' features should be used.");
+#[cfg(all(feature = "web", feature = "native"))]
+compile_error!("subxt: exactly one of the 'web' and 'native' features should be used, but both have been enabled.");
+#[cfg(not(any(feature = "web", feature = "native")))]
+compile_error!("subxt: exactly one of the 'web' and 'native' features should be used, but none have been enabled.");
+
 
 // TODO: Do we need this still?
 // // Suppress an unused dependency warning because these are
