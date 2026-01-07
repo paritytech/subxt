@@ -327,7 +327,7 @@ jobs:
         run: cargo test --exclude integration-tests
 
   integration_tests_default:
-    name: "Integration tests: default RPC and backend"
+    name: "Integration tests: default RPC client and backend"
     runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 45
@@ -349,7 +349,7 @@ jobs:
         run: cargo test -p integration-tests
 
   integration_tests_alternates:
-    name: "Integration tests: light-client-rpc"
+    name: "Integration tests: alternate backends and RPC clients"
     runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 45
