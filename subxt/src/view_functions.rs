@@ -4,15 +4,6 @@
 
 //! This module exposes [`ViewFunctionsClient`], which has methods for calling View Functions.
 //! It's created by calling [`crate::client::ClientAtBlock::view_functions()`].
-//!
-//! ```rust,no_run
-//! pub use subxt::{OnlineClient, PolkadotConfig};
-//!
-//! let client = OnlineClient::new().await?;
-//! let at_block = client.at_current_block().await?;
-//!
-//! let view_functions = at_block.view_functions();
-//! ```
 
 mod payload;
 

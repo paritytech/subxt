@@ -1,14 +1,5 @@
 //! This module exposes [`ConstantsClient`], which has methods for working with constants. It's
 //! created by calling [`crate::client::ClientAtBlock::constants()`].
-//!
-//! ```rust,no_run
-//! pub use subxt::{OnlineClient, PolkadotConfig};
-//!
-//! let client = OnlineClient::new().await?;
-//! let at_block = client.at_current_block().await?;
-//!
-//! let constants = at_block.constants();
-//! ```
 
 mod address;
 

@@ -1,14 +1,5 @@
 //! This module exposes [`CustomValuesClient`], which has methods for working with custom values.
 //! It's created by calling [`crate::client::ClientAtBlock::custom_values()`].
-//!
-//! ```rust,no_run
-//! pub use subxt::{OnlineClient, PolkadotConfig};
-//!
-//! let client = OnlineClient::new().await?;
-//! let at_block = client.at_current_block().await?;
-//!
-//! let custom_values = at_block.custom_values();
-//! ```
 
 mod address;
 

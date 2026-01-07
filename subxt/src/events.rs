@@ -1,14 +1,5 @@
 //! This module exposes [`EventsClient`], which has methods for working with eventts.
 //! It's created by calling [`crate::client::ClientAtBlock::events()`].
-//!
-//! ```rust,no_run
-//! pub use subxt::{OnlineClient, PolkadotConfig};
-//!
-//! let client = OnlineClient::new().await?;
-//! let at_block = client.at_current_block().await?;
-//!
-//! let events = at_block.events();
-//! ```
 
 mod decode_as_event;
 

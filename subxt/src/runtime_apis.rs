@@ -4,15 +4,6 @@
 
 //! This module exposes [`RuntimeApisClient`], which has methods for calling Runtime APIs.
 //! It's created by calling [`crate::client::ClientAtBlock::runtime_apis()`].
-//!
-//! ```rust,no_run
-//! pub use subxt::{OnlineClient, PolkadotConfig};
-//!
-//! let client = OnlineClient::new().await?;
-//! let at_block = client.at_current_block().await?;
-//!
-//! let runtime_apis = at_block.runtime_apis();
-//! ```
 
 mod payload;
 

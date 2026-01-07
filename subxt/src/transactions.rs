@@ -1,15 +1,6 @@
 //! This module exposes [`TransactionsClient`], which has methods for constructing and submitting
 //! transactions. It's created by calling [`crate::client::ClientAtBlock::transactions()`], or
 //! [`crate::client::ClientAtBlock::tx()`] for short.
-//!
-//! ```rust,no_run
-//! pub use subxt::{OnlineClient, PolkadotConfig};
-//!
-//! let client = OnlineClient::new().await?;
-//! let at_block = client.at_current_block().await?;
-//!
-//! let transactions = at_block.transactions();
-//! ```
 
 mod account_nonce;
 mod default_params;

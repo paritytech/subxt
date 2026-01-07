@@ -1,14 +1,5 @@
 //! This module exposes [`StorageClient`], which has methods for fetching and iterating over
 //! storage entries. It's created by calling [`crate::client::ClientAtBlock::storage()`].
-//!
-//! ```rust,no_run
-//! pub use subxt::{OnlineClient, PolkadotConfig};
-//!
-//! let client = OnlineClient::new().await?;
-//! let at_block = client.at_current_block().await?;
-//!
-//! let storage = at_block.storage();
-//! ```
 
 mod address;
 mod prefix_of;

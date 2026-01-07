@@ -10,7 +10,8 @@ mod archive;
 mod chain_head;
 mod combined;
 mod legacy;
-mod utils;
+
+pub mod utils;
 
 use crate::config::{Config, HashFor};
 use crate::error::BackendError;
@@ -31,7 +32,7 @@ pub use legacy::subscribe_to_block_headers_filling_in_gaps;
 
 /// Prevent the backend trait being implemented externally.
 #[doc(hidden)]
-pub(crate) mod sealed {
+mod sealed {
     pub trait Sealed {}
 }
 

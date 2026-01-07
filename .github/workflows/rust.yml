@@ -167,10 +167,6 @@ jobs:
       - name: Cargo hack; check each subxt feature
         run: cargo hack -p subxt --each-feature check --exclude-features web --features native
 
-      # Same with subxt-historic
-      - name: Cargo hack; check each subxt feature
-        run: cargo hack -p subxt-historic --each-feature check --exclude-features web --features native
-
       # And with subxt-rpcs
       - name: Cargo hack; check each subxt-rpcs feature
         run: cargo hack -p subxt-rpcs --each-feature check --exclude-features web --features native
@@ -185,7 +181,7 @@ jobs:
 
       # Next, check all  other crates.
       - name: Cargo hack; check each feature/crate on its own
-        run: cargo hack --exclude subxt --exclude subxt-historic --exclude subxt-signer --exclude subxt-lightclient --exclude subxt-rpcs --exclude-all-features --each-feature check --workspace
+        run: cargo hack --exclude subxt --exclude subxt-signer --exclude subxt-lightclient --exclude subxt-rpcs --exclude-all-features --each-feature check --workspace
 
       # Check the full examples, which aren't a part of the workspace so are otherwise ignored.
       - name: Cargo check parachain-example
