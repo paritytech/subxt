@@ -25,6 +25,7 @@ const URL_ENV_VAR: &str = "SUBXT_TEST_URL";
 fn is_url_provided() -> bool {
     std::env::var(URL_ENV_VAR).is_ok()
 }
+#[allow(unused)]
 fn get_url(port: Option<u16>) -> String {
     match (std::env::var(URL_ENV_VAR).ok(), port) {
         (Some(host), None) => host,

@@ -32,11 +32,7 @@ use codec::Compact;
 use std::sync::Arc;
 use subxt::dynamic::Value;
 use subxt::{
-    backend::{ChainHeadBackend, CombinedBackend, LegacyBackend},
-    client::OnlineClient,
-    config::PolkadotConfig,
-    lightclient::LightClient,
-    metadata::Metadata,
+    client::OnlineClient, config::PolkadotConfig, lightclient::LightClient, metadata::Metadata,
     rpcs::RpcClient,
 };
 
@@ -44,6 +40,36 @@ type Client = OnlineClient<PolkadotConfig>;
 
 /// The Polkadot chainspec.
 const POLKADOT_SPEC: &str = include_str!("../../../../artifacts/demo_chain_specs/polkadot.json");
+
+// Create a light client using the backend configured in our test features.
+async fn create_client() -> OnlineClient<PolkadotConfig> {
+    let (_lc, rpc) = LightClient::relay_chain(POLKADOT_SPEC)
+        .expect("Should be able to run LightClient::relay_chain");
+
+    let config = PolkadotConfig::new();
+
+    #[cfg(default_backend)]
+    let client = {
+        let backend = subxt::backend::CombinedBackend::builder()
+            .build_with_background_driver(RpcClient::new(rpc))
+            .await
+            .expect("Should be able to build background driver for CombinedBackend");
+        OnlineClient::from_backend(config, Arc::new(backend)).await
+    };
+    #[cfg(legacy_backend)]
+    let client = {
+        let backend = subxt::backend::LegacyBackend::builder().build(RpcClient::new(rpc));
+        OnlineClient::from_backend(config, Arc::new(backend)).await
+    };
+    #[cfg(chainhead_backend)]
+    let client = {
+        let backend = subxt::backend::ChainHeadBackend::builder()
+            .build_with_background_driver(RpcClient::new(rpc));
+        OnlineClient::from_backend(config, Arc::new(backend)).await
+    };
+
+    client.expect("Should be able to create client")
+}
 
 // Check that we can subscribe to non-finalized blocks.
 async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
@@ -176,7 +202,8 @@ async fn dynamic_events(api: &Client) -> Result<(), subxt::Error> {
     Ok(())
 }
 
-async fn run_test(backend: BackendType) -> Result<(), subxt::Error> {
+#[tokio::test]
+async fn light_client_tests() {
     // Note: This code fetches the chainspec from the Polkadot public RPC node.
     // This is not recommended for production use, as it may be slow and unreliable.
     // However, this can come in handy for testing purposes.
@@ -188,58 +215,29 @@ async fn run_test(backend: BackendType) -> Result<(), subxt::Error> {
 
     tracing::trace!("Init light client");
     let now = std::time::Instant::now();
-    let (_lc, rpc) = LightClient::relay_chain(POLKADOT_SPEC)?;
 
-    let config = PolkadotConfig::new();
-    let api = match backend {
-        BackendType::ChainHead => {
-            let backend =
-                ChainHeadBackend::builder().build_with_background_driver(RpcClient::new(rpc));
-            OnlineClient::from_backend(config, Arc::new(backend)).await?
-        }
-        BackendType::Legacy => {
-            let backend = LegacyBackend::builder().build(RpcClient::new(rpc));
-            OnlineClient::from_backend(config, Arc::new(backend)).await?
-        }
-        BackendType::Combined => {
-            let backend = CombinedBackend::builder()
-                .build_with_background_driver(RpcClient::new(rpc))
-                .await?;
-            OnlineClient::from_backend(config, Arc::new(backend)).await?
-        }
-    };
-
+    // We only do this once for all tests because it's quite expensive.
+    let api = create_client().await;
     tracing::trace!("Light client initialization took {:?}", now.elapsed());
 
-    non_finalized_headers_subscription(&api).await?;
-    finalized_headers_subscription(&api).await?;
-    runtime_api_call(&api).await?;
-    storage_plain_lookup(&api).await?;
-    dynamic_constant_query(&api).await?;
-    dynamic_events(&api).await?;
+    non_finalized_headers_subscription(&api)
+        .await
+        .expect("non_finalized_headers_subscription should pass");
+    finalized_headers_subscription(&api)
+        .await
+        .expect("finalized_headers_subscription should pass");
+    runtime_api_call(&api)
+        .await
+        .expect("runtime_api_call should pass");
+    storage_plain_lookup(&api)
+        .await
+        .expect("storage_plain_lookup should pass");
+    dynamic_constant_query(&api)
+        .await
+        .expect("dynamic_constant_query should pass");
+    dynamic_events(&api)
+        .await
+        .expect("dynamic_events should pass");
 
     tracing::trace!("Light complete testing took {:?}", now.elapsed());
-    Ok(())
-}
-
-/// Backend type for light client testing.
-enum BackendType {
-    /// Use the unstable backend (ie chainHead).
-    ChainHead,
-    /// Use the legacy backend.
-    Legacy,
-    /// Use the default "combined" backend.
-    Combined,
-}
-
-#[tokio::test]
-async fn light_client_testing() -> Result<(), subxt::Error> {
-    tracing_subscriber::fmt::init();
-
-    // Run light client test with both backends.
-    run_test(BackendType::ChainHead).await?;
-    run_test(BackendType::Legacy).await?;
-    run_test(BackendType::Combined).await?;
-
-    Ok(())
 }
