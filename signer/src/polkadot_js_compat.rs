@@ -156,7 +156,8 @@ impl KeyringPairJson {
         let keypair = sr25519::Keypair::from_ed25519_bytes(secret_key)?;
 
         // Ensure keys are correct.
-        if keypair.public_key().0 != public_key || AccountId32(keypair.public_key()) != self.address
+        if keypair.public_key().0 != public_key
+            || AccountId32(keypair.public_key().0) != self.address
         {
             return Err(Error::InvalidKeys);
         }
