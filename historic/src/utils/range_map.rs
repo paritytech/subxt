@@ -69,7 +69,7 @@ impl<K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
         if let Some(&(s, e, _)) = self
             .mapping
             .iter()
-            .find(|&&(s, e, _)| (start < e && end > s))
+            .find(|&&(s, e, _)| start < e && end > s)
         {
             return Err(RangeMapError::OverlappingRanges {
                 proposed: (start, end),
