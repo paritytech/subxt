@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.44.1] - 2026-01-08
+
+When using `.tip_of(some_tip, optional_asset_id)` to configure a tip for transactions, the actual tip was being set to 0. This is now fixed.
+
+### Fixed
+
+- Fix tipping for ChargeAssetTxPayment tx extension([#2151](https://github.com/paritytech/subxt/pull/2151))
+
 ## [0.44.0] - 2025-08-28
 
 This small release primarily fixes a few issues, but also adds the code for a prelease of `subxt-historic`, a new crate (at the moment) for working with historic blocks and state. Future releases will aim to stabilize this crate to the level of other `subxt` crates or otherwise merge the logic into `subxt` itself.
