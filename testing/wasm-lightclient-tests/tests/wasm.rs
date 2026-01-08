@@ -25,10 +25,9 @@ async fn light_client_works() {
     tracing::info!("Subscribe to latest finalized blocks: ");
 
     let mut blocks_sub = api
-        .blocks()
-        .subscribe_finalized()
+        .stream_blocks()
         .await
-        .expect("Cannot subscribe to finalized hashes")
+        .expect("Cannot subscribe to finalized blocks")
         .take(3);
 
     // For each block, print information about it:
@@ -59,7 +58,8 @@ async fn connect_to_rpc_node() -> OnlineClient<PolkadotConfig> {
     {
         let chainspec = subxt::utils::fetch_chainspec_from_rpc_node(url).await?;
         let (_lc, rpc) = LightClient::relay_chain(chainspec.get())?;
-        let api = OnlineClient::from_rpc_client(rpc).await?;
+        let config = PolkadotConfig::new();
+        let api = OnlineClient::from_rpc_client(config, rpc).await?;
         Ok(api)
     }
 

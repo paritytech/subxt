@@ -320,7 +320,7 @@ jobs:
         run: cargo test --manifest-path signer/tests/no-std/Cargo.toml
 
       - name: Run crate tests
-        run: cargo test --exclude integration-tests
+        run: cargo test --workspace --exclude integration-tests
 
   integration_tests_default:
     name: "Integration tests: default RPC client and backend"
