@@ -20,7 +20,7 @@ use scale_info::{
 use std::sync::Arc;
 use subxt::{
     Metadata, OfflineClient, OfflineClientAtBlock, OnlineClient, SubstrateConfig,
-    config::polkadot::SpecVersionForRange,
+    config::substrate::SpecVersionForRange,
 };
 
 async fn fetch_v15_metadata(client: &OnlineClient<SubstrateConfig>) -> RuntimeMetadataV15 {

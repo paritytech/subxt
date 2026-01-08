@@ -11,8 +11,7 @@ compile_error!("The features 'light-client-rpc' and 'reconnecting-rpc' cannot be
 pub mod utils;
 
 // Only run these against default RPC and backend.
-#[cfg(all(test, default_rpc, default_backend))]
-#[cfg_attr(test, allow(unused_imports))]
+#[cfg(test)]
 use utils::*;
 
 // Run these against everything except lightclient RPC (it's too slow)
