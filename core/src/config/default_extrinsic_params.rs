@@ -126,9 +126,9 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
         let check_mortality_params = self.mortality;
 
         let charge_asset_tx_params = if let Some(asset_id) = self.tip_of_asset_id {
-            transaction_extensions::ChargeAssetTxPaymentParams::tip_of(self.tip, asset_id)
+            transaction_extensions::ChargeAssetTxPaymentParams::tip_of(self.tip_of, asset_id)
         } else {
-            transaction_extensions::ChargeAssetTxPaymentParams::tip(self.tip)
+            transaction_extensions::ChargeAssetTxPaymentParams::tip(self.tip_of)
         };
 
         let charge_transaction_params =

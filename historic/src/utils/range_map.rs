@@ -66,11 +66,7 @@ impl<K: Clone + Copy + Display + PartialOrd + Ord, V> RangeMapBuilder<K, V> {
             return Err(RangeMapError::EmptyRange(start));
         }
 
-        if let Some(&(s, e, _)) = self
-            .mapping
-            .iter()
-            .find(|&&(s, e, _)| (start < e && end > s))
-        {
+        if let Some(&(s, e, _)) = self.mapping.iter().find(|&&(s, e, _)| start < e && end > s) {
             return Err(RangeMapError::OverlappingRanges {
                 proposed: (start, end),
                 existing: (s, e),
