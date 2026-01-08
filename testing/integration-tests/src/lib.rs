@@ -19,10 +19,8 @@ use utils::*;
 #[cfg(all(test, not(lightclient_rpc)))]
 mod full_client;
 
-// Run these against all backends but only with lightclient RPC feature
-// (we explicitly create a light client to test here, so as long as the
-// tests run once it doesn't matter under which feature, but this allows us
-// to select light client RPC tests using the feature).
+// Light client tests always use a lightclient RPC, but can run against any
+// backend selected by the feature flags.
 #[cfg(all(test, lightclient_rpc))]
 mod light_client;
 
