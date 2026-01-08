@@ -158,12 +158,36 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::config::PolkadotConfig;
 
     fn assert_default<T: Default>(_t: T) {}
 
     #[test]
     fn params_are_default() {
-        let params = DefaultExtrinsicParamsBuilder::<crate::config::PolkadotConfig>::new().build();
+        let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new().build();
         assert_default(params)
+    }
+
+    #[test]
+    fn tip_of_sets_correct_tip_on_charge_asset_tx_payment() {
+        let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
+            .tip(100) // Set the "basic" tip for ChargeTransactionPayment
+            .tip_of(200, 42) // Set the asset-based tip for ChargeAssetTxPayment
+            .build();
+
+        // Type signatures here ensure we're getting the params we think we are:
+        let charge_asset_params: &transaction_extensions::ChargeAssetTxPaymentParams<_> = &params.6;
+        let charge_transaction_params: &transaction_extensions::ChargeTransactionPaymentParams =
+            &params.7;
+
+        // Verify that the params are properly set:
+        assert_eq!(
+            *charge_asset_params,
+            transaction_extensions::ChargeAssetTxPaymentParams::tip_of(200, 42)
+        );
+        assert_eq!(
+            *charge_transaction_params,
+            transaction_extensions::ChargeTransactionPaymentParams::tip(100)
+        )
     }
 }

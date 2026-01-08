@@ -465,6 +465,8 @@ impl<T: Config> TransactionExtension<T> for ChargeAssetTxPayment<T> {
 }
 
 /// Parameters to configure the [`ChargeAssetTxPayment`] transaction extension.
+#[cfg_attr(test, derive_where(PartialEq; T::AssetId))]
+#[derive_where(Debug)]
 pub struct ChargeAssetTxPaymentParams<T: Config> {
     tip: u128,
     asset_id: Option<T::AssetId>,
@@ -542,7 +544,8 @@ impl<T: Config> TransactionExtension<T> for ChargeTransactionPayment {
 }
 
 /// Parameters to configure the [`ChargeTransactionPayment`] transaction extension.
-#[derive(Default)]
+#[cfg_attr(test, derive(PartialEq))]
+#[derive(Default, Debug)]
 pub struct ChargeTransactionPaymentParams {
     tip: u128,
 }
