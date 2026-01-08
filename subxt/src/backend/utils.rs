@@ -172,6 +172,7 @@ where
                         if err.is_disconnected_will_reconnect() {
                             self.state = RetrySubscriptionState::Init;
                         }
+                        self.state = RetrySubscriptionState::Done;
                         return Poll::Ready(Some(Err(err)));
                     }
                     Poll::Ready(Ok(stream)) => {

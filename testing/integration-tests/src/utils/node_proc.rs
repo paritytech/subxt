@@ -190,8 +190,6 @@ impl<T: Config> TestNodeProcessBuilder<T> {
             None
         };
 
-        let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
-
         // Cache whatever client we build, and None for the other.
         #[allow(unused_assignments, unused_mut)]
         let mut chainhead_backend = None;
@@ -204,9 +202,15 @@ impl<T: Config> TestNodeProcessBuilder<T> {
         #[cfg(lightclient_rpc)]
         let rpc_client = build_light_client_rpc_client(self.config.clone(), &proc).await?;
         #[cfg(reconnecting_rpc)]
-        let rpc_client = build_reconnecting_rpc_client(&ws_url).await?;
+        let rpc_client = {
+            let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
+            build_reconnecting_rpc_client(&ws_url).await?
+        };
         #[cfg(default_rpc)]
-        let rpc_client = build_default_rpc_client(&ws_url).await?;
+        let rpc_client = {
+            let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
+            build_default_rpc_client(&ws_url).await?
+        };
 
         // Select the backend to use based on features.
         #[cfg(chainhead_backend)]
