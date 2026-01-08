@@ -2,16 +2,17 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+#![cfg(test)]
+
 #[cfg(all(legacy_backend, chainhead_backend))]
 compile_error!("The features 'legacy-backend' and 'chainhead-backend' cannot be used together");
 #[cfg(all(lightclient_rpc, reconnecting_rpc))]
 compile_error!("The features 'light-client-rpc' and 'reconnecting-rpc' cannot be used together");
 
-#[cfg(test)]
-pub mod utils;
-
-// Only run these against default RPC and backend.
-#[cfg(test)]
+// Pub to avoid unused errors
+#[allow(unused)]
+mod utils;
+#[allow(unused)]
 use utils::*;
 
 // Run these against everything except lightclient RPC (it's too slow)
