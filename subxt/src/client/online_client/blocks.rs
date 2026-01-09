@@ -7,6 +7,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 /// A stream of blocks.
+#[derive(Debug)]
 pub struct Blocks<T: Config> {
     client: OnlineClient<T>,
     stream: StreamOfResults<(T::Header, BlockRef<HashFor<T>>)>,
@@ -50,6 +51,7 @@ impl<T: Config> Stream for Blocks<T> {
 }
 
 /// A block from the stream of blocks.
+#[derive(Debug, Clone)]
 pub struct Block<T: Config> {
     block_ref: BlockRef<HashFor<T>>,
     block_header: T::Header,

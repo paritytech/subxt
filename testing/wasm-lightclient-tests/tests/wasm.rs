@@ -21,19 +21,42 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 #[wasm_bindgen_test]
 async fn light_client_works() {
     let api = connect_to_rpc_node().await;
-
     tracing::info!("Subscribe to latest finalized blocks: ");
 
-    let mut blocks_sub = api
+    // Light clients can send Stop events during syncing, which may cause blocks to be missed.
+    // When this happens, and we can't internally restart the stream from the last seen Finalized block,
+    // a DisconnectedWillReconnect error is returned. We filter these out
+    // and continue, as they are expected behavior for light clients during initial sync.
+    let begin_time = web_time::Instant::now();
+    let blocks_sub = api
         .stream_blocks()
         .await
         .expect("Cannot subscribe to finalized blocks")
+        .filter_map(|block| async {
+            match block {
+                Ok(b) => {
+                    let block_number = b.number();
+                    let block_received_at_ms = begin_time.elapsed().as_millis();
+                    tracing::info!("Block {block_number} received at instant {block_received_at_ms}ms");
+                    Some(b)
+                },
+                Err(e) => {
+                    let err: subxt::Error = e.into();
+                    if err.is_disconnected_will_reconnect() {
+                        tracing::warn!("Light client reconnecting, some blocks may have been missed");
+                        None
+                    } else {
+                        panic!("Block error: {err}");
+                    }
+                }
+            }
+        })
         .take(3);
+
+    futures_util::pin_mut!(blocks_sub);
 
     // For each block, print information about it:
     while let Some(block) = blocks_sub.next().await {
-        let block = block.expect("Block not valid");
-
         let block_number = block.header().number;
         let block_hash = block.hash();
 
