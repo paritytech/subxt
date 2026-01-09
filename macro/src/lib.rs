@@ -102,17 +102,7 @@ fn subxt_inner(args: TokenStream, item_mod: syn::ItemMod) -> Result<TokenStream,
         .map_err(|e| TokenStream::from(e.write_errors()))?;
 
     // Fetch metadata first, because we need it to validate some of the chosen codegen options.
-    let metadata = {
-        let mut metadata = fetch_metadata(&args)?;
-
-        // Run this first to ensure type paths are unique (which may result in 1,2,3 suffixes being added
-        // to type paths), so that when we validate derives/substitutions below, they are allowed for such
-        // types. See <https://github.com/paritytech/subxt/issues/2011>.
-        scale_typegen::utils::ensure_unique_type_paths(metadata.types_mut())
-            .expect("ensure_unique_type_paths should not fail; please report an issue.");
-
-        metadata
-    };
+    let metadata = fetch_metadata(&args)?;
 
     let mut codegen = CodegenBuilder::new();
 
@@ -145,7 +135,6 @@ fn subxt_inner(args: TokenStream, item_mod: syn::ItemMod) -> Result<TokenStream,
             .into_iter()
             .collect(),
     );
-
     for d in args.derive_for_type {
         validate_type_path(&d.path.path, &metadata);
         codegen.add_derives_for_type(d.path, d.derive.into_iter(), d.recursive);
@@ -212,6 +201,22 @@ fn validate_type_path(path: &syn::Path, metadata: &Metadata) {
     }
 }
 
+/// Resolves a path, handling the $OUT_DIR placeholder if present.
+/// If $OUT_DIR is present in the path, it's replaced with the actual OUT_DIR environment variable.
+/// Otherwise, the path is resolved relative to CARGO_MANIFEST_DIR.
+fn resolve_path(path_str: &str) -> std::path::PathBuf {
+    if path_str.contains("$OUT_DIR") {
+        let out_dir = std::env::var("OUT_DIR").unwrap_or_else(|_| {
+            abort_call_site!("$OUT_DIR is used in path but OUT_DIR environment variable is not set")
+        });
+        std::path::Path::new(&path_str.replace("$OUT_DIR", &out_dir)).into()
+    } else {
+        let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
+        let root_path = std::path::Path::new(&root);
+        root_path.join(path_str)
+    }
+}
+
 /// Fetches metadata in a blocking manner, from a url or file path.
 fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata, TokenStream> {
     // Do we want to fetch unstable metadata? This only works if fetching from a URL.
@@ -224,9 +229,7 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 "Only one of 'runtime_metadata_path', 'runtime_metadata_insecure_url' or `runtime_path` must be provided"
             );
         };
-        let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
-        let root_path = std::path::Path::new(&root);
-        let path = root_path.join(path);
+        let path = resolve_path(path);
 
         let metadata = wasm_loader::from_wasm_file(&path).map_err(|e| e.into_compile_error())?;
         return Ok(metadata);
@@ -243,9 +246,8 @@ fn fetch_metadata(args: &RuntimeMetadataArgs) -> Result<subxt_codegen::Metadata,
                 )
             }
 
-            let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
-            let root_path = std::path::Path::new(&root);
-            let path = root_path.join(rest_of_path);
+            let path = resolve_path(rest_of_path);
+
             subxt_utils_fetchmetadata::from_file_blocking(&path)
                 .and_then(|b| subxt_codegen::Metadata::decode(&mut &*b).map_err(Into::into))
                 .map_err(|e| CodegenError::Other(e.to_string()).into_compile_error())?

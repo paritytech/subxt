@@ -2757,7 +2757,7 @@ checksum = "81cdd64d312baedb58e21336b31bc043b77e01cc99033ce76ef539f78e965ebc"
 
 [[package]]
 name = "subxt"
-version = "0.44.1"
+version = "0.44.2"
 dependencies = [
  "async-trait",
  "derive-where",
@@ -2792,7 +2792,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.44.1"
+version = "0.44.2"
 dependencies = [
  "heck",
  "parity-scale-codec",
@@ -2807,7 +2807,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-core"
-version = "0.44.1"
+version = "0.44.2"
 dependencies = [
  "base58",
  "blake2",
@@ -2835,7 +2835,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.44.1"
+version = "0.44.2"
 dependencies = [
  "futures",
  "futures-util",
@@ -2850,7 +2850,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.44.1"
+version = "0.44.2"
 dependencies = [
  "darling",
  "parity-scale-codec",
@@ -2865,7 +2865,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.44.1"
+version = "0.44.2"
 dependencies = [
  "frame-decode",
  "frame-metadata",
@@ -2878,7 +2878,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-rpcs"
-version = "0.44.1"
+version = "0.44.2"
 dependencies = [
  "derive-where",
  "frame-metadata",
@@ -2900,7 +2900,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.44.1"
+version = "0.44.2"
 dependencies = [
  "base64 0.22.1",
  "bip39",
@@ -2926,7 +2926,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-utils-fetchmetadata"
-version = "0.44.1"
+version = "0.44.2"
 dependencies = [
  "hex",
  "parity-scale-codec",

@@ -38,7 +38,7 @@ resolver = "2"
 [workspace.package]
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2024"
-version = "0.44.1"
+version = "0.44.2"
 rust-version = "1.85.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
@@ -156,16 +156,16 @@ sp-state-machine = { version = "0.45.0", default-features = false }
 sp-runtime = { version = "41.1.0", default-features = false }
 
 # Subxt workspace crates:
-subxt = { version = "0.44.1", path = "subxt", default-features = false }
-subxt-core = { version = "0.44.1", path = "core", default-features = false }
-subxt-macro = { version = "0.44.1", path = "macro" }
-subxt-metadata = { version = "0.44.1", path = "metadata", default-features = false }
-subxt-codegen = { version = "0.44.1", path = "codegen" }
-subxt-signer = { version = "0.44.1", path = "signer", default-features = false }
-subxt-rpcs = { version = "0.44.1", path = "rpcs", default-features = false }
-subxt-lightclient = { version = "0.44.1", path = "lightclient", default-features = false }
-subxt-utils-fetchmetadata = { version = "0.44.1", path = "utils/fetch-metadata", default-features = false }
-subxt-utils-stripmetadata = { version = "0.44.1", path = "utils/strip-metadata", default-features = false }
+subxt = { version = "0.44.2", path = "subxt", default-features = false }
+subxt-core = { version = "0.44.2", path = "core", default-features = false }
+subxt-macro = { version = "0.44.2", path = "macro" }
+subxt-metadata = { version = "0.44.2", path = "metadata", default-features = false }
+subxt-codegen = { version = "0.44.2", path = "codegen" }
+subxt-signer = { version = "0.44.2", path = "signer", default-features = false }
+subxt-rpcs = { version = "0.44.2", path = "rpcs", default-features = false }
+subxt-lightclient = { version = "0.44.2", path = "lightclient", default-features = false }
+subxt-utils-fetchmetadata = { version = "0.44.2", path = "utils/fetch-metadata", default-features = false }
+subxt-utils-stripmetadata = { version = "0.44.2", path = "utils/strip-metadata", default-features = false }
 test-runtime = { path = "testing/test-runtime" }
 substrate-runner = { path = "testing/substrate-runner" }
 
