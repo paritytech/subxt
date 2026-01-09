@@ -305,8 +305,8 @@ impl IntoHandlerResponse for core::convert::Infallible {
 }
 
 fn serialize_to_raw_value<T: serde::Serialize>(val: &T) -> Result<Box<RawValue>, Error> {
-    let res = serde_json::to_string(val).map_err(Error::Deserialization)?;
-    let raw_value = RawValue::from_string(res).map_err(Error::Deserialization)?;
+    let res = serde_json::to_string(val).map_err(Error::Serialization)?;
+    let raw_value = RawValue::from_string(res).map_err(Error::Serialization)?;
     Ok(raw_value)
 }
 

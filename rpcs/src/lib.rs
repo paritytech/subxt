@@ -80,6 +80,9 @@ pub enum Error {
     /// calls made to them in the meantime until the connection is re-established.
     #[error("RPC error: the connection was lost ({0}); reconnect automatically initiated")]
     DisconnectedWillReconnect(String),
+    /// Cannot serialize the request.
+    #[error("RPC error: cannot serialize request: {0}")]
+    Serialization(serde_json::Error),
     /// Cannot deserialize the response.
     #[error("RPC error: cannot deserialize response: {0}")]
     Deserialization(serde_json::Error),
