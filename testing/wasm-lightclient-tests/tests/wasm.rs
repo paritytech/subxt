@@ -21,12 +21,23 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 #[wasm_bindgen_test]
 async fn light_client_works() {
     let api = connect_to_rpc_node().await;
+    tracing_wasm::set_as_global_default();
     tracing::info!("Subscribe to latest finalized blocks: ");
 
     // Light clients can send Stop events during syncing, which may cause blocks to be missed.
-    // When this happens, and we can't internally restart the stream from the last seen Finalized block,
-    // a DisconnectedWillReconnect error is returned. We filter these out
-    // and continue, as they are expected behavior for light clients during initial sync.
+    // Example log output shows a block being handed back ~14 seconds after this `begin_time`,
+    // and then no followup block until ~288 seconds after this `begin_time`. 
+    //
+    // Between these two occurrences:
+    // 1. Smoldot's GrandPa warp syncing completes, and
+    // 2. Smoldot sends a "stop" event.
+    //
+    // This leads to use getting a DisconnectedWillReconnect error back, which we ignore here,
+    // though we would like to find a better way to wait until synchronization is complete before
+    // starting to use the light client. This is a particular issue in WASM and doesn't seem to be
+    // an issue natively.
+    //
+    // TODO: Work out how to address this better.
     let begin_time = web_time::Instant::now();
     let blocks_sub = api
         .stream_blocks()
