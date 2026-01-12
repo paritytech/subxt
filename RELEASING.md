@@ -73,7 +73,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
     3.  Run the following command to publish each crate in the required order.
 
-        Prior to running this, you'll need to remove the dev dependencies in `subxt-metadata` to
+        Prior to running this, you'll need to remove the dev dependencies in `subxt-metadata` and `subxt` to
         avoid circular dependencies and commit those _or_ append `--allow-dirty` to each of the following.
 
         ```
