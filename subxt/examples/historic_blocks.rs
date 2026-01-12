@@ -5,8 +5,7 @@ use subxt::{Error, OnlineClient, PolkadotConfig};
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     // Point at an archive node since we want to obtain old blocks.
-    let config = PolkadotConfig::new();
-    let api = OnlineClient::from_url(config, "wss://rpc.polkadot.io").await?;
+    let api = OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io").await?;
 
     for block_number in 1234567u32.. {
         let at_block = api.at_block(block_number).await?;

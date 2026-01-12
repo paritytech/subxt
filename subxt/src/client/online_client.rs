@@ -44,20 +44,37 @@ impl<T: Config> std::fmt::Debug for OnlineClientInner<T> {
     }
 }
 
+/// TODO: add _with_config and accept ::<Config> when it's default only, to ease migration / use?
+
 impl<T: Config> OnlineClient<T> {
-    /// Construct a new [`OnlineClient`] using default settings which
-    /// point to a locally running node on `ws://127.0.0.1:9944`.
-    ///
-    /// **Note:** This will only work if the local node is an archive node.
+    /// Construct a new [`OnlineClient`] using default configuration which
+    /// connects to a locally running node on `ws://127.0.0.1:9944`.
     #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
-    pub async fn new(config: T) -> Result<OnlineClient<T>, OnlineClientError> {
-        let url = "ws://127.0.0.1:9944";
-        OnlineClient::from_url(config, url).await
+    pub async fn new() -> Result<OnlineClient<T>, OnlineClientError> where T: Default {
+        OnlineClient::new_with_config(Default::default()).await
     }
 
-    /// Construct a new [`OnlineClient`], providing a URL to connect to.
+    /// Construct a new [`OnlineClient`] using the provided configuration which
+    /// connects to a local running node on `ws://127.0.0.1:9944`.
+    #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
+    pub async fn new_with_config(config: T) -> Result<OnlineClient<T>, OnlineClientError> {
+        let url = "ws://127.0.0.1:9944";
+        OnlineClient::from_url_with_config(config, url).await
+    }
+
+    /// Construct a new [`OnlineClient`] using default configuration and 
+    /// connecting to the given URL.
     #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
     pub async fn from_url(
+        url: impl AsRef<str>,
+    ) -> Result<OnlineClient<T>, OnlineClientError> where T: Default {
+        OnlineClient::from_url_with_config(Default::default(), url).await
+    }
+
+    /// Construct a new [`OnlineClient`] using the provided configuration and 
+    /// connecting to the given URL.
+    #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
+    pub async fn from_url_with_config(
         config: T,
         url: impl AsRef<str>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
@@ -67,25 +84,47 @@ impl<T: Config> OnlineClient<T> {
                 url_str.to_string(),
             )));
         }
-        OnlineClient::from_insecure_url(config, url).await
+        OnlineClient::from_insecure_url_with_config(config, url).await
     }
 
-    /// Construct a new [`OnlineClient`], providing a URL to connect to.
+    /// Construct a new [`OnlineClient`] using default configuration and
+    /// connecting to the given URL.
     ///
     /// Allows insecure URLs without SSL encryption, e.g. (http:// and ws:// URLs).
     #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
     pub async fn from_insecure_url(
+        url: impl AsRef<str>,
+    ) -> Result<OnlineClient<T>, OnlineClientError> where T: Default {
+        OnlineClient::from_insecure_url_with_config(Default::default(), url).await
+    }
+
+    /// Construct a new [`OnlineClient`] using the provided configuration and
+    /// connecting to the given URL.
+    ///
+    /// Allows insecure URLs without SSL encryption, e.g. (http:// and ws:// URLs).
+    #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
+    pub async fn from_insecure_url_with_config(
         config: T,
         url: impl AsRef<str>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
         let rpc_client = subxt_rpcs::RpcClient::from_insecure_url(url).await?;
-        OnlineClient::from_rpc_client(config, rpc_client).await
+        OnlineClient::from_rpc_client_with_config(config, rpc_client).await
     }
 
     /// Construct a new [`OnlineClient`] by providing a [`subxt_rpcs::RpcClient`] to drive the connection.
     /// This will use the current default [`Backend`], which may change in future releases.
     #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
     pub async fn from_rpc_client(
+        rpc_client: impl Into<subxt_rpcs::RpcClient>,
+    ) -> Result<OnlineClient<T>, OnlineClientError> where T: Default {
+        OnlineClient::from_rpc_client_with_config(Default::default(), rpc_client).await
+    }
+
+    /// Construct a new [`OnlineClient`] by providing a [`subxt_rpcs::RpcClient`] to drive the connection,
+    /// and chain configuration. This will use the current default [`Backend`], which may change in future 
+    /// releases.
+    #[cfg(all(feature = "jsonrpsee", feature = "runtime"))]
+    pub async fn from_rpc_client_with_config(
         config: T,
         rpc_client: impl Into<subxt_rpcs::RpcClient>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
@@ -94,12 +133,21 @@ impl<T: Config> OnlineClient<T> {
             .build_with_background_driver(rpc_client)
             .await
             .map_err(OnlineClientError::CannotBuildCombinedBackend)?;
-        OnlineClient::from_backend(config, Arc::new(backend)).await
+        OnlineClient::from_backend_with_config(config, Arc::new(backend)).await
     }
 
     /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
-    /// implementation to power it.
+    /// implementation to power it and using default configuration.
     pub async fn from_backend<B: Backend<T>>(
+        config: T,
+        backend: Arc<B>,
+    ) -> Result<OnlineClient<T>, OnlineClientError> where T: Default {
+        OnlineClient::from_backend_with_config(config, backend).await
+    }
+
+    /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
+    /// implementation to power it and some chain configuration.
+    pub async fn from_backend_with_config<B: Backend<T>>(
         config: T,
         backend: Arc<B>,
     ) -> Result<OnlineClient<T>, OnlineClientError> {
