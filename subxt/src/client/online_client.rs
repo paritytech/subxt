@@ -147,13 +147,12 @@ impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
     /// implementation to power it and using default configuration.
     pub async fn from_backend<B: Backend<T>>(
-        config: T,
         backend: Arc<B>,
     ) -> Result<OnlineClient<T>, OnlineClientError>
     where
         T: Default,
     {
-        OnlineClient::from_backend_with_config(config, backend).await
+        OnlineClient::from_backend_with_config(Default::default(), backend).await
     }
 
     /// Construct a new [`OnlineClient`] by providing an underlying [`Backend`]
