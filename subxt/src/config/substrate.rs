@@ -15,14 +15,14 @@ use scale_info_legacy::{ChainTypeRegistry, TypeRegistrySet};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
-use std::sync::Mutex;
+use std::sync::RwLock;
 
 /// Construct a [`SubstrateConfig`] using this.
 pub struct SubstrateConfigBuilder {
     legacy_types: Option<ChainTypeRegistry>,
     spec_and_transaction_version_for_block_number: RangeMap<u64, (u32, u32)>,
     genesis_hash: Option<H256>,
-    metadata_for_spec_version: Mutex<HashMap<u32, ArcMetadata>>,
+    metadata_for_spec_version: RwLock<HashMap<u32, ArcMetadata>>,
     use_old_v9_hashers_before_spec_version: u32,
 }
 
@@ -39,7 +39,7 @@ impl SubstrateConfigBuilder {
             legacy_types: None,
             genesis_hash: None,
             spec_and_transaction_version_for_block_number: RangeMap::empty(),
-            metadata_for_spec_version: Mutex::new(HashMap::new()),
+            metadata_for_spec_version: RwLock::new(HashMap::new()),
             use_old_v9_hashers_before_spec_version: 0,
         }
     }
@@ -62,7 +62,7 @@ impl SubstrateConfigBuilder {
         self,
         ranges: impl IntoIterator<Item = (u32, ArcMetadata)>,
     ) -> Self {
-        let mut map = self.metadata_for_spec_version.lock().unwrap();
+        let mut map = self.metadata_for_spec_version.write().unwrap();
         for (spec_version, metadata) in ranges.into_iter() {
             map.insert(spec_version, metadata);
         }
@@ -132,7 +132,7 @@ pub struct SubstrateConfig {
 struct SubstrateConfigInner {
     legacy_types: Option<ChainTypeRegistry>,
     spec_and_transaction_version_for_block_number: RangeMap<u64, (u32, u32)>,
-    metadata_for_spec_version: Mutex<HashMap<u32, ArcMetadata>>,
+    metadata_for_spec_version: RwLock<HashMap<u32, ArcMetadata>>,
 }
 
 impl Default for SubstrateConfig {
@@ -185,7 +185,7 @@ impl Config for SubstrateConfig {
     fn metadata_for_spec_version(&self, spec_version: u32) -> Option<ArcMetadata> {
         self.inner
             .metadata_for_spec_version
-            .lock()
+            .read()
             .unwrap()
             .get(&spec_version)
             .cloned()
@@ -194,7 +194,7 @@ impl Config for SubstrateConfig {
     fn set_metadata_for_spec_version(&self, spec_version: u32, metadata: ArcMetadata) {
         self.inner
             .metadata_for_spec_version
-            .lock()
+            .write()
             .unwrap()
             .insert(spec_version, metadata);
     }

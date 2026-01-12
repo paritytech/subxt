@@ -107,7 +107,7 @@ let runtime_apis = api.at_current_block().await?.runtime_apis();
 
 Notes:
 - `at_latest` has been renamed to `at_current_block` and, like before, it fetches the current _finalized_ block at the time of calling.
-- `at_current_block` now accepts a block hahs _or_ block number, and returns a client that works in the context of that block.
+- `at_current_block` now accepts a block hash _or_ block number, and returns a client that works in the context of that block.
 - Constants were not previously retrieved at a given block; Subxt only knew about a single `Metadata` and so it was unnecessary. Now, constants are retrieved at a specific block like everything else (different blocks may have different `Metadata`s).
 - A small thing: `runtime_api()` was renamed to `runtime_apis()` to be consistent with other APIs names.
 - `.tx()` is now callable at a specific block, and uses this block for any account nonce and mortality configuration.
@@ -139,7 +139,7 @@ while let Some(block) = blocks_sub.next().await {
 
 **After**
 
-Now that APIs are largely block-specific up front, we don't need separate APIs for block fetching, and move streaming blocks up a level.
+Now that APIs are largely block-specific up front, we don't need separate APIs for block fetching, and so we move streaming blocks up a level, removing the `.blocks()` APIs.
 
 ```rust
 let api = OnlineClient::<PolkadotConfig>::new().await?;
@@ -335,7 +335,7 @@ let storage_query = subxt::dynamic::storage(
 
 **After**
 
-The dynamic methods have been made more generic, allowing more arbitrary types to be used in their construction, and alloowing the return type to be set. This does however mean that types need to be provided sometimes:
+The dynamic methods have been made more generic, allowing more arbitrary types to be used in their construction, and allowing the return type to be set. This does however mean that types need to be provided sometimes:
 
 ```rust
 let constant_query = subxt::dynamic::constant::<Value>(
@@ -399,7 +399,7 @@ Subxt previously exposed `subxt::Metadata`, which was a wrapped version of `subx
 - `Metadata::from_v9(..)`
 - `Metadata::from_v8(..)`
 
-Where the older versions require type information to be provided in addition to the correpsonding `frame_metadata` version.
+Where the older versions require type information to be provided in addition to the corresponding `frame_metadata` version.
 
 A list of the main change PRs follows:
 
