@@ -294,7 +294,8 @@ pub struct OuterEnums {
 
 impl OuterEnums {
     pub fn find_in(types: &scale_info::PortableRegistry) -> OuterEnums {
-        let find_type = |name: &str| {
+        // Find a type by its ident (last segment of path)
+        let find_type_by_ident = |name: &str| {
             types.types.iter().find_map(|ty| {
                 let ident = ty.ty.path.ident()?;
 
@@ -310,10 +311,44 @@ impl OuterEnums {
             })
         };
 
+        // Find a type by checking if path ends with specific segments (e.g., ["polkadot_runtime", "Call"])
+        // This handles older runtimes where the outer enums were named just "Call"/"Event"
+        // in the runtime module rather than "RuntimeCall"/"RuntimeEvent"
+        let find_runtime_outer_enum = |short_name: &str| {
+            types.types.iter().find_map(|ty| {
+                let segments = &ty.ty.path.segments;
+
+                // Check if this is a variant type
+                let scale_info::TypeDef::Variant(_) = &ty.ty.type_def else {
+                    return None;
+                };
+
+                // Check if path ends with ["*_runtime", short_name] (e.g., ["polkadot_runtime", "Call"])
+                if segments.len() >= 2 {
+                    let last = segments.last()?;
+                    let second_last = segments.get(segments.len() - 2)?;
+
+                    if last == short_name && second_last.ends_with("_runtime") {
+                        return Some(ty.id);
+                    }
+                }
+
+                None
+            })
+        };
+
+        // First try the modern names (RuntimeCall, RuntimeEvent, RuntimeError)
+        // If not found, fall back to legacy names (Call, Event in *_runtime module)
+        let call_ty = find_type_by_ident("RuntimeCall")
+            .or_else(|| find_runtime_outer_enum("Call"));
+        let event_ty = find_type_by_ident("RuntimeEvent")
+            .or_else(|| find_runtime_outer_enum("Event"));
+        let error_ty = find_type_by_ident("RuntimeError");
+
         OuterEnums {
-            call_ty: find_type("RuntimeCall"),
-            event_ty: find_type("RuntimeEvent"),
-            error_ty: find_type("RuntimeError"),
+            call_ty,
+            event_ty,
+            error_ty,
         }
     }
 }
