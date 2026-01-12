@@ -44,8 +44,6 @@ impl<T: Config> std::fmt::Debug for OnlineClientInner<T> {
     }
 }
 
-/// TODO: add _with_config and accept ::<Config> when it's default only, to ease migration / use?
-
 impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default configuration which
     /// connects to a locally running node on `ws://127.0.0.1:9944`.
