@@ -46,13 +46,15 @@ let api = OnlineClient::<PolkadotConfig>::new().await?;
 
 **After**
 
-Configuration now exists at the value level too. This is because it has been extended with support for historic types and working with historic metadatas and spec versions:
+Configuration now exists at the value level too. This is because it has been extended with support for historic types and working with historic metadatas and spec versions. The same code as above will continue to work, but it's now possible to instantiate and tweak the configuration and then use `_with_config` methods to provide it, like so:
 
 ```rust
 use subxt::{OnlineClient, PolkadotConfig};
 
-let config = PolkadotConfig::new();
-let api = OnlineClient::new(config).await?;
+let config = PolkadotConfig::builder()
+    .use_historic_types(false)
+    .build();
+let api = OnlineClient::<PolkadotConfig>::new_with_config(config).await?;
 ```
 
 The rules for when to use `PolkadotConfig` and `SubstrateConfig` remain the same: 
@@ -60,7 +62,7 @@ The rules for when to use `PolkadotConfig` and `SubstrateConfig` remain the same
 - Use `SubstrateConfig` by default with other chains.
 - You may need to modify the configuration to work with some chains, as before.
 
-See the docs for `PolkadotConfig` and `SubstrateConfig` for more. If you want to work with historic blocks for instance, you'll need to provide historic type information for `SubstrateConfig`.
+See the docs for `PolkadotConfig` and `SubstrateConfig` for more. One example to be aware of is that if you want to work with historic blocks with `SubstrateConfig`,  you'll need to instantiate it yourself and provide historic type information before passing it to `OnlineClient` or `OfflineClient`.
 
 ### Working at specific blocks
 
@@ -88,8 +90,7 @@ let runtime_apis = api.runtime_api().at_latest().await?;
 Now, the block is selected first, like so:
 
 ```rust
-let config = PolkadotConfig::new();
-let api = OnlineClient::new(config).await?;
+let api = OnlineClient::<PolkadotConfig>::new().await?;
 
 let constants = api.at_block(block_hash_or_number).await?.constants();
 let constants = api.at_current_block().await?.constants();
@@ -193,8 +194,7 @@ let events = api
 Transactions are anchored to a given block but we continue to provide a `.tx()` method on the client as a shorthand for "create transactions at the current block".
 
 ```rust
-let config = PolkadotConfig::new();
-let api = OnlineClient::new(config).await?;
+let api = OnlineClient::<PolkadotConfig>::new().await?;
 
 // Work at a specific block:
 let at_block = api.at_current_block().await?;
@@ -264,8 +264,7 @@ while let Some(Ok(kv)) = results.next().await {
 A redesign of the Storage APIs makes everything more unified, and allows working at specific storage entries in a much more flexible way than before, while moving logic out of the codegen, simplifying it, and into Subxt proper.
 
 ```rust
-let config = PolkadotConfig::new();
-let api = OnlineClient::new(config).await?;
+let api = OnlineClient::<PolkadotConfig>::new().await?;
 let at_block = api.at_current_block().await?;
 
 let account_balances = at_block

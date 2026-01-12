@@ -46,26 +46,24 @@ async fn create_client() -> OnlineClient<PolkadotConfig> {
     let (_lc, rpc) = LightClient::relay_chain(POLKADOT_SPEC)
         .expect("Should be able to run LightClient::relay_chain");
 
-    let config = PolkadotConfig::new();
-
     #[cfg(default_backend)]
     let client = {
         let backend = subxt::backend::CombinedBackend::builder()
             .build_with_background_driver(RpcClient::new(rpc))
             .await
             .expect("Should be able to build background driver for CombinedBackend");
-        OnlineClient::from_backend(config, Arc::new(backend)).await
+        OnlineClient::<PolkadotConfig>::from_backend(Arc::new(backend)).await
     };
     #[cfg(legacy_backend)]
     let client = {
         let backend = subxt::backend::LegacyBackend::builder().build(RpcClient::new(rpc));
-        OnlineClient::from_backend(config, Arc::new(backend)).await
+        OnlineClient::<PolkadotConfig>::from_backend(Arc::new(backend)).await
     };
     #[cfg(chainhead_backend)]
     let client = {
         let backend = subxt::backend::ChainHeadBackend::builder()
             .build_with_background_driver(RpcClient::new(rpc));
-        OnlineClient::from_backend(config, Arc::new(backend)).await
+        OnlineClient::<PolkadotConfig>::from_backend(Arc::new(backend)).await
     };
 
     client.expect("Should be able to create client")

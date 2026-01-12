@@ -13,8 +13,7 @@ use yew::{AttrValue, Callback};
 pub mod polkadot {}
 
 pub(crate) async fn fetch_constant_block_length() -> Result<String, subxt::Error> {
-    let config = PolkadotConfig::new();
-    let api = OnlineClient::new(config).await?;
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
     let constant_query = polkadot::constants().system().block_length();
 
     let value = api
@@ -26,8 +25,7 @@ pub(crate) async fn fetch_constant_block_length() -> Result<String, subxt::Error
 }
 
 pub(crate) async fn fetch_events_dynamically() -> Result<Vec<String>, subxt::Error> {
-    let config = PolkadotConfig::new();
-    let api = OnlineClient::new(config).await?;
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
     let events = api.at_current_block().await?.events().fetch().await?;
     let mut event_strings = Vec::<String>::new();
     for event in events.iter() {
@@ -44,8 +42,7 @@ pub(crate) async fn fetch_events_dynamically() -> Result<Vec<String>, subxt::Err
 pub(crate) async fn subscribe_to_finalized_blocks(
     cb: Callback<AttrValue>,
 ) -> Result<(), subxt::Error> {
-    let config = PolkadotConfig::new();
-    let api = OnlineClient::new(config).await?;
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
     // Subscribe to all finalized blocks:
     let mut blocks_sub = api.stream_blocks().await?;
     while let Some(block) = blocks_sub.next().await {

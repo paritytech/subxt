@@ -87,8 +87,7 @@ impl Component for SigningExamplesComponent {
 
     fn create(ctx: &Context<Self>) -> Self {
         ctx.link().send_future(async {
-            let conf = PolkadotConfig::new();
-            let Ok(client) = OnlineClient::new(conf).await else {
+            let Ok(client) = OnlineClient::<PolkadotConfig>::new().await else {
                 return Message::Error(anyhow!(
                     "OnlineClient could not be created. Make sure you have a local node running\n"
                 ));

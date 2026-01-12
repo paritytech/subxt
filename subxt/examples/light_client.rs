@@ -25,11 +25,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let asset_hub_rpc = lightclient.parachain(ASSET_HUB_SPEC)?;
 
     // Create Subxt clients from these Smoldot backed RPC clients.
-    let config = PolkadotConfig::new();
-    let polkadot_api =
-        OnlineClient::<PolkadotConfig>::from_rpc_client(config.clone(), polkadot_rpc).await?;
-    let asset_hub_api =
-        OnlineClient::<PolkadotConfig>::from_rpc_client(config, asset_hub_rpc).await?;
+    let polkadot_api = OnlineClient::<PolkadotConfig>::from_rpc_client(polkadot_rpc).await?;
+    let asset_hub_api = OnlineClient::<PolkadotConfig>::from_rpc_client(asset_hub_rpc).await?;
 
     // Now we can use them as with any other Subxt instance. Here we fetch finalized blocks
     // from both chains and print some detail about the contained extrinsics.

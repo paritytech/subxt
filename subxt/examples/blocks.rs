@@ -8,8 +8,7 @@ mod polkadot {}
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     // Create a new API client, configured to talk to Polkadot nodes.
-    let config = PolkadotConfig::new();
-    let api = OnlineClient::new(config).await?;
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Stream the finalized blocks. See the OnlineClient docs for how to
     // stream best blocks or all new blocks.

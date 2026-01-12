@@ -5,8 +5,6 @@ use subxt_rpcs::client::{ReconnectingRpcClient, RpcClient};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let config = PolkadotConfig::new();
-
     // Configure an RPC client. Here we use the reconnecting one, but several impls are
     // available, or you can implement the subxt_rpcs::client::RpcClientT trait yourself
     // to bring your own RPC client.
@@ -18,7 +16,7 @@ async fn main() -> Result<(), Error> {
     let rpc_client = RpcClient::new(inner_rpc_client);
 
     // Pass it to Subxt to use.
-    let client = OnlineClient::from_rpc_client(config, rpc_client.clone()).await?;
+    let client = OnlineClient::<PolkadotConfig>::from_rpc_client(rpc_client.clone()).await?;
 
     // We can use the Subxt client:
     let at_block = client.at_current_block().await?;

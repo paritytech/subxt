@@ -156,7 +156,7 @@ fn mocked_offline_client(metadata: ArcMetadata) -> OfflineClientAtBlock<Substrat
         .set_metadata_for_spec_versions([(1, metadata)])
         .build();
 
-    OfflineClient::<SubstrateConfig>::new(config)
+    OfflineClient::new_with_config(config)
         .at_block(0u64)
         .expect("Should not fail since we plugged consistent data into the config")
 }

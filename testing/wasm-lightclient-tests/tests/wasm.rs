@@ -28,10 +28,9 @@ async fn light_client_works() {
     // (which can lead to DisconnectedWillReconnect errors as we try subscribing to
     // blocks but Smoldot hasn't finished syncing yet).
     let api = {
-        let config = PolkadotConfig::new();
         let (_lc, rpc) = LightClient::relay_chain(POLKADOT_SPEC)
             .expect("Should be able to run LightClient::relay_chain");
-        OnlineClient::from_rpc_client(config, rpc).await.unwrap()
+        OnlineClient::<PolkadotConfig>::from_rpc_client(rpc).await.unwrap()
     };
 
     let begin_time = web_time::Instant::now();

@@ -250,7 +250,7 @@ async fn build_legacy_backend<T: Config>(
     rpc_client: RpcClient,
 ) -> Result<OnlineClient<T>, String> {
     let backend = LegacyBackend::builder().build(rpc_client);
-    let client = OnlineClient::from_backend(config, Arc::new(backend))
+    let client = OnlineClient::from_backend_with_config(config, Arc::new(backend))
         .await
         .map_err(|e| format!("Cannot construct OnlineClient from backend: {e}"))?;
 
@@ -262,7 +262,7 @@ async fn build_chainhead_backend<T: Config>(
     rpc_client: RpcClient,
 ) -> Result<OnlineClient<T>, String> {
     let backend = ChainHeadBackend::builder().build_with_background_driver(rpc_client);
-    let client = OnlineClient::from_backend(config, Arc::new(backend))
+    let client = OnlineClient::from_backend_with_config(config, Arc::new(backend))
         .await
         .map_err(|e| format!("Cannot construct OnlineClient from backend: {e}"))?;
 
@@ -277,7 +277,7 @@ async fn build_default_backend<T: Config>(
         .build_with_background_driver(rpc_client)
         .await
         .map_err(|e| format!("Cannot build CombinedBackend: {e}"))?;
-    let client = OnlineClient::from_backend(config, Arc::new(backend))
+    let client = OnlineClient::from_backend_with_config(config, Arc::new(backend))
         .await
         .map_err(|e| format!("Cannot construct OnlineClient from backend: {e}"))?;
 
@@ -317,7 +317,7 @@ async fn build_light_client_rpc_client<T: Config>(
     // Wait for a few blocks to be produced. We instantiate a Subxt client for
     // this for simplicity, but then throw it away.
     {
-        let client = OnlineClient::<T>::from_url(config.clone(), ws_url.clone())
+        let client = OnlineClient::<T>::from_url_with_config(config.clone(), ws_url.clone())
             .await
             .map_err(|err| format!("Failed to connect to node rpc at {ws_url}: {err}"))?;
 

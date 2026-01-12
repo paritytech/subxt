@@ -30,8 +30,7 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 async fn wasm_ws_transport_works() {
     console_error_panic_hook::set_once();
     tracing_wasm::set_as_global_default();
-    let config = SubstrateConfig::new();
-    let client = OnlineClient::from_url(config, "ws://127.0.0.1:9944")
+    let client = OnlineClient::<SubstrateConfig>::from_url("ws://127.0.0.1:9944")
         .await
         .unwrap();
 
@@ -43,8 +42,7 @@ async fn wasm_ws_transport_works() {
 async fn wasm_ws_chainhead_works() {
     let rpc = RpcClient::from_url("ws://127.0.0.1:9944").await.unwrap();
     let backend = ChainHeadBackend::builder().build_with_background_driver(rpc);
-    let config = SubstrateConfig::new();
-    let client = OnlineClient::from_backend(config, std::sync::Arc::new(backend)).await.unwrap();
+    let client = OnlineClient::<SubstrateConfig>::from_backend(std::sync::Arc::new(backend)).await.unwrap();
 
     let mut stream = client.stream_best_blocks().await.unwrap();
     assert!(stream.next().await.is_some());
@@ -53,8 +51,7 @@ async fn wasm_ws_chainhead_works() {
 #[wasm_bindgen_test]
 async fn reconnecting_rpc_client_ws_transport_works() {
     let rpc = ReconnectingRpcClient::builder().build("ws://127.0.0.1:9944".to_string()).await.unwrap();
-    let config = SubstrateConfig::new();
-    let client = subxt::client::OnlineClient::from_rpc_client(config, rpc.clone()).await.unwrap();
+    let client = subxt::client::OnlineClient::<SubstrateConfig>::from_rpc_client(rpc.clone()).await.unwrap();
 
     let mut stream = client.stream_best_blocks().await.unwrap();
     assert!(stream.next().await.is_some());

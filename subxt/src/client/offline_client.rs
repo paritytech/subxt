@@ -13,7 +13,7 @@ pub struct OfflineClient<T: Config> {
 
 impl<T: Config> OfflineClient<T> {
     /// Create a new [`OfflineClient`] with the given configuration.
-    pub fn new(config: T) -> Self {
+    pub fn new_with_config(config: T) -> Self {
         OfflineClient { config }
     }
 

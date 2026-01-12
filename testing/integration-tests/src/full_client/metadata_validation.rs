@@ -58,7 +58,7 @@ async fn metadata_to_api(metadata: Metadata) -> OfflineClientAtBlock<SubstrateCo
         }])
         .build();
 
-    let offline_client = OfflineClient::new(config);
+    let offline_client = OfflineClient::new_with_config(config);
     offline_client.at_block(0u64).unwrap()
 }
 

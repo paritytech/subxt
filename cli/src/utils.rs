@@ -232,10 +232,9 @@ impl<T: Display> Indent for T {}
 pub async fn create_client(
     file_or_url: &FileOrUrl,
 ) -> color_eyre::Result<OnlineClient<PolkadotConfig>> {
-    let config = PolkadotConfig::new();
     let client = match &file_or_url.url {
-        Some(url) => OnlineClient::<PolkadotConfig>::from_url(config, url).await?,
-        None => OnlineClient::<PolkadotConfig>::new(config).await?,
+        Some(url) => OnlineClient::<PolkadotConfig>::from_url(url).await?,
+        None => OnlineClient::<PolkadotConfig>::new().await?,
     };
     Ok(client)
 }

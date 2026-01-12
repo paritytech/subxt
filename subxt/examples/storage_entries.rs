@@ -8,8 +8,7 @@ mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let config = PolkadotConfig::new();
-    let api = OnlineClient::new(config).await?;
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
     let at_block = api.at_current_block().await?;
 
     // Here we use a statically generated address to fetch the storage entry, which
