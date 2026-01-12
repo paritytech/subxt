@@ -400,7 +400,7 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-latest
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
-    timeout-minutes: 30
+    timeout-minutes: 10
     env:
       # Set timeout for wasm tests to be much bigger than the default 20 secs.
       WASM_BINDGEN_TEST_TIMEOUT: 300
@@ -426,7 +426,7 @@ jobs:
     continue-on-error: true
     runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
-    timeout-minutes: 45
+    timeout-minutes: 10
     strategy:
       matrix:
         # Test each of the backends with the light client.
