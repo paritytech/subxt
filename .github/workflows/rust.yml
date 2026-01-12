@@ -322,30 +322,8 @@ jobs:
       - name: Run crate tests
         run: cargo test --workspace --exclude integration-tests
 
-  integration_tests_default:
-    name: "Integration tests: default RPC client and backend"
-    runs-on: parity-large
-    needs: [clippy, wasm_clippy, check, wasm_check, docs]
-    timeout-minutes: 45
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v6
-
-      - name: Use substrate and polkadot node binaries
-        uses: ./.github/workflows/actions/use-nodes
-
-      - name: Install Rust stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Run crate tests
-        run: cargo test -p integration-tests
-
-  integration_tests_alternates:
-    name: "Integration tests: alternate backends and RPC clients"
+  integration_tests:
+    name: "Integration tests"
     runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 45
@@ -353,7 +331,7 @@ jobs:
       matrix:
         # Test each of these features in our integration tests:
         feature:
-        - light-client-rpc
+        - default
         - reconnecting-rpc
         - legacy-backend
         - chainhead-backend
@@ -411,6 +389,31 @@ jobs:
           pkill substrate-node
         working-directory: testing/wasm-rpc-tests
 
+      - name: Run subxt-signer WASM tests
+        run: |
+          wasm-pack test --headless --firefox
+          wasm-pack test --headless --chrome
+        working-directory: signer/tests/wasm
+
+  flaky_lightclient_wasm_tests:
+    name: Flaky lightclient WASM tests
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    needs: [clippy, wasm_clippy, check, wasm_check, docs]
+    timeout-minutes: 30
+    env:
+      # Set timeout for wasm tests to be much bigger than the default 20 secs.
+      WASM_BINDGEN_TEST_TIMEOUT: 300
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+
       - name: Run subxt-lightclient WASM tests
         run: |
           # These tests connext to RPC nodes and so don't need a local node running.
@@ -418,11 +421,35 @@ jobs:
           wasm-pack test --headless --chrome
         working-directory: testing/wasm-lightclient-tests
 
-      - name: Run subxt-signer WASM tests
-        run: |
-          wasm-pack test --headless --firefox
-          wasm-pack test --headless --chrome
-        working-directory: signer/tests/wasm
+  flaky_lightclient_integration_tests:
+    name: "Flaky lightclient integration tests"
+    continue-on-error: true
+    runs-on: parity-large
+    needs: [clippy, wasm_clippy, check, wasm_check, docs]
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        # Test each of the backends with the light client.
+        feature:
+        - default
+        - legacy-backend
+        - chainhead-backend
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Run crate tests
+        run: cargo test -p integration-tests --features light-client-rpc,${{ matrix.feature }}
 
   nostd_tests:
     name: "Test (no_std)"
