@@ -25,8 +25,8 @@ There are also a couple of organizational changes which aren't visible:
 This changes have results in many breaking changes across APIs, which I will try my best to summarize below.
 
 A good place to look for a more holistic understanding of what's changes are the examples, both:
-- The [smaller single-file examples](https://github.com/paritytech/subxt/tree/master/subxt/examples)
-- The [larger project-based examples](https://github.com/paritytech/subxt/tree/master/examples)
+- The [smaller single-file examples](https://github.com/paritytech/subxt/blob/jsdw-subxt-new/subxt/examples)
+- The [larger project-based examples](https://github.com/paritytech/subxt/blob/jsdw-subxt-new/examples)
 
 For the smaller examples, start with [the basic transaction submission example](https://github.com/paritytech/subxt/blob/jsdw-subxt-new/subxt/examples/submit_transaction.rs) and then have a look at [the blocks example](https://github.com/paritytech/subxt/blob/jsdw-subxt-new/subxt/examples/blocks.rs) and [the storage example](https://github.com/paritytech/subxt/blob/jsdw-subxt-new/subxt/examples/storage_entries.rs) to give the best broad overview of the changes. Pick and choose others next depending on what suits.
 

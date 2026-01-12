@@ -20,8 +20,7 @@ pub async fn main() {
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     // (the port 42069 is specified in the asset-hub-zombienet.toml)
-    let config = StatemintConfig::new();
-    let api = OnlineClient::<StatemintConfig>::from_url(config, "ws://127.0.0.1:42069").await?;
+    let api = OnlineClient::<StatemintConfig>::from_url("ws://127.0.0.1:42069").await?;
     println!("Connection with parachain established.");
 
     let alice: MultiAddress<AccountId32, ()> = dev::alice().public_key().into();
