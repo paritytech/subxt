@@ -1268,14 +1268,16 @@ impl codec::Decode for Metadata {
     }
 }
 
-/// A utility function to decode SCALE encoded metadata. This is much like [`Metadata::decode_from`] but doesn't 
+/// A utility function to decode SCALE encoded metadata. This is much like [`Metadata::decode_from`] but doesn't
 /// do the final step of converting the decoded metadata into [`Metadata`].
 ///
 /// - The default assumption is that metadata is encoded as [`frame_metadata::RuntimeMetadataPrefixed`]. This is the
 ///   expected format that metadata is encoded into.
 /// - if this fails, we also try to decode as [`frame_metadata::RuntimeMetadata`].
 /// - If this all fails, we also try to decode as [`frame_metadata::OpaqueMetadata`].
-pub fn decode_runtime_metadata(input: &[u8]) -> Result<frame_metadata::RuntimeMetadata, codec::Error> {
+pub fn decode_runtime_metadata(
+    input: &[u8],
+) -> Result<frame_metadata::RuntimeMetadata, codec::Error> {
     use codec::Decode;
 
     let err = match frame_metadata::RuntimeMetadataPrefixed::decode(&mut &*input) {
