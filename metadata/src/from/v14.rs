@@ -339,10 +339,9 @@ impl OuterEnums {
 
         // First try the modern names (RuntimeCall, RuntimeEvent, RuntimeError)
         // If not found, fall back to legacy names (Call, Event in *_runtime module)
-        let call_ty = find_type_by_ident("RuntimeCall")
-            .or_else(|| find_runtime_outer_enum("Call"));
-        let event_ty = find_type_by_ident("RuntimeEvent")
-            .or_else(|| find_runtime_outer_enum("Event"));
+        let call_ty = find_type_by_ident("RuntimeCall").or_else(|| find_runtime_outer_enum("Call"));
+        let event_ty =
+            find_type_by_ident("RuntimeEvent").or_else(|| find_runtime_outer_enum("Event"));
         let error_ty = find_type_by_ident("RuntimeError");
 
         OuterEnums {
@@ -350,5 +349,19 @@ impl OuterEnums {
             event_ty,
             error_ty,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::Metadata;
+
+    // In early V14 metadatas, RuntimeCall, RuntimeEvent and RuntimeError didn't exist, and
+    // instead we have types like polkadot_runtime::Call, kusama_runtime::Call etc.
+    // See https://github.com/paritytech/subxt/pull/2154.
+    #[test]
+    fn can_decode_early_polkadot_rc_v14_metadata() {
+        let md_bytes = std::fs::read("../artifacts/polkadot_metadata_v14_9110.scale").unwrap();
+        let _md = Metadata::decode_from(&md_bytes).unwrap();
     }
 }
