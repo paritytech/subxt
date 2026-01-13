@@ -382,7 +382,7 @@ impl<T: Config> OnlineClient<T> {
                     _apis: Vec<([u8; 8], u32)>,
                 }
 
-                let versions = SpecVersionHeader::decode(&mut &spec_version_bytes[..])
+                SpecVersionHeader::decode(&mut &spec_version_bytes[..])
                     .map(|version| (version.spec_version, version.transaction_version))
                     .or_else(|_| {
                         OldSpecVersionHeader::decode(&mut &spec_version_bytes[..])
@@ -391,9 +391,7 @@ impl<T: Config> OnlineClient<T> {
                     .map_err(|e| OnlineClientAtBlockError::CannotDecodeSpecVersion {
                         block_hash: block_hash.into(),
                         reason: e,
-                    })?;
-
-                versions
+                    })?
             }
         };
 
