@@ -308,6 +308,56 @@ while let Some(Ok(entry)) = all_balances.next().await {
 
 This is perhaps the largest change to any specific set of APIs in terms of differences. Take a look at the API docs and [the storage example](https://github.com/paritytech/subxt/blob/jsdw-subxt-new/subxt/examples/storage_entries.rs) and [PR](https://github.com/paritytech/subxt/pull/2100) for more on this.
 
+### Runtime updates
+
+**Before**
+
+In previous versions of Subxt, you could subscribe to runtime updates and have Subxt update its internal metadata in response to them, allowing it to track the head of a chain over runtime changes, like so:
+
+```rust
+let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+// The "easy" approach to ensuring Subxt remains up to date:
+let updater = api.updater();
+tokio::spawn(async move {
+    update_task.perform_runtime_updates().await;
+});
+
+// We can also do something lower level:
+let updater = api.updater();
+tokio::spawn(async move {
+    let mut update_stream = updater.runtime_updates().await.unwrap();
+    while let Ok(update) = update_stream.next().await {
+        let version = update.runtime_version().spec_version;
+        match updater.apply_update(update) {
+            Ok(()) => {
+                println!("Upgrade to version: {} successful", version)
+            }
+            Err(e) => {
+                println!("Upgrade to version {} failed {:?}", version, e);
+            }
+        };
+    }
+});
+```
+
+**After**
+
+The way that Subxt works with metadata across runtimes has been overhauled, and so now Subxt can automatically store and use whichever metadata version is required for a given block, without any need to explicitly monitor for changes. Thus, this code can be safely removed as it is no longer needed.
+
+If you'd like to keep track of when runtime updates occur, you can still do this by simply subscribing to blocks, like so:
+
+```rust
+let mut blocks = api.stream_blocks().await?;
+while let Some(block) = blocks.next().await {
+    let block = block?;
+    let at_block = block.at().await?;
+
+    // If this changes, then it means that the runtime has updated.
+    let spec_version = at_block.spec_version();
+}
+```
+
 ### Dynamic values
 
 **Before**

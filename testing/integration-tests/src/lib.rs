@@ -15,6 +15,11 @@ mod utils;
 #[allow(unused)]
 use utils::*;
 
+// We manually instantiate clients and connect to public nodes to test historic things,
+// so ensure we only run these tests once, when default rpc and backend is being tested.
+#[cfg(all(test, default_rpc, default_backend))]
+mod historic;
+
 // Run these against everything except lightclient RPC (it's too slow)
 #[cfg(all(test, not(lightclient_rpc)))]
 mod full_client;

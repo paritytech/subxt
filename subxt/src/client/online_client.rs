@@ -357,7 +357,9 @@ impl<T: Config> OnlineClient<T> {
                         reason: e,
                     })?;
 
-                #[derive(codec::Decode)]
+                // This is the "modern" version information. We get this back for
+                // all Polkadot RC blocks and try this first.
+                #[derive(codec::Decode, Debug)]
                 struct SpecVersionHeader {
                     _spec_name: String,
                     _impl_name: String,
@@ -367,14 +369,31 @@ impl<T: Config> OnlineClient<T> {
                     _apis: Vec<([u8; 8], u32)>,
                     transaction_version: u32,
                 }
-                let version =
-                    SpecVersionHeader::decode(&mut &spec_version_bytes[..]).map_err(|e| {
-                        OnlineClientAtBlockError::CannotDecodeSpecVersion {
-                            block_hash: block_hash.into(),
-                            reason: e,
-                        }
+
+                // For old Kusama RC blocks (and possibly others), the transaction
+                // version field hasn't been added yet and so we default it to 0.
+                #[derive(codec::Decode, Debug)]
+                struct OldSpecVersionHeader {
+                    _spec_name: String,
+                    _impl_name: String,
+                    _authoring_version: u32,
+                    spec_version: u32,
+                    _impl_version: u32,
+                    _apis: Vec<([u8; 8], u32)>,
+                }
+
+                let versions = SpecVersionHeader::decode(&mut &spec_version_bytes[..])
+                    .map(|version| (version.spec_version, version.transaction_version))
+                    .or_else(|_| {
+                        OldSpecVersionHeader::decode(&mut &spec_version_bytes[..])
+                            .map(|version| (version.spec_version, 0))
+                    })
+                    .map_err(|e| OnlineClientAtBlockError::CannotDecodeSpecVersion {
+                        block_hash: block_hash.into(),
+                        reason: e,
                     })?;
-                (version.spec_version, version.transaction_version)
+
+                versions
             }
         };
 
