@@ -39,7 +39,7 @@ use subxt::{
 type Client = OnlineClient<PolkadotConfig>;
 
 /// The Polkadot chainspec.
-const POLKADOT_SPEC: &str = include_str!("../../../../artifacts/demo_chain_specs/polkadot.json");
+const POLKADOT_SPEC: &str = include_str!("../../../artifacts/demo_chain_specs/polkadot.json");
 
 // Create a light client using the backend configured in our test features.
 async fn create_client() -> OnlineClient<PolkadotConfig> {
