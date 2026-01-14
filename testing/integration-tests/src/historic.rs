@@ -20,7 +20,7 @@ async fn can_instantiate_client_across_historic_polkadot_runtimes() {
             tracing::info!("Instantiating client at block {block_num}");
             api.at_block(block_num)
                 .await
-                .unwrap_or_else(|| panic!("Can instantiate client at block {block_num}"));
+                .unwrap_or_else(|e| panic!("Can't instantiate client at block {block_num}: {e}"));
             tracing::info!("   -> Success Instantiating client at block {block_num}");
         }
     });
@@ -42,7 +42,7 @@ async fn can_instantiate_client_across_historic_kusama_runtimes() {
             tracing::info!("Instantiating client at block {block_num}");
             api.at_block(block_num)
                 .await
-                .unwrap_or_else(|| panic!("Can instantiate client at block {block_num}"));
+                .unwrap_or_else(|e| panic!("Can't instantiate client at block {block_num}: {e}"));
             tracing::info!("   -> Success Instantiating client at block {block_num}");
         }
     });
