@@ -9,6 +9,8 @@
 //! via something like [`OnlineClient::at_block`] or [`OfflineClient::at_block`].
 //! These hand back [`OnlineClientAtBlock`] or [`OfflineClientAtBlock`], which expose
 //! various methods available online or offline at the given block.
+//!
+//! See the docs for [`ClientAtBlock`] to see what it's possible to do at a given block.
 
 mod offline_client;
 mod online_client;

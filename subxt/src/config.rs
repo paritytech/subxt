@@ -11,6 +11,39 @@
 //! - A [`PolkadotConfig`] implementation is provided which is specialized towards the Polkadot
 //!   Relay Chain, and comes pre-configured to work against historic Polkadot RC blocks.
 //!
+//! # Creating custom configuration
+//!
+//! Some chains require this configuration to be customized. In many cases, you can perform most
+//! interactions on these chains using the default [`SubstrateConfig`], but may need small
+//! customizations to enable all interactions to work properly.
+//!
+//! ## Asset Hub
+//!
+//! One chain that needs custom configuration to completely work is Asset Hub. For the most part
+//! you can just use [`SubstrateConfig`], but if you want to add a tip to a transaction in anything
+//! other than DOT, you'll need to change the [`Config::AssetId`] property to allow for this.
+//! This involves creating a new [`Config`] instance for Asset Hub, which looks like this:
+//!
+//! ```rust,no_run
+#![doc = include_str ! ("../examples/config_assethub.rs")]
+//! ```
+//!
+//! ## Ethereum based chains
+//!
+//! If you're interacting with an Ethereum based chain, you'll need to configure Subxt to work with
+//! 20 byte account IDs instead of the default 32 byte ones, and a corresponding `Signature` type.
+//! This would look something like this:
+//!
+//! ```rust,no_run
+#![doc = include_str ! ("../examples/config_eth.rs")]
+//! ```
+//!
+//! # Other chains
+//!
+//! If you find that [`SubstrateConfig`] doesn't work, and neither of the above is applicable, then
+//! the next step is to look at how the runtime for the chain you'd like to interact with is
+//! configured. Please open an issue in the Subxt repository and we can help to narrow down what
+//! the problem might be.
 
 mod default_extrinsic_params;
 
@@ -56,7 +89,7 @@ pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     type ExtrinsicParams: ExtrinsicParams<Self>;
 
     /// This is used to identify an asset in the `ChargeAssetTxPayment` signed extension.
-    type AssetId: Debug + Clone + Encode + DecodeAsType + EncodeAsType + Send;
+    type AssetId: AssetId;
 
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
     /// This is created on demand with the relevant metadata for a given block, and
@@ -129,7 +162,11 @@ pub type HashFor<T> = <<T as Config>::Hasher as Hasher>::Hash;
 /// given some [`Config`], this return the other params needed for its `ExtrinsicParams`.
 pub type ParamsFor<T> = <<T as Config>::ExtrinsicParams as ExtrinsicParams<T>>::Params;
 
-/// Block hashes must conform to a bunch of things to be used in Subxt.
+/// AssetId types must conform to this trait.
+pub trait AssetId: Debug + Clone + Encode + DecodeAsType + EncodeAsType + Send {}
+impl<T> AssetId for T where T: Debug + Clone + Encode + DecodeAsType + EncodeAsType + Send {}
+
+/// Block hash types must conform to this trait.
 pub trait Hash:
     Debug
     + Display

@@ -1,54 +1,73 @@
-# subxt &middot; [![build](https://github.com/paritytech/subxt/actions/workflows/rust.yml/badge.svg)](https://github.com/paritytech/subxt/actions/workflows/rust.yml) [![Latest Version](https://img.shields.io/crates/v/subxt.svg)](https://crates.io/crates/subxt) [![Documentation](https://docs.rs/subxt/badge.svg)](https://docs.rs/subxt)
+<p align="center">
+  <img src="./logo.svg" alt="subxt logo" width="420" />
+</p>
 
-Subxt is a library for interacting with [Substrate](https://github.com/paritytech/polkadot-sdk) based nodes in Rust and WebAssembly. It can:
+<p align="center">
+  <a href="https://github.com/paritytech/subxt/actions/workflows/rust.yml"><img src="https://github.com/paritytech/subxt/actions/workflows/rust.yml/badge.svg" alt="build"></a>
+  <a href="https://crates.io/crates/subxt"><img src="https://img.shields.io/crates/v/subxt.svg" alt="Latest Version"></a>
+  <a href="https://docs.rs/subxt"><img src="https://docs.rs/subxt/badge.svg" alt="Documentation"></a>
+</p>
+
+Subxt is a library for interacting with chains in the [Polkadot](https://github.com/paritytech/polkadot-sdk) network. It can:
 
 - Submit Extrinsics (this is where the name comes from).
-- Subscribe to blocks, reading the extrinsics and associated events from them.
-- Read and iterate over storage values.
-- Read constants and custom values from the metadata.
-- Call runtime APIs, returning the results.
-- Do all of the above via a safe, statically typed interface or via a dynamic one when you need the flexibility.
-- Compile to WASM and run entirely in the browser.
-- Do a bunch of things in a `#[no_std]` environment via the `subxt-core` crate.
-- Use a built-in light client (`smoldot`) to interact with chains.
+- Access information at any block (eg storage values, constants, Runtime APIs, View Functions).
+- Subscribe to new blocks (and then do the above at them).
+- Do all of the above via a safe, statically typed interface or via a flexible dynamic interface.
+- Do most of the above via a built-in light client to interact with chains trustlessly.
+- Compile to WASM and run [entirely in the browser](./examples/wasm-example), or be [called via FFI](./examples/ffi-example) in many other languages.
 
 ## Usage
 
-Take a look in the [examples](./subxt/examples) folder or the [examples](./examples) folder for various smaller or
-larger `subxt` usage examples, or [read the guide](https://docs.rs/subxt/latest/subxt/book/index.html) to learn more.
+Take a look at the [single-file examples](./subxt/examples) folder or the [project based examples](./examples) folder for various smaller or
+larger `subxt` usage examples, or [read the docs](https://docs.rs/subxt/latest/subxt) to learn more.
 
-### Downloading metadata from a Substrate node
+## Example
 
-Use the [`subxt-cli`](./cli) tool to download the metadata for your target runtime from a node.
+The "hello world" example of Subxt is submitting a transaction. This is what it looks like:
 
-1. Install:
+```rust
+use subxt::{Error, OnlineClient, PolkadotConfig};
+use subxt_signer::sr25519::dev;
 
-```bash
-cargo install subxt-cli
-```
+// Generate an interface that we can use from the node's metadata.
+#[subxt::subxt(runtime_metadata_path = "/path/to/polkadot_rc_metadata.scale")]
+mod polkadot {}
 
-2. Save the encoded metadata to a file:
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    // Create a new API client, configured to talk to Polkadot nodes.
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-```bash
-subxt metadata -f bytes > metadata.scale
-```
+    // Almost all actions are performed at an explicit block. Here we use
+    // the current block at the time of running this.
+    let at_block = api.at_current_block().await?;
 
-This defaults to querying the metadata of a locally running node on the default `http://localhost:9933/`. If querying
-a different node then the `metadata` command accepts a `--url` argument.
+    // Build a balance transfer extrinsic.
+    let dest = dev::bob().public_key().into();
+    let balance_transfer_tx = polkadot::transactions()
+        .balances()
+        .transfer_allow_death(dest, 10_000);
 
-## Subxt Documentation
+    // Submit the balance transfer extrinsic from Alice, and wait for it 
+    // to be successful and in a finalized block. We get back the extrinsic 
+    // events if all is well.
+    let from = dev::alice();
+    let events = at_block
+        .transactions()
+        .sign_and_submit_then_watch_default(&balance_transfer_tx, &from)
+        .await?
+        .wait_for_finalized_success()
+        .await?;
 
-For more details regarding utilizing subxt, please visit the [documentation](https://docs.rs/subxt/latest/subxt/).
+    // (Optional) we can look for a specific event to learn more about 
+    // the submission.
+    if let Some(event) = events.find_first::<polkadot::balances::events::Transfer>() {
+        println!("Balance transfer success: {event:?}");
+    }
 
-## Integration Testing
-
-Most tests require a running substrate node to communicate with. This is done by spawning an instance of the
-substrate node per test. It requires an up-to-date `substrate` executable on your path.
-
-This can be installed from source via cargo:
-
-```bash
-cargo install --git https://github.com/paritytech/polkadot-sdk staging-node-cli --force
+    Ok(())
+}
 ```
 
 ## Real world usage
@@ -68,9 +87,9 @@ Please add your project to this list via a PR.
 - [Hyperbridge](https://github.com/polytope-labs/hyperbridge) A hyperscalable coprocessor for verifiable cross-chain interoperability.
 - [pop CLI](https://github.com/r0gue-io/pop-cli) The all-in-one tool for Polkadot development.
 
-**Alternatives**
+## Alternatives
 
-[substrate-api-client](https://github.com/scs/substrate-api-client) provides similar functionality.
+If you're working in TypeScript / JavaScript, [polkadot-api](https://github.com/polkadot-api/polkadot-api) is an excellent and actively developed alternative.
 
 #### License
 

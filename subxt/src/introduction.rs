@@ -2,7 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! # The book
+//! # Introduction
 //!
 //! Subxt is a library for interacting with Substrate based chains. In the early days, it had a focus on
 //! **sub**mitting e**xt**rinsics, hence the name, however it has since evolved into a full featured library for
@@ -24,9 +24,14 @@
 //!
 //! Transactions are appended to the blockchain in batches known as blocks, where each block points to the previous
 //! one. Blocks are immutable and cannot be altered once added, and so the blockchain is essentially a big append-only
-//! log of all of the transactions every submitted. Storage entries update at each block in response to the transactions
-//! in it. Interactions with a blockchain happen _at_ a certain block; transactions are submitted to update the state
-//! at a given block, and state can be read at a given block.
+//! log of all of the transactions ever submitted. Storage entries update at each block in response to the transactions
+//! in it.
+//!
+//! Interactions with a blockchain happen _at_ a certain block:
+//! - Transactions are submitted in the context of a specific block (ie they increment the senders account nonce seen
+//!   in a specific block, and can have a lifetime starting at a specific block).
+//! - State is read at a specific block (meaning that the state will be based on all transactions up to and including
+//!   that block).
 //!
 //! Chains on the Polkadot network are typically created using the Substrate library. This library provides
 //! various primitives and defaults which make it much simpler to build a new blockchain. Substrate based chains group the
@@ -41,8 +46,10 @@
 //! Outside of pallets, _Runtime APIs_ also exist, which are read-only functions that can be called and return some result.
 //!
 //! All of this logic lives inside the _runtime_ of a chain. An important aspect of Substrate based chains is that this
-//! runtime can be upgraded. Runtime upgrades allow the functionality of a chain to be changed over time. This means
-//! that the values that you can read and write from can change from one block to the next.
+//! runtime itself is stored in the blockchain storage alongside everything else, and, like everything else, can be modified
+//! by submitting the right transactions. When we update the runtime, we call this a runtime upgrade. Runtime upgrades allow
+//! the functionality of a chain to be changed over time. This means that the available storage entries, transactions, Runtime
+//! APIs and everything else can change from one block to the next when runtime upgrades happen.
 //!
 //! In order to understand what interactions are possible at a specific runtime version, each runtime exposes
 //! [_metadata_](https://github.com/paritytech/frame-metadata/). Metadata contains all of the information needed to
@@ -50,7 +57,8 @@
 //! is why metadatas are versioned. Typically, we refer to metadata at version 14 or above as "modern" metadata, and
 //! metadata older than this as "historic" or "legacy" metadata. In order to interact with blocks at runtimes which expose
 //! historic metadata, additional type information needs to be provided by the user, as it was not present in the
-//! metadata.
+//! metadata. This type information tells Subxt how to encode and decode the relevant data when interacting with these
+//! old runtimes.
 //!
 //! ### TL;DR:
 //! - Each chain can be configured differently.
@@ -59,22 +67,23 @@
 //! - Functionality is organized into _pallets_.
 //! - This functionality can change over time as Runtime updates occur.
 //! - Metadata describes what functionality is available for a given runtime.
-//!
+//! - For old runtimes / metadatas, we need additional type information to be able to work with them.
+//!   
 //! ## Interacting with the Polkadot Network
 //!
-//! Subxt is built for interacting with Substrate based chains on the Polkadot. The basic steps for using Subxt are:
+//! Subxt is built for interacting with Substrate based chains across the Polkadot network. The basic steps for using Subxt are:
 //!
 //! 0. (Optional) Generate an interface to the chain you wish to interact with. This provides type safe APIs.
-//! 1. Create/instantiate some configuration for the chain you wish to interact with. Subxt provides a default
-//!    [`crate::config::SubstrateConfig`] which works with most chains, or [`crate::config::PolkadotConfig`] which
-//!    is configured specifically for the Polkadot Relay Chain.
-//! 2. Create a _client_ for interacting with the chain, which consumes this configuration. typically, you'll create
-//!    an [`crate::client::OnlineClient`] which will connect to the chain. It's also possible to create an
-//!    [`crate::client::OfflineClient`] in the event that you want to avoid any network connection, although in this
-//!    case you'll obviously have much more limited functionality available to you.
+//!    Read the [`macro@crate::subxt`] docs for more.
+//! 1. Create/instantiate some configuration for the chain you wish to interact with.
+//!    Read the [`crate::config`] docs for more.
+//! 2. Create a _client_ for interacting with the chain, which consumes this configuration.
+//!    Read the [`crate::client`] docs for more.
 //! 3. Pick a block to work at. To work at the current block at the time of calling, you'd use
-//!    [`crate::client::OnlineClient::at_current_block()`].
-//! 4. Do things in the context of this block.
+//!    [`crate::client::OnlineClient::at_current_block()`]. To stream blocks, you can use
+//!    [`crate::client::OnlineClient::stream_blocks()`] and similar.
+//! 4. Do things in the context of this block. See the examples for more, or explore the documentation starting at
+//!    [`crate::client::ClientAtBlock`] to dig into the various things you can do at a given block.
 //!
 //! Behind the scenes, Subxt takes are of things like:
 //! - Downloading the metadata at the given blocks where needed.
@@ -85,3 +94,4 @@
 //! See
 #![doc = concat!("[the examples](https://github.com/paritytech/subxt/tree/", env!("SUBXT_REF"), "/subxt/examples)")]
 //! for more.
+//!
