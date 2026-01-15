@@ -397,7 +397,6 @@ jobs:
 
   flaky_lightclient_wasm_tests:
     name: Flaky lightclient WASM tests
-    continue-on-error: true
     runs-on: ubuntu-latest
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 10
@@ -415,15 +414,37 @@ jobs:
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
 
       - name: Run subxt-lightclient WASM tests
-        run: |
-          # These tests connext to RPC nodes and so don't need a local node running.
-          wasm-pack test --headless --firefox
-          wasm-pack test --headless --chrome
+        id: test
         working-directory: testing/wasm-lightclient-tests
+        run: |
+          # These tests connect to RPC nodes and so don't need a local node running.
+          if wasm-pack test --headless --firefox && wasm-pack test --headless --chrome; then
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "result=failure" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Report flaky test result
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = '${{ steps.test.outputs.result }}';
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Flaky: Lightclient WASM tests',
+              head_sha: context.sha,
+              conclusion: result === 'success' ? 'success' : 'neutral',
+              output: {
+                title: result === 'success' ? 'Tests passed' : 'Tests failed (flaky)',
+                summary: result === 'success'
+                  ? 'All lightclient WASM tests passed.'
+                  : 'Lightclient WASM tests failed. These tests are known to be flaky and do not block the PR.'
+              }
+            });
 
   flaky_lightclient_integration_tests:
-    name: "Flaky lightclient integration tests"
-    continue-on-error: true
+    name: "Flaky lightclient integration tests (${{ matrix.feature }})"
     runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 10
@@ -449,7 +470,33 @@ jobs:
           override: true
 
       - name: Run crate tests
-        run: cargo test -p integration-tests --features light-client-rpc,${{ matrix.feature }}
+        id: test
+        run: |
+          if cargo test -p integration-tests --features light-client-rpc,${{ matrix.feature }}; then
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "result=failure" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Report flaky test result
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = '${{ steps.test.outputs.result }}';
+            const feature = '${{ matrix.feature }}';
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: `Flaky: Lightclient integration tests (${feature})`,
+              head_sha: context.sha,
+              conclusion: result === 'success' ? 'success' : 'neutral',
+              output: {
+                title: result === 'success' ? 'Tests passed' : 'Tests failed (flaky)',
+                summary: result === 'success'
+                  ? `Lightclient integration tests (${feature}) passed.`
+                  : `Lightclient integration tests (${feature}) failed. These tests are known to be flaky and do not block the PR.`
+              }
+            });
 
   nostd_tests:
     name: "Test (no_std)"
