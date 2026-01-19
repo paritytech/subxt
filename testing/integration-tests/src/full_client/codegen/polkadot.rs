@@ -2984,19 +2984,21 @@ pub mod api {
                 #[doc = " Returns the concatenated SCALE encoded public keys."]
                 pub fn generate_session_keys(
                     &self,
+                    owner: generate_session_keys::Owner,
                     seed: generate_session_keys::Seed,
                 ) -> ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload<
-                    (generate_session_keys::Seed,),
+                    (generate_session_keys::Owner, generate_session_keys::Seed),
                     generate_session_keys::output::Output,
                 > {
                     ::subxt::ext::subxt_core::runtime_api::payload::StaticPayload::new_static(
                         "SessionKeys",
                         "generate_session_keys",
-                        (seed,),
+                        (owner, seed),
                         [
-                            96u8, 171u8, 164u8, 166u8, 175u8, 102u8, 101u8, 47u8, 133u8, 95u8,
-                            102u8, 202u8, 83u8, 26u8, 238u8, 47u8, 126u8, 132u8, 22u8, 11u8, 33u8,
-                            190u8, 175u8, 94u8, 58u8, 245u8, 46u8, 80u8, 195u8, 184u8, 107u8, 65u8,
+                            94u8, 230u8, 217u8, 119u8, 217u8, 37u8, 67u8, 190u8, 118u8, 204u8,
+                            72u8, 95u8, 58u8, 138u8, 153u8, 164u8, 95u8, 31u8, 85u8, 83u8, 199u8,
+                            12u8, 119u8, 135u8, 248u8, 96u8, 85u8, 142u8, 84u8, 238u8, 111u8,
+                            254u8,
                         ],
                     )
                 }
@@ -3026,13 +3028,14 @@ pub mod api {
             pub mod generate_session_keys {
                 use super::root_mod;
                 use super::runtime_types;
+                pub type Owner = ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
                 pub type Seed = ::core::option::Option<
                     ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
                 >;
                 pub mod output {
                     use super::runtime_types;
                     pub type Output =
-                        ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>;
+                        runtime_types::sp_session::runtime_api::OpaqueGeneratedSessionKeys;
                 }
             }
             pub mod decode_session_keys {
@@ -3988,9 +3991,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                103u8, 177u8, 93u8, 186u8, 64u8, 8u8, 160u8, 121u8, 76u8, 46u8, 254u8, 77u8, 196u8,
-                209u8, 191u8, 117u8, 203u8, 223u8, 19u8, 252u8, 123u8, 62u8, 58u8, 193u8, 137u8,
-                79u8, 49u8, 204u8, 254u8, 209u8, 164u8, 248u8,
+                185u8, 135u8, 204u8, 24u8, 32u8, 117u8, 53u8, 224u8, 90u8, 93u8, 47u8, 134u8,
+                226u8, 238u8, 144u8, 12u8, 45u8, 132u8, 140u8, 66u8, 189u8, 176u8, 172u8, 186u8,
+                16u8, 167u8, 112u8, 56u8, 130u8, 226u8, 94u8, 67u8,
             ]
     }
     pub mod system {
@@ -8960,14 +8963,16 @@ pub mod api {
                     crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
                 )]
                 #[doc = "Sets the session key(s) of the function caller to `keys`."]
+                #[doc = ""]
                 #[doc = "Allows an account to set its session key prior to becoming a validator."]
                 #[doc = "This doesn't take effect until the next session."]
                 #[doc = ""]
-                #[doc = "The dispatch origin of this function must be signed."]
-                #[doc = ""]
-                #[doc = "## Complexity"]
-                #[doc = "- `O(1)`. Actual cost depends on the number of length of `T::Keys::key_ids()` which is"]
-                #[doc = "  fixed."]
+                #[doc = "- `origin`: The dispatch origin of this function must be signed."]
+                #[doc = "- `keys`: The new session keys to set. These are the public keys of all sessions keys"]
+                #[doc = "  setup in the runtime."]
+                #[doc = "- `proof`: The proof that `origin` has access to the private keys of `keys`. See"]
+                #[doc = "  [`impl_opaque_keys`](sp_runtime::impl_opaque_keys) for more information about the"]
+                #[doc = "  proof format."]
                 pub struct SetKeys {
                     pub keys: set_keys::Keys,
                     pub proof: set_keys::Proof,
@@ -9001,10 +9006,6 @@ pub mod api {
                 #[doc = "convertible to a validator ID using the chain's typical addressing system (this usually"]
                 #[doc = "means being a controller account) or directly convertible into a validator ID (which"]
                 #[doc = "usually means being a stash account)."]
-                #[doc = ""]
-                #[doc = "## Complexity"]
-                #[doc = "- `O(1)` in number of key types. Actual cost depends on the number of length of"]
-                #[doc = "  `T::Keys::key_ids()` which is fixed."]
                 pub struct PurgeKeys;
                 impl ::subxt::ext::subxt_core::blocks::StaticExtrinsic for PurgeKeys {
                     const PALLET: &'static str = "Session";
@@ -9014,14 +9015,16 @@ pub mod api {
             pub struct TransactionApi;
             impl TransactionApi {
                 #[doc = "Sets the session key(s) of the function caller to `keys`."]
+                #[doc = ""]
                 #[doc = "Allows an account to set its session key prior to becoming a validator."]
                 #[doc = "This doesn't take effect until the next session."]
                 #[doc = ""]
-                #[doc = "The dispatch origin of this function must be signed."]
-                #[doc = ""]
-                #[doc = "## Complexity"]
-                #[doc = "- `O(1)`. Actual cost depends on the number of length of `T::Keys::key_ids()` which is"]
-                #[doc = "  fixed."]
+                #[doc = "- `origin`: The dispatch origin of this function must be signed."]
+                #[doc = "- `keys`: The new session keys to set. These are the public keys of all sessions keys"]
+                #[doc = "  setup in the runtime."]
+                #[doc = "- `proof`: The proof that `origin` has access to the private keys of `keys`. See"]
+                #[doc = "  [`impl_opaque_keys`](sp_runtime::impl_opaque_keys) for more information about the"]
+                #[doc = "  proof format."]
                 pub fn set_keys(
                     &self,
                     keys: types::set_keys::Keys,
@@ -9047,10 +9050,6 @@ pub mod api {
                 #[doc = "convertible to a validator ID using the chain's typical addressing system (this usually"]
                 #[doc = "means being a controller account) or directly convertible into a validator ID (which"]
                 #[doc = "usually means being a stash account)."]
-                #[doc = ""]
-                #[doc = "## Complexity"]
-                #[doc = "- `O(1)` in number of key types. Actual cost depends on the number of length of"]
-                #[doc = "  `T::Keys::key_ids()` which is fixed."]
                 pub fn purge_keys(
                     &self,
                 ) -> ::subxt::ext::subxt_core::tx::payload::StaticPayload<types::PurgeKeys>
@@ -54615,14 +54614,16 @@ pub mod api {
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Sets the session key(s) of the function caller to `keys`."]
+                    #[doc = ""]
                     #[doc = "Allows an account to set its session key prior to becoming a validator."]
                     #[doc = "This doesn't take effect until the next session."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin of this function must be signed."]
-                    #[doc = ""]
-                    #[doc = "## Complexity"]
-                    #[doc = "- `O(1)`. Actual cost depends on the number of length of `T::Keys::key_ids()` which is"]
-                    #[doc = "  fixed."]
+                    #[doc = "- `origin`: The dispatch origin of this function must be signed."]
+                    #[doc = "- `keys`: The new session keys to set. These are the public keys of all sessions keys"]
+                    #[doc = "  setup in the runtime."]
+                    #[doc = "- `proof`: The proof that `origin` has access to the private keys of `keys`. See"]
+                    #[doc = "  [`impl_opaque_keys`](sp_runtime::impl_opaque_keys) for more information about the"]
+                    #[doc = "  proof format."]
                     set_keys {
                         keys: runtime_types::rococo_runtime::SessionKeys,
                         proof: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
@@ -54636,10 +54637,6 @@ pub mod api {
                     #[doc = "convertible to a validator ID using the chain's typical addressing system (this usually"]
                     #[doc = "means being a controller account) or directly convertible into a validator ID (which"]
                     #[doc = "usually means being a stash account)."]
-                    #[doc = ""]
-                    #[doc = "## Complexity"]
-                    #[doc = "- `O(1)` in number of key types. Actual cost depends on the number of length of"]
-                    #[doc = "  `T::Keys::key_ids()` which is fixed."]
                     purge_keys,
                 }
                 #[derive(
@@ -63732,6 +63729,24 @@ pub mod api {
         }
         pub mod sp_session {
             use super::runtime_types;
+            pub mod runtime_api {
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_decode"
+                )]
+                #[encode_as_type(
+                    crate_path = ":: subxt :: ext :: subxt_core :: ext :: scale_encode"
+                )]
+                pub struct OpaqueGeneratedSessionKeys {
+                    pub keys: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+                    pub proof: ::subxt::ext::subxt_core::alloc::vec::Vec<::core::primitive::u8>,
+                }
+            }
             #[derive(
                 :: subxt :: ext :: subxt_core :: ext :: scale_decode :: DecodeAsType,
                 :: subxt :: ext :: subxt_core :: ext :: scale_encode :: EncodeAsType,
