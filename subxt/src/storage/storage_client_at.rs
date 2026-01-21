@@ -324,7 +324,7 @@ async fn fetch<'atblock, T: Config, Client: OnlineClientT<T>, Addr: Address>(
     let value = try_fetch(entry, client, block_hash, key_parts)
         .await?
         .or_else(|| entry.default_value())
-        .unwrap();
+        .ok_or(StorageError::NoValueFound)?;
 
     Ok(value)
 }
