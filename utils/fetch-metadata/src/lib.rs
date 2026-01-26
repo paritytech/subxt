@@ -1,20 +1,15 @@
-// Copyright 2019-2024 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 //! Subxt utils fetch metadata.
 
-#![cfg_attr(docsrs, feature(doc_cfg))]
-
-// Internal helper macros
-#[macro_use]
-mod macros;
 mod error;
 
-cfg_fetch_from_url! {
-    mod url;
-    pub use url::{from_url, from_url_blocking, MetadataVersion, Url};
-}
+#[cfg(feature = "url")]
+mod url;
+#[cfg(feature = "url")]
+pub use url::{MetadataVersion, Url, from_url, from_url_blocking};
 
 pub use error::Error;
 

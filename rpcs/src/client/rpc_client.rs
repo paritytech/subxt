@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -164,7 +164,7 @@ impl RpcParams {
         } else {
             self.0.push(b',')
         }
-        serde_json::to_writer(&mut self.0, &param).map_err(Error::Deserialization)?;
+        serde_json::to_writer(&mut self.0, &param).map_err(Error::Serialization)?;
         Ok(())
     }
     /// Build a [`RawValue`] from our params, returning `None` if no parameters

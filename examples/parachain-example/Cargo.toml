@@ -7,5 +7,5 @@ edition = "2021"
 
 [dependencies]
 subxt = { path = "../../subxt" }
-subxt-signer = { path = "../../signer" }
+subxt-signer = { path = "../../signer", features = ["subxt"] }
 tokio = { version = "1.44.2", features = ["macros", "time", "rt-multi-thread"] }

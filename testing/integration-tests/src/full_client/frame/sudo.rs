@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -31,6 +31,7 @@ async fn test_sudo() -> Result<(), subxt::Error> {
 
     let signed_extrinsic = api
         .tx()
+        .await?
         .create_signed(&tx, &alice, Default::default())
         .await?;
 
@@ -39,7 +40,7 @@ async fn test_sudo() -> Result<(), subxt::Error> {
         .await?
         .wait_for_finalized_success()
         .await?
-        .has::<sudo::events::Sudid>()?;
+        .has::<sudo::events::Sudid>();
 
     assert!(found_event);
     Ok(())
@@ -67,6 +68,7 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
 
     let signed_extrinsic = api
         .tx()
+        .await?
         .create_signed(&tx, &alice, Default::default())
         .await?;
 
@@ -75,7 +77,7 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
         .await?
         .wait_for_finalized_success()
         .await?
-        .has::<sudo::events::Sudid>()?;
+        .has::<sudo::events::Sudid>();
 
     assert!(found_event);
     Ok(())

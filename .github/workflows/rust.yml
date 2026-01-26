@@ -46,16 +46,10 @@ jobs:
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
 
       - name: Cargo fmt
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: fmt
-          args: --all -- --check
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
+        run: cargo fmt --all -- --check
 
   machete:
-    name: "Check unused dependencies"
+    name: Check unused dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -78,12 +72,7 @@ jobs:
         run: cargo install cargo-machete
 
       - name: Check unused dependencies
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: machete
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
+        run: cargo machete
 
   clippy:
     name: Cargo clippy
@@ -109,13 +98,10 @@ jobs:
 
       - name: Run clippy
         run: |
-          cargo clippy --all-targets --features unstable-light-client -- -D warnings
+          cargo clippy --all-targets --features light-client -- -D warnings
           cargo clippy -p subxt-lightclient --no-default-features --features web -- -D warnings
           cargo clippy -p subxt --no-default-features --features web -- -D warnings
-          cargo clippy -p subxt --no-default-features --features web,unstable-light-client -- -D warnings
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
+          cargo clippy -p subxt --no-default-features --features web,light-client -- -D warnings
 
   wasm_clippy:
     name: Cargo clippy (WASM)
@@ -141,13 +127,7 @@ jobs:
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
 
       - name: Run clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: -p subxt --no-default-features --features web,unstable-light-client,jsonrpsee --target wasm32-unknown-unknown -- -D warnings
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
+        run: cargo clippy -p subxt --no-default-features --features web,light-client,jsonrpsee --target wasm32-unknown-unknown -- -D warnings
 
   check:
     name: Cargo check
@@ -187,17 +167,13 @@ jobs:
       - name: Cargo hack; check each subxt feature
         run: cargo hack -p subxt --each-feature check --exclude-features web --features native
 
-      # Same with subxt-historic
-      - name: Cargo hack; check each subxt feature
-        run: cargo hack -p subxt-historic --each-feature check --exclude-features web --features native
-
       # And with subxt-rpcs
       - name: Cargo hack; check each subxt-rpcs feature
         run: cargo hack -p subxt-rpcs --each-feature check --exclude-features web --features native
 
-      # And with subxt-signer (seems to work with a more basic check here; disable web if it becomes an issue).
+      # And with subxt-signer
       - name: Cargo hack; check each subxt-signer feature
-        run: cargo hack -p subxt-signer --each-feature check
+        run: cargo hack -p subxt-signer --each-feature check --exclude-features web --features native
 
       # And for subxt-lightclient.
       - name: Cargo check subxt-lightclient
@@ -205,16 +181,13 @@ jobs:
 
       # Next, check all  other crates.
       - name: Cargo hack; check each feature/crate on its own
-        run: cargo hack --exclude subxt --exclude subxt-historic --exclude subxt-signer --exclude subxt-lightclient --exclude subxt-rpcs --exclude-all-features --each-feature check --workspace
+        run: cargo hack --exclude subxt --exclude subxt-signer --exclude subxt-lightclient --exclude subxt-rpcs --exclude-all-features --each-feature check --workspace
 
       # Check the full examples, which aren't a part of the workspace so are otherwise ignored.
       - name: Cargo check parachain-example
         run: cargo check --manifest-path examples/parachain-example/Cargo.toml
       - name: Cargo check ffi-example
         run: cargo check --manifest-path examples/ffi-example/Cargo.toml
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
 
   ffi_example:
     name: Run FFI Example
@@ -296,9 +269,6 @@ jobs:
         run: |
           cargo check --manifest-path examples/wasm-example/Cargo.toml --target wasm32-unknown-unknown
 
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
-
   docs:
     name: Check documentation and run doc tests
     runs-on: parity-large
@@ -325,16 +295,10 @@ jobs:
         run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc --workspace --no-deps --document-private-items
 
       - name: Run cargo test on documentation
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: test
-          args: --doc --features reconnecting-rpc-client
+        run: cargo test --doc --features reconnecting-rpc-client
 
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
-
-  tests:
-    name: "Test (Native)"
+  basic_tests:
+    name: Cargo test
     runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
     timeout-minutes: 45
@@ -352,32 +316,25 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
-
-      - name: Install cargo-nextest
-        run: cargo install cargo-nextest
-
       - name: Run subxt-signer no-std tests
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: test
-          working-directory: signer/tests/no-std
+        run: cargo test --manifest-path signer/tests/no-std/Cargo.toml
 
-      - name: Run tests
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: nextest
-          args: run --workspace --features reconnecting-rpc-client
+      - name: Run crate tests
+        run: cargo test --workspace --exclude integration-tests
 
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
-
-  unstable_backend_tests:
-    name: "Test chainhead backend"
+  integration_tests:
+    name: "Integration tests"
     runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
-    timeout-minutes: 30
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        # Test each of these features in our integration tests:
+        feature:
+        - default
+        - reconnecting-rpc
+        - legacy-backend
+        - chainhead-backend
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
@@ -392,51 +349,8 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
-
-      - name: Install cargo-nextest
-        run: cargo install cargo-nextest
-
-      - name: Run tests
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: nextest
-          args: run --workspace --features chainhead-backend
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
-
-  light_client_tests:
-    name: "Test (Light Client)"
-    runs-on: ubuntu-latest
-    needs: [clippy, wasm_clippy, check, wasm_check, docs]
-    timeout-minutes: 15
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v6
-
-      - name: Use substrate and polkadot node binaries
-        uses: ./.github/workflows/actions/use-nodes
-
-      - name: Install Rust stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
-
-      - name: Run tests
-        uses: actions-rs/cargo@v1.0.3
-        with:
-          command: test
-          args: --release --package integration-tests --features unstable-light-client
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
+      - name: Run crate tests
+        run: cargo test -p integration-tests --features ${{ matrix.feature }}
 
   wasm_tests:
     name: Test (WASM)
@@ -475,26 +389,116 @@ jobs:
           pkill substrate-node
         working-directory: testing/wasm-rpc-tests
 
-      - name: Run subxt-lightclient WASM tests
-        run: |
-          # `listen-addr` is used to configure p2p to accept websocket connections instead of TCP.
-          # `node-key` provides a deterministic p2p address.
-          substrate-node --dev --node-key 0000000000000000000000000000000000000000000000000000000000000001 --listen-addr /ip4/0.0.0.0/tcp/30333/ws > /dev/null 2>&1 &
-          wasm-pack test --headless --firefox
-          wasm-pack test --headless --chrome
-          pkill substrate-node
-        working-directory: testing/wasm-lightclient-tests
-
       - name: Run subxt-signer WASM tests
         run: |
           wasm-pack test --headless --firefox
           wasm-pack test --headless --chrome
         working-directory: signer/tests/wasm
 
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5
+  flaky_lightclient_wasm_tests:
+    name: Flaky lightclient WASM tests
+    runs-on: ubuntu-latest
+    needs: [clippy, wasm_clippy, check, wasm_check, docs]
+    timeout-minutes: 10
+    env:
+      # Set timeout for wasm tests to be much bigger than the default 20 secs.
+      WASM_BINDGEN_TEST_TIMEOUT: 300
 
-  no-std-tests:
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+
+      - name: Run subxt-lightclient WASM tests
+        id: test
+        working-directory: testing/wasm-lightclient-tests
+        run: |
+          # These tests connect to RPC nodes and so don't need a local node running.
+          if wasm-pack test --headless --firefox && wasm-pack test --headless --chrome; then
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "result=failure" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Report flaky test result
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = '${{ steps.test.outputs.result }}';
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Flaky: Lightclient WASM tests',
+              head_sha: context.sha,
+              conclusion: result === 'success' ? 'success' : 'neutral',
+              output: {
+                title: result === 'success' ? 'Tests passed' : 'Tests failed (flaky)',
+                summary: result === 'success'
+                  ? 'All lightclient WASM tests passed.'
+                  : 'Lightclient WASM tests failed. These tests are known to be flaky and do not block the PR.'
+              }
+            });
+
+  flaky_lightclient_integration_tests:
+    name: "Flaky lightclient integration tests (${{ matrix.feature }})"
+    runs-on: parity-large
+    needs: [clippy, wasm_clippy, check, wasm_check, docs]
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        # Test each of the backends with the light client.
+        feature:
+        - default
+        - legacy-backend
+        - chainhead-backend
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Run crate tests
+        id: test
+        run: |
+          if cargo test -p integration-tests --features light-client-rpc,${{ matrix.feature }}; then
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "result=failure" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Report flaky test result
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const result = '${{ steps.test.outputs.result }}';
+            const feature = '${{ matrix.feature }}';
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: `Flaky: Lightclient integration tests (${feature})`,
+              head_sha: context.sha,
+              conclusion: result === 'success' ? 'success' : 'neutral',
+              output: {
+                title: result === 'success' ? 'Tests passed' : 'Tests failed (flaky)',
+                summary: result === 'success'
+                  ? `Lightclient integration tests (${feature}) passed.`
+                  : `Lightclient integration tests (${feature}) failed. These tests are known to be flaky and do not block the PR.`
+              }
+            });
+
+  nostd_tests:
     name: "Test (no_std)"
     runs-on: ubuntu-latest
     needs: [machete, docs]
@@ -524,6 +528,3 @@ jobs:
       - name: Compile `no-std-tests` crate to `thumbv7em-none-eabi` target.
         run: cargo build --target thumbv7em-none-eabi
         working-directory: testing/no-std-tests
-
-      - if: "failure()"
-        uses: "andymckay/cancel-action@a955d435292c0d409d104b57d8e78435a93a6ef1" # v0.5

@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -25,6 +25,7 @@ mod utils;
 use alloc::borrow::Cow;
 use alloc::collections::BTreeMap;
 use alloc::string::{String, ToString};
+use alloc::sync::Arc;
 use alloc::vec::Vec;
 use frame_decode::constants::{ConstantEntry, ConstantInfo, ConstantInfoError};
 use frame_decode::custom_values::{CustomValue, CustomValueInfo, CustomValueInfoError};
@@ -39,7 +40,6 @@ use frame_decode::storage::{StorageEntry, StorageInfo, StorageInfoError, Storage
 use frame_decode::view_functions::{
     ViewFunctionEntry, ViewFunctionInfo, ViewFunctionInfoError, ViewFunctionInput,
 };
-
 use hashbrown::HashMap;
 use scale_info::{PortableRegistry, Variant, form::PortableForm};
 use utils::{
@@ -58,10 +58,13 @@ pub use from::legacy::Error as LegacyFromError;
 
 type CustomMetadataInner = frame_metadata::v15::CustomMetadata<PortableForm>;
 
+/// Metadata is often passed around wrapped in an [`Arc`] so that it can be cloned.
+pub type ArcMetadata = Arc<Metadata>;
+
 /// Node metadata. This can be constructed by providing some compatible [`frame_metadata`]
 /// which is then decoded into this. We aim to preserve all of the existing information in
 /// the incoming metadata while optimizing the format a little for Subxt's use cases.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Metadata {
     /// Type registry containing all types used in the metadata.
     types: PortableRegistry,
@@ -192,6 +195,7 @@ impl frame_decode::storage::StorageTypeInfo for Metadata {
                 .default_value
                 .as_ref()
                 .map(|def| Cow::Borrowed(&**def)),
+            use_old_v9_storage_hashers: false,
         };
 
         Ok(info)
@@ -369,9 +373,22 @@ impl frame_decode::custom_values::CustomValueEntryInfo for Metadata {
 }
 
 impl Metadata {
-    /// This is essentially an alias for `<Metadata as codec::Decode>::decode(&mut bytes)`
-    pub fn decode_from(mut bytes: &[u8]) -> Result<Self, codec::Error> {
-        <Self as codec::Decode>::decode(&mut bytes)
+    /// Metadata tends to be passed around wrapped in an [`Arc`] so that it can be
+    /// cheaply cloned. This is a shorthand to return that.
+    pub fn arc(self) -> ArcMetadata {
+        Arc::new(self)
+    }
+
+    /// This is similar to`<Metadata as codec::Decode>::decode(&mut bytes)`, except it
+    /// is able to attempt to decode from several types.
+    ///
+    /// - The default assumption is that metadata is encoded as [`frame_metadata::RuntimeMetadataPrefixed`]. This is the
+    ///   expected format that metadata is encoded into, and what the [`codec::Decode`] impl tries.
+    /// - if this fails, we also try to decode as [`frame_metadata::RuntimeMetadata`].
+    /// - If this all fails, we finally will try to decode as [`frame_metadata::OpaqueMetadata`].
+    pub fn decode_from(bytes: &[u8]) -> Result<Self, codec::Error> {
+        let metadata = decode_runtime_metadata(bytes)?;
+        from_runtime_metadata(metadata)
     }
 
     /// Convert V16 metadata into [`Metadata`].
@@ -1243,7 +1260,16 @@ impl<'a> CustomValueMetadata<'a> {
     }
 }
 
-/// Decode SCALE encoded metadata.
+// Support decoding metadata from the "wire" format directly into this.
+impl codec::Decode for Metadata {
+    fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
+        let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(input)?;
+        from_runtime_metadata(metadata.1)
+    }
+}
+
+/// A utility function to decode SCALE encoded metadata. This is much like [`Metadata::decode_from`] but doesn't
+/// do the final step of converting the decoded metadata into [`Metadata`].
 ///
 /// - The default assumption is that metadata is encoded as [`frame_metadata::RuntimeMetadataPrefixed`]. This is the
 ///   expected format that metadata is encoded into.
@@ -1275,20 +1301,26 @@ pub fn decode_runtime_metadata(
     Err(err)
 }
 
-// Support decoding metadata from the "wire" format directly into this.
-// Errors may be lost in the case that the metadata content is somehow invalid.
-impl codec::Decode for Metadata {
-    fn decode<I: codec::Input>(input: &mut I) -> Result<Self, codec::Error> {
-        let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(input)?;
-        let metadata = match metadata.1 {
-            frame_metadata::RuntimeMetadata::V14(md) => md.try_into(),
-            frame_metadata::RuntimeMetadata::V15(md) => md.try_into(),
-            frame_metadata::RuntimeMetadata::V16(md) => md.try_into(),
-            _ => {
-                return Err("Metadata::decode failed: Cannot try_into() to Metadata: unsupported metadata version".into())
-            },
-        };
+/// Convert RuntimeMetadata into Metadata if possible.
+fn from_runtime_metadata(
+    metadata: frame_metadata::RuntimeMetadata,
+) -> Result<Metadata, codec::Error> {
+    let metadata = match metadata {
+        frame_metadata::RuntimeMetadata::V14(md) => md.try_into(),
+        frame_metadata::RuntimeMetadata::V15(md) => md.try_into(),
+        frame_metadata::RuntimeMetadata::V16(md) => md.try_into(),
+        _ => {
+            let reason = alloc::format!(
+                "RuntimeMetadata version {} cannot be decoded from",
+                metadata.version()
+            );
+            let e: codec::Error = "Metadata::decode failed: Cannot try_into() to Metadata: unsupported metadata version".into();
+            return Err(e.chain(reason));
+        }
+    };
 
-        metadata.map_err(|_| "Metadata::decode failed: Cannot try_into() to Metadata".into())
-    }
+    metadata.map_err(|reason: TryFromError| {
+        let e: codec::Error = "Metadata::decode failed: Cannot try_into() to Metadata".into();
+        e.chain(reason.to_string())
+    })
 }

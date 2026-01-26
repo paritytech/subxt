@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -13,7 +13,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 /// An interface to call the legacy RPC methods. This interface is instantiated with
-/// some `T: Config` trait which determines some of the types that the RPC methods will
+/// some `T: RpcConfig` trait which determines some of the types that the RPC methods will
 /// take or hand back.
 #[derive_where(Clone, Debug)]
 pub struct LegacyRpcMethods<T> {

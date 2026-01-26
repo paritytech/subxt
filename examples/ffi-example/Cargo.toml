@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 hex = "0.4.3"
 subxt = { path = "../../subxt" }
-subxt-signer = { path = "../../signer" }
+subxt-signer = { path = "../../signer", features = ["subxt"] }
 tokio = { version = "1", features = ["full"] }
 
 [lib]

@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -18,7 +18,7 @@
 //! which implement [`RpcClientT`] and can therefore be used to construct [`RpcClient`]s.
 //!
 //! - **jsonrpsee**: Enable an RPC client based on `jsonrpsee`.
-//! - **unstable-light-client**: Enable an RPC client which uses the Smoldot light client under
+//! - **light-client**: Enable an RPC client which uses the Smoldot light client under
 //!   the hood to communicate with the network of choice.
 //! - **reconnecting-rpc-client**: Enable an RPC client based on `jsonrpsee` which handles
 //!   reconnecting automatically in the event of network issues.

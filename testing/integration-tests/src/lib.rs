@@ -1,30 +1,33 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-#[cfg(all(feature = "unstable-light-client", feature = "chainhead-backend"))]
-compile_error!(
-    "The features 'unstable-light-client' and 'chainhead-backend' cannot be used together"
-);
+#![cfg(test)]
 
-#[cfg(test)]
-pub mod utils;
+#[cfg(all(legacy_backend, chainhead_backend))]
+compile_error!("The features 'legacy-backend' and 'chainhead-backend' cannot be used together");
+#[cfg(all(lightclient_rpc, reconnecting_rpc))]
+compile_error!("The features 'light-client-rpc' and 'reconnecting-rpc' cannot be used together");
 
-#[cfg(test)]
-#[cfg_attr(test, allow(unused_imports))]
+// Pub to avoid unused errors
+#[allow(unused)]
+mod utils;
+#[allow(unused)]
 use utils::*;
 
-#[cfg(any(
-    all(test, not(feature = "unstable-light-client")),
-    all(test, feature = "unstable-light-client-long-running")
-))]
+// We manually instantiate clients and connect to public nodes to test historic things,
+// so ensure we only run these tests once, when default rpc and backend is being tested.
+#[cfg(all(test, default_rpc, default_backend))]
+mod historic;
+
+// Run these against everything except lightclient RPC (it's too slow)
+#[cfg(all(test, not(lightclient_rpc)))]
 mod full_client;
 
-#[cfg(all(test, feature = "unstable-light-client"))]
+// Light client tests always use a lightclient RPC, but can run against any
+// backend selected by the feature flags.
+#[cfg(all(test, lightclient_rpc))]
 mod light_client;
-
-#[cfg(test)]
-use test_runtime::node_runtime;
 
 // We don't use this dependency, but it's here so that we
 // can enable logging easily if need be. Add this to a test
@@ -33,3 +36,13 @@ use test_runtime::node_runtime;
 // tracing_subscriber::fmt::init();
 #[cfg(test)]
 use tracing_subscriber as _;
+
+/// The test timeout is set to 1 second.
+/// However, the test is sleeping for 5 seconds.
+/// This must cause the test to panic.
+#[cfg(test)]
+#[utils::subxt_test(timeout = 1)]
+#[should_panic]
+async fn test_subxt_macro() {
+    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+}

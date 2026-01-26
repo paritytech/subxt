@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -17,7 +17,7 @@ use subxt_metadata::PalletMetadata;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the calls are generated.
-/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt` crate is located, e.g. `::subxt` when using subxt as a dependency.
 pub fn generate_calls(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -41,14 +41,14 @@ pub fn generate_calls(
                 CompositeIRKind::Named(named_fields) => named_fields
                     .iter()
                     .map(|(name, field)| {
-                        // Note: fn_arg_type this is relative the type path of the type alias when prefixed with `types::`, e.g. `set_max_code_size::New`
+                        // Note: fn_arg_type this is relative the type path of the type alias when prefixed with `super::`, e.g. `set_max_code_size::New`
                         let fn_arg_type = field.type_path.to_token_stream(type_gen.settings());
                         let call_arg = if field.is_boxed {
                             quote! { #name: #crate_path::alloc::boxed::Box::new(#name) }
                         } else {
                             quote! { #name }
                         };
-                        (quote!( #name: types::#fn_arg_type ), call_arg)
+                        (quote!( #name: super::#fn_arg_type ), call_arg)
                     })
                     .unzip(),
                 CompositeIRKind::NoFields => Default::default(),
@@ -81,9 +81,14 @@ pub fn generate_calls(
                 #struct_def
                 #alias_mod
 
-                impl #crate_path::blocks::StaticExtrinsic for #struct_name {
-                    const PALLET: &'static str = #pallet_name;
-                    const CALL: &'static str = #call_name;
+                impl #struct_name {
+                    const PALLET_NAME: &'static str = #pallet_name;
+                    const CALL_NAME: &'static str = #call_name;
+                }
+                impl #crate_path::extrinsics::DecodeAsExtrinsic for #struct_name {
+                    fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                        pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                    }
                 }
             };
 
@@ -92,11 +97,11 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> #crate_path::tx::payload::StaticPayload<types::#struct_name> {
-                    #crate_path::tx::payload::StaticPayload::new_static(
+                ) -> #crate_path::transactions::StaticPayload<super::#struct_name> {
+                    #crate_path::transactions::StaticPayload::new_static(
                         #pallet_name,
                         #call_name,
-                        types::#struct_name { #( #call_args, )* },
+                        super::#struct_name { #( #call_args, )* },
                         [#(#call_hash,)*]
                     )
                 }
@@ -123,18 +128,14 @@ pub fn generate_calls(
             use super::root_mod;
             use super::#types_mod_ident;
 
-            type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
+            #( #call_structs )*
 
-            pub mod types {
-                use super::#types_mod_ident;
+            pub mod api {
+                pub struct TransactionApi;
 
-                #( #call_structs )*
-            }
-
-            pub struct TransactionApi;
-
-            impl TransactionApi {
-                #( #call_fns )*
+                impl TransactionApi {
+                    #( #call_fns )*
+                }
             }
         }
     })

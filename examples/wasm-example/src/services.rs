@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::fmt::Write;
 use subxt::ext::codec::{Compact, Encode};
-use subxt::{self, OnlineClient, PolkadotConfig};
+use subxt::{self, OnlineClient, OnlineClientAtBlock, PolkadotConfig};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use yew::{AttrValue, Callback};
@@ -16,19 +16,23 @@ pub(crate) async fn fetch_constant_block_length() -> Result<String, subxt::Error
     let api = OnlineClient::<PolkadotConfig>::new().await?;
     let constant_query = polkadot::constants().system().block_length();
 
-    let value = api.constants().at(&constant_query)?;
+    let value = api
+        .at_current_block()
+        .await?
+        .constants()
+        .entry(&constant_query)?;
     Ok(format!("{value:?}"))
 }
 
 pub(crate) async fn fetch_events_dynamically() -> Result<Vec<String>, subxt::Error> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
-    let events = api.events().at_latest().await?;
+    let events = api.at_current_block().await?.events().fetch().await?;
     let mut event_strings = Vec::<String>::new();
     for event in events.iter() {
         let event = event?;
         let pallet = event.pallet_name();
-        let variant = event.variant_name();
-        let field_values = event.decode_as_fields::<subxt::dynamic::Value>()?;
+        let variant = event.event_name();
+        let field_values = event.decode_fields_unchecked_as::<subxt::dynamic::Value>()?;
         event_strings.push(format!("{pallet}::{variant}: {field_values}"));
     }
     Ok(event_strings)
@@ -40,21 +44,25 @@ pub(crate) async fn subscribe_to_finalized_blocks(
 ) -> Result<(), subxt::Error> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
     // Subscribe to all finalized blocks:
-    let mut blocks_sub = api.blocks().subscribe_finalized().await?;
+    let mut blocks_sub = api.stream_blocks().await?;
     while let Some(block) = blocks_sub.next().await {
         let block = block?;
         let mut output = String::new();
         writeln!(output, "Block #{}:", block.header().number).ok();
         writeln!(output, "  Hash: {}", block.hash()).ok();
         writeln!(output, "  Extrinsics:").ok();
-        let extrinsics = block.extrinsics().await?;
+
+        let at_block = block.at().await?;
+        let extrinsics = at_block.extrinsics().fetch().await?;
         for ext in extrinsics.iter() {
+            let ext = ext?;
+
             let idx = ext.index();
             let events = ext.events().await?;
             let bytes_hex = format!("0x{}", hex::encode(ext.bytes()));
 
             // See the API docs for more ways to decode extrinsics:
-            let decoded_ext = ext.as_root_extrinsic::<polkadot::Call>();
+            let decoded_ext = ext.decode_call_data_as::<polkadot::Call>();
 
             writeln!(output, "    Extrinsic #{idx}:").ok();
             writeln!(output, "      Bytes: {bytes_hex}").ok();
@@ -65,8 +73,8 @@ pub(crate) async fn subscribe_to_finalized_blocks(
                 let evt = evt?;
 
                 let pallet_name = evt.pallet_name();
-                let event_name = evt.variant_name();
-                let event_values = evt.decode_as_fields::<subxt::dynamic::Value>()?;
+                let event_name = evt.event_name();
+                let event_values = evt.decode_fields_unchecked_as::<subxt::dynamic::Value>()?;
 
                 writeln!(output, "        {pallet_name}_{event_name}").ok();
                 writeln!(output, "          {}", event_values).ok();
@@ -122,15 +130,18 @@ fn encode_then_hex<E: Encode>(input: &E) -> String {
 /// Some parameters are hard-coded here and not taken from the partial_extrinsic itself (mortality_checkpoint, era, tip).
 pub async fn extension_signature_for_extrinsic(
     call_data: &[u8],
-    api: &OnlineClient<PolkadotConfig>,
+    api: &OnlineClientAtBlock<PolkadotConfig>,
     account_nonce: u64,
     account_source: String,
     account_address: String,
 ) -> Result<Vec<u8>, anyhow::Error> {
-    let genesis_hash = encode_then_hex(&api.genesis_hash());
+    let genesis_hash = encode_then_hex(
+        &api.genesis_hash()
+            .expect("Should always exist via OnlineClient"),
+    );
     // These numbers aren't SCALE encoded; their bytes are just converted to hex:
-    let spec_version = to_hex(&api.runtime_version().spec_version.to_be_bytes());
-    let transaction_version = to_hex(&api.runtime_version().transaction_version.to_be_bytes());
+    let spec_version = to_hex(&api.spec_version().to_be_bytes());
+    let transaction_version = to_hex(&api.transaction_version().to_be_bytes());
     let nonce = to_hex(&account_nonce.to_be_bytes());
     // If you construct a mortal transaction, then this block hash needs to correspond
     // to the block number passed to `Era::mortal()`.
@@ -138,7 +149,7 @@ pub async fn extension_signature_for_extrinsic(
     let era = encode_then_hex(&subxt::utils::Era::Immortal);
     let method = to_hex(call_data);
     let signed_extensions: Vec<String> = api
-        .metadata()
+        .metadata_ref()
         .extrinsic()
         .transaction_extensions_by_version(0)
         .unwrap()

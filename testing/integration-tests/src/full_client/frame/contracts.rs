@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -15,8 +15,9 @@ use crate::{
 use subxt::ext::futures::StreamExt;
 use subxt::{
     Error,
+    client::OnlineClientAtBlockImpl,
     config::{Config, HashFor},
-    tx::TxProgress,
+    transactions::TransactionProgress,
     utils::MultiAddress,
 };
 use subxt_signer::sr25519::{self, dev};
@@ -63,6 +64,8 @@ impl ContractsTestContext {
         let signed_extrinsic = self
             .client()
             .tx()
+            .await
+            .unwrap()
             .create_signed(&upload_tx, &self.signer, Default::default())
             .await?;
 
@@ -74,8 +77,8 @@ impl ContractsTestContext {
             .await?;
 
         let code_stored = events
-            .find_first::<events::CodeStored>()?
-            .ok_or_else(|| Error::other_str("Failed to find a CodeStored event"))?;
+            .find_first::<events::CodeStored>()
+            .ok_or_else(|| Error::other_str("Failed to find a CodeStored event"))??;
 
         Ok(code_stored.code_hash)
     }
@@ -98,6 +101,8 @@ impl ContractsTestContext {
         let signed_extrinsic = self
             .client()
             .tx()
+            .await
+            .unwrap()
             .create_signed(&instantiate_tx, &self.signer, Default::default())
             .await?;
 
@@ -109,14 +114,14 @@ impl ContractsTestContext {
             .await?;
 
         let code_stored = events
-            .find_first::<events::CodeStored>()?
-            .ok_or_else(|| Error::other_str("Failed to find a CodeStored event"))?;
+            .find_first::<events::CodeStored>()
+            .ok_or_else(|| Error::other_str("Failed to find a CodeStored event"))??;
         let instantiated = events
-            .find_first::<events::Instantiated>()?
-            .ok_or_else(|| Error::other_str("Failed to find a Instantiated event"))?;
+            .find_first::<events::Instantiated>()
+            .ok_or_else(|| Error::other_str("Failed to find a Instantiated event"))??;
         let _extrinsic_success = events
-            .find_first::<system::events::ExtrinsicSuccess>()?
-            .ok_or_else(|| Error::other_str("Failed to find a ExtrinsicSuccess event"))?;
+            .find_first::<system::events::ExtrinsicSuccess>()
+            .ok_or_else(|| Error::other_str("Failed to find a ExtrinsicSuccess event"))??;
 
         tracing::info!("  Code hash: {:?}", code_stored.code_hash);
         tracing::info!("  Contract address: {:?}", instantiated.contract);
@@ -145,6 +150,8 @@ impl ContractsTestContext {
         let signed_extrinsic = self
             .client()
             .tx()
+            .await
+            .unwrap()
             .create_signed(&instantiate_tx, &self.signer, Default::default())
             .await?;
         let result = signed_extrinsic
@@ -156,8 +163,8 @@ impl ContractsTestContext {
 
         tracing::info!("Instantiate result: {:?}", result);
         let instantiated = result
-            .find_first::<events::Instantiated>()?
-            .ok_or_else(|| Error::other_str("Failed to find a Instantiated event"))?;
+            .find_first::<events::Instantiated>()
+            .ok_or_else(|| Error::other_str("Failed to find a Instantiated event"))??;
 
         Ok(instantiated.contract)
     }
@@ -166,7 +173,7 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<TxProgress<TestConfig, TestClient>, Error> {
+    ) -> Result<TransactionProgress<TestConfig, OnlineClientAtBlockImpl<TestConfig>>, Error> {
         tracing::info!("call: {:?}", contract);
         let call_tx = node_runtime::tx().contracts().call(
             MultiAddress::Id(contract),
@@ -182,6 +189,8 @@ impl ContractsTestContext {
         let result = self
             .client()
             .tx()
+            .await
+            .unwrap()
             .sign_and_submit_then_watch_default(&call_tx, &self.signer)
             .await?;
 
@@ -218,13 +227,13 @@ async fn tx_instantiate() {
 async fn tx_call() {
     let cxt = ContractsTestContext::init().await;
     let (_, contract) = cxt.instantiate_with_code().await.unwrap();
-
-    let storage_at = cxt.client().storage().at_latest().await.unwrap();
+    let at_block = cxt.client().at_current_block().await.unwrap();
 
     let contract_info_addr = node_runtime::storage().contracts().contract_info_of();
 
-    let contract_info = storage_at
-        .fetch(&contract_info_addr, (contract.clone(),))
+    let contract_info = at_block
+        .storage()
+        .fetch(&contract_info_addr, (contract,))
         .await
         .unwrap();
 
@@ -233,7 +242,11 @@ async fn tx_call() {
         "Contract info is not ok, is: {contract_info:?}"
     );
 
-    let mut iter = storage_at.iter(contract_info_addr, ()).await.unwrap();
+    let mut iter = at_block
+        .storage()
+        .iter(contract_info_addr, ())
+        .await
+        .unwrap();
 
     let mut keys_and_values = Vec::new();
     while let Some(kv) = iter.next().await {

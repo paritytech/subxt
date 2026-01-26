@@ -1,0 +1,40 @@
+//! Construct and submit a transaction.
+use subxt::{Error, OnlineClient, PolkadotConfig};
+use subxt_signer::sr25519::dev;
+
+// Generate an interface that we can use from the node's metadata.
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata_small.scale")]
+mod polkadot {}
+
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    // Create a new API client, configured to talk to Polkadot nodes.
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+    // Almost all actions are performed at an explicit block. Here we use
+    // the current block at the time of running this.
+    let at_block = api.at_current_block().await?;
+
+    // Build a balance transfer extrinsic.
+    let dest = dev::bob().public_key().into();
+    let balance_transfer_tx = polkadot::transactions()
+        .balances()
+        .transfer_allow_death(dest, 10_000);
+
+    // Submit the balance transfer extrinsic from Alice, and wait for it to be successful
+    // and in a finalized block. We get back the extrinsic events if all is well.
+    let from = dev::alice();
+    let events = at_block
+        .transactions()
+        .sign_and_submit_then_watch_default(&balance_transfer_tx, &from)
+        .await?
+        .wait_for_finalized_success()
+        .await?;
+
+    // Find a Transfer event and print it.
+    if let Some(event) = events.find_first::<polkadot::balances::events::Transfer>() {
+        println!("Balance transfer success: {event:?}");
+    }
+
+    Ok(())
+}

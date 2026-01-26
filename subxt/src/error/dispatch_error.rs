@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -6,7 +6,7 @@
 //! something fails in trying to submit/execute a transaction.
 
 use super::{DispatchErrorDecodeError, ModuleErrorDecodeError, ModuleErrorDetailsError};
-use crate::metadata::Metadata;
+use crate::metadata::ArcMetadata;
 use core::fmt::Debug;
 use scale_decode::{DecodeAsType, TypeResolver, visitor::DecodeAsTypeResult};
 use std::{borrow::Cow, marker::PhantomData};
@@ -133,7 +133,7 @@ pub enum TransactionalError {
 #[derive(Clone, thiserror::Error)]
 #[non_exhaustive]
 pub struct ModuleError {
-    metadata: Metadata,
+    metadata: ArcMetadata,
     /// Bytes representation:
     ///  - `bytes[0]`:   pallet index
     ///  - `bytes[1]`:   error index
@@ -242,7 +242,7 @@ impl DispatchError {
     #[doc(hidden)]
     pub fn decode_from<'a>(
         bytes: impl Into<Cow<'a, [u8]>>,
-        metadata: Metadata,
+        metadata: ArcMetadata,
     ) -> Result<Self, DispatchErrorDecodeError> {
         let bytes = bytes.into();
         let dispatch_error_ty_id = metadata

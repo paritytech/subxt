@@ -1,8 +1,8 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::{TestContext, node_runtime, subxt_test, test_context};
+use crate::{node_runtime, subxt_test, test_context};
 use codec::Decode;
 use frame_metadata::{
     RuntimeMetadata, RuntimeMetadataPrefixed,
@@ -17,15 +17,21 @@ use scale_info::{
     build::{Fields, Variants},
     meta_type,
 };
-use subxt::{Metadata, OfflineClient, OnlineClient, SubstrateConfig};
+use std::sync::Arc;
+use subxt::{
+    Metadata, OfflineClient, OfflineClientAtBlock, OnlineClient, SubstrateConfig,
+    config::substrate::SpecVersionForRange,
+};
 
 async fn fetch_v15_metadata(client: &OnlineClient<SubstrateConfig>) -> RuntimeMetadataV15 {
-    let payload = node_runtime::apis().metadata().metadata_at_version(15);
+    let payload = node_runtime::runtime_apis()
+        .metadata()
+        .metadata_at_version(15);
     let runtime_metadata_bytes = client
-        .runtime_api()
-        .at_latest()
+        .at_current_block()
         .await
         .unwrap()
+        .runtime_apis()
         .call(payload)
         .await
         .unwrap()
@@ -40,12 +46,20 @@ async fn fetch_v15_metadata(client: &OnlineClient<SubstrateConfig>) -> RuntimeMe
     v15_metadata
 }
 
-async fn metadata_to_api(metadata: Metadata, ctx: &TestContext) -> OfflineClient<SubstrateConfig> {
-    OfflineClient::new(
-        ctx.client().genesis_hash(),
-        ctx.client().runtime_version(),
-        metadata,
-    )
+/// Take some metadata and construct an offline Subxt client just as an easy way to test
+/// various validation functions it exposes and assert things about the given metadata.
+async fn metadata_to_api(metadata: Metadata) -> OfflineClientAtBlock<SubstrateConfig> {
+    let config = SubstrateConfig::builder()
+        .set_metadata_for_spec_versions([(0, Arc::new(metadata))])
+        .set_spec_version_for_block_ranges([SpecVersionForRange {
+            block_range: 0..u64::MAX,
+            spec_version: 0,
+            transaction_version: 0,
+        }])
+        .build();
+
+    let offline_client = OfflineClient::new_with_config(config);
+    offline_client.at_block(0u64).unwrap()
 }
 
 fn v15_to_metadata(v15: RuntimeMetadataV15) -> Metadata {
@@ -142,7 +156,7 @@ async fn constant_values_are_not_validated() {
     // the metadata downloaded by the API itself.
     let api_from_original_metadata = {
         let metadata_before = v15_to_metadata(v15_metadata.clone());
-        metadata_to_api(metadata_before, &ctx).await
+        metadata_to_api(metadata_before).await
     };
 
     let deposit_addr = node_runtime::constants().balances().existential_deposit();
@@ -151,7 +165,7 @@ async fn constant_values_are_not_validated() {
     assert!(
         api_from_original_metadata
             .constants()
-            .at(&deposit_addr)
+            .entry(&deposit_addr)
             .is_ok()
     );
 
@@ -172,16 +186,16 @@ async fn constant_values_are_not_validated() {
     // Build our API again, this time from the metadata we've tweaked.
     let api_from_modified_metadata = {
         let metadata_before = v15_to_metadata(v15_metadata);
-        metadata_to_api(metadata_before, &ctx).await
+        metadata_to_api(metadata_before).await
     };
 
     assert!(node_runtime::is_codegen_valid_for(
-        &api_from_modified_metadata.metadata()
+        api_from_modified_metadata.metadata_ref()
     ));
     assert!(
         api_from_modified_metadata
             .constants()
-            .at(&deposit_addr)
+            .entry(&deposit_addr)
             .is_ok()
     );
 }
@@ -190,13 +204,14 @@ async fn constant_values_are_not_validated() {
 async fn calls_check() {
     let ctx = test_context().await;
     let api = ctx.client();
+    let api_at_block = api.at_current_block().await.unwrap();
 
     let unbond_tx = node_runtime::tx().staking().unbond(123_456_789_012_345);
     let withdraw_unbonded_addr = node_runtime::tx().staking().withdraw_unbonded(10);
 
     // Ensure that `Unbond` and `WinthdrawUnbonded` calls are compatible before altering the metadata.
-    assert!(api.tx().validate(&unbond_tx).is_ok());
-    assert!(api.tx().validate(&withdraw_unbonded_addr).is_ok());
+    assert!(api_at_block.tx().validate(&unbond_tx).is_ok());
+    assert!(api_at_block.tx().validate(&withdraw_unbonded_addr).is_ok());
 
     // Reconstruct the `Staking` call as is.
     struct CallRec;
@@ -228,7 +243,7 @@ async fn calls_check() {
         ..default_pallet()
     };
     let metadata = pallets_to_metadata(vec![pallet]);
-    let api = metadata_to_api(metadata, &ctx).await;
+    let api = metadata_to_api(metadata).await;
 
     // The calls should still be valid with this new type info:
     assert!(api.tx().validate(&unbond_tx).is_ok());
@@ -265,7 +280,7 @@ async fn calls_check() {
         ..default_pallet()
     };
     let metadata = pallets_to_metadata(vec![pallet]);
-    let api = metadata_to_api(metadata, &ctx).await;
+    let api = metadata_to_api(metadata).await;
 
     // Unbond call should fail, while withdraw_unbonded remains compatible.
     assert!(api.tx().validate(&unbond_tx).is_err());
@@ -276,13 +291,14 @@ async fn calls_check() {
 async fn storage_check() {
     let ctx = test_context().await;
     let api = ctx.client();
+    let api_at_block = api.at_current_block().await.unwrap();
 
     let tx_count_addr = node_runtime::storage().system().extrinsic_count();
     let tx_len_addr = node_runtime::storage().system().all_extrinsics_len();
 
     // Ensure that `ExtrinsicCount` and `EventCount` storages are compatible before altering the metadata.
-    assert!(api.storage().validate(&tx_count_addr).is_ok());
-    assert!(api.storage().validate(&tx_len_addr).is_ok());
+    assert!(api_at_block.storage().validate(&tx_count_addr).is_ok());
+    assert!(api_at_block.storage().validate(&tx_len_addr).is_ok());
 
     // Reconstruct the storage.
     let storage = PalletStorageMetadata {
@@ -310,7 +326,7 @@ async fn storage_check() {
         ..default_pallet()
     };
     let metadata = pallets_to_metadata(vec![pallet]);
-    let api = metadata_to_api(metadata, &ctx).await;
+    let api = metadata_to_api(metadata).await;
 
     // The addresses should still validate:
     assert!(api.storage().validate(&tx_count_addr).is_ok());
@@ -343,7 +359,7 @@ async fn storage_check() {
         ..default_pallet()
     };
     let metadata = pallets_to_metadata(vec![pallet]);
-    let api = metadata_to_api(metadata, &ctx).await;
+    let api = metadata_to_api(metadata).await;
 
     // The count route should fail now; the other will be ok still.
     assert!(api.storage().validate(&tx_count_addr).is_err());

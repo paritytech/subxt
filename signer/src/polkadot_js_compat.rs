@@ -1,4 +1,4 @@
-// Copyright 2019-2024 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -10,7 +10,6 @@ use crypto_secretbox::{
     aead::{Aead, KeyInit},
 };
 use serde::Deserialize;
-use subxt_core::utils::AccountId32;
 
 use thiserror::Error as DeriveError;
 
@@ -75,6 +74,9 @@ struct KeyringPairJson {
     /// The ss58 encoded address or the hex-encoded version (the latter is for ETH-compat chains)
     address: AccountId32,
 }
+
+// Re-export this type which is used above.
+pub use subxt_utils_accountid32::AccountId32;
 
 // This can be removed once split_array is stabilized.
 fn slice_to_u32(slice: &[u8]) -> u32 {
@@ -155,7 +157,7 @@ impl KeyringPairJson {
 
         // Ensure keys are correct.
         if keypair.public_key().0 != public_key
-            || keypair.public_key().to_account_id() != self.address
+            || AccountId32(keypair.public_key().0) != self.address
         {
             return Err(Error::InvalidKeys);
         }

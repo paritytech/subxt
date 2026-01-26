@@ -1,35 +1,28 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::utils::node_runtime;
 use crate::{subxt_test, test_context, utils::consume_initial_blocks};
 use codec::{Compact, Decode, Encode};
-use futures::StreamExt;
-
-#[cfg(fullclient)]
-use crate::utils::node_runtime;
-
-#[cfg(fullclient)]
 use subxt::{
+    client::OnlineClientAtBlockImpl,
     config::{
         DefaultExtrinsicParamsBuilder, SubstrateConfig,
         transaction_extensions::{ChargeAssetTxPayment, CheckMortality, CheckNonce},
     },
     utils::Era,
 };
-
-#[cfg(fullclient)]
 use subxt_signer::sr25519::dev;
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn block_subscriptions_are_consistent_with_eachother() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let mut all_sub = api.blocks().subscribe_all().await?;
-    let mut best_sub = api.blocks().subscribe_best().await?;
-    let mut finalized_sub = api.blocks().subscribe_finalized().await?;
+    let mut all_sub = api.stream_all_blocks().await?;
+    let mut best_sub = api.stream_best_blocks().await?;
+    let mut finalized_sub = api.stream_blocks().await?;
 
     let mut finals = vec![];
     let mut bests = vec![];
@@ -91,22 +84,24 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let mut sub = api.blocks().subscribe_finalized().await?;
+    let mut sub = api.stream_blocks().await?;
     consume_initial_blocks(&mut sub).await;
 
     // check that the finalized block reported lines up with the `latest_finalized_block_ref`.
     for _ in 0..2 {
-        let header = sub.next().await.unwrap()?;
-        let finalized_hash = api.backend().latest_finalized_block_ref().await?.hash();
-        assert_eq!(header.hash(), finalized_hash);
+        let block = sub.next().await.unwrap()?;
+        let finalized_hash = api.at_current_block().await?.block_hash();
+        assert_eq!(block.hash(), finalized_hash);
     }
 
     Ok(())
 }
 
+// This test only uses legacy RPCs; only run once for default backend + rpc client.
+#[cfg(all(default_backend, default_rpc))]
 #[subxt_test]
 async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
-    use subxt::backend::legacy;
+    use futures::StreamExt;
 
     let ctx = test_context().await;
     let rpc = ctx.legacy_rpc_methods().await;
@@ -126,8 +121,11 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::Error> {
         .map(|(_, r)| r);
 
     // This should spot any gaps in the middle and fill them back in.
-    let all_finalized_blocks =
-        legacy::subscribe_to_block_headers_filling_in_gaps(rpc, some_finalized_blocks, None);
+    let all_finalized_blocks = subxt::backend::subscribe_to_block_headers_filling_in_gaps(
+        rpc,
+        some_finalized_blocks,
+        None,
+    );
     futures::pin_mut!(all_finalized_blocks);
 
     // Iterate the block headers, making sure we get them all in order.
@@ -155,13 +153,16 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     let api = ctx.client();
     let rpc = ctx.legacy_rpc_methods().await;
 
-    let mut sub = api.blocks().subscribe_best().await?;
+    let mut sub = api.stream_best_blocks().await?;
 
     let block = sub.next().await.unwrap()?;
-    let rt = block.runtime_api().await;
+    let at_block = block.at().await?;
 
     // get metadata via raw state_call.
-    let meta_bytes = rt.call_raw("Metadata_metadata", None).await?;
+    let meta_bytes = at_block
+        .runtime_apis()
+        .call_raw("Metadata_metadata", None)
+        .await?;
     let (_, meta1): (Compact<u32>, frame_metadata::RuntimeMetadataPrefixed) =
         Decode::decode(&mut &*meta_bytes)?;
 
@@ -174,7 +175,6 @@ async fn runtime_api_call() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn fetch_block_and_decode_extrinsic_details() {
     let ctx = test_context().await;
@@ -190,6 +190,8 @@ async fn fetch_block_and_decode_extrinsic_details() {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&tx, &alice, Default::default())
         .await
         .unwrap();
@@ -203,28 +205,20 @@ async fn fetch_block_and_decode_extrinsic_details() {
         .unwrap();
 
     // Now, separately, download that block. Let's see what it contains..
-    let block_hash = in_block.block_hash();
-    let block = api.blocks().at(block_hash).await.unwrap();
+    let at_block = in_block.at().await.unwrap();
 
-    // Ensure that we can clone the block.
-    let _ = block.clone();
+    // Ensure that we can clone the "at block" API.
+    let _ = at_block.clone();
 
-    let extrinsics = block.extrinsics().await.unwrap();
-
-    assert_eq!(extrinsics.block_hash(), block_hash);
+    let extrinsics = at_block.extrinsics().fetch().await.unwrap();
 
     // `.has` should work and find a transfer call.
-    assert!(
-        extrinsics
-            .has::<node_runtime::balances::calls::types::TransferAllowDeath>()
-            .unwrap()
-    );
+    assert!(extrinsics.has::<node_runtime::balances::calls::TransferAllowDeath>());
 
     // `.find_first` should similarly work to find the transfer call:
     assert!(
         extrinsics
-            .find_first::<node_runtime::balances::calls::types::TransferAllowDeath>()
-            .unwrap()
+            .find_first::<node_runtime::balances::calls::TransferAllowDeath>()
             .is_some()
     );
 
@@ -234,19 +228,20 @@ async fn fetch_block_and_decode_extrinsic_details() {
     let mut timestamp = None;
 
     for tx in block_extrinsics {
-        tx.as_root_extrinsic::<node_runtime::Call>().unwrap();
+        let tx = tx.unwrap();
 
-        if let Some(ext) = tx
-            .as_extrinsic::<node_runtime::timestamp::calls::types::Set>()
-            .unwrap()
-        {
+        // We should be able to decode all exts into our root type:
+        tx.decode_call_data_as::<node_runtime::Call>().unwrap();
+
+        if let Some(ext) = tx.decode_call_data_fields_as::<node_runtime::timestamp::calls::Set>() {
+            let ext = ext.unwrap();
             timestamp = Some((ext, tx.is_signed()));
         }
 
-        if let Some(ext) = tx
-            .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
-            .unwrap()
+        if let Some(ext) =
+            tx.decode_call_data_fields_as::<node_runtime::balances::calls::TransferAllowDeath>()
         {
+            let ext = ext.unwrap();
             balance = Some((ext, tx.is_signed()));
         }
     }
@@ -270,7 +265,8 @@ async fn fetch_block_and_decode_extrinsic_details() {
 async fn submit_extrinsic_and_get_it_back(
     api: &subxt::OnlineClient<SubstrateConfig>,
     params: subxt::config::DefaultExtrinsicParamsBuilder<SubstrateConfig>,
-) -> subxt::blocks::ExtrinsicDetails<SubstrateConfig, subxt::OnlineClient<SubstrateConfig>> {
+) -> subxt::extrinsics::Extrinsic<'static, SubstrateConfig, OnlineClientAtBlockImpl<SubstrateConfig>>
+{
     let alice = dev::alice();
     let bob = dev::bob();
 
@@ -280,6 +276,8 @@ async fn submit_extrinsic_and_get_it_back(
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&tx, &alice, params.build())
         .await
         .unwrap();
@@ -292,13 +290,20 @@ async fn submit_extrinsic_and_get_it_back(
         .await
         .unwrap();
 
-    let block_hash = in_block.block_hash();
-    let block = api.blocks().at(block_hash).await.unwrap();
-    let extrinsics = block.extrinsics().await.unwrap();
-    extrinsics.iter().find(|e| e.is_signed()).unwrap()
+    let ext_hash = in_block.extrinsic_hash();
+    let at_block = in_block.at().await.unwrap();
+    let extrinsics = at_block.extrinsics().fetch().await.unwrap();
+    let extrinsic = extrinsics
+        .iter()
+        .find_map(|e| match e {
+            Ok(e) if e.hash() == ext_hash => Some(e),
+            _ => None,
+        })
+        .unwrap();
+
+    extrinsic.into_owned()
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn decode_transaction_extensions_from_blocks() {
     let ctx = test_context().await;
@@ -378,7 +383,6 @@ async fn decode_transaction_extensions_from_blocks() {
     }
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn decode_block_mortality() {
     let ctx = test_context().await;

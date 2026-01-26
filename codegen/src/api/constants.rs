@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -32,7 +32,7 @@ use super::CodegenError;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the constants are generated.
-/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt` crate is located, e.g. `::subxt` when using subxt as a dependency.
 pub fn generate_constants(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -68,8 +68,8 @@ pub fn generate_constants(
 
             Ok(quote! {
                 #docs
-                pub fn #fn_name(&self) -> #crate_path::constants::address::StaticAddress<#return_ty> {
-                    #crate_path::constants::address::StaticAddress::new_static(
+                pub fn #fn_name(&self) -> #crate_path::constants::StaticAddress<#return_ty> {
+                    #crate_path::constants::StaticAddress::new_static(
                         #pallet_name,
                         #constant_name,
                         [#(#constant_hash,)*]

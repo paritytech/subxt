@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -83,7 +83,7 @@ impl RuntimeGenerator {
 
         Ok(quote! {
             #( #item_mod_attrs )*
-            #[allow(dead_code, unused_imports, non_camel_case_types, unreachable_patterns)]
+            #[allow(dead_code, missing_docs, unused_imports, non_camel_case_types, unreachable_patterns)]
             #[allow(clippy::all)]
             #[allow(rustdoc::broken_intra_doc_links)]
             pub mod #mod_ident {
@@ -247,7 +247,7 @@ impl RuntimeGenerator {
 
         Ok(quote! {
             #( #item_mod_attrs )*
-            #[allow(dead_code, unused_imports, non_camel_case_types, unreachable_patterns)]
+            #[allow(dead_code, missing_docs, unused_imports, non_camel_case_types, unreachable_patterns)]
             #[allow(clippy::all)]
             #[allow(rustdoc::broken_intra_doc_links)]
             pub mod #mod_ident {
@@ -287,11 +287,16 @@ impl RuntimeGenerator {
                     StorageApi
                 }
 
+                /// This is an alias to [`Self::transactions()`].
                 pub fn tx() -> TransactionApi {
                     TransactionApi
                 }
 
-                pub fn apis() -> runtime_apis::RuntimeApi {
+                pub fn transactions() -> TransactionApi {
+                    TransactionApi
+                }
+
+                pub fn runtime_apis() -> runtime_apis::RuntimeApi {
                     runtime_apis::RuntimeApi
                 }
 
@@ -301,7 +306,7 @@ impl RuntimeGenerator {
                     ViewFunctionsApi
                 }
 
-                pub fn custom() -> CustomValuesApi {
+                pub fn custom_values() -> CustomValuesApi {
                     CustomValuesApi
                 }
 
@@ -328,8 +333,8 @@ impl RuntimeGenerator {
                 pub struct TransactionApi;
                 impl TransactionApi {
                     #(
-                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi {
-                            #pallets_with_calls::calls::TransactionApi
+                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::api::TransactionApi {
+                            #pallets_with_calls::calls::api::TransactionApi
                         }
                     )*
                 }

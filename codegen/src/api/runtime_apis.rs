@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -183,11 +183,11 @@ fn generate_runtime_api(
                 pub fn #method_name(
                     &self,
                     #(#input_args),*
-                ) -> #crate_path::runtime_api::payload::StaticPayload<
+                ) -> #crate_path::runtime_apis::StaticPayload<
                     (#(#input_tuple_types,)*),
                     #method_name::output::Output
                 > {
-                    #crate_path::runtime_api::payload::StaticPayload::new_static(
+                    #crate_path::runtime_apis::StaticPayload::new_static(
                         #trait_name_str,
                         #method_name_str,
                         (#(#input_param_names,)*),

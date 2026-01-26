@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -16,13 +16,14 @@
 //! The provided RPC client implementations can be used natively (with the default `native` feature
 //! flag) or in WASM based web apps (with the `web` feature flag).
 
-#![cfg_attr(docsrs, feature(doc_cfg))]
-
-#[cfg(any(
-    all(feature = "web", feature = "native"),
-    not(any(feature = "web", feature = "native"))
-))]
-compile_error!("subxt-rpcs: exactly one of the 'web' and 'native' features should be used.");
+#[cfg(all(feature = "web", feature = "native"))]
+compile_error!(
+    "subxt-rpcs: exactly one of the 'web' and 'native' features should be used, but both have been enabled."
+);
+#[cfg(not(any(feature = "web", feature = "native")))]
+compile_error!(
+    "subxt-rpcs: exactly one of the 'web' and 'native' features should be used, but none have been enabled."
+);
 
 mod macros;
 
@@ -62,23 +63,6 @@ impl<T> Hash for T where T: serde::de::DeserializeOwned + serde::Serialize {}
 pub trait AccountId: serde::Serialize {}
 impl<T> AccountId for T where T: serde::Serialize {}
 
-// When the subxt feature is enabled, ensure that any valid `subxt::Config`
-// is also a valid `RpcConfig`.
-#[cfg(feature = "subxt")]
-mod impl_config {
-    use super::*;
-    use subxt_core::config::HashFor;
-
-    impl<T> RpcConfig for T
-    where
-        T: subxt_core::Config,
-    {
-        type Header = T::Header;
-        type Hash = HashFor<T>;
-        type AccountId = T::AccountId;
-    }
-}
-
 /// This encapsulates any errors that could be emitted in this crate.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
@@ -96,6 +80,9 @@ pub enum Error {
     /// calls made to them in the meantime until the connection is re-established.
     #[error("RPC error: the connection was lost ({0}); reconnect automatically initiated")]
     DisconnectedWillReconnect(String),
+    /// Cannot serialize the request.
+    #[error("RPC error: cannot serialize request: {0}")]
+    Serialization(serde_json::Error),
     /// Cannot deserialize the response.
     #[error("RPC error: cannot deserialize response: {0}")]
     Deserialization(serde_json::Error),

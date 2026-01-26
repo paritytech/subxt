@@ -54,11 +54,13 @@ pub extern "C" fn do_transfer(dest_hex: *const c_char, amount: u64) -> i32 {
 
     // Submit and wait for finalize
     let res: Result<(), subxt::Error> = tokio_rt().block_on(async {
-        let progress = client
+        client
             .tx()
+            .await?
             .sign_and_submit_then_watch_default(&tx, &signer)
+            .await?
+            .wait_for_finalized_success()
             .await?;
-        progress.wait_for_finalized_success().await?;
         Ok(())
     });
 

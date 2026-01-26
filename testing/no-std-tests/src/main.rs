@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -62,13 +62,5 @@ fn compile_test() {
     // let message = b"Hello!";
     // let _signature = keypair.sign(message);
     // let _public_key = keypair.public_key();
-
-    // Subxt Core compiles:
-    let _era = subxt_core::utils::Era::Immortal;
 }
 
-#[subxt_macro::subxt(
-    runtime_metadata_path = "../../artifacts/polkadot_metadata_full.scale",
-    crate = "::subxt_core"
-)]
-pub mod polkadot {}

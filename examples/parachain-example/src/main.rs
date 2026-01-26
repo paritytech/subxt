@@ -1,7 +1,6 @@
 use subxt::{
-    PolkadotConfig,
     utils::{AccountId32, MultiAddress},
-    OnlineClient,
+    OnlineClient, PolkadotConfig,
 };
 use subxt_signer::sr25519::dev::{self};
 
@@ -36,6 +35,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .create(COLLECTION_ID, alice.clone());
     let _collection_creation_events = api
         .tx()
+        .await?
         .sign_and_submit_then_watch_default(&collection_creation_tx, &alice_pair_signer)
         .await
         .map(|e| {
@@ -52,6 +52,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
         .mint(COLLECTION_ID, NTF_ID, alice.clone());
     let _nft_creation_events = api
         .tx()
+        .await?
         .sign_and_submit_then_watch_default(&nft_creation_tx, &alice_pair_signer)
         .await
         .map(|e| {
@@ -65,9 +66,9 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     // check in storage, that alice is the official owner of the NFT:
     let nft_owner_storage_query = statemint::storage().uniques().asset();
     let nft_storage_details = api
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await?
+        .storage()
         .fetch(nft_owner_storage_query, (COLLECTION_ID, NTF_ID))
         .await?
         .decode()?;

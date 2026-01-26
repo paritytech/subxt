@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -287,15 +287,11 @@ pub mod dev {
 // Make `Keypair` usable to sign transactions in Subxt. This is optional so that
 // `subxt-signer` can be used entirely independently of Subxt.
 #[cfg(feature = "subxt")]
-#[cfg_attr(docsrs, doc(cfg(feature = "subxt")))]
 mod subxt_compat {
     use super::*;
-
-    use subxt_core::{
-        Config,
-        tx::signer::Signer as SignerT,
-        utils::{AccountId32, MultiAddress, MultiSignature},
-    };
+    use subxt::Config;
+    use subxt::transactions::Signer as SignerT;
+    use subxt::utils::{AccountId32, MultiAddress, MultiSignature};
 
     impl From<Signature> for MultiSignature {
         fn from(value: Signature) -> Self {

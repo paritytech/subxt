@@ -2,7 +2,7 @@ use clap::Args;
 use color_eyre::eyre::eyre;
 use indoc::{formatdoc, writedoc};
 use scale_typegen_description::type_description;
-use subxt::metadata::{Metadata, PalletMetadata};
+use subxt::metadata::{ArcMetadata, PalletMetadata};
 
 use crate::utils::{Indent, SyntaxHighlight, first_paragraph_of_docs, format_scale_value};
 
@@ -14,7 +14,7 @@ pub struct ConstantsSubcommand {
 pub fn explore_constants(
     command: ConstantsSubcommand,
     pallet_metadata: PalletMetadata,
-    metadata: &Metadata,
+    metadata: ArcMetadata,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();

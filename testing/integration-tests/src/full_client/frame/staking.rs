@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -48,6 +48,8 @@ async fn validate_with_stash_account() {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&tx, &alice_stash, Default::default())
         .await
         .unwrap();
@@ -74,6 +76,8 @@ async fn validate_not_possible_for_controller_account() -> Result<(), Error> {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&tx, &alice, Default::default())
         .await?;
 
@@ -111,6 +115,8 @@ async fn nominate_with_stash_account() {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&tx, &alice_stash, Default::default())
         .await
         .unwrap();
@@ -138,13 +144,12 @@ async fn nominate_not_possible_for_controller_account() -> Result<(), Error> {
 
     let signed_extrinsic = api
         .tx()
+        .await?
         .create_signed(&tx, &alice, Default::default())
-        .await
-        .unwrap();
+        .await?;
     let nomination = signed_extrinsic
         .submit_and_watch()
-        .await
-        .unwrap()
+        .await?
         .wait_for_finalized_success()
         .await;
 
@@ -177,20 +182,21 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&nominate_tx, &alice_stash, Default::default())
         .await?;
     signed_extrinsic
         .submit_and_watch()
-        .await
-        .unwrap()
+        .await?
         .wait_for_finalized_success()
         .await?;
 
     let ledger_addr = node_runtime::storage().staking().ledger();
     let ledger = api
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await?
+        .storage()
         .fetch(ledger_addr, (alice_stash.public_key().to_account_id(),))
         .await?
         .decode()?;
@@ -200,6 +206,7 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
 
     let signed_extrinsic = api
         .tx()
+        .await?
         .create_signed(&chill_tx, &alice, Default::default())
         .await?;
 
@@ -223,6 +230,8 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
 
     let signed_extrinsic = api
         .tx()
+        .await
+        .unwrap()
         .create_signed(&chill_tx, &alice_stash, Default::default())
         .await?;
     let is_chilled = signed_extrinsic
@@ -230,7 +239,7 @@ async fn chill_works_for_stash_only() -> Result<(), Error> {
         .await?
         .wait_for_finalized_success()
         .await?
-        .has::<staking::events::Chilled>()?;
+        .has::<staking::events::Chilled>();
 
     assert!(is_chilled);
 
@@ -250,6 +259,7 @@ async fn tx_bond() -> Result<(), Error> {
 
     let signed_extrinsic = api
         .tx()
+        .await?
         .create_signed(&bond_tx, &alice, Default::default())
         .await?;
     let bond = signed_extrinsic
@@ -261,6 +271,7 @@ async fn tx_bond() -> Result<(), Error> {
 
     let signed_extrinsic = api
         .tx()
+        .await?
         .create_signed(&bond_tx, &alice, Default::default())
         .await?;
 
@@ -288,7 +299,11 @@ async fn storage_history_depth() -> Result<(), Error> {
     let ctx = test_context().await;
     let api = ctx.client();
     let history_depth_addr = node_runtime::constants().staking().history_depth();
-    let history_depth = api.constants().at(&history_depth_addr)?;
+    let history_depth = api
+        .at_current_block()
+        .await?
+        .constants()
+        .entry(&history_depth_addr)?;
     assert_eq!(history_depth, 84);
     Ok(())
 }
@@ -299,9 +314,9 @@ async fn storage_current_era() -> Result<(), Error> {
     let api = ctx.client();
     let current_era_addr = node_runtime::storage().staking().current_era();
     let _current_era = api
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await?
+        .storage()
         .fetch(current_era_addr, ())
         .await?
         .decode()?;
@@ -314,9 +329,9 @@ async fn storage_era_reward_points() -> Result<(), Error> {
     let api = ctx.client();
     let reward_points_addr = node_runtime::storage().staking().eras_reward_points();
     let current_era_result = api
-        .storage()
-        .at_latest()
+        .at_current_block()
         .await?
+        .storage()
         .fetch(reward_points_addr, (0,))
         .await?
         .decode();

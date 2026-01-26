@@ -1,33 +1,26 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 //! This module exposes a legacy backend implementation, which relies
 //! on the legacy RPC API methods.
 
-use self::rpc_methods::TransactionStatus as RpcTransactionStatus;
+mod descendant_streams;
+
 use crate::backend::utils::{retry, retry_stream};
 use crate::backend::{
-    Backend, BlockRef, RuntimeVersion, StorageResponse, StreamOf, StreamOfResults,
-    TransactionStatus,
+    Backend, BlockRef, StorageResponse, StreamOf, StreamOfResults, TransactionStatus,
 };
-use crate::config::{Config, HashFor, Header};
+use crate::config::{Config, HashFor, Hasher, Header, RpcConfigFor};
 use crate::error::BackendError;
 use async_trait::async_trait;
+use codec::Encode;
+use descendant_streams::{StorageFetchDescendantKeysStream, StorageFetchDescendantValuesStream};
 use futures::TryStreamExt;
-use futures::{Future, FutureExt, Stream, StreamExt, future, future::Either, stream};
-use std::collections::VecDeque;
-use std::pin::Pin;
-use std::task::{Context, Poll};
+use futures::{Future, Stream, StreamExt, future, future::Either, stream};
 use subxt_rpcs::RpcClient;
-
-/// Re-export legacy RPC types and methods from [`subxt_rpcs::methods::legacy`].
-pub mod rpc_methods {
-    pub use subxt_rpcs::methods::legacy::*;
-}
-
-// Expose the RPC methods.
-pub use rpc_methods::LegacyRpcMethods;
+use subxt_rpcs::methods::legacy::NumberOrHex;
+use subxt_rpcs::methods::legacy::{LegacyRpcMethods, TransactionStatus as RpcTransactionStatus};
 
 /// Configure and build an [`LegacyBackend`].
 pub struct LegacyBackendBuilder<T> {
@@ -72,7 +65,7 @@ impl<T: Config> LegacyBackendBuilder<T> {
 #[derive(Debug)]
 pub struct LegacyBackend<T> {
     storage_page_size: u32,
-    methods: LegacyRpcMethods<T>,
+    methods: LegacyRpcMethods<RpcConfigFor<T>>,
 }
 
 impl<T> Clone for LegacyBackend<T> {
@@ -94,7 +87,7 @@ impl<T: Config> LegacyBackend<T> {
 impl<T: Config> super::sealed::Sealed for LegacyBackend<T> {}
 
 #[async_trait]
-impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
+impl<T: Config> Backend<T> for LegacyBackend<T> {
     async fn storage_fetch_values(
         &self,
         keys: Vec<Vec<u8>>,
@@ -103,7 +96,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         fn get_entry<T: Config>(
             key: Vec<u8>,
             at: HashFor<T>,
-            methods: LegacyRpcMethods<T>,
+            methods: LegacyRpcMethods<RpcConfigFor<T>>,
         ) -> impl Future<Output = Result<Option<StorageResponse>, BackendError>> {
             retry(move || {
                 let methods = methods.clone();
@@ -137,15 +130,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         key: Vec<u8>,
         at: HashFor<T>,
     ) -> Result<StreamOfResults<Vec<u8>>, BackendError> {
-        let keys = StorageFetchDescendantKeysStream {
-            at,
+        let keys = StorageFetchDescendantKeysStream::new(
+            self.methods.clone(),
             key,
-            storage_page_size: self.storage_page_size,
-            methods: self.methods.clone(),
-            done: Default::default(),
-            keys_fut: Default::default(),
-            pagination_start_key: None,
-        };
+            at,
+            self.storage_page_size,
+        );
 
         let keys = keys.flat_map(|keys| {
             match keys {
@@ -168,26 +158,35 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         key: Vec<u8>,
         at: HashFor<T>,
     ) -> Result<StreamOfResults<StorageResponse>, BackendError> {
-        let keys_stream = StorageFetchDescendantKeysStream {
-            at,
+        let values_stream = StorageFetchDescendantValuesStream::new(
+            self.methods.clone(),
             key,
-            storage_page_size: self.storage_page_size,
-            methods: self.methods.clone(),
-            done: Default::default(),
-            keys_fut: Default::default(),
-            pagination_start_key: None,
-        };
+            at,
+            self.storage_page_size,
+        );
 
-        Ok(StreamOf(Box::pin(StorageFetchDescendantValuesStream {
-            keys: keys_stream,
-            results_fut: None,
-            results: Default::default(),
-        })))
+        Ok(StreamOf(Box::pin(values_stream)))
     }
 
     async fn genesis_hash(&self) -> Result<HashFor<T>, BackendError> {
         retry(|| async {
             let hash = self.methods.genesis_hash().await?;
+            Ok(hash)
+        })
+        .await
+    }
+
+    async fn block_number_to_hash(
+        &self,
+        number: u64,
+    ) -> Result<Option<BlockRef<HashFor<T>>>, BackendError> {
+        retry(|| async {
+            let number_or_hash = NumberOrHex::Number(number);
+            let hash = self
+                .methods
+                .chain_get_block_hash(Some(number_or_hash))
+                .await?
+                .map(BlockRef::from_hash);
             Ok(hash)
         })
         .await
@@ -221,56 +220,6 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         .await
     }
 
-    async fn current_runtime_version(&self) -> Result<RuntimeVersion, BackendError> {
-        retry(|| async {
-            let details = self.methods.state_get_runtime_version(None).await?;
-            Ok(RuntimeVersion {
-                spec_version: details.spec_version,
-                transaction_version: details.transaction_version,
-            })
-        })
-        .await
-    }
-
-    async fn stream_runtime_version(
-        &self,
-    ) -> Result<StreamOfResults<RuntimeVersion>, BackendError> {
-        let methods = self.methods.clone();
-
-        let retry_sub = retry_stream(move || {
-            let methods = methods.clone();
-
-            Box::pin(async move {
-                let sub = methods.state_subscribe_runtime_version().await?;
-                let sub = sub.map_err(|e| e.into()).map(|r| {
-                    r.map(|v| RuntimeVersion {
-                        spec_version: v.spec_version,
-                        transaction_version: v.transaction_version,
-                    })
-                });
-                Ok(StreamOf(Box::pin(sub)))
-            })
-        })
-        .await?;
-
-        // For runtime version subscriptions we omit the `DisconnectedWillReconnect` error
-        // because the once it resubscribes it will emit the latest runtime version.
-        //
-        // Thus, it's technically possible that a runtime version can be missed if
-        // two runtime upgrades happen in quick succession, but this is very unlikely.
-        let stream = retry_sub.filter(|r| {
-            let mut keep = true;
-            if let Err(e) = r {
-                if e.is_disconnected_will_reconnect() {
-                    keep = false;
-                }
-            }
-            async move { keep }
-        });
-
-        Ok(StreamOf(Box::pin(stream)))
-    }
-
     async fn stream_all_block_headers(
         &self,
         hasher: T::Hasher,
@@ -278,11 +227,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
         let methods = self.methods.clone();
         let retry_sub = retry_stream(move || {
             let methods = methods.clone();
+            let hasher = hasher.clone();
             Box::pin(async move {
                 let sub = methods.chain_subscribe_all_heads().await?;
                 let sub = sub.map_err(|e| e.into()).map(move |r| {
                     r.map(|h| {
-                        let hash = h.hash_with(hasher);
+                        let hash = hasher.hash(&h.encode());
                         (h, BlockRef::from_hash(hash))
                     })
                 });
@@ -302,11 +252,12 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
         let retry_sub = retry_stream(move || {
             let methods = methods.clone();
+            let hasher = hasher.clone();
             Box::pin(async move {
                 let sub = methods.chain_subscribe_new_heads().await?;
                 let sub = sub.map_err(|e| e.into()).map(move |r| {
                     r.map(|h| {
-                        let hash = h.hash_with(hasher);
+                        let hash = hasher.hash(&h.encode());
                         (h, BlockRef::from_hash(hash))
                     })
                 });
@@ -326,6 +277,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 
         let retry_sub = retry_stream(move || {
             let this = this.clone();
+            let hasher = hasher.clone();
             Box::pin(async move {
                 let sub = this.methods.chain_subscribe_finalized_heads().await?;
 
@@ -334,7 +286,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 let last_finalized_block_num = this
                     .block_header(last_finalized_block_ref.hash())
                     .await?
-                    .map(|h| h.number().into());
+                    .map(|h| h.number());
 
                 // Fill in any missing blocks, because the backend may not emit every finalized block; just the latest ones which
                 // are finalized each time.
@@ -345,7 +297,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
                 );
                 let sub = sub.map(move |r| {
                     r.map(|h| {
-                        let hash = h.hash_with(hasher);
+                        let hash = hasher.hash(&h.encode());
                         (h, BlockRef::from_hash(hash))
                     })
                 });
@@ -439,7 +391,7 @@ impl<T: Config + Send + Sync + 'static> Backend<T> for LegacyBackend<T> {
 /// without notice in a patch release.
 #[doc(hidden)]
 pub fn subscribe_to_block_headers_filling_in_gaps<T, S, E>(
-    methods: LegacyRpcMethods<T>,
+    methods: LegacyRpcMethods<RpcConfigFor<T>>,
     sub: S,
     mut last_block_num: Option<u64>,
 ) -> impl Stream<Item = Result<T::Header, BackendError>> + Send
@@ -456,7 +408,7 @@ where
         };
 
         // We want all previous details up to, but not including this current block num.
-        let end_block_num = header.number().into();
+        let end_block_num = header.number();
 
         // This is one after the last block we returned details for last time.
         let start_block_num = last_block_num.map(|n| n + 1).unwrap_or(end_block_num);
@@ -481,182 +433,4 @@ where
         // Return a combination of any previous headers plus the new header.
         Either::Right(previous_headers.chain(stream::once(async { Ok(header) })))
     })
-}
-
-/// This provides a stream of values given some prefix `key`. It
-/// internally manages pagination and such.
-#[allow(clippy::type_complexity)]
-pub struct StorageFetchDescendantKeysStream<T: Config> {
-    methods: LegacyRpcMethods<T>,
-    key: Vec<u8>,
-    at: HashFor<T>,
-    // How many entries to ask for each time.
-    storage_page_size: u32,
-    // What key do we start paginating from? None = from the beginning.
-    pagination_start_key: Option<Vec<u8>>,
-    // Keys, future and cached:
-    keys_fut:
-        Option<Pin<Box<dyn Future<Output = Result<Vec<Vec<u8>>, BackendError>> + Send + 'static>>>,
-    // Set to true when we're done:
-    done: bool,
-}
-
-impl<T: Config> std::marker::Unpin for StorageFetchDescendantKeysStream<T> {}
-
-impl<T: Config> Stream for StorageFetchDescendantKeysStream<T> {
-    type Item = Result<Vec<Vec<u8>>, BackendError>;
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        let mut this = self.as_mut();
-        loop {
-            // We're already done.
-            if this.done {
-                return Poll::Ready(None);
-            }
-
-            // Poll future to fetch next keys.
-            if let Some(mut keys_fut) = this.keys_fut.take() {
-                let Poll::Ready(keys) = keys_fut.poll_unpin(cx) else {
-                    this.keys_fut = Some(keys_fut);
-                    return Poll::Pending;
-                };
-
-                match keys {
-                    Ok(mut keys) => {
-                        if this.pagination_start_key.is_some()
-                            && keys.first() == this.pagination_start_key.as_ref()
-                        {
-                            // Currently, Smoldot returns the "start key" as the first key in the input
-                            // (see https://github.com/smol-dot/smoldot/issues/1692), whereas Substrate doesn't.
-                            // We don't expect the start key to be returned either (since it was the last key of prev
-                            // iteration), so remove it if we see it. This `remove()` method isn't very efficient but
-                            // this will be a non issue with the RPC V2 APIs or if Smoldot aligns with Substrate anyway.
-                            keys.remove(0);
-                        }
-                        if keys.is_empty() {
-                            // No keys left; we're done!
-                            this.done = true;
-                            return Poll::Ready(None);
-                        }
-                        // The last key is where we want to paginate from next time.
-                        this.pagination_start_key = keys.last().cloned();
-                        // return all of the keys from this run.
-                        return Poll::Ready(Some(Ok(keys)));
-                    }
-                    Err(e) => {
-                        if e.is_disconnected_will_reconnect() {
-                            this.keys_fut = Some(keys_fut);
-                            continue;
-                        }
-
-                        // Error getting keys? Return it.
-                        return Poll::Ready(Some(Err(e)));
-                    }
-                }
-            }
-
-            // Else, we don't have a fut to get keys yet so start one going.
-            let methods = this.methods.clone();
-            let key = this.key.clone();
-            let at = this.at;
-            let storage_page_size = this.storage_page_size;
-            let pagination_start_key = this.pagination_start_key.clone();
-            let keys_fut = async move {
-                let keys = methods
-                    .state_get_keys_paged(
-                        &key,
-                        storage_page_size,
-                        pagination_start_key.as_deref(),
-                        Some(at),
-                    )
-                    .await?;
-                Ok(keys)
-            };
-            this.keys_fut = Some(Box::pin(keys_fut));
-        }
-    }
-}
-
-/// This provides a stream of values given some stream of keys.
-#[allow(clippy::type_complexity)]
-pub struct StorageFetchDescendantValuesStream<T: Config> {
-    // Stream of keys.
-    keys: StorageFetchDescendantKeysStream<T>,
-    // Then we track the future to get the values back for each key:
-    results_fut: Option<
-        Pin<
-            Box<
-                dyn Future<Output = Result<Option<VecDeque<(Vec<u8>, Vec<u8>)>>, BackendError>>
-                    + Send
-                    + 'static,
-            >,
-        >,
-    >,
-    // And finally we return each result back one at a time:
-    results: VecDeque<(Vec<u8>, Vec<u8>)>,
-}
-
-impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
-    type Item = Result<StorageResponse, BackendError>;
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        let mut this = self.as_mut();
-        loop {
-            // If we have results back, return them one by one
-            if let Some((key, value)) = this.results.pop_front() {
-                let res = StorageResponse { key, value };
-                return Poll::Ready(Some(Ok(res)));
-            }
-
-            // If we're waiting on the next results then poll that future:
-            if let Some(mut results_fut) = this.results_fut.take() {
-                match results_fut.poll_unpin(cx) {
-                    Poll::Ready(Ok(Some(results))) => {
-                        this.results = results;
-                        continue;
-                    }
-                    Poll::Ready(Ok(None)) => {
-                        // No values back for some keys? Skip.
-                        continue;
-                    }
-                    Poll::Ready(Err(e)) => return Poll::Ready(Some(Err(e))),
-                    Poll::Pending => {
-                        this.results_fut = Some(results_fut);
-                        return Poll::Pending;
-                    }
-                }
-            }
-
-            match this.keys.poll_next_unpin(cx) {
-                Poll::Ready(Some(Ok(keys))) => {
-                    let methods = this.keys.methods.clone();
-                    let at = this.keys.at;
-                    let results_fut = async move {
-                        let keys = keys.iter().map(|k| &**k);
-                        let values = retry(|| async {
-                            let res = methods
-                                .state_query_storage_at(keys.clone(), Some(at))
-                                .await?;
-                            Ok(res)
-                        })
-                        .await?;
-                        let values: VecDeque<_> = values
-                            .into_iter()
-                            .flat_map(|v| {
-                                v.changes.into_iter().filter_map(|(k, v)| {
-                                    let v = v?;
-                                    Some((k.0, v.0))
-                                })
-                            })
-                            .collect();
-                        Ok(Some(values))
-                    };
-
-                    this.results_fut = Some(Box::pin(results_fut));
-                    continue;
-                }
-                Poll::Ready(Some(Err(e))) => return Poll::Ready(Some(Err(e))),
-                Poll::Ready(None) => return Poll::Ready(None),
-                Poll::Pending => return Poll::Pending,
-            }
-        }
-    }
 }

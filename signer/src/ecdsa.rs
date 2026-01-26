@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -297,10 +297,9 @@ pub mod dev {
 #[cfg(feature = "subxt")]
 mod subxt_compat {
     use super::*;
-
-    use subxt_core::config::Config;
-    use subxt_core::tx::signer::Signer as SignerT;
-    use subxt_core::utils::{AccountId32, MultiAddress, MultiSignature};
+    use subxt::config::Config;
+    use subxt::transactions::Signer as SignerT;
+    use subxt::utils::{AccountId32, MultiAddress, MultiSignature};
 
     impl From<Signature> for MultiSignature {
         fn from(value: Signature) -> Self {

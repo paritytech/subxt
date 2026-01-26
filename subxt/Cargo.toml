@@ -11,7 +11,7 @@ readme = "../README.md"
 repository.workspace = true
 documentation.workspace = true
 homepage.workspace = true
-description = "Submit extrinsics (transactions) to a substrate node via RPC"
+description = "Interact with Substrate based chains on the Polkadot Network"
 keywords = ["parity", "substrate", "blockchain"]
 
 [lints]
@@ -21,6 +21,14 @@ workspace = true
 # For dev and documentation reasons we enable more features than are often desired.
 # it's recommended to use `--no-default-features` and then select what you need.
 default = ["jsonrpsee", "native"]
+
+# Features that we expect to be enabled for documentation.
+docs = [
+    "default", 
+    "light-client",
+    "runtime",
+    "reconnecting-rpc-client",
+]
 
 # Enable this for native (ie non web/wasm builds).
 # Exactly 1 of "web" and "native" is expected.
@@ -68,7 +76,7 @@ unstable-metadata = []
 
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
-unstable-light-client = ["subxt-lightclient", "subxt-rpcs/unstable-light-client"]
+light-client = ["subxt-lightclient", "subxt-rpcs/light-client"]
 
 # Activate this to expose the ability to generate metadata from Wasm runtime files.
 runtime-wasm-path = ["subxt-macro/runtime-wasm-path"]
@@ -78,18 +86,23 @@ async-trait = { workspace = true }
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 derive-where = { workspace = true }
 scale-info = { workspace = true, features = ["default"] }
+scale-info-legacy = { workspace = true }
+scale-type-resolver = { workspace = true }
 scale-value = { workspace = true, features = ["default"] }
 scale-bits = { workspace = true, features = ["default"] }
 scale-decode = { workspace = true, features = ["default"] }
 scale-encode = { workspace = true, features = ["default"] }
 futures = { workspace = true }
 hex = { workspace = true }
+impl-serde = { workspace = true, default-features = false }
+keccak-hash = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true, features = ["default", "raw_value"] }
 sp-crypto-hashing = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
+frame-decode = { workspace = true, features = ["legacy-types"] }
 either = { workspace = true }
 web-time = { workspace = true }
 
@@ -101,13 +114,10 @@ jsonrpsee = { workspace = true, optional = true, features = ["jsonrpsee-types"] 
 
 # Other subxt crates we depend on.
 subxt-macro = { workspace = true }
-subxt-core = { workspace = true, features = ["std"] }
-subxt-metadata = { workspace = true, features = ["std"] }
+subxt-metadata = { workspace = true, features = ["std", "legacy"] }
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
-subxt-rpcs = { workspace = true, features = ["subxt"] }
-
-# For parsing urls to disallow insecure schemes
-url = { workspace = true }
+subxt-rpcs = { workspace = true }
+subxt-utils-accountid32 = { workspace = true }
 
 # Included if "native" feature is enabled
 tokio-util = { workspace = true, features = ["compat"], optional = true }
@@ -127,8 +137,8 @@ sp-core = { workspace = true, features = ["std"] }
 sp-keyring = { workspace = true, features = ["std"] }
 sp-runtime = { workspace = true, features = ["std"] }
 assert_matches = { workspace = true }
-subxt-signer = { path = "../signer", features = ["unstable-eth"] }
-subxt-rpcs = { workspace = true, features = ["subxt", "mock-rpc-client"] }
+subxt-signer = { workspace = true, features = ["unstable-eth", "subxt", "sr25519"] }
+subxt-rpcs = { workspace = true, features = ["mock-rpc-client"] }
 # Tracing subscriber is useful for light-client examples to ensure that
 # the `bootNodes` and chain spec are configured correctly. If all is fine, then
 # the light-client will emit INFO logs with
@@ -141,23 +151,17 @@ hyper = { workspace = true }
 http-body = { workspace = true }
 
 [[example]]
-name = "light_client_basic"
-path = "examples/light_client_basic.rs"
-required-features = ["unstable-light-client", "jsonrpsee"]
+name = "light_client"
+path = "examples/light_client.rs"
+required-features = ["light-client", "jsonrpsee"]
 
 [[example]]
-name = "light_client_local_node"
-path = "examples/light_client_local_node.rs"
-required-features = ["unstable-light-client", "jsonrpsee", "native"]
-
-[[example]]
-name = "setup_reconnecting_rpc_client"
-path = "examples/setup_reconnecting_rpc_client.rs"
+name = "rpc_client"
+path = "examples/rpc_client.rs"
 required-features = ["reconnecting-rpc-client"]
 
 [package.metadata.docs.rs]
-features = ["default", "unstable-light-client"]
-rustdoc-args = ["--cfg", "docsrs"]
+features = ["docs"]
 
 [package.metadata.playground]
-features = ["default", "unstable-light-client"]
+features = ["default", "light-client"]

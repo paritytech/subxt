@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -326,7 +326,7 @@ pub fn validate_url_security(url: Option<&Url>, allow_insecure: bool) -> color_e
     let Some(url) = url else {
         return Ok(());
     };
-    match subxt::utils::url_is_secure(url.as_str()) {
+    match subxt::rpcs::utils::url_is_secure(url.as_str()) {
         Ok(is_secure) => {
             if !allow_insecure && !is_secure {
                 bail!(

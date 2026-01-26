@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -167,11 +167,11 @@ fn generate_pallet_view_function(
         pub fn #view_function_name_ident(
             &self,
             #(#input_args),*
-        ) -> #crate_path::view_functions::payload::StaticPayload<
+        ) -> #crate_path::view_functions::StaticPayload<
             (#(#input_tuple_types,)*),
             #view_function_name_ident::output::Output
         > {
-            #crate_path::view_functions::payload::StaticPayload::new_static(
+            #crate_path::view_functions::StaticPayload::new_static(
                 #pallet_name,
                 #view_function_name_str,
                 (#(#input_param_names,)*),

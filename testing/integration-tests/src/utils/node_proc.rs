@@ -1,16 +1,19 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 use std::cell::RefCell;
 use std::ffi::{OsStr, OsString};
 use std::sync::Arc;
-use std::time::Duration;
 use substrate_runner::SubstrateNode;
-use subxt::backend::rpc::reconnecting_rpc_client::{ExponentialBackoff, RpcClientBuilder};
 use subxt::{
-    Config, OnlineClient,
-    backend::{chain_head, legacy, rpc},
+    backend::{ChainHeadBackend, CombinedBackend, LegacyBackend},
+    client::OnlineClient,
+    config::{Config, RpcConfigFor},
+    rpcs::{
+        client::RpcClient,
+        methods::{chain_head, legacy},
+    },
 };
 
 // The URL that we'll connect to for our tests comes from SUBXT_TEXT_HOST env var,
@@ -22,6 +25,7 @@ const URL_ENV_VAR: &str = "SUBXT_TEST_URL";
 fn is_url_provided() -> bool {
     std::env::var(URL_ENV_VAR).is_ok()
 }
+#[allow(unused)]
 fn get_url(port: Option<u16>) -> String {
     match (std::env::var(URL_ENV_VAR).ok(), port) {
         (Some(host), None) => host,
@@ -43,9 +47,12 @@ pub struct TestNodeProcess<R: Config> {
     // Lazily construct these when asked for.
     chainhead_backend: RefCell<Option<OnlineClient<R>>>,
     legacy_backend: RefCell<Option<OnlineClient<R>>>,
+    combined_backend: RefCell<Option<OnlineClient<R>>>,
 
-    rpc_client: rpc::RpcClient,
+    // This is the "default" client handed back based on the selected features.
     client: OnlineClient<R>,
+    rpc_client: RpcClient,
+    config: R,
 }
 
 impl<R> TestNodeProcess<R>
@@ -53,11 +60,11 @@ where
     R: Config,
 {
     /// Construct a builder for spawning a test node process.
-    pub fn build<P>(paths: &[P]) -> TestNodeProcessBuilder
+    pub fn build<P>(config: R, paths: &[P]) -> TestNodeProcessBuilder<R>
     where
         P: AsRef<OsStr> + Clone,
     {
-        TestNodeProcessBuilder::new(paths)
+        TestNodeProcessBuilder::new(config, paths)
     }
 
     pub async fn restart(mut self) -> Self {
@@ -68,27 +75,27 @@ where
             self
         })
         .await
-        .expect("to succeed")
+        .expect("restarting should succeed")
     }
 
     /// Hand back an RPC client connected to the test node which exposes the legacy RPC methods.
-    pub async fn legacy_rpc_methods(&self) -> legacy::LegacyRpcMethods<R> {
+    pub async fn legacy_rpc_methods(&self) -> legacy::LegacyRpcMethods<RpcConfigFor<R>> {
         let rpc_client = self.rpc_client.clone();
         legacy::LegacyRpcMethods::new(rpc_client)
     }
 
     /// Hand back an RPC client connected to the test node which exposes the unstable RPC methods.
-    pub async fn chainhead_rpc_methods(&self) -> chain_head::ChainHeadRpcMethods<R> {
+    pub async fn chainhead_rpc_methods(&self) -> chain_head::ChainHeadRpcMethods<RpcConfigFor<R>> {
         let rpc_client = self.rpc_client.clone();
         chain_head::ChainHeadRpcMethods::new(rpc_client)
     }
 
     /// Always return a client using the chainhead backend.
     /// Only use for comparing backends; use [`TestNodeProcess::client()`] normally,
-    /// which enables us to run each test against both backends.
+    /// which enables us to run each test against all backends.
     pub async fn chainhead_backend(&self) -> OnlineClient<R> {
         if self.chainhead_backend.borrow().is_none() {
-            let c = build_chainhead_backend(self.rpc_client.clone())
+            let c = build_chainhead_backend(self.config.clone(), self.rpc_client.clone())
                 .await
                 .unwrap();
             self.chainhead_backend.replace(Some(c));
@@ -98,13 +105,28 @@ where
 
     /// Always return a client using the legacy backend.
     /// Only use for comparing backends; use [`TestNodeProcess::client()`] normally,
-    /// which enables us to run each test against both backends.
+    /// which enables us to run each test against all backends.
     pub async fn legacy_backend(&self) -> OnlineClient<R> {
         if self.legacy_backend.borrow().is_none() {
-            let c = build_legacy_backend(self.rpc_client.clone()).await.unwrap();
+            let c = build_legacy_backend(self.config.clone(), self.rpc_client.clone())
+                .await
+                .unwrap();
             self.legacy_backend.replace(Some(c));
         }
         self.legacy_backend.borrow().as_ref().unwrap().clone()
+    }
+
+    /// Always return a client using the combined backend.
+    /// Only use for comparing backends; use [`TestNodeProcess::client()`] normally,
+    /// which enables us to run each test against all backends.
+    pub async fn combined_backend(&self) -> OnlineClient<R> {
+        if self.legacy_backend.borrow().is_none() {
+            let c = build_default_backend(self.config.clone(), self.rpc_client.clone())
+                .await
+                .unwrap();
+            self.combined_backend.replace(Some(c));
+        }
+        self.combined_backend.borrow().as_ref().unwrap().clone()
     }
 
     /// Returns the subxt client connected to the running node. This client
@@ -116,26 +138,20 @@ where
     }
 
     /// Returns the rpc client connected to the node
-    pub fn rpc_client(&self) -> rpc::RpcClient {
+    pub fn rpc_client(&self) -> RpcClient {
         self.rpc_client.clone()
     }
 }
 
-/// Kind of rpc client to use in tests
-pub enum RpcClientKind {
-    Legacy,
-    Reconnecting,
-}
-
 /// Construct a test node process.
-pub struct TestNodeProcessBuilder {
+pub struct TestNodeProcessBuilder<T: Config> {
+    config: T,
     node_paths: Vec<OsString>,
     authority: Option<String>,
-    rpc_client: RpcClientKind,
 }
 
-impl TestNodeProcessBuilder {
-    pub fn new<P>(node_paths: &[P]) -> TestNodeProcessBuilder
+impl<T: Config> TestNodeProcessBuilder<T> {
+    pub fn new<P>(config: T, node_paths: &[P]) -> TestNodeProcessBuilder<T>
     where
         P: AsRef<OsStr>,
     {
@@ -147,16 +163,10 @@ impl TestNodeProcessBuilder {
         }
 
         Self {
+            config,
             node_paths: paths,
             authority: None,
-            rpc_client: RpcClientKind::Legacy,
         }
-    }
-
-    /// Set the testRunner to use a preferred RpcClient impl, ie Legacy or Reconnecting.
-    pub fn with_rpc_client_kind(&mut self, rpc_client_kind: RpcClientKind) -> &mut Self {
-        self.rpc_client = rpc_client_kind;
-        self
     }
 
     /// Set the authority dev account for a node in validator mode e.g. --alice.
@@ -166,10 +176,7 @@ impl TestNodeProcessBuilder {
     }
 
     /// Spawn the substrate node at the given path, and wait for rpc to be initialized.
-    pub async fn spawn<R>(self) -> Result<TestNodeProcess<R>, String>
-    where
-        R: Config,
-    {
+    pub async fn spawn(self) -> Result<TestNodeProcess<T>, String> {
         // Only spawn a process if a URL to target wasn't provided as an env var.
         let proc = if !is_url_provided() {
             let mut node_builder = SubstrateNode::builder();
@@ -184,69 +191,66 @@ impl TestNodeProcessBuilder {
             None
         };
 
-        let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
-        let rpc_client = match self.rpc_client {
-            RpcClientKind::Legacy => build_rpc_client(&ws_url).await,
-            RpcClientKind::Reconnecting => build_reconnecting_rpc_client(&ws_url).await,
-        }
-        .map_err(|e| format!("Failed to connect to node at {ws_url}: {e}"))?;
-
         // Cache whatever client we build, and None for the other.
         #[allow(unused_assignments, unused_mut)]
         let mut chainhead_backend = None;
         #[allow(unused_assignments, unused_mut)]
         let mut legacy_backend = None;
+        #[allow(unused_assignments, unused_mut)]
+        let mut combined_backend = None;
 
-        #[cfg(lightclient)]
-        let client = build_light_client(&proc).await?;
-
-        #[cfg(chainhead_backend)]
-        let client = {
-            let client = build_chainhead_backend(rpc_client.clone()).await?;
-            chainhead_backend = Some(client.clone());
-            client
+        // Select the RPC client to use based on features.
+        #[cfg(lightclient_rpc)]
+        let rpc_client = build_light_client_rpc_client(self.config.clone(), &proc).await?;
+        #[cfg(reconnecting_rpc)]
+        let rpc_client = {
+            let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
+            build_reconnecting_rpc_client(&ws_url).await?
+        };
+        #[cfg(default_rpc)]
+        let rpc_client = {
+            let ws_url = get_url(proc.as_ref().map(|p| p.ws_port()));
+            build_default_rpc_client(&ws_url).await?
         };
 
-        #[cfg(all(not(lightclient), legacy_backend))]
+        // Select the backend to use based on features.
+        #[cfg(chainhead_backend)]
         let client = {
-            let client = build_legacy_backend(rpc_client.clone()).await?;
-            legacy_backend = Some(client.clone());
-            client
+            let be = build_chainhead_backend(self.config.clone(), rpc_client.clone()).await?;
+            chainhead_backend = Some(be.clone());
+            be
+        };
+        #[cfg(legacy_backend)]
+        let client = {
+            let be = build_legacy_backend(self.config.clone(), rpc_client.clone()).await?;
+            legacy_backend = Some(be.clone());
+            be
+        };
+        #[cfg(default_backend)]
+        let client = {
+            let be = build_default_backend(self.config.clone(), rpc_client.clone()).await?;
+            combined_backend = Some(be.clone());
+            be
         };
 
         Ok(TestNodeProcess {
             proc,
             client,
+            config: self.config,
             legacy_backend: RefCell::new(legacy_backend),
             chainhead_backend: RefCell::new(chainhead_backend),
+            combined_backend: RefCell::new(combined_backend),
             rpc_client,
         })
     }
 }
 
-async fn build_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
-    let rpc_client = rpc::RpcClient::from_insecure_url(ws_url)
-        .await
-        .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
-
-    Ok(rpc_client)
-}
-
-async fn build_reconnecting_rpc_client(ws_url: &str) -> Result<rpc::RpcClient, String> {
-    let client = RpcClientBuilder::new()
-        .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10)))
-        .build(ws_url.to_string())
-        .await
-        .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
-
-    Ok(rpc::RpcClient::new(client))
-}
-
 async fn build_legacy_backend<T: Config>(
-    rpc_client: rpc::RpcClient,
+    config: T,
+    rpc_client: RpcClient,
 ) -> Result<OnlineClient<T>, String> {
-    let backend = legacy::LegacyBackend::builder().build(rpc_client);
-    let client = OnlineClient::from_backend(Arc::new(backend))
+    let backend = LegacyBackend::builder().build(rpc_client);
+    let client = OnlineClient::from_backend_with_config(config, Arc::new(backend))
         .await
         .map_err(|e| format!("Cannot construct OnlineClient from backend: {e}"))?;
 
@@ -254,21 +258,51 @@ async fn build_legacy_backend<T: Config>(
 }
 
 async fn build_chainhead_backend<T: Config>(
-    rpc_client: rpc::RpcClient,
+    config: T,
+    rpc_client: RpcClient,
 ) -> Result<OnlineClient<T>, String> {
-    let backend = chain_head::ChainHeadBackend::builder().build_with_background_driver(rpc_client);
-
-    let client = OnlineClient::from_backend(Arc::new(backend))
+    let backend = ChainHeadBackend::builder().build_with_background_driver(rpc_client);
+    let client = OnlineClient::from_backend_with_config(config, Arc::new(backend))
         .await
         .map_err(|e| format!("Cannot construct OnlineClient from backend: {e}"))?;
 
     Ok(client)
 }
 
-#[cfg(lightclient)]
-async fn build_light_client<T: Config>(
-    maybe_proc: &Option<SubstrateNode>,
+async fn build_default_backend<T: Config>(
+    config: T,
+    rpc_client: RpcClient,
 ) -> Result<OnlineClient<T>, String> {
+    let backend = CombinedBackend::builder()
+        .build_with_background_driver(rpc_client)
+        .await
+        .map_err(|e| format!("Cannot build CombinedBackend: {e}"))?;
+    let client = OnlineClient::from_backend_with_config(config, Arc::new(backend))
+        .await
+        .map_err(|e| format!("Cannot construct OnlineClient from backend: {e}"))?;
+
+    Ok(client)
+}
+
+#[cfg(reconnecting_rpc)]
+async fn build_reconnecting_rpc_client(ws_url: &str) -> Result<RpcClient, String> {
+    use std::time::Duration;
+    use subxt::rpcs::client::reconnecting_rpc_client::{ExponentialBackoff, RpcClientBuilder};
+
+    let client = RpcClientBuilder::new()
+        .retry_policy(ExponentialBackoff::from_millis(100).max_delay(Duration::from_secs(10)))
+        .build(ws_url.to_string())
+        .await
+        .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
+
+    Ok(RpcClient::new(client))
+}
+
+#[cfg(lightclient_rpc)]
+async fn build_light_client_rpc_client<T: Config>(
+    config: T,
+    maybe_proc: &Option<SubstrateNode>,
+) -> Result<RpcClient, String> {
     use subxt::lightclient::{ChainConfig, LightClient};
 
     let proc = if let Some(proc) = maybe_proc {
@@ -280,15 +314,18 @@ async fn build_light_client<T: Config>(
     // RPC endpoint. Only localhost works.
     let ws_url = format!("ws://127.0.0.1:{}", proc.ws_port());
 
-    // Wait for a few blocks to be produced using the subxt client.
-    let client = OnlineClient::<T>::from_url(ws_url.clone())
-        .await
-        .map_err(|err| format!("Failed to connect to node rpc at {ws_url}: {err}"))?;
+    // Wait for a few blocks to be produced. We instantiate a Subxt client for
+    // this for simplicity, but then throw it away.
+    {
+        let client = OnlineClient::<T>::from_url_with_config(config.clone(), ws_url.clone())
+            .await
+            .map_err(|err| format!("Failed to connect to node rpc at {ws_url}: {err}"))?;
 
-    // Wait for at least a few blocks before starting the light client.
-    // Otherwise, the lightclient might error with
-    // `"Error when retrieving the call proof: No node available for call proof query"`.
-    super::wait_for_number_of_blocks(&client, 5).await;
+        // Wait for at least a few blocks before starting the light client.
+        // Otherwise, the lightclient might error with
+        // `"Error when retrieving the call proof: No node available for call proof query"`.
+        super::wait_for_number_of_blocks(&client, 5).await;
+    }
 
     // Now, configure a light client; fetch the chain spec and modify the bootnodes.
     let bootnode = format!(
@@ -309,6 +346,15 @@ async fn build_light_client<T: Config>(
     let (_lightclient, rpc) = LightClient::relay_chain(chain_config)
         .map_err(|e| format!("Light client: cannot add relay chain: {e}"))?;
 
-    // Instantiate subxt client from this.
-    build_chainhead_backend(rpc.into()).await
+    // Return the RPCs
+    Ok(RpcClient::new(rpc))
+}
+
+#[cfg(default_rpc)]
+async fn build_default_rpc_client(ws_url: &str) -> Result<RpcClient, String> {
+    let rpc_client = RpcClient::from_insecure_url(ws_url)
+        .await
+        .map_err(|e| format!("Cannot construct RPC client: {e}"))?;
+
+    Ok(rpc_client)
 }

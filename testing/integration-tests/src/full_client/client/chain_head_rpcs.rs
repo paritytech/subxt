@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -20,7 +20,6 @@ use subxt_rpcs::methods::chain_head::{
     FollowEvent, Initialized, MethodResponse, RuntimeEvent, RuntimeVersionEvent, StorageQuery,
     StorageQueryType,
 };
-
 use subxt_signer::sr25519::dev;
 
 #[subxt_test]
@@ -47,15 +46,18 @@ async fn chainhead_v1_follow() {
     let event = blocks.next().await.unwrap().unwrap();
     // The initialized event should contain the finalized block hash.
     let finalized_block_hash = legacy_rpc.chain_get_finalized_head().await.unwrap();
-    let runtime_version = ctx.client().runtime_version();
+    // Expect the same spec and runtime version as Subxt gives back at this block.
+    let at_block = ctx.client().at_current_block().await.unwrap();
+    let subxt_transaction_version = at_block.transaction_version();
+    let subxt_spec_version = at_block.spec_version();
 
     assert_matches!(
         event,
         FollowEvent::Initialized(init) => {
             assert!(init.finalized_block_hashes.contains(&finalized_block_hash));
             if let Some(RuntimeEvent::Valid(RuntimeVersionEvent { spec })) = init.finalized_block_runtime {
-                assert_eq!(spec.spec_version, runtime_version.spec_version);
-                assert_eq!(spec.transaction_version, runtime_version.transaction_version);
+                assert_eq!(spec.spec_version, subxt_spec_version);
+                assert_eq!(spec.transaction_version, subxt_transaction_version);
             } else {
                 panic!("runtime details not provided with init event, got {:?}", init.finalized_block_runtime);
             }
@@ -136,9 +138,14 @@ async fn chainhead_v1_storage() {
     let alice: AccountId32 = dev::alice().public_key().into();
 
     let addr_bytes = {
-        let storage_at = api.storage().at_latest().await.unwrap();
+        let at_block = api.at_current_block().await.unwrap();
         let addr = node_runtime::storage().system().account();
-        storage_at.entry(addr).unwrap().key((alice,)).unwrap()
+        at_block
+            .storage()
+            .entry(addr)
+            .unwrap()
+            .fetch_key((alice,))
+            .unwrap()
     };
 
     let items = vec![StorageQuery {
@@ -224,7 +231,6 @@ async fn chainhead_v1_unpin() {
     assert!(rpc.chainhead_v1_unpin(sub_id, hash).await.is_err());
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn chainspec_v1_genesishash() {
     let ctx = test_context().await;
@@ -237,7 +243,6 @@ async fn chainspec_v1_genesishash() {
     assert_eq!(a, b);
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn chainspec_v1_chainname() {
     let ctx = test_context().await;
@@ -250,7 +255,6 @@ async fn chainspec_v1_chainname() {
     assert_eq!(a, b);
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn chainspec_v1_properties() {
     let ctx = test_context().await;
@@ -263,7 +267,6 @@ async fn chainspec_v1_properties() {
     assert_eq!(a, b);
 }
 
-#[cfg(fullclient)]
 #[subxt_test]
 async fn transactionwatch_v1_submit_and_watch() {
     let ctx = test_context().await;
@@ -274,7 +277,9 @@ async fn transactionwatch_v1_submit_and_watch() {
     let tx_bytes = ctx
         .client()
         .tx()
-        .create_partial_offline(&payload, Default::default())
+        .await
+        .unwrap()
+        .create_signable_offline(&payload, Default::default())
         .unwrap()
         .sign(&dev::alice())
         .into_encoded();
@@ -332,7 +337,6 @@ async fn transaction_v1_broadcast() {
 
     let ctx = test_context().await;
     let api = ctx.client();
-    let hasher = api.hasher();
     let rpc = ctx.chainhead_rpc_methods().await;
 
     let tx_payload = node_runtime::tx()
@@ -342,7 +346,9 @@ async fn transaction_v1_broadcast() {
     let tx = ctx
         .client()
         .tx()
-        .create_partial_offline(&tx_payload, Default::default())
+        .await
+        .unwrap()
+        .create_signable_offline(&tx_payload, Default::default())
         .unwrap()
         .sign(&dev::alice());
 
@@ -350,7 +356,7 @@ async fn transaction_v1_broadcast() {
     let tx_bytes = tx.into_encoded();
 
     // Subscribe to finalized blocks.
-    let mut finalized_sub = api.blocks().subscribe_finalized().await.unwrap();
+    let mut finalized_sub = api.stream_blocks().await.unwrap();
 
     consume_initial_blocks(&mut finalized_sub).await;
 
@@ -364,8 +370,8 @@ async fn transaction_v1_broadcast() {
         .unwrap()
         .expect("Server is not overloaded by 1 tx; qed");
 
-    while let Some(finalized) = finalized_sub.next().await {
-        let finalized = finalized.unwrap();
+    while let Some(block) = finalized_sub.next().await {
+        let at_block = block.unwrap().at().await.unwrap();
 
         // Started with positive, should not overflow.
         num_blocks = num_blocks.saturating_sub(1);
@@ -373,8 +379,9 @@ async fn transaction_v1_broadcast() {
             panic!("Did not find the tx in due time");
         }
 
-        let extrinsics = finalized.extrinsics().await.unwrap();
-        let block_extrinsics = extrinsics.iter().collect::<Vec<_>>();
+        let hasher = at_block.hasher();
+        let extrinsics = at_block.extrinsics().fetch().await.unwrap();
+        let block_extrinsics = extrinsics.iter().collect::<Result<Vec<_>, _>>().unwrap();
 
         let Some(ext) = block_extrinsics
             .iter()
@@ -384,7 +391,7 @@ async fn transaction_v1_broadcast() {
         };
 
         let ext = ext
-            .as_extrinsic::<node_runtime::balances::calls::types::TransferAllowDeath>()
+            .decode_call_data_fields_as::<node_runtime::balances::calls::TransferAllowDeath>()
             .unwrap()
             .unwrap();
         assert_eq!(ext.value, 10_001);
@@ -413,7 +420,9 @@ async fn transaction_v1_stop() {
     let tx_bytes = ctx
         .client()
         .tx()
-        .create_partial_offline(&tx, Default::default())
+        .await
+        .unwrap()
+        .create_signable_offline(&tx, Default::default())
         .unwrap()
         .sign(&dev::alice())
         .into_encoded();

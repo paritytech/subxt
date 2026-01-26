@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -15,18 +15,22 @@ use subxt_signer::sr25519::dev;
 async fn v4_unsigned_encode_decode() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
-    let md = api.metadata();
+    let at_block = api.at_current_block().await?;
+    let md = at_block.metadata_ref();
 
     let call = node_runtime::tx()
         .balances()
         .transfer_allow_death(dev::bob().public_key().into(), 1000);
 
-    let tx_bytes = api.tx().create_v4_unsigned(&call).unwrap().into_encoded();
+    let tx_bytes = at_block
+        .tx()
+        .create_v4_unsigned(&call)
+        .unwrap()
+        .into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
     let decoded =
-        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, &md, api.metadata().types())
-            .unwrap();
+        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, md, md.types()).unwrap();
 
     assert_eq!(tx_bytes_cursor.len(), 0);
     assert_eq!(decoded.version(), 4);
@@ -42,17 +46,22 @@ async fn v4_unsigned_encode_decode() -> Result<(), subxt::Error> {
 async fn v5_bare_encode_decode() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
-    let md = api.metadata();
+    let at_block = api.at_current_block().await?;
+    let md = at_block.metadata_ref();
 
     let call = node_runtime::tx()
         .balances()
         .transfer_allow_death(dev::bob().public_key().into(), 1000);
 
-    let tx_bytes = api.tx().create_v5_bare(&call).unwrap().into_encoded();
+    let tx_bytes = at_block
+        .tx()
+        .create_v5_unsigned(&call)
+        .unwrap()
+        .into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
     let decoded =
-        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, &md, md.types()).unwrap();
+        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, md, md.types()).unwrap();
 
     assert_eq!(tx_bytes_cursor.len(), 0);
     assert_eq!(decoded.version(), 5);
@@ -69,15 +78,16 @@ async fn v5_bare_encode_decode() -> Result<(), subxt::Error> {
 async fn v4_signed_encode_decode() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
-    let md = api.metadata();
+    let at_block = api.at_current_block().await?;
+    let md = at_block.metadata_ref();
 
     let call = node_runtime::tx()
         .balances()
         .transfer_allow_death(dev::bob().public_key().into(), 1000);
 
-    let tx_bytes = api
+    let tx_bytes = at_block
         .tx()
-        .create_v4_partial(&call, &dev::alice().public_key().into(), Default::default())
+        .create_v4_signable(&call, &dev::alice().public_key().into(), Default::default())
         .await
         .unwrap()
         .sign(&dev::alice())
@@ -85,7 +95,7 @@ async fn v4_signed_encode_decode() -> Result<(), subxt::Error> {
     let tx_bytes_cursor = &mut &*tx_bytes;
 
     let decoded =
-        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, &md, md.types()).unwrap();
+        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, md, md.types()).unwrap();
 
     assert_eq!(tx_bytes_cursor.len(), 0);
     assert_eq!(decoded.version(), 4);
@@ -101,16 +111,18 @@ async fn v4_signed_encode_decode() -> Result<(), subxt::Error> {
 async fn v5_general_encode_decode() -> Result<(), subxt::Error> {
     let ctx = test_context().await;
     let api = ctx.client();
-    let md = api.metadata();
+    let at_block = api.at_current_block().await?;
+    let md = at_block.metadata_ref();
+
     let dummy_signer = dev::alice();
 
     let call = node_runtime::tx()
         .balances()
         .transfer_allow_death(dev::bob().public_key().into(), 1000);
 
-    let tx_bytes = api
+    let tx_bytes = at_block
         .tx()
-        .create_v5_partial(&call, &dev::alice().public_key().into(), Default::default())
+        .create_v5_signable(&call, &dev::alice().public_key().into(), Default::default())
         .await
         .unwrap()
         .sign(&dummy_signer) // No signature payload is added, but may be inserted into tx extensions.
@@ -118,7 +130,7 @@ async fn v5_general_encode_decode() -> Result<(), subxt::Error> {
     let tx_bytes_cursor = &mut &*tx_bytes;
 
     let decoded =
-        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, &md, md.types()).unwrap();
+        frame_decode::extrinsics::decode_extrinsic(tx_bytes_cursor, md, md.types()).unwrap();
 
     assert_eq!(tx_bytes_cursor.len(), 0);
     assert_eq!(decoded.version(), 5);

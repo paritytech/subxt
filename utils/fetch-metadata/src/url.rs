@@ -1,11 +1,11 @@
-// Copyright 2019-2024 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
 //! Fetch metadata from a URL.
 
 use crate::Error;
-use codec::{Decode, Encode}; 
+use codec::{Decode, Encode};
 use jsonrpsee::{
     core::client::ClientT, http_client::HttpClientBuilder, rpc_params, ws_client::WsClientBuilder,
 };
@@ -44,7 +44,11 @@ impl std::str::FromStr for MetadataVersion {
 }
 
 /// Returns the metadata bytes from the provided URL.
-pub async fn from_url(url: Url, version: MetadataVersion, at_block_hash: Option<&str>) -> Result<Vec<u8>, Error> {
+pub async fn from_url(
+    url: Url,
+    version: MetadataVersion,
+    at_block_hash: Option<&str>,
+) -> Result<Vec<u8>, Error> {
     let bytes = match url.scheme() {
         "http" | "https" => fetch_metadata_http(url, version, at_block_hash).await,
         "ws" | "wss" => fetch_metadata_ws(url, version, at_block_hash).await,
@@ -55,7 +59,11 @@ pub async fn from_url(url: Url, version: MetadataVersion, at_block_hash: Option<
 }
 
 /// Returns the metadata bytes from the provided URL, blocking the current thread.
-pub fn from_url_blocking(url: Url, version: MetadataVersion, at_block_hash: Option<&str>) -> Result<Vec<u8>, Error> {
+pub fn from_url_blocking(
+    url: Url,
+    version: MetadataVersion,
+    at_block_hash: Option<&str>,
+) -> Result<Vec<u8>, Error> {
     tokio_block_on(from_url(url, version, at_block_hash))
 }
 
@@ -68,7 +76,11 @@ fn tokio_block_on<T, Fut: std::future::Future<Output = T>>(fut: Fut) -> T {
         .block_on(fut)
 }
 
-async fn fetch_metadata_ws(url: Url, version: MetadataVersion, at_block_hash: Option<&str>) -> Result<Vec<u8>, Error> {
+async fn fetch_metadata_ws(
+    url: Url,
+    version: MetadataVersion,
+    at_block_hash: Option<&str>,
+) -> Result<Vec<u8>, Error> {
     let client = WsClientBuilder::default()
         .request_timeout(std::time::Duration::from_secs(180))
         .max_buffer_capacity_per_subscription(4096)
@@ -78,7 +90,11 @@ async fn fetch_metadata_ws(url: Url, version: MetadataVersion, at_block_hash: Op
     fetch_metadata(client, version, at_block_hash).await
 }
 
-async fn fetch_metadata_http(url: Url, version: MetadataVersion, at_block_hash: Option<&str>) -> Result<Vec<u8>, Error> {
+async fn fetch_metadata_http(
+    url: Url,
+    version: MetadataVersion,
+    at_block_hash: Option<&str>,
+) -> Result<Vec<u8>, Error> {
     let client = HttpClientBuilder::default()
         .request_timeout(std::time::Duration::from_secs(180))
         .build(url)?;
@@ -87,12 +103,16 @@ async fn fetch_metadata_http(url: Url, version: MetadataVersion, at_block_hash: 
 }
 
 /// The innermost call to fetch metadata:
-async fn fetch_metadata(client: impl ClientT, version: MetadataVersion, at_block_hash: Option<&str>) -> Result<Vec<u8>, Error> {
+async fn fetch_metadata(
+    client: impl ClientT,
+    version: MetadataVersion,
+    at_block_hash: Option<&str>,
+) -> Result<Vec<u8>, Error> {
     const UNSTABLE_METADATA_VERSION: u32 = u32::MAX;
 
     // Ensure always 0x prefix.
-    let at_block_hash = at_block_hash
-        .map(|hash| format!("0x{}", hash.strip_prefix("0x").unwrap_or(hash)));
+    let at_block_hash =
+        at_block_hash.map(|hash| format!("0x{}", hash.strip_prefix("0x").unwrap_or(hash)));
     let at_block_hash = at_block_hash.as_deref();
 
     // Fetch available metadata versions. If error, revert to legacy metadata code.
@@ -101,7 +121,10 @@ async fn fetch_metadata(client: impl ClientT, version: MetadataVersion, at_block
         at_block_hash: Option<&str>,
     ) -> Result<Vec<u32>, Error> {
         let res: String = client
-            .request("state_call", rpc_params!["Metadata_metadata_versions", "0x", at_block_hash])
+            .request(
+                "state_call",
+                rpc_params!["Metadata_metadata_versions", "0x", at_block_hash],
+            )
             .await?;
         let raw_bytes = hex::decode(res.trim_start_matches("0x"))?;
         Decode::decode(&mut &raw_bytes[..]).map_err(Into::into)
@@ -170,7 +193,10 @@ async fn fetch_metadata(client: impl ClientT, version: MetadataVersion, at_block
     ) -> Result<Vec<u8>, Error> {
         // Fetch the metadata.
         let metadata_string: String = client
-            .request("state_call", rpc_params!["Metadata_metadata", "0x", at_block_hash])
+            .request(
+                "state_call",
+                rpc_params!["Metadata_metadata", "0x", at_block_hash],
+            )
             .await?;
 
         // Decode the metadata.
@@ -182,12 +208,15 @@ async fn fetch_metadata(client: impl ClientT, version: MetadataVersion, at_block
     match fetch_available_versions(&client, at_block_hash).await {
         Ok(supported_versions) => {
             fetch_inner(&client, version, supported_versions, at_block_hash).await
-        },
+        }
         Err(e) => {
             // The "new" interface failed. if the user is asking for V14 or the "latest"
             // metadata then try the legacy interface instead. Else, just return the
             // reason for failure.
-            if matches!(version, MetadataVersion::Version(14) | MetadataVersion::Latest) {
+            if matches!(
+                version,
+                MetadataVersion::Version(14) | MetadataVersion::Latest
+            ) {
                 fetch_inner_legacy(&client, at_block_hash).await
             } else {
                 Err(e)

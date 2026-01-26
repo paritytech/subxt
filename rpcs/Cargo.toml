@@ -16,11 +16,9 @@ keywords = ["parity", "subxt", "rpcs"]
 
 [features]
 default = ["jsonrpsee", "native"]
-
-subxt = ["dep:subxt-core"]
 jsonrpsee = ["dep:jsonrpsee", "dep:tokio-util"]
 
-unstable-light-client = [
+light-client = [
     "dep:subxt-lightclient"
 ]
 
@@ -83,9 +81,6 @@ tokio = { workspace = true, optional = true }
 # Included with the lightclient feature
 subxt-lightclient = { workspace = true, optional = true, default-features = false }
 
-# Included with the subxt-core feature to impl Config for RpcConfig
-subxt-core = { workspace = true, optional = true }
-
 # Included with WASM feature
 wasm-bindgen-futures = { workspace = true, optional = true }
 
@@ -97,7 +92,6 @@ jsonrpsee = { workspace = true, features = ["server"] }
 
 [package.metadata.docs.rs]
 default-features = true
-rustdoc-args = ["--cfg", "docsrs"]
 
 [lints]
 workspace = true

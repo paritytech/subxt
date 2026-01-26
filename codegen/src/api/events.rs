@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -37,7 +37,7 @@ use subxt_metadata::PalletMetadata;
 ///
 /// - `type_gen` - [`scale_typegen::TypeGenerator`] that contains settings and all types from the runtime metadata.
 /// - `pallet` - Pallet metadata from which the events are generated.
-/// - `crate_path` - The crate path under which the `subxt-core` crate is located, e.g. `::subxt::ext::subxt_core` when using subxt as a dependency.
+/// - `crate_path` - The crate path under which the `subxt` crate is located, e.g. `::subxt` when using subxt as a dependency.
 pub fn generate_events(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata,
@@ -63,9 +63,14 @@ pub fn generate_events(
             #struct_def
             #alias_mod
 
-            impl #crate_path::events::StaticEvent for #event_struct_name {
-                const PALLET: &'static str = #pallet_name;
-                const EVENT: &'static str = #event_name;
+            impl #event_struct_name {
+                const PALLET_NAME: &'static str = #pallet_name;
+                const EVENT_NAME: &'static str = #event_name;
+            }
+            impl #crate_path::events::DecodeAsEvent for #event_struct_name {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
             }
         }
     });

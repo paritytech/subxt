@@ -5,14 +5,11 @@ use indoc::{formatdoc, writedoc};
 use scale_info::form::PortableForm;
 use scale_info::{PortableRegistry, Type, TypeDef, TypeDefVariant};
 use scale_value::{Composite, ValueDef};
-use std::str::FromStr;
-
-use subxt::tx;
-use subxt::utils::H256;
 use subxt::{
-    OfflineClient,
+    OfflineClient, OfflineClientAtBlock,
     config::SubstrateConfig,
-    metadata::{Metadata, PalletMetadata},
+    metadata::{ArcMetadata, PalletMetadata},
+    tx,
 };
 
 use crate::utils::{
@@ -30,7 +27,7 @@ pub struct CallsSubcommand {
 pub fn explore_calls(
     command: CallsSubcommand,
     pallet_metadata: PalletMetadata,
-    metadata: &Metadata,
+    metadata: ArcMetadata,
     output: &mut impl std::io::Write,
 ) -> color_eyre::Result<()> {
     let pallet_name = pallet_metadata.name();
@@ -148,18 +145,20 @@ fn get_calls_enum_type<'a>(
     Ok((calls_enum_type_def, calls_enum_type))
 }
 
-/// The specific values used for construction do not matter too much, we just need any OfflineClient to create unsigned extrinsics
-fn mocked_offline_client(metadata: Metadata) -> OfflineClient<SubstrateConfig> {
-    let genesis_hash =
-        H256::from_str("91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3")
-            .expect("Valid hash; qed");
+/// We don't care about any specific genesis hash etc; we just need any OfflineClient to create unsigned extrinsics
+fn mocked_offline_client(metadata: ArcMetadata) -> OfflineClientAtBlock<SubstrateConfig> {
+    let config = SubstrateConfig::builder()
+        .set_spec_version_for_block_ranges([subxt::config::substrate::SpecVersionForRange {
+            block_range: 0..1,
+            spec_version: 1,
+            transaction_version: 1,
+        }])
+        .set_metadata_for_spec_versions([(1, metadata)])
+        .build();
 
-    let runtime_version = subxt::client::RuntimeVersion {
-        spec_version: 9370,
-        transaction_version: 20,
-    };
-
-    OfflineClient::<SubstrateConfig>::new(genesis_hash, runtime_version, metadata)
+    OfflineClient::new_with_config(config)
+        .at_block(0u64)
+        .expect("Should not fail since we plugged consistent data into the config")
 }
 
 /// composites stay composites, all other types are converted into a 1-fielded unnamed composite

@@ -1,10 +1,9 @@
 [workspace]
 members = [
+    "subxt",
     "cli",
     "codegen",
-    "core",
     "lightclient",
-    "historic",
     "testing/substrate-runner",
     "testing/test-runtime",
     "testing/integration-tests",
@@ -15,10 +14,10 @@ members = [
     "metadata",
     "rpcs",
     "signer",
-    "subxt",
     "scripts/artifacts",
     "utils/fetch-metadata",
     "utils/strip-metadata",
+    "utils/accountid32"
 ]
 
 # We exclude any crates that would depend on non mutually
@@ -38,7 +37,7 @@ resolver = "2"
 [workspace.package]
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2024"
-version = "0.44.0"
+version = "0.50.0"
 rust-version = "1.85.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
@@ -81,7 +80,7 @@ darling = "0.20.10"
 derive-where = "1.2.7"
 either = { version = "1.13.0", default-features = false }
 finito = { version = "0.1.0", default-features = false }
-frame-decode = { version = "0.15.0", default-features = false }
+frame-decode = { version = "0.16.1", default-features = false }
 frame-metadata = { version = "23.0.0", default-features = false }
 futures = { version = "0.3.31", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
@@ -101,9 +100,9 @@ scale-info = { version = "2.11.4", default-features = false }
 scale-value = { version = "0.18.1", default-features = false }
 scale-bits = { version = "0.7.0", default-features = false }
 scale-decode = { version = "0.16.2", default-features = false }
-scale-encode = { version = "0.10.0", default-features = false }
+scale-encode = { version = "0.10.1", default-features = false }
 scale-type-resolver = { version = "0.2.0" }
-scale-info-legacy = { version = "0.4.0", default-features = false }
+scale-info-legacy = { version = "0.4.2", default-features = false }
 scale-typegen = "0.12.0"
 scale-typegen-description = "0.11.0"
 serde = { version = "1.0.210", default-features = false, features = ["derive"] }
@@ -156,16 +155,16 @@ sp-state-machine = { version = "0.45.0", default-features = false }
 sp-runtime = { version = "41.1.0", default-features = false }
 
 # Subxt workspace crates:
-subxt = { version = "0.44.0", path = "subxt", default-features = false }
-subxt-core = { version = "0.44.0", path = "core", default-features = false }
-subxt-macro = { version = "0.44.0", path = "macro" }
-subxt-metadata = { version = "0.44.0", path = "metadata", default-features = false }
-subxt-codegen = { version = "0.44.0", path = "codegen" }
-subxt-signer = { version = "0.44.0", path = "signer", default-features = false }
-subxt-rpcs = { version = "0.44.0", path = "rpcs", default-features = false }
-subxt-lightclient = { version = "0.44.0", path = "lightclient", default-features = false }
-subxt-utils-fetchmetadata = { version = "0.44.0", path = "utils/fetch-metadata", default-features = false }
-subxt-utils-stripmetadata = { version = "0.44.0", path = "utils/strip-metadata", default-features = false }
+subxt = { version = "0.50.0", path = "subxt", default-features = false }
+subxt-macro = { version = "0.50.0", path = "macro" }
+subxt-metadata = { version = "0.50.0", path = "metadata", default-features = false }
+subxt-codegen = { version = "0.50.0", path = "codegen" }
+subxt-signer = { version = "0.50.0", path = "signer", default-features = false }
+subxt-rpcs = { version = "0.50.0", path = "rpcs", default-features = false }
+subxt-lightclient = { version = "0.50.0", path = "lightclient", default-features = false }
+subxt-utils-fetchmetadata = { version = "0.50.0", path = "utils/fetch-metadata", default-features = false }
+subxt-utils-stripmetadata = { version = "0.50.0", path = "utils/strip-metadata", default-features = false }
+subxt-utils-accountid32 = { version = "0.50.0", path = "utils/accountid32", default-features = false }
 test-runtime = { path = "testing/test-runtime" }
 substrate-runner = { path = "testing/substrate-runner" }
 

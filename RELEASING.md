@@ -71,29 +71,26 @@ We also assume that ongoing work done is being merged directly to the `master` b
         cargo test --all-targets
         ```
 
-    3.  Run the following command to publish each crate in the required order (allowing
-        a little time in between each to let crates.io catch up with what we've published).
+    3.  Run the following command to publish each crate in the required order.
+
+        Prior to running this, you'll need to remove the dev dependencies in `subxt-metadata` and `subxt` to
+        avoid circular dependencies and commit those _or_ append `--allow-dirty` to each of the following.
 
         ```
         (cd utils/strip-metadata && cargo publish) && \
-        (cd metadata && cargo publish) && \
-        (cd lightclient && cargo publish) && \
         (cd utils/fetch-metadata && cargo publish) && \
+        (cd utils/accountid32 && cargo publish) && \
+        (cd lightclient && cargo publish) && \
+        (cd metadata && cargo publish) && \
         (cd codegen && cargo publish) && \
-        (cd macro && cargo publish);
-        ```
-
-        Now, remove the dev dependencies from `subxt-core` (to avoid circular deps), and then run:
-
-        ```
-        (cd core && cargo publish) && \
+        (cd macro && cargo publish) && \
         (cd rpcs && cargo publish) && \
         (cd subxt && cargo publish) && \
         (cd signer && cargo publish) && \
         (cd cli && cargo publish);
         ```
 
-        Finally, put back the dev dependencies in `subxt-core`.
+        You **MUST** remember to `git reset HEAD~1` after this to avoid committing the dev dependency removal.
 
 11. If the release was successful, tag the commit that we released in the `master` branch with the
     version that we just released, for example:

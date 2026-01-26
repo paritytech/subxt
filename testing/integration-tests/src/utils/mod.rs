@@ -1,4 +1,4 @@
-// Copyright 2019-2025 Parity Technologies (UK) Ltd.
+// Copyright 2019-2026 Parity Technologies (UK) Ltd.
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
@@ -9,13 +9,5 @@ mod wait_for_blocks;
 pub use context::*;
 pub use node_proc::TestNodeProcess;
 pub use subxt_test_macro::subxt_test;
+pub use test_runtime::node_runtime;
 pub use wait_for_blocks::*;
-
-/// The test timeout is set to 1 second.
-/// However, the test is sleeping for 5 seconds.
-/// This must cause the test to panic.
-#[subxt_test(timeout = 1)]
-#[should_panic]
-async fn test_subxt_macro() {
-    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
-}

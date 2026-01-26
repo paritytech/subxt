@@ -1,6 +1,6 @@
 use crate::utils::FileOrUrl;
 use crate::utils::validate_url_security;
-use clap::{Parser, Subcommand, command};
+use clap::{Parser, Subcommand};
 use codec::Decode;
 use color_eyre::eyre::eyre;
 use color_eyre::owo_colors::OwoColorize;
@@ -144,7 +144,7 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
     // get the metadata
     let file_or_url = opts.file_or_url;
     let bytes = file_or_url.fetch().await?;
-    let metadata = Metadata::decode(&mut &bytes[..])?;
+    let metadata = Metadata::decode(&mut &bytes[..])?.arc();
 
     let pallet_placeholder = "<PALLET>".blue();
     let runtime_api_placeholder = "<RUNTIME_API>".blue();
@@ -185,7 +185,14 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                 .pallets()
                 .find(|e| e.name().eq_ignore_ascii_case(&name))
             {
-                pallets::run(opts.subcommand, pallet, &metadata, file_or_url, output).await
+                pallets::run(
+                    opts.subcommand,
+                    pallet,
+                    metadata.clone(),
+                    file_or_url,
+                    output,
+                )
+                .await
             } else {
                 Err(eyre!(
                     "pallet \"{name}\" not found in metadata!\n{}",
