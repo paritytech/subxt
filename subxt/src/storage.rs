@@ -19,7 +19,7 @@ use std::borrow::Cow;
 
 pub use address::{Address, DynamicAddress, StaticAddress, dynamic};
 pub use prefix_of::PrefixOf;
-pub use storage_entry::StorageEntry;
+pub use storage_entry::{StorageEntries, StorageEntry};
 pub use storage_key::{StorageKey, StorageKeyPart};
 pub use storage_key_value::StorageKeyValue;
 pub use storage_value::StorageValue;
@@ -123,11 +123,7 @@ impl<'atblock, T: Config, Client: OnlineClientAtBlockT<T>> StorageClient<'atbloc
         &self,
         addr: Addr,
         key_parts: KeyParts,
-    ) -> Result<
-        impl futures::Stream<Item = Result<StorageKeyValue<'atblock, Addr>, StorageError>>
-        + use<'atblock, Addr, Client, T, KeyParts>,
-        StorageError,
-    > {
+    ) -> Result<StorageEntries<'atblock, Addr>, StorageError> {
         let entry = self.entry(addr)?;
         entry.iter(key_parts).await
     }

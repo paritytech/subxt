@@ -94,7 +94,7 @@ pub struct StorageKeyPart<'info> {
 }
 
 impl<'info> StorageKeyPart<'info> {
-    /// Get the raw bytes for this part of the storage key.
+    /// Get all of the raw bytes for this part of the storage key.
     pub fn bytes(&self) -> &[u8] {
         let part = &self.info[self.index];
         let hash_range = part.hash_range();
@@ -107,6 +107,34 @@ impl<'info> StorageKeyPart<'info> {
             end: value_range.end,
         };
         &self.bytes[combined_range]
+    }
+
+    /// Get the bytes corresponding to the hash part of the key.
+    ///
+    /// - For `Blake2_128Concat` and `Twox64Concat` hashers, this will return only the
+    ///   BlakeTwo128 or Twox64 hash and _not_ the value that's been concatenated onto it.
+    /// - For the `Identity` hasher, no bytes will be returned (since it contains only the
+    ///   encoded value and no hash)
+    /// - For other hashers, all of the bytes will be returned since they all correspond to
+    ///   the hash and there is no additional value concatenated.
+    pub fn hash_bytes(&self) -> &[u8] {
+        let part = &self.info[self.index];
+        let hash_range = part.hash_range();
+        &self.bytes[hash_range]
+    }
+
+    /// Get the bytes corresponding to the value part of the key.
+    ///
+    /// - For `Blake2_128Concat` and `Twox64Concat` hashers, this will return only the
+    ///   bytes corresponding to the value that is concatenated after the hash.
+    /// - For the `Identity` hasher, all of the bytes are returned since they all
+    ///   correspond to the value.
+    /// - For other hashers, no bytes will be returned since there is no value concatenated.
+    pub fn value_bytes(&self) -> &[u8] {
+        let part = &self.info[self.index];
+        part.value()
+            .map(|v| &self.bytes[v.range()])
+            .unwrap_or_default()
     }
 
     /// Get the hasher that was used to construct this part of the storage key.
