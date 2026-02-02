@@ -12,7 +12,6 @@ use crate::{
     },
     subxt_test, test_context,
 };
-use subxt::ext::futures::StreamExt;
 use subxt::{
     Error,
     client::OnlineClientAtBlockImpl,
