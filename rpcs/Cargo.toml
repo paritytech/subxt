@@ -89,6 +89,9 @@ tower = { workspace = true }
 hyper = { workspace = true }
 http-body = { workspace = true }
 jsonrpsee = { workspace = true, features = ["server"] }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+futures = { workspace = true }
+subxt = { path = "../subxt", default-features = false, features = ["native"] }
 
 [package.metadata.docs.rs]
 default-features = true
