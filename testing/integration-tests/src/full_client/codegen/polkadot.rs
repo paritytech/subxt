@@ -3912,9 +3912,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                185u8, 135u8, 204u8, 24u8, 32u8, 117u8, 53u8, 224u8, 90u8, 93u8, 47u8, 134u8,
-                226u8, 238u8, 144u8, 12u8, 45u8, 132u8, 140u8, 66u8, 189u8, 176u8, 172u8, 186u8,
-                16u8, 167u8, 112u8, 56u8, 130u8, 226u8, 94u8, 67u8,
+                203u8, 78u8, 107u8, 58u8, 130u8, 99u8, 89u8, 170u8, 212u8, 153u8, 4u8, 247u8,
+                134u8, 129u8, 82u8, 100u8, 18u8, 28u8, 164u8, 191u8, 103u8, 115u8, 129u8, 177u8,
+                175u8, 31u8, 112u8, 18u8, 175u8, 135u8, 130u8, 49u8,
             ]
     }
     pub mod system {
@@ -4723,21 +4723,21 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Total length (in bytes) for all extrinsics put together, for the current block."]
-                pub fn all_extrinsics_len(
+                #[doc = " Total size (in bytes) of the current block."]
+                #[doc = ""]
+                #[doc = " Tracks the size of the header and all extrinsics."]
+                pub fn block_size(
                     &self,
-                ) -> ::subxt::storage::StaticAddress<
-                    (),
-                    all_extrinsics_len::Output,
-                    ::subxt::utils::Yes,
-                > {
+                ) -> ::subxt::storage::StaticAddress<(), block_size::Output, ::subxt::utils::Yes>
+                {
                     ::subxt::storage::StaticAddress::new_static(
                         "System",
-                        "AllExtrinsicsLen",
+                        "BlockSize",
                         [
-                            120u8, 200u8, 84u8, 67u8, 97u8, 25u8, 119u8, 71u8, 170u8, 217u8, 12u8,
-                            157u8, 63u8, 100u8, 245u8, 118u8, 99u8, 65u8, 148u8, 110u8, 252u8,
-                            86u8, 172u8, 45u8, 235u8, 90u8, 58u8, 123u8, 59u8, 191u8, 1u8, 215u8,
+                            189u8, 209u8, 204u8, 16u8, 123u8, 182u8, 74u8, 254u8, 0u8, 137u8,
+                            184u8, 170u8, 94u8, 208u8, 251u8, 174u8, 105u8, 91u8, 184u8, 127u8,
+                            194u8, 201u8, 191u8, 81u8, 121u8, 136u8, 121u8, 127u8, 4u8, 40u8,
+                            179u8, 159u8,
                         ],
                     )
                 }
@@ -5040,7 +5040,7 @@ pub mod api {
                     runtime_types::sp_weights::weight_v2::Weight,
                 >;
             }
-            pub mod all_extrinsics_len {
+            pub mod block_size {
                 use super::root_mod;
                 use super::runtime_types;
                 pub mod input {
@@ -5200,9 +5200,10 @@ pub mod api {
                         "System",
                         "BlockLength",
                         [
-                            23u8, 242u8, 225u8, 39u8, 225u8, 67u8, 152u8, 41u8, 155u8, 104u8, 68u8,
-                            229u8, 185u8, 133u8, 10u8, 143u8, 184u8, 152u8, 234u8, 44u8, 140u8,
-                            96u8, 166u8, 235u8, 162u8, 160u8, 72u8, 7u8, 35u8, 194u8, 3u8, 37u8,
+                            25u8, 97u8, 176u8, 77u8, 2u8, 60u8, 44u8, 69u8, 161u8, 69u8, 251u8,
+                            229u8, 198u8, 186u8, 185u8, 237u8, 105u8, 56u8, 122u8, 35u8, 78u8,
+                            195u8, 98u8, 222u8, 215u8, 49u8, 249u8, 146u8, 231u8, 21u8, 224u8,
+                            134u8,
                         ],
                     )
                 }
@@ -25419,7 +25420,9 @@ pub mod api {
             #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
             #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
             #[doc = ""]
-            #[doc = "If there are enough, then dispatch the call."]
+            #[doc = "**If the approval threshold is met (including the sender's approval), this will"]
+            #[doc = "immediately execute the call.** This is the only way to execute a multisig call -"]
+            #[doc = "`approve_as_multi` will never trigger execution."]
             #[doc = ""]
             #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
             #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
@@ -25435,8 +25438,9 @@ pub mod api {
             #[doc = "transaction index) of the first approval transaction."]
             #[doc = "- `call`: The call to be executed."]
             #[doc = ""]
-            #[doc = "NOTE: Unless this is the final approval, you will generally want to use"]
-            #[doc = "`approve_as_multi` instead, since it only requires a hash of the call."]
+            #[doc = "NOTE: For intermediate approvals (not the final approval), you should generally use"]
+            #[doc = "`approve_as_multi` instead, since it only requires a hash of the call and is more"]
+            #[doc = "efficient."]
             #[doc = ""]
             #[doc = "Result is equivalent to the dispatched result if `threshold` is exactly `1`. Otherwise"]
             #[doc = "on success, result is `Ok` and the result from the interior call, if it was executed,"]
@@ -25491,6 +25495,13 @@ pub mod api {
             #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
             #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
             #[doc = ""]
+            #[doc = "**This function will NEVER execute the call, even if the approval threshold is"]
+            #[doc = "reached.** It only registers approval. To actually execute the call, `as_multi` must"]
+            #[doc = "be called with the full call data by any of the signatories."]
+            #[doc = ""]
+            #[doc = "This function is more efficient than `as_multi` for intermediate approvals since it"]
+            #[doc = "only requires the call hash, not the full call data."]
+            #[doc = ""]
             #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
             #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
             #[doc = "is cancelled."]
@@ -25505,7 +25516,8 @@ pub mod api {
             #[doc = "transaction index) of the first approval transaction."]
             #[doc = "- `call_hash`: The hash of the call to be executed."]
             #[doc = ""]
-            #[doc = "NOTE: If this is the final approval, you will want to use `as_multi` instead."]
+            #[doc = "NOTE: To execute the call after approvals are gathered, any signatory must call"]
+            #[doc = "`as_multi` with the full call data. This function cannot execute the call."]
             #[doc = ""]
             #[doc = "## Complexity"]
             #[doc = "- `O(S)`."]
@@ -25674,7 +25686,9 @@ pub mod api {
                     #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
                     #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
                     #[doc = ""]
-                    #[doc = "If there are enough, then dispatch the call."]
+                    #[doc = "**If the approval threshold is met (including the sender's approval), this will"]
+                    #[doc = "immediately execute the call.** This is the only way to execute a multisig call -"]
+                    #[doc = "`approve_as_multi` will never trigger execution."]
                     #[doc = ""]
                     #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
                     #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
@@ -25690,8 +25704,9 @@ pub mod api {
                     #[doc = "transaction index) of the first approval transaction."]
                     #[doc = "- `call`: The call to be executed."]
                     #[doc = ""]
-                    #[doc = "NOTE: Unless this is the final approval, you will generally want to use"]
-                    #[doc = "`approve_as_multi` instead, since it only requires a hash of the call."]
+                    #[doc = "NOTE: For intermediate approvals (not the final approval), you should generally use"]
+                    #[doc = "`approve_as_multi` instead, since it only requires a hash of the call and is more"]
+                    #[doc = "efficient."]
                     #[doc = ""]
                     #[doc = "Result is equivalent to the dispatched result if `threshold` is exactly `1`. Otherwise"]
                     #[doc = "on success, result is `Ok` and the result from the interior call, if it was executed,"]
@@ -25739,6 +25754,13 @@ pub mod api {
                     #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
                     #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
                     #[doc = ""]
+                    #[doc = "**This function will NEVER execute the call, even if the approval threshold is"]
+                    #[doc = "reached.** It only registers approval. To actually execute the call, `as_multi` must"]
+                    #[doc = "be called with the full call data by any of the signatories."]
+                    #[doc = ""]
+                    #[doc = "This function is more efficient than `as_multi` for intermediate approvals since it"]
+                    #[doc = "only requires the call hash, not the full call data."]
+                    #[doc = ""]
                     #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
                     #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
                     #[doc = "is cancelled."]
@@ -25753,7 +25775,8 @@ pub mod api {
                     #[doc = "transaction index) of the first approval transaction."]
                     #[doc = "- `call_hash`: The hash of the call to be executed."]
                     #[doc = ""]
-                    #[doc = "NOTE: If this is the final approval, you will want to use `as_multi` instead."]
+                    #[doc = "NOTE: To execute the call after approvals are gathered, any signatory must call"]
+                    #[doc = "`as_multi` with the full call data. This function cannot execute the call."]
                     #[doc = ""]
                     #[doc = "## Complexity"]
                     #[doc = "- `O(S)`."]
@@ -49005,6 +49028,7 @@ pub mod api {
                     pub max: runtime_types::frame_support::dispatch::PerDispatchClass<
                         ::core::primitive::u32,
                     >,
+                    pub max_header_size: ::core::option::Option<::core::primitive::u32>,
                 }
                 #[derive(
                     :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -52546,7 +52570,9 @@ pub mod api {
                     #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
                     #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
                     #[doc = ""]
-                    #[doc = "If there are enough, then dispatch the call."]
+                    #[doc = "**If the approval threshold is met (including the sender's approval), this will"]
+                    #[doc = "immediately execute the call.** This is the only way to execute a multisig call -"]
+                    #[doc = "`approve_as_multi` will never trigger execution."]
                     #[doc = ""]
                     #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
                     #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
@@ -52562,8 +52588,9 @@ pub mod api {
                     #[doc = "transaction index) of the first approval transaction."]
                     #[doc = "- `call`: The call to be executed."]
                     #[doc = ""]
-                    #[doc = "NOTE: Unless this is the final approval, you will generally want to use"]
-                    #[doc = "`approve_as_multi` instead, since it only requires a hash of the call."]
+                    #[doc = "NOTE: For intermediate approvals (not the final approval), you should generally use"]
+                    #[doc = "`approve_as_multi` instead, since it only requires a hash of the call and is more"]
+                    #[doc = "efficient."]
                     #[doc = ""]
                     #[doc = "Result is equivalent to the dispatched result if `threshold` is exactly `1`. Otherwise"]
                     #[doc = "on success, result is `Ok` and the result from the interior call, if it was executed,"]
@@ -52596,6 +52623,13 @@ pub mod api {
                     #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
                     #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
                     #[doc = ""]
+                    #[doc = "**This function will NEVER execute the call, even if the approval threshold is"]
+                    #[doc = "reached.** It only registers approval. To actually execute the call, `as_multi` must"]
+                    #[doc = "be called with the full call data by any of the signatories."]
+                    #[doc = ""]
+                    #[doc = "This function is more efficient than `as_multi` for intermediate approvals since it"]
+                    #[doc = "only requires the call hash, not the full call data."]
+                    #[doc = ""]
                     #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
                     #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
                     #[doc = "is cancelled."]
@@ -52610,7 +52644,8 @@ pub mod api {
                     #[doc = "transaction index) of the first approval transaction."]
                     #[doc = "- `call_hash`: The hash of the call to be executed."]
                     #[doc = ""]
-                    #[doc = "NOTE: If this is the final approval, you will want to use `as_multi` instead."]
+                    #[doc = "NOTE: To execute the call after approvals are gathered, any signatory must call"]
+                    #[doc = "`as_multi` with the full call data. This function cannot execute the call."]
                     #[doc = ""]
                     #[doc = "## Complexity"]
                     #[doc = "- `O(S)`."]
