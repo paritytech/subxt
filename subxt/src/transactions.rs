@@ -12,12 +12,11 @@ mod validation_result;
 use crate::backend::TransactionStatus as BackendTransactionStatus;
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::transaction_extensions::Params;
-use crate::config::{ClientState, Config, HashFor, Hasher, Header, TransactionExtensions};
+use crate::config::{ClientState, Config, HashFor, Hasher, TransactionExtensions};
 use crate::error::{ExtrinsicError, TransactionStatusError};
 use crate::utils::Static;
 use codec::{Compact, Decode, Encode};
 use core::marker::PhantomData;
-use futures::{TryFutureExt, future::try_join};
 
 pub use default_params::DefaultParams;
 pub use payload::{DynamicPayload, Payload, StaticPayload, dynamic};
@@ -462,34 +461,19 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
             .await
     }
 
-    /// Fetch the latest block header and account nonce from the backend and use them to refine [`ExtrinsicParams::Params`].
+    /// Fetch the block header and account nonce from the current block and use
+    /// them to refine our [`TransactionExtensions::Params`].
     async fn inject_account_nonce_and_block(
         &self,
         account_id: &T::AccountId,
         params: &mut <T::TransactionExtensions as TransactionExtensions<T>>::Params,
     ) -> Result<(), ExtrinsicError> {
-        let block_ref = self
-            .client
-            .backend()
-            .latest_finalized_block_ref()
-            .await
-            .map_err(ExtrinsicError::CannotGetLatestFinalizedBlock)?;
-
-        let (block_header, account_nonce) = try_join(
-            self.client
-                .backend()
-                .block_header(block_ref.hash())
-                .map_err(ExtrinsicError::CannotGetLatestFinalizedBlock),
-            self.account_nonce(account_id),
-        )
-        .await?;
-
-        let block_header = block_header.ok_or_else(|| ExtrinsicError::CannotFindBlockHeader {
-            block_hash: block_ref.hash().into(),
-        })?;
+        let block_number = self.client.block_number();
+        let block_hash = self.client.block_ref().hash();
+        let account_nonce = self.account_nonce(account_id).await?;
 
         params.inject_account_nonce(account_nonce);
-        params.inject_block(block_header.number(), block_ref.hash());
+        params.inject_block(block_number, block_hash);
 
         Ok(())
     }
@@ -722,17 +706,15 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> SubmittableTransaction<T, Clien
         ValidationResult::try_from_bytes(res)
     }
 
-    /// This returns an estimate for what the transaction is expected to cost to execute, less any tips.
-    /// The actual amount paid can vary from block to block based on node traffic and other factors.
+    /// This returns an estimate for what the transaction is expected to cost to execute, less any tips,
+    /// based on the block at which you are submitting the transaction. The actual amount paid can vary
+    /// from block to block based on node traffic and other factors.
     pub async fn partial_fee_estimate(&self) -> Result<u128, ExtrinsicError> {
+        let block_hash = self.client.block_ref().hash();
+
+        // Params for the Runtime API call
         let mut params = self.encoded().to_vec();
         (self.encoded().len() as u32).encode_to(&mut params);
-        let latest_block_ref = self
-            .client
-            .backend()
-            .latest_finalized_block_ref()
-            .await
-            .map_err(ExtrinsicError::CannotGetLatestFinalizedBlock)?;
 
         // destructuring RuntimeDispatchInfo, see type information <https://paritytech.github.io/substrate/master/pallet_transaction_payment_rpc_runtime_api/struct.RuntimeDispatchInfo.html>
         // data layout: {weight_ref_time: Compact<u64>, weight_proof_size: Compact<u64>, class: u8, partial_fee: u128}
@@ -742,7 +724,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> SubmittableTransaction<T, Clien
             .call(
                 "TransactionPaymentApi_query_info",
                 Some(&params),
-                latest_block_ref.hash(),
+                block_hash,
             )
             .await
             .map_err(ExtrinsicError::CannotGetFeeInfo)?;
