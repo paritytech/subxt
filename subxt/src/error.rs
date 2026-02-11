@@ -609,6 +609,8 @@ impl EventsError {
 #[derive(Debug, thiserror::Error)]
 #[allow(missing_docs)]
 pub enum ExtrinsicError {
+    #[error("Failed to construct extrinsic: {0}")]
+    EncodeError(#[from] frame_decode::extrinsics::ExtrinsicEncodeError),
     #[error("The extrinsic payload is not compatible with the live chain")]
     IncompatibleCodegen,
     #[error("Can't find extrinsic: pallet with name {0} not found")]

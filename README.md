@@ -16,6 +16,7 @@ Subxt is a library for interacting with chains in the [Polkadot](https://github.
 - Do all of the above via a safe, statically typed interface or via a flexible dynamic interface.
 - Do most of the above via a built-in light client to interact with chains trustlessly.
 - Compile to WASM and run [entirely in the browser](./examples/wasm-example), or be [called via FFI](./examples/ffi-example) in many other languages.
+- Be used entirely offline to provide a subset of the available functionality.
 
 ## Usage
 

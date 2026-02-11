@@ -99,7 +99,7 @@ pub struct Metadata {
 impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
     type TypeId = u32;
 
-    fn extrinsic_call_info(
+    fn extrinsic_call_info_by_index(
         &self,
         pallet_index: u8,
         call_index: u8,
@@ -119,6 +119,8 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         })?;
 
         Ok(ExtrinsicCallInfo {
+            call_index,
+            pallet_index,
             pallet_name: Cow::Borrowed(pallet.name()),
             call_name: Cow::Borrowed(&call.name),
             args: call
@@ -132,6 +134,42 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         })
     }
 
+    fn extrinsic_call_info_by_name(
+        &self,
+        pallet_name: &str,
+        call_name: &str,
+    ) -> Result<ExtrinsicCallInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
+        let pallet = self.pallet_by_name(pallet_name).ok_or({
+            ExtrinsicInfoError::PalletNotFoundByName { 
+                name: Cow::Owned(pallet_name.to_string())
+            }
+        })?;
+
+        let call = pallet.call_variant_by_name(call_name).ok_or_else(|| {
+            ExtrinsicInfoError::CallNotFoundByName { 
+                call_name: Cow::Owned(pallet_name.to_string()), 
+                pallet_index: pallet.call_index(), 
+                pallet_name: Cow::Borrowed(pallet.name())
+            }
+        })?;
+
+        Ok(ExtrinsicCallInfo {
+            call_index: call.index,
+            pallet_index: pallet.call_index(),
+            pallet_name: Cow::Borrowed(pallet.name()),
+            call_name: Cow::Borrowed(&call.name),
+            args: call
+                .fields
+                .iter()
+                .map(|f| ExtrinsicInfoArg {
+                    name: Cow::Borrowed(f.name.as_deref().unwrap_or("")),
+                    id: f.ty.id,
+                })
+                .collect(),
+        })
+    }
+
+
     fn extrinsic_signature_info(
         &self,
     ) -> Result<ExtrinsicSignatureInfo<Self::TypeId>, ExtrinsicInfoError<'_>> {
@@ -139,6 +177,12 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
             address_id: self.extrinsic().address_ty,
             signature_id: self.extrinsic().signature_ty,
         })
+    }
+
+    fn extrinsic_extension_version_info(
+        &self,
+    ) -> Result<impl Iterator<Item = u8>, ExtrinsicInfoError<'_>> {
+        Ok(self.extrinsic.transaction_extensions_by_version.keys().copied())
     }
 
     fn extrinsic_extension_info(

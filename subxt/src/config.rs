@@ -50,6 +50,7 @@ mod default_extrinsic_params;
 pub mod extrinsic_params;
 pub mod polkadot;
 pub mod substrate;
+pub mod transaction_extension_traits;
 pub mod transaction_extensions;
 
 use crate::metadata::{ArcMetadata, Metadata};
@@ -66,7 +67,7 @@ pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParam
 pub use extrinsic_params::{ClientState, ExtrinsicParams, ExtrinsicParamsEncoder};
 pub use polkadot::{PolkadotConfig, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder};
 pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder};
-pub use transaction_extensions::TransactionExtension;
+pub use transaction_extension_traits::{TransactionExtensions, TransactionExtension, Params};
 
 /// Configuration for a given chain and the runtimes within. This consists of the
 /// type information needed to work at the head of the chain (namely submitting
@@ -86,7 +87,7 @@ pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     type Header: Header;
 
     /// This type defines the extrinsic extra and additional parameters.
-    type ExtrinsicParams: ExtrinsicParams<Self>;
+    type ExtrinsicParams: TransactionExtensions<Self>;
 
     /// This is used to identify an asset in the `ChargeAssetTxPayment` signed extension.
     type AssetId: AssetId;
