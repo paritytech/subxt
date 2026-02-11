@@ -475,9 +475,9 @@ pub enum RpcError {
 #[allow(missing_docs)]
 pub enum AccountNonceError {
     #[error("Could not retrieve account nonce: {0}")]
-    CouldNotRetrieve(#[from] BackendError),
+    CouldNotRetrieve(BackendError),
     #[error("Could not decode account nonce: {0}")]
-    CouldNotDecode(#[from] codec::Error),
+    CouldNotDecode(codec::Error),
     #[error("Wrong number of account nonce bytes returned: {0} (expected 2, 4 or 8)")]
     WrongNumberOfBytes(usize),
 }
