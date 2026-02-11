@@ -30,8 +30,8 @@ use alloc::vec::Vec;
 use frame_decode::constants::{ConstantEntry, ConstantInfo, ConstantInfoError};
 use frame_decode::custom_values::{CustomValue, CustomValueInfo, CustomValueInfoError};
 use frame_decode::extrinsics::{
-    ExtrinsicCallInfo, ExtrinsicExtensionInfo, ExtrinsicInfoArg, ExtrinsicInfoError,
-    ExtrinsicSignatureInfo,
+    ExtrinsicCallInfo, ExtrinsicCallInfoArg, ExtrinsicExtensionInfo, ExtrinsicExtensionInfoArg,
+    ExtrinsicInfoError, ExtrinsicSignatureInfo,
 };
 use frame_decode::runtime_apis::{
     RuntimeApiEntry, RuntimeApiInfo, RuntimeApiInfoError, RuntimeApiInput,
@@ -126,7 +126,7 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
             args: call
                 .fields
                 .iter()
-                .map(|f| ExtrinsicInfoArg {
+                .map(|f| ExtrinsicCallInfoArg {
                     name: Cow::Borrowed(f.name.as_deref().unwrap_or("")),
                     id: f.ty.id,
                 })
@@ -140,16 +140,16 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         call_name: &str,
     ) -> Result<ExtrinsicCallInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
         let pallet = self.pallet_by_name(pallet_name).ok_or({
-            ExtrinsicInfoError::PalletNotFoundByName { 
-                name: Cow::Owned(pallet_name.to_string())
+            ExtrinsicInfoError::PalletNotFoundByName {
+                name: Cow::Owned(pallet_name.to_string()),
             }
         })?;
 
         let call = pallet.call_variant_by_name(call_name).ok_or_else(|| {
-            ExtrinsicInfoError::CallNotFoundByName { 
-                call_name: Cow::Owned(pallet_name.to_string()), 
-                pallet_index: pallet.call_index(), 
-                pallet_name: Cow::Borrowed(pallet.name())
+            ExtrinsicInfoError::CallNotFoundByName {
+                call_name: Cow::Owned(pallet_name.to_string()),
+                pallet_index: pallet.call_index(),
+                pallet_name: Cow::Borrowed(pallet.name()),
             }
         })?;
 
@@ -161,14 +161,13 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
             args: call
                 .fields
                 .iter()
-                .map(|f| ExtrinsicInfoArg {
+                .map(|f| ExtrinsicCallInfoArg {
                     name: Cow::Borrowed(f.name.as_deref().unwrap_or("")),
                     id: f.ty.id,
                 })
                 .collect(),
         })
     }
-
 
     fn extrinsic_signature_info(
         &self,
@@ -182,7 +181,11 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
     fn extrinsic_extension_version_info(
         &self,
     ) -> Result<impl Iterator<Item = u8>, ExtrinsicInfoError<'_>> {
-        Ok(self.extrinsic.transaction_extensions_by_version.keys().copied())
+        Ok(self
+            .extrinsic
+            .transaction_extensions_by_version
+            .keys()
+            .copied())
     }
 
     fn extrinsic_extension_info(
@@ -201,9 +204,10 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
             .extrinsic()
             .transaction_extensions_by_version(extension_version)
             .ok_or(ExtrinsicInfoError::ExtrinsicExtensionVersionNotFound { extension_version })?
-            .map(|f| ExtrinsicInfoArg {
+            .map(|f| ExtrinsicExtensionInfoArg {
                 name: Cow::Borrowed(f.identifier()),
                 id: f.extra_ty(),
+                implicit_id: f.additional_ty(),
             })
             .collect();
 

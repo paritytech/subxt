@@ -380,7 +380,7 @@ mod test {
         type Signature = Signature;
         type Hasher = substrate::BlakeTwo256;
         type Header = substrate::SubstrateHeader<HashFor<Self>>;
-        type ExtrinsicParams = substrate::SubstrateExtrinsicParams<Self>;
+        type TransactionExtensions = substrate::SubstrateExtrinsicParams<Self>;
         type AssetId = u32;
     }
 

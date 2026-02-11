@@ -7,16 +7,19 @@
 //! [`AnyOf`] to configure the set of transaction extensions which are known about
 //! when interacting with a chain.
 
-use crate::config::{Config, HashFor, ClientState, TransactionExtension, Params};
+use crate::config::transaction_extension_traits::TransactionExtension;
+use crate::config::{ClientState, Config, HashFor};
 use crate::error::ExtrinsicParamsError;
 use crate::utils::{Era, Static};
 use codec::{Compact, Encode};
-use core::any::Any;
 use core::fmt::Debug;
 use derive_where::derive_where;
 use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
-use std::collections::HashMap;
+
+// Re-export this here because it's a nicer public interface, and "Params" isn't overly
+// specific as a name otherwise.
+pub use super::transaction_extension_traits::Params;
 
 /// The [`VerifySignature`] extension. For V5 General transactions, this is how a signature
 /// is provided. The signature is constructed by signing a payload which contains the
@@ -25,54 +28,59 @@ use std::collections::HashMap;
 pub struct VerifySignature<T: Config>(VerifySignatureDetails<T>);
 
 impl<T: Config> TransactionExtension<T> for VerifySignature<T> {
-    type Params = ();
     type Decoded = Static<VerifySignatureDetails<T>>;
+    type Params = ();
 
     fn new(_client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(VerifySignature(VerifySignatureDetails::Disabled))
     }
+
+    fn inject_signature(&mut self, account: &T::AccountId, signature: &T::Signature) {
+        // The signature is not set through params, only here, once given by a user:
+        self.0 = VerifySignatureDetails::Signed {
+            signature: signature.clone(),
+            account: account.clone(),
+        }
+    }
 }
 
-impl<T: Config> frame_decode::extrinsics::TransactionExtension for VerifySignature<T> {
-    fn extension_name(&self) -> &'static str {
-        "VerifySignature"
-    }
-    fn encode_value_to(&self, v: &mut Vec<u8>) {
+impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
+    for VerifySignature<T>
+{
+    const NAME: &str = "VerifySignature";
+
+    fn encode_value_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
         self.0.encode_to(v);
+        Ok(())
     }
-    fn encode_signer_payload_value_to(&self, v: &mut Vec<u8>) {
+    fn encode_value_for_signer_payload_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
         // This extension is never encoded to the signer payload, and extensions
         // prior to this are ignored when creating said payload, so clear anything
         // we've seen so far.
         v.clear();
+        Ok(())
     }
-    fn encode_implicit_to(&self, v: &mut Vec<u8>) {
+    fn encode_implicit_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
         // We only use the "implicit" data for extensions _after_ this one
         // in the pipeline to form the signer payload. Thus, clear anything
         // we've seen so far.
         v.clear();
-    }
-
-    fn inject_signature(&mut self, account: &dyn Any, signature: &dyn Any) {
-        // Downcast refs back to concrete types (we use `&dyn Any`` so that the trait remains object safe)
-        let account = account
-            .downcast_ref::<T::AccountId>()
-            .expect("A T::AccountId should have been provided")
-            .clone();
-        let signature = signature
-            .downcast_ref::<T::Signature>()
-            .expect("A T::Signature should have been provided")
-            .clone();
-
-        // The signature is not set through params, only here, once given by a user:
-        self.0 = VerifySignatureDetails::Signed { signature, account }
-    }
-}
-
-impl<T: Config> TransactionExtension<T> for VerifySignature<T> {
-    type Decoded = Static<VerifySignatureDetails<T>>;
-    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
-        identifier == "VerifySignature"
+        Ok(())
     }
 }
 
@@ -97,7 +105,8 @@ pub struct CheckMetadataHash {
     // but for now we never provide a hash and so this is empty.
 }
 
-impl<T: Config> ExtrinsicParams<T> for CheckMetadataHash {
+impl<T: Config> TransactionExtension<T> for CheckMetadataHash {
+    type Decoded = CheckMetadataHashMode;
     type Params = ();
 
     fn new(_client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
@@ -105,22 +114,29 @@ impl<T: Config> ExtrinsicParams<T> for CheckMetadataHash {
     }
 }
 
-impl ExtrinsicParamsEncoder for CheckMetadataHash {
-    fn encode_value_to(&self, v: &mut Vec<u8>) {
+impl frame_decode::extrinsics::TransactionExtension<PortableRegistry> for CheckMetadataHash {
+    const NAME: &str = "CheckMetadataHash";
+
+    fn encode_value_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
         // A single 0 byte in the TX payload indicates that the chain should
         // _not_ expect any metadata hash to exist in the signer payload.
         0u8.encode_to(v);
+        Ok(())
     }
-    fn encode_implicit_to(&self, v: &mut Vec<u8>) {
+    fn encode_implicit_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
         // We provide no metadata hash in the signer payload to align with the above.
         None::<()>.encode_to(v);
-    }
-}
-
-impl<T: Config> TransactionExtension<T> for CheckMetadataHash {
-    type Decoded = CheckMetadataHashMode;
-    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
-        identifier == "CheckMetadataHash"
+        Ok(())
     }
 }
 
@@ -149,7 +165,8 @@ impl CheckMetadataHashMode {
 /// The [`CheckSpecVersion`] transaction extension.
 pub struct CheckSpecVersion(u32);
 
-impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
+impl<T: Config> TransactionExtension<T> for CheckSpecVersion {
+    type Decoded = ();
     type Params = ();
 
     fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
@@ -157,23 +174,33 @@ impl<T: Config> ExtrinsicParams<T> for CheckSpecVersion {
     }
 }
 
-impl ExtrinsicParamsEncoder for CheckSpecVersion {
-    fn encode_implicit_to(&self, v: &mut Vec<u8>) {
-        self.0.encode_to(v);
-    }
-}
+impl frame_decode::extrinsics::TransactionExtension<PortableRegistry> for CheckSpecVersion {
+    const NAME: &str = "CheckSpecVersion";
 
-impl<T: Config> TransactionExtension<T> for CheckSpecVersion {
-    type Decoded = ();
-    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
-        identifier == "CheckSpecVersion"
+    fn encode_value_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        _v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        Ok(())
+    }
+    fn encode_implicit_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        self.0.encode_to(v);
+        Ok(())
     }
 }
 
 /// The [`CheckNonce`] transaction extension.
 pub struct CheckNonce(u64);
 
-impl<T: Config> ExtrinsicParams<T> for CheckNonce {
+impl<T: Config> TransactionExtension<T> for CheckNonce {
+    type Decoded = u64;
     type Params = CheckNonceParams;
 
     fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
@@ -181,16 +208,25 @@ impl<T: Config> ExtrinsicParams<T> for CheckNonce {
     }
 }
 
-impl ExtrinsicParamsEncoder for CheckNonce {
-    fn encode_value_to(&self, v: &mut Vec<u8>) {
-        Compact(self.0).encode_to(v);
-    }
-}
+impl frame_decode::extrinsics::TransactionExtension<PortableRegistry> for CheckNonce {
+    const NAME: &str = "CheckNonce";
 
-impl<T: Config> TransactionExtension<T> for CheckNonce {
-    type Decoded = u64;
-    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
-        identifier == "CheckNonce"
+    fn encode_value_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        Compact(self.0).encode_to(v);
+        Ok(())
+    }
+    fn encode_implicit_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        _v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        Ok(())
     }
 }
 
@@ -220,7 +256,8 @@ impl<T: Config> Params<T> for CheckNonceParams {
 /// The [`CheckTxVersion`] transaction extension.
 pub struct CheckTxVersion(u32);
 
-impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
+impl<T: Config> TransactionExtension<T> for CheckTxVersion {
+    type Decoded = ();
     type Params = ();
 
     fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
@@ -228,23 +265,33 @@ impl<T: Config> ExtrinsicParams<T> for CheckTxVersion {
     }
 }
 
-impl ExtrinsicParamsEncoder for CheckTxVersion {
-    fn encode_implicit_to(&self, v: &mut Vec<u8>) {
-        self.0.encode_to(v);
-    }
-}
+impl frame_decode::extrinsics::TransactionExtension<PortableRegistry> for CheckTxVersion {
+    const NAME: &str = "CheckTxVersion";
 
-impl<T: Config> TransactionExtension<T> for CheckTxVersion {
-    type Decoded = ();
-    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
-        identifier == "CheckTxVersion"
+    fn encode_value_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        _v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        Ok(())
+    }
+    fn encode_implicit_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        self.0.encode_to(v);
+        Ok(())
     }
 }
 
 /// The [`CheckGenesis`] transaction extension.
 pub struct CheckGenesis<T: Config>(HashFor<T>);
 
-impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
+impl<T: Config> TransactionExtension<T> for CheckGenesis<T> {
+    type Decoded = ();
     type Params = ();
 
     fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
@@ -252,16 +299,27 @@ impl<T: Config> ExtrinsicParams<T> for CheckGenesis<T> {
     }
 }
 
-impl<T: Config> ExtrinsicParamsEncoder for CheckGenesis<T> {
-    fn encode_implicit_to(&self, v: &mut Vec<u8>) {
-        self.0.encode_to(v);
-    }
-}
+impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
+    for CheckGenesis<T>
+{
+    const NAME: &str = "CheckGenesis";
 
-impl<T: Config> TransactionExtension<T> for CheckGenesis<T> {
-    type Decoded = ();
-    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
-        identifier == "CheckGenesis"
+    fn encode_value_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        _v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        Ok(())
+    }
+    fn encode_implicit_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        self.0.encode_to(v);
+        Ok(())
     }
 }
 
@@ -271,7 +329,8 @@ pub struct CheckMortality<T: Config> {
     genesis_hash: HashFor<T>,
 }
 
-impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
+impl<T: Config> TransactionExtension<T> for CheckMortality<T> {
+    type Decoded = Era;
     type Params = CheckMortalityParams<T>;
 
     fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
@@ -293,8 +352,17 @@ impl<T: Config> ExtrinsicParams<T> for CheckMortality<T> {
     }
 }
 
-impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
-    fn encode_value_to(&self, v: &mut Vec<u8>) {
+impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
+    for CheckMortality<T>
+{
+    const NAME: &str = "CheckMortality";
+
+    fn encode_value_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
         match &self.params {
             CheckMortalityParamsInner::MortalFromBlock {
                 for_n_blocks,
@@ -310,8 +378,14 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
                 Era::Immortal.encode_to(v);
             }
         }
+        Ok(())
     }
-    fn encode_implicit_to(&self, v: &mut Vec<u8>) {
+    fn encode_implicit_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
         match &self.params {
             CheckMortalityParamsInner::MortalFromBlock {
                 from_block_hash, ..
@@ -322,13 +396,7 @@ impl<T: Config> ExtrinsicParamsEncoder for CheckMortality<T> {
                 self.genesis_hash.encode_to(v);
             }
         }
-    }
-}
-
-impl<T: Config> TransactionExtension<T> for CheckMortality<T> {
-    type Decoded = Era;
-    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
-        identifier == "CheckMortality"
+        Ok(())
     }
 }
 
@@ -424,7 +492,8 @@ impl<T: Config> ChargeAssetTxPayment<T> {
     }
 }
 
-impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
+impl<T: Config> TransactionExtension<T> for ChargeAssetTxPayment<T> {
+    type Decoded = Self;
     type Params = ChargeAssetTxPaymentParams<T>;
 
     fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
@@ -435,16 +504,27 @@ impl<T: Config> ExtrinsicParams<T> for ChargeAssetTxPayment<T> {
     }
 }
 
-impl<T: Config> ExtrinsicParamsEncoder for ChargeAssetTxPayment<T> {
-    fn encode_value_to(&self, v: &mut Vec<u8>) {
-        (self.tip, &self.asset_id).encode_to(v);
-    }
-}
+impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
+    for ChargeAssetTxPayment<T>
+{
+    const NAME: &str = "ChargeAssetTxPayment";
 
-impl<T: Config> TransactionExtension<T> for ChargeAssetTxPayment<T> {
-    type Decoded = Self;
-    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
-        identifier == "ChargeAssetTxPayment"
+    fn encode_value_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        (self.tip, &self.asset_id).encode_to(v);
+        Ok(())
+    }
+    fn encode_implicit_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        _v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        Ok(())
     }
 }
 
@@ -504,7 +584,8 @@ impl ChargeTransactionPayment {
     }
 }
 
-impl<T: Config> ExtrinsicParams<T> for ChargeTransactionPayment {
+impl<T: Config> TransactionExtension<T> for ChargeTransactionPayment {
+    type Decoded = Self;
     type Params = ChargeTransactionPaymentParams;
 
     fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
@@ -514,16 +595,25 @@ impl<T: Config> ExtrinsicParams<T> for ChargeTransactionPayment {
     }
 }
 
-impl ExtrinsicParamsEncoder for ChargeTransactionPayment {
-    fn encode_value_to(&self, v: &mut Vec<u8>) {
-        self.tip.encode_to(v);
-    }
-}
+impl frame_decode::extrinsics::TransactionExtension<PortableRegistry> for ChargeTransactionPayment {
+    const NAME: &str = "ChargeTransactionPayment";
 
-impl<T: Config> TransactionExtension<T> for ChargeTransactionPayment {
-    type Decoded = Self;
-    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
-        identifier == "ChargeTransactionPayment"
+    fn encode_value_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        self.tip.encode_to(v);
+        Ok(())
+    }
+    fn encode_implicit_to(
+        &self,
+        _type_id: u32,
+        _type_resolver: &PortableRegistry,
+        _v: &mut Vec<u8>,
+    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
+        Ok(())
     }
 }
 
@@ -546,130 +636,3 @@ impl ChargeTransactionPaymentParams {
 }
 
 impl<T: Config> Params<T> for ChargeTransactionPaymentParams {}
-
-/// This accepts a tuple of [`TransactionExtension`]s, and will dynamically make use of whichever
-/// ones are actually required for the chain in the correct order, ignoring the rest. This
-/// is a sensible default, and allows for a single configuration to work across multiple chains.
-pub struct AnyOf<T, Params> {
-    params: Vec<Box<dyn ExtrinsicParamsEncoder + Send + 'static>>,
-    _marker: core::marker::PhantomData<(T, Params)>,
-}
-
-macro_rules! impl_tuples {
-    ($($ident:ident $index:tt),+) => {
-        // We do some magic when the tuple is wrapped in AnyOf. We
-        // look at the metadata, and use this to select and make use of only the extensions
-        // that we actually need for the chain we're dealing with.
-        impl <T, $($ident),+> ExtrinsicParams<T> for AnyOf<T, ($($ident,)+)>
-        where
-            T: Config,
-            $($ident: TransactionExtension<T>,)+
-        {
-            type Params = ($($ident::Params,)+);
-
-            fn new(
-                client: &ClientState<T>,
-                params: Self::Params,
-            ) -> Result<Self, ExtrinsicParamsError> {
-                let metadata = &client.metadata;
-                let types = metadata.types();
-
-                // For each transaction extension in the tuple, find the matching index in the metadata, if
-                // there is one, and add it to a map with that index as the key.
-                let mut exts_by_index = HashMap::new();
-                $({
-                    for (idx, e) in metadata.extrinsic().transaction_extensions_to_use_for_encoding().enumerate() {
-                        // Skip over any exts that have a match already:
-                        if exts_by_index.contains_key(&idx) {
-                            continue
-                        }
-                        // Break and record as soon as we find a match:
-                        if $ident::matches(e.identifier(), e.extra_ty(), types) {
-                            let ext = $ident::new(client, params.$index)?;
-                            let boxed_ext: Box<dyn ExtrinsicParamsEncoder + Send + 'static> = Box::new(ext);
-                            exts_by_index.insert(idx, boxed_ext);
-                            break
-                        }
-                    }
-                })+
-
-                // Next, turn these into an ordered vec, erroring if we haven't matched on any exts yet.
-                let mut params = Vec::new();
-                for (idx, e) in metadata.extrinsic().transaction_extensions_to_use_for_encoding().enumerate() {
-                    let Some(ext) = exts_by_index.remove(&idx) else {
-                        if is_type_empty(e.extra_ty(), types) {
-                            continue
-                        } else {
-                            return Err(ExtrinsicParamsError::UnknownTransactionExtension(e.identifier().to_owned()));
-                        }
-                    };
-                    params.push(ext);
-                }
-
-                Ok(AnyOf {
-                    params,
-                    _marker: core::marker::PhantomData
-                })
-            }
-        }
-
-        impl <T, $($ident),+> ExtrinsicParamsEncoder for AnyOf<T, ($($ident,)+)>
-        where
-            T: Config,
-            $($ident: TransactionExtension<T>,)+
-        {
-            fn inject_signature(&mut self, account_id: &dyn Any, signature: &dyn Any) {
-                for ext in &mut self.params {
-                    ext.inject_signature(account_id, signature);
-                }
-            }
-        }
-    }
-}
-
-#[rustfmt::skip]
-const _: () = {
-    impl_tuples!(A 0);
-    impl_tuples!(A 0, B 1);
-    impl_tuples!(A 0, B 1, C 2);
-    impl_tuples!(A 0, B 1, C 2, D 3);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15, Q 16);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15, Q 16, R 17);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15, Q 16, R 17, S 18);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15, Q 16, R 17, S 18, U 19);
-    impl_tuples!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15, Q 16, R 17, S 18, U 19, V 20);
-};
-
-/// Checks to see whether the type being given is empty, ie would require
-/// 0 bytes to encode.
-fn is_type_empty(type_id: u32, types: &scale_info::PortableRegistry) -> bool {
-    let Some(ty) = types.resolve(type_id) else {
-        // Can't resolve; type may not be empty. Not expected to hit this.
-        return false;
-    };
-
-    use scale_info::TypeDef;
-    match &ty.type_def {
-        TypeDef::Composite(c) => c.fields.iter().all(|f| is_type_empty(f.ty.id, types)),
-        TypeDef::Array(a) => a.len == 0 || is_type_empty(a.type_param.id, types),
-        TypeDef::Tuple(t) => t.fields.iter().all(|f| is_type_empty(f.id, types)),
-        // Explicitly list these in case any additions are made in the future.
-        TypeDef::BitSequence(_)
-        | TypeDef::Variant(_)
-        | TypeDef::Sequence(_)
-        | TypeDef::Compact(_)
-        | TypeDef::Primitive(_) => false,
-    }
-}

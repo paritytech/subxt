@@ -2,8 +2,9 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::config::{Config, ClientState, HashFor};
+use crate::config::{Config, HashFor};
 use crate::error::ExtrinsicParamsError;
+use crate::metadata::ArcMetadata;
 use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
 
@@ -13,7 +14,9 @@ use scale_info::PortableRegistry;
 /// - Accepts custom params on construction, allowing user configuration to be provided.
 /// - Can be decoded into some output type.
 /// - Can have an account ID and signature injected (useful for V5 transaction extensions).
-pub trait TransactionExtensions<T: Config>: frame_decode::extrinsics::TransactionExtensions<PortableRegistry> + Sized {
+pub trait TransactionExtensions<T: Config>:
+    frame_decode::extrinsics::TransactionExtensions<PortableRegistry> + Sized
+{
     /// These parameters can be provided to the constructor along with
     /// some default parameters that Subxt understands.
     type Params: Params<T>;
@@ -36,10 +39,12 @@ pub trait TransactionExtensions<T: Config>: frame_decode::extrinsics::Transactio
 }
 
 /// A single transaction extension.
-pub trait TransactionExtension<T: Config>: frame_decode::extrinsics::TransactionExtension<PortableRegistry> + Sized {
+pub trait TransactionExtension<T: Config>:
+    frame_decode::extrinsics::TransactionExtension<PortableRegistry> + Sized
+{
     /// The type representing the `extra` / value bytes of a transaction extension.
     /// Decoding from this type should be symmetrical to the respective
-    /// [`frame_decode::extrinsics::TransactionExtension::encode_value_to()`] implementation 
+    /// [`frame_decode::extrinsics::TransactionExtension::encode_value_to()`] implementation
     /// for this transaction extension.
     type Decoded: DecodeAsType;
 
@@ -62,6 +67,20 @@ pub trait TransactionExtension<T: Config>: frame_decode::extrinsics::Transaction
     /// and provided values which line up with the relevant `Config`. In theory though, this
     /// method can be called manually with any types, hence this warning.
     fn inject_signature(&mut self, _account_id: &T::AccountId, _signature: &T::Signature) {}
+}
+
+/// This provides access to some relevant client state in transaction extensions,
+/// and is just a combination of some of the available properties.
+#[derive(Clone, Debug)]
+pub struct ClientState<T: Config> {
+    /// Genesis hash.
+    pub genesis_hash: HashFor<T>,
+    /// Spec version.
+    pub spec_version: u32,
+    /// Transaction version.
+    pub transaction_version: u32,
+    /// Metadata.
+    pub metadata: ArcMetadata,
 }
 
 /// The parameters (ie [`TransactionExtensions::Params`]) can also have data injected into them,

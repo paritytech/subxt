@@ -45,7 +45,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let block = block?;
 
         // Print some details about the blocks we fetch via the light client.
-        println!("Chain {:?} height={:?} hash={:?}", chain, block.number(), block.hash());
+        println!(
+            "Chain {:?} height={:?} hash={:?}",
+            chain,
+            block.number(),
+            block.hash()
+        );
         let at_block = block.at().await?;
         let extrinsics = at_block.extrinsics().fetch().await?;
         for ext in extrinsics.iter() {

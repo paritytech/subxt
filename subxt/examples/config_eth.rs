@@ -1,6 +1,6 @@
 //! Configuring Subxt to talk to AssetHub.
 use subxt::Error;
-use subxt::config::{Config, DefaultExtrinsicParams, SubstrateConfig};
+use subxt::config::{Config, DefaultTransactionExtensions, SubstrateConfig};
 
 /// Our EthConfig wraps SubstrateConfig and configures the
 /// account ID / address / signature to be based on 20 byte IDs.
@@ -8,7 +8,7 @@ use subxt::config::{Config, DefaultExtrinsicParams, SubstrateConfig};
 pub struct EthConfig(SubstrateConfig);
 
 impl Config for EthConfig {
-    // Eth based chains use 20 byte account IDs 
+    // Eth based chains use 20 byte account IDs
     // and ecdsa based signing:
     type Address = subxt::utils::AccountId20;
     type AccountId = subxt::utils::AccountId20;
@@ -18,7 +18,7 @@ impl Config for EthConfig {
     type AssetId = <SubstrateConfig as Config>::AssetId;
     type Hasher = <SubstrateConfig as Config>::Hasher;
     type Header = <SubstrateConfig as Config>::Header;
-    type ExtrinsicParams = DefaultExtrinsicParams<EthConfig>;
+    type TransactionExtensions = DefaultTransactionExtensions<EthConfig>;
 
     // Forward these methods to the default SubstrateConfig:
     fn genesis_hash(&self) -> Option<subxt::config::HashFor<Self>> {

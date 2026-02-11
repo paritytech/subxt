@@ -90,26 +90,26 @@ pub struct ExtrinsicTransactionExtension<'extrinsic, T: Config> {
 }
 
 impl<'extrinsic, T: Config> ExtrinsicTransactionExtension<'extrinsic, T> {
-    /// The bytes representing this signed extension.
+    /// The bytes representing this transaction extension.
     pub fn bytes(&self) -> &'extrinsic [u8] {
         self.bytes
     }
 
-    /// The name of the signed extension.
+    /// The name of the transaction extension.
     pub fn name(&self) -> &'extrinsic str {
         self.identifier
     }
 
-    /// The type id of the signed extension.
+    /// The type id of the transaction extension.
     pub fn type_id(&self) -> u32 {
         self.ty_id
     }
 
-    /// Decodes this signed extension based on the provided [`TransactionExtension`] type.
+    /// Decodes this transaction extension based on the provided [`TransactionExtension`] type.
     pub fn decode_as<S: TransactionExtension<T>>(
         &self,
     ) -> Option<Result<S::Decoded, ExtrinsicError>> {
-        if !S::matches(self.identifier, self.ty_id, self.metadata.types()) {
+        if S::NAME != self.identifier {
             return None;
         }
         Some(self.decode_unchecked_as::<S::Decoded>())

@@ -11,11 +11,8 @@ mod validation_result;
 
 use crate::backend::TransactionStatus as BackendTransactionStatus;
 use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
-use crate::config::extrinsic_params::Params;
-use crate::config::{
-    ClientState, Config, ExtrinsicParams, ExtrinsicParamsEncoder, HashFor, Hasher, Header,
-    TransactionExtensions,
-};
+use crate::config::transaction_extensions::Params;
+use crate::config::{ClientState, Config, HashFor, Hasher, Header, TransactionExtensions};
 use crate::error::{ExtrinsicError, TransactionStatusError};
 use crate::utils::Static;
 use codec::{Compact, Decode, Encode};
@@ -168,7 +165,7 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
             client: self.client.clone(),
             encoded,
             marker: PhantomData,
-        })    
+        })
     }
 
     /// Create a signable transaction. Depending on the metadata, we might end up constructing either a v4 or
@@ -180,7 +177,7 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
     pub fn create_signable_offline<'call, Call>(
         &self,
         call: &'call Call,
-        params: <T::ExtrinsicParams as TransactionExtensions<T>>::Params,
+        params: <T::TransactionExtensions as TransactionExtensions<T>>::Params,
     ) -> Result<SignableTransaction<'call, T, Client, Call>, ExtrinsicError>
     where
         Call: Payload,
@@ -201,7 +198,7 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
     pub fn create_v4_signable_offline<'call, Call>(
         &self,
         call: &'call Call,
-        params: <T::ExtrinsicParams as TransactionExtensions<T>>::Params,
+        params: <T::TransactionExtensions as TransactionExtensions<T>>::Params,
     ) -> Result<SignableTransaction<'call, T, Client, Call>, ExtrinsicError>
     where
         Call: Payload,
@@ -219,7 +216,7 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
     pub fn create_v5_signable_offline<'call, Call>(
         &self,
         call: &'call Call,
-        params: <T::ExtrinsicParams as TransactionExtensions<T>>::Params,
+        params: <T::TransactionExtensions as TransactionExtensions<T>>::Params,
     ) -> Result<SignableTransaction<'call, T, Client, Call>, ExtrinsicError>
     where
         Call: Payload,
@@ -251,7 +248,7 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
     fn create_signable_at_version<'call, Call>(
         &self,
         call: &'call Call,
-        params: <T::ExtrinsicParams as TransactionExtensions<T>>::Params,
+        params: <T::TransactionExtensions as TransactionExtensions<T>>::Params,
         tx_version: SupportedTransactionVersion,
     ) -> Result<SignableTransaction<'call, T, Client, Call>, ExtrinsicError>
     where
@@ -285,7 +282,7 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
             metadata: self.client.metadata(),
         };
         let tx_extensions =
-            <T::ExtrinsicParams as TransactionExtensions<T>>::new(&client_state, params)?;
+            <T::TransactionExtensions as TransactionExtensions<T>>::new(&client_state, params)?;
 
         // Return these details, ready to construct a signed extrinsic from.
         Ok(SignableTransaction {
@@ -314,7 +311,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
         &self,
         call: &'call Call,
         account_id: &T::AccountId,
-        mut params: <T::ExtrinsicParams as TransactionExtensions<T>>::Params,
+        mut params: <T::TransactionExtensions as TransactionExtensions<T>>::Params,
     ) -> Result<SignableTransaction<'call, T, Client, Call>, ExtrinsicError>
     where
         Call: Payload,
@@ -332,7 +329,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
         &self,
         call: &'call Call,
         account_id: &T::AccountId,
-        mut params: <T::ExtrinsicParams as TransactionExtensions<T>>::Params,
+        mut params: <T::TransactionExtensions as TransactionExtensions<T>>::Params,
     ) -> Result<SignableTransaction<'call, T, Client, Call>, ExtrinsicError>
     where
         Call: Payload,
@@ -350,7 +347,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
         &self,
         call: &'call Call,
         account_id: &T::AccountId,
-        mut params: <T::ExtrinsicParams as TransactionExtensions<T>>::Params,
+        mut params: <T::TransactionExtensions as TransactionExtensions<T>>::Params,
     ) -> Result<SignableTransaction<'call, T, Client, Call>, ExtrinsicError>
     where
         Call: Payload,
@@ -365,7 +362,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
         &mut self,
         call: &Call,
         signer: &S,
-        params: <T::ExtrinsicParams as TransactionExtensions<T>>::Params,
+        params: <T::TransactionExtensions as TransactionExtensions<T>>::Params,
     ) -> Result<SubmittableTransaction<T, Client>, ExtrinsicError>
     where
         Call: Payload,
@@ -391,7 +388,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
     where
         Call: Payload,
         S: Signer<T>,
-        <T::ExtrinsicParams as TransactionExtensions<T>>::Params: DefaultParams,
+        <T::TransactionExtensions as TransactionExtensions<T>>::Params: DefaultParams,
     {
         self.sign_and_submit_then_watch(call, signer, DefaultParams::default_params())
             .await
@@ -405,7 +402,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
         &mut self,
         call: &Call,
         signer: &S,
-        params: <T::ExtrinsicParams as TransactionExtensions<T>>::Params,
+        params: <T::TransactionExtensions as TransactionExtensions<T>>::Params,
     ) -> Result<TransactionProgress<T, Client>, ExtrinsicError>
     where
         Call: Payload,
@@ -435,7 +432,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
     where
         Call: Payload,
         S: Signer<T>,
-        <T::ExtrinsicParams as TransactionExtensions<T>>::Params: DefaultParams,
+        <T::TransactionExtensions as TransactionExtensions<T>>::Params: DefaultParams,
     {
         self.sign_and_submit(call, signer, DefaultParams::default_params())
             .await
@@ -453,7 +450,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
         &mut self,
         call: &Call,
         signer: &S,
-        params: <T::ExtrinsicParams as TransactionExtensions<T>>::Params,
+        params: <T::TransactionExtensions as TransactionExtensions<T>>::Params,
     ) -> Result<HashFor<T>, ExtrinsicError>
     where
         Call: Payload,
@@ -469,7 +466,7 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> TransactionsClient<T, Client> {
     async fn inject_account_nonce_and_block(
         &self,
         account_id: &T::AccountId,
-        params: &mut <T::ExtrinsicParams as TransactionExtensions<T>>::Params,
+        params: &mut <T::TransactionExtensions as TransactionExtensions<T>>::Params,
     ) -> Result<(), ExtrinsicError> {
         let block_ref = self
             .client
@@ -512,32 +509,36 @@ pub enum SupportedTransactionVersion {
 pub struct SignableTransaction<'call, T: Config, Client, Call> {
     client: Client,
     call: &'call Call,
-    tx_extensions: <T as Config>::ExtrinsicParams,
+    tx_extensions: <T as Config>::TransactionExtensions,
     // For V4 transactions this doesn't exist, and for V5 it does.
     tx_extension_version: Option<u8>,
 }
 
-impl<'call, T: Config, Client: OfflineClientAtBlockT<T>, Call: Payload> SignableTransaction<'call, T, Client, Call> {
+impl<'call, T: Config, Client: OfflineClientAtBlockT<T>, Call: Payload>
+    SignableTransaction<'call, T, Client, Call>
+{
     /// Return the signer payload for this transaction. These are the bytes that must
     /// be signed in order to produce a valid signature for the transaction.
     pub fn signer_payload(&self) -> Result<Vec<u8>, ExtrinsicError> {
-        let signer_payload = if let Some(transaction_extension_version) = self.tx_extension_version {
+        let signer_payload = if let Some(transaction_extension_version) = self.tx_extension_version
+        {
             frame_decode::extrinsics::encode_v5_signer_payload(
-                self.call.pallet_name(), 
-                self.call.call_name(), 
+                self.call.pallet_name(),
+                self.call.call_name(),
                 self.call.call_data(),
-                transaction_extension_version, 
-                &self.tx_extensions, 
-                self.client.metadata_ref(), 
+                transaction_extension_version,
+                &self.tx_extensions,
+                self.client.metadata_ref(),
                 self.client.metadata_ref().types(),
-            )?.to_vec()
+            )?
+            .to_vec()
         } else {
             frame_decode::extrinsics::encode_v4_signer_payload(
-                self.call.pallet_name(), 
-                self.call.call_name(), 
+                self.call.pallet_name(),
+                self.call.call_name(),
                 self.call.call_data(),
-                &self.tx_extensions, 
-                self.client.metadata_ref(), 
+                &self.tx_extensions,
+                self.client.metadata_ref(),
                 self.client.metadata_ref().types(),
             )?
         };
@@ -548,7 +549,10 @@ impl<'call, T: Config, Client: OfflineClientAtBlockT<T>, Call: Payload> Signable
     /// Convert this [`SignableTransaction`] into a [`SubmittableTransaction`], ready to submit.
     /// The provided `signer` is responsible for providing the "from" address for the transaction,
     /// as well as providing a signature to attach to it.
-    pub fn sign<S: Signer<T>>(&mut self, signer: &S) -> Result<SubmittableTransaction<T, Client>, ExtrinsicError> {
+    pub fn sign<S: Signer<T>>(
+        &mut self,
+        signer: &S,
+    ) -> Result<SubmittableTransaction<T, Client>, ExtrinsicError> {
         // Given our signer, we can sign the payload representing this extrinsic.
         let signature = signer.sign(&self.signer_payload()?);
         // Now, use the signature and "from" account to build the extrinsic.
@@ -569,25 +573,25 @@ impl<'call, T: Config, Client: OfflineClientAtBlockT<T>, Call: Payload> Signable
             self.tx_extensions.inject_signature(account_id, signature);
 
             frame_decode::extrinsics::encode_v5_general(
-                self.call.pallet_name(), 
-                self.call.call_name(), 
+                self.call.pallet_name(),
+                self.call.call_name(),
                 self.call.call_data(),
-                transaction_extension_version, 
-                &self.tx_extensions, 
-                self.client.metadata_ref(), 
+                transaction_extension_version,
+                &self.tx_extensions,
+                self.client.metadata_ref(),
                 self.client.metadata_ref().types(),
             )
         } else {
             let address: T::Address = account_id.clone().into();
 
             frame_decode::extrinsics::encode_v4_signed(
-                self.call.pallet_name(), 
-                self.call.call_name(), 
+                self.call.pallet_name(),
+                self.call.call_name(),
                 self.call.call_data(),
                 &self.tx_extensions,
                 &Static(address),
                 &Static(signature),
-                self.client.metadata_ref(), 
+                self.client.metadata_ref(),
                 self.client.metadata_ref().types(),
             )
         }?;
@@ -597,11 +601,6 @@ impl<'call, T: Config, Client: OfflineClientAtBlockT<T>, Call: Payload> Signable
             encoded,
             marker: PhantomData,
         })
-    }
-
-    // Are we working with a V5 transaction? This is handled a bit differently.
-    fn is_v5(&self) -> bool {
-        self.tx_extension_version.is_some()
     }
 }
 

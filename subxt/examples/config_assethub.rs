@@ -1,7 +1,8 @@
 //! Configuring Subxt to talk to AssetHub.
 use subxt::Error;
 use subxt::config::{
-    Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, PolkadotConfig, SubstrateConfig,
+    Config, DefaultExtrinsicParamsBuilder, DefaultTransactionExtensions, PolkadotConfig,
+    SubstrateConfig,
 };
 use subxt_signer::sr25519::dev;
 
@@ -34,7 +35,7 @@ impl Config for AssetHubConfig {
     type Signature = <SubstrateConfig as Config>::Signature;
     type Hasher = <SubstrateConfig as Config>::Hasher;
     type Header = <SubstrateConfig as Config>::Header;
-    type ExtrinsicParams = DefaultExtrinsicParams<AssetHubConfig>;
+    type TransactionExtensions = DefaultTransactionExtensions<AssetHubConfig>;
 
     // Forward these methods to the default SubstrateConfig:
     fn genesis_hash(&self) -> Option<subxt::config::HashFor<Self>> {
