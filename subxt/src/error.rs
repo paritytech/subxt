@@ -219,10 +219,6 @@ pub enum OnlineClientError {
     RpcError(#[from] subxt_rpcs::Error),
     #[error("Could not construct the CombinedBackend: {0}")]
     CannotBuildCombinedBackend(CombinedBackendError),
-    #[error(
-        "Cannot construct OnlineClient: Cannot fetch latest finalized block to obtain init details from: {0}"
-    )]
-    CannotGetLatestFinalizedBlock(BackendError),
     #[error("Cannot construct OnlineClient: Cannot fetch genesis hash: {0}")]
     CannotGetGenesisHash(BackendError),
 }
@@ -230,8 +226,7 @@ pub enum OnlineClientError {
 impl OnlineClientError {
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
-            OnlineClientError::CannotGetLatestFinalizedBlock(e)
-            | OnlineClientError::CannotGetGenesisHash(e) => Some(e),
+            OnlineClientError::CannotGetGenesisHash(e) => Some(e),
             _ => None,
         }
     }
@@ -628,12 +623,6 @@ pub enum ExtrinsicError {
     CannotGetBlockBody(BackendError),
     #[error("Block not found: {0}")]
     BlockNotFound(Hex),
-    #[error(
-        "Extrinsic submission error: Cannot get latest finalized block to grab account nonce at: {0}"
-    )]
-    CannotGetLatestFinalizedBlock(BackendError),
-    #[error("Cannot find block header for block {block_hash}")]
-    CannotFindBlockHeader { block_hash: Hex },
     #[error("Error getting account nonce at block {block_hash}")]
     AccountNonceError {
         block_hash: Hex,
@@ -668,7 +657,6 @@ impl ExtrinsicError {
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
             ExtrinsicError::CannotGetBlockBody(e)
-            | ExtrinsicError::CannotGetLatestFinalizedBlock(e)
             | ExtrinsicError::ErrorSubmittingTransaction(e)
             | ExtrinsicError::TransactionStatusStreamError(e)
             | ExtrinsicError::CannotGetFeeInfo(e)
