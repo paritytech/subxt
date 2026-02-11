@@ -7,9 +7,7 @@
 //! [`AnyOf`] to configure the set of transaction extensions which are known about
 //! when interacting with a chain.
 
-use super::extrinsic_params::{ClientState, ExtrinsicParams};
-use crate::config::ExtrinsicParamsEncoder;
-use crate::config::{Config, HashFor};
+use crate::config::{Config, HashFor, ClientState, TransactionExtension, Params};
 use crate::error::ExtrinsicParamsError;
 use crate::utils::{Era, Static};
 use codec::{Compact, Encode};
@@ -20,39 +18,25 @@ use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
 use std::collections::HashMap;
 
-// Re-export this here; it's a bit generically named to be re-exported from ::config.
-pub use super::extrinsic_params::Params;
-
-/// A single [`TransactionExtension`] has a unique name, but is otherwise the
-/// same as [`ExtrinsicParams`] in describing how to encode the extra and
-/// additional data.
-pub trait TransactionExtension<T: Config>: ExtrinsicParams<T> {
-    /// The type representing the `extra` / value bytes of a transaction extension.
-    /// Decoding from this type should be symmetrical to the respective
-    /// `ExtrinsicParamsEncoder::encode_value_to()` implementation of this transaction extension.
-    type Decoded: DecodeAsType;
-
-    /// This should return true if the transaction extension matches the details given.
-    /// Often, this will involve just checking that the identifier given matches that of the
-    /// extension in question.
-    fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool;
-}
-
 /// The [`VerifySignature`] extension. For V5 General transactions, this is how a signature
 /// is provided. The signature is constructed by signing a payload which contains the
 /// transaction call data as well as the encoded "additional" bytes for any extensions _after_
 /// this one in the list.
 pub struct VerifySignature<T: Config>(VerifySignatureDetails<T>);
 
-impl<T: Config> ExtrinsicParams<T> for VerifySignature<T> {
+impl<T: Config> TransactionExtension<T> for VerifySignature<T> {
     type Params = ();
+    type Decoded = Static<VerifySignatureDetails<T>>;
 
     fn new(_client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
         Ok(VerifySignature(VerifySignatureDetails::Disabled))
     }
 }
 
-impl<T: Config> ExtrinsicParamsEncoder for VerifySignature<T> {
+impl<T: Config> frame_decode::extrinsics::TransactionExtension for VerifySignature<T> {
+    fn extension_name(&self) -> &'static str {
+        "VerifySignature"
+    }
     fn encode_value_to(&self, v: &mut Vec<u8>) {
         self.0.encode_to(v);
     }
@@ -634,21 +618,6 @@ macro_rules! impl_tuples {
             T: Config,
             $($ident: TransactionExtension<T>,)+
         {
-            fn encode_value_to(&self, v: &mut Vec<u8>) {
-                for ext in &self.params {
-                    ext.encode_value_to(v);
-                }
-            }
-            fn encode_signer_payload_value_to(&self, v: &mut Vec<u8>) {
-                for ext in &self.params {
-                    ext.encode_signer_payload_value_to(v);
-                }
-            }
-            fn encode_implicit_to(&self, v: &mut Vec<u8>) {
-                for ext in &self.params {
-                    ext.encode_implicit_to(v);
-                }
-            }
             fn inject_signature(&mut self, account_id: &dyn Any, signature: &dyn Any) {
                 for ext in &mut self.params {
                     ext.inject_signature(account_id, signature);

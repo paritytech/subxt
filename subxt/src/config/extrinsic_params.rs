@@ -7,6 +7,8 @@
 //! [`crate::config::DefaultExtrinsicParams`] provides a general-purpose
 //! implementation of this that will work in many cases.
 
+use frame_decode::extrinsics::TransactionExtensions;
+use scale_info::PortableRegistry;
 use crate::config::{Config, HashFor};
 use crate::error::ExtrinsicParamsError;
 use crate::metadata::ArcMetadata;
@@ -29,7 +31,7 @@ pub struct ClientState<T: Config> {
 /// This trait allows you to configure the "signed extra" and
 /// "additional" parameters that are a part of the transaction payload
 /// or the signer payload respectively.
-pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + Send + 'static {
+pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + TransactionExtensions<PortableRegistry> + Sized + Send + 'static {
     /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to
     /// help construct your [`ExtrinsicParams`] object.
@@ -43,29 +45,6 @@ pub trait ExtrinsicParams<T: Config>: ExtrinsicParamsEncoder + Sized + Send + 's
 /// defines how to encode the "additional" and "extra" params. Both functions
 /// are optional and will encode nothing by default.
 pub trait ExtrinsicParamsEncoder: 'static {
-    /// This is expected to SCALE encode the transaction extension data to some
-    /// buffer that has been provided. This data is attached to the transaction
-    /// and also (by default) attached to the signer payload which is signed to
-    /// provide a signature for the transaction.
-    ///
-    /// If [`ExtrinsicParamsEncoder::encode_signer_payload_value_to`] is implemented,
-    /// then that will be used instead when generating a signer payload. Useful for
-    /// eg the `VerifySignature` extension, which is send with the transaction but
-    /// is not a part of the signer payload.
-    fn encode_value_to(&self, _v: &mut Vec<u8>) {}
-
-    /// See [`ExtrinsicParamsEncoder::encode_value_to`]. This defaults to calling that
-    /// method, but if implemented will dictate what is encoded to the signer payload.
-    fn encode_signer_payload_value_to(&self, v: &mut Vec<u8>) {
-        self.encode_value_to(v);
-    }
-
-    /// This is expected to SCALE encode the "implicit" (formally "additional")
-    /// parameters to some buffer that has been provided. These parameters are
-    /// _not_ sent along with the transaction, but are taken into account when
-    /// signing it, meaning the client and node must agree on their values.
-    fn encode_implicit_to(&self, _v: &mut Vec<u8>) {}
-
     /// Set the signature. This happens after we have constructed the extrinsic params,
     /// and so is defined here rather than on the params, below. We need to use `&dyn Any`
     /// to keep this trait object safe, but can downcast in the impls.

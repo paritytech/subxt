@@ -7,3 +7,4 @@ cargo-timing*
 /examples/parachain-example/target
 /examples/parachain-example/metadata/target
 .vscode
+.claude

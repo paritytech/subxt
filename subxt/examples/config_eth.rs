@@ -8,7 +8,8 @@ use subxt::config::{Config, DefaultExtrinsicParams, SubstrateConfig};
 pub struct EthConfig(SubstrateConfig);
 
 impl Config for EthConfig {
-    // AssetHub, like Polkadot, has no account index on its address type:
+    // Eth based chains use 20 byte account IDs 
+    // and ecdsa based signing:
     type Address = subxt::utils::AccountId20;
     type AccountId = subxt::utils::AccountId20;
     type Signature = subxt_signer::eth::Signature;
