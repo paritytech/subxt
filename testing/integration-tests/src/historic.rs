@@ -7,47 +7,49 @@ use subxt::{OnlineClient, config::PolkadotConfig};
 
 #[subxt_test]
 async fn can_instantiate_client_across_historic_polkadot_runtimes() {
-    let api = connect_to_rpc_node(&[
-        "wss://rpc.polkadot.io",
-        "wss://polkadot-public-rpc.blockops.network/ws",
-        "wss://1rpc.io/dot",
-    ])
-    .await;
+    let futs = POLKADOT_SPEC_VERSION_BLOCKS
+        .into_iter()
+        .map(async move |block_num| {
+            tracing::info!("Connecting to RPC node at block {block_num}");
+            let api = connect_to_rpc_node(&[
+                "wss://rpc.polkadot.io",
+                "wss://polkadot-public-rpc.blockops.network/ws",
+                "wss://1rpc.io/dot",
+            ])
+            .await;
 
-    let futs = POLKADOT_SPEC_VERSION_BLOCKS.into_iter().map(|block_num| {
-        let api = api.clone();
-        async move {
             tracing::info!("Instantiating client at block {block_num}");
             api.at_block(block_num)
                 .await
                 .unwrap_or_else(|e| panic!("Can't instantiate client at block {block_num}: {e}"));
-            tracing::info!("   -> Success Instantiating client at block {block_num}");
-        }
-    });
 
-    run_with_concurrency(5, futs).await;
+            tracing::info!("   -> Success Instantiating client at block {block_num}");
+        });
+
+    run_with_concurrency(10, futs).await;
 }
 
 #[subxt_test]
 async fn can_instantiate_client_across_historic_kusama_runtimes() {
-    let api = connect_to_rpc_node(&[
-        "wss://kusama-public-rpc.blockops.network/ws",
-        "wss://rpc.ibp.network/kusama",
-    ])
-    .await;
+    let futs = KUSAMA_SPEC_VERSION_BLOCKS
+        .into_iter()
+        .map(async move |block_num| {
+            tracing::info!("Connecting to RPC node at block {block_num}");
+            let api = connect_to_rpc_node(&[
+                "wss://rpc.ibp.network/kusama",
+                "wss://kusama-public-rpc.blockops.network/ws",
+            ])
+            .await;
 
-    let futs = KUSAMA_SPEC_VERSION_BLOCKS.into_iter().map(|block_num| {
-        let api = api.clone();
-        async move {
-            tracing::info!("Instantiating client at block {block_num}");
+            println!("Instantiating client at block {block_num}");
             api.at_block(block_num)
                 .await
                 .unwrap_or_else(|e| panic!("Can't instantiate client at block {block_num}: {e}"));
-            tracing::info!("   -> Success Instantiating client at block {block_num}");
-        }
-    });
 
-    run_with_concurrency(5, futs).await;
+            println!("   -> Success Instantiating client at block {block_num}");
+        });
+
+    run_with_concurrency(10, futs).await;
 }
 
 /// Runs at most `num_tasks` at once, running the next tasks only when currently running ones finish and free up space.
@@ -70,11 +72,13 @@ async fn run_with_concurrency<F: Future<Output = ()>>(
 }
 
 async fn connect_to_rpc_node(urls: &[&'static str]) -> OnlineClient<PolkadotConfig> {
-    for url in urls {
-        let api = OnlineClient::<PolkadotConfig>::from_url(url).await;
-        match api {
-            Ok(api) => return api,
-            Err(e) => tracing::warn!("Error connecting to RPC node {url}: {e}"),
+    for _ in 0..3 {
+        for url in urls {
+            let api = OnlineClient::<PolkadotConfig>::from_url(url).await;
+            match api {
+                Ok(api) => return api,
+                Err(e) => tracing::warn!("Error connecting to RPC node {url}: {e}"),
+            }
         }
     }
     panic!("Could not connect to any RPC node")
