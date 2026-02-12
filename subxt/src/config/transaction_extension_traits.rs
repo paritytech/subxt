@@ -3,7 +3,7 @@
 // see LICENSE for license details.
 
 use crate::config::{Config, HashFor};
-use crate::error::ExtrinsicParamsError;
+use crate::error::TransactionExtensionError;
 use crate::metadata::ArcMetadata;
 use scale_decode::DecodeAsType;
 use scale_info::PortableRegistry;
@@ -21,7 +21,10 @@ pub trait TransactionExtensions<T: Config>:
     type Params: Params<T>;
 
     /// Construct a new instance of our [`TransactionExtensions`].
-    fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError>;
+    fn new(
+        client: &ClientState<T>,
+        params: Self::Params,
+    ) -> Result<Self, TransactionExtensionError>;
 
     /// Set the signature and account ID for any transaction extensions that care.
     fn inject_signature(&mut self, account_id: &T::AccountId, signature: &T::Signature);
@@ -42,7 +45,10 @@ pub trait TransactionExtension<T: Config>:
     type Params: Params<T>;
 
     /// Construct a new instance of our [`TransactionExtension`].
-    fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError>;
+    fn new(
+        client: &ClientState<T>,
+        params: Self::Params,
+    ) -> Result<Self, TransactionExtensionError>;
 
     /// Set the signature and accountID for this transaction extension. Defaults to doing nothing.
     fn inject_signature(&mut self, _account_id: &T::AccountId, _signature: &T::Signature) {}
@@ -130,7 +136,7 @@ macro_rules! impl_extensions_tuple {
         {
             type Params = ($($ident::Params,)+);
 
-            fn new(client: &ClientState<Conf>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+            fn new(client: &ClientState<Conf>, params: Self::Params) -> Result<Self, TransactionExtensionError> {
                 Ok((
                     $($ident::new(client, params.$index)?,)+
                 ))

@@ -3,13 +3,13 @@
 // see LICENSE for license details.
 
 //! This module contains implementations for common transaction extensions, each
-//! of which implements [`TransactionExtension`], and can be used in conjunction with
-//! [`AnyOf`] to configure the set of transaction extensions which are known about
-//! when interacting with a chain.
+//! of which implements [`TransactionExtension`]. A tuple of these can be provided
+//! to [`crate::Config::TransactionExtensions`] to select those that we want to
+//! make available for a given chain.
 
 use crate::config::transaction_extension_traits::TransactionExtension;
 use crate::config::{ClientState, Config, HashFor};
-use crate::error::ExtrinsicParamsError;
+use crate::error::TransactionExtensionError;
 use crate::utils::Era;
 use codec::{Compact, Encode};
 use core::fmt::Debug;
@@ -32,7 +32,10 @@ impl<T: Config> TransactionExtension<T> for VerifySignature<T> {
     type Decoded = VerifySignatureDetails<T>;
     type Params = ();
 
-    fn new(_client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+    fn new(
+        _client: &ClientState<T>,
+        _params: Self::Params,
+    ) -> Result<Self, TransactionExtensionError> {
         Ok(VerifySignature(VerifySignatureDetails::Disabled))
     }
 
@@ -112,7 +115,10 @@ impl<T: Config> TransactionExtension<T> for CheckMetadataHash {
     type Decoded = CheckMetadataHashMode;
     type Params = ();
 
-    fn new(_client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+    fn new(
+        _client: &ClientState<T>,
+        _params: Self::Params,
+    ) -> Result<Self, TransactionExtensionError> {
         Ok(CheckMetadataHash {})
     }
 }
@@ -172,7 +178,10 @@ impl<T: Config> TransactionExtension<T> for CheckSpecVersion {
     type Decoded = ();
     type Params = ();
 
-    fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+    fn new(
+        client: &ClientState<T>,
+        _params: Self::Params,
+    ) -> Result<Self, TransactionExtensionError> {
         Ok(CheckSpecVersion(client.spec_version))
     }
 }
@@ -206,7 +215,10 @@ impl<T: Config> TransactionExtension<T> for CheckNonce {
     type Decoded = u64;
     type Params = CheckNonceParams;
 
-    fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+    fn new(
+        _client: &ClientState<T>,
+        params: Self::Params,
+    ) -> Result<Self, TransactionExtensionError> {
         Ok(CheckNonce(params.0.unwrap_or(0)))
     }
 }
@@ -263,7 +275,10 @@ impl<T: Config> TransactionExtension<T> for CheckTxVersion {
     type Decoded = ();
     type Params = ();
 
-    fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+    fn new(
+        client: &ClientState<T>,
+        _params: Self::Params,
+    ) -> Result<Self, TransactionExtensionError> {
         Ok(CheckTxVersion(client.transaction_version))
     }
 }
@@ -297,7 +312,10 @@ impl<T: Config> TransactionExtension<T> for CheckGenesis<T> {
     type Decoded = ();
     type Params = ();
 
-    fn new(client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+    fn new(
+        client: &ClientState<T>,
+        _params: Self::Params,
+    ) -> Result<Self, TransactionExtensionError> {
         Ok(CheckGenesis(client.genesis_hash))
     }
 }
@@ -336,12 +354,15 @@ impl<T: Config> TransactionExtension<T> for CheckMortality<T> {
     type Decoded = Era;
     type Params = CheckMortalityParams<T>;
 
-    fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+    fn new(
+        client: &ClientState<T>,
+        params: Self::Params,
+    ) -> Result<Self, TransactionExtensionError> {
         // If a user has explicitly configured the transaction to be mortal for n blocks, but we get
         // to this stage and no injected information was able to turn this into MortalFromBlock{..},
         // then we hit an error as we are unable to construct a mortal transaction here.
         if matches!(&params.0, CheckMortalityParamsInner::MortalForBlocks(_)) {
-            return Err(ExtrinsicParamsError::custom(
+            return Err(TransactionExtensionError::custom(
                 "CheckMortality: We cannot construct an offline extrinsic with only the number of blocks it is mortal for. Use mortal_from_unchecked instead.",
             ));
         }
@@ -499,7 +520,10 @@ impl<T: Config> TransactionExtension<T> for ChargeAssetTxPayment<T> {
     type Decoded = Self;
     type Params = ChargeAssetTxPaymentParams<T>;
 
-    fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+    fn new(
+        _client: &ClientState<T>,
+        params: Self::Params,
+    ) -> Result<Self, TransactionExtensionError> {
         Ok(ChargeAssetTxPayment {
             tip: Compact(params.tip),
             asset_id: params.asset_id,
@@ -591,7 +615,10 @@ impl<T: Config> TransactionExtension<T> for ChargeTransactionPayment {
     type Decoded = Self;
     type Params = ChargeTransactionPaymentParams;
 
-    fn new(_client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
+    fn new(
+        _client: &ClientState<T>,
+        params: Self::Params,
+    ) -> Result<Self, TransactionExtensionError> {
         Ok(ChargeTransactionPayment {
             tip: Compact(params.tip),
         })

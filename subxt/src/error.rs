@@ -597,7 +597,7 @@ pub enum ExtrinsicError {
     #[error("Subxt does not support the extrinsic versions expected by the chain")]
     UnsupportedVersion,
     #[error("Cannot construct the required transaction extensions: {0}")]
-    Params(#[from] ExtrinsicParamsError),
+    Params(#[from] TransactionExtensionError),
     #[error("Cannot decode transaction extension '{name}': {error}")]
     CouldNotDecodeTransactionExtension {
         /// The extension name.
@@ -1060,26 +1060,26 @@ pub enum ExtrinsicDecodeErrorAtReason {
     LeftoverBytes(Vec<u8>),
 }
 
-/// An error that can be emitted when trying to construct an instance of [`crate::config::ExtrinsicParams`],
+/// An error that can be emitted when trying to construct a [`crate::config::TransactionExtension`],
 /// encode data from the instance, or match on signed extensions.
 #[derive(Debug, DeriveError)]
 #[non_exhaustive]
 #[allow(missing_docs)]
-pub enum ExtrinsicParamsError {
+pub enum TransactionExtensionError {
     #[error("Error constructing extrinsic parameters: {0}")]
     Custom(Box<dyn core::error::Error + Send + Sync + 'static>),
 }
 
-impl ExtrinsicParamsError {
-    /// Create a custom [`ExtrinsicParamsError`] from a string.
+impl TransactionExtensionError {
+    /// Create a custom [`TransactionExtensionError`] from a string.
     pub fn custom<S: Into<String>>(error: S) -> Self {
         let error: String = error.into();
         let error: Box<dyn core::error::Error + Send + Sync + 'static> = Box::from(error);
-        ExtrinsicParamsError::Custom(error)
+        TransactionExtensionError::Custom(error)
     }
 }
 
-impl From<core::convert::Infallible> for ExtrinsicParamsError {
+impl From<core::convert::Infallible> for TransactionExtensionError {
     fn from(value: core::convert::Infallible) -> Self {
         match value {}
     }

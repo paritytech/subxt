@@ -320,9 +320,9 @@ mod subxt_compat {
         }
     }
 
-    impl Into<Signature> for subxt::utils::eth::Signature {
-        fn into(self) -> Signature {
-            Signature(self.0)
+    impl From<subxt::utils::eth::Signature> for Signature {
+        fn from(value: subxt::utils::eth::Signature) -> Self {
+            Signature(value.0)
         }
     }
 
