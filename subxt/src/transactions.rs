@@ -14,7 +14,6 @@ use crate::client::{OfflineClientAtBlockT, OnlineClientAtBlockT};
 use crate::config::transaction_extensions::Params;
 use crate::config::{ClientState, Config, HashFor, Hasher, TransactionExtensions};
 use crate::error::{ExtrinsicError, TransactionStatusError};
-use crate::utils::Static;
 use codec::{Compact, Decode, Encode};
 use core::marker::PhantomData;
 
@@ -566,6 +565,7 @@ impl<'call, T: Config, Client: OfflineClientAtBlockT<T>, Call: Payload>
                 self.client.metadata_ref().types(),
             )
         } else {
+            // We need an Address, not an AccountId, to create a tx.
             let address: T::Address = account_id.clone().into();
 
             frame_decode::extrinsics::encode_v4_signed(
@@ -573,8 +573,8 @@ impl<'call, T: Config, Client: OfflineClientAtBlockT<T>, Call: Payload>
                 self.call.call_name(),
                 self.call.call_data(),
                 &self.tx_extensions,
-                &Static(address),
-                &Static(signature),
+                &address,
+                &signature,
                 self.client.metadata_ref(),
                 self.client.metadata_ref().types(),
             )

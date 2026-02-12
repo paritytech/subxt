@@ -10,11 +10,12 @@
 use crate::config::transaction_extension_traits::TransactionExtension;
 use crate::config::{ClientState, Config, HashFor};
 use crate::error::ExtrinsicParamsError;
-use crate::utils::{Era, Static};
+use crate::utils::Era;
 use codec::{Compact, Encode};
 use core::fmt::Debug;
 use derive_where::derive_where;
 use scale_decode::DecodeAsType;
+use scale_encode::EncodeAsType;
 use scale_info::PortableRegistry;
 
 // Re-export this here because it's a nicer public interface, and "Params" isn't overly
@@ -28,7 +29,7 @@ pub use super::transaction_extension_traits::Params;
 pub struct VerifySignature<T: Config>(VerifySignatureDetails<T>);
 
 impl<T: Config> TransactionExtension<T> for VerifySignature<T> {
-    type Decoded = Static<VerifySignatureDetails<T>>;
+    type Decoded = VerifySignatureDetails<T>;
     type Params = ();
 
     fn new(_client: &ClientState<T>, _params: Self::Params) -> Result<Self, ExtrinsicParamsError> {
@@ -51,11 +52,11 @@ impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
 
     fn encode_value_to(
         &self,
-        _type_id: u32,
-        _type_resolver: &PortableRegistry,
+        type_id: u32,
+        type_resolver: &PortableRegistry,
         v: &mut Vec<u8>,
     ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
-        self.0.encode_to(v);
+        self.0.encode_as_type_to(type_id, type_resolver, v)?;
         Ok(())
     }
     fn encode_value_for_signer_payload_to(
@@ -86,7 +87,9 @@ impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
 
 /// This allows a signature to be provided to the [`VerifySignature`] transaction extension.
 // Dev note: this must encode identically to https://github.com/paritytech/polkadot-sdk/blob/fd72d58313c297a10600037ce1bb88ec958d722e/substrate/frame/verify-signature/src/extension.rs#L43
-#[derive(codec::Encode, codec::Decode)]
+#[derive(EncodeAsType, DecodeAsType)]
+#[decode_as_type(trait_bounds = "")]
+#[encode_as_type(trait_bounds = "")]
 pub enum VerifySignatureDetails<T: Config> {
     /// A signature has been provided.
     Signed {

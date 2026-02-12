@@ -10,7 +10,19 @@ use codec::{Decode, Encode};
 
 /// Signature container that can store known signature types. This is a simplified version of
 /// `sp_runtime::MultiSignature`. To obtain more functionality, convert this into that type.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Encode, Decode, Debug, scale_info::TypeInfo)]
+#[derive(
+    Clone,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    scale_encode::EncodeAsType,
+    scale_decode::DecodeAsType,
+    Encode,
+    Decode,
+    Debug,
+    scale_info::TypeInfo,
+)]
 pub enum MultiSignature {
     /// An Ed25519 signature.
     Ed25519([u8; 64]),

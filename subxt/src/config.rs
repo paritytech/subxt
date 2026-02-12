@@ -75,13 +75,13 @@ pub use transaction_extension_traits::{ClientState, TransactionExtension, Transa
 /// given chain.
 pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     /// The account ID type; required for constructing extrinsics.
-    type AccountId: Debug + Clone + Encode + Decode + Serialize + Send;
+    type AccountId: Debug + Clone + Encode + EncodeAsType + DecodeAsType + Serialize + Send;
 
     /// The address type; required for constructing extrinsics.
-    type Address: Debug + Encode + From<Self::AccountId>;
+    type Address: Debug + EncodeAsType + From<Self::AccountId>;
 
     /// The signature type.
-    type Signature: Debug + Clone + Encode + Decode + Send;
+    type Signature: Debug + Clone + EncodeAsType + DecodeAsType + Send;
 
     /// The block header.
     type Header: Header;

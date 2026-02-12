@@ -12,7 +12,6 @@ use scale_info::PortableRegistry;
 /// - Implements [`frame_decode::extrinsics::TransactionExtensions`], meaning that it
 ///   can be encoded to value or implicit bytes.
 /// - Accepts custom params on construction, allowing user configuration to be provided.
-/// - Can be decoded into some output type.
 /// - Can have an account ID and signature injected (useful for V5 transaction extensions).
 pub trait TransactionExtensions<T: Config>:
     frame_decode::extrinsics::TransactionExtensions<PortableRegistry> + Sized
@@ -25,16 +24,6 @@ pub trait TransactionExtensions<T: Config>:
     fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError>;
 
     /// Set the signature and account ID for any transaction extensions that care.
-    ///
-    /// # Panics
-    ///
-    /// Implementations of this will likely try to downcast the provided `account_id`
-    /// and `signature` into `T::AccountId` and `T::Signature` (where `T: Config`), and are
-    /// free to panic if this downcasting does not succeed.
-    ///
-    /// In typical usage, this is not a problem, since this method is only called internally
-    /// and provided values which line up with the relevant `Config`. In theory though, this
-    /// method can be called manually with any types, hence this warning.
     fn inject_signature(&mut self, account_id: &T::AccountId, signature: &T::Signature);
 }
 
@@ -52,20 +41,10 @@ pub trait TransactionExtension<T: Config>:
     /// some default parameters that Subxt understands.
     type Params: Params<T>;
 
-    /// Construct a new instance of our [`TransactionExtensions`].
+    /// Construct a new instance of our [`TransactionExtension`].
     fn new(client: &ClientState<T>, params: Self::Params) -> Result<Self, ExtrinsicParamsError>;
 
     /// Set the signature and accountID for this transaction extension. Defaults to doing nothing.
-    ///
-    /// # Panics
-    ///
-    /// Implementations of this will likely try to downcast the provided `account_id`
-    /// and `signature` into `T::AccountId` and `T::Signature` (where `T: Config`), and are
-    /// free to panic if this downcasting does not succeed.
-    ///
-    /// In typical usage, this is not a problem, since this method is only called internally
-    /// and provided values which line up with the relevant `Config`. In theory though, this
-    /// method can be called manually with any types, hence this warning.
     fn inject_signature(&mut self, _account_id: &T::AccountId, _signature: &T::Signature) {}
 }
 
@@ -141,7 +120,7 @@ const _: () = {
     impl_params_tuple!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7, I 8, J 9, K 10, L 11, M 12, N 13, O 14, P 15, Q 16, R 17, S 18, T 19, U 20, V 21, W 22, X 23, Y 24, Z 25);
 };
 
-// tuples of TransactionExtensions are valid so long as each item is a TransactionExtension.
+// tuples of TransactionExtension types are automatically TransactionExtensions.
 macro_rules! impl_extensions_tuple {
     ($($ident:ident $index:tt),+) => {
         impl<Conf: Config, $($ident: TransactionExtension<Conf>),+>

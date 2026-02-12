@@ -10,9 +10,9 @@ pub struct EthConfig(SubstrateConfig);
 impl Config for EthConfig {
     // Eth based chains use 20 byte account IDs
     // and ecdsa based signing:
-    type Address = subxt::utils::AccountId20;
-    type AccountId = subxt::utils::AccountId20;
-    type Signature = subxt_signer::eth::Signature;
+    type Address = subxt::utils::eth::AccountId20;
+    type AccountId = subxt::utils::eth::AccountId20;
+    type Signature = subxt::utils::eth::Signature;
 
     // Just copy the default SubstrateConfig for these:
     type AssetId = <SubstrateConfig as Config>::AssetId;
