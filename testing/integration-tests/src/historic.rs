@@ -41,12 +41,12 @@ async fn can_instantiate_client_across_historic_kusama_runtimes() {
             ])
             .await;
 
-            println!("Instantiating client at block {block_num}");
+            tracing::info!("Instantiating client at block {block_num}");
             api.at_block(block_num)
                 .await
                 .unwrap_or_else(|e| panic!("Can't instantiate client at block {block_num}: {e}"));
 
-            println!("   -> Success Instantiating client at block {block_num}");
+            tracing::info!("   -> Success Instantiating client at block {block_num}");
         });
 
     run_with_concurrency(10, futs).await;

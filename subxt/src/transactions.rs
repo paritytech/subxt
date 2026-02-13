@@ -128,6 +128,8 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
     where
         Call: Payload,
     {
+        self.validate(call)?;
+
         let encoded = frame_decode::extrinsics::encode_v4_unsigned(
             call.pallet_name(),
             call.call_name(),
@@ -151,6 +153,8 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
     where
         Call: Payload,
     {
+        self.validate(call)?;
+
         let encoded = frame_decode::extrinsics::encode_v5_bare(
             call.pallet_name(),
             call.call_name(),

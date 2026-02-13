@@ -147,9 +147,9 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
 
         let call = pallet.call_variant_by_name(call_name).ok_or_else(|| {
             ExtrinsicInfoError::CallNotFoundByName {
-                call_name: Cow::Owned(pallet_name.to_string()),
                 pallet_index: pallet.call_index(),
                 pallet_name: Cow::Borrowed(pallet.name()),
+                call_name: Cow::Owned(call_name.to_string()),
             }
         })?;
 
