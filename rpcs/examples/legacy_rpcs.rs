@@ -1,5 +1,5 @@
-//! This example demonstrates basic usage of `subxt-rpcs` in isolation,
-//! showing how to set up an RPC client and make simple RPC calls.
+//! This example demonstrates setting up `subxt-rpcs` and using the legacy RPC methods
+//! for subscribing to Substrate blocks.
 
 use subxt::{config::PolkadotConfig, config::RpcConfigFor};
 use subxt_rpcs::{client::RpcClient, methods::LegacyRpcMethods};

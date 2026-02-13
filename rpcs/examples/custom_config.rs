@@ -2,7 +2,7 @@
 //! that might have different types than the standard configuration.
 //!
 //! For most Substrate-based chains, you can use `RpcConfigFor<PolkadotConfig>`
-//! as shown in the basic_rpc_usage example. This example shows how to create
+//! as shown in the legacy_rpcs example. This example shows how to create
 //! a completely custom configuration if needed.
 
 #![allow(missing_docs)]

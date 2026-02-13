@@ -1,4 +1,4 @@
-//! This example demonstrates using the newer ChainHead RPC methods
+//! This example demonstrates using the modern ChainHead RPC methods
 //! for subscribing to blocks.
 
 use subxt::{config::PolkadotConfig, config::RpcConfigFor};
