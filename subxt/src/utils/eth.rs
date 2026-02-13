@@ -2,13 +2,14 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! `AccountId20` is a representation of Ethereum address derived from hashing the public key.
+//! A couple of convenience types to use for Ethereum style chains.
 
 use codec::{Decode, Encode};
 use keccak_hash::keccak;
 use serde::{Deserialize, Serialize};
 use thiserror::Error as DeriveError;
 
+/// Ehtereum-compatible 65 byte ecdsa signature
 #[derive(
     Clone,
     Copy,
@@ -23,7 +24,23 @@ use thiserror::Error as DeriveError;
     scale_decode::DecodeAsType,
     scale_info::TypeInfo,
 )]
-/// Ethereum-compatible `AccountId`.
+pub struct Signature(pub [u8; 65]);
+
+/// Ethereum-compatible 20 byte `AccountId`.
+#[derive(
+    Clone,
+    Copy,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Encode,
+    Decode,
+    Debug,
+    scale_encode::EncodeAsType,
+    scale_decode::DecodeAsType,
+    scale_info::TypeInfo,
+)]
 pub struct AccountId20(pub [u8; 20]);
 
 impl AsRef<[u8]> for AccountId20 {

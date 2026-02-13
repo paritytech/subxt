@@ -173,12 +173,13 @@ async fn external_signing() {
         .unwrap();
 
     // Get the signer payload.
-    let signer_payload = partial_extrinsic.signer_payload();
+    let signer_payload = partial_extrinsic.signer_payload().unwrap();
     // Sign it (possibly externally).
     let signature = alice.sign(&signer_payload);
     // Use this to build a signed extrinsic.
     let extrinsic = partial_extrinsic
-        .sign_with_account_and_signature(&alice.public_key().into(), &signature.into());
+        .sign_with_account_and_signature(&alice.public_key().into(), &signature.into())
+        .unwrap();
 
     // And now submit it.
     extrinsic

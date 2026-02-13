@@ -91,6 +91,7 @@ async fn v4_signed_encode_decode() -> Result<(), subxt::Error> {
         .await
         .unwrap()
         .sign(&dev::alice())
+        .unwrap()
         .into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
@@ -126,6 +127,7 @@ async fn v5_general_encode_decode() -> Result<(), subxt::Error> {
         .await
         .unwrap()
         .sign(&dummy_signer) // No signature payload is added, but may be inserted into tx extensions.
+        .unwrap()
         .into_encoded();
     let tx_bytes_cursor = &mut &*tx_bytes;
 
