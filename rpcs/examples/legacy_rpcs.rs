@@ -1,8 +1,8 @@
 //! This example demonstrates setting up `subxt-rpcs` and using the legacy RPC methods
 //! for subscribing to Substrate blocks.
-//! 
+//!
 //! The legacy RPC methods are not well specified or "complete" in terms of what is available,
-//! nor is there any intention to implement them all. Instead, prefer the chainHead RPCs 
+//! nor is there any intention to implement them all. Instead, prefer the chainHead RPCs
 //! where possible (which include archive methods for accessing historic data); these are well
 //! specified and 100% implemented in this library.
 
