@@ -2,31 +2,28 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use super::{Config, HashFor};
+use super::{TransactionExtensions, transaction_extensions};
 use crate::config::transaction_extensions::CheckMortalityParams;
 
-use super::{Config, HashFor};
-use super::{ExtrinsicParams, transaction_extensions};
+/// A set of transaction extensions which is applicable in most default cases. This can be used
+/// as our [`Config::TransactionExtensions`] type, and then users can configure transactions by
+/// using the corresponding [`DefaultExtrinsicParamsBuilder`].
+pub type DefaultTransactionExtensions<T> = (
+    transaction_extensions::VerifySignature<T>,
+    transaction_extensions::CheckSpecVersion,
+    transaction_extensions::CheckTxVersion,
+    transaction_extensions::CheckNonce,
+    transaction_extensions::CheckGenesis<T>,
+    transaction_extensions::CheckMortality<T>,
+    transaction_extensions::ChargeAssetTxPayment<T>,
+    transaction_extensions::ChargeTransactionPayment,
+    transaction_extensions::CheckMetadataHash,
+);
 
-/// The default [`super::ExtrinsicParams`] implementation understands common signed extensions
-/// and how to apply them to a given chain.
-pub type DefaultExtrinsicParams<T> = transaction_extensions::AnyOf<
-    T,
-    (
-        transaction_extensions::VerifySignature<T>,
-        transaction_extensions::CheckSpecVersion,
-        transaction_extensions::CheckTxVersion,
-        transaction_extensions::CheckNonce,
-        transaction_extensions::CheckGenesis<T>,
-        transaction_extensions::CheckMortality<T>,
-        transaction_extensions::ChargeAssetTxPayment<T>,
-        transaction_extensions::ChargeTransactionPayment,
-        transaction_extensions::CheckMetadataHash,
-    ),
->;
-
-/// A builder that outputs the set of [`super::ExtrinsicParams::Params`] required for
-/// [`DefaultExtrinsicParams`]. This may expose methods that aren't applicable to the current
-/// chain; such values will simply be ignored if so.
+/// A builder that outputs the set of parameters required to configure transactions when
+/// [`DefaultTransactionExtensions`] is used. This may expose methods that aren't applicable
+/// to the current chain; such values will simply be ignored if so.
 pub struct DefaultExtrinsicParamsBuilder<T: Config> {
     /// `None` means the tx will be immortal, else it's mortality is described.
     mortality: transaction_extensions::CheckMortalityParams<T>,
@@ -123,7 +120,7 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
     }
 
     /// Build the extrinsic parameters.
-    pub fn build(self) -> <DefaultExtrinsicParams<T> as ExtrinsicParams<T>>::Params {
+    pub fn build(self) -> <DefaultTransactionExtensions<T> as TransactionExtensions<T>>::Params {
         let check_mortality_params = self.mortality;
 
         let charge_asset_tx_params = if let Some(asset_id) = self.tip_of_asset_id {

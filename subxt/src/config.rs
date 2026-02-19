@@ -45,9 +45,9 @@
 //! configured. Please open an issue in the Subxt repository and we can help to narrow down what
 //! the problem might be.
 
-mod default_extrinsic_params;
+mod default_transaction_extensions;
+mod transaction_extension_traits;
 
-pub mod extrinsic_params;
 pub mod polkadot;
 pub mod substrate;
 pub mod transaction_extensions;
@@ -62,11 +62,12 @@ use serde::{Serialize, de::DeserializeOwned};
 use std::{fmt::Display, marker::PhantomData};
 use subxt_rpcs::RpcConfig;
 
-pub use default_extrinsic_params::{DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
-pub use extrinsic_params::{ClientState, ExtrinsicParams, ExtrinsicParamsEncoder};
+pub use default_transaction_extensions::{
+    DefaultExtrinsicParamsBuilder, DefaultTransactionExtensions,
+};
 pub use polkadot::{PolkadotConfig, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder};
 pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder};
-pub use transaction_extensions::TransactionExtension;
+pub use transaction_extension_traits::{ClientState, TransactionExtension, TransactionExtensions};
 
 /// Configuration for a given chain and the runtimes within. This consists of the
 /// type information needed to work at the head of the chain (namely submitting
@@ -74,19 +75,19 @@ pub use transaction_extensions::TransactionExtension;
 /// given chain.
 pub trait Config: Clone + Debug + Sized + Send + Sync + 'static {
     /// The account ID type; required for constructing extrinsics.
-    type AccountId: Debug + Clone + Encode + Decode + Serialize + Send;
+    type AccountId: Debug + Clone + Encode + EncodeAsType + DecodeAsType + Serialize + Send;
 
     /// The address type; required for constructing extrinsics.
-    type Address: Debug + Encode + From<Self::AccountId>;
+    type Address: Debug + EncodeAsType + From<Self::AccountId>;
 
     /// The signature type.
-    type Signature: Debug + Clone + Encode + Decode + Send;
+    type Signature: Debug + Clone + EncodeAsType + DecodeAsType + Send;
 
     /// The block header.
     type Header: Header;
 
     /// This type defines the extrinsic extra and additional parameters.
-    type ExtrinsicParams: ExtrinsicParams<Self>;
+    type TransactionExtensions: TransactionExtensions<Self>;
 
     /// This is used to identify an asset in the `ChargeAssetTxPayment` signed extension.
     type AssetId: AssetId;
@@ -160,7 +161,7 @@ impl<T: Config> RpcConfig for RpcConfigFor<T> {
 pub type HashFor<T> = <<T as Config>::Hasher as Hasher>::Hash;
 
 /// given some [`Config`], this return the other params needed for its `ExtrinsicParams`.
-pub type ParamsFor<T> = <<T as Config>::ExtrinsicParams as ExtrinsicParams<T>>::Params;
+pub type ParamsFor<T> = <<T as Config>::TransactionExtensions as TransactionExtensions<T>>::Params;
 
 /// AssetId types must conform to this trait.
 pub trait AssetId: Debug + Clone + Encode + DecodeAsType + EncodeAsType + Send {}

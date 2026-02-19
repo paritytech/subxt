@@ -311,8 +311,20 @@ mod subxt_compat {
     use super::*;
     use subxt::config::Config;
     use subxt::transactions::Signer as SignerT;
-    use subxt::utils::AccountId20;
     use subxt::utils::MultiAddress;
+    use subxt::utils::eth::AccountId20;
+
+    impl From<Signature> for subxt::utils::eth::Signature {
+        fn from(value: Signature) -> Self {
+            subxt::utils::eth::Signature(value.0)
+        }
+    }
+
+    impl From<subxt::utils::eth::Signature> for Signature {
+        fn from(value: subxt::utils::eth::Signature) -> Self {
+            Signature(value.0)
+        }
+    }
 
     impl<T: Config> SignerT<T> for Keypair
     where
@@ -367,7 +379,7 @@ mod test {
     use secp256k1::Secp256k1;
     use subxt::config::{Config, HashFor, substrate};
     use subxt::transactions::Signer as SignerT;
-    use subxt::utils::AccountId20;
+    use subxt::utils::eth::AccountId20;
 
     use super::*;
 
@@ -377,10 +389,10 @@ mod test {
     impl Config for StubEthRuntimeConfig {
         type AccountId = AccountId20;
         type Address = AccountId20;
-        type Signature = Signature;
+        type Signature = subxt::utils::eth::Signature;
         type Hasher = substrate::BlakeTwo256;
         type Header = substrate::SubstrateHeader<HashFor<Self>>;
-        type ExtrinsicParams = substrate::SubstrateExtrinsicParams<Self>;
+        type TransactionExtensions = substrate::SubstrateExtrinsicParams<Self>;
         type AssetId = u32;
     }
 
@@ -439,7 +451,7 @@ mod test {
             let msg_as_bytes = msg.as_bytes();
 
             assert_eq!(SubxtSigner::account_id(&keypair), keypair.public_key().to_account_id());
-            assert_eq!(SubxtSigner::sign(&keypair, msg_as_bytes), keypair.sign(msg_as_bytes));
+            assert_eq!(SubxtSigner::sign(&keypair, msg_as_bytes), keypair.sign(msg_as_bytes).into());
         }
 
         #[test]
@@ -459,7 +471,7 @@ mod test {
 
         #[test]
         fn check_signing_and_verifying_matches(keypair in keypair(), msg in ".*") {
-            let sig = SubxtSigner::sign(&keypair, msg.as_bytes());
+            let sig = SubxtSigner::sign(&keypair, msg.as_bytes()).into();
 
             assert!(verify(
                 &sig,

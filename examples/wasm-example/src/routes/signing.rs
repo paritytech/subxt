@@ -5,7 +5,6 @@ use subxt::{client::OnlineClientAtBlockImpl, OnlineClient, OnlineClientAtBlock, 
 
 use subxt::config::DefaultExtrinsicParamsBuilder;
 use subxt::ext::codec::{Decode, Encode};
-use subxt::tx::Payload as _;
 use subxt::tx::SubmittableTransaction;
 use subxt::utils::{AccountId32, MultiSignature};
 
@@ -26,10 +25,7 @@ impl SigningExamplesComponent {
     fn set_message(&mut self, message: String) {
         let remark_call = polkadot::tx().system().remark(message.as_bytes().to_vec());
         let online_client_at_block = self.online_client.as_ref().unwrap();
-        let remark_call_bytes = remark_call
-            .encode_call_data(online_client_at_block.metadata_ref())
-            .unwrap();
-        self.remark_call_bytes = remark_call_bytes;
+        self.remark_call_bytes = online_client_at_block.tx().call_data(&remark_call).unwrap();
         self.message = message;
     }
 }
@@ -182,8 +178,9 @@ impl Component for SigningExamplesComponent {
                         };
 
                         // Apply the signature
-                        let signed_extrinsic =
-                            signable.sign_with_account_and_signature(&account_id, &multi_signature);
+                        let Ok(signed_extrinsic) = signable.sign_with_account_and_signature(&account_id, &multi_signature) else {
+                            return Message::Error(anyhow!("could not sign the extrinsic"));
+                        };
 
                         // check the TX validity (to debug in the js console if the extrinsic would work)
                         let dry_res = signed_extrinsic.validate().await;

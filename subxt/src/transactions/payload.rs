@@ -5,30 +5,24 @@
 //! This module contains the trait and types used to represent
 //! transactions that can be submitted.
 
-use crate::error::ExtrinsicError;
-use codec::Encode;
 use scale_encode::EncodeAsFields;
 use scale_value::{Composite, Value, ValueDef, Variant};
 use std::borrow::Cow;
-use subxt_metadata::Metadata;
 
 /// This represents a transaction payload that can be submitted
 /// to a node.
 pub trait Payload {
-    /// Encode call data to the provided output.
-    fn encode_call_data_to(
-        &self,
-        metadata: &Metadata,
-        out: &mut Vec<u8>,
-    ) -> Result<(), ExtrinsicError>;
+    /// The call data
+    type CallData: EncodeAsFields;
 
-    /// Encode call data and return the output. This is a convenience
-    /// wrapper around [`Payload::encode_call_data_to`].
-    fn encode_call_data(&self, metadata: &Metadata) -> Result<Vec<u8>, ExtrinsicError> {
-        let mut v = Vec::new();
-        self.encode_call_data_to(metadata, &mut v)?;
-        Ok(v)
-    }
+    /// The pallet name
+    fn pallet_name(&self) -> &str;
+
+    /// The call name
+    fn call_name(&self) -> &str;
+
+    /// The call data
+    fn call_data(&self) -> &Self::CallData;
 
     /// Returns the details needed to validate the call, which
     /// include a statically generated hash, the pallet name,
@@ -41,15 +35,16 @@ pub trait Payload {
 macro_rules! boxed_payload {
     ($ty:path) => {
         impl<T: Payload + ?Sized> Payload for $ty {
-            fn encode_call_data_to(
-                &self,
-                metadata: &Metadata,
-                out: &mut Vec<u8>,
-            ) -> Result<(), ExtrinsicError> {
-                self.as_ref().encode_call_data_to(metadata, out)
+            type CallData = T::CallData;
+
+            fn pallet_name(&self) -> &str {
+                self.as_ref().pallet_name()
             }
-            fn encode_call_data(&self, metadata: &Metadata) -> Result<Vec<u8>, ExtrinsicError> {
-                self.as_ref().encode_call_data(metadata)
+            fn call_name(&self) -> &str {
+                self.as_ref().call_name()
+            }
+            fn call_data(&self) -> &Self::CallData {
+                self.as_ref().call_data()
             }
             fn validation_details(&self) -> Option<ValidationDetails<'_>> {
                 self.as_ref().validation_details()
@@ -158,37 +153,19 @@ impl StaticPayload<Composite<()>> {
     }
 }
 
-impl<CallData: EncodeAsFields> Payload for StaticPayload<CallData> {
-    fn encode_call_data_to(
-        &self,
-        metadata: &Metadata,
-        out: &mut Vec<u8>,
-    ) -> Result<(), ExtrinsicError> {
-        let pallet = metadata
-            .pallet_by_name(&self.pallet_name)
-            .ok_or_else(|| ExtrinsicError::PalletNameNotFound(self.pallet_name.to_string()))?;
-        let call = pallet
-            .call_variant_by_name(&self.call_name)
-            .ok_or_else(|| ExtrinsicError::CallNameNotFound {
-                pallet_name: pallet.name().to_string(),
-                call_name: self.call_name.to_string(),
-            })?;
+impl<CD: EncodeAsFields> Payload for StaticPayload<CD> {
+    type CallData = CD;
 
-        let pallet_index = pallet.call_index();
-        let call_index = call.index;
+    fn pallet_name(&self) -> &str {
+        &self.pallet_name
+    }
 
-        pallet_index.encode_to(out);
-        call_index.encode_to(out);
+    fn call_name(&self) -> &str {
+        &self.call_name
+    }
 
-        let mut fields = call
-            .fields
-            .iter()
-            .map(|f| scale_encode::Field::new(f.ty.id, f.name.as_deref()));
-
-        self.call_data
-            .encode_as_fields_to(&mut fields, metadata.types(), out)
-            .map_err(ExtrinsicError::CannotEncodeCallData)?;
-        Ok(())
+    fn call_data(&self) -> &Self::CallData {
+        &self.call_data
     }
 
     fn validation_details(&self) -> Option<ValidationDetails<'_>> {
@@ -207,63 +184,4 @@ pub fn dynamic<CallData>(
     call_data: CallData,
 ) -> DynamicPayload<CallData> {
     StaticPayload::new(pallet_name, call_name, call_data)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use codec::Decode;
-    use scale_value::Composite;
-
-    fn test_metadata() -> Metadata {
-        let metadata_bytes = include_bytes!("../../../artifacts/polkadot_metadata_small.scale");
-        Metadata::decode(&mut &metadata_bytes[..]).expect("Valid metadata")
-    }
-
-    #[test]
-    fn encode_call_with_incompatible_types_returns_error() {
-        let metadata = test_metadata();
-
-        let incompatible_data = Composite::named([
-            ("dest", scale_value::Value::bool(true)), // Boolean instead of MultiAddress
-            ("value", scale_value::Value::string("not_a_number")), // String instead of u128
-        ]);
-
-        let payload = StaticPayload::new("Balances", "transfer_allow_death", incompatible_data);
-
-        let mut out = Vec::new();
-        let result = payload.encode_call_data_to(&metadata, &mut out);
-
-        assert!(
-            result.is_err(),
-            "Expected error when encoding with incompatible types"
-        );
-    }
-
-    #[test]
-    fn encode_call_with_valid_data_succeeds() {
-        let metadata = test_metadata();
-
-        // Create a valid payload to ensure our error handling doesn't break valid cases
-        // For MultiAddress, we'll use the Id variant with a 32-byte account
-        let valid_address =
-            scale_value::Value::unnamed_variant("Id", [scale_value::Value::from_bytes([0u8; 32])]);
-
-        let valid_data = Composite::named([
-            ("dest", valid_address),
-            ("value", scale_value::Value::u128(1000)),
-        ]);
-
-        let payload = StaticPayload::new("Balances", "transfer_allow_death", valid_data);
-
-        // This should succeed
-        let mut out = Vec::new();
-        let result = payload.encode_call_data_to(&metadata, &mut out);
-
-        assert!(
-            result.is_ok(),
-            "Expected success when encoding with valid data"
-        );
-        assert!(!out.is_empty(), "Expected encoded output to be non-empty");
-    }
 }
