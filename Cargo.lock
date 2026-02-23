@@ -5818,6 +5818,7 @@ dependencies = [
  "primitive-types",
  "serde",
  "serde_json",
+ "subxt",
  "subxt-lightclient",
  "thiserror 2.0.12",
  "tokio",
