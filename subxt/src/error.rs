@@ -215,34 +215,18 @@ impl OfflineClientAtBlockError {
 #[non_exhaustive]
 #[allow(missing_docs)]
 pub enum OnlineClientError {
-    #[error("Cannot construct OnlineClient: The URL provided is invalid: {url}")]
-    InvalidUrl {
-        /// The URL that was invalid.
-        url: String,
-    },
     #[error("Cannot construct OnlineClient: {0}")]
     RpcError(#[from] subxt_rpcs::Error),
     #[error("Could not construct the CombinedBackend: {0}")]
     CannotBuildCombinedBackend(CombinedBackendError),
-    #[error(
-        "Cannot construct OnlineClient: Cannot fetch latest finalized block to obtain init details from: {0}"
-    )]
-    CannotGetLatestFinalizedBlock(BackendError),
     #[error("Cannot construct OnlineClient: Cannot fetch genesis hash: {0}")]
     CannotGetGenesisHash(BackendError),
-    #[error("Cannot construct OnlineClient: Cannot fetch current runtime version: {0}")]
-    CannotGetCurrentRuntimeVersion(BackendError),
-    #[error("Cannot construct OnlineClient: Cannot fetch metadata: {0}")]
-    CannotFetchMetadata(BackendError),
 }
 
 impl OnlineClientError {
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
-            OnlineClientError::CannotGetLatestFinalizedBlock(e)
-            | OnlineClientError::CannotGetGenesisHash(e)
-            | OnlineClientError::CannotGetCurrentRuntimeVersion(e)
-            | OnlineClientError::CannotFetchMetadata(e) => Some(e),
+            OnlineClientError::CannotGetGenesisHash(e) => Some(e),
             _ => None,
         }
     }
@@ -422,12 +406,6 @@ impl BlockError {
 pub enum BackendError {
     #[error("Backend error: RPC error: {0}")]
     Rpc(#[from] RpcError),
-    #[error("Backend error: Could not find metadata version {0}")]
-    MetadataVersionNotFound(u32),
-    #[error("Backend error: Could not codec::Decode Runtime API response: {0}")]
-    CouldNotScaleDecodeRuntimeResponse(codec::Error),
-    #[error("Backend error: Could not codec::Decode metadata bytes into subxt::Metadata: {0}")]
-    CouldNotDecodeMetadata(codec::Error),
     // This is for errors in `Backend` implementations which aren't any of the "pre-defined" set above:
     #[error("Custom backend error: {0}")]
     Other(Cow<'static, str>),
@@ -497,9 +475,9 @@ pub enum RpcError {
 #[allow(missing_docs)]
 pub enum AccountNonceError {
     #[error("Could not retrieve account nonce: {0}")]
-    CouldNotRetrieve(#[from] BackendError),
+    CouldNotRetrieve(BackendError),
     #[error("Could not decode account nonce: {0}")]
-    CouldNotDecode(#[from] codec::Error),
+    CouldNotDecode(codec::Error),
     #[error("Wrong number of account nonce bytes returned: {0} (expected 2, 4 or 8)")]
     WrongNumberOfBytes(usize),
 }
@@ -531,8 +509,6 @@ pub enum RuntimeApiError {
     CouldNotEncodeInputs(frame_decode::runtime_apis::RuntimeApiInputsEncodeError),
     #[error("Failed to decode Runtime API: {0}")]
     CouldNotDecodeResponse(frame_decode::runtime_apis::RuntimeApiDecodeError<u32>),
-    #[error("Cannot access Runtime APIs at latest block: Cannot fetch latest finalized block: {0}")]
-    CannotGetLatestFinalizedBlock(BackendError),
     #[error("Cannot call the Runtime API: {0}")]
     CannotCallApi(BackendError),
 }
@@ -540,8 +516,7 @@ pub enum RuntimeApiError {
 impl RuntimeApiError {
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
-            RuntimeApiError::CannotGetLatestFinalizedBlock(e)
-            | RuntimeApiError::CannotCallApi(e) => Some(e),
+            RuntimeApiError::CannotCallApi(e) => Some(e),
             _ => None,
         }
     }
@@ -588,8 +563,6 @@ pub enum EventsError {
         event_name: String,
         reason: scale_decode::Error,
     },
-    #[error("Cannot access events at latest block: Cannot fetch latest finalized block: {0}")]
-    CannotGetLatestFinalizedBlock(BackendError),
     #[error("Cannot fetch event bytes: {0}")]
     CannotFetchEventBytes(BackendError),
 }
@@ -597,8 +570,7 @@ pub enum EventsError {
 impl EventsError {
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
-            EventsError::CannotGetLatestFinalizedBlock(e)
-            | EventsError::CannotFetchEventBytes(e) => Some(e),
+            EventsError::CannotFetchEventBytes(e) => Some(e),
             _ => None,
         }
     }
@@ -609,6 +581,8 @@ impl EventsError {
 #[derive(Debug, thiserror::Error)]
 #[allow(missing_docs)]
 pub enum ExtrinsicError {
+    #[error("Failed to construct extrinsic: {0}")]
+    EncodeError(#[from] frame_decode::extrinsics::ExtrinsicEncodeError),
     #[error("The extrinsic payload is not compatible with the live chain")]
     IncompatibleCodegen,
     #[error("Can't find extrinsic: pallet with name {0} not found")]
@@ -618,14 +592,12 @@ pub enum ExtrinsicError {
         pallet_name: String,
         call_name: String,
     },
-    #[error("Can't encode the extrinsic call data: {0}")]
-    CannotEncodeCallData(scale_encode::Error),
     #[error("Failed to encode an extrinsic: the genesis hash was not provided")]
     GenesisHashNotProvided,
     #[error("Subxt does not support the extrinsic versions expected by the chain")]
     UnsupportedVersion,
     #[error("Cannot construct the required transaction extensions: {0}")]
-    Params(#[from] ExtrinsicParamsError),
+    Params(#[from] TransactionExtensionError),
     #[error("Cannot decode transaction extension '{name}': {error}")]
     CouldNotDecodeTransactionExtension {
         /// The extension name.
@@ -633,17 +605,6 @@ pub enum ExtrinsicError {
         /// The decode error.
         error: scale_decode::Error,
     },
-    #[error(
-        "After decoding the extrinsic at index {extrinsic_index}, {num_leftover_bytes} bytes were left, suggesting that decoding may have failed"
-    )]
-    LeftoverBytes {
-        /// Index of the extrinsic that failed to decode.
-        extrinsic_index: usize,
-        /// Number of bytes leftover after decoding the extrinsic.
-        num_leftover_bytes: usize,
-    },
-    #[error("{0}")]
-    ExtrinsicDecodeErrorAt(#[from] ExtrinsicDecodeErrorAt),
     #[error("Failed to decode the fields of an extrinsic at index {extrinsic_index}: {error}")]
     CannotDecodeFields {
         /// Index of the extrinsic whose fields we could not decode
@@ -662,12 +623,6 @@ pub enum ExtrinsicError {
     CannotGetBlockBody(BackendError),
     #[error("Block not found: {0}")]
     BlockNotFound(Hex),
-    #[error(
-        "Extrinsic submission error: Cannot get latest finalized block to grab account nonce at: {0}"
-    )]
-    CannotGetLatestFinalizedBlock(BackendError),
-    #[error("Cannot find block header for block {block_hash}")]
-    CannotFindBlockHeader { block_hash: Hex },
     #[error("Error getting account nonce at block {block_hash}")]
     AccountNonceError {
         block_hash: Hex,
@@ -702,7 +657,6 @@ impl ExtrinsicError {
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
             ExtrinsicError::CannotGetBlockBody(e)
-            | ExtrinsicError::CannotGetLatestFinalizedBlock(e)
             | ExtrinsicError::ErrorSubmittingTransaction(e)
             | ExtrinsicError::TransactionStatusStreamError(e)
             | ExtrinsicError::CannotGetFeeInfo(e)
@@ -749,10 +703,6 @@ pub enum ViewFunctionError {
     CouldNotEncodeInputs(frame_decode::view_functions::ViewFunctionInputsEncodeError),
     #[error("Failed to decode View Function: {0}")]
     CouldNotDecodeResponse(frame_decode::view_functions::ViewFunctionDecodeError<u32>),
-    #[error(
-        "Cannot access View Functions at latest block: Cannot fetch latest finalized block: {0}"
-    )]
-    CannotGetLatestFinalizedBlock(BackendError),
     #[error("Cannot call the View Function Runtime API: {0}")]
     CannotCallApi(BackendError),
 }
@@ -760,8 +710,7 @@ pub enum ViewFunctionError {
 impl ViewFunctionError {
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
-            ViewFunctionError::CannotGetLatestFinalizedBlock(e)
-            | ViewFunctionError::CannotCallApi(e) => Some(e),
+            ViewFunctionError::CannotCallApi(e) => Some(e),
             _ => None,
         }
     }
@@ -987,8 +936,6 @@ pub enum StorageError {
         "Wrong number of key parts provided to fetch a storage address. We expected {expected} key parts but got {got} key parts"
     )]
     WrongNumberOfKeyPartsProvidedForFetching { expected: usize, got: usize },
-    #[error("Cannot access storage at latest block: Cannot fetch latest finalized block: {0}")]
-    CannotGetLatestFinalizedBlock(BackendError),
     #[error(
         "No storage value found at the given address, and no default value to fall back to using."
     )]
@@ -1006,8 +953,7 @@ pub enum StorageError {
 impl StorageError {
     fn backend_error(&self) -> Option<&BackendError> {
         match self {
-            StorageError::CannotGetLatestFinalizedBlock(e)
-            | StorageError::CannotFetchValue(e)
+            StorageError::CannotFetchValue(e)
             | StorageError::CannotIterateValues(e)
             | StorageError::StreamFailure(e) => Some(e),
             _ => None,
@@ -1114,35 +1060,26 @@ pub enum ExtrinsicDecodeErrorAtReason {
     LeftoverBytes(Vec<u8>),
 }
 
-/// An error that can be emitted when trying to construct an instance of [`crate::config::ExtrinsicParams`],
+/// An error that can be emitted when trying to construct a [`crate::config::TransactionExtension`],
 /// encode data from the instance, or match on signed extensions.
 #[derive(Debug, DeriveError)]
 #[non_exhaustive]
 #[allow(missing_docs)]
-pub enum ExtrinsicParamsError {
-    #[error("Cannot find type id '{type_id} in the metadata (context: {context})")]
-    MissingTypeId {
-        /// Type ID.
-        type_id: u32,
-        /// Some arbitrary context to help narrow the source of the error.
-        context: &'static str,
-    },
-    #[error("The chain expects a signed extension with the name {0}, but we did not provide one")]
-    UnknownTransactionExtension(String),
+pub enum TransactionExtensionError {
     #[error("Error constructing extrinsic parameters: {0}")]
     Custom(Box<dyn core::error::Error + Send + Sync + 'static>),
 }
 
-impl ExtrinsicParamsError {
-    /// Create a custom [`ExtrinsicParamsError`] from a string.
+impl TransactionExtensionError {
+    /// Create a custom [`TransactionExtensionError`] from a string.
     pub fn custom<S: Into<String>>(error: S) -> Self {
         let error: String = error.into();
         let error: Box<dyn core::error::Error + Send + Sync + 'static> = Box::from(error);
-        ExtrinsicParamsError::Custom(error)
+        TransactionExtensionError::Custom(error)
     }
 }
 
-impl From<core::convert::Infallible> for ExtrinsicParamsError {
+impl From<core::convert::Infallible> for TransactionExtensionError {
     fn from(value: core::convert::Infallible) -> Self {
         match value {}
     }

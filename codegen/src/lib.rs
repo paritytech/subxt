@@ -381,7 +381,7 @@ fn default_substitutes(crate_path: &syn::Path) -> TypeSubstitutes {
         ),
         (
             parse_quote!(fp_account::AccountId20),
-            parse_quote!(#crate_path::utils::AccountId20),
+            parse_quote!(#crate_path::utils::eth::AccountId20),
         ),
         (
             parse_quote!(sp_runtime::multiaddress::MultiAddress),

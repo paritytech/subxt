@@ -4,7 +4,7 @@
 
 //! Substrate specific configuration
 
-use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, Hasher, Header};
+use super::{Config, DefaultExtrinsicParamsBuilder, DefaultTransactionExtensions, Hasher, Header};
 use crate::config::Hash;
 use crate::metadata::{ArcMetadata, Metadata};
 use crate::utils::RangeMap;
@@ -162,7 +162,7 @@ impl Config for SubstrateConfig {
     type Signature = MultiSignature;
     type Hasher = DynamicHasher256;
     type Header = SubstrateHeader<<Self::Hasher as Hasher>::Hash>;
-    type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
+    type TransactionExtensions = SubstrateExtrinsicParams<Self>;
     type AssetId = u32;
 
     fn legacy_types_for_spec_version(&'_ self, spec_version: u32) -> Option<TypeRegistrySet<'_>> {
@@ -202,7 +202,7 @@ impl Config for SubstrateConfig {
 
 /// A struct representing the signed extra and additional parameters required
 /// to construct a transaction for the default substrate node.
-pub type SubstrateExtrinsicParams<T> = DefaultExtrinsicParams<T>;
+pub type SubstrateExtrinsicParams<T> = DefaultTransactionExtensions<T>;
 
 /// A builder which leads to [`SubstrateExtrinsicParams`] being constructed.
 /// This is what you provide to methods like `sign_and_submit()`.

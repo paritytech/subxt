@@ -64,6 +64,12 @@ The rules for when to use `PolkadotConfig` and `SubstrateConfig` remain the same
 
 See the docs for `PolkadotConfig` and `SubstrateConfig` for more. One example to be aware of is that if you want to work with historic blocks with `SubstrateConfig`,  you'll need to instantiate it yourself and provide historic type information before passing it to `OnlineClient` or `OfflineClient`.
 
+#### Configuration: `ExtrinsicParams`
+
+Aside from the new historic types support, a notable change to the configuration has been the simplification of transaction extensions, **previously called `ExtrinsicParams`** in our `Config`. **Now, the type is called `TransactionExtensions`** and the supporting traits have been simplified and named more appropriately (just `TransactionExtensions` and `TransactionExtension`), moving to rely more on `frame-decode` for the core logic. For any users that implement their own transaction extensions, migrating to the new traits is straightforward and I would encourage you to look at how the built-in transaction extensions are implemented for guidance here.
+
+See (see [#2177](https://github.com/paritytech/subxt/pull/2177)) for more details around this change.
+
 ### Working at specific blocks
 
 **Before**
@@ -218,6 +224,7 @@ let events = api
 ```
 
 Notes:
+- `SignableTransaction::signer_payload`, `SignableTransaction::sign` and `SignableTransaction::sign_with_account_and_signature` now may return an error (which previously would have led to harder to diagnose issues), and the `SignableTransaction` type now has a lifetime (see [#2177](https://github.com/paritytech/subxt/pull/2177)).
 - We now use `transactions` instead of `tx` everywhere to align better with other API names, but continue to provide `tx` as a shorthand.
 - The word `partial` is changed to `signable` in transaction APIs. "partial" was always a confusing name, and "signable" makes it much clearer what is being created; something that can be signed.
   - `tx().create_partial_offline(..)` => `tx().create_signable_offline(..)`
@@ -461,6 +468,7 @@ A list of the main change PRs follows:
 
 ### Changed
 
+- Upgrade to frame-decode 0.17: remove extrinsic encode logic and use from there ([#2177](https://github.com/paritytech/subxt/pull/2177))
 - [v0.50.0] Implement support for historic blocks in Subxt ([#2131](https://github.com/paritytech/subxt/pull/2131))
 - subxt-historic: 0.0.8 release: expose type resolver that can be used with visitors ([#2140](https://github.com/paritytech/subxt/pull/2140))
 - subxt-historic: 0.0.7 release: expose ClientAtBlock bits ([#2138](https://github.com/paritytech/subxt/pull/2138))

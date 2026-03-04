@@ -12,7 +12,7 @@ pub mod api {
     mod root_mod {
         pub use super::*;
     }
-    pub static PALLETS: [&str; 68usize] = [
+    pub static PALLETS: [&str; 67usize] = [
         "System",
         "Babe",
         "Timestamp",
@@ -63,7 +63,6 @@ pub mod api {
         "ParasSlashing",
         "MessageQueue",
         "OnDemandAssignmentProvider",
-        "CoretimeAssignmentProvider",
         "Registrar",
         "Slots",
         "Auctions",
@@ -3684,11 +3683,6 @@ pub mod api {
         ) -> on_demand_assignment_provider::storage::StorageApi {
             on_demand_assignment_provider::storage::StorageApi
         }
-        pub fn coretime_assignment_provider(
-            &self,
-        ) -> coretime_assignment_provider::storage::StorageApi {
-            coretime_assignment_provider::storage::StorageApi
-        }
         pub fn registrar(&self) -> registrar::storage::StorageApi {
             registrar::storage::StorageApi
         }
@@ -3912,9 +3906,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                185u8, 135u8, 204u8, 24u8, 32u8, 117u8, 53u8, 224u8, 90u8, 93u8, 47u8, 134u8,
-                226u8, 238u8, 144u8, 12u8, 45u8, 132u8, 140u8, 66u8, 189u8, 176u8, 172u8, 186u8,
-                16u8, 167u8, 112u8, 56u8, 130u8, 226u8, 94u8, 67u8,
+                141u8, 192u8, 76u8, 65u8, 182u8, 131u8, 83u8, 98u8, 77u8, 198u8, 56u8, 9u8, 101u8,
+                190u8, 160u8, 184u8, 2u8, 127u8, 7u8, 166u8, 57u8, 147u8, 41u8, 137u8, 212u8, 31u8,
+                18u8, 210u8, 184u8, 79u8, 46u8, 5u8,
             ]
     }
     pub mod system {
@@ -4723,21 +4717,21 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Total length (in bytes) for all extrinsics put together, for the current block."]
-                pub fn all_extrinsics_len(
+                #[doc = " Total size (in bytes) of the current block."]
+                #[doc = ""]
+                #[doc = " Tracks the size of the header and all extrinsics."]
+                pub fn block_size(
                     &self,
-                ) -> ::subxt::storage::StaticAddress<
-                    (),
-                    all_extrinsics_len::Output,
-                    ::subxt::utils::Yes,
-                > {
+                ) -> ::subxt::storage::StaticAddress<(), block_size::Output, ::subxt::utils::Yes>
+                {
                     ::subxt::storage::StaticAddress::new_static(
                         "System",
-                        "AllExtrinsicsLen",
+                        "BlockSize",
                         [
-                            120u8, 200u8, 84u8, 67u8, 97u8, 25u8, 119u8, 71u8, 170u8, 217u8, 12u8,
-                            157u8, 63u8, 100u8, 245u8, 118u8, 99u8, 65u8, 148u8, 110u8, 252u8,
-                            86u8, 172u8, 45u8, 235u8, 90u8, 58u8, 123u8, 59u8, 191u8, 1u8, 215u8,
+                            189u8, 209u8, 204u8, 16u8, 123u8, 182u8, 74u8, 254u8, 0u8, 137u8,
+                            184u8, 170u8, 94u8, 208u8, 251u8, 174u8, 105u8, 91u8, 184u8, 127u8,
+                            194u8, 201u8, 191u8, 81u8, 121u8, 136u8, 121u8, 127u8, 4u8, 40u8,
+                            179u8, 159u8,
                         ],
                     )
                 }
@@ -5040,7 +5034,7 @@ pub mod api {
                     runtime_types::sp_weights::weight_v2::Weight,
                 >;
             }
-            pub mod all_extrinsics_len {
+            pub mod block_size {
                 use super::root_mod;
                 use super::runtime_types;
                 pub mod input {
@@ -5200,9 +5194,10 @@ pub mod api {
                         "System",
                         "BlockLength",
                         [
-                            23u8, 242u8, 225u8, 39u8, 225u8, 67u8, 152u8, 41u8, 155u8, 104u8, 68u8,
-                            229u8, 185u8, 133u8, 10u8, 143u8, 184u8, 152u8, 234u8, 44u8, 140u8,
-                            96u8, 166u8, 235u8, 162u8, 160u8, 72u8, 7u8, 35u8, 194u8, 3u8, 37u8,
+                            25u8, 97u8, 176u8, 77u8, 2u8, 60u8, 44u8, 69u8, 161u8, 69u8, 251u8,
+                            229u8, 198u8, 186u8, 185u8, 237u8, 105u8, 56u8, 122u8, 35u8, 78u8,
+                            195u8, 98u8, 222u8, 215u8, 49u8, 249u8, 146u8, 231u8, 21u8, 224u8,
+                            134u8,
                         ],
                     )
                 }
@@ -9311,6 +9306,28 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = " Accounts whose keys were set via `SessionInterface` (external path) without"]
+                #[doc = " incrementing the consumer reference or placing a key deposit. `do_purge_keys`"]
+                #[doc = " only decrements consumers for accounts that were registered through the local"]
+                #[doc = " session pallet."]
+                pub fn externally_set_keys(
+                    &self,
+                ) -> ::subxt::storage::StaticAddress<
+                    (externally_set_keys::input::Param0,),
+                    externally_set_keys::Output,
+                    ::subxt::utils::Maybe,
+                > {
+                    ::subxt::storage::StaticAddress::new_static(
+                        "Session",
+                        "ExternallySetKeys",
+                        [
+                            32u8, 226u8, 166u8, 155u8, 9u8, 117u8, 172u8, 224u8, 120u8, 103u8,
+                            186u8, 65u8, 198u8, 203u8, 118u8, 247u8, 118u8, 164u8, 203u8, 108u8,
+                            101u8, 156u8, 87u8, 20u8, 130u8, 43u8, 49u8, 59u8, 58u8, 89u8, 5u8,
+                            231u8,
+                        ],
+                    )
+                }
             }
             pub mod validators {
                 use super::root_mod;
@@ -9378,6 +9395,15 @@ pub mod api {
                     );
                 }
                 pub type Output = ::subxt::utils::AccountId32;
+            }
+            pub mod externally_set_keys {
+                use super::root_mod;
+                use super::runtime_types;
+                pub mod input {
+                    use super::runtime_types;
+                    pub type Param0 = ::subxt::utils::AccountId32;
+                }
+                pub type Output = ();
             }
         }
         pub mod constants {
@@ -25419,7 +25445,9 @@ pub mod api {
             #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
             #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
             #[doc = ""]
-            #[doc = "If there are enough, then dispatch the call."]
+            #[doc = "**If the approval threshold is met (including the sender's approval), this will"]
+            #[doc = "immediately execute the call.** This is the only way to execute a multisig call -"]
+            #[doc = "`approve_as_multi` will never trigger execution."]
             #[doc = ""]
             #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
             #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
@@ -25435,8 +25463,9 @@ pub mod api {
             #[doc = "transaction index) of the first approval transaction."]
             #[doc = "- `call`: The call to be executed."]
             #[doc = ""]
-            #[doc = "NOTE: Unless this is the final approval, you will generally want to use"]
-            #[doc = "`approve_as_multi` instead, since it only requires a hash of the call."]
+            #[doc = "NOTE: For intermediate approvals (not the final approval), you should generally use"]
+            #[doc = "`approve_as_multi` instead, since it only requires a hash of the call and is more"]
+            #[doc = "efficient."]
             #[doc = ""]
             #[doc = "Result is equivalent to the dispatched result if `threshold` is exactly `1`. Otherwise"]
             #[doc = "on success, result is `Ok` and the result from the interior call, if it was executed,"]
@@ -25491,6 +25520,13 @@ pub mod api {
             #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
             #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
             #[doc = ""]
+            #[doc = "**This function will NEVER execute the call, even if the approval threshold is"]
+            #[doc = "reached.** It only registers approval. To actually execute the call, `as_multi` must"]
+            #[doc = "be called with the full call data by any of the signatories."]
+            #[doc = ""]
+            #[doc = "This function is more efficient than `as_multi` for intermediate approvals since it"]
+            #[doc = "only requires the call hash, not the full call data."]
+            #[doc = ""]
             #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
             #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
             #[doc = "is cancelled."]
@@ -25505,7 +25541,8 @@ pub mod api {
             #[doc = "transaction index) of the first approval transaction."]
             #[doc = "- `call_hash`: The hash of the call to be executed."]
             #[doc = ""]
-            #[doc = "NOTE: If this is the final approval, you will want to use `as_multi` instead."]
+            #[doc = "NOTE: To execute the call after approvals are gathered, any signatory must call"]
+            #[doc = "`as_multi` with the full call data. This function cannot execute the call."]
             #[doc = ""]
             #[doc = "## Complexity"]
             #[doc = "- `O(S)`."]
@@ -25674,7 +25711,9 @@ pub mod api {
                     #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
                     #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
                     #[doc = ""]
-                    #[doc = "If there are enough, then dispatch the call."]
+                    #[doc = "**If the approval threshold is met (including the sender's approval), this will"]
+                    #[doc = "immediately execute the call.** This is the only way to execute a multisig call -"]
+                    #[doc = "`approve_as_multi` will never trigger execution."]
                     #[doc = ""]
                     #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
                     #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
@@ -25690,8 +25729,9 @@ pub mod api {
                     #[doc = "transaction index) of the first approval transaction."]
                     #[doc = "- `call`: The call to be executed."]
                     #[doc = ""]
-                    #[doc = "NOTE: Unless this is the final approval, you will generally want to use"]
-                    #[doc = "`approve_as_multi` instead, since it only requires a hash of the call."]
+                    #[doc = "NOTE: For intermediate approvals (not the final approval), you should generally use"]
+                    #[doc = "`approve_as_multi` instead, since it only requires a hash of the call and is more"]
+                    #[doc = "efficient."]
                     #[doc = ""]
                     #[doc = "Result is equivalent to the dispatched result if `threshold` is exactly `1`. Otherwise"]
                     #[doc = "on success, result is `Ok` and the result from the interior call, if it was executed,"]
@@ -25739,6 +25779,13 @@ pub mod api {
                     #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
                     #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
                     #[doc = ""]
+                    #[doc = "**This function will NEVER execute the call, even if the approval threshold is"]
+                    #[doc = "reached.** It only registers approval. To actually execute the call, `as_multi` must"]
+                    #[doc = "be called with the full call data by any of the signatories."]
+                    #[doc = ""]
+                    #[doc = "This function is more efficient than `as_multi` for intermediate approvals since it"]
+                    #[doc = "only requires the call hash, not the full call data."]
+                    #[doc = ""]
                     #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
                     #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
                     #[doc = "is cancelled."]
@@ -25753,7 +25800,8 @@ pub mod api {
                     #[doc = "transaction index) of the first approval transaction."]
                     #[doc = "- `call_hash`: The hash of the call to be executed."]
                     #[doc = ""]
-                    #[doc = "NOTE: If this is the final approval, you will want to use `as_multi` instead."]
+                    #[doc = "NOTE: To execute the call after approvals are gathered, any signatory must call"]
+                    #[doc = "`as_multi` with the full call data. This function cannot execute the call."]
                     #[doc = ""]
                     #[doc = "## Complexity"]
                     #[doc = "- `O(S)`."]
@@ -34240,6 +34288,8 @@ pub mod api {
     pub mod para_scheduler {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "The `Error` enum of this pallet."]
+        pub type Error = runtime_types::polkadot_runtime_parachains::scheduler::pallet::Error;
         pub mod storage {
             use super::root_mod;
             use super::runtime_types;
@@ -34294,19 +34344,48 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " One entry for each availability core. The `VecDeque` represents the assignments to be"]
-                #[doc = " scheduled on that core."]
-                pub fn claim_queue(
+                #[doc = " Scheduled assignment sets for coretime cores."]
+                #[doc = ""]
+                #[doc = " Assignments as of the given block number. They will go into state once the block number is"]
+                #[doc = " reached (and replace whatever was in there before)."]
+                #[doc = ""]
+                #[doc = " Managed by the `assigner_coretime` submodule."]
+                pub fn core_schedules(
                     &self,
-                ) -> ::subxt::storage::StaticAddress<(), claim_queue::Output, ::subxt::utils::Yes>
-                {
+                ) -> ::subxt::storage::StaticAddress<
+                    (core_schedules::input::Param0,),
+                    core_schedules::Output,
+                    ::subxt::utils::Maybe,
+                > {
                     ::subxt::storage::StaticAddress::new_static(
                         "ParaScheduler",
-                        "ClaimQueue",
+                        "CoreSchedules",
                         [
-                            90u8, 69u8, 52u8, 236u8, 241u8, 89u8, 171u8, 235u8, 79u8, 15u8, 67u8,
-                            77u8, 230u8, 202u8, 8u8, 228u8, 243u8, 95u8, 131u8, 185u8, 110u8, 23u8,
-                            254u8, 165u8, 145u8, 76u8, 75u8, 239u8, 77u8, 41u8, 209u8, 63u8,
+                            68u8, 248u8, 149u8, 191u8, 113u8, 22u8, 93u8, 144u8, 72u8, 21u8, 224u8,
+                            72u8, 176u8, 24u8, 94u8, 187u8, 115u8, 93u8, 226u8, 42u8, 255u8, 1u8,
+                            110u8, 233u8, 247u8, 44u8, 83u8, 108u8, 77u8, 193u8, 143u8, 33u8,
+                        ],
+                    )
+                }
+                #[doc = " Assignments which are currently active for each core."]
+                #[doc = ""]
+                #[doc = " They will be picked from `CoreSchedules` once we reach the scheduled block number."]
+                #[doc = ""]
+                #[doc = " Managed by the `assigner_coretime` submodule."]
+                pub fn core_descriptors(
+                    &self,
+                ) -> ::subxt::storage::StaticAddress<
+                    (),
+                    core_descriptors::Output,
+                    ::subxt::utils::Yes,
+                > {
+                    ::subxt::storage::StaticAddress::new_static(
+                        "ParaScheduler",
+                        "CoreDescriptors",
+                        [
+                            165u8, 245u8, 34u8, 146u8, 18u8, 88u8, 219u8, 58u8, 157u8, 89u8, 215u8,
+                            254u8, 173u8, 112u8, 185u8, 251u8, 128u8, 131u8, 157u8, 39u8, 57u8,
+                            161u8, 87u8, 74u8, 212u8, 39u8, 76u8, 171u8, 22u8, 14u8, 78u8, 119u8,
                         ],
                     )
                 }
@@ -34331,18 +34410,25 @@ pub mod api {
                 }
                 pub type Output = ::core::primitive::u32;
             }
-            pub mod claim_queue {
+            pub mod core_schedules {
+                use super::root_mod;
+                use super::runtime_types;
+                pub mod input {
+                    use super::runtime_types;
+                    pub type Param0 = (
+                        ::core::primitive::u32,
+                        runtime_types::polkadot_primitives::v9::CoreIndex,
+                    );
+                }
+                pub type Output = runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: Schedule < :: core :: primitive :: u32 > ;
+            }
+            pub mod core_descriptors {
                 use super::root_mod;
                 use super::runtime_types;
                 pub mod input {
                     use super::runtime_types;
                 }
-                pub type Output = ::subxt::utils::KeyedVec<
-                    runtime_types::polkadot_primitives::v9::CoreIndex,
-                    ::subxt::alloc::vec::Vec<
-                        runtime_types::polkadot_runtime_parachains::scheduler::common::Assignment,
-                    >,
-                >;
+                pub type Output = :: subxt :: utils :: KeyedVec < runtime_types :: polkadot_primitives :: v9 :: CoreIndex , runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: CoreDescriptor < :: core :: primitive :: u32 > > ;
             }
         }
     }
@@ -38820,73 +38906,18 @@ pub mod api {
             use super::runtime_types;
             pub struct StorageApi;
             impl StorageApi {
-                #[doc = " Maps a `ParaId` to `CoreIndex` and keeps track of how many assignments the scheduler has in"]
-                #[doc = " it's lookahead. Keeping track of this affinity prevents parallel execution of the same"]
-                #[doc = " `ParaId` on two or more `CoreIndex`es."]
-                pub fn para_id_affinity(
-                    &self,
-                ) -> ::subxt::storage::StaticAddress<
-                    (para_id_affinity::input::Param0,),
-                    para_id_affinity::Output,
-                    ::subxt::utils::Maybe,
-                > {
-                    ::subxt::storage::StaticAddress::new_static(
-                        "OnDemandAssignmentProvider",
-                        "ParaIdAffinity",
-                        [
-                            218u8, 34u8, 197u8, 111u8, 214u8, 117u8, 183u8, 3u8, 117u8, 184u8,
-                            199u8, 103u8, 178u8, 205u8, 117u8, 173u8, 171u8, 8u8, 193u8, 255u8,
-                            60u8, 8u8, 120u8, 83u8, 129u8, 59u8, 49u8, 86u8, 14u8, 181u8, 89u8,
-                            223u8,
-                        ],
-                    )
-                }
-                #[doc = " Overall status of queue (both free + affinity entries)"]
-                pub fn queue_status(
-                    &self,
-                ) -> ::subxt::storage::StaticAddress<(), queue_status::Output, ::subxt::utils::Yes>
-                {
-                    ::subxt::storage::StaticAddress::new_static(
-                        "OnDemandAssignmentProvider",
-                        "QueueStatus",
-                        [
-                            132u8, 122u8, 194u8, 209u8, 37u8, 171u8, 243u8, 239u8, 190u8, 254u8,
-                            189u8, 228u8, 211u8, 153u8, 91u8, 104u8, 161u8, 20u8, 118u8, 148u8,
-                            98u8, 61u8, 102u8, 14u8, 66u8, 127u8, 56u8, 37u8, 240u8, 204u8, 66u8,
-                            224u8,
-                        ],
-                    )
-                }
                 #[doc = " Priority queue for all orders which don't yet (or not any more) have any core affinity."]
-                pub fn free_entries(
+                pub fn order_status(
                     &self,
-                ) -> ::subxt::storage::StaticAddress<(), free_entries::Output, ::subxt::utils::Yes>
+                ) -> ::subxt::storage::StaticAddress<(), order_status::Output, ::subxt::utils::Yes>
                 {
                     ::subxt::storage::StaticAddress::new_static(
                         "OnDemandAssignmentProvider",
-                        "FreeEntries",
+                        "OrderStatus",
                         [
-                            44u8, 103u8, 2u8, 83u8, 66u8, 184u8, 34u8, 29u8, 255u8, 181u8, 227u8,
-                            46u8, 181u8, 124u8, 63u8, 222u8, 117u8, 234u8, 42u8, 186u8, 132u8,
-                            224u8, 79u8, 202u8, 167u8, 180u8, 175u8, 59u8, 245u8, 6u8, 99u8, 56u8,
-                        ],
-                    )
-                }
-                #[doc = " Queue entries that are currently bound to a particular core due to core affinity."]
-                pub fn affinity_entries(
-                    &self,
-                ) -> ::subxt::storage::StaticAddress<
-                    (affinity_entries::input::Param0,),
-                    affinity_entries::Output,
-                    ::subxt::utils::Maybe,
-                > {
-                    ::subxt::storage::StaticAddress::new_static(
-                        "OnDemandAssignmentProvider",
-                        "AffinityEntries",
-                        [
-                            199u8, 2u8, 26u8, 53u8, 29u8, 95u8, 222u8, 132u8, 125u8, 135u8, 51u8,
-                            126u8, 105u8, 63u8, 236u8, 104u8, 225u8, 136u8, 159u8, 136u8, 119u8,
-                            108u8, 118u8, 170u8, 142u8, 27u8, 53u8, 80u8, 5u8, 240u8, 94u8, 7u8,
+                            66u8, 210u8, 43u8, 191u8, 75u8, 155u8, 122u8, 54u8, 233u8, 134u8, 51u8,
+                            206u8, 77u8, 90u8, 32u8, 44u8, 49u8, 183u8, 174u8, 133u8, 119u8, 136u8,
+                            150u8, 228u8, 150u8, 40u8, 125u8, 110u8, 245u8, 185u8, 28u8, 215u8,
                         ],
                     )
                 }
@@ -38924,45 +38955,16 @@ pub mod api {
                     )
                 }
             }
-            pub mod para_id_affinity {
-                use super::root_mod;
-                use super::runtime_types;
-                pub mod input {
-                    use super::runtime_types;
-                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
-                }
-                pub type Output =
-                    runtime_types::polkadot_runtime_parachains::on_demand::types::CoreAffinityCount;
-            }
-            pub mod queue_status {
+            pub mod order_status {
                 use super::root_mod;
                 use super::runtime_types;
                 pub mod input {
                     use super::runtime_types;
                 }
                 pub type Output =
-                    runtime_types::polkadot_runtime_parachains::on_demand::types::QueueStatusType;
-            }
-            pub mod free_entries {
-                use super::root_mod;
-                use super::runtime_types;
-                pub mod input {
-                    use super::runtime_types;
-                }
-                pub type Output = ::subxt::alloc::vec::Vec<
-                    runtime_types::polkadot_runtime_parachains::on_demand::types::EnqueuedOrder,
-                >;
-            }
-            pub mod affinity_entries {
-                use super::root_mod;
-                use super::runtime_types;
-                pub mod input {
-                    use super::runtime_types;
-                    pub type Param0 = runtime_types::polkadot_primitives::v9::CoreIndex;
-                }
-                pub type Output = ::subxt::alloc::vec::Vec<
-                    runtime_types::polkadot_runtime_parachains::on_demand::types::EnqueuedOrder,
-                >;
+                    runtime_types::polkadot_runtime_parachains::on_demand::OrderStatus<
+                        ::core::primitive::u32,
+                    >;
             }
             pub mod revenue {
                 use super::root_mod;
@@ -39036,90 +39038,6 @@ pub mod api {
                         ],
                     )
                 }
-            }
-        }
-    }
-    pub mod coretime_assignment_provider {
-        use super::root_mod;
-        use super::runtime_types;
-        #[doc = "The `Error` enum of this pallet."]
-        pub type Error =
-            runtime_types::polkadot_runtime_parachains::assigner_coretime::pallet::Error;
-        pub mod storage {
-            use super::root_mod;
-            use super::runtime_types;
-            pub struct StorageApi;
-            impl StorageApi {
-                #[doc = " Scheduled assignment sets."]
-                #[doc = ""]
-                #[doc = " Assignments as of the given block number. They will go into state once the block number is"]
-                #[doc = " reached (and replace whatever was in there before)."]
-                pub fn core_schedules(
-                    &self,
-                ) -> ::subxt::storage::StaticAddress<
-                    (core_schedules::input::Param0,),
-                    core_schedules::Output,
-                    ::subxt::utils::Maybe,
-                > {
-                    ::subxt::storage::StaticAddress::new_static(
-                        "CoretimeAssignmentProvider",
-                        "CoreSchedules",
-                        [
-                            19u8, 0u8, 96u8, 29u8, 157u8, 30u8, 60u8, 179u8, 243u8, 28u8, 135u8,
-                            240u8, 245u8, 161u8, 250u8, 229u8, 75u8, 72u8, 0u8, 118u8, 225u8, 12u8,
-                            198u8, 223u8, 15u8, 30u8, 113u8, 56u8, 241u8, 245u8, 64u8, 128u8,
-                        ],
-                    )
-                }
-                #[doc = " Assignments which are currently active."]
-                #[doc = ""]
-                #[doc = " They will be picked from `PendingAssignments` once we reach the scheduled block number in"]
-                #[doc = " `PendingAssignments`."]
-                pub fn core_descriptors(
-                    &self,
-                ) -> ::subxt::storage::StaticAddress<
-                    (core_descriptors::input::Param0,),
-                    core_descriptors::Output,
-                    ::subxt::utils::Maybe,
-                > {
-                    ::subxt::storage::StaticAddress::new_static(
-                        "CoretimeAssignmentProvider",
-                        "CoreDescriptors",
-                        [
-                            74u8, 53u8, 1u8, 122u8, 94u8, 93u8, 188u8, 54u8, 82u8, 70u8, 97u8,
-                            213u8, 230u8, 74u8, 224u8, 37u8, 52u8, 240u8, 117u8, 203u8, 220u8,
-                            103u8, 155u8, 168u8, 169u8, 184u8, 154u8, 19u8, 67u8, 242u8, 67u8,
-                            65u8,
-                        ],
-                    )
-                }
-            }
-            pub mod core_schedules {
-                use super::root_mod;
-                use super::runtime_types;
-                pub mod input {
-                    use super::runtime_types;
-                    pub type Param0 = (
-                        ::core::primitive::u32,
-                        runtime_types::polkadot_primitives::v9::CoreIndex,
-                    );
-                }
-                pub type Output =
-                    runtime_types::polkadot_runtime_parachains::assigner_coretime::Schedule<
-                        ::core::primitive::u32,
-                    >;
-            }
-            pub mod core_descriptors {
-                use super::root_mod;
-                use super::runtime_types;
-                pub mod input {
-                    use super::runtime_types;
-                    pub type Param0 = runtime_types::polkadot_primitives::v9::CoreIndex;
-                }
-                pub type Output =
-                    runtime_types::polkadot_runtime_parachains::assigner_coretime::CoreDescriptor<
-                        ::core::primitive::u32,
-                    >;
             }
         }
     }
@@ -41827,7 +41745,7 @@ pub mod api {
         use super::runtime_types;
         #[doc = "The `Error` enum of this pallet."]
         pub type Error = runtime_types::polkadot_runtime_parachains::coretime::pallet::Error;
-        #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
+        #[doc = "Extrinsics to be called by the Coretime chain."]
         pub type Call = runtime_types::polkadot_runtime_parachains::coretime::pallet::Call;
         pub mod calls {
             use super::root_mod;
@@ -41939,10 +41857,7 @@ pub mod api {
                 use super::runtime_types;
                 pub type Core = ::core::primitive::u16;
                 pub type Begin = ::core::primitive::u32;
-                pub type Assignment = ::subxt::alloc::vec::Vec<(
-                    runtime_types::pallet_broker::coretime_interface::CoreAssignment,
-                    runtime_types::polkadot_runtime_parachains::assigner_coretime::PartsOf57600,
-                )>;
+                pub type Assignment = :: subxt :: alloc :: vec :: Vec < (runtime_types :: pallet_broker :: coretime_interface :: CoreAssignment , runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: PartsOf57600 ,) > ;
                 pub type EndHint = ::core::option::Option<::core::primitive::u32>;
             }
             impl AssignCore {
@@ -49005,6 +48920,7 @@ pub mod api {
                     pub max: runtime_types::frame_support::dispatch::PerDispatchClass<
                         ::core::primitive::u32,
                     >,
+                    pub max_header_size: ::core::option::Option<::core::primitive::u32>,
                 }
                 #[derive(
                     :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -52546,7 +52462,9 @@ pub mod api {
                     #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
                     #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
                     #[doc = ""]
-                    #[doc = "If there are enough, then dispatch the call."]
+                    #[doc = "**If the approval threshold is met (including the sender's approval), this will"]
+                    #[doc = "immediately execute the call.** This is the only way to execute a multisig call -"]
+                    #[doc = "`approve_as_multi` will never trigger execution."]
                     #[doc = ""]
                     #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
                     #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
@@ -52562,8 +52480,9 @@ pub mod api {
                     #[doc = "transaction index) of the first approval transaction."]
                     #[doc = "- `call`: The call to be executed."]
                     #[doc = ""]
-                    #[doc = "NOTE: Unless this is the final approval, you will generally want to use"]
-                    #[doc = "`approve_as_multi` instead, since it only requires a hash of the call."]
+                    #[doc = "NOTE: For intermediate approvals (not the final approval), you should generally use"]
+                    #[doc = "`approve_as_multi` instead, since it only requires a hash of the call and is more"]
+                    #[doc = "efficient."]
                     #[doc = ""]
                     #[doc = "Result is equivalent to the dispatched result if `threshold` is exactly `1`. Otherwise"]
                     #[doc = "on success, result is `Ok` and the result from the interior call, if it was executed,"]
@@ -52596,6 +52515,13 @@ pub mod api {
                     #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
                     #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
                     #[doc = ""]
+                    #[doc = "**This function will NEVER execute the call, even if the approval threshold is"]
+                    #[doc = "reached.** It only registers approval. To actually execute the call, `as_multi` must"]
+                    #[doc = "be called with the full call data by any of the signatories."]
+                    #[doc = ""]
+                    #[doc = "This function is more efficient than `as_multi` for intermediate approvals since it"]
+                    #[doc = "only requires the call hash, not the full call data."]
+                    #[doc = ""]
                     #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
                     #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
                     #[doc = "is cancelled."]
@@ -52610,7 +52536,8 @@ pub mod api {
                     #[doc = "transaction index) of the first approval transaction."]
                     #[doc = "- `call_hash`: The hash of the call to be executed."]
                     #[doc = ""]
-                    #[doc = "NOTE: If this is the final approval, you will want to use `as_multi` instead."]
+                    #[doc = "NOTE: To execute the call after approvals are gathered, any signatory must call"]
+                    #[doc = "`as_multi` with the full call data. This function cannot execute the call."]
                     #[doc = ""]
                     #[doc = "## Complexity"]
                     #[doc = "- `O(S)`."]
@@ -59624,91 +59551,6 @@ pub mod api {
         }
         pub mod polkadot_runtime_parachains {
             use super::runtime_types;
-            pub mod assigner_coretime {
-                use super::runtime_types;
-                pub mod pallet {
-                    use super::runtime_types;
-                    #[derive(
-                        :: subxt :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                    #[doc = "The `Error` enum of this pallet."]
-                    pub enum Error {
-                        #[codec(index = 0)]
-                        AssignmentsEmpty,
-                        #[codec(index = 1)]
-                        #[doc = "assign_core is only allowed to append new assignments at the end of already existing"]
-                        #[doc = "ones or update the last entry."]
-                        DisallowedInsert,
-                    }
-                }
-                #[derive(
-                    :: subxt :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                pub struct AssignmentState {
-                    pub ratio:
-                        runtime_types::polkadot_runtime_parachains::assigner_coretime::PartsOf57600,
-                    pub remaining:
-                        runtime_types::polkadot_runtime_parachains::assigner_coretime::PartsOf57600,
-                }
-                #[derive(
-                    :: subxt :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                pub struct CoreDescriptor < _0 > { pub queue : :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: assigner_coretime :: QueueDescriptor < _0 > > , pub current_work : :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: assigner_coretime :: WorkState < _0 > > , }
-                #[derive(
-                    :: subxt :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                pub struct PartsOf57600(pub ::core::primitive::u16);
-                #[derive(
-                    :: subxt :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                pub struct QueueDescriptor<_0> {
-                    pub first: _0,
-                    pub last: _0,
-                }
-                #[derive(
-                    :: subxt :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                pub struct Schedule<_0> {
-                    pub assignments: ::subxt::alloc::vec::Vec<(
-                        runtime_types::pallet_broker::coretime_interface::CoreAssignment,
-                        runtime_types::polkadot_runtime_parachains::assigner_coretime::PartsOf57600,
-                    )>,
-                    pub end_hint: ::core::option::Option<_0>,
-                    pub next_schedule: ::core::option::Option<_0>,
-                }
-                #[derive(
-                    :: subxt :: ext :: scale_decode :: DecodeAsType,
-                    :: subxt :: ext :: scale_encode :: EncodeAsType,
-                    Debug,
-                )]
-                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                pub struct WorkState < _0 > { pub assignments : :: subxt :: alloc :: vec :: Vec < (runtime_types :: pallet_broker :: coretime_interface :: CoreAssignment , runtime_types :: polkadot_runtime_parachains :: assigner_coretime :: AssignmentState ,) > , pub end_hint : :: core :: option :: Option < _0 > , pub pos : :: core :: primitive :: u16 , pub step : runtime_types :: polkadot_runtime_parachains :: assigner_coretime :: PartsOf57600 , }
-            }
             pub mod configuration {
                 use super::runtime_types;
                 pub mod pallet {
@@ -59800,9 +59642,9 @@ pub mod api {
                     )]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                    #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
+                    #[doc = "Extrinsics to be called by the Coretime chain."]
                     pub enum Call {
-                        # [codec (index = 1)] # [doc = "Request the configuration to be updated with the specified number of cores. Warning:"] # [doc = "Since this only schedules a configuration update, it takes two sessions to come into"] # [doc = "effect."] # [doc = ""] # [doc = "- `origin`: Root or the Coretime Chain"] # [doc = "- `count`: total number of cores"] request_core_count { count : :: core :: primitive :: u16 , } , # [codec (index = 2)] # [doc = "Request to claim the instantaneous coretime sales revenue starting from the block it was"] # [doc = "last claimed until and up to the block specified. The claimed amount value is sent back"] # [doc = "to the Coretime chain in a `notify_revenue` message. At the same time, the amount is"] # [doc = "teleported to the Coretime chain."] request_revenue_at { when : :: core :: primitive :: u32 , } , # [codec (index = 3)] credit_account { who : :: subxt :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Receive instructions from the `ExternalBrokerOrigin`, detailing how a specific core is"] # [doc = "to be used."] # [doc = ""] # [doc = "Parameters:"] # [doc = "-`origin`: The `ExternalBrokerOrigin`, assumed to be the coretime chain."] # [doc = "-`core`: The core that should be scheduled."] # [doc = "-`begin`: The starting blockheight of the instruction."] # [doc = "-`assignment`: How the blockspace should be utilised."] # [doc = "-`end_hint`: An optional hint as to when this particular set of instructions will end."] assign_core { core : :: core :: primitive :: u16 , begin : :: core :: primitive :: u32 , assignment : :: subxt :: alloc :: vec :: Vec < (runtime_types :: pallet_broker :: coretime_interface :: CoreAssignment , runtime_types :: polkadot_runtime_parachains :: assigner_coretime :: PartsOf57600 ,) > , end_hint : :: core :: option :: Option < :: core :: primitive :: u32 > , } , }
+                        # [codec (index = 1)] # [doc = "Request the configuration to be updated with the specified number of cores. Warning:"] # [doc = "Since this only schedules a configuration update, it takes two sessions to come into"] # [doc = "effect."] # [doc = ""] # [doc = "- `origin`: Root or the Coretime Chain"] # [doc = "- `count`: total number of cores"] request_core_count { count : :: core :: primitive :: u16 , } , # [codec (index = 2)] # [doc = "Request to claim the instantaneous coretime sales revenue starting from the block it was"] # [doc = "last claimed until and up to the block specified. The claimed amount value is sent back"] # [doc = "to the Coretime chain in a `notify_revenue` message. At the same time, the amount is"] # [doc = "teleported to the Coretime chain."] request_revenue_at { when : :: core :: primitive :: u32 , } , # [codec (index = 3)] credit_account { who : :: subxt :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Receive instructions from the `ExternalBrokerOrigin`, detailing how a specific core is"] # [doc = "to be used."] # [doc = ""] # [doc = "Parameters:"] # [doc = "-`origin`: The `ExternalBrokerOrigin`, assumed to be the coretime chain."] # [doc = "-`core`: The core that should be scheduled."] # [doc = "-`begin`: The starting blockheight of the instruction."] # [doc = "-`assignment`: How the blockspace should be utilised."] # [doc = "-`end_hint`: An optional hint as to when this particular set of instructions will end."] assign_core { core : :: core :: primitive :: u16 , begin : :: core :: primitive :: u32 , assignment : :: subxt :: alloc :: vec :: Vec < (runtime_types :: pallet_broker :: coretime_interface :: CoreAssignment , runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: PartsOf57600 ,) > , end_hint : :: core :: option :: Option < :: core :: primitive :: u32 > , } , }
                     #[derive(
                         :: subxt :: ext :: scale_decode :: DecodeAsType,
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
@@ -60465,51 +60307,40 @@ pub mod api {
                         },
                     }
                 }
-                pub mod types {
-                    use super::runtime_types;
-                    #[derive(
-                        :: subxt :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                    pub struct CoreAffinityCount {
-                        pub core_index: runtime_types::polkadot_primitives::v9::CoreIndex,
-                        pub count: ::core::primitive::u32,
-                    }
-                    #[derive(
-                        :: subxt :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                    pub struct EnqueuedOrder { pub para_id : runtime_types :: polkadot_parachain_primitives :: primitives :: Id , pub idx : runtime_types :: polkadot_runtime_parachains :: on_demand :: types :: QueueIndex , }
-                    #[derive(
-                        :: subxt :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                    pub struct QueueIndex(pub ::core::primitive::u32);
-                    #[derive(
-                        :: subxt :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                    pub struct QueueStatusType { pub traffic : runtime_types :: sp_arithmetic :: fixed_point :: FixedU128 , pub next_index : runtime_types :: polkadot_runtime_parachains :: on_demand :: types :: QueueIndex , pub smallest_index : runtime_types :: polkadot_runtime_parachains :: on_demand :: types :: QueueIndex , pub freed_indices : :: subxt :: alloc :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: on_demand :: types :: ReverseQueueIndex > , }
-                    #[derive(
-                        :: subxt :: ext :: scale_decode :: DecodeAsType,
-                        :: subxt :: ext :: scale_encode :: EncodeAsType,
-                        Debug,
-                    )]
-                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                    pub struct ReverseQueueIndex(pub ::core::primitive::u32);
+                #[derive(
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct EnqueuedOrder<_0> {
+                    pub para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
+                    pub ordered_at: _0,
+                }
+                #[derive(
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct OrderQueue<_0> {
+                    pub queue: runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        runtime_types::polkadot_runtime_parachains::on_demand::EnqueuedOrder<_0>,
+                    >,
+                }
+                #[derive(
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct OrderStatus<_0> {
+                    pub traffic: runtime_types::sp_arithmetic::fixed_point::FixedU128,
+                    pub queue:
+                        runtime_types::polkadot_runtime_parachains::on_demand::OrderQueue<_0>,
                 }
             }
             pub mod origin {
@@ -60786,7 +60617,7 @@ pub mod api {
             }
             pub mod scheduler {
                 use super::runtime_types;
-                pub mod common {
+                pub mod assigner_coretime {
                     use super::runtime_types;
                     #[derive(
                         :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -60795,14 +60626,68 @@ pub mod api {
                     )]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                    pub enum Assignment {
+                    pub struct AssignmentState { pub ratio : runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: PartsOf57600 , pub remaining : runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: PartsOf57600 , }
+                    #[derive(
+                        :: subxt :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                    pub struct CoreDescriptor < _0 > { pub queue : :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: QueueDescriptor < _0 > > , pub current_work : :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: WorkState < _0 > > , }
+                    #[derive(
+                        :: subxt :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                    pub struct PartsOf57600(pub ::core::primitive::u16);
+                    #[derive(
+                        :: subxt :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                    pub struct QueueDescriptor<_0> {
+                        pub first: _0,
+                        pub last: _0,
+                    }
+                    #[derive(
+                        :: subxt :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                    pub struct Schedule < _0 > { pub assignments : :: subxt :: alloc :: vec :: Vec < (runtime_types :: pallet_broker :: coretime_interface :: CoreAssignment , runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: PartsOf57600 ,) > , pub end_hint : :: core :: option :: Option < _0 > , pub next_schedule : :: core :: option :: Option < _0 > , }
+                    #[derive(
+                        :: subxt :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                    pub struct WorkState < _0 > { pub assignments : :: subxt :: alloc :: vec :: Vec < (runtime_types :: pallet_broker :: coretime_interface :: CoreAssignment , runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: AssignmentState ,) > , pub end_hint : :: core :: option :: Option < _0 > , pub pos : :: core :: primitive :: u16 , pub step : runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: PartsOf57600 , }
+                }
+                pub mod pallet {
+                    use super::runtime_types;
+                    #[derive(
+                        :: subxt :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                    #[doc = "The `Error` enum of this pallet."]
+                    pub enum Error {
                         #[codec(index = 0)]
-                        Pool {
-                            para_id: runtime_types::polkadot_parachain_primitives::primitives::Id,
-                            core_index: runtime_types::polkadot_primitives::v9::CoreIndex,
-                        },
+                        #[doc = "assign_core was called with no assignments."]
+                        AssignmentsEmpty,
                         #[codec(index = 1)]
-                        Bulk(runtime_types::polkadot_parachain_primitives::primitives::Id),
+                        #[doc = "assign_core with non allowed insertion."]
+                        DisallowedInsert,
                     }
                 }
             }
@@ -61359,6 +61244,8 @@ pub mod api {
                 ParaInherent(
                     runtime_types::polkadot_runtime_parachains::paras_inherent::pallet::Error,
                 ),
+                #[codec(index = 55)]
+                ParaScheduler(runtime_types::polkadot_runtime_parachains::scheduler::pallet::Error),
                 #[codec(index = 56)]
                 Paras(runtime_types::polkadot_runtime_parachains::paras::pallet::Error),
                 #[codec(index = 60)]
@@ -61374,10 +61261,6 @@ pub mod api {
                 #[codec(index = 66)]
                 OnDemandAssignmentProvider(
                     runtime_types::polkadot_runtime_parachains::on_demand::pallet::Error,
-                ),
-                #[codec(index = 68)]
-                CoretimeAssignmentProvider(
-                    runtime_types::polkadot_runtime_parachains::assigner_coretime::pallet::Error,
                 ),
                 #[codec(index = 70)]
                 Registrar(runtime_types::polkadot_runtime_common::paras_registrar::pallet::Error),

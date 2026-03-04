@@ -4,7 +4,6 @@
 
 //! Miscellaneous utility helpers.
 
-mod account_id20;
 mod era;
 #[cfg(feature = "jsonrpsee")]
 mod fetch_chain_spec;
@@ -17,11 +16,11 @@ mod wrapper_opaque;
 mod yesnomaybe;
 
 pub mod bits;
+pub mod eth;
 
 use codec::{Compact, Decode, Encode};
 use derive_where::derive_where;
 
-pub use account_id20::AccountId20;
 pub use era::Era;
 pub use multi_address::MultiAddress;
 pub use multi_signature::MultiSignature;

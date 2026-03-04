@@ -4,7 +4,7 @@
 
 //! Polkadot specific configuration
 
-use super::{Config, DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder};
+use super::{Config, DefaultExtrinsicParamsBuilder, DefaultTransactionExtensions};
 
 use crate::config::substrate::{SubstrateConfig, SubstrateConfigBuilder};
 use crate::metadata::ArcMetadata;
@@ -123,7 +123,7 @@ impl Config for PolkadotConfig {
 
     // These are the same as the default substrate node, but redefined
     // because we need to pass the PolkadotConfig trait as a param.
-    type ExtrinsicParams = PolkadotExtrinsicParams<Self>;
+    type TransactionExtensions = PolkadotExtrinsicParams<Self>;
 
     fn genesis_hash(&self) -> Option<super::HashFor<Self>> {
         self.0.genesis_hash()
@@ -152,7 +152,7 @@ impl Config for PolkadotConfig {
 
 /// A struct representing the signed extra and additional parameters required
 /// to construct a transaction for a polkadot node.
-pub type PolkadotExtrinsicParams<T> = DefaultExtrinsicParams<T>;
+pub type PolkadotExtrinsicParams<T> = DefaultTransactionExtensions<T>;
 
 /// A builder which leads to [`PolkadotExtrinsicParams`] being constructed.
 /// This is what you provide to methods like `sign_and_submit()`.

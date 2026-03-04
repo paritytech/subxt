@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/jameswilson/Work/frame-decode/src/methods/**)"
+    ]
+  }
+}

@@ -5,49 +5,51 @@
 use crate::subxt_test;
 use subxt::{OnlineClient, config::PolkadotConfig};
 
-#[subxt_test]
+#[subxt_test(timeout = 600)]
 async fn can_instantiate_client_across_historic_polkadot_runtimes() {
-    let api = connect_to_rpc_node(&[
-        "wss://rpc.polkadot.io",
-        "wss://polkadot-public-rpc.blockops.network/ws",
-        "wss://1rpc.io/dot",
-    ])
-    .await;
+    let futs = POLKADOT_SPEC_VERSION_BLOCKS
+        .into_iter()
+        .map(async move |block_num| {
+            tracing::info!("Connecting to RPC node at block {block_num}");
+            let api = connect_to_rpc_node(&[
+                "wss://rpc.polkadot.io",
+                "wss://polkadot-public-rpc.blockops.network/ws",
+                "wss://1rpc.io/dot",
+            ])
+            .await;
 
-    let futs = POLKADOT_SPEC_VERSION_BLOCKS.into_iter().map(|block_num| {
-        let api = api.clone();
-        async move {
             tracing::info!("Instantiating client at block {block_num}");
             api.at_block(block_num)
                 .await
                 .unwrap_or_else(|e| panic!("Can't instantiate client at block {block_num}: {e}"));
-            tracing::info!("   -> Success Instantiating client at block {block_num}");
-        }
-    });
 
-    run_with_concurrency(5, futs).await;
+            tracing::info!("   -> Success Instantiating client at block {block_num}");
+        });
+
+    run_with_concurrency(10, futs).await;
 }
 
-#[subxt_test]
+#[subxt_test(timeout = 600)]
 async fn can_instantiate_client_across_historic_kusama_runtimes() {
-    let api = connect_to_rpc_node(&[
-        "wss://kusama-public-rpc.blockops.network/ws",
-        "wss://rpc.ibp.network/kusama",
-    ])
-    .await;
+    let futs = KUSAMA_SPEC_VERSION_BLOCKS
+        .into_iter()
+        .map(async move |block_num| {
+            tracing::info!("Connecting to RPC node at block {block_num}");
+            let api = connect_to_rpc_node(&[
+                "wss://rpc.ibp.network/kusama",
+                "wss://kusama-public-rpc.blockops.network/ws",
+            ])
+            .await;
 
-    let futs = KUSAMA_SPEC_VERSION_BLOCKS.into_iter().map(|block_num| {
-        let api = api.clone();
-        async move {
             tracing::info!("Instantiating client at block {block_num}");
             api.at_block(block_num)
                 .await
                 .unwrap_or_else(|e| panic!("Can't instantiate client at block {block_num}: {e}"));
-            tracing::info!("   -> Success Instantiating client at block {block_num}");
-        }
-    });
 
-    run_with_concurrency(5, futs).await;
+            tracing::info!("   -> Success Instantiating client at block {block_num}");
+        });
+
+    run_with_concurrency(10, futs).await;
 }
 
 /// Runs at most `num_tasks` at once, running the next tasks only when currently running ones finish and free up space.
@@ -70,11 +72,13 @@ async fn run_with_concurrency<F: Future<Output = ()>>(
 }
 
 async fn connect_to_rpc_node(urls: &[&'static str]) -> OnlineClient<PolkadotConfig> {
-    for url in urls {
-        let api = OnlineClient::<PolkadotConfig>::from_url(url).await;
-        match api {
-            Ok(api) => return api,
-            Err(e) => tracing::warn!("Error connecting to RPC node {url}: {e}"),
+    for _ in 0..3 {
+        for url in urls {
+            let api = OnlineClient::<PolkadotConfig>::from_url(url).await;
+            match api {
+                Ok(api) => return api,
+                Err(e) => tracing::warn!("Error connecting to RPC node {url}: {e}"),
+            }
         }
     }
     panic!("Could not connect to any RPC node")
@@ -94,13 +98,11 @@ const POLKADOT_SPEC_VERSION_BLOCKS: [u64; 70] = [
 ];
 
 /// A list of entries denoting the historic Kusama RC blocks with spec and transaction versions changes.
-/// This will change over time, but we only really care about historic blocks.
-const KUSAMA_SPEC_VERSION_BLOCKS: [u64; 68] = [
+/// Our Kusama RPC nodes are _slow_ so we don't test _every_ version, only all of the oldest ones.
+const KUSAMA_SPEC_VERSION_BLOCKS: [u64; 50] = [
     26668, 38244, 54248, 59658, 67650, 82191, 83237, 101503, 203466, 295787, 461692, 504329,
     569326, 587686, 653183, 693487, 901442, 1375086, 1445458, 1472960, 1475648, 1491596, 1574408,
     2064961, 2201991, 2671528, 2704202, 2728002, 2832534, 2962294, 3240000, 3274408, 3323565,
     3534175, 3860281, 4143129, 4401242, 4841367, 5961600, 6137912, 6561855, 7100891, 7468792,
-    7668600, 7812476, 8010981, 8073833, 8555825, 8945245, 9611377, 9625129, 9866422, 10403784,
-    10960765, 11006614, 11404482, 11601803, 12008022, 12405451, 12665416, 12909508, 13109752,
-    13555777, 13727747, 14248044, 14433840, 14645900, 15048375,
+    7668600, 7812476, 8010981, 8073833, 8555825, 8945245, 9611377,
 ];

@@ -294,7 +294,7 @@ async fn storage_check() {
     let api_at_block = api.at_current_block().await.unwrap();
 
     let tx_count_addr = node_runtime::storage().system().extrinsic_count();
-    let tx_len_addr = node_runtime::storage().system().all_extrinsics_len();
+    let tx_len_addr = node_runtime::storage().system().block_size();
 
     // Ensure that `ExtrinsicCount` and `EventCount` storages are compatible before altering the metadata.
     assert!(api_at_block.storage().validate(&tx_count_addr).is_ok());
@@ -312,7 +312,7 @@ async fn storage_check() {
                 docs: vec![],
             },
             StorageEntryMetadata {
-                name: "AllExtrinsicsLen",
+                name: "BlockSize",
                 modifier: StorageEntryModifier::Optional,
                 ty: StorageEntryType::Plain(meta_type::<u32>()),
                 default: vec![0],
@@ -345,7 +345,7 @@ async fn storage_check() {
                 docs: vec![],
             },
             StorageEntryMetadata {
-                name: "AllExtrinsicsLen",
+                name: "BlockSize",
                 modifier: StorageEntryModifier::Optional,
                 ty: StorageEntryType::Plain(meta_type::<u32>()),
                 default: vec![0],
