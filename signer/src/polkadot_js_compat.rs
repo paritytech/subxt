@@ -4,16 +4,26 @@
 
 //! A Polkadot-JS account loader.
 
+use crate::sr25519;
 use base64::Engine;
 use crypto_secretbox::{
     Key, Nonce, XSalsa20Poly1305,
     aead::{Aead, KeyInit},
 };
 use serde::Deserialize;
-
+use subxt_utils_accountid32::AccountId32;
 use thiserror::Error as DeriveError;
 
-use crate::sr25519;
+/// Official Polkadot-JS allowed scrypt parameters
+/// https://github.com/polkadot-js/common/blob/fe0886be239526e6c559e98d1099815d4b4f4a7f/packages/util-crypto/src/scrypt/defaults.ts#L6
+const ALLOWED_PARAMS: &[(u32, u32, u32)] = &[
+    (1 << 13, 10, 8),
+    (1 << 14, 5, 8),
+    (1 << 15, 3, 8),
+    (1 << 15, 1, 8), // Standard
+    (1 << 16, 2, 8),
+    (1 << 17, 1, 8), // High Security
+];
 
 /// Given a JSON keypair as exported from Polkadot-JS, this returns an [`sr25519::Keypair`]
 pub fn decrypt_json(json: &str, password: &str) -> Result<sr25519::Keypair, Error> {
@@ -75,9 +85,6 @@ struct KeyringPairJson {
     address: AccountId32,
 }
 
-// Re-export this type which is used above.
-pub use subxt_utils_accountid32::AccountId32;
-
 // This can be removed once split_array is stabilized.
 fn slice_to_u32(slice: &[u8]) -> u32 {
     u32::from_le_bytes(slice.try_into().expect("Slice should be 4 bytes."))
@@ -118,13 +125,21 @@ impl KeyringPairJson {
         // protection against carefully-crafted params that can eat up CPU since these are user
         // inputs. So we need to get very clever here, but atm we only allow the defaults
         // and if no match, bail out.
-        if n != 32768 || p != 1 || r != 8 {
+        //
+        // Check if the combination exists in the allowed list
+        if !ALLOWED_PARAMS
+            .iter()
+            .any(|&(a_n, a_p, a_r)| n == a_n && p == a_p && r == a_r)
+        {
             return Err(Error::UnsupportedScryptParameters { n, p, r });
         }
 
+        // Calculate the `log_n` (e.g., 32768 -> 15)
+        let log_n = (n as f64).log2() as u8;
+
         // Hash password.
-        let scrypt_params =
-            scrypt::Params::new(15, 8, 1, 32).expect("Provided parameters should be valid.");
+        let scrypt_params = scrypt::Params::new(log_n, r, p, 32)
+            .map_err(|_| Error::UnsupportedScryptParameters { n, p, r })?;
         let mut key = Key::default();
         scrypt::scrypt(password.as_bytes(), salt, &scrypt_params, &mut key)
             .expect("Key should be 32 bytes.");
@@ -171,7 +186,28 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_get_keypair_sr25519() {
+    fn test_get_bob_keypair_sr25519() {
+        let json = r#"
+            {
+              "encoded": "J2FFcPHAY11Pmq/38eqbwfUv9OPitYJs+oYgahBvlagAAAIAAQAAAAgAAAB5o0DwXCWDblsH+9pc++RaBO4fpHBHzUirHFHFE9yS3sDzgAIQjhgvPqJ3ODrMR2gy7vk0VZg1fyirIvmsrfjGbWnOI8YU0joX0tYytroyWaykFKtZJMmE0pNKcJ5dJmDxscbK53Ac+7ld2UdH07yKPXxmPuYNNw3vKx8cg9CdQgifKfzQxHnC+EUpOoHPLwGlHsFEYtIlQtngqd9n",
+              "encoding": {
+                "content": ["pkcs8", "sr25519"],
+                "type": ["scrypt", "xsalsa20-poly1305"],
+                "version": "3"
+              },
+              "address": "5CfWTDh7XxJ2yrayqQ2aJnnZAH5v5XaF1oJFfH5QCpbfP9v8",
+              "meta": {
+                "genesisHash": "",
+                "name": "Bob (Dev)",
+                "whenCreated": 1768916488918
+              }
+            }
+        "#;
+        decrypt_json(json, "whoisbob").unwrap();
+    }
+
+    #[test]
+    fn test_get_alice_keypair_sr25519() {
         let json = r#"
             {
               "encoded": "DumgApKCTqoCty1OZW/8WS+sgo6RdpHhCwAkA2IoDBMAgAAAAQAAAAgAAAB6IG/q24EeVf0JqWqcBd5m2tKq5BlyY84IQ8oamLn9DZe9Ouhgunr7i36J1XxUnTI801axqL/ym1gil0U8440Qvj0lFVKwGuxq38zuifgoj0B3Yru0CI6QKEvQPU5xxj4MpyxdSxP+2PnTzYao0HDH0fulaGvlAYXfqtU89xrx2/z9z7IjSwS3oDFPXRQ9kAdDebtyCVreZ9Otw9v3",
