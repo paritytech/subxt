@@ -23,7 +23,7 @@ use sp_crypto_hashing::blake2_256;
 use std::borrow::Cow;
 
 pub use default_params::DefaultParams;
-pub use payload::{DynamicPayload, Payload, StaticPayload, dynamic};
+pub use payload::{DynamicPayload, Payload, StaticPayload, ValidationDetails, dynamic};
 pub use signer::Signer;
 pub use transaction_progress::{TransactionInBlock, TransactionProgress, TransactionStatus};
 pub use validation_result::{
