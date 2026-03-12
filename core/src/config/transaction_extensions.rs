@@ -92,7 +92,9 @@ impl<T: Config> ExtrinsicParamsEncoder for VerifySignature<T> {
 impl<T: Config> TransactionExtension<T> for VerifySignature<T> {
     type Decoded = Static<VerifySignatureDetails<T>>;
     fn matches(identifier: &str, _type_id: u32, _types: &PortableRegistry) -> bool {
-        identifier == "VerifySignature"
+        // The name is expected to be VerifyMultiSignature, but to ensure 100% backward
+        // compatibility, also accept VerifySignature.
+        identifier == "VerifyMultiSignature" || identifier == "verifySignature"
     }
 }
 
