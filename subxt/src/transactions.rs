@@ -18,7 +18,7 @@ use codec::{Compact, Decode, Encode};
 use core::marker::PhantomData;
 
 pub use default_params::DefaultParams;
-pub use payload::{DynamicPayload, Payload, StaticPayload, dynamic};
+pub use payload::{DynamicPayload, Payload, StaticPayload, ValidationDetails, dynamic};
 pub use signer::Signer;
 pub use transaction_progress::{TransactionInBlock, TransactionProgress, TransactionStatus};
 pub use validation_result::{
