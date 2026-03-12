@@ -51,7 +51,7 @@ impl<T: Config> TransactionExtension<T> for VerifySignature<T> {
 impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
     for VerifySignature<T>
 {
-    const NAME: &str = "VerifySignature";
+    const NAME: &str = "VerifyMultiSignature";
 
     fn encode_value_to(
         &self,
