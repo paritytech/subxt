@@ -182,6 +182,49 @@ impl Keypair {
         let signature = self.0.sign(context.bytes(message));
         Signature(signature.to_bytes())
     }
+
+    /// Encrypt `plaintext` for `recipient` using ECIES over sr25519.
+    ///
+    /// The `ctx` parameter provides domain separation — use a unique
+    /// application-specific byte string (e.g. `b"my-app-v1"`).
+    ///
+    /// # Example
+    ///
+    /// ```rust,standalone_crate
+    /// use subxt_signer::sr25519;
+    ///
+    /// let alice = sr25519::dev::alice();
+    /// let bob = sr25519::dev::bob();
+    ///
+    /// let encrypted = alice.encrypt(b"secret message", &bob.public_key(), b"example")
+    ///     .expect("encryption works");
+    /// let decrypted = bob.decrypt(&encrypted, b"example")
+    ///     .expect("decryption works");
+    /// assert_eq!(decrypted, b"secret message");
+    /// ```
+    #[cfg(feature = "ecies")]
+    pub fn encrypt(
+        &self,
+        plaintext: &[u8],
+        recipient: &PublicKey,
+        ctx: &[u8],
+    ) -> Result<alloc::vec::Vec<u8>, schnorrkel::ecies::EciesError> {
+        let recipient_pk = schnorrkel::PublicKey::from_bytes(&recipient.0)
+            .map_err(|_| schnorrkel::ecies::EciesError::InvalidEphemeralKey)?;
+        schnorrkel::ecies::encrypt(plaintext, &recipient_pk, ctx)
+    }
+
+    /// Decrypt an ECIES ciphertext using this keypair's secret key.
+    ///
+    /// The `ctx` must match the context used during encryption.
+    #[cfg(feature = "ecies")]
+    pub fn decrypt(
+        &self,
+        ciphertext: &[u8],
+        ctx: &[u8],
+    ) -> Result<alloc::vec::Vec<u8>, schnorrkel::ecies::EciesError> {
+        schnorrkel::ecies::decrypt(ciphertext, &self.0.secret, ctx)
+    }
 }
 
 /// Verify that some signature for a message was created by the owner of the [`PublicKey`].
