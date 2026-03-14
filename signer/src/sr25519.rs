@@ -183,10 +183,20 @@ impl Keypair {
         Signature(signature.to_bytes())
     }
 
+    /// Derive the full viewing key for this keypair.
+    ///
+    /// The viewing key allows decrypting incoming and outgoing ECIES
+    /// messages without signing authority.
+    #[cfg(feature = "ecies")]
+    pub fn viewing_key(&self) -> schnorrkel::viewing_key::FullViewingKey {
+        schnorrkel::viewing_key::FullViewingKey::from_keypair(&self.0)
+    }
+
     /// Encrypt `plaintext` for `recipient` using ECIES over sr25519.
     ///
-    /// The `ctx` parameter provides domain separation — use a unique
-    /// application-specific byte string (e.g. `b"my-app-v1"`).
+    /// `recipient` should be an IVK public key (from the recipient's
+    /// viewing key), and `sender_ovk` is this keypair's outgoing
+    /// viewing key so the sender can later re-read the message.
     ///
     /// # Example
     ///
@@ -195,10 +205,14 @@ impl Keypair {
     ///
     /// let alice = sr25519::dev::alice();
     /// let bob = sr25519::dev::bob();
+    /// let alice_vk = alice.viewing_key();
+    /// let bob_vk = bob.viewing_key();
     ///
-    /// let encrypted = alice.encrypt(b"secret message", &bob.public_key(), b"example")
-    ///     .expect("encryption works");
-    /// let decrypted = bob.decrypt(&encrypted, b"example")
+    /// let encrypted = alice.encrypt(
+    ///     b"secret message", bob_vk.ivk_public(), b"example", alice_vk.ovk(),
+    /// ).expect("encryption works");
+    ///
+    /// let decrypted = bob_vk.decrypt_incoming(&encrypted, b"example")
     ///     .expect("decryption works");
     /// assert_eq!(decrypted, b"secret message");
     /// ```
@@ -206,12 +220,11 @@ impl Keypair {
     pub fn encrypt(
         &self,
         plaintext: &[u8],
-        recipient: &PublicKey,
+        recipient: &schnorrkel::PublicKey,
         ctx: &[u8],
+        sender_ovk: &schnorrkel::viewing_key::OutgoingViewingKey,
     ) -> Result<alloc::vec::Vec<u8>, schnorrkel::ecies::EciesError> {
-        let recipient_pk = schnorrkel::PublicKey::from_bytes(&recipient.0)
-            .map_err(|_| schnorrkel::ecies::EciesError::InvalidEphemeralKey)?;
-        schnorrkel::ecies::encrypt(plaintext, &recipient_pk, ctx)
+        schnorrkel::ecies::encrypt(plaintext, recipient, ctx, sender_ovk)
     }
 
     /// Decrypt an ECIES ciphertext using this keypair's secret key.

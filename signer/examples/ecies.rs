@@ -9,30 +9,34 @@ use subxt_signer::sr25519;
 fn main() {
     let alice = sr25519::dev::alice();
     let bob = sr25519::dev::bob();
+    let alice_vk = alice.viewing_key();
+    let bob_vk = bob.viewing_key();
 
     let plaintext = b"The quick brown fox jumps over the lazy dog";
-    let ctx = b"example-ecies-v1";
+    let ctx = b"example-ecies";
 
     // Alice encrypts a message for Bob
     let encrypted = alice
-        .encrypt(plaintext, &bob.public_key(), ctx)
+        .encrypt(plaintext, bob_vk.ivk_public(), ctx, alice_vk.ovk())
         .expect("encryption failed");
 
     println!("Plaintext:  {} bytes", plaintext.len());
     println!("Ciphertext: {} bytes (overhead: {} bytes)", encrypted.len(), encrypted.len() - plaintext.len());
 
-    // Bob decrypts
-    let decrypted = bob.decrypt(&encrypted, ctx).expect("decryption failed");
+    // Bob decrypts with his viewing key
+    let decrypted = bob_vk.decrypt_incoming(&encrypted, ctx).expect("decryption failed");
     assert_eq!(&decrypted[..], plaintext);
-    println!("Bob decrypted successfully: {:?}", core::str::from_utf8(&decrypted).unwrap());
+    println!("Bob decrypted: {:?}", core::str::from_utf8(&decrypted).unwrap());
 
-    // Alice cannot decrypt (wrong key)
-    let result = alice.decrypt(&encrypted, ctx);
-    assert!(result.is_err());
-    println!("Alice cannot decrypt Bob's message: {:?}", result.unwrap_err());
+    // Alice re-reads her outgoing message
+    let outgoing = alice_vk
+        .decrypt_outgoing(&encrypted, bob_vk.ivk_public(), ctx)
+        .expect("outgoing decryption failed");
+    assert_eq!(&outgoing[..], plaintext);
+    println!("Alice re-read outgoing: {:?}", core::str::from_utf8(&outgoing).unwrap());
 
     // Wrong context fails
-    let result = bob.decrypt(&encrypted, b"wrong-context");
+    let result = bob_vk.decrypt_incoming(&encrypted, b"wrong-context");
     assert!(result.is_err());
     println!("Wrong context fails: {:?}", result.unwrap_err());
 }

@@ -4624,7 +4624,7 @@ dependencies = [
 [[package]]
 name = "schnorrkel"
 version = "0.11.5"
-source = "git+https://github.com/hitchhooker/schnorrkel?branch=ecies#78d9d86cc291f66299db0a576c25129d865658a3"
+source = "git+https://github.com/hitchhooker/schnorrkel?branch=ecies#f931ad4320461ca5fcc1fbe5074c789ca069cd52"
 dependencies = [
  "aead",
  "arrayref",
