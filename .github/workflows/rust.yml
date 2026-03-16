@@ -43,7 +43,7 @@ jobs:
           components: rustfmt
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
 
       - name: Cargo fmt
         run: cargo fmt --all -- --check
@@ -66,7 +66,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
 
       - name: Install cargo-machete
         run: cargo install cargo-machete
@@ -94,7 +94,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
 
       - name: Run clippy
         run: |
@@ -124,7 +124,7 @@ jobs:
           components: clippy
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
 
       - name: Run clippy
         run: cargo clippy -p subxt --no-default-features --features web,light-client,jsonrpsee --target wasm32-unknown-unknown -- -D warnings
@@ -148,7 +148,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
 
       - name: Install cargo-hack
         uses: baptiste0928/cargo-install@v3
@@ -209,7 +209,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
 
       - name: Install 
         uses: actions/setup-node@v4
@@ -257,7 +257,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
 
       - name: Cargo check web features which require wasm32 target.
         run: |
@@ -289,7 +289,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
 
       - name: Check internal documentation links
         run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc --workspace --no-deps --document-private-items
@@ -377,7 +377,7 @@ jobs:
         uses: ./.github/workflows/actions/use-nodes
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
 
       - name: Run subxt WASM tests
         run: |
@@ -411,7 +411,7 @@ jobs:
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
 
       - name: Run subxt-lightclient WASM tests
         id: test
@@ -520,7 +520,7 @@ jobs:
         run: sudo apt install gcc-arm-none-eabi
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+        uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
 
       # Note: We currently do not have a way to run real tests in a `no_std` environment.
       # We can only make sure that they compile to ARM thumb ISA.
