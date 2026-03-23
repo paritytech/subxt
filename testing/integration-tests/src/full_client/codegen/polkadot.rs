@@ -1640,28 +1640,35 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Retrieve the relay parent info (block number and state root) for a given"]
-                #[doc = " session index and relay parent hash. Returns `None` if the relay parent"]
-                #[doc = " is not found in the allowed relay parents for that session."]
-                pub fn allowed_relay_parent_info(
+                #[doc = " Look up relay parent info for a block that is an **ancestor** of the block"]
+                #[doc = " this API is called at. Returns `None` if the relay parent is not found"]
+                #[doc = " in the allowed relay parents for the given session."]
+                #[doc = ""]
+                #[doc = " NOTE: A block is not in its own `AllowedRelayParents` storage (it gets"]
+                #[doc = " added during the next block's inherent). Querying a block about itself"]
+                #[doc = " will always return `None`. Use the node-side `check_relay_parent_session`"]
+                #[doc = " utility for a general-purpose check that handles both the self and"]
+                #[doc = " ancestor cases."]
+                pub fn ancestor_relay_parent_info(
                     &self,
-                    session_index: allowed_relay_parent_info::SessionIndex,
-                    relay_parent: allowed_relay_parent_info::RelayParent,
+                    session_index: ancestor_relay_parent_info::SessionIndex,
+                    relay_parent: ancestor_relay_parent_info::RelayParent,
                 ) -> ::subxt::runtime_apis::StaticPayload<
                     (
-                        allowed_relay_parent_info::SessionIndex,
-                        allowed_relay_parent_info::RelayParent,
+                        ancestor_relay_parent_info::SessionIndex,
+                        ancestor_relay_parent_info::RelayParent,
                     ),
-                    allowed_relay_parent_info::output::Output,
+                    ancestor_relay_parent_info::output::Output,
                 > {
                     ::subxt::runtime_apis::StaticPayload::new_static(
                         "ParachainHost",
-                        "allowed_relay_parent_info",
+                        "ancestor_relay_parent_info",
                         (session_index, relay_parent),
                         [
-                            125u8, 146u8, 38u8, 118u8, 244u8, 92u8, 188u8, 209u8, 20u8, 43u8, 72u8,
-                            16u8, 67u8, 240u8, 2u8, 93u8, 39u8, 130u8, 70u8, 188u8, 239u8, 11u8,
-                            100u8, 180u8, 24u8, 112u8, 33u8, 12u8, 25u8, 209u8, 221u8, 168u8,
+                            249u8, 148u8, 44u8, 215u8, 65u8, 153u8, 150u8, 221u8, 207u8, 181u8,
+                            41u8, 11u8, 212u8, 49u8, 158u8, 173u8, 175u8, 85u8, 109u8, 64u8, 149u8,
+                            186u8, 248u8, 255u8, 87u8, 200u8, 48u8, 145u8, 179u8, 189u8, 226u8,
+                            76u8,
                         ],
                     )
                 }
@@ -2090,7 +2097,7 @@ pub mod api {
                     pub type Output = ::core::primitive::u32;
                 }
             }
-            pub mod allowed_relay_parent_info {
+            pub mod ancestor_relay_parent_info {
                 use super::root_mod;
                 use super::runtime_types;
                 pub type SessionIndex = ::core::primitive::u32;
@@ -3972,9 +3979,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                201u8, 16u8, 65u8, 113u8, 222u8, 22u8, 72u8, 65u8, 101u8, 195u8, 185u8, 61u8,
-                215u8, 65u8, 120u8, 44u8, 150u8, 93u8, 184u8, 154u8, 80u8, 138u8, 93u8, 163u8,
-                119u8, 214u8, 165u8, 212u8, 103u8, 167u8, 97u8, 61u8,
+                88u8, 236u8, 243u8, 39u8, 250u8, 25u8, 254u8, 137u8, 56u8, 187u8, 61u8, 125u8,
+                69u8, 71u8, 9u8, 148u8, 125u8, 158u8, 87u8, 92u8, 42u8, 205u8, 36u8, 1u8, 231u8,
+                186u8, 45u8, 17u8, 115u8, 186u8, 223u8, 192u8,
             ]
     }
     pub mod system {
