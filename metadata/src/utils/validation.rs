@@ -312,7 +312,7 @@ fn get_custom_metadata_hash(custom_metadata: &CustomMetadata) -> Hash {
         })
 }
 
-/// Obtain the hash of some custom value in the metadata including it's name/key.
+/// Obtain the hash of some custom value in the metadata including its name/key.
 ///
 /// If the `custom_value` has a type id that is not present in the metadata,
 /// only the name and bytes are used for hashing.
@@ -1022,7 +1022,7 @@ mod tests {
             First { b: u8 },
         }
 
-        // Named fields contain a different semantic meaning ('a' and 'b')  despite
+        // Named fields contain a different semantic meaning ('a' and 'b') despite
         // being binary compatible, so hashes should be different.
         assert_ne!(
             to_hash(meta_type::<EnumD1>()),

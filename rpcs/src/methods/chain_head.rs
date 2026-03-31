@@ -81,7 +81,7 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
     }
 
     /// Stops an operation started with `chainHead_v1_body`, `chainHead_v1_call`, or
-    /// `chainHead_v1_storage¦. If the operation was still in progress, this interrupts it.
+    /// `chainHead_v1_storage`. If the operation was still in progress, this interrupts it.
     /// If the operation was already finished, this call has no effect.
     ///
     /// Has no effect if the `followSubscription` is invalid or stale.
@@ -417,7 +417,7 @@ impl<T: RpcConfig> ChainHeadRpcMethods<T> {
 /// 1. Initialized - generated only once to signal the latest finalized block
 /// 2. NewBlock - a new block was added.
 /// 3. BestBlockChanged - indicate that the best block is now the one from this event. The block was
-///    announced priorly with the `NewBlock` event.
+///    announced previously with the `NewBlock` event.
 /// 4. Finalized - State the finalized and pruned blocks.
 ///
 /// The following events are related to operations:
