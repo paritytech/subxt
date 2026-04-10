@@ -414,7 +414,7 @@ impl<T: Config> Backend<T> for CombinedBackend<T> {
                 // guarantees around the block handed back being pinned & ready to access.
                 self.chainhead(),
                 self.legacy(),
-                // archive last just incase chainHead & legacy fail or aren't provided for some
+                // archive last just in case chainHead & legacy fail or aren't provided for some
                 // reason.
                 self.archive(),
             ],
