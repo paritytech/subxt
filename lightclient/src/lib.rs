@@ -108,6 +108,7 @@ impl LightClient {
             database_content: "",
             potential_relay_chains: std::iter::empty(),
             user_data: (),
+            statement_protocol_config: None,
         };
 
         let added_chain = client
@@ -160,6 +161,7 @@ impl LightClient {
             database_content: "",
             potential_relay_chains: std::iter::once(self.relay_chain_id),
             user_data: (),
+            statement_protocol_config: None,
         };
 
         let added_chain = self
