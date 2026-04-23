@@ -148,7 +148,7 @@ fn subxt_inner(args: TokenStream, item_mod: syn::ItemMod) -> Result<TokenStream,
 
     for d in args.derive_for_type {
         validate_type_path(&d.path.path, &metadata);
-        codegen.add_derives_for_type(d.path, d.derive.into_iter(), d.recursive);
+        codegen.add_derives_for_type(d.path, d.derive, d.recursive);
     }
 
     // Configure attributes:
