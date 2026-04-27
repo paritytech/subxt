@@ -40,7 +40,7 @@ async fn storage_iter() -> Result<(), subxt::Error> {
         .count()
         .await;
 
-    assert_eq!(len, 17);
+    assert_eq!(len, 19);
     Ok(())
 }
 
