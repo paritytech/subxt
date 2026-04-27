@@ -130,7 +130,7 @@ smoldot = { version = "1.1.0", default-features = false }
 smoldot-light = { version = "1.1.0", default-features = false }
 tokio-stream = "0.1.16"
 futures-util = "0.3.31"
-rand = "0.8.5"
+rand = "0.8.6"
 pin-project = "1.1.5"
 
 # Light client wasm:
