@@ -670,10 +670,8 @@ async fn submit_transaction_tracking_follow_events<T: Config>(
                     // Optimization: once we have a `finalized_hash`, we only care about finalized
                     // block refs now and can avoid bothering to save new blocks.
                     FollowEvent::NewBlock(ev) if finalized_hash.is_none() => {
-                        seen_blocks.insert(
-                            ev.block_hash.hash(),
-                            (SeenBlockMarker::New, ev.block_hash),
-                        );
+                        seen_blocks
+                            .insert(ev.block_hash.hash(), (SeenBlockMarker::New, ev.block_hash));
                     }
                     FollowEvent::Finalized(ev) => {
                         for block_ref in ev.finalized_block_hashes {
