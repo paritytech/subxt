@@ -48279,7 +48279,7 @@ pub mod api {
                 #[doc = " - [`frame_support::storage::StorageDoubleMap`]: 96 byte"]
                 #[doc = ""]
                 #[doc = " For more info see"]
-                #[doc = " <https://www.shawntabrizi.com/blog/substrate/querying-substrate-storage-via-rpc/>"]
+                #[doc = " <https://www.shawntabrizi.com/blog/interacting-with-the-substrate-rpc-endpoint/>"]
                 pub fn max_key_len(
                     &self,
                 ) -> ::subxt::constants::StaticAddress<::core::primitive::u32> {
