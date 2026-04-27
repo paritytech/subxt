@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.50.1] - 2026-04-27
+
+This release bumps the light-client smoldot crate to the latest version and adds several fixes.
+
+### Changed
+
+- Bump smoldot  ([#2217](https://github.com/paritytech/subxt/pull/2217))
+- Update rust version  ([#2218](https://github.com/paritytech/subxt/pull/2218))
+
+### Fixed
+
+- Fix clippy  ([#2226](https://github.com/paritytech/subxt/pull/2226))
+- VerifySignature => VerifyMultiSignature tx extension rename to fix  ([#2197](https://github.com/paritytech/subxt/pull/2197))
+- chore: fix some minor issues in the comments  ([#2211](https://github.com/paritytech/subxt/pull/2211))
+
 ## [0.50.0] - 2025-12-17
 
 This release version is a deliberately large bump up from 0.44.0 to signify the extent of the changes in this release.
