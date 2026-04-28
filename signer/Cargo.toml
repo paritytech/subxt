@@ -36,6 +36,7 @@ std = [
 # ecdsa compiling to WASM on my mac; following this comment helped:
 # https://github.com/rust-bitcoin/rust-bitcoin/issues/930#issuecomment-1215538699
 sr25519 = ["schnorrkel"]
+ecies = ["sr25519", "schnorrkel/ecies"]
 ecdsa = ["secp256k1"]
 unstable-eth = ["keccak-hash", "ecdsa", "secp256k1", "bip32"]
 
