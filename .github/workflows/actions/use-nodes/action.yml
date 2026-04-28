@@ -9,14 +9,14 @@ runs:
 
     - name: Download substrate-node binary
       id: download-substrate-binary
-      uses: dawidd6/action-download-artifact@4c1e823582f43b179e2cbb49c3eade4e41f992e2 # v10
+      uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
       with:
         workflow: build-nodes.yml
         name: nightly-substrate-binary
 
     - name: Download polkadot binary
       id: download-polkadot-binary
-      uses: dawidd6/action-download-artifact@4c1e823582f43b179e2cbb49c3eade4e41f992e2 # v10
+      uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
       with:
         workflow: build-nodes.yml
         name: nightly-polkadot-binary
