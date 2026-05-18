@@ -4,7 +4,9 @@
 
 //! Substrate specific configuration
 
-use super::{Config, DefaultExtrinsicParamsBuilder, DefaultTransactionExtensions, Hasher, Header};
+use super::{
+    Config, DefaultExtrinsicParamsBuilder, DefaultTransactionExtensions, HashFor, Hasher, Header,
+};
 use crate::config::Hash;
 use crate::metadata::{ArcMetadata, Metadata};
 use crate::utils::RangeMap;
@@ -193,7 +195,7 @@ impl Config for SubstrateConfig {
             .cloned()
     }
 
-    fn genesis_hash(&self) -> Option<H256> {
+    fn genesis_hash(&self) -> Option<HashFor<Self>> {
         self.inner.genesis_hash
     }
 
@@ -569,7 +571,10 @@ mod test {
     fn builder_propagates_genesis_hash() {
         let hash = H256::from([42u8; 32]);
         let config = SubstrateConfig::builder().set_genesis_hash(hash).build();
-        assert_eq!(<SubstrateConfig as Config>::genesis_hash(&config), Some(hash));
+        assert_eq!(
+            <SubstrateConfig as Config>::genesis_hash(&config),
+            Some(hash)
+        );
     }
 
     #[test]
