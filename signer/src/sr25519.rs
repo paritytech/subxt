@@ -182,6 +182,62 @@ impl Keypair {
         let signature = self.0.sign(context.bytes(message));
         Signature(signature.to_bytes())
     }
+
+    /// Derive the full viewing key for this keypair.
+    ///
+    /// The viewing key allows decrypting incoming and outgoing ECIES
+    /// messages without signing authority.
+    #[cfg(feature = "ecies")]
+    pub fn viewing_key(&self) -> schnorrkel::viewing_key::FullViewingKey {
+        schnorrkel::viewing_key::FullViewingKey::from_keypair(&self.0)
+    }
+
+    /// Encrypt `plaintext` for `recipient` using ECIES over sr25519.
+    ///
+    /// `recipient` should be an IVK public key (from the recipient's
+    /// viewing key), and `sender_ovk` is this keypair's outgoing
+    /// viewing key so the sender can later re-read the message.
+    ///
+    /// # Example
+    ///
+    /// ```rust,standalone_crate
+    /// use subxt_signer::sr25519;
+    ///
+    /// let alice = sr25519::dev::alice();
+    /// let bob = sr25519::dev::bob();
+    /// let alice_vk = alice.viewing_key();
+    /// let bob_vk = bob.viewing_key();
+    ///
+    /// let encrypted = alice.encrypt(
+    ///     b"secret message", bob_vk.ivk_public(), b"example", alice_vk.ovk(),
+    /// ).expect("encryption works");
+    ///
+    /// let decrypted = bob_vk.decrypt_incoming(&encrypted, b"example")
+    ///     .expect("decryption works");
+    /// assert_eq!(decrypted, b"secret message");
+    /// ```
+    #[cfg(feature = "ecies")]
+    pub fn encrypt(
+        &self,
+        plaintext: &[u8],
+        recipient: &schnorrkel::PublicKey,
+        ctx: &[u8],
+        sender_ovk: &schnorrkel::viewing_key::OutgoingViewingKey,
+    ) -> Result<alloc::vec::Vec<u8>, schnorrkel::ecies::EciesError> {
+        schnorrkel::ecies::encrypt(plaintext, recipient, ctx, sender_ovk)
+    }
+
+    /// Decrypt an ECIES ciphertext using this keypair's secret key.
+    ///
+    /// The `ctx` must match the context used during encryption.
+    #[cfg(feature = "ecies")]
+    pub fn decrypt(
+        &self,
+        ciphertext: &[u8],
+        ctx: &[u8],
+    ) -> Result<alloc::vec::Vec<u8>, schnorrkel::ecies::EciesError> {
+        schnorrkel::ecies::decrypt(ciphertext, &self.0.secret, ctx)
+    }
 }
 
 /// Verify that some signature for a message was created by the owner of the [`PublicKey`].

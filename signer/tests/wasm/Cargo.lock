@@ -308,6 +308,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "chacha20poly1305"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "10cd79432192d1c0f4e1a0fef9527696cc039165d729fb41b3f4f4f354c2dc35"
+dependencies = [
+ "aead",
+ "chacha20",
+ "cipher",
+ "poly1305",
+ "zeroize",
+]
+
+[[package]]
 name = "cipher"
 version = "0.4.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -789,9 +802,9 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.16.1"
+version = "0.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e63257bb5f8d7a707d626aa1b4e464c3b9720edd168b73cee98f48f0dd6386e4"
+checksum = "88cda60c640572c970c544ba5879375a18ecfb2c47c617be8265830b63df193d"
 dependencies = [
  "frame-metadata",
  "parity-scale-codec",
@@ -2106,6 +2119,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "schnorrkel"
+version = "0.11.5"
+source = "git+https://github.com/hitchhooker/schnorrkel?branch=ecies#78d9d86cc291f66299db0a576c25129d865658a3"
+dependencies = [
+ "aead",
+ "arrayref",
+ "arrayvec 0.7.6",
+ "chacha20poly1305",
+ "curve25519-dalek",
+ "getrandom_or_panic",
+ "merlin",
+ "rand_core",
+ "serde_bytes",
+ "sha2 0.10.9",
+ "subtle",
+ "zeroize",
+]
+
+[[package]]
 name = "scrypt"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2397,7 +2429,7 @@ dependencies = [
  "rand",
  "rand_chacha",
  "ruzstd",
- "schnorrkel",
+ "schnorrkel 0.11.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "serde_json",
  "sha2 0.10.9",
@@ -2660,7 +2692,7 @@ dependencies = [
  "parity-scale-codec",
  "pbkdf2",
  "regex",
- "schnorrkel",
+ "schnorrkel 0.11.5 (git+https://github.com/hitchhooker/schnorrkel?branch=ecies)",
  "scrypt",
  "secp256k1 0.30.0",
  "secrecy",
