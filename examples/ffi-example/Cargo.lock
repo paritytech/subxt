@@ -889,9 +889,9 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.17.0"
+version = "0.17.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dea4ae9db992bb3d089885a4fc17d06ffbd6918d7434fd192a20aba02d554bff"
+checksum = "88cda60c640572c970c544ba5879375a18ecfb2c47c617be8265830b63df193d"
 dependencies = [
  "frame-metadata",
  "parity-scale-codec",
@@ -2158,9 +2158,9 @@ checksum = "f87165f0995f63a9fbeea62b64d10b4d9d8e78ec6d7d51fb2125fda7bb36788f"
 
 [[package]]
 name = "rustls-webpki"
-version = "0.103.3"
+version = "0.103.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4a72fe2bcf7a6ac6fd7d0b9e5cb68aeb7d4c0a0271730218b3e92d43b4eb435"
+checksum = "61c429a8649f110dddef65e2a5ad240f747e85f7758a6bccc7e5777bd33f756e"
 dependencies = [
  "ring",
  "rustls-pki-types",
