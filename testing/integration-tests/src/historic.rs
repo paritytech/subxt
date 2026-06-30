@@ -38,7 +38,6 @@ async fn can_instantiate_client_across_historic_kusama_runtimes() {
             tracing::info!("Connecting to RPC node at block {block_num}");
             let api = connect_to_rpc_node(&[
                 "wss://kusama-rpc.polkadot.io",
-                "wss://rpc.ibp.network/kusama",
                 "wss://kusama.dotters.network",
                 "wss://kusama-public-rpc.blockops.network/ws",
             ])
