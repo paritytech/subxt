@@ -13,6 +13,7 @@ async fn can_instantiate_client_across_historic_polkadot_runtimes() {
             tracing::info!("Connecting to RPC node at block {block_num}");
             let api = connect_to_rpc_node(&[
                 "wss://rpc.polkadot.io",
+                "wss://polkadot.dotters.network",
                 "wss://polkadot-public-rpc.blockops.network/ws",
                 "wss://1rpc.io/dot",
             ])
@@ -36,7 +37,8 @@ async fn can_instantiate_client_across_historic_kusama_runtimes() {
         .map(async move |block_num| {
             tracing::info!("Connecting to RPC node at block {block_num}");
             let api = connect_to_rpc_node(&[
-                "wss://rpc.ibp.network/kusama",
+                "wss://kusama-rpc.polkadot.io",
+                "wss://kusama.dotters.network",
                 "wss://kusama-public-rpc.blockops.network/ws",
             ])
             .await;
@@ -72,7 +74,12 @@ async fn run_with_concurrency<F: Future<Output = ()>>(
 }
 
 async fn connect_to_rpc_node(urls: &[&'static str]) -> OnlineClient<PolkadotConfig> {
-    for _ in 0..3 {
+    // The public RPC nodes we rely on are flaky: they occasionally rate-limit or
+    // temporarily refuse connections (especially the slow Kusama archive nodes).
+    // Retry the whole list a few times with a growing backoff before giving up, so
+    // that a transient hiccup doesn't fail the test.
+    const MAX_ROUNDS: u32 = 5;
+    for round in 0..MAX_ROUNDS {
         for url in urls {
             let api = OnlineClient::<PolkadotConfig>::from_url(url).await;
             match api {
@@ -80,8 +87,15 @@ async fn connect_to_rpc_node(urls: &[&'static str]) -> OnlineClient<PolkadotConf
                 Err(e) => tracing::warn!("Error connecting to RPC node {url}: {e}"),
             }
         }
+
+        // Give overloaded/rate-limited nodes a chance to recover before retrying.
+        if round + 1 < MAX_ROUNDS {
+            let backoff = std::time::Duration::from_secs(2u64.pow(round));
+            tracing::info!("Could not connect to any RPC node; retrying in {backoff:?}");
+            tokio::time::sleep(backoff).await;
+        }
     }
-    panic!("Could not connect to any RPC node")
+    panic!("Could not connect to any RPC node from {urls:?}")
 }
 
 /// A list of entries denoting the historic Polkadot RC blocks with spec and transaction versions changes.
