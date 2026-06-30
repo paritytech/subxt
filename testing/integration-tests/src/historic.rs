@@ -13,7 +13,6 @@ async fn can_instantiate_client_across_historic_polkadot_runtimes() {
             tracing::info!("Connecting to RPC node at block {block_num}");
             let api = connect_to_rpc_node(&[
                 "wss://rpc.polkadot.io",
-                "wss://rpc.ibp.network/polkadot",
                 "wss://polkadot.dotters.network",
                 "wss://polkadot-public-rpc.blockops.network/ws",
                 "wss://1rpc.io/dot",
