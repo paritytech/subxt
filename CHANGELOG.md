@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.50.2] - 2026-07-06
+
+This release fixes an issue whereby setting the genesis hash in the `SubstrateConfigBuilder` had no effect, and improves the reliability of tests against public archival RPC endpoints.
+
+### Changed
+
+- Update Artifacts (auto-generated) ([#2245](https://github.com/paritytech/subxt/pull/2245))
+- tests: Exponential backoff for archival RPC public endpoints ([#2244](https://github.com/paritytech/subxt/pull/2244))
+
+### Fixed
+
+- Fix: `SubstrateConfigBuilder::set_genesis_hash` is a no-op ([#2236](https://github.com/paritytech/subxt/pull/2236))
+
 ## [0.50.1] - 2026-04-27
 
 This release bumps the light-client smoldot crate to the latest version and adds several fixes.
