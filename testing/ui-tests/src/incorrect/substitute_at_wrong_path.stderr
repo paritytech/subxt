@@ -31,6 +31,7 @@ error: Type `Event` does not exist at path `sp_runtime::multiaddress::Event`
        pallet_balances::pallet::Event
        polkadot_runtime_parachains::inclusion::pallet::Event
        polkadot_runtime_parachains::paras::pallet::Event
+       polkadot_runtime_parachains::dmp::pallet::Event
        polkadot_runtime_parachains::hrmp::pallet::Event
        polkadot_runtime_parachains::disputes::pallet::Event
        pallet_message_queue::pallet::Event
