@@ -458,10 +458,10 @@ impl<H: Hash> Drop for BlockRef<H> {
         // only "external" one left and we should ask to unpin it now. if it's
         // the only ref remaining, it means that it's already been unpinned, so
         // nothing to do here anyway.
-        if Arc::strong_count(&self.inner) == 2 {
-            if let Ok(mut unpin_flags) = self.inner.unpin_flags.lock() {
-                unpin_flags.insert(self.inner.hash);
-            }
+        if Arc::strong_count(&self.inner) == 2
+            && let Ok(mut unpin_flags) = self.inner.unpin_flags.lock()
+        {
+            unpin_flags.insert(self.inner.hash);
         }
     }
 }

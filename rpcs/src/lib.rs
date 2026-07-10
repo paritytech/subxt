@@ -133,6 +133,6 @@ impl UserError {
 
 impl core::fmt::Display for UserError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} ({})", &self.message, &self.code)
+        write!(f, "{} ({})", self.message, self.code)
     }
 }

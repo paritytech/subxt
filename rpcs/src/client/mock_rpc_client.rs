@@ -194,10 +194,10 @@ impl RpcClientT for MockRpcClient {
     ) -> RawRpcFuture<'a, Box<serde_json::value::RawValue>> {
         // Remove and call a one-time handler if any exist.
         let mut handlers_once = self.method_handlers_once.lock().unwrap();
-        if let Some(handlers) = handlers_once.get_mut(method) {
-            if let Some(handler) = handlers.pop_front() {
-                return handler(method, params)
-            }
+        if let Some(handlers) = handlers_once.get_mut(method)
+            && let Some(handler) = handlers.pop_front()
+        {
+            return handler(method, params)
         }
         drop(handlers_once);
 
@@ -225,10 +225,10 @@ impl RpcClientT for MockRpcClient {
     ) -> RawRpcFuture<'a, RawRpcSubscription> {
         // Remove and call a one-time handler if any exist.
         let mut handlers_once = self.subscription_handlers_once.lock().unwrap();
-        if let Some(handlers) = handlers_once.get_mut(sub) {
-            if let Some(handler) = handlers.pop_front() {
-                return handler(sub, params, unsub)
-            }
+        if let Some(handlers) = handlers_once.get_mut(sub)
+            && let Some(handler) = handlers.pop_front()
+        {
+            return handler(sub, params, unsub)
         }
         drop(handlers_once);
 

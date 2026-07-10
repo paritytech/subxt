@@ -67,18 +67,18 @@ pub async fn run(opts: Opts, output: &mut impl std::io::Write) -> color_eyre::Re
                                 Diff::Added(new) => writeln!(
                                     output,
                                     "{}",
-                                    format!("            + {}", &new.name).green()
+                                    format!("            + {}", new.name).green()
                                 )?,
                                 Diff::Removed(old) => writeln!(
                                     output,
                                     "{}",
-                                    format!("            - {}", &old.name).red()
+                                    format!("            - {}", old.name).red()
                                 )?,
                                 Diff::Changed { from, to: _ } => {
                                     writeln!(
                                         output,
                                         "{}",
-                                        format!("            ~ {}", &from.name).yellow()
+                                        format!("            ~ {}", from.name).yellow()
                                     )?;
                                 }
                             }

@@ -27,7 +27,7 @@
 //! For more context see: https://github.com/tokio-rs/tokio/issues/2374.
 //!
 
-use crate::utils::{node_runtime, subxt_test};
+use crate::utils::node_runtime;
 use codec::Compact;
 use std::sync::Arc;
 use std::time::Duration;
