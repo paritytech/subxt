@@ -27,9 +27,10 @@
 //! For more context see: https://github.com/tokio-rs/tokio/issues/2374.
 //!
 
-use crate::utils::node_runtime;
+use crate::utils::{node_runtime, subxt_test};
 use codec::Compact;
 use std::sync::Arc;
+use std::time::Duration;
 use subxt::dynamic::Value;
 use subxt::{
     client::OnlineClient, config::PolkadotConfig, lightclient::LightClient, metadata::Metadata,
@@ -37,6 +38,22 @@ use subxt::{
 };
 
 type Client = OnlineClient<PolkadotConfig>;
+
+/// Maximum time to wait for the light client to warp sync and hand us a usable client.
+const CLIENT_INIT_TIMEOUT: Duration = Duration::from_secs(240);
+/// Maximum time to wait for each individual check once the client is up.
+const CHECK_TIMEOUT: Duration = Duration::from_secs(120);
+
+/// Run one check against [`CHECK_TIMEOUT`], panicking with the step name if it fails
+/// or times out, so that a stalled light client fails quickly and names the stuck
+/// step instead of hanging until the CI job timeout cancels it without any output.
+async fn run_check(step: &str, fut: impl std::future::Future<Output = Result<(), subxt::Error>>) {
+    match tokio::time::timeout(CHECK_TIMEOUT, fut).await {
+        Ok(Ok(())) => (),
+        Ok(Err(e)) => panic!("light client test step '{step}' failed: {e:?}"),
+        Err(_) => panic!("light client test step '{step}' timed out after {CHECK_TIMEOUT:?}"),
+    }
+}
 
 /// The Polkadot chainspec.
 const POLKADOT_SPEC: &str = include_str!("../../../artifacts/demo_chain_specs/polkadot.json");
@@ -211,31 +228,38 @@ async fn light_client_tests() {
     //     .unwrap();
     // let chain_config = chainspec.get();
 
+    // Surface smoldot and subxt logs when RUST_LOG is set (eg in CI), so that
+    // failures come with diagnostics attached. Smoldot logs via the `log` crate,
+    // which the fmt subscriber picks up through its log compatibility layer.
+    let _ = tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .try_init();
+
     tracing::trace!("Init light client");
     let now = std::time::Instant::now();
 
     // We only do this once for all tests because it's quite expensive.
-    let api = create_client().await;
+    let api = tokio::time::timeout(CLIENT_INIT_TIMEOUT, create_client())
+        .await
+        .unwrap_or_else(|_| {
+            panic!("light client initialization timed out after {CLIENT_INIT_TIMEOUT:?}")
+        });
     tracing::trace!("Light client initialization took {:?}", now.elapsed());
 
-    non_finalized_headers_subscription(&api)
-        .await
-        .expect("non_finalized_headers_subscription should pass");
-    finalized_headers_subscription(&api)
-        .await
-        .expect("finalized_headers_subscription should pass");
-    runtime_api_call(&api)
-        .await
-        .expect("runtime_api_call should pass");
-    storage_plain_lookup(&api)
-        .await
-        .expect("storage_plain_lookup should pass");
-    dynamic_constant_query(&api)
-        .await
-        .expect("dynamic_constant_query should pass");
-    dynamic_events(&api)
-        .await
-        .expect("dynamic_events should pass");
+    run_check(
+        "non_finalized_headers_subscription",
+        non_finalized_headers_subscription(&api),
+    )
+    .await;
+    run_check(
+        "finalized_headers_subscription",
+        finalized_headers_subscription(&api),
+    )
+    .await;
+    run_check("runtime_api_call", runtime_api_call(&api)).await;
+    run_check("storage_plain_lookup", storage_plain_lookup(&api)).await;
+    run_check("dynamic_constant_query", dynamic_constant_query(&api)).await;
+    run_check("dynamic_events", dynamic_events(&api)).await;
 
     tracing::trace!("Light complete testing took {:?}", now.elapsed());
 }
