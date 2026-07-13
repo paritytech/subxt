@@ -500,9 +500,9 @@ pub mod api {
                         "dry_run_call",
                         (origin, call, result_xcms_version),
                         [
-                            147u8, 129u8, 156u8, 182u8, 194u8, 110u8, 221u8, 247u8, 43u8, 178u8,
-                            45u8, 86u8, 113u8, 166u8, 38u8, 56u8, 197u8, 141u8, 134u8, 14u8, 230u8,
-                            24u8, 193u8, 43u8, 231u8, 61u8, 133u8, 221u8, 170u8, 19u8, 56u8, 238u8,
+                            219u8, 125u8, 168u8, 220u8, 22u8, 193u8, 188u8, 43u8, 203u8, 140u8,
+                            105u8, 7u8, 16u8, 37u8, 231u8, 132u8, 243u8, 162u8, 134u8, 36u8, 213u8,
+                            97u8, 91u8, 132u8, 141u8, 232u8, 112u8, 96u8, 86u8, 36u8, 200u8, 142u8,
                         ],
                     )
                 }
@@ -520,9 +520,10 @@ pub mod api {
                         "dry_run_xcm",
                         (origin_location, xcm),
                         [
-                            141u8, 187u8, 93u8, 204u8, 95u8, 93u8, 199u8, 47u8, 217u8, 12u8, 34u8,
-                            88u8, 57u8, 3u8, 83u8, 69u8, 184u8, 193u8, 167u8, 244u8, 50u8, 114u8,
-                            255u8, 23u8, 125u8, 170u8, 248u8, 176u8, 147u8, 237u8, 216u8, 71u8,
+                            7u8, 5u8, 98u8, 207u8, 243u8, 185u8, 208u8, 84u8, 128u8, 182u8, 70u8,
+                            101u8, 233u8, 174u8, 141u8, 26u8, 20u8, 212u8, 56u8, 221u8, 71u8,
+                            240u8, 123u8, 164u8, 220u8, 156u8, 115u8, 133u8, 10u8, 53u8, 134u8,
+                            176u8,
                         ],
                     )
                 }
@@ -3979,9 +3980,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                254u8, 112u8, 102u8, 77u8, 125u8, 0u8, 7u8, 188u8, 48u8, 63u8, 109u8, 52u8, 253u8,
-                241u8, 207u8, 133u8, 122u8, 125u8, 49u8, 73u8, 56u8, 218u8, 16u8, 113u8, 213u8,
-                22u8, 13u8, 73u8, 31u8, 0u8, 146u8, 13u8,
+                124u8, 3u8, 209u8, 127u8, 27u8, 246u8, 44u8, 25u8, 231u8, 16u8, 37u8, 150u8, 55u8,
+                70u8, 93u8, 10u8, 244u8, 242u8, 23u8, 207u8, 242u8, 166u8, 4u8, 198u8, 134u8,
+                147u8, 36u8, 172u8, 41u8, 39u8, 107u8, 246u8,
             ]
     }
     pub mod system {
@@ -4912,9 +4913,9 @@ pub mod api {
                         "System",
                         "Events",
                         [
-                            27u8, 234u8, 199u8, 112u8, 43u8, 113u8, 141u8, 86u8, 182u8, 97u8, 66u8,
-                            31u8, 75u8, 168u8, 187u8, 182u8, 184u8, 134u8, 172u8, 132u8, 110u8,
-                            37u8, 77u8, 163u8, 68u8, 45u8, 250u8, 39u8, 63u8, 151u8, 207u8, 142u8,
+                            160u8, 210u8, 152u8, 173u8, 169u8, 99u8, 143u8, 38u8, 255u8, 162u8,
+                            59u8, 120u8, 96u8, 150u8, 172u8, 159u8, 164u8, 22u8, 84u8, 31u8, 131u8,
+                            161u8, 175u8, 63u8, 187u8, 189u8, 15u8, 74u8, 161u8, 33u8, 16u8, 133u8,
                         ],
                     )
                 }
@@ -8850,15 +8851,15 @@ pub mod api {
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "There is an offence reported of the given `kind` happened at the `session_index` and"]
             #[doc = "(kind-specific) time slot. This event is not deposited for duplicate slashes."]
-            #[doc = "\\[kind, timeslot\\]."]
+            #[doc = "\\[kind, slot\\]."]
             pub struct Offence {
                 pub kind: offence::Kind,
-                pub timeslot: offence::Timeslot,
+                pub slot: offence::Slot,
             }
             pub mod offence {
                 use super::runtime_types;
                 pub type Kind = [::core::primitive::u8; 16usize];
-                pub type Timeslot = ::subxt::alloc::vec::Vec<::core::primitive::u8>;
+                pub type Slot = ::subxt::alloc::vec::Vec<::core::primitive::u8>;
             }
             impl Offence {
                 const PALLET_NAME: &'static str = "Offences";
@@ -19644,6 +19645,8 @@ pub mod api {
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Repay the payment previously given to the member with the signed origin, remove any"]
             #[doc = "pending payments, and elevate them from rank 0 to rank 1."]
+            #[doc = ""]
+            #[doc = "The funds reserved for the forfeited pending payments are returned to the society pot."]
             pub struct WaiveRepay {
                 pub amount: waive_repay::Amount,
             }
@@ -20239,6 +20242,8 @@ pub mod api {
                     }
                     #[doc = "Repay the payment previously given to the member with the signed origin, remove any"]
                     #[doc = "pending payments, and elevate them from rank 0 to rank 1."]
+                    #[doc = ""]
+                    #[doc = "The funds reserved for the forfeited pending payments are returned to the society pot."]
                     pub fn waive_repay(
                         &self,
                         amount: super::waive_repay::Amount,
@@ -53380,10 +53385,10 @@ pub mod api {
                     #[codec(index = 0)]
                     #[doc = "There is an offence reported of the given `kind` happened at the `session_index` and"]
                     #[doc = "(kind-specific) time slot. This event is not deposited for duplicate slashes."]
-                    #[doc = "\\[kind, timeslot\\]."]
+                    #[doc = "\\[kind, slot\\]."]
                     Offence {
                         kind: [::core::primitive::u8; 16usize],
-                        timeslot: ::subxt::alloc::vec::Vec<::core::primitive::u8>,
+                        slot: ::subxt::alloc::vec::Vec<::core::primitive::u8>,
                     },
                 }
             }
@@ -55542,6 +55547,8 @@ pub mod api {
                     #[codec(index = 7)]
                     #[doc = "Repay the payment previously given to the member with the signed origin, remove any"]
                     #[doc = "pending payments, and elevate them from rank 0 to rank 1."]
+                    #[doc = ""]
+                    #[doc = "The funds reserved for the forfeited pending payments are returned to the society pot."]
                     waive_repay { amount: ::core::primitive::u128 },
                     #[codec(index = 8)]
                     #[doc = "Found the society."]
