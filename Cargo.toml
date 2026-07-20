@@ -116,7 +116,7 @@ tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
 trybuild = "1.0.99"
 url = "2.5.2"
 wat = "1.228.0"
-wasm-bindgen-test = "0.3.24"
+wasm-bindgen-test = "0.3.76"
 which = "6.0.3"
 strip-ansi-escapes = "0.2.0"
 proptest = "1.5.0"
@@ -134,11 +134,11 @@ rand = "0.8.5"
 pin-project = "1.1.5"
 
 # Light client wasm:
-web-sys = { version = "0.3.70", features = ["BinaryType", "CloseEvent", "MessageEvent", "WebSocket"] }
-wasm-bindgen = "0.2.93"
+web-sys = { version = "0.3.103", features = ["BinaryType", "CloseEvent", "MessageEvent", "WebSocket"] }
+wasm-bindgen = "0.2.126"
 send_wrapper = "0.6.0"
-js-sys = "0.3.70"
-wasm-bindgen-futures = "0.4.43"
+js-sys = "0.3.103"
+wasm-bindgen-futures = "0.4.76"
 futures-timer = "3"
 web-time = { version = "1.1", default-features = false }
 tokio-util = "0.7.12"
