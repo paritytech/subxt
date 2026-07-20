@@ -590,7 +590,7 @@ mod test {
 
         for (case_idx, (keypair, exp_account_id, exp_priv_key)) in cases.into_iter().enumerate() {
             let act_account_id = keypair.public_key().to_account_id().checksum();
-            let act_priv_key = format!("0x{}", &keypair.0.0.display_secret());
+            let act_priv_key = format!("0x{}", keypair.0.0.display_secret());
 
             assert_eq!(
                 exp_account_id, act_account_id,

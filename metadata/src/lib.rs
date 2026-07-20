@@ -1340,10 +1340,10 @@ pub fn decode_runtime_metadata(
     // frame_metadata::OpaqueMetadata is a vec of bytes. If we can decode the length, AND
     // the length definitely corresponds to the number of remaining bytes, then we try to
     // decode the inner bytes.
-    if let Ok(len) = codec::Compact::<u64>::decode(&mut &*input) {
-        if input.len() == len.0 as usize {
-            return decode_runtime_metadata(input);
-        }
+    if let Ok(len) = codec::Compact::<u64>::decode(&mut &*input)
+        && input.len() == len.0 as usize
+    {
+        return decode_runtime_metadata(input);
     }
 
     Err(err)

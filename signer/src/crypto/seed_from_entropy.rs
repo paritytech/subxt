@@ -13,7 +13,7 @@ use zeroize::Zeroize;
 /// `None` if invalid length.
 #[allow(dead_code)]
 pub fn seed_from_entropy(entropy: &[u8], password: &str) -> Option<[u8; 64]> {
-    if entropy.len() < 16 || entropy.len() > 32 || entropy.len() % 4 != 0 {
+    if entropy.len() < 16 || entropy.len() > 32 || !entropy.len().is_multiple_of(4) {
         return None;
     }
 

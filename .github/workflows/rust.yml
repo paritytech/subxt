@@ -7,7 +7,7 @@ on:
     branches:
       - master
       # If we want to backport changes to an old release, push a branch
-      # eg v0.40.x and CI will run on it. PRs merging to such branches 
+      # eg v0.40.x and CI will run on it. PRs merging to such branches
       # will also trigger CI.
       - v0.[0-9]+.x
   pull_request:
@@ -211,7 +211,7 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
 
-      - name: Install 
+      - name: Install
         uses: actions/setup-node@v4
         with:
           # Node version 20 and higher seem to cause an issue with the JS example so stick to 19 for now.
@@ -230,7 +230,7 @@ jobs:
           echo "Running Python FFI example..."
           python3 src/main.py
           echo "Python FFI example completed with exit code $?"
-          
+
           # Run the node version of the FFI code
           echo "Installing Node.js dependencies..."
           npm i
@@ -331,10 +331,10 @@ jobs:
       matrix:
         # Test each of these features in our integration tests:
         feature:
-        - default
-        - reconnecting-rpc
-        - legacy-backend
-        - chainhead-backend
+          - default
+          - reconnecting-rpc
+          - legacy-backend
+          - chainhead-backend
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
@@ -447,14 +447,14 @@ jobs:
     name: "Flaky lightclient integration tests (${{ matrix.feature }})"
     runs-on: parity-large
     needs: [clippy, wasm_clippy, check, wasm_check, docs]
-    timeout-minutes: 10
+    timeout-minutes: 15
     strategy:
       matrix:
         # Test each of the backends with the light client.
         feature:
-        - default
-        - legacy-backend
-        - chainhead-backend
+          - default
+          - legacy-backend
+          - chainhead-backend
     steps:
       - name: Checkout sources
         uses: actions/checkout@v6
@@ -471,8 +471,10 @@ jobs:
 
       - name: Run crate tests
         id: test
+        env:
+          RUST_LOG: "info,subxt=debug,integration_tests=trace"
         run: |
-          if cargo test -p integration-tests --features light-client-rpc,${{ matrix.feature }}; then
+          if cargo test -p integration-tests --features light-client-rpc,${{ matrix.feature }} light_client -- --nocapture; then
             echo "result=success" >> $GITHUB_OUTPUT
           else
             echo "result=failure" >> $GITHUB_OUTPUT

@@ -444,17 +444,16 @@ impl<TPlatform: PlatformRef, TChain> BackgroundTaskData<TPlatform, TChain> {
                             "Cannot send method response to id={id} chain={chain_id:?}",
                         );
                     }
-                } else if let Some(subscription_id_state) = self.pending_subscriptions.remove(&id) {
-                    if subscription_id_state
+                } else if let Some(subscription_id_state) = self.pending_subscriptions.remove(&id)
+                    && subscription_id_state
                         .response_sender
                         .send(Err(LightClientRpcError::JsonRpcError(JsonRpcError(error))))
                         .is_err()
-                    {
-                        tracing::warn!(
-                            target: LOG_TARGET,
-                            "Cannot send method response to id {id} chain={chain_id:?}",
-                        );
-                    }
+                {
+                    tracing::warn!(
+                        target: LOG_TARGET,
+                        "Cannot send method response to id {id} chain={chain_id:?}",
+                    );
                 }
             }
             Ok(RpcResponse::Notification {

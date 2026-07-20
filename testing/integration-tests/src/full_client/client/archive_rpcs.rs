@@ -104,12 +104,13 @@ async fn archive_v1_finalized_height() {
 
         // On a dev node we expect blocks to be finalized 1 by 1, so panic
         // if the height we fetch has grown by more than 1.
-        if let Some(last) = last_block_height {
-            if archive_block_height != last && archive_block_height != last + 1 {
-                panic!(
-                    "Archive block height should increase 1 at a time, but jumped from {last} to {archive_block_height}"
-                );
-            }
+        if let Some(last) = last_block_height
+            && archive_block_height != last
+            && archive_block_height != last + 1
+        {
+            panic!(
+                "Archive block height should increase 1 at a time, but jumped from {last} to {archive_block_height}"
+            );
         }
 
         last_block_height = Some(archive_block_height);
