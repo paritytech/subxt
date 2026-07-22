@@ -54,7 +54,7 @@ jobs:
           base: master
           branch: update-artifacts
           commit-message: Update Artifacts (auto-generated)
-          branch-suffix: timestamp
+          delete-branch: true
           title: Update Artifacts (auto-generated)
           body: |
             This PR updates the artifacts by fetching fresh metadata from a substrate node.
