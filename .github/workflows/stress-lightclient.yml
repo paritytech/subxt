@@ -1,0 +1,107 @@
+# Temporary workflow for https://github.com/paritytech/subxt/issues/2247.
+# Stress-runs the light client test suites many times to measure flakiness
+# before promoting the "Flaky" CI steps to mandatory. Not meant to be merged.
+name: Stress LightClient Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      iterations:
+        description: "Test iterations per job"
+        default: "5"
+  push:
+    branches:
+      - stress-lightclient-ci
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  stress_integration:
+    name: "Stress integration (${{ matrix.feature }} batch ${{ matrix.batch }})"
+    runs-on: parity-large
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      # Be polite to the shared self-hosted runner pool.
+      max-parallel: 5
+      matrix:
+        feature:
+          - default
+          - legacy-backend
+          - chainhead-backend
+        batch: [1, 2, 3]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Use substrate and polkadot node binaries
+        uses: ./.github/workflows/actions/use-nodes
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+
+      - name: Run light_client tests repeatedly
+        env:
+          RUST_LOG: "info,subxt=debug,integration_tests=trace"
+        run: |
+          N="${{ github.event.inputs.iterations || 5 }}"
+          fails=0
+          for i in $(seq 1 "$N"); do
+            echo "::group::iteration $i/$N"
+            if cargo test -p integration-tests --features light-client-rpc,${{ matrix.feature }} light_client -- --nocapture; then
+              echo "iteration $i: PASS"
+            else
+              echo "iteration $i: FAIL"
+              fails=$((fails+1))
+            fi
+            echo "::endgroup::"
+          done
+          echo "RESULT feature=${{ matrix.feature }} batch=${{ matrix.batch }} failures=$fails/$N"
+          [ "$fails" -eq 0 ]
+
+  stress_wasm:
+    name: "Stress WASM (batch ${{ matrix.batch }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [1, 2, 3]
+    env:
+      # Set timeout for wasm tests to be much bigger than the default 20 secs.
+      WASM_BINDGEN_TEST_TIMEOUT: 300
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
+
+      - name: Run lightclient WASM tests repeatedly
+        working-directory: testing/wasm-lightclient-tests
+        run: |
+          N="${{ github.event.inputs.iterations || 5 }}"
+          fails=0
+          for i in $(seq 1 "$N"); do
+            echo "::group::iteration $i/$N"
+            if wasm-pack test --headless --firefox && wasm-pack test --headless --chrome; then
+              echo "iteration $i: PASS"
+            else
+              echo "iteration $i: FAIL"
+              fails=$((fails+1))
+            fi
+            echo "::endgroup::"
+          done
+          echo "RESULT wasm batch=${{ matrix.batch }} failures=$fails/$N"
+          [ "$fails" -eq 0 ]
