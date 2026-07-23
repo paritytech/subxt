@@ -51,6 +51,10 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.app-token.outputs.token }}
+          # Without these, the commit author defaults to github.actor, which for
+          # scheduled runs is whoever last modified this workflow file.
+          author: paritytech-subxt-pr-maker[bot] <159533160+paritytech-subxt-pr-maker[bot]@users.noreply.github.com>
+          committer: paritytech-subxt-pr-maker[bot] <159533160+paritytech-subxt-pr-maker[bot]@users.noreply.github.com>
           base: master
           branch: update-artifacts
           commit-message: Update Artifacts (auto-generated)
