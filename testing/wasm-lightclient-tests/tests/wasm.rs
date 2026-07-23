@@ -9,19 +9,20 @@ wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
 // Run the tests by calling:
 //
 // ```text
-// RUST_LOG=info WASM_BINDGEN_TEST_TIMEOUT=300 wasm-pack test --headless --chrome
-// ```
-//
-// Use the following to enable logs:
-// ```
-//  console_error_panic_hook::set_once();
-//  tracing_wasm::set_as_global_default();
+// WASM_BINDGEN_TEST_TIMEOUT=300 wasm-pack test --headless --chrome
 // ```
 
 const POLKADOT_SPEC: &str = include_str!("../../../artifacts/demo_chain_specs/polkadot.json");
 
 #[wasm_bindgen_test]
 async fn light_client_works() {
+    console_error_panic_hook::set_once();
+    tracing_wasm::set_as_global_default_with_config(
+        tracing_wasm::WASMLayerConfigBuilder::new()
+            .set_max_level(tracing::Level::DEBUG)
+            .build(),
+    );
+
     // Create a new LightClient based client. This uses the same chainSpec as our
     // native light client tests. If we hit any issues then we probably need to update our
     // chain spec so that the light client is uptodate enough not to need to sync lots
