@@ -129,6 +129,8 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
             scale_decode::Field::new(arg.id, name)
         });
 
+        // The first two bytes are the pallet and call indices decoded above;
+        // only the call arguments remain to be decoded here
         let cursor = &mut &call_data[2..];
         let args = Composite::<()>::decode_as_fields(cursor, &mut fields, metadata.types())
             .map_err(ExtrinsicError::CannotDecodeCallDataFields)?;
@@ -790,8 +792,7 @@ mod test {
     use scale_value::Value;
     use std::sync::Arc;
 
-    fn test_client() -> OfflineClientAtBlock<SubstrateConfig> {
-        let metadata_bytes: &[u8] = include_bytes!("../../artifacts/polkadot_metadata_small.scale");
+    fn test_client_with_metadata(metadata_bytes: &[u8]) -> OfflineClientAtBlock<SubstrateConfig> {
         let metadata = Metadata::decode(&mut &*metadata_bytes).unwrap();
 
         let config = SubstrateConfig::builder()
@@ -806,6 +807,12 @@ mod test {
         OfflineClient::new_with_config(config)
             .at_block(0u64)
             .unwrap()
+    }
+
+    fn test_client() -> OfflineClientAtBlock<SubstrateConfig> {
+        test_client_with_metadata(include_bytes!(
+            "../../artifacts/polkadot_metadata_small.scale"
+        ))
     }
 
     #[test]
@@ -828,6 +835,52 @@ mod test {
         assert_eq!(recovered.call_name(), "transfer_keep_alive");
 
         // Re-encoding the recovered payload should give back identical bytes:
+        assert_eq!(tx.call_data(&recovered).unwrap(), call_data);
+    }
+
+    #[test]
+    fn from_call_data_bytes_decodes_call_without_arguments() {
+        let client = test_client_with_metadata(include_bytes!(
+            "../../artifacts/polkadot_metadata_full.scale"
+        ));
+        let tx = client.tx();
+
+        let pallet = client
+            .metadata_ref()
+            .pallet_by_name("Sudo")
+            .expect("the test metadata should contain the Sudo pallet");
+        let call = pallet
+            .call_variant_by_name("remove_key")
+            .expect("the test metadata should contain Sudo.remove_key");
+        assert!(call.fields.is_empty());
+
+        let call_data = [pallet.call_index(), call.index];
+
+        let recovered = tx.from_call_data_bytes(&call_data).unwrap();
+
+        assert_eq!(recovered.pallet_name(), "Sudo");
+        assert_eq!(recovered.call_name(), "remove_key");
+        assert_eq!(recovered.call_data(), &Composite::Unnamed(Vec::new()));
+        assert_eq!(tx.call_data(&recovered).unwrap(), call_data);
+    }
+
+    #[test]
+    fn from_call_data_bytes_decodes_known_scale_fixture() {
+        let client = test_client();
+        let tx = client.tx();
+
+        // System pallet index 0, remark call index 0, followed by a SCALE encoded
+        // Vec containing the three bytes 1, 2 and 3
+        let call_data = [0x00, 0x00, 0x0c, 0x01, 0x02, 0x03];
+
+        let recovered = tx.from_call_data_bytes(&call_data).unwrap();
+
+        assert_eq!(recovered.pallet_name(), "System");
+        assert_eq!(recovered.call_name(), "remark");
+        assert_eq!(
+            recovered.call_data(),
+            &Composite::Named(vec![("remark".to_owned(), Value::from_bytes([1u8, 2, 3]),)])
+        );
         assert_eq!(tx.call_data(&recovered).unwrap(), call_data);
     }
 
