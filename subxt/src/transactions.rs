@@ -16,6 +16,7 @@ use crate::config::{ClientState, Config, HashFor, Hasher, TransactionExtensions}
 use crate::error::{ExtrinsicError, TransactionStatusError};
 use codec::{Compact, Decode, Encode};
 use core::marker::PhantomData;
+use scale_value::Composite;
 
 pub use default_params::DefaultParams;
 pub use payload::{DynamicPayload, Payload, StaticPayload, ValidationDetails, dynamic};
@@ -100,6 +101,43 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
         )?;
 
         Ok(encoded)
+    }
+
+    /// Decode SCALE encoded call data (such as the bytes handed back from
+    /// [`Self::call_data()`]) into a [`DynamicPayload`], which can then be
+    /// signed and submitted like any other payload. The call data is decoded
+    /// against the current metadata, and an error is returned if it's not
+    /// valid for the current runtime.
+    pub fn from_call_data_bytes(
+        &self,
+        call_data: &[u8],
+    ) -> Result<DynamicPayload<Composite<()>>, ExtrinsicError> {
+        use frame_decode::extrinsics::ExtrinsicTypeInfo;
+        use scale_decode::DecodeAsFields;
+
+        let &[pallet_index, call_index, ..] = call_data else {
+            return Err(ExtrinsicError::CallDataTooShort(call_data.len()));
+        };
+
+        let metadata = self.client.metadata_ref();
+        let call_info = metadata
+            .extrinsic_call_info_by_index(pallet_index, call_index)
+            .map_err(|e| ExtrinsicError::CannotDecodeCallData(e.into_owned()))?;
+
+        let mut fields = call_info.args.iter().map(|arg| {
+            let name = (!arg.name.is_empty()).then_some(&*arg.name);
+            scale_decode::Field::new(arg.id, name)
+        });
+
+        let cursor = &mut &call_data[2..];
+        let args = Composite::<()>::decode_as_fields(cursor, &mut fields, metadata.types())
+            .map_err(ExtrinsicError::CannotDecodeCallDataFields)?;
+
+        if !cursor.is_empty() {
+            return Err(ExtrinsicError::LeftoverBytesDecodingCallData(cursor.len()));
+        }
+
+        Ok(dynamic(call_info.pallet_name, call_info.call_name, args))
     }
 
     /// Creates an unsigned transaction without submitting it. Depending on the metadata, we might end
@@ -738,5 +776,112 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> SubmittableTransaction<T, Clien
                 .map_err(ExtrinsicError::CannotDecodeFeeInfo)?;
 
         Ok(partial_fee)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::client::{OfflineClient, OfflineClientAtBlock};
+    use crate::config::SubstrateConfig;
+    use crate::config::substrate::SpecVersionForRange;
+    use crate::metadata::Metadata;
+    use assert_matches::assert_matches;
+    use scale_value::Value;
+    use std::sync::Arc;
+
+    fn test_client() -> OfflineClientAtBlock<SubstrateConfig> {
+        let metadata_bytes: &[u8] = include_bytes!("../../artifacts/polkadot_metadata_small.scale");
+        let metadata = Metadata::decode(&mut &*metadata_bytes).unwrap();
+
+        let config = SubstrateConfig::builder()
+            .set_metadata_for_spec_versions([(0, Arc::new(metadata))])
+            .set_spec_version_for_block_ranges([SpecVersionForRange {
+                block_range: 0..u64::MAX,
+                spec_version: 0,
+                transaction_version: 0,
+            }])
+            .build();
+
+        OfflineClient::new_with_config(config)
+            .at_block(0u64)
+            .unwrap()
+    }
+
+    #[test]
+    fn from_call_data_bytes_roundtrips() {
+        let client = test_client();
+        let tx = client.tx();
+
+        // A call whose arguments include a variant and a compact encoded number:
+        let dest = Value::unnamed_variant("Id", [Value::from_bytes([7u8; 32])]);
+        let original = dynamic(
+            "Balances",
+            "transfer_keep_alive",
+            (dest, 12_345_000_000u128),
+        );
+
+        let call_data = tx.call_data(&original).unwrap();
+        let recovered = tx.from_call_data_bytes(&call_data).unwrap();
+
+        assert_eq!(recovered.pallet_name(), "Balances");
+        assert_eq!(recovered.call_name(), "transfer_keep_alive");
+
+        // Re-encoding the recovered payload should give back identical bytes:
+        assert_eq!(tx.call_data(&recovered).unwrap(), call_data);
+    }
+
+    #[test]
+    fn from_call_data_bytes_rejects_invalid_bytes() {
+        let client = test_client();
+        let tx = client.tx();
+
+        // Not enough bytes to read the pallet and call index:
+        assert_matches!(
+            tx.from_call_data_bytes(&[]),
+            Err(ExtrinsicError::CallDataTooShort(0))
+        );
+        assert_matches!(
+            tx.from_call_data_bytes(&[0]),
+            Err(ExtrinsicError::CallDataTooShort(1))
+        );
+
+        // A pallet index that doesn't exist:
+        let unused_pallet_index = (0..=u8::MAX)
+            .find(|i| client.metadata_ref().pallet_by_call_index(*i).is_none())
+            .unwrap();
+        assert_matches!(
+            tx.from_call_data_bytes(&[unused_pallet_index, 0]),
+            Err(ExtrinsicError::CannotDecodeCallData(_))
+        );
+
+        // A call index that doesn't exist in the pallet:
+        let system_pallet_index = client
+            .metadata_ref()
+            .pallet_by_name("System")
+            .unwrap()
+            .call_index();
+        assert_matches!(
+            tx.from_call_data_bytes(&[system_pallet_index, 0xEE]),
+            Err(ExtrinsicError::CannotDecodeCallData(_))
+        );
+
+        let valid = tx
+            .call_data(&dynamic("System", "remark", (vec![1u8, 2, 3],)))
+            .unwrap();
+
+        // Truncated argument bytes:
+        assert_matches!(
+            tx.from_call_data_bytes(&valid[..valid.len() - 1]),
+            Err(ExtrinsicError::CannotDecodeCallDataFields(_))
+        );
+
+        // Bytes left over after the arguments were decoded:
+        let mut extended = valid.clone();
+        extended.push(0);
+        assert_matches!(
+            tx.from_call_data_bytes(&extended),
+            Err(ExtrinsicError::LeftoverBytesDecodingCallData(1))
+        );
     }
 }
