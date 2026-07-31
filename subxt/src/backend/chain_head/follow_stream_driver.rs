@@ -322,8 +322,9 @@ impl<H: Hash> Shared<H> {
                     .push_back(FollowEvent::NewBlock(new_block_ev));
             }
             FollowStreamMsg::Event(ev @ FollowEvent::BestBlockChanged(_)) => {
-                // The node sends exactly one `BestBlockChanged` to each new `chainHead_follow`
-                // subscription, so replay only the latest one to our new subscribers.
+                // When the node starts a new subscription it reports exactly one
+                // `BestBlockChanged`, so replaying only the latest matches what a fresh
+                // subscription would see.
                 shared
                     .block_events_for_new_subscriptions
                     .retain(|e| !matches!(e, FollowEvent::BestBlockChanged(_)));
