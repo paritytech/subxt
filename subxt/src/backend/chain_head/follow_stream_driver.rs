@@ -79,8 +79,8 @@ impl<H: Hash> FollowStreamDriverHandle<H> {
 /// A subscription to events from the [`FollowStreamDriver`]. All subscriptions
 /// begin first with a `Ready` event containing the current subscription ID, and
 /// then with an `Initialized` event containing the latest finalized block and latest
-/// runtime information, and then any new/best block events and so on received since
-/// the latest finalized block.
+/// runtime information, and then any new block events and so on received since the
+/// latest finalized block. Only the most recent best block event is handed over.
 #[derive(Debug)]
 pub struct FollowStreamDriverSubscription<H: Hash> {
     id: usize,
@@ -322,6 +322,11 @@ impl<H: Hash> Shared<H> {
                     .push_back(FollowEvent::NewBlock(new_block_ev));
             }
             FollowStreamMsg::Event(ev @ FollowEvent::BestBlockChanged(_)) => {
+                // The node sends exactly one `BestBlockChanged` to each new `chainHead_follow`
+                // subscription, so replay only the latest one to our new subscribers.
+                shared
+                    .block_events_for_new_subscriptions
+                    .retain(|e| !matches!(e, FollowEvent::BestBlockChanged(_)));
                 shared.block_events_for_new_subscriptions.push_back(ev);
             }
             FollowStreamMsg::Event(FollowEvent::Stop) => {
@@ -489,7 +494,7 @@ where
 
 #[cfg(test)]
 mod test_utils {
-    use super::super::follow_stream_unpin::test_utils::test_unpin_stream_getter;
+    use super::super::follow_stream_unpin::test_utils::{UnpinRx, test_unpin_stream_getter};
     use super::*;
 
     /// Return a `FollowStreamDriver`
@@ -502,8 +507,21 @@ mod test_utils {
         F: Fn() -> I + Send + 'static,
         I: IntoIterator<Item = Result<FollowEvent<H>, BackendError>>,
     {
-        let (stream, _) = test_unpin_stream_getter(events, max_life);
-        FollowStreamDriver::new(stream)
+        test_follow_stream_driver_getter_with_unpin_rx(events, max_life).0
+    }
+
+    /// Return a `FollowStreamDriver` along with the channel that unpin requests are sent to.
+    pub fn test_follow_stream_driver_getter_with_unpin_rx<H, F, I>(
+        events: F,
+        max_life: usize,
+    ) -> (FollowStreamDriver<H>, UnpinRx<H>)
+    where
+        H: Hash + 'static,
+        F: Fn() -> I + Send + 'static,
+        I: IntoIterator<Item = Result<FollowEvent<H>, BackendError>>,
+    {
+        let (stream, unpin_rx) = test_unpin_stream_getter(events, max_life);
+        (FollowStreamDriver::new(stream), unpin_rx)
     }
 }
 
@@ -520,6 +538,53 @@ mod test {
     };
     use super::test_utils::test_follow_stream_driver_getter;
     use super::*;
+
+    #[tokio::test]
+    async fn startup_best_block_event_is_not_kept_alive_forever() {
+        use super::super::follow_stream_unpin::test_utils::assert_from_unpin_rx;
+        use super::test_utils::test_follow_stream_driver_getter_with_unpin_rx;
+
+        // Block 0 is already finalized when we subscribe, so no later `Finalized` event names it.
+        let (mut driver, unpin_rx) = test_follow_stream_driver_getter_with_unpin_rx(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_best_block(0)),
+                    Ok(ev_new_block(0, 1)),
+                    Ok(ev_best_block(1)),
+                    Ok(ev_finalized([1], [])),
+                    Ok(ev_new_block(1, 2)),
+                    Ok(ev_best_block(2)),
+                    Ok(ev_finalized([2], [])),
+                    Err(BackendError::other("ended")),
+                ]
+            },
+            usize::MAX,
+        );
+
+        while let Some(Ok(())) = driver.next().await {}
+
+        let buffered: Vec<H256> = driver
+            .shared
+            .0
+            .lock()
+            .unwrap()
+            .block_events_for_new_subscriptions
+            .iter()
+            .map(|ev| match ev {
+                FollowEvent::NewBlock(n) => n.block_hash.hash(),
+                FollowEvent::BestBlockChanged(b) => b.best_block_hash.hash(),
+                other => panic!("unexpected buffered event: {other:?}"),
+            })
+            .collect();
+
+        let block0 = H256::from_low_u64_le(0);
+        assert!(
+            !buffered.contains(&block0),
+            "replay buffer still references the startup finalized block: {buffered:?}"
+        );
+        assert_from_unpin_rx(&unpin_rx, [block0]);
+    }
 
     #[test]
     fn follow_stream_driver_is_sendable() {
