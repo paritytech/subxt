@@ -619,6 +619,16 @@ pub enum ExtrinsicError {
         /// The decode error.
         error: scale_decode::Error,
     },
+    #[error(
+        "Cannot decode call data: expected at least 2 bytes (the pallet and call index) but got {0}"
+    )]
+    CallDataTooShort(usize),
+    #[error("Cannot decode call data: {0}")]
+    CannotDecodeCallData(frame_decode::extrinsics::ExtrinsicInfoError<'static>),
+    #[error("Cannot decode the call data arguments: {0}")]
+    CannotDecodeCallDataFields(scale_decode::Error),
+    #[error("Cannot decode call data: {0} bytes are left over after decoding it")]
+    LeftoverBytesDecodingCallData(usize),
     #[error("Could not download block body to extract extrinsics from: {0}")]
     CannotGetBlockBody(BackendError),
     #[error("Block not found: {0}")]
