@@ -299,6 +299,38 @@ async fn unsigned_extrinsic_is_same_shape_as_polkadotjs() {
 }
 
 #[subxt_test]
+async fn from_call_data_bytes_can_be_signed_and_submitted() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+    let at_block = api.at_current_block().await?;
+
+    let tx = node_runtime::tx()
+        .balances()
+        .transfer_allow_death(dev::bob().public_key().into(), 10_000);
+
+    // Encode the payload into call data bytes, and then bring the bytes back
+    // into a payload
+    let call_data = at_block.tx().call_data(&tx)?;
+    let payload = at_block.tx().from_call_data_bytes(&call_data)?;
+
+    assert_eq!(payload.pallet_name(), "Balances");
+    assert_eq!(payload.call_name(), "transfer_allow_death");
+
+    // Re-encoding the recovered payload gives back identical call data
+    assert_eq!(at_block.tx().call_data(&payload)?, call_data);
+
+    // The recovered payload can be signed and submitted
+    at_block
+        .tx()
+        .sign_and_submit_then_watch_default(&payload, &dev::alice())
+        .await?
+        .wait_for_finalized_success()
+        .await?;
+
+    Ok(())
+}
+
+#[subxt_test]
 async fn extrinsic_hash_is_same_as_returned() {
     let ctx = test_context().await;
     let api = ctx.client();
