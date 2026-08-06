@@ -53,6 +53,10 @@ impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
 {
     const NAME: &str = "VerifyMultiSignature";
 
+    fn is_authorization_extension(&self) -> bool {
+        true
+    }
+
     fn encode_value_to(
         &self,
         type_id: u32,
@@ -62,28 +66,13 @@ impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
         self.0.encode_as_type_to(type_id, type_resolver, v)?;
         Ok(())
     }
-    fn encode_value_for_signer_payload_to(
-        &self,
-        _type_id: u32,
-        _type_resolver: &PortableRegistry,
-        v: &mut Vec<u8>,
-    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
-        // This extension is never encoded to the signer payload, and extensions
-        // prior to this are ignored when creating said payload, so clear anything
-        // we've seen so far.
-        v.clear();
-        Ok(())
-    }
+
     fn encode_implicit_to(
         &self,
         _type_id: u32,
         _type_resolver: &PortableRegistry,
-        v: &mut Vec<u8>,
+        _v: &mut Vec<u8>,
     ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
-        // We only use the "implicit" data for extensions _after_ this one
-        // in the pipeline to form the signer payload. Thus, clear anything
-        // we've seen so far.
-        v.clear();
         Ok(())
     }
 }
