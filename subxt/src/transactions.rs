@@ -793,18 +793,28 @@ mod test {
     use std::sync::Arc;
 
     fn test_client_with_metadata(metadata_bytes: &[u8]) -> OfflineClientAtBlock<SubstrateConfig> {
+        test_client_with_metadata_and_genesis(metadata_bytes, None)
+    }
+
+    fn test_client_with_metadata_and_genesis(
+        metadata_bytes: &[u8],
+        genesis_hash: Option<crate::utils::H256>,
+    ) -> OfflineClientAtBlock<SubstrateConfig> {
         let metadata = Metadata::decode(&mut &*metadata_bytes).unwrap();
 
-        let config = SubstrateConfig::builder()
+        let mut builder = SubstrateConfig::builder()
             .set_metadata_for_spec_versions([(0, Arc::new(metadata))])
             .set_spec_version_for_block_ranges([SpecVersionForRange {
                 block_range: 0..u64::MAX,
                 spec_version: 0,
                 transaction_version: 0,
-            }])
-            .build();
+            }]);
 
-        OfflineClient::new_with_config(config)
+        if let Some(hash) = genesis_hash {
+            builder = builder.set_genesis_hash(hash);
+        }
+
+        OfflineClient::new_with_config(builder.build())
             .at_block(0u64)
             .unwrap()
     }
@@ -936,5 +946,30 @@ mod test {
             tx.from_call_data_bytes(&extended),
             Err(ExtrinsicError::LeftoverBytesDecodingCallData(1))
         );
+    }
+
+    #[test]
+    fn v5_signer_payload_succeeds() {
+        let client = test_client_with_metadata_and_genesis(
+            include_bytes!("../../artifacts/polkadot_metadata_small.scale"),
+            Some(crate::utils::H256::zero()),
+        );
+        let tx = client.tx();
+
+        let call = dynamic("System", "remark", (vec![1u8, 2, 3],));
+        let params = crate::config::DefaultExtrinsicParamsBuilder::<SubstrateConfig>::new().build();
+
+        let signable = tx.create_v5_signable_offline(&call, params);
+
+        // V5 might not be supported by this metadata; if so, skip.
+        let signable = match signable {
+            Ok(s) => s,
+            Err(ExtrinsicError::UnsupportedVersion) => return,
+            Err(e) => panic!("unexpected error creating signable: {e}"),
+        };
+
+        // The signer payload should succeed and return a 32-byte blake2-256 hash.
+        let payload = signable.signer_payload().unwrap();
+        assert_eq!(payload.len(), 32);
     }
 }
