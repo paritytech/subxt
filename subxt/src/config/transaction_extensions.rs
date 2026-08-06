@@ -24,8 +24,12 @@ pub use super::transaction_extension_traits::Params;
 
 /// The [`VerifySignature`] extension. For V5 General transactions, this is how a signature
 /// is provided. The signature is constructed by signing a payload which contains the
-/// transaction call data as well as the encoded "additional" bytes for any extensions _after_
-/// this one in the list.
+/// transaction extension version, the call data, and the values and implicits of any
+/// extensions _after_ this one in the list.
+///
+/// Note: this is currently the only authorization extension. If multiple authorization
+/// extensions are ever used, `inject_signature` would need updating since it broadcasts
+/// the same account and signature to every extension in the tuple.
 pub struct VerifySignature<T: Config>(VerifySignatureDetails<T>);
 
 impl<T: Config> TransactionExtension<T> for VerifySignature<T> {
@@ -67,6 +71,9 @@ impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
         Ok(())
     }
 
+    // Authorization extension with implicit type `()`: nothing to encode for either
+    // the transaction or the signer payload (authorization extensions are excluded from
+    // the signer payload by `is_authorization_extension` above).
     fn encode_implicit_to(
         &self,
         _type_id: u32,
@@ -655,3 +662,50 @@ impl ChargeTransactionPaymentParams {
 }
 
 impl<T: Config> Params<T> for ChargeTransactionPaymentParams {}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::config::PolkadotConfig;
+    use frame_decode::extrinsics::TransactionExtension as FrameDecodeTransactionExtension;
+    use frame_decode::extrinsics::TransactionExtensions as FrameDecodeTransactionExtensions;
+
+    #[test]
+    fn verify_signature_is_authorization_extension() {
+        let ext = VerifySignature::<PolkadotConfig>(VerifySignatureDetails::Disabled);
+        assert!(FrameDecodeTransactionExtension::<
+            scale_info::PortableRegistry,
+        >::is_authorization_extension(&ext),);
+    }
+
+    #[test]
+    fn non_authorization_extensions_return_false() {
+        let ext = CheckMetadataHash {};
+        assert!(!FrameDecodeTransactionExtension::<
+            scale_info::PortableRegistry,
+        >::is_authorization_extension(&ext),);
+    }
+
+    #[test]
+    fn tuple_routes_is_authorization_extension() {
+        // A minimal tuple containing VerifySignature alongside a non-authorization extension.
+        let exts = (
+            VerifySignature::<PolkadotConfig>(VerifySignatureDetails::Disabled),
+            CheckMetadataHash {},
+        );
+
+        assert!(FrameDecodeTransactionExtensions::<
+            scale_info::PortableRegistry,
+        >::is_authorization_extension(
+            &exts, "VerifyMultiSignature"
+        ));
+        assert!(!FrameDecodeTransactionExtensions::<
+            scale_info::PortableRegistry,
+        >::is_authorization_extension(
+            &exts, "CheckMetadataHash"
+        ));
+        assert!(!FrameDecodeTransactionExtensions::<
+            scale_info::PortableRegistry,
+        >::is_authorization_extension(&exts, "NonExistent"));
+    }
+}
