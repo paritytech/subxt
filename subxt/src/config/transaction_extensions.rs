@@ -687,6 +687,38 @@ mod test {
     }
 
     #[test]
+    fn verify_multi_signature_name() {
+        assert_eq!(
+            <VerifySignature<PolkadotConfig> as FrameDecodeTransactionExtension<
+                scale_info::PortableRegistry,
+            >>::NAME,
+            "VerifyMultiSignature"
+        );
+    }
+
+    #[test]
+    fn verify_multi_signature_implicit_encodes_nothing() {
+        let registry = scale_info::PortableRegistry { types: vec![] };
+
+        // Disabled state: implicit should be empty.
+        let ext = VerifySignature::<PolkadotConfig>(VerifySignatureDetails::Disabled);
+        let mut buf = Vec::new();
+        ext.encode_implicit_to(0, &registry, &mut buf).unwrap();
+        assert!(buf.is_empty(), "VerifyMultiSignature implicit should be empty (Disabled)");
+
+        // After inject_signature: implicit should still be empty.
+        let mut ext = VerifySignature::<PolkadotConfig>(VerifySignatureDetails::Disabled);
+        use crate::config::transaction_extension_traits::TransactionExtension as SubxtTransactionExtension;
+        let account: <PolkadotConfig as Config>::AccountId =
+            subxt_signer::sr25519::dev::alice().public_key().into();
+        let signature = crate::utils::MultiSignature::Sr25519([0u8; 64]);
+        ext.inject_signature(&account, &signature);
+        let mut buf = Vec::new();
+        ext.encode_implicit_to(0, &registry, &mut buf).unwrap();
+        assert!(buf.is_empty(), "VerifyMultiSignature implicit should be empty (Signed)");
+    }
+
+    #[test]
     fn tuple_routes_is_authorization_extension() {
         // A minimal tuple containing VerifySignature alongside a non-authorization extension.
         let exts = (
