@@ -346,6 +346,7 @@ async fn decode_transaction_extensions_from_blocks() {
     assert_eq!(tip2, tip2_static);
 
     let expected_transaction_extensions = [
+        "AsScarcity",
         "AuthorizeCall",
         "CheckNonZeroSender",
         "CheckSpecVersion",
