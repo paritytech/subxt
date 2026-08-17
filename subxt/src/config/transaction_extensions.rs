@@ -704,7 +704,10 @@ mod test {
         let ext = VerifySignature::<PolkadotConfig>(VerifySignatureDetails::Disabled);
         let mut buf = Vec::new();
         ext.encode_implicit_to(0, &registry, &mut buf).unwrap();
-        assert!(buf.is_empty(), "VerifyMultiSignature implicit should be empty (Disabled)");
+        assert!(
+            buf.is_empty(),
+            "VerifyMultiSignature implicit should be empty (Disabled)"
+        );
 
         // After inject_signature: implicit should still be empty.
         let mut ext = VerifySignature::<PolkadotConfig>(VerifySignatureDetails::Disabled);
@@ -715,7 +718,10 @@ mod test {
         ext.inject_signature(&account, &signature);
         let mut buf = Vec::new();
         ext.encode_implicit_to(0, &registry, &mut buf).unwrap();
-        assert!(buf.is_empty(), "VerifyMultiSignature implicit should be empty (Signed)");
+        assert!(
+            buf.is_empty(),
+            "VerifyMultiSignature implicit should be empty (Signed)"
+        );
     }
 
     #[test]
