@@ -111,11 +111,22 @@ impl<T: Config> TransactionExtensions<T> for DefaultTransactionExtensions<T> {
                     "Custom transaction extension '{name}' conflicts with a known transaction extension"
                 )));
             }
-            if custom.insert(name.clone(), value).is_some() {
+            if custom.contains_key(&name) {
                 return Err(TransactionExtensionError::custom(format!(
                     "Custom transaction extension '{name}' was provided more than once"
                 )));
             }
+            let in_metadata = client
+                .metadata
+                .extrinsic()
+                .transaction_extensions_to_use_for_encoding()
+                .any(|extension| extension.identifier() == name);
+            if !in_metadata {
+                return Err(TransactionExtensionError::custom(format!(
+                    "Custom transaction extension '{name}' is not present in the runtime metadata"
+                )));
+            }
+            custom.insert(name, value);
         }
 
         Ok(Self { known, custom })
@@ -315,8 +326,27 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
 
     /// Provide a metadata-aware value for a custom transaction extension.
     ///
-    /// Values absent from runtime metadata are ignored. Known or duplicate names and extensions
-    /// with non-empty implicit data are rejected. Custom authorization extensions are unsupported.
+    /// This is for extensions that a chain declares but Subxt has no typed support for; the
+    /// value given here is encoded using the type information in the runtime metadata.
+    ///
+    /// Extensions absent from runtime metadata are rejected, as are known or duplicate names
+    /// and extensions with non-empty implicit data. Custom authorization extensions are
+    /// unsupported.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use subxt::config::{DefaultExtrinsicParamsBuilder, PolkadotConfig};
+    ///
+    /// // The name must match an extension identifier in the chain's metadata, and the value
+    /// // must encode to the type that the metadata declares for it.
+    /// let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
+    ///     .tip(100)
+    ///     .custom_extension("MyCustomExtension", true)
+    ///     .build();
+    ///
+    /// assert_eq!(params.custom(), [("MyCustomExtension".to_owned(), true.into())]);
+    /// ```
     pub fn custom_extension(mut self, name: impl Into<String>, value: impl Into<Value>) -> Self {
         self.custom.push((name.into(), value.into()));
         self
@@ -419,7 +449,7 @@ mod test {
             },
             ExtrinsicExtensionInfo {
                 extension_ids: vec![ExtrinsicExtensionInfoArg {
-                    name: Cow::Borrowed("RestrictOrigins"),
+                    name: Cow::Borrowed("CheckWeight"),
                     id: bool_id,
                     implicit_id: unit_id,
                 }],
@@ -457,14 +487,14 @@ mod test {
         assert_matches!(
             error,
             ExtrinsicEncodeError::TransactionExtensions(TransactionExtensionsError::NotFound(name))
-                if name == "RestrictOrigins"
+                if name == "CheckWeight"
         );
     }
 
     #[test]
     fn authorization_extension_check_is_forwarded() {
         let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
-            .custom_extension("RestrictOrigins", true)
+            .custom_extension("CheckWeight", true)
             .build();
         let extensions = DefaultTransactionExtensions::new(&client_state(), params).unwrap();
         assert!(
@@ -477,7 +507,7 @@ mod test {
         assert!(
             !frame_decode::extrinsics::TransactionExtensions::is_authorization_extension(
                 &extensions,
-                "RestrictOrigins"
+                "CheckWeight"
             )
         );
     }
@@ -521,7 +551,7 @@ mod test {
     #[test]
     fn params_forward_injected_nonce_and_block() {
         let mut params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
-            .custom_extension("RestrictOrigins", true)
+            .custom_extension("CheckWeight", true)
             .build();
         params.inject_account_nonce(7);
         params.inject_block(10, H256::repeat_byte(1));
@@ -567,8 +597,8 @@ mod test {
     #[test]
     fn custom_extension_name_cannot_be_repeated() {
         let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
-            .custom_extension("RestrictOrigins", true)
-            .custom_extension("RestrictOrigins", false)
+            .custom_extension("CheckWeight", true)
+            .custom_extension("CheckWeight", false)
             .build();
 
         let error = DefaultTransactionExtensions::new(&client_state(), params)
@@ -581,7 +611,7 @@ mod test {
     #[test]
     fn contains_known_and_custom_extensions() {
         let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
-            .custom_extension("RestrictOrigins", true)
+            .custom_extension("CheckWeight", true)
             .build();
         let extensions = DefaultTransactionExtensions::new(&client_state(), params).unwrap();
 
@@ -594,7 +624,7 @@ mod test {
         assert!(
             frame_decode::extrinsics::TransactionExtensions::contains_extension(
                 &extensions,
-                "RestrictOrigins"
+                "CheckWeight"
             )
         );
         assert!(
@@ -608,7 +638,7 @@ mod test {
     #[test]
     fn nonempty_custom_implicit_has_a_specific_error() {
         let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
-            .custom_extension("Custom", true)
+            .custom_extension("WeightReclaim", true)
             .build();
         let extensions = DefaultTransactionExtensions::new(&client_state(), params).unwrap();
         let (type_id, types) = type_info::<u32>();
@@ -616,7 +646,7 @@ mod test {
 
         let error = frame_decode::extrinsics::TransactionExtensions::encode_extension_implicit_to(
             &extensions,
-            "Custom",
+            "WeightReclaim",
             type_id,
             &types,
             &mut out,
@@ -633,7 +663,7 @@ mod test {
     #[test]
     fn custom_encoding_error_does_not_modify_output() {
         let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
-            .custom_extension("Custom", Value::u128(1))
+            .custom_extension("WeightReclaim", Value::u128(1))
             .build();
         let extensions = DefaultTransactionExtensions::new(&client_state(), params).unwrap();
         let (type_id, types) = type_info::<bool>();
@@ -641,7 +671,7 @@ mod test {
 
         let error = frame_decode::extrinsics::TransactionExtensions::encode_extension_value_to(
             &extensions,
-            "Custom",
+            "WeightReclaim",
             type_id,
             &types,
             &mut out,
@@ -652,14 +682,14 @@ mod test {
         assert_matches!(
             error,
             TransactionExtensionsError::Other { extension_name, .. }
-                if extension_name == "Custom"
+                if extension_name == "WeightReclaim"
         );
     }
 
     #[test]
     fn custom_extension_is_used_in_v4_payload_and_extrinsic() {
         let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
-            .custom_extension("RestrictOrigins", true)
+            .custom_extension("CheckWeight", true)
             .build();
         let extensions = DefaultTransactionExtensions::new(&client_state(), params).unwrap();
         let (call_info, extension_info, signature_info, types) = encoding_info();
@@ -690,6 +720,23 @@ mod test {
 
         assert_eq!(payload, [1, 2, 1]);
         assert_eq!(inner, [0x84, 3, 4, 1, 1, 2]);
+    }
+
+    #[test]
+    fn custom_extension_absent_from_metadata_is_rejected() {
+        let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
+            .custom_extension("ChckWeight", true)
+            .build();
+
+        let error = DefaultTransactionExtensions::new(&client_state(), params)
+            .err()
+            .unwrap();
+
+        assert!(
+            error
+                .to_string()
+                .contains("is not present in the runtime metadata")
+        );
     }
 
     #[test]
