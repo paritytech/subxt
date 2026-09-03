@@ -168,6 +168,9 @@ impl<T: Config> frame_decode::extrinsics::TransactionExtensions<PortableRegistry
             || self.custom.contains_key(name)
     }
 
+    // Only the known extensions can authorize a transaction; a chain-specific extension
+    // supplied via `custom_extension` always reports `false` here. See
+    // https://github.com/paritytech/subxt/issues/2276.
     fn is_authorization_extension(&self, name: &str) -> bool {
         frame_decode::extrinsics::TransactionExtensions::is_authorization_extension(
             &self.known,
@@ -408,6 +411,18 @@ mod test {
 
     fn assert_default<T: Default>(_t: T) {}
 
+    /// Mirrors `VerifySignatureDetails`, which is what the `VerifyMultiSignature`
+    /// extension encodes into.
+    #[allow(dead_code)]
+    #[derive(scale_info::TypeInfo)]
+    enum SignatureDetails {
+        Signed {
+            signature: MultiSignature,
+            account: AccountId32,
+        },
+        Disabled,
+    }
+
     fn client_state() -> ClientState<PolkadotConfig> {
         let metadata = Metadata::decode(
             &mut &include_bytes!("../../../artifacts/polkadot_metadata_small.scale")[..],
@@ -462,6 +477,49 @@ mod test {
         )
     }
 
+    fn v5_encoding_info() -> (
+        ExtrinsicCallInfo<'static, u32>,
+        ExtrinsicExtensionInfo<'static, u32>,
+        PortableRegistry,
+    ) {
+        let mut types = Registry::new();
+        let bool_id = types.register_type(&MetaType::new::<bool>()).id;
+        let unit_id = types.register_type(&MetaType::new::<()>()).id;
+        let signature_id = types.register_type(&MetaType::new::<SignatureDetails>()).id;
+
+        (
+            ExtrinsicCallInfo {
+                pallet_index: 1,
+                call_index: 2,
+                pallet_name: Cow::Borrowed("Test"),
+                call_name: Cow::Borrowed("call"),
+                args: Vec::new(),
+            },
+            // `CheckWeight` sits before the authorization extension and `WeightReclaim`
+            // after it, so the extrinsic must carry a value from either side.
+            ExtrinsicExtensionInfo {
+                extension_ids: vec![
+                    ExtrinsicExtensionInfoArg {
+                        name: Cow::Borrowed("CheckWeight"),
+                        id: bool_id,
+                        implicit_id: unit_id,
+                    },
+                    ExtrinsicExtensionInfoArg {
+                        name: Cow::Borrowed("VerifyMultiSignature"),
+                        id: signature_id,
+                        implicit_id: unit_id,
+                    },
+                    ExtrinsicExtensionInfoArg {
+                        name: Cow::Borrowed("WeightReclaim"),
+                        id: bool_id,
+                        implicit_id: unit_id,
+                    },
+                ],
+            },
+            types.into(),
+        )
+    }
+
     #[test]
     fn params_are_default() {
         let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new().build();
@@ -510,20 +568,23 @@ mod test {
                 "CheckWeight"
             )
         );
+        // Neither is a known non-authorization extension, nor a name we don't hold at all.
+        assert!(
+            !frame_decode::extrinsics::TransactionExtensions::is_authorization_extension(
+                &extensions,
+                "CheckNonce"
+            )
+        );
+        assert!(
+            !frame_decode::extrinsics::TransactionExtensions::is_authorization_extension(
+                &extensions,
+                "Unknown"
+            )
+        );
     }
 
     #[test]
     fn signature_injection_is_forwarded() {
-        #[allow(dead_code)]
-        #[derive(scale_info::TypeInfo)]
-        enum SignatureDetails {
-            Signed {
-                signature: MultiSignature,
-                account: AccountId32,
-            },
-            Disabled,
-        }
-
         let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new().build();
         let mut extensions = DefaultTransactionExtensions::new(&client_state(), params).unwrap();
         extensions.inject_signature(
@@ -737,6 +798,35 @@ mod test {
                 .to_string()
                 .contains("is not present in the runtime metadata")
         );
+    }
+
+    #[test]
+    fn v5_general_extrinsic_includes_custom_extensions_either_side_of_authorization() {
+        let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
+            .custom_extension("CheckWeight", true)
+            .custom_extension("WeightReclaim", false)
+            .build();
+        let extensions = DefaultTransactionExtensions::new(&client_state(), params).unwrap();
+        let (call_info, extension_info, types) = v5_encoding_info();
+        let call_data = Composite::<()>::Unnamed(Vec::new());
+        let mut extrinsic = Vec::new();
+
+        frame_decode::extrinsics::encode_v5_general_with_info_to(
+            &call_data,
+            0,
+            &extensions,
+            &types,
+            &call_info,
+            &extension_info,
+            &mut extrinsic,
+        )
+        .unwrap();
+        let inner = Vec::<u8>::decode(&mut &*extrinsic).unwrap();
+
+        // Unlike the signer payload, the extrinsic carries every extension value: the
+        // version byte, tx extension version, `CheckWeight` (true), `VerifyMultiSignature`
+        // (`Disabled`), `WeightReclaim` (false), then the call.
+        assert_eq!(inner, [0b0100_0000 + 5, 0, 1, 1, 0, 1, 2]);
     }
 
     #[test]
