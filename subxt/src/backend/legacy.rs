@@ -84,6 +84,7 @@ impl<T: Config> LegacyBackend<T> {
     }
 }
 
+#[cfg(not(feature = "unstable-backend"))]
 impl<T: Config> super::sealed::Sealed for LegacyBackend<T> {}
 
 #[async_trait]

@@ -322,6 +322,9 @@ jobs:
       - name: Run crate tests
         run: cargo test --workspace --exclude integration-tests
 
+      - name: Run unstable-backend tests
+        run: cargo test -p subxt --features unstable-backend --test unstable_backend
+
   integration_tests:
     name: "Integration tests"
     runs-on: parity-large

@@ -34,10 +34,17 @@ pub use legacy::subscribe_to_block_headers_filling_in_gaps;
 #[doc(hidden)]
 mod sealed {
     pub trait Sealed {}
+
+    #[cfg(feature = "unstable-backend")]
+    impl<T> Sealed for T {}
 }
 
 /// This trait exposes the interface that Subxt will use to communicate with
 /// a backend. Its goal is to be as minimal as possible.
+///
+/// Enable the `unstable-backend` feature to implement this trait outside of
+/// Subxt. The backend API is unstable and may change without following
+/// semantic versioning.
 #[async_trait]
 pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     /// Fetch values from storage.

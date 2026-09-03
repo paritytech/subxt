@@ -74,6 +74,12 @@ jsonrpsee = [
 # latest features exposed by the metadata.
 unstable-metadata = []
 
+# Enable this to implement the `Backend` trait outside of Subxt.
+# The backend API is unstable and subject to breaking changes without
+# following semantic versioning. Use this only if you need to provide
+# your own backend implementation.
+unstable-backend = []
+
 # Activate this to expose the Light Client functionality.
 # Note that this feature is experimental and things may break or not work as expected.
 light-client = ["subxt-lightclient", "subxt-rpcs/light-client"]
