@@ -822,11 +822,18 @@ mod test {
         )
         .unwrap();
         let inner = Vec::<u8>::decode(&mut &*extrinsic).unwrap();
-
-        // Unlike the signer payload, the extrinsic carries every extension value: the
-        // version byte, tx extension version, `CheckWeight` (true), `VerifyMultiSignature`
-        // (`Disabled`), `WeightReclaim` (false), then the call.
-        assert_eq!(inner, [0b0100_0000 + 5, 0, 1, 1, 0, 1, 2]);
+        assert_eq!(
+            inner,
+            [
+                0b0100_0000 + 5, // Preamble: "general" transaction, extrinsic version 5
+                0,               // Transaction extension version
+                1,               // CheckWeight: true
+                1,               // VerifyMultiSignature: Disabled (variant index 1)
+                0,               // WeightReclaim: false
+                1,               // Pallet index
+                2,               // Call index
+            ]
+        );
     }
 
     #[test]
