@@ -37,8 +37,8 @@ resolver = "2"
 [workspace.package]
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2024"
-version = "0.50.1"
-rust-version = "1.85.0"
+version = "0.50.3"
+rust-version = "1.88.0"
 license = "Apache-2.0 OR GPL-3.0"
 repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt"
@@ -80,7 +80,7 @@ darling = "0.20.10"
 derive-where = "1.2.7"
 either = { version = "1.13.0", default-features = false }
 finito = { version = "0.1.0", default-features = false }
-frame-decode = { version = "0.17.1", default-features = false }
+frame-decode = { version = "0.18.1", default-features = false }
 frame-metadata = { version = "23.0.0", default-features = false }
 futures = { version = "0.3.31", default-features = false, features = ["std"] }
 getrandom = { version = "0.2", default-features = false }
@@ -126,8 +126,8 @@ hyper = "1"
 http-body = "1"
 
 # Light client support:
-smoldot = { version = "1.1.0", default-features = false }
-smoldot-light = { version = "1.1.0", default-features = false }
+smoldot = { version = "2.1.0", default-features = false }
+smoldot-light = { version = "1.3.1", default-features = false }
 tokio-stream = "0.1.16"
 futures-util = "0.3.31"
 rand = "0.8.5"

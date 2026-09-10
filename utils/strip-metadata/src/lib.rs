@@ -83,26 +83,26 @@ impl StripMetadata for v16::RuntimeMetadataV16 {
 
         // If the user asked to strip the System pallet, we'll strip most things from it but keep the
         // associated types, because Subxt makes use of them.
-        if !keep_pallet("System") {
-            if let Some(system_pallet) = self.pallets.iter_mut().find(|p| p.name == "System") {
-                let index = system_pallet.index;
-                let associated_types = core::mem::take(&mut system_pallet.associated_types);
+        if !keep_pallet("System")
+            && let Some(system_pallet) = self.pallets.iter_mut().find(|p| p.name == "System")
+        {
+            let index = system_pallet.index;
+            let associated_types = core::mem::take(&mut system_pallet.associated_types);
 
-                *system_pallet = v16::PalletMetadata {
-                    name: "System".to_string(),
-                    index,
-                    associated_types,
-                    // Everything else is empty:
-                    storage: None,
-                    calls: None,
-                    event: None,
-                    constants: vec![],
-                    error: None,
-                    view_functions: vec![],
-                    docs: vec![],
-                    deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
-                };
-            }
+            *system_pallet = v16::PalletMetadata {
+                name: "System".to_string(),
+                index,
+                associated_types,
+                // Everything else is empty:
+                storage: None,
+                calls: None,
+                event: None,
+                constants: vec![],
+                error: None,
+                view_functions: vec![],
+                docs: vec![],
+                deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
+            };
         }
 
         // Now, only retain types we care about in the registry:

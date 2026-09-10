@@ -464,7 +464,7 @@ checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
 
 [[package]]
 name = "artifacts"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "substrate-runner",
 ]
@@ -1977,9 +1977,9 @@ dependencies = [
 
 [[package]]
 name = "frame-decode"
-version = "0.17.1"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42ea4168fb6383e5abb84b5316804cb463ba2d6c9fa89981792e2b88c209192a"
+checksum = "c9a9e93cab13c8e9a6accf029997d19943cf54fea5f5eb028a1133b7179d06aa"
 dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
@@ -2156,7 +2156,7 @@ dependencies = [
 
 [[package]]
 name = "generate-custom-metadata"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "frame-metadata 23.0.0",
  "parity-scale-codec",
@@ -2789,7 +2789,7 @@ dependencies = [
 
 [[package]]
 name = "integration-tests"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "assert_matches",
  "cfg_aliases",
@@ -3966,9 +3966,9 @@ checksum = "dc33ff2d4973d518d823d61aa239014831e521c75da58e3df4840d3f47749d09"
 
 [[package]]
 name = "rand"
-version = "0.8.5"
+version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34af8d1a0e25924bc5b7c43c079c942339d8f0a8b57c39049bef581b46327404"
+checksum = "5ca0ecfa931c29007047d1bc58e623ab12e5590e8c7cc53200d5202b69266d8a"
 dependencies = [
  "libc",
  "rand_chacha",
@@ -5002,9 +5002,9 @@ dependencies = [
 
 [[package]]
 name = "smoldot"
-version = "1.1.0"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9879c3b19576797ad597164a07898aab5c6a99d9aed38a7d17120cace4c0f187"
+checksum = "1d0e22281ede6eb40a9b4fc5e74f1476a31c020e1f3e9940b5efaea885c8285b"
 dependencies = [
  "arrayvec 0.7.6",
  "async-lock",
@@ -5058,9 +5058,9 @@ dependencies = [
 
 [[package]]
 name = "smoldot-light"
-version = "1.1.0"
+version = "1.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23c762d8f022452958f7473a5aa6e5427c178837c8a72a6f5da3e45ed2c7d804"
+checksum = "e92a85743eca4e1b4f614e0bfd64a4cadd7bbae333538dcf7a80ff6c818fe684"
 dependencies = [
  "async-channel",
  "async-lock",
@@ -5653,7 +5653,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-runner"
-version = "0.50.1"
+version = "0.50.3"
 
 [[package]]
 name = "subtle"
@@ -5663,7 +5663,7 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "subxt"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "assert_matches",
  "async-trait",
@@ -5712,7 +5712,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-cli"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "clap",
  "color-eyre",
@@ -5746,7 +5746,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "frame-metadata 23.0.0",
  "getrandom 0.2.16",
@@ -5763,7 +5763,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-lightclient"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "futures",
  "futures-timer",
@@ -5788,7 +5788,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-macro"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "darling",
  "parity-scale-codec",
@@ -5808,7 +5808,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "bitvec",
  "criterion",
@@ -5827,7 +5827,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-rpcs"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "derive-where",
  "finito",
@@ -5856,7 +5856,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "base64 0.22.1",
  "bip32",
@@ -5890,7 +5890,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-test-macro"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "quote",
  "syn 2.0.101",
@@ -5898,7 +5898,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-utils-accountid32"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "base58",
  "blake2",
@@ -5914,7 +5914,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-utils-fetchmetadata"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "frame-metadata 23.0.0",
  "hex",
@@ -5927,7 +5927,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-utils-stripmetadata"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "either",
  "frame-metadata 23.0.0",
@@ -6010,7 +6010,7 @@ dependencies = [
 
 [[package]]
 name = "test-runtime"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "hex",
  "impl-serde",
@@ -6436,7 +6436,7 @@ checksum = "1dccffe3ce07af9386bfd29e80c0ab1a8205a2fc34e4bcd40364df902cfa8f3f"
 
 [[package]]
 name = "ui-tests"
-version = "0.50.1"
+version = "0.50.3"
 dependencies = [
  "frame-metadata 23.0.0",
  "generate-custom-metadata",

@@ -4,7 +4,9 @@
 
 //! Substrate specific configuration
 
-use super::{Config, DefaultExtrinsicParamsBuilder, DefaultTransactionExtensions, Hasher, Header};
+use super::{
+    Config, DefaultExtrinsicParamsBuilder, DefaultTransactionExtensions, HashFor, Hasher, Header,
+};
 use crate::config::Hash;
 use crate::metadata::{ArcMetadata, Metadata};
 use crate::utils::RangeMap;
@@ -102,6 +104,7 @@ impl SubstrateConfigBuilder {
                 legacy_types: self.legacy_types,
                 spec_and_transaction_version_for_block_number: self
                     .spec_and_transaction_version_for_block_number,
+                genesis_hash: self.genesis_hash,
                 metadata_for_spec_version: self.metadata_for_spec_version,
             }),
         }
@@ -132,6 +135,7 @@ pub struct SubstrateConfig {
 struct SubstrateConfigInner {
     legacy_types: Option<ChainTypeRegistry>,
     spec_and_transaction_version_for_block_number: RangeMap<u64, (u32, u32)>,
+    genesis_hash: Option<H256>,
     metadata_for_spec_version: RwLock<HashMap<u32, ArcMetadata>>,
 }
 
@@ -189,6 +193,10 @@ impl Config for SubstrateConfig {
             .unwrap()
             .get(&spec_version)
             .cloned()
+    }
+
+    fn genesis_hash(&self) -> Option<HashFor<Self>> {
+        self.inner.genesis_hash
     }
 
     fn set_metadata_for_spec_version(&self, spec_version: u32, metadata: ArcMetadata) {
@@ -557,5 +565,21 @@ mod test {
         let header: SubstrateHeader<H256> =
             serde_json::from_str(numeric_block_number_json).expect("valid block header");
         assert_eq!(header.number(), 4);
+    }
+
+    #[test]
+    fn builder_propagates_genesis_hash() {
+        let hash = H256::from([42u8; 32]);
+        let config = SubstrateConfig::builder().set_genesis_hash(hash).build();
+        assert_eq!(
+            <SubstrateConfig as Config>::genesis_hash(&config),
+            Some(hash)
+        );
+    }
+
+    #[test]
+    fn builder_without_genesis_hash_returns_none() {
+        let config = SubstrateConfig::builder().build();
+        assert_eq!(<SubstrateConfig as Config>::genesis_hash(&config), None);
     }
 }

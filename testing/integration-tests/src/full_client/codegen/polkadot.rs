@@ -500,9 +500,9 @@ pub mod api {
                         "dry_run_call",
                         (origin, call, result_xcms_version),
                         [
-                            129u8, 190u8, 185u8, 20u8, 182u8, 197u8, 121u8, 136u8, 163u8, 198u8,
-                            62u8, 144u8, 166u8, 66u8, 243u8, 228u8, 1u8, 17u8, 80u8, 73u8, 39u8,
-                            6u8, 144u8, 49u8, 223u8, 240u8, 109u8, 207u8, 148u8, 99u8, 64u8, 46u8,
+                            217u8, 208u8, 149u8, 134u8, 34u8, 5u8, 167u8, 90u8, 247u8, 88u8, 123u8,
+                            215u8, 85u8, 235u8, 39u8, 83u8, 181u8, 149u8, 13u8, 14u8, 225u8, 174u8,
+                            233u8, 237u8, 70u8, 200u8, 101u8, 180u8, 113u8, 76u8, 251u8, 82u8,
                         ],
                     )
                 }
@@ -520,9 +520,9 @@ pub mod api {
                         "dry_run_xcm",
                         (origin_location, xcm),
                         [
-                            175u8, 242u8, 118u8, 29u8, 24u8, 99u8, 113u8, 92u8, 164u8, 200u8, 89u8,
-                            126u8, 245u8, 165u8, 97u8, 199u8, 18u8, 90u8, 237u8, 177u8, 254u8,
-                            194u8, 169u8, 153u8, 79u8, 178u8, 74u8, 7u8, 198u8, 0u8, 120u8, 18u8,
+                            74u8, 155u8, 121u8, 18u8, 119u8, 218u8, 19u8, 177u8, 226u8, 132u8,
+                            121u8, 25u8, 45u8, 55u8, 2u8, 222u8, 190u8, 141u8, 181u8, 207u8, 94u8,
+                            90u8, 148u8, 28u8, 17u8, 124u8, 100u8, 123u8, 89u8, 212u8, 146u8, 40u8,
                         ],
                     )
                 }
@@ -1195,9 +1195,10 @@ pub mod api {
                         "on_chain_votes",
                         (),
                         [
-                            161u8, 113u8, 190u8, 56u8, 229u8, 235u8, 58u8, 229u8, 254u8, 125u8,
-                            180u8, 115u8, 183u8, 36u8, 177u8, 16u8, 1u8, 172u8, 229u8, 135u8, 32u8,
-                            31u8, 105u8, 25u8, 231u8, 122u8, 25u8, 223u8, 69u8, 194u8, 21u8, 70u8,
+                            217u8, 6u8, 78u8, 154u8, 230u8, 96u8, 57u8, 43u8, 148u8, 47u8, 165u8,
+                            182u8, 167u8, 198u8, 41u8, 149u8, 167u8, 178u8, 155u8, 166u8, 103u8,
+                            89u8, 241u8, 122u8, 85u8, 150u8, 1u8, 185u8, 179u8, 241u8, 197u8,
+                            180u8,
                         ],
                     )
                 }
@@ -3978,9 +3979,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                233u8, 168u8, 62u8, 179u8, 184u8, 189u8, 215u8, 213u8, 33u8, 253u8, 175u8, 243u8,
-                53u8, 247u8, 212u8, 153u8, 153u8, 157u8, 165u8, 120u8, 26u8, 61u8, 58u8, 255u8,
-                43u8, 244u8, 190u8, 57u8, 67u8, 195u8, 87u8, 216u8,
+                146u8, 165u8, 95u8, 148u8, 201u8, 242u8, 74u8, 242u8, 112u8, 102u8, 126u8, 51u8,
+                28u8, 199u8, 79u8, 1u8, 12u8, 18u8, 24u8, 3u8, 219u8, 141u8, 224u8, 24u8, 209u8,
+                233u8, 235u8, 29u8, 16u8, 123u8, 139u8, 72u8,
             ]
     }
     pub mod system {
@@ -4579,8 +4580,14 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "`:code` was updated."]
-            pub struct CodeUpdated;
+            #[doc = "`:code` was updated to the code with the given hash."]
+            pub struct CodeUpdated {
+                pub hash: code_updated::Hash,
+            }
+            pub mod code_updated {
+                use super::runtime_types;
+                pub type Hash = ::subxt::utils::H256;
+            }
             impl CodeUpdated {
                 const PALLET_NAME: &'static str = "System";
                 const EVENT_NAME: &'static str = "CodeUpdated";
@@ -4905,9 +4912,10 @@ pub mod api {
                         "System",
                         "Events",
                         [
-                            219u8, 220u8, 157u8, 47u8, 218u8, 11u8, 179u8, 98u8, 33u8, 34u8, 221u8,
-                            167u8, 127u8, 133u8, 155u8, 214u8, 221u8, 88u8, 240u8, 72u8, 44u8,
-                            41u8, 107u8, 170u8, 71u8, 193u8, 153u8, 195u8, 57u8, 33u8, 194u8, 87u8,
+                            232u8, 74u8, 192u8, 3u8, 87u8, 123u8, 172u8, 38u8, 21u8, 129u8, 181u8,
+                            47u8, 123u8, 113u8, 138u8, 82u8, 67u8, 117u8, 233u8, 237u8, 95u8,
+                            206u8, 101u8, 100u8, 1u8, 140u8, 55u8, 109u8, 33u8, 124u8, 127u8,
+                            172u8,
                         ],
                     )
                 }
@@ -8305,9 +8313,10 @@ pub mod api {
                         "Balances",
                         "Holds",
                         [
-                            243u8, 190u8, 61u8, 27u8, 177u8, 143u8, 74u8, 255u8, 22u8, 109u8,
-                            167u8, 85u8, 179u8, 42u8, 42u8, 37u8, 8u8, 190u8, 38u8, 60u8, 158u8,
-                            138u8, 66u8, 201u8, 131u8, 136u8, 85u8, 160u8, 98u8, 110u8, 33u8, 50u8,
+                            102u8, 117u8, 58u8, 38u8, 168u8, 228u8, 105u8, 126u8, 141u8, 68u8,
+                            136u8, 120u8, 250u8, 253u8, 221u8, 62u8, 78u8, 235u8, 221u8, 145u8,
+                            119u8, 156u8, 18u8, 73u8, 70u8, 120u8, 8u8, 147u8, 33u8, 238u8, 114u8,
+                            118u8,
                         ],
                     )
                 }
@@ -8842,15 +8851,15 @@ pub mod api {
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "There is an offence reported of the given `kind` happened at the `session_index` and"]
             #[doc = "(kind-specific) time slot. This event is not deposited for duplicate slashes."]
-            #[doc = "\\[kind, timeslot\\]."]
+            #[doc = "\\[kind, slot\\]."]
             pub struct Offence {
                 pub kind: offence::Kind,
-                pub timeslot: offence::Timeslot,
+                pub slot: offence::Slot,
             }
             pub mod offence {
                 use super::runtime_types;
                 pub type Kind = [::core::primitive::u8; 16usize];
-                pub type Timeslot = ::subxt::alloc::vec::Vec<::core::primitive::u8>;
+                pub type Slot = ::subxt::alloc::vec::Vec<::core::primitive::u8>;
             }
             impl Offence {
                 const PALLET_NAME: &'static str = "Offences";
@@ -15272,6 +15281,29 @@ pub mod api {
                     pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
                 }
             }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            pub struct RemoveDeferredDispatch {
+                pub call_hash: remove_deferred_dispatch::CallHash,
+            }
+            pub mod remove_deferred_dispatch {
+                use super::runtime_types;
+                pub type CallHash = ::subxt::utils::H256;
+            }
+            impl RemoveDeferredDispatch {
+                const PALLET_NAME: &'static str = "Whitelist";
+                const CALL_NAME: &'static str = "remove_deferred_dispatch";
+            }
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for RemoveDeferredDispatch {
+                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                }
+            }
             pub mod api {
                 pub struct TransactionApi;
                 impl TransactionApi {
@@ -15345,10 +15377,27 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                90u8, 86u8, 96u8, 70u8, 150u8, 68u8, 134u8, 229u8, 19u8, 180u8,
-                                215u8, 163u8, 26u8, 8u8, 95u8, 98u8, 79u8, 141u8, 101u8, 117u8,
-                                56u8, 45u8, 113u8, 204u8, 166u8, 114u8, 152u8, 116u8, 22u8, 162u8,
-                                79u8, 124u8,
+                                72u8, 149u8, 147u8, 178u8, 143u8, 153u8, 120u8, 240u8, 114u8,
+                                223u8, 168u8, 187u8, 98u8, 160u8, 240u8, 182u8, 155u8, 59u8, 146u8,
+                                32u8, 16u8, 181u8, 227u8, 138u8, 230u8, 40u8, 132u8, 63u8, 45u8,
+                                137u8, 246u8, 96u8,
+                            ],
+                        )
+                    }
+                    pub fn remove_deferred_dispatch(
+                        &self,
+                        call_hash: super::remove_deferred_dispatch::CallHash,
+                    ) -> ::subxt::transactions::StaticPayload<super::RemoveDeferredDispatch>
+                    {
+                        ::subxt::transactions::StaticPayload::new_static(
+                            "Whitelist",
+                            "remove_deferred_dispatch",
+                            super::RemoveDeferredDispatch { call_hash },
+                            [
+                                227u8, 42u8, 89u8, 133u8, 194u8, 82u8, 71u8, 116u8, 246u8, 102u8,
+                                201u8, 233u8, 56u8, 218u8, 33u8, 179u8, 128u8, 179u8, 74u8, 182u8,
+                                150u8, 22u8, 253u8, 71u8, 95u8, 197u8, 229u8, 174u8, 0u8, 6u8,
+                                40u8, 228u8,
                             ],
                         )
                     }
@@ -15435,6 +15484,84 @@ pub mod api {
                     pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
                 }
             }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "A call dispatch has been deferred to a future provided block."]
+            pub struct DispatchDeferred {
+                pub call_hash: dispatch_deferred::CallHash,
+            }
+            pub mod dispatch_deferred {
+                use super::runtime_types;
+                pub type CallHash = ::subxt::utils::H256;
+            }
+            impl DispatchDeferred {
+                const PALLET_NAME: &'static str = "Whitelist";
+                const EVENT_NAME: &'static str = "DispatchDeferred";
+            }
+            impl ::subxt::events::DecodeAsEvent for DispatchDeferred {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "A deferred dispatch entry has been removed after expiration."]
+            pub struct DeferredDispatchRemoved {
+                pub call_hash: deferred_dispatch_removed::CallHash,
+            }
+            pub mod deferred_dispatch_removed {
+                use super::runtime_types;
+                pub type CallHash = ::subxt::utils::H256;
+            }
+            impl DeferredDispatchRemoved {
+                const PALLET_NAME: &'static str = "Whitelist";
+                const EVENT_NAME: &'static str = "DeferredDispatchRemoved";
+            }
+            impl ::subxt::events::DecodeAsEvent for DeferredDispatchRemoved {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "A relayer (signed origin) executed a deferred dispatch."]
+            #[doc = ""]
+            #[doc = "Emitted whenever the deferred entry is consumed by a relayer, regardless of whether the"]
+            #[doc = "inner call itself succeeded; the inner call's outcome is reported separately by"]
+            #[doc = "[`Event::WhitelistedCallDispatched`]."]
+            pub struct DeferredDispatchExecuted {
+                pub call_hash: deferred_dispatch_executed::CallHash,
+                pub who: deferred_dispatch_executed::Who,
+            }
+            pub mod deferred_dispatch_executed {
+                use super::runtime_types;
+                pub type CallHash = ::subxt::utils::H256;
+                pub type Who = ::subxt::utils::AccountId32;
+            }
+            impl DeferredDispatchExecuted {
+                const PALLET_NAME: &'static str = "Whitelist";
+                const EVENT_NAME: &'static str = "DeferredDispatchExecuted";
+            }
+            impl ::subxt::events::DecodeAsEvent for DeferredDispatchExecuted {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
+            }
         }
         pub mod storage {
             use super::root_mod;
@@ -15458,6 +15585,26 @@ pub mod api {
                         ],
                     )
                 }
+                #[doc = " Deferred dispatches, mapping a call hash to the provided block number at which the deferral"]
+                #[doc = " expires and the entry can be permissionlessly removed."]
+                pub fn deferred_dispatch(
+                    &self,
+                ) -> ::subxt::storage::StaticAddress<
+                    (deferred_dispatch::input::Param0,),
+                    deferred_dispatch::Output,
+                    ::subxt::utils::Maybe,
+                > {
+                    ::subxt::storage::StaticAddress::new_static(
+                        "Whitelist",
+                        "DeferredDispatch",
+                        [
+                            24u8, 50u8, 247u8, 189u8, 104u8, 97u8, 153u8, 217u8, 112u8, 54u8,
+                            215u8, 156u8, 26u8, 5u8, 193u8, 156u8, 29u8, 243u8, 219u8, 202u8,
+                            130u8, 43u8, 89u8, 1u8, 33u8, 164u8, 59u8, 58u8, 58u8, 212u8, 146u8,
+                            194u8,
+                        ],
+                    )
+                }
             }
             pub mod whitelisted_call {
                 use super::root_mod;
@@ -15467,6 +15614,15 @@ pub mod api {
                     pub type Param0 = ::subxt::utils::H256;
                 }
                 pub type Output = ();
+            }
+            pub mod deferred_dispatch {
+                use super::root_mod;
+                use super::runtime_types;
+                pub mod input {
+                    use super::runtime_types;
+                    pub type Param0 = ::subxt::utils::H256;
+                }
+                pub type Output = ::core::primitive::u32;
             }
         }
     }
@@ -16442,10 +16598,10 @@ pub mod api {
                             "batch",
                             super::Batch { calls },
                             [
-                                98u8, 125u8, 122u8, 141u8, 232u8, 141u8, 53u8, 175u8, 83u8, 122u8,
-                                76u8, 195u8, 142u8, 127u8, 131u8, 112u8, 150u8, 96u8, 156u8, 110u8,
-                                249u8, 137u8, 160u8, 215u8, 125u8, 164u8, 132u8, 156u8, 42u8,
-                                242u8, 4u8, 214u8,
+                                206u8, 104u8, 120u8, 204u8, 185u8, 189u8, 139u8, 52u8, 168u8,
+                                221u8, 80u8, 147u8, 117u8, 187u8, 5u8, 0u8, 62u8, 217u8, 5u8,
+                                116u8, 190u8, 54u8, 121u8, 11u8, 221u8, 250u8, 0u8, 50u8, 80u8,
+                                248u8, 171u8, 181u8,
                             ],
                         )
                     }
@@ -16476,10 +16632,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                81u8, 118u8, 204u8, 64u8, 67u8, 128u8, 227u8, 66u8, 176u8, 223u8,
-                                112u8, 8u8, 224u8, 245u8, 176u8, 112u8, 152u8, 139u8, 89u8, 162u8,
-                                127u8, 181u8, 214u8, 56u8, 55u8, 144u8, 1u8, 76u8, 189u8, 202u8,
-                                127u8, 81u8,
+                                100u8, 75u8, 99u8, 124u8, 134u8, 132u8, 90u8, 203u8, 48u8, 55u8,
+                                26u8, 59u8, 186u8, 154u8, 66u8, 99u8, 199u8, 156u8, 5u8, 224u8,
+                                174u8, 241u8, 194u8, 17u8, 76u8, 89u8, 57u8, 226u8, 50u8, 18u8,
+                                182u8, 244u8,
                             ],
                         )
                     }
@@ -16505,10 +16661,10 @@ pub mod api {
                             "batch_all",
                             super::BatchAll { calls },
                             [
-                                167u8, 191u8, 77u8, 116u8, 106u8, 253u8, 88u8, 55u8, 242u8, 205u8,
-                                173u8, 96u8, 87u8, 50u8, 75u8, 23u8, 61u8, 237u8, 240u8, 178u8,
-                                131u8, 93u8, 93u8, 41u8, 54u8, 220u8, 9u8, 47u8, 119u8, 247u8,
-                                44u8, 199u8,
+                                173u8, 244u8, 249u8, 166u8, 194u8, 205u8, 138u8, 157u8, 129u8,
+                                222u8, 186u8, 215u8, 175u8, 5u8, 75u8, 56u8, 144u8, 244u8, 205u8,
+                                160u8, 128u8, 217u8, 101u8, 92u8, 253u8, 198u8, 48u8, 222u8, 212u8,
+                                75u8, 4u8, 216u8,
                             ],
                         )
                     }
@@ -16532,10 +16688,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                167u8, 146u8, 0u8, 53u8, 138u8, 51u8, 105u8, 77u8, 161u8, 132u8,
-                                38u8, 102u8, 137u8, 121u8, 219u8, 213u8, 211u8, 8u8, 205u8, 59u8,
-                                182u8, 184u8, 121u8, 37u8, 132u8, 40u8, 58u8, 9u8, 55u8, 222u8,
-                                219u8, 221u8,
+                                192u8, 160u8, 96u8, 115u8, 21u8, 177u8, 163u8, 162u8, 144u8, 147u8,
+                                223u8, 199u8, 140u8, 147u8, 245u8, 185u8, 1u8, 182u8, 136u8, 243u8,
+                                85u8, 67u8, 66u8, 11u8, 241u8, 30u8, 233u8, 240u8, 55u8, 191u8,
+                                193u8, 178u8,
                             ],
                         )
                     }
@@ -16562,10 +16718,10 @@ pub mod api {
                             "force_batch",
                             super::ForceBatch { calls },
                             [
-                                5u8, 7u8, 79u8, 170u8, 56u8, 38u8, 102u8, 160u8, 141u8, 105u8,
-                                215u8, 243u8, 226u8, 155u8, 1u8, 110u8, 22u8, 233u8, 183u8, 144u8,
-                                133u8, 8u8, 134u8, 31u8, 130u8, 102u8, 107u8, 139u8, 42u8, 213u8,
-                                110u8, 154u8,
+                                113u8, 95u8, 147u8, 221u8, 72u8, 191u8, 77u8, 223u8, 218u8, 114u8,
+                                109u8, 209u8, 224u8, 121u8, 99u8, 212u8, 152u8, 83u8, 82u8, 132u8,
+                                112u8, 212u8, 13u8, 83u8, 230u8, 101u8, 128u8, 2u8, 182u8, 131u8,
+                                198u8, 210u8,
                             ],
                         )
                     }
@@ -16589,10 +16745,10 @@ pub mod api {
                                 weight,
                             },
                             [
-                                199u8, 173u8, 28u8, 229u8, 60u8, 168u8, 166u8, 173u8, 20u8, 54u8,
-                                148u8, 220u8, 198u8, 222u8, 107u8, 231u8, 208u8, 178u8, 43u8, 38u8,
-                                44u8, 62u8, 101u8, 84u8, 180u8, 168u8, 140u8, 111u8, 45u8, 130u8,
-                                189u8, 249u8,
+                                193u8, 29u8, 53u8, 151u8, 53u8, 107u8, 26u8, 87u8, 104u8, 172u8,
+                                195u8, 120u8, 173u8, 162u8, 175u8, 54u8, 57u8, 210u8, 136u8, 11u8,
+                                15u8, 100u8, 78u8, 88u8, 83u8, 145u8, 160u8, 185u8, 148u8, 245u8,
+                                86u8, 203u8,
                             ],
                         )
                     }
@@ -16632,10 +16788,10 @@ pub mod api {
                                 fallback: ::subxt::alloc::boxed::Box::new(fallback),
                             },
                             [
-                                128u8, 11u8, 128u8, 106u8, 228u8, 166u8, 140u8, 172u8, 165u8,
-                                175u8, 237u8, 223u8, 29u8, 126u8, 7u8, 47u8, 20u8, 246u8, 111u8,
-                                214u8, 106u8, 248u8, 164u8, 42u8, 14u8, 112u8, 185u8, 171u8, 30u8,
-                                113u8, 255u8, 114u8,
+                                20u8, 130u8, 227u8, 158u8, 34u8, 31u8, 80u8, 69u8, 64u8, 103u8,
+                                117u8, 174u8, 222u8, 154u8, 79u8, 158u8, 109u8, 101u8, 35u8, 198u8,
+                                216u8, 135u8, 64u8, 94u8, 146u8, 38u8, 186u8, 87u8, 214u8, 75u8,
+                                169u8, 35u8,
                             ],
                         )
                     }
@@ -16658,10 +16814,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                47u8, 160u8, 6u8, 155u8, 5u8, 87u8, 80u8, 12u8, 3u8, 2u8, 163u8,
-                                27u8, 214u8, 190u8, 51u8, 212u8, 57u8, 1u8, 68u8, 198u8, 11u8,
-                                98u8, 123u8, 206u8, 181u8, 46u8, 253u8, 82u8, 174u8, 62u8, 105u8,
-                                100u8,
+                                54u8, 183u8, 245u8, 215u8, 246u8, 66u8, 127u8, 249u8, 45u8, 72u8,
+                                254u8, 128u8, 82u8, 17u8, 13u8, 49u8, 60u8, 207u8, 185u8, 190u8,
+                                236u8, 247u8, 14u8, 119u8, 36u8, 167u8, 252u8, 187u8, 57u8, 121u8,
+                                86u8, 200u8,
                             ],
                         )
                     }
@@ -16903,6 +17059,48 @@ pub mod api {
                 const CALL_NAME: &'static str = "add_registrar";
             }
             impl ::subxt::extrinsics::DecodeAsExtrinsic for AddRegistrar {
+                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Remove a registrar from the system."]
+            #[doc = ""]
+            #[doc = "The dispatch origin for this call must be `T::RegistrarOrigin`."]
+            #[doc = ""]
+            #[doc = "The registrar's slot is tombstoned (set to `None`) rather than removed, so that the"]
+            #[doc = "`RegistrarIndex` of every other registrar — and any judgements already recorded against"]
+            #[doc = "them — stays stable. The freed index is not reused by `add_registrar`, so each removal"]
+            #[doc = "permanently consumes one slot against `MaxRegistrars` (reusing the slot would let a new"]
+            #[doc = "registrar inherit an index that historical judgements still reference)."]
+            #[doc = ""]
+            #[doc = "Deposits reserved by pending `request_judgement` calls against this registrar are"]
+            #[doc = "**not** returned; once the registrar is removed `provide_judgement` can no longer"]
+            #[doc = "release them, so affected users should reclaim their funds manually with"]
+            #[doc = "`cancel_request`."]
+            #[doc = ""]
+            #[doc = "- `index`: the index of the registrar to remove."]
+            #[doc = ""]
+            #[doc = "Emits `RegistrarRemoved` if successful."]
+            pub struct RemoveRegistrar {
+                #[codec(compact)]
+                pub index: remove_registrar::Index,
+            }
+            pub mod remove_registrar {
+                use super::runtime_types;
+                pub type Index = ::core::primitive::u32;
+            }
+            impl RemoveRegistrar {
+                const PALLET_NAME: &'static str = "Identity";
+                const CALL_NAME: &'static str = "remove_registrar";
+            }
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for RemoveRegistrar {
                 fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
                 }
@@ -17666,6 +17864,41 @@ pub mod api {
                             ],
                         )
                     }
+                    #[doc = "Remove a registrar from the system."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be `T::RegistrarOrigin`."]
+                    #[doc = ""]
+                    #[doc = "The registrar's slot is tombstoned (set to `None`) rather than removed, so that the"]
+                    #[doc = "`RegistrarIndex` of every other registrar — and any judgements already recorded against"]
+                    #[doc = "them — stays stable. The freed index is not reused by `add_registrar`, so each removal"]
+                    #[doc = "permanently consumes one slot against `MaxRegistrars` (reusing the slot would let a new"]
+                    #[doc = "registrar inherit an index that historical judgements still reference)."]
+                    #[doc = ""]
+                    #[doc = "Deposits reserved by pending `request_judgement` calls against this registrar are"]
+                    #[doc = "**not** returned; once the registrar is removed `provide_judgement` can no longer"]
+                    #[doc = "release them, so affected users should reclaim their funds manually with"]
+                    #[doc = "`cancel_request`."]
+                    #[doc = ""]
+                    #[doc = "- `index`: the index of the registrar to remove."]
+                    #[doc = ""]
+                    #[doc = "Emits `RegistrarRemoved` if successful."]
+                    pub fn remove_registrar(
+                        &self,
+                        index: super::remove_registrar::Index,
+                    ) -> ::subxt::transactions::StaticPayload<super::RemoveRegistrar>
+                    {
+                        ::subxt::transactions::StaticPayload::new_static(
+                            "Identity",
+                            "remove_registrar",
+                            super::RemoveRegistrar { index },
+                            [
+                                182u8, 22u8, 140u8, 108u8, 209u8, 156u8, 101u8, 203u8, 107u8,
+                                183u8, 197u8, 29u8, 213u8, 180u8, 155u8, 63u8, 169u8, 91u8, 115u8,
+                                248u8, 87u8, 71u8, 19u8, 246u8, 59u8, 117u8, 187u8, 65u8, 192u8,
+                                27u8, 195u8, 74u8,
+                            ],
+                        )
+                    }
                     #[doc = "Set an account's identity information and reserve the appropriate deposit."]
                     #[doc = ""]
                     #[doc = "If the account already has identity information, the deposit is taken as part payment"]
@@ -18422,6 +18655,30 @@ pub mod api {
                 const EVENT_NAME: &'static str = "RegistrarAdded";
             }
             impl ::subxt::events::DecodeAsEvent for RegistrarAdded {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "A registrar was removed."]
+            pub struct RegistrarRemoved {
+                pub registrar_index: registrar_removed::RegistrarIndex,
+            }
+            pub mod registrar_removed {
+                use super::runtime_types;
+                pub type RegistrarIndex = ::core::primitive::u32;
+            }
+            impl RegistrarRemoved {
+                const PALLET_NAME: &'static str = "Identity";
+                const EVENT_NAME: &'static str = "RegistrarRemoved";
+            }
+            impl ::subxt::events::DecodeAsEvent for RegistrarRemoved {
                 fn is_event(pallet_name: &str, event_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
                 }
@@ -19535,6 +19792,8 @@ pub mod api {
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Repay the payment previously given to the member with the signed origin, remove any"]
             #[doc = "pending payments, and elevate them from rank 0 to rank 1."]
+            #[doc = ""]
+            #[doc = "The funds reserved for the forfeited pending payments are returned to the society pot."]
             pub struct WaiveRepay {
                 pub amount: waive_repay::Amount,
             }
@@ -20130,6 +20389,8 @@ pub mod api {
                     }
                     #[doc = "Repay the payment previously given to the member with the signed origin, remove any"]
                     #[doc = "pending payments, and elevate them from rank 0 to rank 1."]
+                    #[doc = ""]
+                    #[doc = "The funds reserved for the forfeited pending payments are returned to the society pot."]
                     pub fn waive_repay(
                         &self,
                         amount: super::waive_repay::Amount,
@@ -21734,28 +21995,25 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "Send a call through a recovered account."]
+            #[doc = "Allows the inheritor of a recovered account to control it."]
             #[doc = ""]
-            #[doc = "The dispatch origin for this call must be _Signed_ and registered to"]
-            #[doc = "be able to make calls on behalf of the recovered account."]
-            #[doc = ""]
-            #[doc = "Parameters:"]
-            #[doc = "- `account`: The recovered account you want to make a call on-behalf-of."]
-            #[doc = "- `call`: The call you want to make with the recovered account."]
-            pub struct AsRecovered {
-                pub account: as_recovered::Account,
-                pub call: ::subxt::alloc::boxed::Box<as_recovered::Call>,
+            #[doc = "The controller is not allowed to dispatch calls of the recovery pallet. Otherwise they"]
+            #[doc = "could mess with the recovery configuration and possibly cancel or slash attempts from"]
+            #[doc = "higher-priority friend groups."]
+            pub struct ControlInheritedAccount {
+                pub recovered: control_inherited_account::Recovered,
+                pub call: ::subxt::alloc::boxed::Box<control_inherited_account::Call>,
             }
-            pub mod as_recovered {
+            pub mod control_inherited_account {
                 use super::runtime_types;
-                pub type Account = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
+                pub type Recovered = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
                 pub type Call = runtime_types::rococo_runtime::RuntimeCall;
             }
-            impl AsRecovered {
+            impl ControlInheritedAccount {
                 const PALLET_NAME: &'static str = "Recovery";
-                const CALL_NAME: &'static str = "as_recovered";
+                const CALL_NAME: &'static str = "control_inherited_account";
             }
-            impl ::subxt::extrinsics::DecodeAsExtrinsic for AsRecovered {
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for ControlInheritedAccount {
                 fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
                 }
@@ -21767,314 +22025,201 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "Allow ROOT to bypass the recovery process and set a rescuer account"]
-            #[doc = "for a lost account directly."]
+            #[doc = "Revoke the inheritor of the calling (lost) account."]
             #[doc = ""]
-            #[doc = "The dispatch origin for this call must be _ROOT_."]
-            #[doc = ""]
-            #[doc = "Parameters:"]
-            #[doc = "- `lost`: The \"lost account\" to be recovered."]
-            #[doc = "- `rescuer`: The \"rescuer account\" which can call as the lost account."]
-            pub struct SetRecovered {
-                pub lost: set_recovered::Lost,
-                pub rescuer: set_recovered::Rescuer,
+            #[doc = "This removes the inheritor entry and refunds the inheritor deposit. Can only be called"]
+            #[doc = "by the lost account itself after it regains access."]
+            pub struct RevokeInheritor;
+            impl RevokeInheritor {
+                const PALLET_NAME: &'static str = "Recovery";
+                const CALL_NAME: &'static str = "revoke_inheritor";
             }
-            pub mod set_recovered {
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for RevokeInheritor {
+                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Set the friend groups of the calling account before it lost access."]
+            #[doc = ""]
+            #[doc = "Cannot be used while there are ongoing recovery attempts. The friends of each group"]
+            #[doc = "MUST be sorted and unique. Trying to insert two friend groups with the same set of"]
+            #[doc = "friends will result in an error."]
+            #[doc = ""]
+            #[doc = "A `FriendGroupsChanged` event is emitted only when the new friends groups differed from"]
+            #[doc = "the old ones."]
+            pub struct SetFriendGroups {
+                pub friend_groups: set_friend_groups::FriendGroups,
+            }
+            pub mod set_friend_groups {
                 use super::runtime_types;
-                pub type Lost = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
-                pub type Rescuer = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
-            }
-            impl SetRecovered {
-                const PALLET_NAME: &'static str = "Recovery";
-                const CALL_NAME: &'static str = "set_recovered";
-            }
-            impl ::subxt::extrinsics::DecodeAsExtrinsic for SetRecovered {
-                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
-                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
-                }
-            }
-            #[derive(
-                :: subxt :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "Create a recovery configuration for your account. This makes your account recoverable."]
-            #[doc = ""]
-            #[doc = "Payment: `ConfigDepositBase` + `FriendDepositFactor` * #_of_friends balance"]
-            #[doc = "will be reserved for storing the recovery configuration. This deposit is returned"]
-            #[doc = "in full when the user calls `remove_recovery`."]
-            #[doc = ""]
-            #[doc = "The dispatch origin for this call must be _Signed_."]
-            #[doc = ""]
-            #[doc = "Parameters:"]
-            #[doc = "- `friends`: A list of friends you trust to vouch for recovery attempts. Should be"]
-            #[doc = "  ordered and contain no duplicate values."]
-            #[doc = "- `threshold`: The number of friends that must vouch for a recovery attempt before the"]
-            #[doc = "  account can be recovered. Should be less than or equal to the length of the list of"]
-            #[doc = "  friends."]
-            #[doc = "- `delay_period`: The number of blocks after a recovery attempt is initialized that"]
-            #[doc = "  needs to pass before the account can be recovered."]
-            pub struct CreateRecovery {
-                pub friends: create_recovery::Friends,
-                pub threshold: create_recovery::Threshold,
-                pub delay_period: create_recovery::DelayPeriod,
-            }
-            pub mod create_recovery {
-                use super::runtime_types;
-                pub type Friends = ::subxt::alloc::vec::Vec<::subxt::utils::AccountId32>;
-                pub type Threshold = ::core::primitive::u16;
-                pub type DelayPeriod = ::core::primitive::u32;
-            }
-            impl CreateRecovery {
-                const PALLET_NAME: &'static str = "Recovery";
-                const CALL_NAME: &'static str = "create_recovery";
-            }
-            impl ::subxt::extrinsics::DecodeAsExtrinsic for CreateRecovery {
-                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
-                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
-                }
-            }
-            #[derive(
-                :: subxt :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "Initiate the process for recovering a recoverable account."]
-            #[doc = ""]
-            #[doc = "Payment: `RecoveryDeposit` balance will be reserved for initiating the"]
-            #[doc = "recovery process. This deposit will always be repatriated to the account"]
-            #[doc = "trying to be recovered. See `close_recovery`."]
-            #[doc = ""]
-            #[doc = "The dispatch origin for this call must be _Signed_."]
-            #[doc = ""]
-            #[doc = "Parameters:"]
-            #[doc = "- `account`: The lost account that you want to recover. This account needs to be"]
-            #[doc = "  recoverable (i.e. have a recovery configuration)."]
-            pub struct InitiateRecovery {
-                pub account: initiate_recovery::Account,
-            }
-            pub mod initiate_recovery {
-                use super::runtime_types;
-                pub type Account = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
-            }
-            impl InitiateRecovery {
-                const PALLET_NAME: &'static str = "Recovery";
-                const CALL_NAME: &'static str = "initiate_recovery";
-            }
-            impl ::subxt::extrinsics::DecodeAsExtrinsic for InitiateRecovery {
-                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
-                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
-                }
-            }
-            #[derive(
-                :: subxt :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "Allow a \"friend\" of a recoverable account to vouch for an active recovery"]
-            #[doc = "process for that account."]
-            #[doc = ""]
-            #[doc = "The dispatch origin for this call must be _Signed_ and must be a \"friend\""]
-            #[doc = "for the recoverable account."]
-            #[doc = ""]
-            #[doc = "Parameters:"]
-            #[doc = "- `lost`: The lost account that you want to recover."]
-            #[doc = "- `rescuer`: The account trying to rescue the lost account that you want to vouch for."]
-            #[doc = ""]
-            #[doc = "The combination of these two parameters must point to an active recovery"]
-            #[doc = "process."]
-            pub struct VouchRecovery {
-                pub lost: vouch_recovery::Lost,
-                pub rescuer: vouch_recovery::Rescuer,
-            }
-            pub mod vouch_recovery {
-                use super::runtime_types;
-                pub type Lost = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
-                pub type Rescuer = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
-            }
-            impl VouchRecovery {
-                const PALLET_NAME: &'static str = "Recovery";
-                const CALL_NAME: &'static str = "vouch_recovery";
-            }
-            impl ::subxt::extrinsics::DecodeAsExtrinsic for VouchRecovery {
-                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
-                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
-                }
-            }
-            #[derive(
-                :: subxt :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "Allow a successful rescuer to claim their recovered account."]
-            #[doc = ""]
-            #[doc = "The dispatch origin for this call must be _Signed_ and must be a \"rescuer\""]
-            #[doc = "who has successfully completed the account recovery process: collected"]
-            #[doc = "`threshold` or more vouches, waited `delay_period` blocks since initiation."]
-            #[doc = ""]
-            #[doc = "Parameters:"]
-            #[doc = "- `account`: The lost account that you want to claim has been successfully recovered by"]
-            #[doc = "  you."]
-            pub struct ClaimRecovery {
-                pub account: claim_recovery::Account,
-            }
-            pub mod claim_recovery {
-                use super::runtime_types;
-                pub type Account = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
-            }
-            impl ClaimRecovery {
-                const PALLET_NAME: &'static str = "Recovery";
-                const CALL_NAME: &'static str = "claim_recovery";
-            }
-            impl ::subxt::extrinsics::DecodeAsExtrinsic for ClaimRecovery {
-                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
-                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
-                }
-            }
-            #[derive(
-                :: subxt :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "As the controller of a recoverable account, close an active recovery"]
-            #[doc = "process for your account."]
-            #[doc = ""]
-            #[doc = "Payment: By calling this function, the recoverable account will receive"]
-            #[doc = "the recovery deposit `RecoveryDeposit` placed by the rescuer."]
-            #[doc = ""]
-            #[doc = "The dispatch origin for this call must be _Signed_ and must be a"]
-            #[doc = "recoverable account with an active recovery process for it."]
-            #[doc = ""]
-            #[doc = "Parameters:"]
-            #[doc = "- `rescuer`: The account trying to rescue this recoverable account."]
-            pub struct CloseRecovery {
-                pub rescuer: close_recovery::Rescuer,
-            }
-            pub mod close_recovery {
-                use super::runtime_types;
-                pub type Rescuer = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
-            }
-            impl CloseRecovery {
-                const PALLET_NAME: &'static str = "Recovery";
-                const CALL_NAME: &'static str = "close_recovery";
-            }
-            impl ::subxt::extrinsics::DecodeAsExtrinsic for CloseRecovery {
-                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
-                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
-                }
-            }
-            #[derive(
-                :: subxt :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "Remove the recovery process for your account. Recovered accounts are still accessible."]
-            #[doc = ""]
-            #[doc = "NOTE: The user must make sure to call `close_recovery` on all active"]
-            #[doc = "recovery attempts before calling this function else it will fail."]
-            #[doc = ""]
-            #[doc = "Payment: By calling this function the recoverable account will unreserve"]
-            #[doc = "their recovery configuration deposit."]
-            #[doc = "(`ConfigDepositBase` + `FriendDepositFactor` * #_of_friends)"]
-            #[doc = ""]
-            #[doc = "The dispatch origin for this call must be _Signed_ and must be a"]
-            #[doc = "recoverable account (i.e. has a recovery configuration)."]
-            pub struct RemoveRecovery;
-            impl RemoveRecovery {
-                const PALLET_NAME: &'static str = "Recovery";
-                const CALL_NAME: &'static str = "remove_recovery";
-            }
-            impl ::subxt::extrinsics::DecodeAsExtrinsic for RemoveRecovery {
-                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
-                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
-                }
-            }
-            #[derive(
-                :: subxt :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "Cancel the ability to use `as_recovered` for `account`."]
-            #[doc = ""]
-            #[doc = "The dispatch origin for this call must be _Signed_ and registered to"]
-            #[doc = "be able to make calls on behalf of the recovered account."]
-            #[doc = ""]
-            #[doc = "Parameters:"]
-            #[doc = "- `account`: The recovered account you are able to call on-behalf-of."]
-            pub struct CancelRecovered {
-                pub account: cancel_recovered::Account,
-            }
-            pub mod cancel_recovered {
-                use super::runtime_types;
-                pub type Account = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
-            }
-            impl CancelRecovered {
-                const PALLET_NAME: &'static str = "Recovery";
-                const CALL_NAME: &'static str = "cancel_recovered";
-            }
-            impl ::subxt::extrinsics::DecodeAsExtrinsic for CancelRecovered {
-                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
-                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
-                }
-            }
-            #[derive(
-                :: subxt :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "Poke deposits for recovery configurations and / or active recoveries."]
-            #[doc = ""]
-            #[doc = "This can be used by accounts to possibly lower their locked amount."]
-            #[doc = ""]
-            #[doc = "The dispatch origin for this call must be _Signed_."]
-            #[doc = ""]
-            #[doc = "Parameters:"]
-            #[doc = "- `maybe_account`: Optional recoverable account for which you have an active recovery"]
-            #[doc = "and want to adjust the deposit for the active recovery."]
-            #[doc = ""]
-            #[doc = "This function checks both recovery configuration deposit and active recovery deposits"]
-            #[doc = "of the caller:"]
-            #[doc = "- If the caller has created a recovery configuration, checks and adjusts its deposit"]
-            #[doc = "- If the caller has initiated any active recoveries, and provides the account in"]
-            #[doc = "`maybe_account`, checks and adjusts those deposits"]
-            #[doc = ""]
-            #[doc = "If any deposit is updated, the difference will be reserved/unreserved from the caller's"]
-            #[doc = "account."]
-            #[doc = ""]
-            #[doc = "The transaction is made free if any deposit is updated and paid otherwise."]
-            #[doc = ""]
-            #[doc = "Emits `DepositPoked` if any deposit is updated."]
-            #[doc = "Multiple events may be emitted in case both types of deposits are updated."]
-            pub struct PokeDeposit {
-                pub maybe_account: poke_deposit::MaybeAccount,
-            }
-            pub mod poke_deposit {
-                use super::runtime_types;
-                pub type MaybeAccount = ::core::option::Option<
-                    ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                pub type FriendGroups = ::subxt::alloc::vec::Vec<
+                    runtime_types::pallet_recovery::FriendGroup<
+                        ::core::primitive::u32,
+                        ::subxt::utils::AccountId32,
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                            ::subxt::utils::AccountId32,
+                        >,
+                    >,
                 >;
             }
-            impl PokeDeposit {
+            impl SetFriendGroups {
                 const PALLET_NAME: &'static str = "Recovery";
-                const CALL_NAME: &'static str = "poke_deposit";
+                const CALL_NAME: &'static str = "set_friend_groups";
             }
-            impl ::subxt::extrinsics::DecodeAsExtrinsic for PokeDeposit {
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for SetFriendGroups {
+                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Attempt to recover a lost account by a friend within the given friend group."]
+            #[doc = ""]
+            #[doc = "The initiator's approval is recorded automatically, so they do not need to call"]
+            #[doc = "`approve_attempt` themselves."]
+            #[doc = ""]
+            #[doc = "Once an account has been recovered by a friend group, no friend group of equal or lower"]
+            #[doc = "priority can open a new attempt: it will fail with [`Error::HigherPriorityRecovered`]."]
+            #[doc = "Only a strictly higher-priority group (lower numerical"]
+            #[doc = "[`FriendGroup::inheritance_priority`]) can take over the inheritor."]
+            pub struct InitiateAttempt {
+                pub lost: initiate_attempt::Lost,
+                pub friend_group_index: initiate_attempt::FriendGroupIndex,
+            }
+            pub mod initiate_attempt {
+                use super::runtime_types;
+                pub type Lost = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
+                pub type FriendGroupIndex = ::core::primitive::u32;
+            }
+            impl InitiateAttempt {
+                const PALLET_NAME: &'static str = "Recovery";
+                const CALL_NAME: &'static str = "initiate_attempt";
+            }
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for InitiateAttempt {
+                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Approve the recovery for a lost account."]
+            #[doc = ""]
+            #[doc = "Must be called by a friend of the friend group that the recovery attempt belongs to that"]
+            #[doc = "did not yet vote. Voting is only allowed until the threshold is reached."]
+            #[doc = "`finish_attempt` should be called after the last friend voted."]
+            pub struct ApproveAttempt {
+                pub lost: approve_attempt::Lost,
+                pub friend_group_index: approve_attempt::FriendGroupIndex,
+            }
+            pub mod approve_attempt {
+                use super::runtime_types;
+                pub type Lost = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
+                pub type FriendGroupIndex = ::core::primitive::u32;
+            }
+            impl ApproveAttempt {
+                const PALLET_NAME: &'static str = "Recovery";
+                const CALL_NAME: &'static str = "approve_attempt";
+            }
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for ApproveAttempt {
+                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Finish a recovery attempt and make the lost account accessible from the inheritor."]
+            #[doc = ""]
+            #[doc = "Can be called by anyone who is willing to pay for the inheritor deposit."]
+            pub struct FinishAttempt {
+                pub lost: finish_attempt::Lost,
+                pub friend_group_index: finish_attempt::FriendGroupIndex,
+            }
+            pub mod finish_attempt {
+                use super::runtime_types;
+                pub type Lost = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
+                pub type FriendGroupIndex = ::core::primitive::u32;
+            }
+            impl FinishAttempt {
+                const PALLET_NAME: &'static str = "Recovery";
+                const CALL_NAME: &'static str = "finish_attempt";
+            }
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for FinishAttempt {
+                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "The lost account can cancel an attempt at any moment; the initiator, only after a delay."]
+            #[doc = ""]
+            #[doc = "This will release the security deposit back to the initiator. The cancel delay must be"]
+            #[doc = "respected if the initiator calls it to prevent it from front-running the lost account"]
+            #[doc = "from slashing the attempt."]
+            pub struct CancelAttempt {
+                pub lost: cancel_attempt::Lost,
+                pub friend_group_index: cancel_attempt::FriendGroupIndex,
+            }
+            pub mod cancel_attempt {
+                use super::runtime_types;
+                pub type Lost = ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>;
+                pub type FriendGroupIndex = ::core::primitive::u32;
+            }
+            impl CancelAttempt {
+                const PALLET_NAME: &'static str = "Recovery";
+                const CALL_NAME: &'static str = "cancel_attempt";
+            }
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for CancelAttempt {
+                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Slash a malicious recovery attempt and burn the security deposit of the initiator."]
+            pub struct SlashAttempt {
+                pub friend_group_index: slash_attempt::FriendGroupIndex,
+            }
+            pub mod slash_attempt {
+                use super::runtime_types;
+                pub type FriendGroupIndex = ::core::primitive::u32;
+            }
+            impl SlashAttempt {
+                const PALLET_NAME: &'static str = "Recovery";
+                const CALL_NAME: &'static str = "slash_attempt";
+            }
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for SlashAttempt {
                 fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
                 }
@@ -22082,307 +22227,205 @@ pub mod api {
             pub mod api {
                 pub struct TransactionApi;
                 impl TransactionApi {
-                    #[doc = "Send a call through a recovered account."]
+                    #[doc = "Allows the inheritor of a recovered account to control it."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and registered to"]
-                    #[doc = "be able to make calls on behalf of the recovered account."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `account`: The recovered account you want to make a call on-behalf-of."]
-                    #[doc = "- `call`: The call you want to make with the recovered account."]
-                    pub fn as_recovered(
+                    #[doc = "The controller is not allowed to dispatch calls of the recovery pallet. Otherwise they"]
+                    #[doc = "could mess with the recovery configuration and possibly cancel or slash attempts from"]
+                    #[doc = "higher-priority friend groups."]
+                    pub fn control_inherited_account(
                         &self,
-                        account: super::as_recovered::Account,
-                        call: super::as_recovered::Call,
-                    ) -> ::subxt::transactions::StaticPayload<super::AsRecovered>
+                        recovered: super::control_inherited_account::Recovered,
+                        call: super::control_inherited_account::Call,
+                    ) -> ::subxt::transactions::StaticPayload<super::ControlInheritedAccount>
                     {
                         ::subxt::transactions::StaticPayload::new_static(
                             "Recovery",
-                            "as_recovered",
-                            super::AsRecovered {
-                                account,
+                            "control_inherited_account",
+                            super::ControlInheritedAccount {
+                                recovered,
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                158u8, 205u8, 11u8, 62u8, 182u8, 4u8, 73u8, 254u8, 130u8, 224u8,
-                                84u8, 183u8, 98u8, 106u8, 47u8, 42u8, 171u8, 179u8, 43u8, 162u8,
-                                197u8, 43u8, 204u8, 22u8, 122u8, 91u8, 175u8, 38u8, 191u8, 168u8,
-                                216u8, 179u8,
+                                248u8, 31u8, 79u8, 179u8, 166u8, 134u8, 55u8, 51u8, 168u8, 159u8,
+                                218u8, 239u8, 173u8, 61u8, 109u8, 240u8, 72u8, 100u8, 44u8, 164u8,
+                                125u8, 175u8, 7u8, 199u8, 130u8, 178u8, 123u8, 63u8, 75u8, 143u8,
+                                187u8, 162u8,
                             ],
                         )
                     }
-                    #[doc = "Allow ROOT to bypass the recovery process and set a rescuer account"]
-                    #[doc = "for a lost account directly."]
+                    #[doc = "Revoke the inheritor of the calling (lost) account."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _ROOT_."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `lost`: The \"lost account\" to be recovered."]
-                    #[doc = "- `rescuer`: The \"rescuer account\" which can call as the lost account."]
-                    pub fn set_recovered(
+                    #[doc = "This removes the inheritor entry and refunds the inheritor deposit. Can only be called"]
+                    #[doc = "by the lost account itself after it regains access."]
+                    pub fn revoke_inheritor(
                         &self,
-                        lost: super::set_recovered::Lost,
-                        rescuer: super::set_recovered::Rescuer,
-                    ) -> ::subxt::transactions::StaticPayload<super::SetRecovered>
+                    ) -> ::subxt::transactions::StaticPayload<super::RevokeInheritor>
                     {
                         ::subxt::transactions::StaticPayload::new_static(
                             "Recovery",
-                            "set_recovered",
-                            super::SetRecovered { lost, rescuer },
+                            "revoke_inheritor",
+                            super::RevokeInheritor {},
                             [
-                                194u8, 147u8, 14u8, 197u8, 132u8, 185u8, 122u8, 81u8, 61u8, 14u8,
-                                10u8, 177u8, 74u8, 184u8, 150u8, 217u8, 246u8, 149u8, 26u8, 165u8,
-                                196u8, 83u8, 230u8, 195u8, 213u8, 40u8, 51u8, 180u8, 23u8, 90u8,
-                                3u8, 14u8,
+                                26u8, 191u8, 251u8, 215u8, 204u8, 21u8, 184u8, 150u8, 84u8, 60u8,
+                                121u8, 31u8, 16u8, 189u8, 197u8, 175u8, 225u8, 0u8, 214u8, 57u8,
+                                140u8, 145u8, 1u8, 77u8, 193u8, 176u8, 9u8, 222u8, 180u8, 190u8,
+                                25u8, 112u8,
                             ],
                         )
                     }
-                    #[doc = "Create a recovery configuration for your account. This makes your account recoverable."]
+                    #[doc = "Set the friend groups of the calling account before it lost access."]
                     #[doc = ""]
-                    #[doc = "Payment: `ConfigDepositBase` + `FriendDepositFactor` * #_of_friends balance"]
-                    #[doc = "will be reserved for storing the recovery configuration. This deposit is returned"]
-                    #[doc = "in full when the user calls `remove_recovery`."]
+                    #[doc = "Cannot be used while there are ongoing recovery attempts. The friends of each group"]
+                    #[doc = "MUST be sorted and unique. Trying to insert two friend groups with the same set of"]
+                    #[doc = "friends will result in an error."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `friends`: A list of friends you trust to vouch for recovery attempts. Should be"]
-                    #[doc = "  ordered and contain no duplicate values."]
-                    #[doc = "- `threshold`: The number of friends that must vouch for a recovery attempt before the"]
-                    #[doc = "  account can be recovered. Should be less than or equal to the length of the list of"]
-                    #[doc = "  friends."]
-                    #[doc = "- `delay_period`: The number of blocks after a recovery attempt is initialized that"]
-                    #[doc = "  needs to pass before the account can be recovered."]
-                    pub fn create_recovery(
+                    #[doc = "A `FriendGroupsChanged` event is emitted only when the new friends groups differed from"]
+                    #[doc = "the old ones."]
+                    pub fn set_friend_groups(
                         &self,
-                        friends: super::create_recovery::Friends,
-                        threshold: super::create_recovery::Threshold,
-                        delay_period: super::create_recovery::DelayPeriod,
-                    ) -> ::subxt::transactions::StaticPayload<super::CreateRecovery>
+                        friend_groups: super::set_friend_groups::FriendGroups,
+                    ) -> ::subxt::transactions::StaticPayload<super::SetFriendGroups>
                     {
                         ::subxt::transactions::StaticPayload::new_static(
                             "Recovery",
-                            "create_recovery",
-                            super::CreateRecovery {
-                                friends,
-                                threshold,
-                                delay_period,
+                            "set_friend_groups",
+                            super::SetFriendGroups { friend_groups },
+                            [
+                                31u8, 231u8, 164u8, 41u8, 187u8, 38u8, 217u8, 165u8, 113u8, 220u8,
+                                37u8, 54u8, 150u8, 4u8, 217u8, 154u8, 52u8, 248u8, 250u8, 42u8,
+                                127u8, 104u8, 64u8, 147u8, 149u8, 8u8, 36u8, 107u8, 72u8, 253u8,
+                                236u8, 14u8,
+                            ],
+                        )
+                    }
+                    #[doc = "Attempt to recover a lost account by a friend within the given friend group."]
+                    #[doc = ""]
+                    #[doc = "The initiator's approval is recorded automatically, so they do not need to call"]
+                    #[doc = "`approve_attempt` themselves."]
+                    #[doc = ""]
+                    #[doc = "Once an account has been recovered by a friend group, no friend group of equal or lower"]
+                    #[doc = "priority can open a new attempt: it will fail with [`Error::HigherPriorityRecovered`]."]
+                    #[doc = "Only a strictly higher-priority group (lower numerical"]
+                    #[doc = "[`FriendGroup::inheritance_priority`]) can take over the inheritor."]
+                    pub fn initiate_attempt(
+                        &self,
+                        lost: super::initiate_attempt::Lost,
+                        friend_group_index: super::initiate_attempt::FriendGroupIndex,
+                    ) -> ::subxt::transactions::StaticPayload<super::InitiateAttempt>
+                    {
+                        ::subxt::transactions::StaticPayload::new_static(
+                            "Recovery",
+                            "initiate_attempt",
+                            super::InitiateAttempt {
+                                lost,
+                                friend_group_index,
                             },
                             [
-                                36u8, 175u8, 11u8, 85u8, 95u8, 170u8, 58u8, 193u8, 102u8, 18u8,
-                                117u8, 27u8, 199u8, 214u8, 70u8, 47u8, 129u8, 130u8, 109u8, 242u8,
-                                240u8, 255u8, 120u8, 176u8, 40u8, 243u8, 175u8, 71u8, 3u8, 91u8,
-                                186u8, 220u8,
+                                180u8, 3u8, 38u8, 49u8, 32u8, 109u8, 62u8, 154u8, 83u8, 195u8,
+                                225u8, 177u8, 54u8, 87u8, 135u8, 249u8, 94u8, 136u8, 65u8, 18u8,
+                                133u8, 91u8, 212u8, 17u8, 31u8, 102u8, 7u8, 213u8, 152u8, 231u8,
+                                110u8, 246u8,
                             ],
                         )
                     }
-                    #[doc = "Initiate the process for recovering a recoverable account."]
+                    #[doc = "Approve the recovery for a lost account."]
                     #[doc = ""]
-                    #[doc = "Payment: `RecoveryDeposit` balance will be reserved for initiating the"]
-                    #[doc = "recovery process. This deposit will always be repatriated to the account"]
-                    #[doc = "trying to be recovered. See `close_recovery`."]
-                    #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `account`: The lost account that you want to recover. This account needs to be"]
-                    #[doc = "  recoverable (i.e. have a recovery configuration)."]
-                    pub fn initiate_recovery(
+                    #[doc = "Must be called by a friend of the friend group that the recovery attempt belongs to that"]
+                    #[doc = "did not yet vote. Voting is only allowed until the threshold is reached."]
+                    #[doc = "`finish_attempt` should be called after the last friend voted."]
+                    pub fn approve_attempt(
                         &self,
-                        account: super::initiate_recovery::Account,
-                    ) -> ::subxt::transactions::StaticPayload<super::InitiateRecovery>
+                        lost: super::approve_attempt::Lost,
+                        friend_group_index: super::approve_attempt::FriendGroupIndex,
+                    ) -> ::subxt::transactions::StaticPayload<super::ApproveAttempt>
                     {
                         ::subxt::transactions::StaticPayload::new_static(
                             "Recovery",
-                            "initiate_recovery",
-                            super::InitiateRecovery { account },
+                            "approve_attempt",
+                            super::ApproveAttempt {
+                                lost,
+                                friend_group_index,
+                            },
                             [
-                                60u8, 243u8, 229u8, 176u8, 221u8, 52u8, 44u8, 224u8, 233u8, 14u8,
-                                89u8, 100u8, 174u8, 74u8, 38u8, 32u8, 97u8, 48u8, 53u8, 74u8, 30u8,
-                                242u8, 19u8, 114u8, 145u8, 74u8, 69u8, 125u8, 227u8, 214u8, 144u8,
-                                58u8,
+                                39u8, 216u8, 133u8, 90u8, 50u8, 45u8, 144u8, 17u8, 103u8, 43u8,
+                                205u8, 205u8, 212u8, 221u8, 122u8, 156u8, 24u8, 78u8, 164u8, 176u8,
+                                136u8, 110u8, 102u8, 159u8, 206u8, 244u8, 225u8, 74u8, 25u8, 254u8,
+                                54u8, 210u8,
                             ],
                         )
                     }
-                    #[doc = "Allow a \"friend\" of a recoverable account to vouch for an active recovery"]
-                    #[doc = "process for that account."]
+                    #[doc = "Finish a recovery attempt and make the lost account accessible from the inheritor."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and must be a \"friend\""]
-                    #[doc = "for the recoverable account."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `lost`: The lost account that you want to recover."]
-                    #[doc = "- `rescuer`: The account trying to rescue the lost account that you want to vouch for."]
-                    #[doc = ""]
-                    #[doc = "The combination of these two parameters must point to an active recovery"]
-                    #[doc = "process."]
-                    pub fn vouch_recovery(
+                    #[doc = "Can be called by anyone who is willing to pay for the inheritor deposit."]
+                    pub fn finish_attempt(
                         &self,
-                        lost: super::vouch_recovery::Lost,
-                        rescuer: super::vouch_recovery::Rescuer,
-                    ) -> ::subxt::transactions::StaticPayload<super::VouchRecovery>
+                        lost: super::finish_attempt::Lost,
+                        friend_group_index: super::finish_attempt::FriendGroupIndex,
+                    ) -> ::subxt::transactions::StaticPayload<super::FinishAttempt>
                     {
                         ::subxt::transactions::StaticPayload::new_static(
                             "Recovery",
-                            "vouch_recovery",
-                            super::VouchRecovery { lost, rescuer },
+                            "finish_attempt",
+                            super::FinishAttempt {
+                                lost,
+                                friend_group_index,
+                            },
                             [
-                                97u8, 190u8, 60u8, 15u8, 191u8, 117u8, 1u8, 217u8, 62u8, 40u8,
-                                210u8, 1u8, 237u8, 111u8, 48u8, 196u8, 180u8, 154u8, 198u8, 12u8,
-                                108u8, 42u8, 6u8, 234u8, 2u8, 113u8, 163u8, 111u8, 80u8, 146u8,
-                                6u8, 73u8,
+                                96u8, 34u8, 255u8, 39u8, 65u8, 159u8, 65u8, 86u8, 142u8, 197u8,
+                                109u8, 137u8, 90u8, 49u8, 5u8, 98u8, 206u8, 168u8, 164u8, 184u8,
+                                7u8, 175u8, 95u8, 182u8, 126u8, 206u8, 192u8, 42u8, 120u8, 250u8,
+                                119u8, 94u8,
                             ],
                         )
                     }
-                    #[doc = "Allow a successful rescuer to claim their recovered account."]
+                    #[doc = "The lost account can cancel an attempt at any moment; the initiator, only after a delay."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and must be a \"rescuer\""]
-                    #[doc = "who has successfully completed the account recovery process: collected"]
-                    #[doc = "`threshold` or more vouches, waited `delay_period` blocks since initiation."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `account`: The lost account that you want to claim has been successfully recovered by"]
-                    #[doc = "  you."]
-                    pub fn claim_recovery(
+                    #[doc = "This will release the security deposit back to the initiator. The cancel delay must be"]
+                    #[doc = "respected if the initiator calls it to prevent it from front-running the lost account"]
+                    #[doc = "from slashing the attempt."]
+                    pub fn cancel_attempt(
                         &self,
-                        account: super::claim_recovery::Account,
-                    ) -> ::subxt::transactions::StaticPayload<super::ClaimRecovery>
+                        lost: super::cancel_attempt::Lost,
+                        friend_group_index: super::cancel_attempt::FriendGroupIndex,
+                    ) -> ::subxt::transactions::StaticPayload<super::CancelAttempt>
                     {
                         ::subxt::transactions::StaticPayload::new_static(
                             "Recovery",
-                            "claim_recovery",
-                            super::ClaimRecovery { account },
+                            "cancel_attempt",
+                            super::CancelAttempt {
+                                lost,
+                                friend_group_index,
+                            },
                             [
-                                41u8, 47u8, 162u8, 88u8, 13u8, 166u8, 130u8, 146u8, 218u8, 162u8,
-                                166u8, 33u8, 89u8, 129u8, 177u8, 178u8, 68u8, 128u8, 161u8, 229u8,
-                                207u8, 3u8, 57u8, 35u8, 211u8, 208u8, 74u8, 155u8, 183u8, 173u8,
-                                74u8, 56u8,
+                                75u8, 170u8, 230u8, 216u8, 156u8, 181u8, 234u8, 77u8, 249u8, 65u8,
+                                54u8, 92u8, 244u8, 183u8, 51u8, 0u8, 114u8, 64u8, 245u8, 226u8,
+                                199u8, 25u8, 72u8, 62u8, 225u8, 175u8, 62u8, 110u8, 183u8, 164u8,
+                                214u8, 148u8,
                             ],
                         )
                     }
-                    #[doc = "As the controller of a recoverable account, close an active recovery"]
-                    #[doc = "process for your account."]
-                    #[doc = ""]
-                    #[doc = "Payment: By calling this function, the recoverable account will receive"]
-                    #[doc = "the recovery deposit `RecoveryDeposit` placed by the rescuer."]
-                    #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and must be a"]
-                    #[doc = "recoverable account with an active recovery process for it."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `rescuer`: The account trying to rescue this recoverable account."]
-                    pub fn close_recovery(
+                    #[doc = "Slash a malicious recovery attempt and burn the security deposit of the initiator."]
+                    pub fn slash_attempt(
                         &self,
-                        rescuer: super::close_recovery::Rescuer,
-                    ) -> ::subxt::transactions::StaticPayload<super::CloseRecovery>
+                        friend_group_index: super::slash_attempt::FriendGroupIndex,
+                    ) -> ::subxt::transactions::StaticPayload<super::SlashAttempt>
                     {
                         ::subxt::transactions::StaticPayload::new_static(
                             "Recovery",
-                            "close_recovery",
-                            super::CloseRecovery { rescuer },
+                            "slash_attempt",
+                            super::SlashAttempt { friend_group_index },
                             [
-                                161u8, 178u8, 117u8, 209u8, 119u8, 164u8, 135u8, 41u8, 25u8, 108u8,
-                                194u8, 175u8, 221u8, 65u8, 184u8, 137u8, 171u8, 97u8, 204u8, 61u8,
-                                159u8, 39u8, 192u8, 53u8, 246u8, 69u8, 113u8, 16u8, 170u8, 232u8,
-                                163u8, 10u8,
-                            ],
-                        )
-                    }
-                    #[doc = "Remove the recovery process for your account. Recovered accounts are still accessible."]
-                    #[doc = ""]
-                    #[doc = "NOTE: The user must make sure to call `close_recovery` on all active"]
-                    #[doc = "recovery attempts before calling this function else it will fail."]
-                    #[doc = ""]
-                    #[doc = "Payment: By calling this function the recoverable account will unreserve"]
-                    #[doc = "their recovery configuration deposit."]
-                    #[doc = "(`ConfigDepositBase` + `FriendDepositFactor` * #_of_friends)"]
-                    #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and must be a"]
-                    #[doc = "recoverable account (i.e. has a recovery configuration)."]
-                    pub fn remove_recovery(
-                        &self,
-                    ) -> ::subxt::transactions::StaticPayload<super::RemoveRecovery>
-                    {
-                        ::subxt::transactions::StaticPayload::new_static(
-                            "Recovery",
-                            "remove_recovery",
-                            super::RemoveRecovery {},
-                            [
-                                11u8, 38u8, 133u8, 172u8, 212u8, 252u8, 57u8, 216u8, 42u8, 202u8,
-                                206u8, 91u8, 115u8, 91u8, 242u8, 123u8, 95u8, 196u8, 172u8, 243u8,
-                                164u8, 1u8, 69u8, 180u8, 40u8, 68u8, 208u8, 221u8, 161u8, 250u8,
-                                8u8, 72u8,
-                            ],
-                        )
-                    }
-                    #[doc = "Cancel the ability to use `as_recovered` for `account`."]
-                    #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and registered to"]
-                    #[doc = "be able to make calls on behalf of the recovered account."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `account`: The recovered account you are able to call on-behalf-of."]
-                    pub fn cancel_recovered(
-                        &self,
-                        account: super::cancel_recovered::Account,
-                    ) -> ::subxt::transactions::StaticPayload<super::CancelRecovered>
-                    {
-                        ::subxt::transactions::StaticPayload::new_static(
-                            "Recovery",
-                            "cancel_recovered",
-                            super::CancelRecovered { account },
-                            [
-                                100u8, 222u8, 80u8, 226u8, 187u8, 188u8, 111u8, 58u8, 190u8, 5u8,
-                                178u8, 144u8, 37u8, 98u8, 71u8, 145u8, 28u8, 248u8, 222u8, 188u8,
-                                53u8, 21u8, 127u8, 176u8, 249u8, 166u8, 250u8, 59u8, 170u8, 33u8,
-                                251u8, 239u8,
-                            ],
-                        )
-                    }
-                    #[doc = "Poke deposits for recovery configurations and / or active recoveries."]
-                    #[doc = ""]
-                    #[doc = "This can be used by accounts to possibly lower their locked amount."]
-                    #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `maybe_account`: Optional recoverable account for which you have an active recovery"]
-                    #[doc = "and want to adjust the deposit for the active recovery."]
-                    #[doc = ""]
-                    #[doc = "This function checks both recovery configuration deposit and active recovery deposits"]
-                    #[doc = "of the caller:"]
-                    #[doc = "- If the caller has created a recovery configuration, checks and adjusts its deposit"]
-                    #[doc = "- If the caller has initiated any active recoveries, and provides the account in"]
-                    #[doc = "`maybe_account`, checks and adjusts those deposits"]
-                    #[doc = ""]
-                    #[doc = "If any deposit is updated, the difference will be reserved/unreserved from the caller's"]
-                    #[doc = "account."]
-                    #[doc = ""]
-                    #[doc = "The transaction is made free if any deposit is updated and paid otherwise."]
-                    #[doc = ""]
-                    #[doc = "Emits `DepositPoked` if any deposit is updated."]
-                    #[doc = "Multiple events may be emitted in case both types of deposits are updated."]
-                    pub fn poke_deposit(
-                        &self,
-                        maybe_account: super::poke_deposit::MaybeAccount,
-                    ) -> ::subxt::transactions::StaticPayload<super::PokeDeposit>
-                    {
-                        ::subxt::transactions::StaticPayload::new_static(
-                            "Recovery",
-                            "poke_deposit",
-                            super::PokeDeposit { maybe_account },
-                            [
-                                177u8, 98u8, 53u8, 15u8, 228u8, 36u8, 173u8, 55u8, 125u8, 3u8,
-                                234u8, 70u8, 147u8, 147u8, 124u8, 86u8, 31u8, 101u8, 171u8, 56u8,
-                                148u8, 180u8, 87u8, 149u8, 11u8, 113u8, 195u8, 35u8, 56u8, 32u8,
-                                251u8, 56u8,
+                                111u8, 73u8, 112u8, 158u8, 21u8, 112u8, 197u8, 148u8, 240u8, 0u8,
+                                234u8, 91u8, 91u8, 94u8, 242u8, 77u8, 0u8, 124u8, 1u8, 35u8, 110u8,
+                                255u8, 72u8, 127u8, 100u8, 90u8, 187u8, 30u8, 177u8, 171u8, 221u8,
+                                170u8,
                             ],
                         )
                     }
                 }
             }
         }
-        #[doc = "Events type."]
+        #[doc = "The `Event` enum of this pallet"]
         pub type Event = runtime_types::pallet_recovery::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -22393,19 +22436,23 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "A recovery process has been set up for an account."]
-            pub struct RecoveryCreated {
-                pub account: recovery_created::Account,
+            #[doc = "A recovery attempt was approved by a friend."]
+            pub struct AttemptApproved {
+                pub lost: attempt_approved::Lost,
+                pub friend_group_index: attempt_approved::FriendGroupIndex,
+                pub friend: attempt_approved::Friend,
             }
-            pub mod recovery_created {
+            pub mod attempt_approved {
                 use super::runtime_types;
-                pub type Account = ::subxt::utils::AccountId32;
+                pub type Lost = ::subxt::utils::AccountId32;
+                pub type FriendGroupIndex = ::core::primitive::u32;
+                pub type Friend = ::subxt::utils::AccountId32;
             }
-            impl RecoveryCreated {
+            impl AttemptApproved {
                 const PALLET_NAME: &'static str = "Recovery";
-                const EVENT_NAME: &'static str = "RecoveryCreated";
+                const EVENT_NAME: &'static str = "AttemptApproved";
             }
-            impl ::subxt::events::DecodeAsEvent for RecoveryCreated {
+            impl ::subxt::events::DecodeAsEvent for AttemptApproved {
                 fn is_event(pallet_name: &str, event_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
                 }
@@ -22417,21 +22464,23 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "A recovery process has been initiated for lost account by rescuer account."]
-            pub struct RecoveryInitiated {
-                pub lost_account: recovery_initiated::LostAccount,
-                pub rescuer_account: recovery_initiated::RescuerAccount,
+            #[doc = "A recovery attempt was canceled by either the lost account or the initiator."]
+            pub struct AttemptCanceled {
+                pub lost: attempt_canceled::Lost,
+                pub friend_group_index: attempt_canceled::FriendGroupIndex,
+                pub canceler: attempt_canceled::Canceler,
             }
-            pub mod recovery_initiated {
+            pub mod attempt_canceled {
                 use super::runtime_types;
-                pub type LostAccount = ::subxt::utils::AccountId32;
-                pub type RescuerAccount = ::subxt::utils::AccountId32;
+                pub type Lost = ::subxt::utils::AccountId32;
+                pub type FriendGroupIndex = ::core::primitive::u32;
+                pub type Canceler = ::subxt::utils::AccountId32;
             }
-            impl RecoveryInitiated {
+            impl AttemptCanceled {
                 const PALLET_NAME: &'static str = "Recovery";
-                const EVENT_NAME: &'static str = "RecoveryInitiated";
+                const EVENT_NAME: &'static str = "AttemptCanceled";
             }
-            impl ::subxt::events::DecodeAsEvent for RecoveryInitiated {
+            impl ::subxt::events::DecodeAsEvent for AttemptCanceled {
                 fn is_event(pallet_name: &str, event_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
                 }
@@ -22443,23 +22492,23 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "A recovery process for lost account by rescuer account has been vouched for by sender."]
-            pub struct RecoveryVouched {
-                pub lost_account: recovery_vouched::LostAccount,
-                pub rescuer_account: recovery_vouched::RescuerAccount,
-                pub sender: recovery_vouched::Sender,
+            #[doc = "A recovery attempt was initiated by a friend."]
+            pub struct AttemptInitiated {
+                pub lost: attempt_initiated::Lost,
+                pub friend_group_index: attempt_initiated::FriendGroupIndex,
+                pub initiator: attempt_initiated::Initiator,
             }
-            pub mod recovery_vouched {
+            pub mod attempt_initiated {
                 use super::runtime_types;
-                pub type LostAccount = ::subxt::utils::AccountId32;
-                pub type RescuerAccount = ::subxt::utils::AccountId32;
-                pub type Sender = ::subxt::utils::AccountId32;
+                pub type Lost = ::subxt::utils::AccountId32;
+                pub type FriendGroupIndex = ::core::primitive::u32;
+                pub type Initiator = ::subxt::utils::AccountId32;
             }
-            impl RecoveryVouched {
+            impl AttemptInitiated {
                 const PALLET_NAME: &'static str = "Recovery";
-                const EVENT_NAME: &'static str = "RecoveryVouched";
+                const EVENT_NAME: &'static str = "AttemptInitiated";
             }
-            impl ::subxt::events::DecodeAsEvent for RecoveryVouched {
+            impl ::subxt::events::DecodeAsEvent for AttemptInitiated {
                 fn is_event(pallet_name: &str, event_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
                 }
@@ -22471,21 +22520,25 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "A recovery process for lost account by rescuer account has been closed."]
-            pub struct RecoveryClosed {
-                pub lost_account: recovery_closed::LostAccount,
-                pub rescuer_account: recovery_closed::RescuerAccount,
+            #[doc = "A recovery attempt was finished."]
+            pub struct AttemptFinished {
+                pub lost: attempt_finished::Lost,
+                pub friend_group_index: attempt_finished::FriendGroupIndex,
+                pub inheritor: attempt_finished::Inheritor,
+                pub previous_inheritor: attempt_finished::PreviousInheritor,
             }
-            pub mod recovery_closed {
+            pub mod attempt_finished {
                 use super::runtime_types;
-                pub type LostAccount = ::subxt::utils::AccountId32;
-                pub type RescuerAccount = ::subxt::utils::AccountId32;
+                pub type Lost = ::subxt::utils::AccountId32;
+                pub type FriendGroupIndex = ::core::primitive::u32;
+                pub type Inheritor = ::subxt::utils::AccountId32;
+                pub type PreviousInheritor = ::core::option::Option<::subxt::utils::AccountId32>;
             }
-            impl RecoveryClosed {
+            impl AttemptFinished {
                 const PALLET_NAME: &'static str = "Recovery";
-                const EVENT_NAME: &'static str = "RecoveryClosed";
+                const EVENT_NAME: &'static str = "AttemptFinished";
             }
-            impl ::subxt::events::DecodeAsEvent for RecoveryClosed {
+            impl ::subxt::events::DecodeAsEvent for AttemptFinished {
                 fn is_event(pallet_name: &str, event_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
                 }
@@ -22497,21 +22550,27 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "Lost account has been successfully recovered by rescuer account."]
-            pub struct AccountRecovered {
-                pub lost_account: account_recovered::LostAccount,
-                pub rescuer_account: account_recovered::RescuerAccount,
+            #[doc = "A recovery attempt was discarded because the account was already recovered by a"]
+            #[doc = "friend group of equal or higher priority."]
+            #[doc = ""]
+            #[doc = "The attempt is consumed (removed from storage) and its deposits are released, but"]
+            #[doc = "the existing inheritor remains unchanged."]
+            pub struct AttemptDiscarded {
+                pub lost: attempt_discarded::Lost,
+                pub friend_group_index: attempt_discarded::FriendGroupIndex,
+                pub existing_inheritor: attempt_discarded::ExistingInheritor,
             }
-            pub mod account_recovered {
+            pub mod attempt_discarded {
                 use super::runtime_types;
-                pub type LostAccount = ::subxt::utils::AccountId32;
-                pub type RescuerAccount = ::subxt::utils::AccountId32;
+                pub type Lost = ::subxt::utils::AccountId32;
+                pub type FriendGroupIndex = ::core::primitive::u32;
+                pub type ExistingInheritor = ::subxt::utils::AccountId32;
             }
-            impl AccountRecovered {
+            impl AttemptDiscarded {
                 const PALLET_NAME: &'static str = "Recovery";
-                const EVENT_NAME: &'static str = "AccountRecovered";
+                const EVENT_NAME: &'static str = "AttemptDiscarded";
             }
-            impl ::subxt::events::DecodeAsEvent for AccountRecovered {
+            impl ::subxt::events::DecodeAsEvent for AttemptDiscarded {
                 fn is_event(pallet_name: &str, event_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
                 }
@@ -22523,19 +22582,23 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "A recovery process has been removed for an account."]
-            pub struct RecoveryRemoved {
-                pub lost_account: recovery_removed::LostAccount,
+            #[doc = "A recovery attempt was slashed by the lost account."]
+            #[doc = ""]
+            #[doc = "The initiator will lose their security deposit."]
+            pub struct AttemptSlashed {
+                pub lost: attempt_slashed::Lost,
+                pub friend_group_index: attempt_slashed::FriendGroupIndex,
             }
-            pub mod recovery_removed {
+            pub mod attempt_slashed {
                 use super::runtime_types;
-                pub type LostAccount = ::subxt::utils::AccountId32;
+                pub type Lost = ::subxt::utils::AccountId32;
+                pub type FriendGroupIndex = ::core::primitive::u32;
             }
-            impl RecoveryRemoved {
+            impl AttemptSlashed {
                 const PALLET_NAME: &'static str = "Recovery";
-                const EVENT_NAME: &'static str = "RecoveryRemoved";
+                const EVENT_NAME: &'static str = "AttemptSlashed";
             }
-            impl ::subxt::events::DecodeAsEvent for RecoveryRemoved {
+            impl ::subxt::events::DecodeAsEvent for AttemptSlashed {
                 fn is_event(pallet_name: &str, event_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
                 }
@@ -22547,27 +22610,76 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            #[doc = "A deposit has been updated."]
-            pub struct DepositPoked {
-                pub who: deposit_poked::Who,
-                pub kind: deposit_poked::Kind,
-                pub old_deposit: deposit_poked::OldDeposit,
-                pub new_deposit: deposit_poked::NewDeposit,
+            #[doc = "The friend groups of an account have been changed."]
+            pub struct FriendGroupsChanged {
+                pub lost: friend_groups_changed::Lost,
             }
-            pub mod deposit_poked {
+            pub mod friend_groups_changed {
                 use super::runtime_types;
-                pub type Who = ::subxt::utils::AccountId32;
-                pub type Kind = runtime_types::pallet_recovery::DepositKind<
-                    runtime_types::rococo_runtime::Runtime,
-                >;
-                pub type OldDeposit = ::core::primitive::u128;
-                pub type NewDeposit = ::core::primitive::u128;
+                pub type Lost = ::subxt::utils::AccountId32;
             }
-            impl DepositPoked {
+            impl FriendGroupsChanged {
                 const PALLET_NAME: &'static str = "Recovery";
-                const EVENT_NAME: &'static str = "DepositPoked";
+                const EVENT_NAME: &'static str = "FriendGroupsChanged";
             }
-            impl ::subxt::events::DecodeAsEvent for DepositPoked {
+            impl ::subxt::events::DecodeAsEvent for FriendGroupsChanged {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "The inheritor of a lost account was revoked by the lost account."]
+            pub struct InheritorRevoked {
+                pub lost: inheritor_revoked::Lost,
+            }
+            pub mod inheritor_revoked {
+                use super::runtime_types;
+                pub type Lost = ::subxt::utils::AccountId32;
+            }
+            impl InheritorRevoked {
+                const PALLET_NAME: &'static str = "Recovery";
+                const EVENT_NAME: &'static str = "InheritorRevoked";
+            }
+            impl ::subxt::events::DecodeAsEvent for InheritorRevoked {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "A recovered account was controlled by its inheritor."]
+            #[doc = ""]
+            #[doc = "Check the `call_result` to see if it was successful."]
+            pub struct RecoveredAccountControlled {
+                pub recovered: recovered_account_controlled::Recovered,
+                pub inheritor: recovered_account_controlled::Inheritor,
+                pub call_hash: recovered_account_controlled::CallHash,
+                pub call_result: recovered_account_controlled::CallResult,
+            }
+            pub mod recovered_account_controlled {
+                use super::runtime_types;
+                pub type Recovered = ::subxt::utils::AccountId32;
+                pub type Inheritor = ::subxt::utils::AccountId32;
+                pub type CallHash = ::subxt::utils::H256;
+                pub type CallResult =
+                    ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>;
+            }
+            impl RecoveredAccountControlled {
+                const PALLET_NAME: &'static str = "Recovery";
+                const EVENT_NAME: &'static str = "RecoveredAccountControlled";
+            }
+            impl ::subxt::events::DecodeAsEvent for RecoveredAccountControlled {
                 fn is_event(pallet_name: &str, event_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
                 }
@@ -22578,126 +22690,140 @@ pub mod api {
             use super::runtime_types;
             pub struct StorageApi;
             impl StorageApi {
-                #[doc = " The set of recoverable accounts and their recovery configuration."]
-                pub fn recoverable(
+                #[doc = " The friend groups of an account that can conduct recovery attempts."]
+                #[doc = ""]
+                #[doc = " Modifying this storage is not possible while an account has ongoing recovery attempts."]
+                pub fn friend_groups(
                     &self,
                 ) -> ::subxt::storage::StaticAddress<
-                    (recoverable::input::Param0,),
-                    recoverable::Output,
+                    (friend_groups::input::Param0,),
+                    friend_groups::Output,
                     ::subxt::utils::Maybe,
                 > {
                     ::subxt::storage::StaticAddress::new_static(
                         "Recovery",
-                        "Recoverable",
+                        "FriendGroups",
                         [
-                            92u8, 36u8, 203u8, 193u8, 48u8, 241u8, 235u8, 152u8, 130u8, 98u8,
-                            126u8, 33u8, 133u8, 28u8, 28u8, 110u8, 29u8, 186u8, 82u8, 233u8, 1u8,
-                            200u8, 54u8, 18u8, 220u8, 86u8, 218u8, 249u8, 45u8, 118u8, 169u8,
-                            147u8,
+                            138u8, 181u8, 47u8, 142u8, 45u8, 2u8, 146u8, 175u8, 220u8, 34u8, 172u8,
+                            153u8, 238u8, 142u8, 46u8, 44u8, 186u8, 159u8, 37u8, 212u8, 149u8,
+                            67u8, 195u8, 110u8, 207u8, 117u8, 68u8, 159u8, 198u8, 221u8, 25u8,
+                            94u8,
                         ],
                     )
                 }
-                #[doc = " Active recovery attempts."]
-                #[doc = ""]
-                #[doc = " First account is the account to be recovered, and the second account"]
-                #[doc = " is the user trying to recover the account."]
-                pub fn active_recoveries(
+                #[doc = " Ongoing recovery attempts of a lost account indexed by `(lost, friend_group)`."]
+                pub fn attempt(
                     &self,
                 ) -> ::subxt::storage::StaticAddress<
-                    (
-                        active_recoveries::input::Param0,
-                        active_recoveries::input::Param1,
-                    ),
-                    active_recoveries::Output,
+                    (attempt::input::Param0, attempt::input::Param1),
+                    attempt::Output,
                     ::subxt::utils::Maybe,
                 > {
                     ::subxt::storage::StaticAddress::new_static(
                         "Recovery",
-                        "ActiveRecoveries",
+                        "Attempt",
                         [
-                            81u8, 91u8, 163u8, 177u8, 62u8, 126u8, 136u8, 201u8, 88u8, 233u8,
-                            248u8, 194u8, 75u8, 36u8, 9u8, 155u8, 113u8, 0u8, 95u8, 57u8, 64u8,
-                            46u8, 92u8, 199u8, 234u8, 213u8, 176u8, 174u8, 14u8, 36u8, 204u8, 6u8,
+                            181u8, 218u8, 34u8, 32u8, 166u8, 75u8, 26u8, 54u8, 87u8, 18u8, 196u8,
+                            131u8, 104u8, 17u8, 205u8, 146u8, 80u8, 28u8, 231u8, 196u8, 16u8,
+                            255u8, 37u8, 43u8, 67u8, 195u8, 116u8, 163u8, 207u8, 249u8, 192u8,
+                            45u8,
                         ],
                     )
                 }
-                #[doc = " The list of allowed proxy accounts."]
+                #[doc = " The account that inherited full access to a lost account after successful recovery."]
                 #[doc = ""]
-                #[doc = " Map from the user who can access it to the recovered account."]
-                pub fn proxy(
+                #[doc = " The key is the lost account and the value is the inheritor account."]
+                #[doc = ""]
+                #[doc = " NOTE: This could be a multisig or proxy account"]
+                pub fn inheritor(
                     &self,
                 ) -> ::subxt::storage::StaticAddress<
-                    (proxy::input::Param0,),
-                    proxy::Output,
+                    (inheritor::input::Param0,),
+                    inheritor::Output,
                     ::subxt::utils::Maybe,
                 > {
                     ::subxt::storage::StaticAddress::new_static(
                         "Recovery",
-                        "Proxy",
+                        "Inheritor",
                         [
-                            132u8, 51u8, 255u8, 46u8, 204u8, 22u8, 135u8, 24u8, 187u8, 117u8,
-                            144u8, 146u8, 46u8, 166u8, 90u8, 233u8, 22u8, 33u8, 195u8, 234u8,
-                            107u8, 61u8, 102u8, 166u8, 178u8, 58u8, 135u8, 107u8, 255u8, 40u8,
-                            76u8, 235u8,
+                            58u8, 121u8, 26u8, 56u8, 229u8, 188u8, 66u8, 251u8, 27u8, 133u8, 215u8,
+                            194u8, 26u8, 90u8, 83u8, 39u8, 152u8, 7u8, 36u8, 223u8, 66u8, 89u8,
+                            226u8, 54u8, 218u8, 128u8, 235u8, 162u8, 80u8, 166u8, 234u8, 26u8,
                         ],
                     )
                 }
             }
-            pub mod recoverable {
+            pub mod friend_groups {
                 use super::root_mod;
                 use super::runtime_types;
                 pub mod input {
                     use super::runtime_types;
                     pub type Param0 = ::subxt::utils::AccountId32;
                 }
-                pub type Output = runtime_types::pallet_recovery::RecoveryConfig<
-                    ::core::primitive::u32,
-                    ::core::primitive::u128,
+                pub type Output = (
                     runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        runtime_types::pallet_recovery::FriendGroup<
+                            ::core::primitive::u32,
+                            ::subxt::utils::AccountId32,
+                            runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                                ::subxt::utils::AccountId32,
+                            >,
+                        >,
+                    >,
+                    (),
+                );
+            }
+            pub mod attempt {
+                use super::root_mod;
+                use super::runtime_types;
+                pub mod input {
+                    use super::runtime_types;
+                    pub type Param0 = ::subxt::utils::AccountId32;
+                    pub type Param1 = ::core::primitive::u32;
+                }
+                pub type Output = (
+                    runtime_types::pallet_recovery::Attempt<
+                        ::core::primitive::u32,
+                        runtime_types::pallet_recovery::types::Bitfield,
                         ::subxt::utils::AccountId32,
                     >,
-                >;
-            }
-            pub mod active_recoveries {
-                use super::root_mod;
-                use super::runtime_types;
-                pub mod input {
-                    use super::runtime_types;
-                    pub type Param0 = ::subxt::utils::AccountId32;
-                    pub type Param1 = ::subxt::utils::AccountId32;
-                }
-                pub type Output = runtime_types::pallet_recovery::ActiveRecovery<
-                    ::core::primitive::u32,
-                    ::core::primitive::u128,
-                    runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                    runtime_types::pallet_recovery::types::IdentifiedConsideration<
                         ::subxt::utils::AccountId32,
+                        runtime_types::frame_support::traits::storage::Footprint,
+                        (),
                     >,
-                >;
+                    ::core::primitive::u128,
+                );
             }
-            pub mod proxy {
+            pub mod inheritor {
                 use super::root_mod;
                 use super::runtime_types;
                 pub mod input {
                     use super::runtime_types;
                     pub type Param0 = ::subxt::utils::AccountId32;
                 }
-                pub type Output = ::subxt::utils::AccountId32;
+                pub type Output = (
+                    ::core::primitive::u32,
+                    ::subxt::utils::AccountId32,
+                    runtime_types::pallet_recovery::types::IdentifiedConsideration<
+                        ::subxt::utils::AccountId32,
+                        runtime_types::frame_support::traits::storage::Footprint,
+                        (),
+                    >,
+                );
             }
         }
         pub mod constants {
             use super::runtime_types;
             pub struct ConstantsApi;
             impl ConstantsApi {
-                #[doc = " The base amount of currency needed to reserve for creating a recovery configuration."]
-                #[doc = ""]
-                #[doc = " This is held for an additional storage item whose value size is"]
-                #[doc = " `2 + sizeof(BlockNumber, Balance)` bytes."]
-                pub fn config_deposit_base(
+                #[doc = " Security deposit taken for each attempt that the initiator needs to place."]
+                pub fn security_deposit(
                     &self,
                 ) -> ::subxt::constants::StaticAddress<::core::primitive::u128> {
                     ::subxt::constants::StaticAddress::new_static(
                         "Recovery",
-                        "ConfigDepositBase",
+                        "SecurityDeposit",
                         [
                             84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
                             27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
@@ -22705,61 +22831,20 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " The amount of currency needed per additional user when creating a recovery"]
-                #[doc = " configuration."]
+                #[doc = " DO NOT REDUCE THIS VALUE. Maximum number of friends per account config."]
                 #[doc = ""]
-                #[doc = " This is held for adding `sizeof(AccountId)` bytes more into a pre-existing storage"]
-                #[doc = " value."]
-                pub fn friend_deposit_factor(
-                    &self,
-                ) -> ::subxt::constants::StaticAddress<::core::primitive::u128> {
-                    ::subxt::constants::StaticAddress::new_static(
-                        "Recovery",
-                        "FriendDepositFactor",
-                        [
-                            84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
-                            27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
-                            136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
-                        ],
-                    )
-                }
-                #[doc = " The maximum amount of friends allowed in a recovery configuration."]
-                #[doc = ""]
-                #[doc = " NOTE: The threshold programmed in this Pallet uses u16, so it does"]
-                #[doc = " not really make sense to have a limit here greater than u16::MAX."]
-                #[doc = " But also, that is a lot more than you should probably set this value"]
-                #[doc = " to anyway..."]
-                pub fn max_friends(
+                #[doc = " Reducing this value can cause decoding errors in the bounded vectors."]
+                pub fn max_friends_per_config(
                     &self,
                 ) -> ::subxt::constants::StaticAddress<::core::primitive::u32> {
                     ::subxt::constants::StaticAddress::new_static(
                         "Recovery",
-                        "MaxFriends",
+                        "MaxFriendsPerConfig",
                         [
                             98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
                             125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
                             178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
                             145u8,
-                        ],
-                    )
-                }
-                #[doc = " The base amount of currency needed to reserve for starting a recovery."]
-                #[doc = ""]
-                #[doc = " This is primarily held for deterring malicious recovery attempts, and should"]
-                #[doc = " have a value large enough that a bad actor would choose not to place this"]
-                #[doc = " deposit. It also acts to fund additional storage item whose value size is"]
-                #[doc = " `sizeof(BlockNumber, Balance + T * AccountId)` bytes. Where T is a configurable"]
-                #[doc = " threshold."]
-                pub fn recovery_deposit(
-                    &self,
-                ) -> ::subxt::constants::StaticAddress<::core::primitive::u128> {
-                    ::subxt::constants::StaticAddress::new_static(
-                        "Recovery",
-                        "RecoveryDeposit",
-                        [
-                            84u8, 157u8, 140u8, 4u8, 93u8, 57u8, 29u8, 133u8, 105u8, 200u8, 214u8,
-                            27u8, 144u8, 208u8, 218u8, 160u8, 130u8, 109u8, 101u8, 54u8, 210u8,
-                            136u8, 71u8, 63u8, 49u8, 237u8, 234u8, 15u8, 178u8, 98u8, 148u8, 156u8,
                         ],
                     )
                 }
@@ -23716,10 +23801,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                182u8, 156u8, 79u8, 214u8, 10u8, 112u8, 165u8, 42u8, 56u8, 61u8,
-                                77u8, 116u8, 126u8, 162u8, 246u8, 217u8, 237u8, 45u8, 189u8, 68u8,
-                                150u8, 84u8, 23u8, 224u8, 217u8, 1u8, 181u8, 65u8, 66u8, 5u8,
-                                103u8, 85u8,
+                                36u8, 88u8, 35u8, 173u8, 47u8, 154u8, 230u8, 195u8, 224u8, 126u8,
+                                29u8, 77u8, 17u8, 194u8, 139u8, 185u8, 1u8, 235u8, 104u8, 173u8,
+                                116u8, 225u8, 3u8, 133u8, 149u8, 120u8, 229u8, 22u8, 118u8, 224u8,
+                                82u8, 38u8,
                             ],
                         )
                     }
@@ -23765,10 +23850,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                196u8, 54u8, 212u8, 24u8, 133u8, 145u8, 222u8, 122u8, 136u8, 255u8,
-                                90u8, 162u8, 3u8, 252u8, 71u8, 66u8, 219u8, 54u8, 115u8, 132u8,
-                                88u8, 151u8, 227u8, 244u8, 30u8, 170u8, 43u8, 252u8, 249u8, 135u8,
-                                210u8, 146u8,
+                                229u8, 76u8, 205u8, 131u8, 74u8, 65u8, 19u8, 27u8, 229u8, 2u8,
+                                244u8, 131u8, 55u8, 0u8, 100u8, 196u8, 94u8, 112u8, 134u8, 75u8,
+                                142u8, 130u8, 158u8, 139u8, 92u8, 65u8, 17u8, 240u8, 120u8, 223u8,
+                                245u8, 77u8,
                             ],
                         )
                     }
@@ -23809,10 +23894,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                128u8, 249u8, 14u8, 126u8, 35u8, 162u8, 221u8, 90u8, 155u8, 114u8,
-                                162u8, 100u8, 29u8, 94u8, 5u8, 225u8, 92u8, 169u8, 29u8, 229u8,
-                                226u8, 224u8, 192u8, 217u8, 157u8, 44u8, 39u8, 73u8, 60u8, 68u8,
-                                181u8, 65u8,
+                                236u8, 166u8, 144u8, 58u8, 60u8, 31u8, 10u8, 167u8, 35u8, 108u8,
+                                123u8, 206u8, 153u8, 195u8, 48u8, 140u8, 96u8, 223u8, 135u8, 88u8,
+                                226u8, 122u8, 233u8, 73u8, 155u8, 188u8, 162u8, 124u8, 195u8,
+                                175u8, 13u8, 150u8,
                             ],
                         )
                     }
@@ -23837,10 +23922,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                246u8, 62u8, 55u8, 238u8, 86u8, 57u8, 216u8, 180u8, 61u8, 34u8,
-                                34u8, 144u8, 252u8, 42u8, 44u8, 80u8, 206u8, 36u8, 51u8, 42u8,
-                                106u8, 95u8, 222u8, 203u8, 59u8, 255u8, 81u8, 92u8, 219u8, 223u8,
-                                242u8, 214u8,
+                                93u8, 33u8, 179u8, 201u8, 143u8, 228u8, 97u8, 58u8, 149u8, 161u8,
+                                160u8, 75u8, 96u8, 45u8, 22u8, 104u8, 235u8, 252u8, 95u8, 174u8,
+                                68u8, 79u8, 162u8, 138u8, 171u8, 8u8, 18u8, 115u8, 163u8, 165u8,
+                                174u8, 64u8,
                             ],
                         )
                     }
@@ -24838,10 +24923,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                194u8, 214u8, 47u8, 190u8, 254u8, 181u8, 199u8, 185u8, 28u8, 135u8,
-                                216u8, 159u8, 25u8, 93u8, 98u8, 228u8, 248u8, 214u8, 12u8, 170u8,
-                                242u8, 31u8, 53u8, 198u8, 211u8, 157u8, 19u8, 137u8, 206u8, 167u8,
-                                121u8, 2u8,
+                                100u8, 22u8, 220u8, 164u8, 129u8, 58u8, 19u8, 253u8, 227u8, 136u8,
+                                105u8, 51u8, 27u8, 227u8, 228u8, 126u8, 7u8, 249u8, 107u8, 185u8,
+                                66u8, 163u8, 96u8, 196u8, 133u8, 124u8, 247u8, 60u8, 87u8, 145u8,
+                                206u8, 73u8,
                             ],
                         )
                     }
@@ -25131,10 +25216,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                233u8, 193u8, 239u8, 217u8, 19u8, 0u8, 203u8, 101u8, 28u8, 49u8,
-                                118u8, 66u8, 97u8, 61u8, 36u8, 57u8, 138u8, 182u8, 212u8, 96u8,
-                                95u8, 178u8, 10u8, 95u8, 118u8, 236u8, 109u8, 179u8, 123u8, 27u8,
-                                0u8, 173u8,
+                                31u8, 207u8, 252u8, 54u8, 42u8, 254u8, 150u8, 8u8, 247u8, 163u8,
+                                49u8, 252u8, 18u8, 88u8, 140u8, 10u8, 33u8, 228u8, 96u8, 211u8,
+                                201u8, 66u8, 180u8, 52u8, 142u8, 198u8, 67u8, 236u8, 89u8, 26u8,
+                                239u8, 88u8,
                             ],
                         )
                     }
@@ -25877,10 +25962,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                164u8, 215u8, 173u8, 0u8, 10u8, 246u8, 232u8, 189u8, 227u8, 49u8,
-                                252u8, 131u8, 21u8, 123u8, 147u8, 16u8, 165u8, 27u8, 193u8, 35u8,
-                                240u8, 133u8, 249u8, 215u8, 190u8, 188u8, 208u8, 112u8, 207u8, 5u8,
-                                119u8, 197u8,
+                                196u8, 113u8, 224u8, 217u8, 166u8, 90u8, 103u8, 185u8, 114u8, 80u8,
+                                107u8, 10u8, 93u8, 167u8, 86u8, 83u8, 80u8, 66u8, 215u8, 64u8,
+                                248u8, 235u8, 124u8, 71u8, 86u8, 48u8, 89u8, 106u8, 162u8, 80u8,
+                                3u8, 203u8,
                             ],
                         )
                     }
@@ -25945,10 +26030,10 @@ pub mod api {
                                 max_weight,
                             },
                             [
-                                133u8, 182u8, 4u8, 111u8, 203u8, 75u8, 76u8, 40u8, 135u8, 223u8,
-                                204u8, 24u8, 92u8, 102u8, 85u8, 161u8, 73u8, 14u8, 147u8, 18u8,
-                                98u8, 15u8, 160u8, 247u8, 79u8, 189u8, 1u8, 107u8, 150u8, 132u8,
-                                85u8, 115u8,
+                                82u8, 73u8, 105u8, 150u8, 226u8, 119u8, 32u8, 159u8, 34u8, 28u8,
+                                100u8, 20u8, 22u8, 59u8, 226u8, 82u8, 17u8, 35u8, 63u8, 11u8, 18u8,
+                                54u8, 56u8, 99u8, 180u8, 34u8, 36u8, 120u8, 208u8, 169u8, 18u8,
+                                90u8,
                             ],
                         )
                     }
@@ -27486,6 +27571,41 @@ pub mod api {
                     pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
                 }
             }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Reclaim funds stranded in a closed bounty's account back to the treasury."]
+            #[doc = ""]
+            #[doc = "Permissionless. Moves all remaining assets from a closed bounty's account back to the"]
+            #[doc = "treasury in a single call. Which assets are swept depends on the `TransferAllAssets`"]
+            #[doc = "configuration."]
+            #[doc = ""]
+            #[doc = "The call is free if funds were reclaimed and paid otherwise, so no-op calls cannot be"]
+            #[doc = "used to grief the network. Emits `BountyFundsReclaimed` on success."]
+            #[doc = ""]
+            #[doc = "## Complexity"]
+            #[doc = "- O(A) where A is the number of relevant assets configured in `TransferAllAssets`."]
+            pub struct ReclaimBountyFunds {
+                #[codec(compact)]
+                pub bounty_id: reclaim_bounty_funds::BountyId,
+            }
+            pub mod reclaim_bounty_funds {
+                use super::runtime_types;
+                pub type BountyId = ::core::primitive::u32;
+            }
+            impl ReclaimBountyFunds {
+                const PALLET_NAME: &'static str = "Bounties";
+                const CALL_NAME: &'static str = "reclaim_bounty_funds";
+            }
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for ReclaimBountyFunds {
+                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                }
+            }
             pub mod api {
                 pub struct TransactionApi;
                 impl TransactionApi {
@@ -27805,6 +27925,34 @@ pub mod api {
                             ],
                         )
                     }
+                    #[doc = "Reclaim funds stranded in a closed bounty's account back to the treasury."]
+                    #[doc = ""]
+                    #[doc = "Permissionless. Moves all remaining assets from a closed bounty's account back to the"]
+                    #[doc = "treasury in a single call. Which assets are swept depends on the `TransferAllAssets`"]
+                    #[doc = "configuration."]
+                    #[doc = ""]
+                    #[doc = "The call is free if funds were reclaimed and paid otherwise, so no-op calls cannot be"]
+                    #[doc = "used to grief the network. Emits `BountyFundsReclaimed` on success."]
+                    #[doc = ""]
+                    #[doc = "## Complexity"]
+                    #[doc = "- O(A) where A is the number of relevant assets configured in `TransferAllAssets`."]
+                    pub fn reclaim_bounty_funds(
+                        &self,
+                        bounty_id: super::reclaim_bounty_funds::BountyId,
+                    ) -> ::subxt::transactions::StaticPayload<super::ReclaimBountyFunds>
+                    {
+                        ::subxt::transactions::StaticPayload::new_static(
+                            "Bounties",
+                            "reclaim_bounty_funds",
+                            super::ReclaimBountyFunds { bounty_id },
+                            [
+                                219u8, 148u8, 27u8, 143u8, 190u8, 69u8, 228u8, 14u8, 147u8, 99u8,
+                                218u8, 18u8, 67u8, 132u8, 41u8, 127u8, 62u8, 81u8, 129u8, 58u8,
+                                184u8, 65u8, 12u8, 232u8, 147u8, 71u8, 50u8, 235u8, 196u8, 152u8,
+                                235u8, 104u8,
+                            ],
+                        )
+                    }
                 }
             }
         }
@@ -28114,6 +28262,30 @@ pub mod api {
                 const EVENT_NAME: &'static str = "DepositPoked";
             }
             impl ::subxt::events::DecodeAsEvent for DepositPoked {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Stranded funds left in a closed bounty's account were reclaimed to the treasury."]
+            pub struct BountyFundsReclaimed {
+                pub bounty_id: bounty_funds_reclaimed::BountyId,
+            }
+            pub mod bounty_funds_reclaimed {
+                use super::runtime_types;
+                pub type BountyId = ::core::primitive::u32;
+            }
+            impl BountyFundsReclaimed {
+                const PALLET_NAME: &'static str = "Bounties";
+                const EVENT_NAME: &'static str = "BountyFundsReclaimed";
+            }
+            impl ::subxt::events::DecodeAsEvent for BountyFundsReclaimed {
                 fn is_event(pallet_name: &str, event_name: &str) -> bool {
                     pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
                 }
@@ -31759,9 +31931,10 @@ pub mod api {
                         "NisCounterpartBalances",
                         "Holds",
                         [
-                            243u8, 190u8, 61u8, 27u8, 177u8, 143u8, 74u8, 255u8, 22u8, 109u8,
-                            167u8, 85u8, 179u8, 42u8, 42u8, 37u8, 8u8, 190u8, 38u8, 60u8, 158u8,
-                            138u8, 66u8, 201u8, 131u8, 136u8, 85u8, 160u8, 98u8, 110u8, 33u8, 50u8,
+                            102u8, 117u8, 58u8, 38u8, 168u8, 228u8, 105u8, 126u8, 141u8, 68u8,
+                            136u8, 120u8, 250u8, 253u8, 221u8, 62u8, 78u8, 235u8, 221u8, 145u8,
+                            119u8, 156u8, 18u8, 73u8, 70u8, 120u8, 8u8, 147u8, 33u8, 238u8, 114u8,
+                            118u8,
                         ],
                     )
                 }
@@ -33984,10 +34157,10 @@ pub mod api {
                         "Configuration",
                         "ActiveConfig",
                         [
-                            158u8, 127u8, 115u8, 249u8, 118u8, 107u8, 21u8, 105u8, 136u8, 57u8,
-                            92u8, 55u8, 91u8, 213u8, 8u8, 103u8, 40u8, 206u8, 207u8, 113u8, 71u8,
-                            65u8, 222u8, 63u8, 124u8, 217u8, 132u8, 249u8, 111u8, 198u8, 235u8,
-                            94u8,
+                            46u8, 252u8, 191u8, 247u8, 200u8, 8u8, 183u8, 155u8, 65u8, 174u8,
+                            150u8, 149u8, 166u8, 171u8, 197u8, 150u8, 113u8, 73u8, 58u8, 159u8,
+                            229u8, 252u8, 81u8, 150u8, 21u8, 197u8, 199u8, 6u8, 37u8, 246u8, 224u8,
+                            155u8,
                         ],
                     )
                 }
@@ -34520,10 +34693,10 @@ pub mod api {
                             "enter",
                             super::Enter { data },
                             [
-                                9u8, 146u8, 186u8, 172u8, 66u8, 215u8, 202u8, 58u8, 18u8, 120u8,
-                                213u8, 153u8, 233u8, 254u8, 199u8, 63u8, 197u8, 53u8, 252u8, 18u8,
-                                94u8, 4u8, 118u8, 236u8, 44u8, 23u8, 224u8, 17u8, 221u8, 255u8,
-                                52u8, 128u8,
+                                201u8, 205u8, 44u8, 115u8, 137u8, 226u8, 212u8, 65u8, 133u8, 155u8,
+                                141u8, 146u8, 113u8, 198u8, 77u8, 246u8, 24u8, 90u8, 158u8, 81u8,
+                                154u8, 90u8, 23u8, 125u8, 169u8, 1u8, 77u8, 1u8, 17u8, 210u8,
+                                225u8, 246u8,
                             ],
                         )
                     }
@@ -34564,9 +34737,9 @@ pub mod api {
                         "ParaInherent",
                         "OnChainVotes",
                         [
-                            192u8, 77u8, 209u8, 160u8, 89u8, 117u8, 13u8, 136u8, 141u8, 19u8, 94u8,
-                            241u8, 20u8, 208u8, 195u8, 200u8, 17u8, 46u8, 214u8, 11u8, 253u8, 17u8,
-                            252u8, 83u8, 236u8, 175u8, 145u8, 4u8, 224u8, 223u8, 86u8, 210u8,
+                            183u8, 221u8, 249u8, 162u8, 38u8, 16u8, 40u8, 145u8, 45u8, 170u8,
+                            172u8, 204u8, 132u8, 108u8, 65u8, 208u8, 41u8, 175u8, 89u8, 82u8, 22u8,
+                            164u8, 10u8, 7u8, 202u8, 3u8, 80u8, 243u8, 195u8, 131u8, 130u8, 220u8,
                         ],
                     )
                 }
@@ -36487,27 +36660,101 @@ pub mod api {
     pub mod dmp {
         use super::root_mod;
         use super::runtime_types;
+        #[doc = "The `Event` enum of this pallet"]
+        pub type Event = runtime_types::polkadot_runtime_parachains::dmp::pallet::Event;
+        pub mod events {
+            use super::runtime_types;
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Legacy V0 DMP queue storage has been cleaned."]
+            pub struct DmpQueueV0Cleaned {
+                pub para: dmp_queue_v0_cleaned::Para,
+            }
+            pub mod dmp_queue_v0_cleaned {
+                use super::runtime_types;
+                pub type Para = runtime_types::polkadot_parachain_primitives::primitives::Id;
+            }
+            impl DmpQueueV0Cleaned {
+                const PALLET_NAME: &'static str = "Dmp";
+                const EVENT_NAME: &'static str = "DmpQueueV0Cleaned";
+            }
+            impl ::subxt::events::DecodeAsEvent for DmpQueueV0Cleaned {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
+            }
+        }
         pub mod storage {
             use super::root_mod;
             use super::runtime_types;
             pub struct StorageApi;
             impl StorageApi {
-                #[doc = " The downward messages addressed for a certain para."]
-                pub fn downward_message_queues(
+                #[doc = " Metadata for managing `DownwardMessageQueuePages`."]
+                #[doc = ""]
+                #[doc = " DO NOT MODIFY manually. Only use `InboundDownwardQueue` to preserve invariants."]
+                pub fn downward_message_queue_meta(
                     &self,
                 ) -> ::subxt::storage::StaticAddress<
-                    (downward_message_queues::input::Param0,),
-                    downward_message_queues::Output,
+                    (downward_message_queue_meta::input::Param0,),
+                    downward_message_queue_meta::Output,
                     ::subxt::utils::Maybe,
                 > {
                     ::subxt::storage::StaticAddress::new_static(
                         "Dmp",
-                        "DownwardMessageQueues",
+                        "DownwardMessageQueueMeta",
                         [
-                            6u8, 23u8, 193u8, 150u8, 211u8, 237u8, 200u8, 96u8, 200u8, 220u8, 17u8,
-                            179u8, 172u8, 205u8, 195u8, 131u8, 126u8, 134u8, 109u8, 53u8, 53u8,
-                            174u8, 92u8, 223u8, 242u8, 234u8, 148u8, 139u8, 92u8, 157u8, 11u8,
-                            175u8,
+                            62u8, 25u8, 126u8, 70u8, 212u8, 224u8, 49u8, 54u8, 196u8, 8u8, 3u8,
+                            211u8, 104u8, 27u8, 158u8, 37u8, 145u8, 56u8, 246u8, 74u8, 239u8, 29u8,
+                            210u8, 53u8, 98u8, 90u8, 10u8, 5u8, 212u8, 8u8, 142u8, 40u8,
+                        ],
+                    )
+                }
+                #[doc = " Linked message data list to hold inbound downward message pages."]
+                #[doc = ""]
+                #[doc = " Messages are not packed and one page is equivalent to one message."]
+                #[doc = " DO NOT MODIFY manually. Only use `InboundDownwardQueue` to preserve invariants."]
+                pub fn downward_message_queue_pages(
+                    &self,
+                ) -> ::subxt::storage::StaticAddress<
+                    (
+                        downward_message_queue_pages::input::Param0,
+                        downward_message_queue_pages::input::Param1,
+                    ),
+                    downward_message_queue_pages::Output,
+                    ::subxt::utils::Maybe,
+                > {
+                    ::subxt::storage::StaticAddress::new_static(
+                        "Dmp",
+                        "DownwardMessageQueuePages",
+                        [
+                            95u8, 116u8, 17u8, 105u8, 4u8, 162u8, 38u8, 37u8, 214u8, 144u8, 98u8,
+                            67u8, 53u8, 171u8, 174u8, 103u8, 47u8, 29u8, 162u8, 65u8, 21u8, 9u8,
+                            152u8, 68u8, 98u8, 70u8, 86u8, 226u8, 165u8, 114u8, 156u8, 94u8,
+                        ],
+                    )
+                }
+                #[doc = " Queue with ParaIds and the [first, last) page range to be deleted."]
+                #[doc = ""]
+                #[doc = " DO NOT MODIFY manually. Only use `InboundDownwardQueue` to preserve invariants."]
+                pub fn downward_message_queue_lazy_delete(
+                    &self,
+                ) -> ::subxt::storage::StaticAddress<
+                    (downward_message_queue_lazy_delete::input::Param0,),
+                    downward_message_queue_lazy_delete::Output,
+                    ::subxt::utils::Maybe,
+                > {
+                    ::subxt::storage::StaticAddress::new_static(
+                        "Dmp",
+                        "DownwardMessageQueueLazyDelete",
+                        [
+                            93u8, 79u8, 50u8, 50u8, 217u8, 111u8, 84u8, 203u8, 108u8, 84u8, 179u8,
+                            20u8, 108u8, 250u8, 92u8, 6u8, 217u8, 142u8, 78u8, 14u8, 113u8, 18u8,
+                            122u8, 143u8, 64u8, 74u8, 95u8, 94u8, 213u8, 8u8, 96u8, 88u8,
                         ],
                     )
                 }
@@ -36554,18 +36801,35 @@ pub mod api {
                     )
                 }
             }
-            pub mod downward_message_queues {
+            pub mod downward_message_queue_meta {
                 use super::root_mod;
                 use super::runtime_types;
                 pub mod input {
                     use super::runtime_types;
                     pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
                 }
-                pub type Output = ::subxt::alloc::vec::Vec<
-                    runtime_types::polkadot_core_primitives::InboundDownwardMessage<
-                        ::core::primitive::u32,
-                    >,
+                pub type Output = runtime_types::polkadot_core_primitives::InboundDownwardQueueMeta;
+            }
+            pub mod downward_message_queue_pages {
+                use super::root_mod;
+                use super::runtime_types;
+                pub mod input {
+                    use super::runtime_types;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                    pub type Param1 = ::core::primitive::u64;
+                }
+                pub type Output = runtime_types::polkadot_core_primitives::InboundDownwardMessage<
+                    ::core::primitive::u32,
                 >;
+            }
+            pub mod downward_message_queue_lazy_delete {
+                use super::root_mod;
+                use super::runtime_types;
+                pub mod input {
+                    use super::runtime_types;
+                    pub type Param0 = runtime_types::polkadot_parachain_primitives::primitives::Id;
+                }
+                pub type Output = (::core::primitive::u64, ::core::primitive::u64);
             }
             pub mod downward_message_queue_heads {
                 use super::root_mod;
@@ -48279,7 +48543,7 @@ pub mod api {
                 #[doc = " - [`frame_support::storage::StorageDoubleMap`]: 96 byte"]
                 #[doc = ""]
                 #[doc = " For more info see"]
-                #[doc = " <https://www.shawntabrizi.com/blog/substrate/querying-substrate-storage-via-rpc/>"]
+                #[doc = " <https://www.shawntabrizi.com/blog/interacting-with-the-substrate-rpc-endpoint/>"]
                 pub fn max_key_len(
                     &self,
                 ) -> ::subxt::constants::StaticAddress<::core::primitive::u32> {
@@ -48563,10 +48827,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                90u8, 204u8, 147u8, 61u8, 218u8, 3u8, 35u8, 121u8, 243u8, 150u8,
-                                20u8, 117u8, 246u8, 162u8, 157u8, 188u8, 213u8, 50u8, 138u8, 186u8,
-                                33u8, 66u8, 144u8, 216u8, 31u8, 97u8, 21u8, 182u8, 116u8, 23u8,
-                                170u8, 230u8,
+                                219u8, 200u8, 139u8, 130u8, 3u8, 104u8, 216u8, 103u8, 115u8, 45u8,
+                                68u8, 185u8, 101u8, 42u8, 189u8, 248u8, 95u8, 207u8, 227u8, 82u8,
+                                186u8, 198u8, 43u8, 100u8, 70u8, 194u8, 133u8, 211u8, 101u8, 235u8,
+                                240u8, 106u8,
                             ],
                         )
                     }
@@ -48589,10 +48853,10 @@ pub mod api {
                                 weight,
                             },
                             [
-                                80u8, 150u8, 63u8, 82u8, 90u8, 248u8, 87u8, 2u8, 16u8, 77u8, 188u8,
-                                144u8, 115u8, 95u8, 28u8, 104u8, 234u8, 115u8, 72u8, 75u8, 230u8,
-                                216u8, 40u8, 63u8, 120u8, 202u8, 1u8, 151u8, 13u8, 72u8, 66u8,
-                                26u8,
+                                223u8, 216u8, 176u8, 108u8, 117u8, 231u8, 187u8, 42u8, 176u8,
+                                220u8, 120u8, 178u8, 127u8, 178u8, 63u8, 153u8, 117u8, 100u8, 48u8,
+                                249u8, 143u8, 20u8, 132u8, 187u8, 169u8, 81u8, 251u8, 161u8, 76u8,
+                                183u8, 135u8, 91u8,
                             ],
                         )
                     }
@@ -48631,10 +48895,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                158u8, 73u8, 153u8, 138u8, 8u8, 220u8, 25u8, 203u8, 246u8, 217u8,
-                                76u8, 227u8, 193u8, 19u8, 205u8, 172u8, 128u8, 18u8, 91u8, 20u8,
-                                21u8, 16u8, 175u8, 130u8, 70u8, 79u8, 27u8, 92u8, 172u8, 46u8,
-                                234u8, 215u8,
+                                166u8, 140u8, 254u8, 79u8, 29u8, 102u8, 192u8, 175u8, 158u8, 203u8,
+                                245u8, 232u8, 29u8, 140u8, 78u8, 137u8, 163u8, 26u8, 213u8, 246u8,
+                                189u8, 247u8, 144u8, 107u8, 248u8, 151u8, 213u8, 85u8, 216u8, 68u8,
+                                217u8, 255u8,
                             ],
                         )
                     }
@@ -49043,6 +49307,17 @@ pub mod api {
                     )]
                     #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                    pub struct Footprint {
+                        pub count: ::core::primitive::u64,
+                        pub size: ::core::primitive::u64,
+                    }
+                    #[derive(
+                        :: subxt :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     pub struct NoDrop<_0>(pub _0);
                 }
                 pub mod tokens {
@@ -49414,8 +49689,8 @@ pub mod api {
                         dispatch_info: runtime_types::frame_system::DispatchEventInfo,
                     },
                     #[codec(index = 2)]
-                    #[doc = "`:code` was updated."]
-                    CodeUpdated,
+                    #[doc = "`:code` was updated to the code with the given hash."]
+                    CodeUpdated { hash: ::subxt::utils::H256 },
                     #[codec(index = 3)]
                     #[doc = "A new account was created."]
                     NewAccount {
@@ -50495,6 +50770,22 @@ pub mod api {
                         #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
                     },
+                    #[codec(index = 11)]
+                    #[doc = "Reclaim funds stranded in a closed bounty's account back to the treasury."]
+                    #[doc = ""]
+                    #[doc = "Permissionless. Moves all remaining assets from a closed bounty's account back to the"]
+                    #[doc = "treasury in a single call. Which assets are swept depends on the `TransferAllAssets`"]
+                    #[doc = "configuration."]
+                    #[doc = ""]
+                    #[doc = "The call is free if funds were reclaimed and paid otherwise, so no-op calls cannot be"]
+                    #[doc = "used to grief the network. Emits `BountyFundsReclaimed` on success."]
+                    #[doc = ""]
+                    #[doc = "## Complexity"]
+                    #[doc = "- O(A) where A is the number of relevant assets configured in `TransferAllAssets`."]
+                    reclaim_bounty_funds {
+                        #[codec(compact)]
+                        bounty_id: ::core::primitive::u32,
+                    },
                 }
                 #[derive(
                     :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -50542,6 +50833,9 @@ pub mod api {
                     #[codec(index = 11)]
                     #[doc = "User is not the proposer of the bounty."]
                     NotProposer,
+                    #[codec(index = 12)]
+                    #[doc = "The bounty is still active and its account cannot be reclaimed."]
+                    BountyStillActive,
                 }
                 #[derive(
                     :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -50609,6 +50903,9 @@ pub mod api {
                         old_deposit: ::core::primitive::u128,
                         new_deposit: ::core::primitive::u128,
                     },
+                    #[codec(index = 12)]
+                    #[doc = "Stranded funds left in a closed bounty's account were reclaimed to the treasury."]
+                    BountyFundsReclaimed { bounty_id: ::core::primitive::u32 },
                 }
             }
             #[derive(
@@ -51561,6 +51858,29 @@ pub mod api {
                     add_registrar {
                         account: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                     },
+                    #[codec(index = 24)]
+                    #[doc = "Remove a registrar from the system."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be `T::RegistrarOrigin`."]
+                    #[doc = ""]
+                    #[doc = "The registrar's slot is tombstoned (set to `None`) rather than removed, so that the"]
+                    #[doc = "`RegistrarIndex` of every other registrar — and any judgements already recorded against"]
+                    #[doc = "them — stays stable. The freed index is not reused by `add_registrar`, so each removal"]
+                    #[doc = "permanently consumes one slot against `MaxRegistrars` (reusing the slot would let a new"]
+                    #[doc = "registrar inherit an index that historical judgements still reference)."]
+                    #[doc = ""]
+                    #[doc = "Deposits reserved by pending `request_judgement` calls against this registrar are"]
+                    #[doc = "**not** returned; once the registrar is removed `provide_judgement` can no longer"]
+                    #[doc = "release them, so affected users should reclaim their funds manually with"]
+                    #[doc = "`cancel_request`."]
+                    #[doc = ""]
+                    #[doc = "- `index`: the index of the registrar to remove."]
+                    #[doc = ""]
+                    #[doc = "Emits `RegistrarRemoved` if successful."]
+                    remove_registrar {
+                        #[codec(compact)]
+                        index: ::core::primitive::u32,
+                    },
                     #[codec(index = 1)]
                     #[doc = "Set an account's identity information and reserve the appropriate deposit."]
                     #[doc = ""]
@@ -52000,33 +52320,38 @@ pub mod api {
                         registrar_index: ::core::primitive::u32,
                     },
                     #[codec(index = 7)]
+                    #[doc = "A registrar was removed."]
+                    RegistrarRemoved {
+                        registrar_index: ::core::primitive::u32,
+                    },
+                    #[codec(index = 8)]
                     #[doc = "A sub-identity was added to an identity and the deposit paid."]
                     SubIdentityAdded {
                         sub: ::subxt::utils::AccountId32,
                         main: ::subxt::utils::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
-                    #[codec(index = 8)]
+                    #[codec(index = 9)]
                     #[doc = "An account's sub-identities were set (in bulk)."]
                     SubIdentitiesSet {
                         main: ::subxt::utils::AccountId32,
                         number_of_subs: ::core::primitive::u32,
                         new_deposit: ::core::primitive::u128,
                     },
-                    #[codec(index = 9)]
+                    #[codec(index = 10)]
                     #[doc = "A given sub-account's associated name was changed by its super-identity."]
                     SubIdentityRenamed {
                         sub: ::subxt::utils::AccountId32,
                         main: ::subxt::utils::AccountId32,
                     },
-                    #[codec(index = 10)]
+                    #[codec(index = 11)]
                     #[doc = "A sub-identity was removed from an identity and the deposit freed."]
                     SubIdentityRemoved {
                         sub: ::subxt::utils::AccountId32,
                         main: ::subxt::utils::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
-                    #[codec(index = 11)]
+                    #[codec(index = 12)]
                     #[doc = "A sub-identity was cleared, and the given deposit repatriated from the"]
                     #[doc = "main identity account to the sub-identity account."]
                     SubIdentityRevoked {
@@ -52034,17 +52359,17 @@ pub mod api {
                         main: ::subxt::utils::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
-                    #[codec(index = 12)]
+                    #[codec(index = 13)]
                     #[doc = "A username authority was added."]
                     AuthorityAdded {
                         authority: ::subxt::utils::AccountId32,
                     },
-                    #[codec(index = 13)]
+                    #[codec(index = 14)]
                     #[doc = "A username authority was removed."]
                     AuthorityRemoved {
                         authority: ::subxt::utils::AccountId32,
                     },
-                    #[codec(index = 14)]
+                    #[codec(index = 15)]
                     #[doc = "A username was set for `who`."]
                     UsernameSet {
                         who: ::subxt::utils::AccountId32,
@@ -52052,7 +52377,7 @@ pub mod api {
                             ::core::primitive::u8,
                         >,
                     },
-                    #[codec(index = 15)]
+                    #[codec(index = 16)]
                     #[doc = "A username was queued, but `who` must accept it prior to `expiration`."]
                     UsernameQueued {
                         who: ::subxt::utils::AccountId32,
@@ -52061,10 +52386,10 @@ pub mod api {
                         >,
                         expiration: ::core::primitive::u32,
                     },
-                    #[codec(index = 16)]
+                    #[codec(index = 17)]
                     #[doc = "A queued username passed its expiration without being claimed and was removed."]
                     PreapprovalExpired { whose: ::subxt::utils::AccountId32 },
-                    #[codec(index = 17)]
+                    #[codec(index = 18)]
                     #[doc = "A username was set as a primary and can be looked up from `who`."]
                     PrimaryUsernameSet {
                         who: ::subxt::utils::AccountId32,
@@ -52072,7 +52397,7 @@ pub mod api {
                             ::core::primitive::u8,
                         >,
                     },
-                    #[codec(index = 18)]
+                    #[codec(index = 19)]
                     #[doc = "A dangling username (as in, a username corresponding to an account that has removed its"]
                     #[doc = "identity) has been removed."]
                     DanglingUsernameRemoved {
@@ -52081,21 +52406,21 @@ pub mod api {
                             ::core::primitive::u8,
                         >,
                     },
-                    #[codec(index = 19)]
+                    #[codec(index = 20)]
                     #[doc = "A username has been unbound."]
                     UsernameUnbound {
                         username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
-                    #[codec(index = 20)]
+                    #[codec(index = 21)]
                     #[doc = "A username has been removed."]
                     UsernameRemoved {
                         username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             ::core::primitive::u8,
                         >,
                     },
-                    #[codec(index = 21)]
+                    #[codec(index = 22)]
                     #[doc = "A username has been killed."]
                     UsernameKilled {
                         username: runtime_types::bounded_collections::bounded_vec::BoundedVec<
@@ -53316,10 +53641,10 @@ pub mod api {
                     #[codec(index = 0)]
                     #[doc = "There is an offence reported of the given `kind` happened at the `session_index` and"]
                     #[doc = "(kind-specific) time slot. This event is not deposited for duplicate slashes."]
-                    #[doc = "\\[kind, timeslot\\]."]
+                    #[doc = "\\[kind, slot\\]."]
                     Offence {
                         kind: [::core::primitive::u8; 16usize],
-                        timeslot: ::subxt::alloc::vec::Vec<::core::primitive::u8>,
+                        slot: ::subxt::alloc::vec::Vec<::core::primitive::u8>,
                     },
                 }
             }
@@ -54093,166 +54418,88 @@ pub mod api {
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
                     #[codec(index = 0)]
-                    #[doc = "Send a call through a recovered account."]
+                    #[doc = "Allows the inheritor of a recovered account to control it."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and registered to"]
-                    #[doc = "be able to make calls on behalf of the recovered account."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `account`: The recovered account you want to make a call on-behalf-of."]
-                    #[doc = "- `call`: The call you want to make with the recovered account."]
-                    as_recovered {
-                        account: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                    #[doc = "The controller is not allowed to dispatch calls of the recovery pallet. Otherwise they"]
+                    #[doc = "could mess with the recovery configuration and possibly cancel or slash attempts from"]
+                    #[doc = "higher-priority friend groups."]
+                    control_inherited_account {
+                        recovered: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
                         call:
                             ::subxt::alloc::boxed::Box<runtime_types::rococo_runtime::RuntimeCall>,
                     },
                     #[codec(index = 1)]
-                    #[doc = "Allow ROOT to bypass the recovery process and set a rescuer account"]
-                    #[doc = "for a lost account directly."]
+                    #[doc = "Revoke the inheritor of the calling (lost) account."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _ROOT_."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `lost`: The \"lost account\" to be recovered."]
-                    #[doc = "- `rescuer`: The \"rescuer account\" which can call as the lost account."]
-                    set_recovered {
-                        lost: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
-                        rescuer: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
-                    },
+                    #[doc = "This removes the inheritor entry and refunds the inheritor deposit. Can only be called"]
+                    #[doc = "by the lost account itself after it regains access."]
+                    revoke_inheritor,
                     #[codec(index = 2)]
-                    #[doc = "Create a recovery configuration for your account. This makes your account recoverable."]
+                    #[doc = "Set the friend groups of the calling account before it lost access."]
                     #[doc = ""]
-                    #[doc = "Payment: `ConfigDepositBase` + `FriendDepositFactor` * #_of_friends balance"]
-                    #[doc = "will be reserved for storing the recovery configuration. This deposit is returned"]
-                    #[doc = "in full when the user calls `remove_recovery`."]
+                    #[doc = "Cannot be used while there are ongoing recovery attempts. The friends of each group"]
+                    #[doc = "MUST be sorted and unique. Trying to insert two friend groups with the same set of"]
+                    #[doc = "friends will result in an error."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `friends`: A list of friends you trust to vouch for recovery attempts. Should be"]
-                    #[doc = "  ordered and contain no duplicate values."]
-                    #[doc = "- `threshold`: The number of friends that must vouch for a recovery attempt before the"]
-                    #[doc = "  account can be recovered. Should be less than or equal to the length of the list of"]
-                    #[doc = "  friends."]
-                    #[doc = "- `delay_period`: The number of blocks after a recovery attempt is initialized that"]
-                    #[doc = "  needs to pass before the account can be recovered."]
-                    create_recovery {
-                        friends: ::subxt::alloc::vec::Vec<::subxt::utils::AccountId32>,
-                        threshold: ::core::primitive::u16,
-                        delay_period: ::core::primitive::u32,
+                    #[doc = "A `FriendGroupsChanged` event is emitted only when the new friends groups differed from"]
+                    #[doc = "the old ones."]
+                    set_friend_groups {
+                        friend_groups: ::subxt::alloc::vec::Vec<
+                            runtime_types::pallet_recovery::FriendGroup<
+                                ::core::primitive::u32,
+                                ::subxt::utils::AccountId32,
+                                runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                                    ::subxt::utils::AccountId32,
+                                >,
+                            >,
+                        >,
                     },
                     #[codec(index = 3)]
-                    #[doc = "Initiate the process for recovering a recoverable account."]
+                    #[doc = "Attempt to recover a lost account by a friend within the given friend group."]
                     #[doc = ""]
-                    #[doc = "Payment: `RecoveryDeposit` balance will be reserved for initiating the"]
-                    #[doc = "recovery process. This deposit will always be repatriated to the account"]
-                    #[doc = "trying to be recovered. See `close_recovery`."]
+                    #[doc = "The initiator's approval is recorded automatically, so they do not need to call"]
+                    #[doc = "`approve_attempt` themselves."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `account`: The lost account that you want to recover. This account needs to be"]
-                    #[doc = "  recoverable (i.e. have a recovery configuration)."]
-                    initiate_recovery {
-                        account: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                    #[doc = "Once an account has been recovered by a friend group, no friend group of equal or lower"]
+                    #[doc = "priority can open a new attempt: it will fail with [`Error::HigherPriorityRecovered`]."]
+                    #[doc = "Only a strictly higher-priority group (lower numerical"]
+                    #[doc = "[`FriendGroup::inheritance_priority`]) can take over the inheritor."]
+                    initiate_attempt {
+                        lost: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                        friend_group_index: ::core::primitive::u32,
                     },
                     #[codec(index = 4)]
-                    #[doc = "Allow a \"friend\" of a recoverable account to vouch for an active recovery"]
-                    #[doc = "process for that account."]
+                    #[doc = "Approve the recovery for a lost account."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and must be a \"friend\""]
-                    #[doc = "for the recoverable account."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `lost`: The lost account that you want to recover."]
-                    #[doc = "- `rescuer`: The account trying to rescue the lost account that you want to vouch for."]
-                    #[doc = ""]
-                    #[doc = "The combination of these two parameters must point to an active recovery"]
-                    #[doc = "process."]
-                    vouch_recovery {
+                    #[doc = "Must be called by a friend of the friend group that the recovery attempt belongs to that"]
+                    #[doc = "did not yet vote. Voting is only allowed until the threshold is reached."]
+                    #[doc = "`finish_attempt` should be called after the last friend voted."]
+                    approve_attempt {
                         lost: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
-                        rescuer: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                        friend_group_index: ::core::primitive::u32,
                     },
                     #[codec(index = 5)]
-                    #[doc = "Allow a successful rescuer to claim their recovered account."]
+                    #[doc = "Finish a recovery attempt and make the lost account accessible from the inheritor."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and must be a \"rescuer\""]
-                    #[doc = "who has successfully completed the account recovery process: collected"]
-                    #[doc = "`threshold` or more vouches, waited `delay_period` blocks since initiation."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `account`: The lost account that you want to claim has been successfully recovered by"]
-                    #[doc = "  you."]
-                    claim_recovery {
-                        account: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                    #[doc = "Can be called by anyone who is willing to pay for the inheritor deposit."]
+                    finish_attempt {
+                        lost: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                        friend_group_index: ::core::primitive::u32,
                     },
                     #[codec(index = 6)]
-                    #[doc = "As the controller of a recoverable account, close an active recovery"]
-                    #[doc = "process for your account."]
+                    #[doc = "The lost account can cancel an attempt at any moment; the initiator, only after a delay."]
                     #[doc = ""]
-                    #[doc = "Payment: By calling this function, the recoverable account will receive"]
-                    #[doc = "the recovery deposit `RecoveryDeposit` placed by the rescuer."]
-                    #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and must be a"]
-                    #[doc = "recoverable account with an active recovery process for it."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `rescuer`: The account trying to rescue this recoverable account."]
-                    close_recovery {
-                        rescuer: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                    #[doc = "This will release the security deposit back to the initiator. The cancel delay must be"]
+                    #[doc = "respected if the initiator calls it to prevent it from front-running the lost account"]
+                    #[doc = "from slashing the attempt."]
+                    cancel_attempt {
+                        lost: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
+                        friend_group_index: ::core::primitive::u32,
                     },
                     #[codec(index = 7)]
-                    #[doc = "Remove the recovery process for your account. Recovered accounts are still accessible."]
-                    #[doc = ""]
-                    #[doc = "NOTE: The user must make sure to call `close_recovery` on all active"]
-                    #[doc = "recovery attempts before calling this function else it will fail."]
-                    #[doc = ""]
-                    #[doc = "Payment: By calling this function the recoverable account will unreserve"]
-                    #[doc = "their recovery configuration deposit."]
-                    #[doc = "(`ConfigDepositBase` + `FriendDepositFactor` * #_of_friends)"]
-                    #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and must be a"]
-                    #[doc = "recoverable account (i.e. has a recovery configuration)."]
-                    remove_recovery,
-                    #[codec(index = 8)]
-                    #[doc = "Cancel the ability to use `as_recovered` for `account`."]
-                    #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_ and registered to"]
-                    #[doc = "be able to make calls on behalf of the recovered account."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `account`: The recovered account you are able to call on-behalf-of."]
-                    cancel_recovered {
-                        account: ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
-                    },
-                    #[codec(index = 9)]
-                    #[doc = "Poke deposits for recovery configurations and / or active recoveries."]
-                    #[doc = ""]
-                    #[doc = "This can be used by accounts to possibly lower their locked amount."]
-                    #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be _Signed_."]
-                    #[doc = ""]
-                    #[doc = "Parameters:"]
-                    #[doc = "- `maybe_account`: Optional recoverable account for which you have an active recovery"]
-                    #[doc = "and want to adjust the deposit for the active recovery."]
-                    #[doc = ""]
-                    #[doc = "This function checks both recovery configuration deposit and active recovery deposits"]
-                    #[doc = "of the caller:"]
-                    #[doc = "- If the caller has created a recovery configuration, checks and adjusts its deposit"]
-                    #[doc = "- If the caller has initiated any active recoveries, and provides the account in"]
-                    #[doc = "`maybe_account`, checks and adjusts those deposits"]
-                    #[doc = ""]
-                    #[doc = "If any deposit is updated, the difference will be reserved/unreserved from the caller's"]
-                    #[doc = "account."]
-                    #[doc = ""]
-                    #[doc = "The transaction is made free if any deposit is updated and paid otherwise."]
-                    #[doc = ""]
-                    #[doc = "Emits `DepositPoked` if any deposit is updated."]
-                    #[doc = "Multiple events may be emitted in case both types of deposits are updated."]
-                    poke_deposit {
-                        maybe_account: ::core::option::Option<
-                            ::subxt::utils::MultiAddress<::subxt::utils::AccountId32, ()>,
-                        >,
+                    #[doc = "Slash a malicious recovery attempt and burn the security deposit of the initiator."]
+                    slash_attempt {
+                        friend_group_index: ::core::primitive::u32,
                     },
                 }
                 #[derive(
@@ -54265,53 +54512,74 @@ pub mod api {
                 #[doc = "The `Error` enum of this pallet."]
                 pub enum Error {
                     #[codec(index = 0)]
-                    #[doc = "User is not allowed to make a call on behalf of this account"]
-                    NotAllowed,
+                    #[doc = "This attempt is already fully approved and does not need any more votes."]
+                    AlreadyApproved,
                     #[codec(index = 1)]
-                    #[doc = "Threshold must be greater than zero"]
-                    ZeroThreshold,
+                    #[doc = "The recovery attempt has already been initiated."]
+                    AlreadyInitiated,
                     #[codec(index = 2)]
-                    #[doc = "Friends list must be greater than zero and threshold"]
-                    NotEnoughFriends,
+                    #[doc = "The friend already voted for this attempt."]
+                    AlreadyVoted,
                     #[codec(index = 3)]
-                    #[doc = "Friends list must be less than max friends"]
-                    MaxFriends,
+                    #[doc = "The lost account has ongoing recovery attempts."]
+                    HasOngoingAttempts,
                     #[codec(index = 4)]
-                    #[doc = "Friends list must be sorted and free of duplicates"]
-                    NotSorted,
+                    #[doc = "The lost account cannot be a friend of itself."]
+                    LostAccountInFriendGroup,
                     #[codec(index = 5)]
-                    #[doc = "This account is not set up for recovery"]
-                    NotRecoverable,
+                    #[doc = "The account was already recovered by a group of equal or higher priority."]
+                    HigherPriorityRecovered,
                     #[codec(index = 6)]
-                    #[doc = "This account is already set up for recovery"]
-                    AlreadyRecoverable,
+                    #[doc = "Cancel delay must be at least 1."]
+                    NoCancelDelay,
                     #[codec(index = 7)]
-                    #[doc = "A recovery process has already started for this account"]
-                    AlreadyStarted,
+                    #[doc = "This account does not have any friend groups."]
+                    NoFriendGroups,
                     #[codec(index = 8)]
-                    #[doc = "A recovery process has not started for this rescuer"]
-                    NotStarted,
+                    #[doc = "The friend group has no friends."]
+                    NoFriends,
                     #[codec(index = 9)]
-                    #[doc = "This account is not a friend who can vouch"]
-                    NotFriend,
+                    #[doc = "The lost account does not have any inheritor."]
+                    NoInheritor,
                     #[codec(index = 10)]
-                    #[doc = "The friend must wait until the delay period to vouch for this recovery"]
-                    DelayPeriod,
+                    #[doc = "Not enough friends approved this attempt."]
+                    NotApproved,
                     #[codec(index = 11)]
-                    #[doc = "This user has already vouched for this recovery"]
-                    AlreadyVouched,
+                    #[doc = "The referenced recovery attempt was not found."]
+                    NotAttempt,
                     #[codec(index = 12)]
-                    #[doc = "The threshold for recovering this account has not been met"]
-                    Threshold,
+                    #[doc = "The caller is not the initiator or the lost account."]
+                    NotCanceller,
                     #[codec(index = 13)]
-                    #[doc = "There are still active recovery attempts that need to be closed"]
-                    StillActive,
+                    #[doc = "The caller is not a friend of the lost account."]
+                    NotFriend,
                     #[codec(index = 14)]
-                    #[doc = "This account is already set up for recovery"]
-                    AlreadyProxy,
+                    #[doc = "A specific referenced friend group was not found."]
+                    NotFriendGroup,
                     #[codec(index = 15)]
-                    #[doc = "Some internal state is broken."]
-                    BadState,
+                    #[doc = "The caller is not the inheritor of the lost account."]
+                    NotInheritor,
+                    #[codec(index = 16)]
+                    #[doc = "The cancel delay since the last approval or initialization has not yet passed."]
+                    NotYetCancelable,
+                    #[codec(index = 17)]
+                    #[doc = "The inheritance delay of this attempt has not yet passed."]
+                    NotYetInheritable,
+                    #[codec(index = 18)]
+                    #[doc = "Too many friend groups."]
+                    TooManyFriendGroups,
+                    #[codec(index = 19)]
+                    #[doc = "The number of friends needed is greater than the number of friends."]
+                    TooManyFriendsNeeded,
+                    #[codec(index = 20)]
+                    #[doc = "The number of friends needed is zero."]
+                    NoFriendsNeeded,
+                    #[codec(index = 21)]
+                    #[doc = "The friends of a friend group are not sorted or not unique."]
+                    FriendsNotSortedOrUnique,
+                    #[codec(index = 22)]
+                    #[doc = "Two friend groups have the same set of friends."]
+                    DuplicateFriendGroups,
                 }
                 #[derive(
                     :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -54320,53 +54588,118 @@ pub mod api {
                 )]
                 #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-                #[doc = "Events type."]
+                #[doc = "The `Event` enum of this pallet"]
                 pub enum Event {
                     #[codec(index = 0)]
-                    #[doc = "A recovery process has been set up for an account."]
-                    RecoveryCreated {
-                        account: ::subxt::utils::AccountId32,
+                    #[doc = "A recovery attempt was approved by a friend."]
+                    AttemptApproved {
+                        lost: ::subxt::utils::AccountId32,
+                        friend_group_index: ::core::primitive::u32,
+                        friend: ::subxt::utils::AccountId32,
                     },
                     #[codec(index = 1)]
-                    #[doc = "A recovery process has been initiated for lost account by rescuer account."]
-                    RecoveryInitiated {
-                        lost_account: ::subxt::utils::AccountId32,
-                        rescuer_account: ::subxt::utils::AccountId32,
+                    #[doc = "A recovery attempt was canceled by either the lost account or the initiator."]
+                    AttemptCanceled {
+                        lost: ::subxt::utils::AccountId32,
+                        friend_group_index: ::core::primitive::u32,
+                        canceler: ::subxt::utils::AccountId32,
                     },
                     #[codec(index = 2)]
-                    #[doc = "A recovery process for lost account by rescuer account has been vouched for by sender."]
-                    RecoveryVouched {
-                        lost_account: ::subxt::utils::AccountId32,
-                        rescuer_account: ::subxt::utils::AccountId32,
-                        sender: ::subxt::utils::AccountId32,
+                    #[doc = "A recovery attempt was initiated by a friend."]
+                    AttemptInitiated {
+                        lost: ::subxt::utils::AccountId32,
+                        friend_group_index: ::core::primitive::u32,
+                        initiator: ::subxt::utils::AccountId32,
                     },
                     #[codec(index = 3)]
-                    #[doc = "A recovery process for lost account by rescuer account has been closed."]
-                    RecoveryClosed {
-                        lost_account: ::subxt::utils::AccountId32,
-                        rescuer_account: ::subxt::utils::AccountId32,
+                    #[doc = "A recovery attempt was finished."]
+                    AttemptFinished {
+                        lost: ::subxt::utils::AccountId32,
+                        friend_group_index: ::core::primitive::u32,
+                        inheritor: ::subxt::utils::AccountId32,
+                        previous_inheritor: ::core::option::Option<::subxt::utils::AccountId32>,
                     },
                     #[codec(index = 4)]
-                    #[doc = "Lost account has been successfully recovered by rescuer account."]
-                    AccountRecovered {
-                        lost_account: ::subxt::utils::AccountId32,
-                        rescuer_account: ::subxt::utils::AccountId32,
+                    #[doc = "A recovery attempt was discarded because the account was already recovered by a"]
+                    #[doc = "friend group of equal or higher priority."]
+                    #[doc = ""]
+                    #[doc = "The attempt is consumed (removed from storage) and its deposits are released, but"]
+                    #[doc = "the existing inheritor remains unchanged."]
+                    AttemptDiscarded {
+                        lost: ::subxt::utils::AccountId32,
+                        friend_group_index: ::core::primitive::u32,
+                        existing_inheritor: ::subxt::utils::AccountId32,
                     },
                     #[codec(index = 5)]
-                    #[doc = "A recovery process has been removed for an account."]
-                    RecoveryRemoved {
-                        lost_account: ::subxt::utils::AccountId32,
+                    #[doc = "A recovery attempt was slashed by the lost account."]
+                    #[doc = ""]
+                    #[doc = "The initiator will lose their security deposit."]
+                    AttemptSlashed {
+                        lost: ::subxt::utils::AccountId32,
+                        friend_group_index: ::core::primitive::u32,
                     },
                     #[codec(index = 6)]
-                    #[doc = "A deposit has been updated."]
-                    DepositPoked {
-                        who: ::subxt::utils::AccountId32,
-                        kind: runtime_types::pallet_recovery::DepositKind<
-                            runtime_types::rococo_runtime::Runtime,
-                        >,
-                        old_deposit: ::core::primitive::u128,
-                        new_deposit: ::core::primitive::u128,
+                    #[doc = "The friend groups of an account have been changed."]
+                    FriendGroupsChanged { lost: ::subxt::utils::AccountId32 },
+                    #[codec(index = 7)]
+                    #[doc = "The inheritor of a lost account was revoked by the lost account."]
+                    InheritorRevoked { lost: ::subxt::utils::AccountId32 },
+                    #[codec(index = 8)]
+                    #[doc = "A recovered account was controlled by its inheritor."]
+                    #[doc = ""]
+                    #[doc = "Check the `call_result` to see if it was successful."]
+                    RecoveredAccountControlled {
+                        recovered: ::subxt::utils::AccountId32,
+                        inheritor: ::subxt::utils::AccountId32,
+                        call_hash: ::subxt::utils::H256,
+                        call_result:
+                            ::core::result::Result<(), runtime_types::sp_runtime::DispatchError>,
                     },
+                }
+                #[derive(
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub enum HoldReason {
+                    #[codec(index = 0)]
+                    FriendGroupsStorage,
+                    #[codec(index = 1)]
+                    AttemptStorage,
+                    #[codec(index = 2)]
+                    InheritorStorage,
+                    #[codec(index = 3)]
+                    SecurityDeposit,
+                }
+            }
+            pub mod types {
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct Bitfield(
+                    pub  runtime_types::bounded_collections::bounded_vec::BoundedVec<
+                        ::core::primitive::u16,
+                    >,
+                );
+                #[derive(
+                    :: subxt :: ext :: scale_decode :: DecodeAsType,
+                    :: subxt :: ext :: scale_encode :: EncodeAsType,
+                    Debug,
+                )]
+                #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                pub struct IdentifiedConsideration<_0, _1, _2> {
+                    pub depositor: _0,
+                    pub ticket: ::core::option::Option<_2>,
+                    #[codec(skip)]
+                    pub __ignore: ::core::marker::PhantomData<_1>,
                 }
             }
             #[derive(
@@ -54376,10 +54709,12 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            pub struct ActiveRecovery<_0, _1, _2> {
-                pub created: _0,
-                pub deposit: _1,
-                pub friends: _2,
+            pub struct Attempt<_0, _1, _2> {
+                pub friend_group_index: ::core::primitive::u32,
+                pub initiator: _2,
+                pub init_block: _0,
+                pub last_approval_block: _0,
+                pub approvals: _1,
             }
             #[derive(
                 :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -54388,25 +54723,13 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            pub enum DepositKind<_0> {
-                #[codec(index = 0)]
-                RecoveryConfig,
-                #[codec(index = 1)]
-                ActiveRecoveryFor(::subxt::utils::AccountId32),
-                __Ignore(::core::marker::PhantomData<_0>),
-            }
-            #[derive(
-                :: subxt :: ext :: scale_decode :: DecodeAsType,
-                :: subxt :: ext :: scale_encode :: EncodeAsType,
-                Debug,
-            )]
-            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
-            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
-            pub struct RecoveryConfig<_0, _1, _2> {
-                pub delay_period: _0,
-                pub deposit: _1,
+            pub struct FriendGroup<_0, _1, _2> {
                 pub friends: _2,
-                pub threshold: ::core::primitive::u16,
+                pub friends_needed: ::core::primitive::u32,
+                pub inheritor: _1,
+                pub inheritance_delay: _0,
+                pub inheritance_priority: ::core::primitive::u32,
+                pub cancel_delay: _0,
             }
         }
         pub mod pallet_referenda {
@@ -55480,6 +55803,8 @@ pub mod api {
                     #[codec(index = 7)]
                     #[doc = "Repay the payment previously given to the member with the signed origin, remove any"]
                     #[doc = "pending payments, and elevate them from rank 0 to rank 1."]
+                    #[doc = ""]
+                    #[doc = "The funds reserved for the forfeited pending payments are returned to the society pot."]
                     waive_repay { amount: ::core::primitive::u128 },
                     #[codec(index = 8)]
                     #[doc = "Found the society."]
@@ -57205,6 +57530,8 @@ pub mod api {
                         call:
                             ::subxt::alloc::boxed::Box<runtime_types::rococo_runtime::RuntimeCall>,
                     },
+                    #[codec(index = 4)]
+                    remove_deferred_dispatch { call_hash: ::subxt::utils::H256 },
                 }
                 #[derive(
                     :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -57230,6 +57557,18 @@ pub mod api {
                     #[codec(index = 4)]
                     #[doc = "The call was already whitelisted; No-Op."]
                     CallAlreadyWhitelisted,
+                    #[codec(index = 5)]
+                    #[doc = "No deferred dispatch entry exists for this call hash."]
+                    DeferredDispatchNotFound,
+                    #[codec(index = 6)]
+                    #[doc = "The deferred dispatch entry has not yet expired."]
+                    DeferredDispatchNotExpired,
+                    #[codec(index = 7)]
+                    #[doc = "The dispatch has already been deferred."]
+                    AlreadyDeferred,
+                    #[codec(index = 8)]
+                    #[doc = "The deferred dispatch has expired."]
+                    DeferredDispatchExpired,
                 }
                 #[derive(
                     :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -57253,6 +57592,22 @@ pub mod api {
                                 runtime_types::frame_support::dispatch::PostDispatchInfo,
                             >,
                         >,
+                    },
+                    #[codec(index = 3)]
+                    #[doc = "A call dispatch has been deferred to a future provided block."]
+                    DispatchDeferred { call_hash: ::subxt::utils::H256 },
+                    #[codec(index = 4)]
+                    #[doc = "A deferred dispatch entry has been removed after expiration."]
+                    DeferredDispatchRemoved { call_hash: ::subxt::utils::H256 },
+                    #[codec(index = 5)]
+                    #[doc = "A relayer (signed origin) executed a deferred dispatch."]
+                    #[doc = ""]
+                    #[doc = "Emitted whenever the deferred entry is consumed by a relayer, regardless of whether the"]
+                    #[doc = "inner call itself succeeded; the inner call's outcome is reported separately by"]
+                    #[doc = "[`Event::WhitelistedCallDispatched`]."]
+                    DeferredDispatchExecuted {
+                        call_hash: ::subxt::utils::H256,
+                        who: ::subxt::utils::AccountId32,
                     },
                 }
             }
@@ -57834,6 +58189,17 @@ pub mod api {
             pub struct InboundDownwardMessage<_0> {
                 pub sent_at: _0,
                 pub msg: ::subxt::alloc::vec::Vec<::core::primitive::u8>,
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            pub struct InboundDownwardQueueMeta {
+                pub first_full: ::core::primitive::u64,
+                pub first_free: ::core::primitive::u64,
             }
             #[derive(
                 :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -58634,7 +59000,7 @@ pub mod api {
                     ApprovalChecking,
                     #[codec(index = 4)]
                     ApprovalCheckingMultipleCandidates(
-                        ::subxt::alloc::vec::Vec<
+                        runtime_types::bounded_collections::bounded_vec::BoundedVec<
                             runtime_types::polkadot_core_primitives::CandidateHash,
                         >,
                     ),
@@ -59121,6 +59487,10 @@ pub mod api {
                         #[codec(index = 5)]
                         #[doc = "The account already has a vested balance."]
                         VestedBalanceExists,
+                        #[codec(index = 6)]
+                        #[doc = "The claim has a vesting schedule but its value is below the existential deposit, so the"]
+                        #[doc = "destination account could not be kept alive to carry the vesting lock."]
+                        ClaimBelowExistentialDeposit,
                     }
                     #[derive(
                         :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -59751,24 +60121,27 @@ pub mod api {
                         #[doc = "downward message."]
                         ExceedsMaxMessageSize,
                         #[codec(index = 3)]
+                        #[doc = "A DMP message couldn't be sent because the destination's queue is full."]
+                        ExceedsMaxQueueSize,
+                        #[codec(index = 4)]
                         #[doc = "A DMP message couldn't be sent because the destination is unreachable."]
                         Unroutable,
-                        #[codec(index = 4)]
+                        #[codec(index = 5)]
                         #[doc = "Could not schedule para cleanup."]
                         CouldntCleanup,
-                        #[codec(index = 5)]
+                        #[codec(index = 6)]
                         #[doc = "Not a parathread (on-demand parachain)."]
                         NotParathread,
-                        #[codec(index = 6)]
+                        #[codec(index = 7)]
                         #[doc = "Not a lease holding parachain."]
                         NotParachain,
-                        #[codec(index = 7)]
+                        #[codec(index = 8)]
                         #[doc = "Cannot upgrade on-demand parachain to lease holding parachain."]
                         CannotUpgrade,
-                        #[codec(index = 8)]
+                        #[codec(index = 9)]
                         #[doc = "Cannot downgrade lease holding parachain to on-demand."]
                         CannotDowngrade,
-                        #[codec(index = 9)]
+                        #[codec(index = 10)]
                         #[doc = "There are more cores than supported by the runtime."]
                         TooManyCores,
                     }
@@ -60161,6 +60534,27 @@ pub mod api {
                     Valid,
                     #[codec(index = 1)]
                     Invalid,
+                }
+            }
+            pub mod dmp {
+                use super::runtime_types;
+                pub mod pallet {
+                    use super::runtime_types;
+                    #[derive(
+                        :: subxt :: ext :: scale_decode :: DecodeAsType,
+                        :: subxt :: ext :: scale_encode :: EncodeAsType,
+                        Debug,
+                    )]
+                    #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+                    #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+                    #[doc = "The `Event` enum of this pallet"]
+                    pub enum Event {
+                        #[codec(index = 0)]
+                        #[doc = "Legacy V0 DMP queue storage has been cleaned."]
+                        DmpQueueV0Cleaned {
+                            para: runtime_types::polkadot_parachain_primitives::primitives::Id,
+                        },
+                    }
                 }
             }
             pub mod hrmp {
@@ -61683,6 +62077,8 @@ pub mod api {
                 ParaInclusion(runtime_types::polkadot_runtime_parachains::inclusion::pallet::Event),
                 #[codec(index = 56)]
                 Paras(runtime_types::polkadot_runtime_parachains::paras::pallet::Event),
+                #[codec(index = 58)]
+                Dmp(runtime_types::polkadot_runtime_parachains::dmp::pallet::Event),
                 #[codec(index = 60)]
                 Hrmp(runtime_types::polkadot_runtime_parachains::hrmp::pallet::Event),
                 #[codec(index = 62)]
@@ -61734,6 +62130,8 @@ pub mod api {
             pub enum RuntimeHoldReason {
                 #[codec(index = 8)]
                 Session(runtime_types::pallet_session::pallet::HoldReason),
+                #[codec(index = 27)]
+                Recovery(runtime_types::pallet_recovery::pallet::HoldReason),
                 #[codec(index = 32)]
                 Preimage(runtime_types::pallet_preimage::pallet::HoldReason),
                 #[codec(index = 38)]

@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.50.3] - 2026-08-06
+
+This release updates `frame-decode` to 0.18.1, which fixes V5 signer payload construction and improves how authorization extensions (like `VerifyMultiSignature`) are handled.
+
+### Fixed
+
+- V5 signer payloads now correctly include the transaction extension version and call data as an immutable base implication, matching FRAME's transaction extension pipeline semantics. ([paritytech/frame-decode#104](https://github.com/paritytech/frame-decode/pull/104))
+- Unknown `Option<T>` transaction extensions are now encoded as `None` (`0u8`) by default, allowing transaction encoding to succeed on chains with optional extensions. (from frame-decode 0.17.2)
+
+### Changed
+
+- `VerifySignature` now uses `is_authorization_extension` to declare itself as an authorization boundary, replacing the previous `out.clear()` side effects in `encode_value_for_signer_payload_to` and `encode_implicit_to`. ([#2268](https://github.com/paritytech/subxt/pull/2268), [#2269](https://github.com/paritytech/subxt/pull/2269))
+- Update `frame-decode` from 0.17.1 to 0.18.1. ([#2268](https://github.com/paritytech/subxt/pull/2268))
+
+## [0.50.2] - 2026-07-06
+
+This release fixes an issue whereby setting the genesis hash in the `SubstrateConfigBuilder` had no effect, and improves the reliability of tests against public archival RPC endpoints.
+
+### Changed
+
+- Update Artifacts (auto-generated) ([#2245](https://github.com/paritytech/subxt/pull/2245))
+- tests: Exponential backoff for archival RPC public endpoints ([#2244](https://github.com/paritytech/subxt/pull/2244))
+
+### Fixed
+
+- Fix: `SubstrateConfigBuilder::set_genesis_hash` is a no-op ([#2236](https://github.com/paritytech/subxt/pull/2236))
+
 ## [0.50.1] - 2026-04-27
 
 This release bumps the light-client smoldot crate to the latest version and adds several fixes.

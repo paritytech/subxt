@@ -24,8 +24,12 @@ pub use super::transaction_extension_traits::Params;
 
 /// The [`VerifySignature`] extension. For V5 General transactions, this is how a signature
 /// is provided. The signature is constructed by signing a payload which contains the
-/// transaction call data as well as the encoded "additional" bytes for any extensions _after_
-/// this one in the list.
+/// transaction extension version, the call data, and the values and implicits of any
+/// extensions _after_ this one in the list.
+///
+/// Note: this is currently the only authorization extension. If multiple authorization
+/// extensions are ever used, `inject_signature` would need updating since it broadcasts
+/// the same account and signature to every extension in the tuple.
 pub struct VerifySignature<T: Config>(VerifySignatureDetails<T>);
 
 impl<T: Config> TransactionExtension<T> for VerifySignature<T> {
@@ -53,6 +57,10 @@ impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
 {
     const NAME: &str = "VerifyMultiSignature";
 
+    fn is_authorization_extension(&self) -> bool {
+        true
+    }
+
     fn encode_value_to(
         &self,
         type_id: u32,
@@ -62,28 +70,16 @@ impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
         self.0.encode_as_type_to(type_id, type_resolver, v)?;
         Ok(())
     }
-    fn encode_value_for_signer_payload_to(
-        &self,
-        _type_id: u32,
-        _type_resolver: &PortableRegistry,
-        v: &mut Vec<u8>,
-    ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
-        // This extension is never encoded to the signer payload, and extensions
-        // prior to this are ignored when creating said payload, so clear anything
-        // we've seen so far.
-        v.clear();
-        Ok(())
-    }
+
+    // Authorization extension with implicit type `()`: nothing to encode for either
+    // the transaction or the signer payload (authorization extensions are excluded from
+    // the signer payload by `is_authorization_extension` above).
     fn encode_implicit_to(
         &self,
         _type_id: u32,
         _type_resolver: &PortableRegistry,
-        v: &mut Vec<u8>,
+        _v: &mut Vec<u8>,
     ) -> Result<(), frame_decode::extrinsics::TransactionExtensionError> {
-        // We only use the "implicit" data for extensions _after_ this one
-        // in the pipeline to form the signer payload. Thus, clear anything
-        // we've seen so far.
-        v.clear();
         Ok(())
     }
 }
@@ -666,3 +662,88 @@ impl ChargeTransactionPaymentParams {
 }
 
 impl<T: Config> Params<T> for ChargeTransactionPaymentParams {}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::config::PolkadotConfig;
+    use frame_decode::extrinsics::TransactionExtension as FrameDecodeTransactionExtension;
+    use frame_decode::extrinsics::TransactionExtensions as FrameDecodeTransactionExtensions;
+
+    #[test]
+    fn verify_signature_is_authorization_extension() {
+        let ext = VerifySignature::<PolkadotConfig>(VerifySignatureDetails::Disabled);
+        assert!(FrameDecodeTransactionExtension::<
+            scale_info::PortableRegistry,
+        >::is_authorization_extension(&ext),);
+    }
+
+    #[test]
+    fn non_authorization_extensions_return_false() {
+        let ext = CheckMetadataHash {};
+        assert!(!FrameDecodeTransactionExtension::<
+            scale_info::PortableRegistry,
+        >::is_authorization_extension(&ext),);
+    }
+
+    #[test]
+    fn verify_multi_signature_name() {
+        assert_eq!(
+            <VerifySignature<PolkadotConfig> as FrameDecodeTransactionExtension<
+                scale_info::PortableRegistry,
+            >>::NAME,
+            "VerifyMultiSignature"
+        );
+    }
+
+    #[test]
+    fn verify_multi_signature_implicit_encodes_nothing() {
+        let registry = scale_info::PortableRegistry { types: vec![] };
+
+        // Disabled state: implicit should be empty.
+        let ext = VerifySignature::<PolkadotConfig>(VerifySignatureDetails::Disabled);
+        let mut buf = Vec::new();
+        ext.encode_implicit_to(0, &registry, &mut buf).unwrap();
+        assert!(
+            buf.is_empty(),
+            "VerifyMultiSignature implicit should be empty (Disabled)"
+        );
+
+        // After inject_signature: implicit should still be empty.
+        let mut ext = VerifySignature::<PolkadotConfig>(VerifySignatureDetails::Disabled);
+        use crate::config::transaction_extension_traits::TransactionExtension as SubxtTransactionExtension;
+        let account: <PolkadotConfig as Config>::AccountId =
+            subxt_signer::sr25519::dev::alice().public_key().into();
+        let signature = crate::utils::MultiSignature::Sr25519([0u8; 64]);
+        ext.inject_signature(&account, &signature);
+        let mut buf = Vec::new();
+        ext.encode_implicit_to(0, &registry, &mut buf).unwrap();
+        assert!(
+            buf.is_empty(),
+            "VerifyMultiSignature implicit should be empty (Signed)"
+        );
+    }
+
+    #[test]
+    fn tuple_routes_is_authorization_extension() {
+        // A minimal tuple containing VerifySignature alongside a non-authorization extension.
+        let exts = (
+            VerifySignature::<PolkadotConfig>(VerifySignatureDetails::Disabled),
+            CheckMetadataHash {},
+        );
+
+        assert!(FrameDecodeTransactionExtensions::<
+            scale_info::PortableRegistry,
+        >::is_authorization_extension(
+            &exts, "VerifyMultiSignature"
+        ));
+        assert!(!FrameDecodeTransactionExtensions::<
+            scale_info::PortableRegistry,
+        >::is_authorization_extension(
+            &exts, "CheckMetadataHash"
+        ));
+        assert!(!FrameDecodeTransactionExtensions::<
+            scale_info::PortableRegistry,
+        >::is_authorization_extension(&exts, "NonExistent"));
+    }
+}

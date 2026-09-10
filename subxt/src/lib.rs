@@ -140,6 +140,7 @@ pub mod ext {
 /// Annotate a Rust module with the `subxt` attribute referencing some runtime WASM like so:
 ///
 /// ```rust,no_run
+/// # #[cfg(feature = "runtime-wasm-path")]
 /// #[subxt::subxt(
 ///     runtime_path = "../artifacts/westend_runtime.wasm",
 /// )]

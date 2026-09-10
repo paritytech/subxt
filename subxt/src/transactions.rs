@@ -16,6 +16,7 @@ use crate::config::{ClientState, Config, HashFor, Hasher, TransactionExtensions}
 use crate::error::{ExtrinsicError, TransactionStatusError};
 use codec::{Compact, Decode, Encode};
 use core::marker::PhantomData;
+use scale_value::Composite;
 
 pub use default_params::DefaultParams;
 pub use payload::{DynamicPayload, Payload, StaticPayload, ValidationDetails, dynamic};
@@ -100,6 +101,45 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
         )?;
 
         Ok(encoded)
+    }
+
+    /// Decode SCALE encoded call data (such as the bytes handed back from
+    /// [`Self::call_data()`]) into a [`DynamicPayload`], which can then be
+    /// signed and submitted like any other payload. The call data is decoded
+    /// against the current metadata, and an error is returned if it's not
+    /// valid for the current runtime.
+    pub fn from_call_data_bytes(
+        &self,
+        call_data: &[u8],
+    ) -> Result<DynamicPayload<Composite<()>>, ExtrinsicError> {
+        use frame_decode::extrinsics::ExtrinsicTypeInfo;
+        use scale_decode::DecodeAsFields;
+
+        let &[pallet_index, call_index, ..] = call_data else {
+            return Err(ExtrinsicError::CallDataTooShort(call_data.len()));
+        };
+
+        let metadata = self.client.metadata_ref();
+        let call_info = metadata
+            .extrinsic_call_info_by_index(pallet_index, call_index)
+            .map_err(|e| ExtrinsicError::CannotDecodeCallData(e.into_owned()))?;
+
+        let mut fields = call_info.args.iter().map(|arg| {
+            let name = (!arg.name.is_empty()).then_some(&*arg.name);
+            scale_decode::Field::new(arg.id, name)
+        });
+
+        // The first two bytes are the pallet and call indices decoded above;
+        // only the call arguments remain to be decoded here
+        let cursor = &mut &call_data[2..];
+        let args = Composite::<()>::decode_as_fields(cursor, &mut fields, metadata.types())
+            .map_err(ExtrinsicError::CannotDecodeCallDataFields)?;
+
+        if !cursor.is_empty() {
+            return Err(ExtrinsicError::LeftoverBytesDecodingCallData(cursor.len()));
+        }
+
+        Ok(dynamic(call_info.pallet_name, call_info.call_name, args))
     }
 
     /// Creates an unsigned transaction without submitting it. Depending on the metadata, we might end
@@ -738,5 +778,198 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> SubmittableTransaction<T, Clien
                 .map_err(ExtrinsicError::CannotDecodeFeeInfo)?;
 
         Ok(partial_fee)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::client::{OfflineClient, OfflineClientAtBlock};
+    use crate::config::SubstrateConfig;
+    use crate::config::substrate::SpecVersionForRange;
+    use crate::metadata::Metadata;
+    use assert_matches::assert_matches;
+    use scale_value::Value;
+    use std::sync::Arc;
+
+    fn test_client_with_metadata(metadata_bytes: &[u8]) -> OfflineClientAtBlock<SubstrateConfig> {
+        test_client_with_metadata_and_genesis(metadata_bytes, None)
+    }
+
+    fn test_client_with_metadata_and_genesis(
+        metadata_bytes: &[u8],
+        genesis_hash: Option<crate::utils::H256>,
+    ) -> OfflineClientAtBlock<SubstrateConfig> {
+        let metadata = Metadata::decode(&mut &*metadata_bytes).unwrap();
+
+        let mut builder = SubstrateConfig::builder()
+            .set_metadata_for_spec_versions([(0, Arc::new(metadata))])
+            .set_spec_version_for_block_ranges([SpecVersionForRange {
+                block_range: 0..u64::MAX,
+                spec_version: 0,
+                transaction_version: 0,
+            }]);
+
+        if let Some(hash) = genesis_hash {
+            builder = builder.set_genesis_hash(hash);
+        }
+
+        OfflineClient::new_with_config(builder.build())
+            .at_block(0u64)
+            .unwrap()
+    }
+
+    fn test_client() -> OfflineClientAtBlock<SubstrateConfig> {
+        test_client_with_metadata(include_bytes!(
+            "../../artifacts/polkadot_metadata_small.scale"
+        ))
+    }
+
+    #[test]
+    fn from_call_data_bytes_roundtrips() {
+        let client = test_client();
+        let tx = client.tx();
+
+        // A call whose arguments include a variant and a compact encoded number:
+        let dest = Value::unnamed_variant("Id", [Value::from_bytes([7u8; 32])]);
+        let original = dynamic(
+            "Balances",
+            "transfer_keep_alive",
+            (dest, 12_345_000_000u128),
+        );
+
+        let call_data = tx.call_data(&original).unwrap();
+        let recovered = tx.from_call_data_bytes(&call_data).unwrap();
+
+        assert_eq!(recovered.pallet_name(), "Balances");
+        assert_eq!(recovered.call_name(), "transfer_keep_alive");
+
+        // Re-encoding the recovered payload should give back identical bytes:
+        assert_eq!(tx.call_data(&recovered).unwrap(), call_data);
+    }
+
+    #[test]
+    fn from_call_data_bytes_decodes_call_without_arguments() {
+        let client = test_client_with_metadata(include_bytes!(
+            "../../artifacts/polkadot_metadata_full.scale"
+        ));
+        let tx = client.tx();
+
+        let pallet = client
+            .metadata_ref()
+            .pallet_by_name("Sudo")
+            .expect("the test metadata should contain the Sudo pallet");
+        let call = pallet
+            .call_variant_by_name("remove_key")
+            .expect("the test metadata should contain Sudo.remove_key");
+        assert!(call.fields.is_empty());
+
+        let call_data = [pallet.call_index(), call.index];
+
+        let recovered = tx.from_call_data_bytes(&call_data).unwrap();
+
+        assert_eq!(recovered.pallet_name(), "Sudo");
+        assert_eq!(recovered.call_name(), "remove_key");
+        assert_eq!(recovered.call_data(), &Composite::Unnamed(Vec::new()));
+        assert_eq!(tx.call_data(&recovered).unwrap(), call_data);
+    }
+
+    #[test]
+    fn from_call_data_bytes_decodes_known_scale_fixture() {
+        let client = test_client();
+        let tx = client.tx();
+
+        // System pallet index 0, remark call index 0, followed by a SCALE encoded
+        // Vec containing the three bytes 1, 2 and 3
+        let call_data = [0x00, 0x00, 0x0c, 0x01, 0x02, 0x03];
+
+        let recovered = tx.from_call_data_bytes(&call_data).unwrap();
+
+        assert_eq!(recovered.pallet_name(), "System");
+        assert_eq!(recovered.call_name(), "remark");
+        assert_eq!(
+            recovered.call_data(),
+            &Composite::Named(vec![("remark".to_owned(), Value::from_bytes([1u8, 2, 3]),)])
+        );
+        assert_eq!(tx.call_data(&recovered).unwrap(), call_data);
+    }
+
+    #[test]
+    fn from_call_data_bytes_rejects_invalid_bytes() {
+        let client = test_client();
+        let tx = client.tx();
+
+        // Not enough bytes to read the pallet and call index:
+        assert_matches!(
+            tx.from_call_data_bytes(&[]),
+            Err(ExtrinsicError::CallDataTooShort(0))
+        );
+        assert_matches!(
+            tx.from_call_data_bytes(&[0]),
+            Err(ExtrinsicError::CallDataTooShort(1))
+        );
+
+        // A pallet index that doesn't exist:
+        let unused_pallet_index = (0..=u8::MAX)
+            .find(|i| client.metadata_ref().pallet_by_call_index(*i).is_none())
+            .unwrap();
+        assert_matches!(
+            tx.from_call_data_bytes(&[unused_pallet_index, 0]),
+            Err(ExtrinsicError::CannotDecodeCallData(_))
+        );
+
+        // A call index that doesn't exist in the pallet:
+        let system_pallet_index = client
+            .metadata_ref()
+            .pallet_by_name("System")
+            .unwrap()
+            .call_index();
+        assert_matches!(
+            tx.from_call_data_bytes(&[system_pallet_index, 0xEE]),
+            Err(ExtrinsicError::CannotDecodeCallData(_))
+        );
+
+        let valid = tx
+            .call_data(&dynamic("System", "remark", (vec![1u8, 2, 3],)))
+            .unwrap();
+
+        // Truncated argument bytes:
+        assert_matches!(
+            tx.from_call_data_bytes(&valid[..valid.len() - 1]),
+            Err(ExtrinsicError::CannotDecodeCallDataFields(_))
+        );
+
+        // Bytes left over after the arguments were decoded:
+        let mut extended = valid.clone();
+        extended.push(0);
+        assert_matches!(
+            tx.from_call_data_bytes(&extended),
+            Err(ExtrinsicError::LeftoverBytesDecodingCallData(1))
+        );
+    }
+
+    #[test]
+    fn v5_signer_payload_succeeds() {
+        let client = test_client_with_metadata_and_genesis(
+            include_bytes!("../../artifacts/polkadot_metadata_small.scale"),
+            Some(crate::utils::H256::zero()),
+        );
+        let tx = client.tx();
+
+        let call = dynamic("System", "remark", (vec![1u8, 2, 3],));
+        let params = crate::config::DefaultExtrinsicParamsBuilder::<SubstrateConfig>::new().build();
+
+        let signable = tx.create_v5_signable_offline(&call, params);
+
+        // V5 might not be supported by this metadata; if so, skip.
+        let signable = match signable {
+            Ok(s) => s,
+            Err(ExtrinsicError::UnsupportedVersion) => return,
+            Err(e) => panic!("unexpected error creating signable: {e}"),
+        };
+
+        // The signer payload should succeed and return a 32-byte blake2-256 hash.
+        let payload = signable.signer_payload().unwrap();
+        assert_eq!(payload.len(), 32);
     }
 }

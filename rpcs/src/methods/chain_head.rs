@@ -817,17 +817,17 @@ impl<H: Hash> Stream for TransactionSubscription<H> {
 
         let res = self.sub.poll_next_unpin(cx);
 
-        if let Poll::Ready(Some(Ok(res))) = &res {
-            if matches!(
+        if let Poll::Ready(Some(Ok(res))) = &res
+            && matches!(
                 res,
                 TransactionStatus::Dropped { .. }
                     | TransactionStatus::Error { .. }
                     | TransactionStatus::Invalid { .. }
                     | TransactionStatus::Finalized { .. }
-            ) {
-                // No more events will occur after these ones.
-                self.done = true
-            }
+            )
+        {
+            // No more events will occur after these ones.
+            self.done = true
         }
 
         res
