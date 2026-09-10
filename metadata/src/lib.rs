@@ -193,9 +193,9 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
         extension_version: Option<u8>,
     ) -> Result<ExtrinsicExtensionInfo<'_, Self::TypeId>, ExtrinsicInfoError<'_>> {
         let extension_version = extension_version.unwrap_or_else(|| {
-            // We have some transaction, probably a V4 one with no extension version,
-            // but our metadata may support multiple versions. Use the metadata to decide
-            // what version to assume we'll decode it as.
+            // No extension version means a V4 transaction, which encodes none and is
+            // defined to use version 0. A V5 General transaction always hands us the
+            // version it declared, and that is used verbatim.
             self.extrinsic()
                 .transaction_extension_version_to_use_for_decoding()
         });
@@ -1007,12 +1007,13 @@ impl ExtrinsicMetadata {
     }
 
     /// When presented with a v4 extrinsic that has no version, treat it as being this version.
+    ///
+    /// This is always version 0. A v4 extrinsic encodes no transaction extension version
+    /// and is defined to use version 0 of the transaction extensions, whatever other
+    /// versions the runtime happens to expose in its metadata. Only v5 "General"
+    /// extrinsics carry an explicit version, and that version is used as given.
     pub fn transaction_extension_version_to_use_for_decoding(&self) -> u8 {
-        *self
-            .transaction_extensions_by_version
-            .keys()
-            .max()
-            .expect("At least one version of transaction extensions is expected")
+        0
     }
 }
 
@@ -1371,4 +1372,84 @@ fn from_runtime_metadata(
         let e: codec::Error = "Metadata::decode failed: Cannot try_into() to Metadata".into();
         e.chain(reason.to_string())
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// An `ExtrinsicMetadata` exposing the given transaction extension versions, each
+    /// version pointing at a single extension named after it.
+    fn extrinsic_metadata_with_versions(versions: &[u8]) -> ExtrinsicMetadata {
+        let transaction_extensions = versions
+            .iter()
+            .map(|v| TransactionExtensionMetadataInner {
+                identifier: format!("Extension{v}"),
+                extra_ty: 0,
+                additional_ty: 0,
+            })
+            .collect();
+
+        let transaction_extensions_by_version = versions
+            .iter()
+            .enumerate()
+            .map(|(idx, v)| (*v, vec![idx as u32]))
+            .collect();
+
+        ExtrinsicMetadata {
+            address_ty: 0,
+            signature_ty: 0,
+            supported_versions: vec![4, 5],
+            transaction_extensions,
+            transaction_extensions_by_version,
+        }
+    }
+
+    /// A v4 extrinsic encodes no transaction extension version and is defined to use
+    /// version 0, so the version we decode it with must not follow whatever the newest
+    /// version in the metadata happens to be.
+    #[test]
+    fn v4_extrinsics_decode_with_transaction_extension_version_0() {
+        for versions in [&[0][..], &[0, 1][..], &[0, 1, 2][..]] {
+            let extrinsic = extrinsic_metadata_with_versions(versions);
+            assert_eq!(
+                extrinsic.transaction_extension_version_to_use_for_decoding(),
+                0,
+                "expected version 0 for a v4 extrinsic, metadata exposed {versions:?}"
+            );
+        }
+    }
+
+    /// Encoding a v5 extrinsic is a separate decision and still prefers the newest
+    /// version, so a regression there should not be hidden by the test above.
+    #[test]
+    fn v5_encoding_still_prefers_the_newest_version() {
+        let extrinsic = extrinsic_metadata_with_versions(&[0, 1, 2]);
+        assert_eq!(
+            extrinsic.transaction_extension_version_to_use_for_encoding(),
+            2
+        );
+    }
+
+    /// The extensions handed back for decoding a v4 extrinsic must be version 0's set,
+    /// not the newest version's, which is what made v4 extrinsics fail to decode on
+    /// runtimes exposing versions 0 and 1.
+    #[test]
+    fn extension_info_for_a_v4_extrinsic_uses_version_0_extensions() {
+        use frame_decode::extrinsics::ExtrinsicTypeInfo;
+
+        let md_bytes = std::fs::read("../artifacts/polkadot_metadata_small.scale").unwrap();
+        let mut metadata = Metadata::decode_from(&md_bytes).unwrap();
+        metadata.extrinsic = extrinsic_metadata_with_versions(&[0, 1]);
+
+        let names: Vec<String> = metadata
+            .extrinsic_extension_info(None)
+            .expect("version 0 extensions should be found")
+            .extension_ids
+            .iter()
+            .map(|e| e.name.to_string())
+            .collect();
+
+        assert_eq!(names, vec!["Extension0".to_string()]);
+    }
 }
