@@ -4,11 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.50.4] - 2026-09-11
+
+A v4 extrinsic has no transaction extension version of its own, and is always meant to use version 0. Subxt was instead using whichever version was newest in the metadata. That made no difference while chains only published version 0, but Polkadot Asset Hub started publishing versions 0 and 1 in spec 2005000, and subxt then read and wrote v4 extrinsics against the wrong set of extensions.
+
+This broke two things at once, and both are fixed here.
 
 ### Fixed
 
-- V4 extrinsics are now decoded using transaction extension version 0, rather than the newest version present in the metadata. A v4 extrinsic encodes no transaction extension version and is defined to use version 0, so on a runtime exposing more than one version (Polkadot Asset Hub spec 2005000 exposes `[0, 1]`) the extras were read against the wrong extension set and decoding failed with `VariantNotFound`. V5 extrinsics are unaffected: they carry an explicit version and it is used as given. Addresses the v4 half of [#1998](https://github.com/paritytech/subxt/issues/1998).
+- Reading blocks. V4 extrinsics failed to decode with `VariantNotFound` and were silently skipped, so blocks came back missing extrinsics. ([#2277](https://github.com/paritytech/subxt/pull/2277))
+- Signing. Building a v4 transaction failed with `TransactionExtensions(NotFound("RestrictOrigins"))`, because subxt tried to encode version 1's extensions and cannot supply a value for that one. This is the v4 half of [#2265](https://github.com/paritytech/subxt/issues/2265). Signing a v5 transaction still uses the newest version in the metadata and is not fixed here. ([#2277](https://github.com/paritytech/subxt/pull/2277))
+
+V5 extrinsics are unaffected when decoding, since they carry their own extension version and subxt uses the one they declare. This also covers the v4 half of [#1998](https://github.com/paritytech/subxt/issues/1998).
 
 ## [0.50.3] - 2026-08-06
 
