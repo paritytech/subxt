@@ -6438,6 +6438,7 @@ checksum = "1dccffe3ce07af9386bfd29e80c0ab1a8205a2fc34e4bcd40364df902cfa8f3f"
 name = "ui-tests"
 version = "0.50.3"
 dependencies = [
+ "async-trait",
  "frame-metadata 23.0.0",
  "generate-custom-metadata",
  "hex",

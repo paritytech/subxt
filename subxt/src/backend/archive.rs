@@ -232,4 +232,5 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
     }
 }
 
+#[cfg(not(feature = "unstable-backend"))]
 impl<T: Config> crate::backend::sealed::Sealed for ArchiveBackend<T> {}
