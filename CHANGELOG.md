@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.50.4] - 2026-09-11
+
+This release fixes the decoding of v4 extrinsics on runtimes that expose more than one transaction extension version, such as Polkadot Asset Hub from spec version 2005000.
 
 ### Fixed
 
