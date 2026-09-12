@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- V4 extrinsics are now decoded using transaction extension version 0, rather than the newest version present in the metadata. A v4 extrinsic encodes no transaction extension version and is defined to use version 0, so on a runtime exposing more than one version (Polkadot Asset Hub spec 2005000 exposes `[0, 1]`) the extras were read against the wrong extension set and decoding failed with `VariantNotFound`. V5 extrinsics are unaffected: they carry an explicit version and it is used as given. Addresses the v4 half of [#1998](https://github.com/paritytech/subxt/issues/1998).
+
 ## [0.50.3] - 2026-08-06
 
 This release updates `frame-decode` to 0.18.1, which fixes V5 signer payload construction and improves how authorization extensions (like `VerifyMultiSignature`) are handled.
