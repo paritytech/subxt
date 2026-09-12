@@ -300,20 +300,7 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
         // with a hash allowing us to do so.
         self.validate(call)?;
 
-        // 2. Work out which TX extension version to target based on metadata.
-        let tx_extension_version = match tx_version {
-            SupportedTransactionVersion::V4 => None,
-            SupportedTransactionVersion::V5 => {
-                let v = self
-                    .client
-                    .metadata_ref()
-                    .extrinsic()
-                    .transaction_extension_version_to_use_for_encoding();
-                Some(v)
-            }
-        };
-
-        // 4. Construct our custom additional/extra params.
+        // 2. Construct our custom additional/extra params.
         let client_state = ClientState {
             genesis_hash: self
                 .client
@@ -325,6 +312,21 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
         };
         let tx_extensions =
             <T::TransactionExtensions as TransactionExtensions<T>>::new(&client_state, params)?;
+
+        // 3. Work out which TX extension version to target: the newest one for which
+        // all required extension data is available, falling back to older versions.
+        let tx_extension_version = match tx_version {
+            SupportedTransactionVersion::V4 => None,
+            SupportedTransactionVersion::V5 => {
+                let metadata = self.client.metadata_ref();
+                let v = frame_decode::extrinsics::best_v5_general_transaction_extension_version(
+                    &tx_extensions,
+                    metadata,
+                    metadata.types(),
+                )?;
+                Some(v)
+            }
+        };
 
         // Return these details, ready to construct a signed extrinsic from.
         Ok(SignableTransaction {
@@ -801,7 +803,13 @@ mod test {
         genesis_hash: Option<crate::utils::H256>,
     ) -> OfflineClientAtBlock<SubstrateConfig> {
         let metadata = Metadata::decode(&mut &*metadata_bytes).unwrap();
+        test_client_with_decoded_metadata(metadata, genesis_hash)
+    }
 
+    fn test_client_with_decoded_metadata(
+        metadata: Metadata,
+        genesis_hash: Option<crate::utils::H256>,
+    ) -> OfflineClientAtBlock<SubstrateConfig> {
         let mut builder = SubstrateConfig::builder()
             .set_metadata_for_spec_versions([(0, Arc::new(metadata))])
             .set_spec_version_for_block_ranges([SpecVersionForRange {
@@ -945,6 +953,119 @@ mod test {
         assert_matches!(
             tx.from_call_data_bytes(&extended),
             Err(ExtrinsicError::LeftoverBytesDecodingCallData(1))
+        );
+    }
+
+    /// The call enum of the `Test` pallet in [`two_version_metadata`].
+    #[allow(dead_code, non_camel_case_types)]
+    #[derive(scale_info::TypeInfo)]
+    enum TestCall {
+        call,
+    }
+
+    /// Metadata declaring two transaction extension versions: version 0 has no
+    /// extensions, and version 1 requires a value for a `NewExt` extension that
+    /// Subxt has no typed support for.
+    fn two_version_metadata() -> Metadata {
+        use frame_metadata::v16;
+        use scale_info::meta_type;
+
+        v16::RuntimeMetadataV16::new(
+            vec![v16::PalletMetadata {
+                name: "Test",
+                storage: None,
+                calls: Some(v16::PalletCallMetadata {
+                    ty: meta_type::<TestCall>(),
+                    deprecation_info: v16::EnumDeprecationInfo::nothing_deprecated(),
+                }),
+                event: None,
+                constants: Vec::new(),
+                error: None,
+                associated_types: Vec::new(),
+                view_functions: Vec::new(),
+                index: 0,
+                docs: Vec::new(),
+                deprecation_info: v16::ItemDeprecationInfo::NotDeprecated,
+            }],
+            v16::ExtrinsicMetadata {
+                versions: vec![5],
+                address_ty: meta_type::<u8>(),
+                call_ty: meta_type::<TestCall>(),
+                signature_ty: meta_type::<u8>(),
+                transaction_extensions_by_version: [
+                    (0u8, Vec::new()),
+                    (1u8, vec![codec::Compact(0u32)]),
+                ]
+                .into_iter()
+                .collect(),
+                transaction_extensions: vec![v16::TransactionExtensionMetadata {
+                    identifier: "NewExt",
+                    ty: meta_type::<bool>(),
+                    implicit: meta_type::<()>(),
+                }],
+            },
+            Vec::new(),
+            v16::OuterEnums {
+                call_enum_ty: meta_type::<TestCall>(),
+                event_enum_ty: meta_type::<()>(),
+                error_enum_ty: meta_type::<()>(),
+            },
+            v16::CustomMetadata {
+                map: Default::default(),
+            },
+        )
+        .try_into()
+        .expect("can build valid metadata")
+    }
+
+    #[test]
+    fn v5_extension_version_falls_back_when_values_are_missing() {
+        let client = test_client_with_decoded_metadata(
+            two_version_metadata(),
+            Some(crate::utils::H256::zero()),
+        );
+        let tx = client.tx();
+        let call = dynamic("Test", "call", ());
+
+        // No value is provided for `NewExt`, so version 1 cannot be encoded and we
+        // fall back to version 0 rather than erroring.
+        let params = crate::config::DefaultExtrinsicParamsBuilder::<SubstrateConfig>::new().build();
+        let signable = tx.create_v5_signable_offline(&call, params).unwrap();
+
+        assert_eq!(signable.tx_extension_version, Some(0));
+    }
+
+    #[test]
+    fn v5_extension_version_prefers_newest_version_it_can_encode() {
+        let client = test_client_with_decoded_metadata(
+            two_version_metadata(),
+            Some(crate::utils::H256::zero()),
+        );
+        let tx = client.tx();
+        let call = dynamic("Test", "call", ());
+
+        let params = crate::config::DefaultExtrinsicParamsBuilder::<SubstrateConfig>::new()
+            .custom_extension("NewExt", true)
+            .build();
+        let mut signable = tx.create_v5_signable_offline(&call, params).unwrap();
+        assert_eq!(signable.tx_extension_version, Some(1));
+
+        let submittable = signable
+            .sign_with_account_and_signature(
+                &crate::utils::AccountId32::from([0u8; 32]),
+                &crate::utils::MultiSignature::Sr25519([0u8; 64]),
+            )
+            .unwrap();
+        let inner = Vec::<u8>::decode(&mut submittable.encoded()).unwrap();
+        assert_eq!(
+            inner,
+            [
+                0b0100_0000 + 5, // Preamble: "general" transaction, extrinsic version 5
+                1,               // Transaction extension version 1
+                1,               // NewExt: true
+                0,               // Pallet index
+                0,               // Call index
+            ]
         );
     }
 

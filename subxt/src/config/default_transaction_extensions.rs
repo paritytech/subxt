@@ -7,10 +7,11 @@ use crate::config::transaction_extension_traits::Params;
 use crate::config::transaction_extensions::CheckMortalityParams;
 use crate::error::TransactionExtensionError;
 use crate::transactions::DefaultParams;
+use derive_where::derive_where;
 use scale_encode::EncodeAsType;
 use scale_info::PortableRegistry;
 use scale_value::Value;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, btree_map::Entry};
 
 /// The known transaction extensions used by [`DefaultTransactionExtensions`].
 ///
@@ -39,6 +40,7 @@ pub struct DefaultTransactionExtensions<T: Config> {
 }
 
 /// Parameters used to construct [`DefaultTransactionExtensions`].
+#[derive_where(Debug)]
 pub struct DefaultExtrinsicParams<T: Config> {
     known: KnownDefaultExtrinsicParams<T>,
     custom: Vec<(String, Value)>,
@@ -103,6 +105,7 @@ impl<T: Config> TransactionExtensions<T> for DefaultTransactionExtensions<T> {
             client,
             params.known,
         )?;
+        let types = client.metadata.types();
         let mut custom = BTreeMap::new();
 
         for (name, value) in params.custom {
@@ -111,22 +114,60 @@ impl<T: Config> TransactionExtensions<T> for DefaultTransactionExtensions<T> {
                     "Custom transaction extension '{name}' conflicts with a known transaction extension"
                 )));
             }
-            if custom.contains_key(&name) {
-                return Err(TransactionExtensionError::custom(format!(
-                    "Custom transaction extension '{name}' was provided more than once"
-                )));
-            }
-            let in_metadata = client
+            // Encoding may pick any declared extension version, so a name declared in
+            // any of them is accepted; a mismatch with the version ultimately chosen
+            // still fails loudly at encode time.
+            let newest_version = client
                 .metadata
                 .extrinsic()
-                .transaction_extensions_to_use_for_encoding()
-                .any(|extension| extension.identifier() == name);
-            if !in_metadata {
+                .transaction_extension_version_to_use_for_encoding();
+            let entries: Vec<_> = (0..=newest_version)
+                .filter_map(|version| {
+                    client
+                        .metadata
+                        .extrinsic()
+                        .transaction_extensions_by_version(version)
+                })
+                .flatten()
+                .filter(|extension| extension.identifier() == name)
+                .collect();
+            if entries.is_empty() {
                 return Err(TransactionExtensionError::custom(format!(
                     "Custom transaction extension '{name}' is not present in the runtime metadata"
                 )));
             }
-            custom.insert(name, value);
+            if !entries
+                .iter()
+                .any(|extension| is_type_empty(extension.additional_ty(), types))
+            {
+                return Err(TransactionExtensionError::custom(format!(
+                    "Custom transaction extension '{name}' requires non-empty implicit data, which is not supported"
+                )));
+            }
+            let mut encode_result = Ok(());
+            for extension in &entries {
+                encode_result =
+                    value.encode_as_type_to(extension.extra_ty(), types, &mut Vec::new());
+                if encode_result.is_ok() {
+                    break;
+                }
+            }
+            encode_result.map_err(|error| {
+                TransactionExtensionError::custom(format!(
+                    "The value given for the custom transaction extension '{name}' does not encode to the type declared in the runtime metadata: {error}"
+                ))
+            })?;
+            match custom.entry(name) {
+                Entry::Occupied(entry) => {
+                    return Err(TransactionExtensionError::custom(format!(
+                        "Custom transaction extension '{}' was provided more than once",
+                        entry.key()
+                    )));
+                }
+                Entry::Vacant(entry) => {
+                    entry.insert(value);
+                }
+            }
         }
 
         Ok(Self { known, custom })
@@ -134,6 +175,28 @@ impl<T: Config> TransactionExtensions<T> for DefaultTransactionExtensions<T> {
 
     fn inject_signature(&mut self, account_id: &T::AccountId, signature: &T::Signature) {
         self.known.inject_signature(account_id, signature);
+    }
+}
+
+/// Whether a type encodes to zero bytes; mirrors the check frame-decode uses to skip
+/// extensions when encoding, so a value given for a skipped extension is rejected up front.
+fn is_type_empty(type_id: u32, types: &PortableRegistry) -> bool {
+    let Some(ty) = types.resolve(type_id) else {
+        return false;
+    };
+    match &ty.type_def {
+        scale_info::TypeDef::Composite(composite) => composite
+            .fields
+            .iter()
+            .all(|field| is_type_empty(field.ty.id, types)),
+        scale_info::TypeDef::Tuple(tuple) => tuple
+            .fields
+            .iter()
+            .all(|field| is_type_empty(field.id, types)),
+        scale_info::TypeDef::Array(array) => {
+            array.len == 0 || is_type_empty(array.type_param.id, types)
+        }
+        _ => false,
     }
 }
 
@@ -332,8 +395,9 @@ impl<T: Config> DefaultExtrinsicParamsBuilder<T> {
     /// This is for extensions that a chain declares but Subxt has no typed support for; the
     /// value given here is encoded using the type information in the runtime metadata.
     ///
-    /// Extensions absent from runtime metadata are rejected, as are known or duplicate names
-    /// and extensions with non-empty implicit data. Custom authorization extensions are
+    /// Extensions absent from runtime metadata are rejected, as are known or duplicate names,
+    /// values that don't encode to the type the metadata declares for the extension, and
+    /// extensions with non-empty implicit data. Custom authorization extensions are
     /// unsupported.
     ///
     /// # Example
@@ -424,17 +488,64 @@ mod test {
     }
 
     fn client_state() -> ClientState<PolkadotConfig> {
-        let metadata = Metadata::decode(
-            &mut &include_bytes!("../../../artifacts/polkadot_metadata_small.scale")[..],
-        )
-        .unwrap();
-
         ClientState {
             genesis_hash: H256::zero(),
             spec_version: 0,
             transaction_version: 0,
-            metadata: Arc::new(metadata),
+            metadata: Arc::new(test_metadata()),
         }
+    }
+
+    /// Metadata declaring the extensions these tests pass as custom values, typed to
+    /// match the fabricated encoding info. `WithImplicit` exercises the rejection of
+    /// custom extensions whose implicit data is non-empty.
+    fn test_metadata() -> Metadata {
+        use frame_metadata::v16;
+        use scale_info::meta_type;
+
+        let transaction_extensions = vec![
+            v16::TransactionExtensionMetadata {
+                identifier: "CheckWeight",
+                ty: meta_type::<bool>(),
+                implicit: meta_type::<()>(),
+            },
+            v16::TransactionExtensionMetadata {
+                identifier: "WeightReclaim",
+                ty: meta_type::<bool>(),
+                implicit: meta_type::<()>(),
+            },
+            v16::TransactionExtensionMetadata {
+                identifier: "WithImplicit",
+                ty: meta_type::<bool>(),
+                implicit: meta_type::<u32>(),
+            },
+        ];
+        let extension_indexes = (0..transaction_extensions.len() as u32)
+            .map(codec::Compact)
+            .collect();
+
+        v16::RuntimeMetadataV16::new(
+            Vec::new(),
+            v16::ExtrinsicMetadata {
+                versions: vec![4, 5],
+                address_ty: meta_type::<u8>(),
+                call_ty: meta_type::<()>(),
+                signature_ty: meta_type::<u8>(),
+                transaction_extensions_by_version: [(0u8, extension_indexes)].into_iter().collect(),
+                transaction_extensions,
+            },
+            Vec::new(),
+            v16::OuterEnums {
+                call_enum_ty: meta_type::<()>(),
+                event_enum_ty: meta_type::<()>(),
+                error_enum_ty: meta_type::<()>(),
+            },
+            v16::CustomMetadata {
+                map: Default::default(),
+            },
+        )
+        .try_into()
+        .expect("can build valid metadata")
     }
 
     fn type_info<T: scale_info::TypeInfo + 'static>() -> (u32, PortableRegistry) {
@@ -722,12 +833,46 @@ mod test {
     }
 
     #[test]
+    fn custom_extension_with_nonempty_implicit_is_rejected() {
+        let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
+            .custom_extension("WithImplicit", true)
+            .build();
+
+        let error = DefaultTransactionExtensions::new(&client_state(), params)
+            .err()
+            .unwrap();
+
+        assert!(
+            error
+                .to_string()
+                .contains("requires non-empty implicit data")
+        );
+    }
+
+    #[test]
+    fn custom_extension_value_of_wrong_type_is_rejected() {
+        let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
+            .custom_extension("CheckWeight", Value::u128(1))
+            .build();
+
+        let error = DefaultTransactionExtensions::new(&client_state(), params)
+            .err()
+            .unwrap();
+
+        assert!(
+            error
+                .to_string()
+                .contains("does not encode to the type declared in the runtime metadata")
+        );
+    }
+
+    #[test]
     fn custom_encoding_error_does_not_modify_output() {
         let params = DefaultExtrinsicParamsBuilder::<PolkadotConfig>::new()
-            .custom_extension("WeightReclaim", Value::u128(1))
+            .custom_extension("WeightReclaim", true)
             .build();
         let extensions = DefaultTransactionExtensions::new(&client_state(), params).unwrap();
-        let (type_id, types) = type_info::<bool>();
+        let (type_id, types) = type_info::<u32>();
         let mut out = vec![42];
 
         let error = frame_decode::extrinsics::TransactionExtensions::encode_extension_value_to(

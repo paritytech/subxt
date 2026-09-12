@@ -421,8 +421,10 @@ impl<T: Config> frame_decode::extrinsics::TransactionExtension<PortableRegistry>
 }
 
 /// Parameters to configure the [`CheckMortality`] transaction extension.
+#[derive_where(Debug)]
 pub struct CheckMortalityParams<T: Config>(CheckMortalityParamsInner<T>);
 
+#[derive_where(Debug)]
 enum CheckMortalityParamsInner<T: Config> {
     /// The transaction will be immortal.
     Immortal,

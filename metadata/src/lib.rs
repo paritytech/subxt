@@ -185,6 +185,7 @@ impl frame_decode::extrinsics::ExtrinsicTypeInfo for Metadata {
             .extrinsic
             .transaction_extensions_by_version
             .keys()
+            .rev()
             .copied())
     }
 
