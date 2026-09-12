@@ -63,7 +63,8 @@ use std::{fmt::Display, marker::PhantomData};
 use subxt_rpcs::RpcConfig;
 
 pub use default_transaction_extensions::{
-    DefaultExtrinsicParamsBuilder, DefaultTransactionExtensions,
+    DefaultExtrinsicParams, DefaultExtrinsicParamsBuilder, DefaultTransactionExtensions,
+    KnownDefaultExtrinsicParams, KnownDefaultTransactionExtensions,
 };
 pub use polkadot::{PolkadotConfig, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder};
 pub use substrate::{SubstrateConfig, SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder};
