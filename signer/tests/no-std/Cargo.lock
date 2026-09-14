@@ -729,7 +729,7 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
 name = "subxt-signer"
-version = "0.50.0"
+version = "0.51.0"
 dependencies = [
  "bip32",
  "bip39",
