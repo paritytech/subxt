@@ -1,7 +1,7 @@
 # parachain-example
 
-This example showcases working with Subxt and Zombienet to try out connecting to a locally deployed parachain, here
-["Statemint"](https://parachains.info/details/statemint), also known as "Asset Hub".
+This example showcases working with Subxt and Zombienet to try out connecting to a locally
+deployed Asset Hub parachain.
 
 ## Running the example
 
@@ -66,7 +66,8 @@ To run our example code.
 
 ## Dev notes
 
-We can obtain the metadata for Statemint via the [subxt cli](https://crates.io/crates/subxt-cli) tool, like so:
+We can obtain the metadata for Asset Hub via the [subxt cli](https://crates.io/crates/subxt-cli)
+tool, like so:
 
 ```txt
 subxt metadata  --url wss://polkadot-asset-hub-rpc.polkadot.io:443 > statemint_metadata.scale
