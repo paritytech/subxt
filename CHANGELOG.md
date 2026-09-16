@@ -4,11 +4,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.51.0] - 2026-09-14
+
+This release adds support for providing custom transaction extension values without implementing a custom `Config`, which fixes signing on chains with bespoke transaction extensions (such as Paseo Asset Hub), and fixes decoding of V4 extrinsics on runtimes exposing more than one transaction extension version.
+
+**Breaking change:** `DefaultTransactionExtensions<T>` and `DefaultExtrinsicParams<T>` are no longer tuple type aliases; they are now structs with private fields, so that custom extension values can travel alongside the known ones. The tuple forms live on as `KnownDefaultTransactionExtensions<T>` and `KnownDefaultExtrinsicParams<T>`, and the known values remain accessible via `known()` and `known_mut()`.
+
+### Added
+
+- Custom transaction extension values can now be provided via `DefaultExtrinsicParamsBuilder::custom_extension(name, value)`. The value is a `scale_value::Value` encoded against the extension type declared in the runtime metadata, and a name the runtime does not declare is rejected rather than silently ignored. When encoding a V5 extrinsic, the newest transaction extension version for which all required extension data is available is now selected, so a chain adding a new non-optional extension no longer breaks clients without a value for it. ([#2273](https://github.com/paritytech/subxt/pull/2273))
 
 ### Fixed
 
-- V4 extrinsics are now decoded using transaction extension version 0, rather than the newest version present in the metadata. A v4 extrinsic encodes no transaction extension version and is defined to use version 0, so on a runtime exposing more than one version (Polkadot Asset Hub spec 2005000 exposes `[0, 1]`) the extras were read against the wrong extension set and decoding failed with `VariantNotFound`. V5 extrinsics are unaffected: they carry an explicit version and it is used as given. Addresses the v4 half of [#1998](https://github.com/paritytech/subxt/issues/1998).
+- V4 extrinsics are now decoded using transaction extension version 0, rather than the newest version present in the metadata. A v4 extrinsic encodes no transaction extension version and is defined to use version 0, so on a runtime exposing more than one version (Polkadot Asset Hub spec 2005000 exposes `[0, 1]`) the extras were read against the wrong extension set and decoding failed with `VariantNotFound`. V5 extrinsics are unaffected: they carry an explicit version and it is used as given. Addresses the v4 half of [#1998](https://github.com/paritytech/subxt/issues/1998). ([#2277](https://github.com/paritytech/subxt/pull/2277))
+
+### Changed
+
+- tests: update integration tests for the latest substrate-node runtime ([#2274](https://github.com/paritytech/subxt/pull/2274))
 
 ## [0.50.3] - 2026-08-06
 

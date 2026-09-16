@@ -179,9 +179,9 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
 name = "frame-decode"
-version = "0.16.1"
+version = "0.18.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e63257bb5f8d7a707d626aa1b4e464c3b9720edd168b73cee98f48f0dd6386e4"
+checksum = "c9a9e93cab13c8e9a6accf029997d19943cf54fea5f5eb028a1133b7179d06aa"
 dependencies = [
  "frame-metadata",
  "parity-scale-codec",
@@ -541,7 +541,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.50.0"
+version = "0.51.0"
 dependencies = [
  "frame-decode",
  "frame-metadata",
@@ -554,7 +554,7 @@ dependencies = [
 
 [[package]]
 name = "subxt-signer"
-version = "0.50.0"
+version = "0.51.0"
 dependencies = [
  "bip39",
  "cfg-if",
