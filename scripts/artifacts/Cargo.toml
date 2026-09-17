@@ -9,6 +9,7 @@ repository.workspace = true
 documentation.workspace = true
 homepage.workspace = true
 description = "Internal tool to regenerate artifacts"
+publish = false
 
 [dependencies]
 substrate-runner = { workspace = true }
