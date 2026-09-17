@@ -1,0 +1,61 @@
+# Publishes subxt's crates to crates.io through paritytech/crates_publish_automation.
+# Runs when a GitHub Release is published: packages the crates, uploads them, and
+# asks the central workflow to publish whatever crates.io does not have yet.
+# See RELEASING.md for the full procedure.
+
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+# Two releases published close together must not race on the `crates` artifact.
+concurrency:
+  group: release-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Package & publish to crates.io
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Cargo package
+        run: |
+          set -euo pipefail
+          # Every workspace member without `publish = false`.
+          crates=$(cargo metadata --no-deps --format-version 1 \
+                   | jq -r '.packages[] | select(.publish == null) | "-p \(.name)"')
+          cargo package --locked --exclude-lockfile $crates
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: crates
+          path: target/package/*.crate
+          if-no-files-found: error
+          overwrite: true
+
+      - name: Generate content write token
+        id: generate-content-write-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.CRATES_NPM_PUBLISHING_APP_CLIENT_ID }}
+          private-key: ${{ secrets.CRATES_NPM_PUBLISHING_APP_PRIVATE_KEY }}
+          owner: paritytech
+          repositories: crates_publish_automation
+          permission-actions: write
+
+      - name: Trigger publishing in the crates_publish_automation repo
+        uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae # v3.0.0
+        with:
+          route: POST /repos/paritytech/crates_publish_automation/actions/workflows/publish.yml/dispatches
+          ref: main
+          inputs: '${{ format(''{{ "repo": "{0}", "run_id": "{1}" }}'', github.repository, github.run_id) }}'
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-content-write-token.outputs.token }}
