@@ -12,11 +12,6 @@ on:
 permissions:
   contents: read
 
-# Two releases published close together must not race on the `crates` artifact.
-concurrency:
-  group: release-publish
-  cancel-in-progress: false
-
 jobs:
   publish:
     name: Package & publish to crates.io
