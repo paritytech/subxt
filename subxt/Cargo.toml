@@ -24,7 +24,7 @@ default = ["jsonrpsee", "native"]
 
 # Features that we expect to be enabled for documentation.
 docs = [
-    "default", 
+    "default",
     "light-client",
     "runtime",
     "reconnecting-rpc-client",
@@ -137,7 +137,7 @@ sp-core = { workspace = true, features = ["std"] }
 sp-keyring = { workspace = true, features = ["std"] }
 sp-runtime = { workspace = true, features = ["std"] }
 assert_matches = { workspace = true }
-subxt-signer = { workspace = true, features = ["unstable-eth", "subxt", "sr25519"] }
+subxt-signer = { path = "../signer", default-features = false, features = ["unstable-eth", "subxt", "sr25519"] }
 subxt-rpcs = { workspace = true, features = ["mock-rpc-client"] }
 # Tracing subscriber is useful for light-client examples to ensure that
 # the `bootNodes` and chain spec are configured correctly. If all is fine, then
