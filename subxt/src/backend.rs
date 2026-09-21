@@ -82,7 +82,6 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     async fn block_body(&self, at: HashFor<T>) -> Result<Option<Vec<Vec<u8>>>, BackendError>;
 
     /// Get the most recent finalized block hash.
-    /// Note: needed only in blocks client for finalized block stream; can prolly be removed.
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<HashFor<T>>, BackendError>;
 
     /// A stream of all new block headers as they arrive.
