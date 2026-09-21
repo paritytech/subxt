@@ -97,6 +97,31 @@ async fn finalized_headers_subscription() -> Result<(), subxt::Error> {
     Ok(())
 }
 
+#[subxt_test]
+async fn best_block_is_at_or_ahead_of_finalized_block() -> Result<(), subxt::Error> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let mut sub = api.stream_blocks().await?;
+    consume_initial_blocks(&mut sub).await;
+
+    for _ in 0..2 {
+        let finalized = sub.next().await.unwrap()?;
+        let best = api.at_current_best_block().await?;
+        assert!(
+            best.block_number() >= finalized.number(),
+            "best block {} is behind finalized block {}",
+            best.block_number(),
+            finalized.number()
+        );
+        if best.block_number() == finalized.number() {
+            assert_eq!(best.block_hash(), finalized.hash());
+        }
+    }
+
+    Ok(())
+}
+
 // This test only uses legacy RPCs; only run once for default backend + rpc client.
 #[cfg(all(default_backend, default_rpc))]
 #[subxt_test]
