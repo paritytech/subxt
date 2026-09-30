@@ -473,11 +473,11 @@ async fn background_task<P>(
                 };
             }
             // The connection was terminated and try to reconnect.
-            _ = client.on_disconnect() => {
+            close_reason = client.on_disconnect() => {
                 let params = ReconnectParams {
                     url: &url,
                     client_builder: &client_builder,
-                    close_reason: client.disconnect_reason().await,
+                    close_reason,
                 };
 
                 client = match reconnect(params).await {
@@ -576,7 +576,7 @@ async fn subscription_handler(
         tokio::select! {
             next_msg = rpc_sub.next() => {
                 let Some(notif) = next_msg else {
-                    let close = client.disconnect_reason().await;
+                    let close = client.on_disconnect().await;
                     _ = sub_tx.send(Err(DisconnectedWillReconnect(close.to_string())));
                     break;
                 };

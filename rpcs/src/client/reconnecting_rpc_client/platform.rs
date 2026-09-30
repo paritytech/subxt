@@ -4,6 +4,7 @@
 
 use super::{RpcClientBuilder, RpcError};
 use jsonrpsee::core::client::Client;
+use jsonrpsee::core::middleware::RpcServiceBuilder;
 use std::sync::Arc;
 use url::Url;
 
@@ -41,7 +42,7 @@ pub async fn ws_client<P>(
         .max_redirections(*max_redirections as usize)
         .max_buffer_capacity_per_subscription(tokio::sync::Semaphore::MAX_PERMITS)
         .max_concurrent_requests(*max_concurrent_requests as usize)
-        .set_max_logging_length(*max_log_len)
+        .set_rpc_middleware(RpcServiceBuilder::default().rpc_logger(*max_log_len))
         .set_tcp_no_delay(true)
         .request_timeout(*request_timeout)
         .connection_timeout(*connection_timeout)
@@ -74,7 +75,7 @@ pub async fn ws_client<P>(
     let ws_client_builder = WasmClientBuilder::new()
         .max_buffer_capacity_per_subscription(tokio::sync::Semaphore::MAX_PERMITS)
         .max_concurrent_requests(*max_concurrent_requests as usize)
-        .set_max_logging_length(*max_log_len)
+        .set_rpc_middleware(RpcServiceBuilder::default().rpc_logger(*max_log_len))
         .request_timeout(*request_timeout)
         .id_format(*id_kind);
 

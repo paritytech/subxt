@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.51.1] - 2026-09-30
+
+### Changed
+
+- Upgrade jsonrpsee from 0.24.5 to 0.26.1 and tower from 0.4 to 0.5 ([#2287](https://github.com/paritytech/subxt/pull/2287))
+
 ## [0.51.0] - 2026-09-14
 
 This release adds support for providing custom transaction extension values without implementing a custom `Config`, which fixes signing on chains with bespoke transaction extensions (such as Paseo Asset Hub), and fixes decoding of V4 extrinsics on runtimes exposing more than one transaction extension version.

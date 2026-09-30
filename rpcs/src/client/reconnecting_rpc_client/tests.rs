@@ -6,9 +6,10 @@ use super::*;
 use futures::{future::Either, FutureExt};
 
 use jsonrpsee::core::BoxError;
+use jsonrpsee::server::middleware::rpc::RpcServiceBuilder;
 use jsonrpsee::server::{
     http, stop_channel, ws, ConnectionGuard, ConnectionState, HttpRequest, HttpResponse, RpcModule,
-    RpcServiceBuilder, ServerConfig, SubscriptionMessage,
+    ServerConfig,
 };
 
 #[tokio::test]
@@ -115,6 +116,51 @@ async fn call_with_reconnect() {
     assert!(client.request("say_hello".to_string(), None).await.is_ok());
 }
 
+#[tokio::test]
+async fn call_with_reconnect_after_hanging_handshake() {
+    let (handle, addr) = run_server().await.unwrap();
+    let client = RpcClient::builder()
+        .retry_policy(FixedInterval::from_millis(10))
+        .connection_timeout(Duration::from_millis(500))
+        .build(addr.clone())
+        .await
+        .unwrap();
+
+    // Shut down the server, the client starts to reconnect.
+    let _ = handle.send(());
+
+    // Accept the next reconnect attempt and keep the connection open without ever answering
+    // the WebSocket handshake.
+    let sockaddr = addr.strip_prefix("ws://").unwrap();
+    let listener = tokio::time::timeout(Duration::from_secs(5), async {
+        loop {
+            if let Ok(listener) = tokio::net::TcpListener::bind(sockaddr).await {
+                break listener;
+            }
+            tokio::time::sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await
+    .expect("address should be free after the server shut down");
+    let (_unresponsive_conn, _) = tokio::time::timeout(Duration::from_secs(5), listener.accept())
+        .await
+        .expect("client should try to reconnect")
+        .unwrap();
+    drop(listener);
+
+    let (_handle, _) = run_server_with_settings(Some(&addr), false).await.unwrap();
+
+    let res = tokio::time::timeout(
+        Duration::from_secs(5),
+        client.request("say_hello".to_string(), None),
+    )
+    .await;
+    assert!(
+        matches!(res, Ok(Ok(_))),
+        "client didn't recover after a reconnect attempt hung in the handshake: {res:?}"
+    );
+}
+
 async fn run_server() -> Result<(tokio::sync::broadcast::Sender<()>, String), BoxError> {
     run_server_with_settings(None, false).await
 }
@@ -166,7 +212,7 @@ async fn run_server_with_settings(
 
             loop {
                 if sink
-                    .send(SubscriptionMessage::from_json(&i).unwrap())
+                    .send(serde_json::value::to_raw_value(&i).unwrap())
                     .await
                     .is_err()
                 {
