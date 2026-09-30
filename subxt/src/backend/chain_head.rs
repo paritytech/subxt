@@ -440,6 +440,15 @@ impl<T: Config> Backend<T> for ChainHeadBackend<T> {
         next_ref.ok_or_else(|| RpcError::SubscriptionDropped.into())
     }
 
+    async fn latest_best_block_ref(&self) -> Result<BlockRef<HashFor<T>>, BackendError> {
+        self.follow_handle
+            .subscribe()
+            .latest_best_block()
+            .await
+            .map(Into::into)
+            .ok_or_else(|| RpcError::SubscriptionDropped.into())
+    }
+
     async fn stream_all_block_headers(
         &self,
         _hasher: T::Hasher,
