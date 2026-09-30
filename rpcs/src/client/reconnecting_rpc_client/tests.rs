@@ -6,9 +6,10 @@ use super::*;
 use futures::{future::Either, FutureExt};
 
 use jsonrpsee::core::BoxError;
+use jsonrpsee::server::middleware::rpc::RpcServiceBuilder;
 use jsonrpsee::server::{
     http, stop_channel, ws, ConnectionGuard, ConnectionState, HttpRequest, HttpResponse, RpcModule,
-    RpcServiceBuilder, ServerConfig, SubscriptionMessage,
+    ServerConfig,
 };
 
 #[tokio::test]
@@ -211,7 +212,7 @@ async fn run_server_with_settings(
 
             loop {
                 if sink
-                    .send(SubscriptionMessage::from_json(&i).unwrap())
+                    .send(serde_json::value::to_raw_value(&i).unwrap())
                     .await
                     .is_err()
                 {

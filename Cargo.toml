@@ -121,7 +121,7 @@ which = "6.0.3"
 strip-ansi-escapes = "0.2.0"
 proptest = "1.5.0"
 hex-literal = "0.4.1"
-tower = "0.4"
+tower = "0.5"
 hyper = "1"
 http-body = "1"
 
