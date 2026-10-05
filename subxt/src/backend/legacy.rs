@@ -220,6 +220,18 @@ impl<T: Config> Backend<T> for LegacyBackend<T> {
         .await
     }
 
+    async fn latest_best_block_ref(&self) -> Result<BlockRef<HashFor<T>>, BackendError> {
+        retry(|| async {
+            let hash = self
+                .methods
+                .chain_get_block_hash(None)
+                .await?
+                .ok_or_else(|| BackendError::other("chain_getBlockHash returned no best block"))?;
+            Ok(BlockRef::from_hash(hash))
+        })
+        .await
+    }
+
     async fn stream_all_block_headers(
         &self,
         hasher: T::Hasher,

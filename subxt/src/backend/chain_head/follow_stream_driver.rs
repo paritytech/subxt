@@ -5,6 +5,7 @@
 use super::follow_stream_unpin::{BlockRef, FollowStreamMsg, FollowStreamUnpin};
 use crate::config::Hash;
 use crate::error::{BackendError, RpcError};
+use futures::FutureExt;
 use futures::stream::{Stream, StreamExt};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::ops::DerefMut;
@@ -134,6 +135,30 @@ impl<H: Hash> FollowStreamDriverSubscription<H> {
         match ready_event {
             FollowStreamMsg::Ready(sub_id) => Some(sub_id),
             _ => None,
+        }
+    }
+
+    /// The last queued `BestBlockChanged` after `Initialized`, else the latest finalized block.
+    /// A queued `Stop` restarts the wait. `None` if the stream ends.
+    pub async fn latest_best_block(mut self) -> Option<BlockRef<H>> {
+        'restart: loop {
+            let mut best_block = loop {
+                if let FollowStreamMsg::Event(FollowEvent::Initialized(init)) = self.next().await? {
+                    break init.finalized_block_hashes.last().cloned();
+                }
+            };
+
+            while let Some(Some(msg)) = self.next().now_or_never() {
+                match msg {
+                    FollowStreamMsg::Event(FollowEvent::BestBlockChanged(ev)) => {
+                        best_block = Some(ev.best_block_hash);
+                    }
+                    FollowStreamMsg::Event(FollowEvent::Stop) => continue 'restart,
+                    _ => {}
+                }
+            }
+
+            return best_block;
         }
     }
 
@@ -720,6 +745,89 @@ mod test {
             FollowStreamMsg::Event(ev_new_block_ref(2, 3)),
         ];
         assert_eq!(evs, expected);
+    }
+
+    #[tokio::test]
+    async fn latest_best_block_prefers_replayed_best_block_over_finalized() {
+        let mut driver = test_follow_stream_driver_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_new_block(0, 1)),
+                    Ok(ev_best_block(1)),
+                    Ok(ev_new_block(1, 2)),
+                    Ok(ev_best_block(2)),
+                    Err(BackendError::other("ended")),
+                ]
+            },
+            10,
+        );
+
+        let _ready = driver.next().await.unwrap();
+        let _init0 = driver.next().await.unwrap();
+        let _new1 = driver.next().await.unwrap();
+        let _best1 = driver.next().await.unwrap();
+        let _new2 = driver.next().await.unwrap();
+        let _best2 = driver.next().await.unwrap();
+
+        let best_block = driver.handle().subscribe().latest_best_block().await;
+        assert_eq!(best_block.map(|b| b.hash()), Some(H256::from_low_u64_le(2)));
+    }
+
+    #[tokio::test]
+    async fn latest_best_block_falls_back_to_finalized_when_nothing_replayed() {
+        let mut driver = test_follow_stream_driver_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_new_block(0, 1)),
+                    Ok(ev_best_block(1)),
+                    Ok(ev_finalized([1], [])),
+                    Err(BackendError::other("ended")),
+                ]
+            },
+            10,
+        );
+
+        let _ready = driver.next().await.unwrap();
+        let _init0 = driver.next().await.unwrap();
+        let _new1 = driver.next().await.unwrap();
+        let _best1 = driver.next().await.unwrap();
+        let _fin1 = driver.next().await.unwrap();
+
+        let best_block = driver.handle().subscribe().latest_best_block().await;
+        assert_eq!(best_block.map(|b| b.hash()), Some(H256::from_low_u64_le(1)));
+    }
+
+    #[tokio::test]
+    async fn latest_best_block_restarts_after_a_stop_in_the_replay() {
+        let mut driver = test_follow_stream_driver_getter(
+            || {
+                [
+                    Ok(ev_initialized(0)),
+                    Ok(ev_new_block(0, 1)),
+                    Ok(ev_best_block(1)),
+                    Ok(FollowEvent::Stop),
+                    Ok(ev_initialized(2)),
+                    Err(BackendError::other("ended")),
+                ]
+            },
+            10,
+        );
+
+        let _ready = driver.next().await.unwrap();
+        let _init0 = driver.next().await.unwrap();
+        let _new1 = driver.next().await.unwrap();
+        let _best1 = driver.next().await.unwrap();
+
+        let subscription = driver.handle().subscribe();
+
+        let _stop = driver.next().await.unwrap();
+        let _ready_again = driver.next().await.unwrap();
+        let _init2 = driver.next().await.unwrap();
+
+        let best_block = subscription.latest_best_block().await;
+        assert_eq!(best_block.map(|b| b.hash()), Some(H256::from_low_u64_le(2)));
     }
 
     #[tokio::test]
