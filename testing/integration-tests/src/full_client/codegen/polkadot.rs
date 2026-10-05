@@ -500,9 +500,9 @@ pub mod api {
                         "dry_run_call",
                         (origin, call, result_xcms_version),
                         [
-                            217u8, 208u8, 149u8, 134u8, 34u8, 5u8, 167u8, 90u8, 247u8, 88u8, 123u8,
-                            215u8, 85u8, 235u8, 39u8, 83u8, 181u8, 149u8, 13u8, 14u8, 225u8, 174u8,
-                            233u8, 237u8, 70u8, 200u8, 101u8, 180u8, 113u8, 76u8, 251u8, 82u8,
+                            18u8, 37u8, 72u8, 16u8, 27u8, 106u8, 51u8, 43u8, 76u8, 114u8, 135u8,
+                            227u8, 8u8, 39u8, 63u8, 26u8, 249u8, 144u8, 34u8, 188u8, 143u8, 140u8,
+                            245u8, 182u8, 111u8, 4u8, 199u8, 224u8, 175u8, 234u8, 67u8, 205u8,
                         ],
                     )
                 }
@@ -520,9 +520,10 @@ pub mod api {
                         "dry_run_xcm",
                         (origin_location, xcm),
                         [
-                            74u8, 155u8, 121u8, 18u8, 119u8, 218u8, 19u8, 177u8, 226u8, 132u8,
-                            121u8, 25u8, 45u8, 55u8, 2u8, 222u8, 190u8, 141u8, 181u8, 207u8, 94u8,
-                            90u8, 148u8, 28u8, 17u8, 124u8, 100u8, 123u8, 89u8, 212u8, 146u8, 40u8,
+                            220u8, 156u8, 101u8, 55u8, 246u8, 77u8, 238u8, 223u8, 121u8, 174u8,
+                            121u8, 203u8, 81u8, 255u8, 66u8, 153u8, 99u8, 148u8, 180u8, 247u8,
+                            193u8, 142u8, 138u8, 21u8, 141u8, 208u8, 72u8, 118u8, 97u8, 139u8,
+                            231u8, 106u8,
                         ],
                     )
                 }
@@ -3979,9 +3980,9 @@ pub mod api {
             .hash();
         runtime_metadata_hash
             == [
-                146u8, 165u8, 95u8, 148u8, 201u8, 242u8, 74u8, 242u8, 112u8, 102u8, 126u8, 51u8,
-                28u8, 199u8, 79u8, 1u8, 12u8, 18u8, 24u8, 3u8, 219u8, 141u8, 224u8, 24u8, 209u8,
-                233u8, 235u8, 29u8, 16u8, 123u8, 139u8, 72u8,
+                131u8, 209u8, 152u8, 191u8, 184u8, 183u8, 120u8, 54u8, 232u8, 152u8, 241u8, 108u8,
+                255u8, 179u8, 139u8, 177u8, 19u8, 158u8, 56u8, 236u8, 79u8, 198u8, 184u8, 215u8,
+                39u8, 105u8, 4u8, 193u8, 209u8, 147u8, 107u8, 165u8,
             ]
     }
     pub mod system {
@@ -4912,10 +4913,10 @@ pub mod api {
                         "System",
                         "Events",
                         [
-                            232u8, 74u8, 192u8, 3u8, 87u8, 123u8, 172u8, 38u8, 21u8, 129u8, 181u8,
-                            47u8, 123u8, 113u8, 138u8, 82u8, 67u8, 117u8, 233u8, 237u8, 95u8,
-                            206u8, 101u8, 100u8, 1u8, 140u8, 55u8, 109u8, 33u8, 124u8, 127u8,
-                            172u8,
+                            97u8, 50u8, 188u8, 211u8, 107u8, 42u8, 239u8, 181u8, 119u8, 251u8,
+                            86u8, 155u8, 85u8, 186u8, 12u8, 139u8, 61u8, 82u8, 178u8, 184u8, 39u8,
+                            254u8, 219u8, 225u8, 179u8, 246u8, 114u8, 224u8, 151u8, 254u8, 45u8,
+                            140u8,
                         ],
                     )
                 }
@@ -8332,10 +8333,10 @@ pub mod api {
                         "Balances",
                         "Freezes",
                         [
-                            41u8, 196u8, 69u8, 26u8, 201u8, 141u8, 252u8, 255u8, 78u8, 216u8,
-                            102u8, 207u8, 133u8, 185u8, 86u8, 18u8, 79u8, 137u8, 132u8, 92u8,
-                            228u8, 237u8, 91u8, 125u8, 25u8, 111u8, 127u8, 212u8, 215u8, 114u8,
-                            219u8, 72u8,
+                            103u8, 248u8, 73u8, 236u8, 239u8, 124u8, 250u8, 210u8, 106u8, 200u8,
+                            122u8, 101u8, 229u8, 47u8, 253u8, 152u8, 20u8, 59u8, 6u8, 172u8, 157u8,
+                            83u8, 244u8, 197u8, 179u8, 15u8, 20u8, 168u8, 227u8, 104u8, 210u8,
+                            76u8,
                         ],
                     )
                 }
@@ -8415,7 +8416,7 @@ pub mod api {
                 }
                 pub type Output = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                     runtime_types::frame_support::traits::tokens::misc::IdAmount<
-                        (),
+                        runtime_types::rococo_runtime::RuntimeFreezeReason,
                         ::core::primitive::u128,
                     >,
                 >;
@@ -8473,21 +8474,6 @@ pub mod api {
                     ::subxt::constants::StaticAddress::new_static(
                         "Balances",
                         "MaxReserves",
-                        [
-                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
-                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
-                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
-                            145u8,
-                        ],
-                    )
-                }
-                #[doc = " The maximum number of individual freeze locks that can exist on an account at any time."]
-                pub fn max_freezes(
-                    &self,
-                ) -> ::subxt::constants::StaticAddress<::core::primitive::u32> {
-                    ::subxt::constants::StaticAddress::new_static(
-                        "Balances",
-                        "MaxFreezes",
                         [
                             98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
                             125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
@@ -15215,6 +15201,10 @@ pub mod api {
             )]
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Remove a call hash from the whitelist."]
+            #[doc = ""]
+            #[doc = "Leaves any live [`DeferredDispatch`] entry in place, so re-whitelisting the hash before"]
+            #[doc = "it expires re-enables relayed execution."]
             pub struct RemoveWhitelistedCall {
                 pub call_hash: remove_whitelisted_call::CallHash,
             }
@@ -15324,6 +15314,10 @@ pub mod api {
                             ],
                         )
                     }
+                    #[doc = "Remove a call hash from the whitelist."]
+                    #[doc = ""]
+                    #[doc = "Leaves any live [`DeferredDispatch`] entry in place, so re-whitelisting the hash before"]
+                    #[doc = "it expires re-enables relayed execution."]
                     pub fn remove_whitelisted_call(
                         &self,
                         call_hash: super::remove_whitelisted_call::CallHash,
@@ -15377,10 +15371,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                72u8, 149u8, 147u8, 178u8, 143u8, 153u8, 120u8, 240u8, 114u8,
-                                223u8, 168u8, 187u8, 98u8, 160u8, 240u8, 182u8, 155u8, 59u8, 146u8,
-                                32u8, 16u8, 181u8, 227u8, 138u8, 230u8, 40u8, 132u8, 63u8, 45u8,
-                                137u8, 246u8, 96u8,
+                                14u8, 127u8, 132u8, 34u8, 141u8, 11u8, 217u8, 109u8, 128u8, 224u8,
+                                138u8, 201u8, 143u8, 194u8, 160u8, 99u8, 7u8, 132u8, 23u8, 76u8,
+                                2u8, 225u8, 156u8, 57u8, 49u8, 244u8, 158u8, 117u8, 153u8, 117u8,
+                                67u8, 151u8,
                             ],
                         )
                     }
@@ -16598,10 +16592,10 @@ pub mod api {
                             "batch",
                             super::Batch { calls },
                             [
-                                206u8, 104u8, 120u8, 204u8, 185u8, 189u8, 139u8, 52u8, 168u8,
-                                221u8, 80u8, 147u8, 117u8, 187u8, 5u8, 0u8, 62u8, 217u8, 5u8,
-                                116u8, 190u8, 54u8, 121u8, 11u8, 221u8, 250u8, 0u8, 50u8, 80u8,
-                                248u8, 171u8, 181u8,
+                                193u8, 36u8, 250u8, 193u8, 226u8, 47u8, 194u8, 145u8, 11u8, 143u8,
+                                149u8, 142u8, 115u8, 32u8, 59u8, 218u8, 136u8, 98u8, 154u8, 149u8,
+                                212u8, 153u8, 61u8, 181u8, 31u8, 73u8, 95u8, 69u8, 5u8, 143u8,
+                                66u8, 83u8,
                             ],
                         )
                     }
@@ -16632,10 +16626,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                100u8, 75u8, 99u8, 124u8, 134u8, 132u8, 90u8, 203u8, 48u8, 55u8,
-                                26u8, 59u8, 186u8, 154u8, 66u8, 99u8, 199u8, 156u8, 5u8, 224u8,
-                                174u8, 241u8, 194u8, 17u8, 76u8, 89u8, 57u8, 226u8, 50u8, 18u8,
-                                182u8, 244u8,
+                                235u8, 13u8, 111u8, 225u8, 179u8, 206u8, 170u8, 220u8, 216u8, 45u8,
+                                46u8, 207u8, 227u8, 50u8, 31u8, 119u8, 121u8, 225u8, 35u8, 11u8,
+                                183u8, 19u8, 66u8, 103u8, 41u8, 180u8, 44u8, 177u8, 22u8, 3u8,
+                                199u8, 184u8,
                             ],
                         )
                     }
@@ -16661,10 +16655,10 @@ pub mod api {
                             "batch_all",
                             super::BatchAll { calls },
                             [
-                                173u8, 244u8, 249u8, 166u8, 194u8, 205u8, 138u8, 157u8, 129u8,
-                                222u8, 186u8, 215u8, 175u8, 5u8, 75u8, 56u8, 144u8, 244u8, 205u8,
-                                160u8, 128u8, 217u8, 101u8, 92u8, 253u8, 198u8, 48u8, 222u8, 212u8,
-                                75u8, 4u8, 216u8,
+                                247u8, 47u8, 111u8, 229u8, 6u8, 239u8, 165u8, 109u8, 96u8, 40u8,
+                                157u8, 94u8, 155u8, 11u8, 196u8, 239u8, 151u8, 237u8, 185u8, 157u8,
+                                218u8, 246u8, 57u8, 179u8, 216u8, 254u8, 44u8, 185u8, 101u8, 182u8,
+                                170u8, 118u8,
                             ],
                         )
                     }
@@ -16688,10 +16682,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                192u8, 160u8, 96u8, 115u8, 21u8, 177u8, 163u8, 162u8, 144u8, 147u8,
-                                223u8, 199u8, 140u8, 147u8, 245u8, 185u8, 1u8, 182u8, 136u8, 243u8,
-                                85u8, 67u8, 66u8, 11u8, 241u8, 30u8, 233u8, 240u8, 55u8, 191u8,
-                                193u8, 178u8,
+                                88u8, 223u8, 17u8, 157u8, 203u8, 220u8, 167u8, 41u8, 172u8, 69u8,
+                                182u8, 157u8, 145u8, 32u8, 25u8, 101u8, 21u8, 242u8, 218u8, 7u8,
+                                126u8, 140u8, 96u8, 215u8, 243u8, 178u8, 8u8, 33u8, 7u8, 13u8,
+                                177u8, 237u8,
                             ],
                         )
                     }
@@ -16718,10 +16712,10 @@ pub mod api {
                             "force_batch",
                             super::ForceBatch { calls },
                             [
-                                113u8, 95u8, 147u8, 221u8, 72u8, 191u8, 77u8, 223u8, 218u8, 114u8,
-                                109u8, 209u8, 224u8, 121u8, 99u8, 212u8, 152u8, 83u8, 82u8, 132u8,
-                                112u8, 212u8, 13u8, 83u8, 230u8, 101u8, 128u8, 2u8, 182u8, 131u8,
-                                198u8, 210u8,
+                                73u8, 42u8, 93u8, 180u8, 111u8, 94u8, 49u8, 1u8, 239u8, 77u8,
+                                120u8, 51u8, 207u8, 72u8, 196u8, 101u8, 214u8, 173u8, 88u8, 114u8,
+                                138u8, 101u8, 165u8, 124u8, 97u8, 144u8, 168u8, 234u8, 129u8,
+                                196u8, 193u8, 13u8,
                             ],
                         )
                     }
@@ -16745,10 +16739,10 @@ pub mod api {
                                 weight,
                             },
                             [
-                                193u8, 29u8, 53u8, 151u8, 53u8, 107u8, 26u8, 87u8, 104u8, 172u8,
-                                195u8, 120u8, 173u8, 162u8, 175u8, 54u8, 57u8, 210u8, 136u8, 11u8,
-                                15u8, 100u8, 78u8, 88u8, 83u8, 145u8, 160u8, 185u8, 148u8, 245u8,
-                                86u8, 203u8,
+                                176u8, 248u8, 85u8, 105u8, 119u8, 255u8, 210u8, 80u8, 69u8, 58u8,
+                                17u8, 179u8, 150u8, 182u8, 204u8, 33u8, 203u8, 26u8, 156u8, 212u8,
+                                126u8, 141u8, 39u8, 84u8, 82u8, 126u8, 100u8, 24u8, 76u8, 112u8,
+                                109u8, 61u8,
                             ],
                         )
                     }
@@ -16788,10 +16782,10 @@ pub mod api {
                                 fallback: ::subxt::alloc::boxed::Box::new(fallback),
                             },
                             [
-                                20u8, 130u8, 227u8, 158u8, 34u8, 31u8, 80u8, 69u8, 64u8, 103u8,
-                                117u8, 174u8, 222u8, 154u8, 79u8, 158u8, 109u8, 101u8, 35u8, 198u8,
-                                216u8, 135u8, 64u8, 94u8, 146u8, 38u8, 186u8, 87u8, 214u8, 75u8,
-                                169u8, 35u8,
+                                189u8, 223u8, 82u8, 218u8, 118u8, 0u8, 135u8, 223u8, 244u8, 23u8,
+                                101u8, 133u8, 49u8, 221u8, 13u8, 69u8, 150u8, 231u8, 189u8, 235u8,
+                                111u8, 72u8, 10u8, 5u8, 47u8, 27u8, 77u8, 29u8, 185u8, 162u8, 65u8,
+                                140u8,
                             ],
                         )
                     }
@@ -16814,10 +16808,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                54u8, 183u8, 245u8, 215u8, 246u8, 66u8, 127u8, 249u8, 45u8, 72u8,
-                                254u8, 128u8, 82u8, 17u8, 13u8, 49u8, 60u8, 207u8, 185u8, 190u8,
-                                236u8, 247u8, 14u8, 119u8, 36u8, 167u8, 252u8, 187u8, 57u8, 121u8,
-                                86u8, 200u8,
+                                218u8, 76u8, 206u8, 37u8, 32u8, 214u8, 40u8, 251u8, 8u8, 22u8,
+                                135u8, 200u8, 203u8, 138u8, 8u8, 153u8, 102u8, 95u8, 204u8, 19u8,
+                                173u8, 193u8, 35u8, 27u8, 34u8, 33u8, 194u8, 175u8, 215u8, 228u8,
+                                132u8, 164u8,
                             ],
                         )
                     }
@@ -22246,10 +22240,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                248u8, 31u8, 79u8, 179u8, 166u8, 134u8, 55u8, 51u8, 168u8, 159u8,
-                                218u8, 239u8, 173u8, 61u8, 109u8, 240u8, 72u8, 100u8, 44u8, 164u8,
-                                125u8, 175u8, 7u8, 199u8, 130u8, 178u8, 123u8, 63u8, 75u8, 143u8,
-                                187u8, 162u8,
+                                105u8, 28u8, 132u8, 83u8, 56u8, 187u8, 179u8, 149u8, 7u8, 129u8,
+                                162u8, 217u8, 81u8, 120u8, 54u8, 87u8, 190u8, 167u8, 91u8, 47u8,
+                                203u8, 176u8, 151u8, 68u8, 225u8, 143u8, 2u8, 130u8, 49u8, 13u8,
+                                101u8, 36u8,
                             ],
                         )
                     }
@@ -23670,7 +23664,8 @@ pub mod api {
             #[doc = "original task's configuration, but will have a lower value for `remaining` than the"]
             #[doc = "original `total_retries`."]
             #[doc = ""]
-            #[doc = "This call **cannot** be used to set a retry configuration for a named task."]
+            #[doc = "This call **cannot** be used to set a retry configuration for a named task; it fails"]
+            #[doc = "with [`Error::Named`]. Use [`Pallet::set_retry_named`] for those."]
             pub struct SetRetry {
                 pub task: set_retry::Task,
                 pub retries: set_retry::Retries,
@@ -23740,6 +23735,10 @@ pub mod api {
             #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
             #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
             #[doc = "Removes the retry configuration of a task."]
+            #[doc = ""]
+            #[doc = "Unlike [`Pallet::set_retry`], this accepts named tasks too: dropping a retry"]
+            #[doc = "configuration is always safe, and configurations left by older runtimes still need a"]
+            #[doc = "way out. The `RetryCancelled` event therefore carries `id: None` even for a named task."]
             pub struct CancelRetry {
                 pub task: cancel_retry::Task,
             }
@@ -23801,10 +23800,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                36u8, 88u8, 35u8, 173u8, 47u8, 154u8, 230u8, 195u8, 224u8, 126u8,
-                                29u8, 77u8, 17u8, 194u8, 139u8, 185u8, 1u8, 235u8, 104u8, 173u8,
-                                116u8, 225u8, 3u8, 133u8, 149u8, 120u8, 229u8, 22u8, 118u8, 224u8,
-                                82u8, 38u8,
+                                6u8, 16u8, 49u8, 173u8, 50u8, 58u8, 167u8, 101u8, 177u8, 14u8,
+                                11u8, 45u8, 2u8, 15u8, 77u8, 152u8, 112u8, 85u8, 163u8, 43u8, 74u8,
+                                25u8, 25u8, 148u8, 216u8, 78u8, 29u8, 127u8, 118u8, 215u8, 69u8,
+                                243u8,
                             ],
                         )
                     }
@@ -23850,10 +23849,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                229u8, 76u8, 205u8, 131u8, 74u8, 65u8, 19u8, 27u8, 229u8, 2u8,
-                                244u8, 131u8, 55u8, 0u8, 100u8, 196u8, 94u8, 112u8, 134u8, 75u8,
-                                142u8, 130u8, 158u8, 139u8, 92u8, 65u8, 17u8, 240u8, 120u8, 223u8,
-                                245u8, 77u8,
+                                47u8, 16u8, 80u8, 215u8, 99u8, 121u8, 2u8, 151u8, 152u8, 5u8, 34u8,
+                                111u8, 82u8, 20u8, 101u8, 30u8, 195u8, 40u8, 129u8, 115u8, 204u8,
+                                239u8, 39u8, 156u8, 42u8, 10u8, 250u8, 224u8, 76u8, 10u8, 55u8,
+                                241u8,
                             ],
                         )
                     }
@@ -23894,10 +23893,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                236u8, 166u8, 144u8, 58u8, 60u8, 31u8, 10u8, 167u8, 35u8, 108u8,
-                                123u8, 206u8, 153u8, 195u8, 48u8, 140u8, 96u8, 223u8, 135u8, 88u8,
-                                226u8, 122u8, 233u8, 73u8, 155u8, 188u8, 162u8, 124u8, 195u8,
-                                175u8, 13u8, 150u8,
+                                181u8, 130u8, 205u8, 146u8, 94u8, 177u8, 241u8, 117u8, 178u8,
+                                242u8, 211u8, 86u8, 145u8, 209u8, 43u8, 206u8, 237u8, 238u8, 85u8,
+                                17u8, 119u8, 0u8, 191u8, 126u8, 220u8, 203u8, 252u8, 232u8, 151u8,
+                                165u8, 229u8, 54u8,
                             ],
                         )
                     }
@@ -23922,10 +23921,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                93u8, 33u8, 179u8, 201u8, 143u8, 228u8, 97u8, 58u8, 149u8, 161u8,
-                                160u8, 75u8, 96u8, 45u8, 22u8, 104u8, 235u8, 252u8, 95u8, 174u8,
-                                68u8, 79u8, 162u8, 138u8, 171u8, 8u8, 18u8, 115u8, 163u8, 165u8,
-                                174u8, 64u8,
+                                52u8, 212u8, 156u8, 226u8, 187u8, 225u8, 236u8, 136u8, 179u8, 95u8,
+                                239u8, 223u8, 161u8, 30u8, 200u8, 183u8, 73u8, 101u8, 70u8, 118u8,
+                                80u8, 224u8, 76u8, 38u8, 188u8, 240u8, 188u8, 95u8, 202u8, 192u8,
+                                66u8, 25u8,
                             ],
                         )
                     }
@@ -23942,7 +23941,8 @@ pub mod api {
                     #[doc = "original task's configuration, but will have a lower value for `remaining` than the"]
                     #[doc = "original `total_retries`."]
                     #[doc = ""]
-                    #[doc = "This call **cannot** be used to set a retry configuration for a named task."]
+                    #[doc = "This call **cannot** be used to set a retry configuration for a named task; it fails"]
+                    #[doc = "with [`Error::Named`]. Use [`Pallet::set_retry_named`] for those."]
                     pub fn set_retry(
                         &self,
                         task: super::set_retry::Task,
@@ -24003,6 +24003,10 @@ pub mod api {
                         )
                     }
                     #[doc = "Removes the retry configuration of a task."]
+                    #[doc = ""]
+                    #[doc = "Unlike [`Pallet::set_retry`], this accepts named tasks too: dropping a retry"]
+                    #[doc = "configuration is always safe, and configurations left by older runtimes still need a"]
+                    #[doc = "way out. The `RetryCancelled` event therefore carries `id: None` even for a named task."]
                     pub fn cancel_retry(
                         &self,
                         task: super::cancel_retry::Task,
@@ -24923,10 +24927,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                100u8, 22u8, 220u8, 164u8, 129u8, 58u8, 19u8, 253u8, 227u8, 136u8,
-                                105u8, 51u8, 27u8, 227u8, 228u8, 126u8, 7u8, 249u8, 107u8, 185u8,
-                                66u8, 163u8, 96u8, 196u8, 133u8, 124u8, 247u8, 60u8, 87u8, 145u8,
-                                206u8, 73u8,
+                                136u8, 209u8, 226u8, 164u8, 205u8, 77u8, 193u8, 95u8, 55u8, 176u8,
+                                165u8, 51u8, 49u8, 106u8, 28u8, 48u8, 120u8, 10u8, 10u8, 243u8,
+                                107u8, 156u8, 250u8, 109u8, 75u8, 112u8, 29u8, 220u8, 117u8, 68u8,
+                                251u8, 18u8,
                             ],
                         )
                     }
@@ -25216,10 +25220,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                31u8, 207u8, 252u8, 54u8, 42u8, 254u8, 150u8, 8u8, 247u8, 163u8,
-                                49u8, 252u8, 18u8, 88u8, 140u8, 10u8, 33u8, 228u8, 96u8, 211u8,
-                                201u8, 66u8, 180u8, 52u8, 142u8, 198u8, 67u8, 236u8, 89u8, 26u8,
-                                239u8, 88u8,
+                                133u8, 186u8, 252u8, 125u8, 110u8, 120u8, 44u8, 118u8, 0u8, 142u8,
+                                114u8, 125u8, 66u8, 214u8, 123u8, 232u8, 240u8, 234u8, 225u8,
+                                195u8, 226u8, 122u8, 85u8, 165u8, 78u8, 7u8, 244u8, 57u8, 10u8,
+                                208u8, 94u8, 14u8,
                             ],
                         )
                     }
@@ -25962,10 +25966,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                196u8, 113u8, 224u8, 217u8, 166u8, 90u8, 103u8, 185u8, 114u8, 80u8,
-                                107u8, 10u8, 93u8, 167u8, 86u8, 83u8, 80u8, 66u8, 215u8, 64u8,
-                                248u8, 235u8, 124u8, 71u8, 86u8, 48u8, 89u8, 106u8, 162u8, 80u8,
-                                3u8, 203u8,
+                                225u8, 186u8, 175u8, 241u8, 57u8, 140u8, 171u8, 56u8, 251u8, 22u8,
+                                214u8, 19u8, 100u8, 150u8, 240u8, 210u8, 187u8, 246u8, 154u8,
+                                208u8, 100u8, 99u8, 77u8, 26u8, 150u8, 59u8, 181u8, 201u8, 172u8,
+                                49u8, 94u8, 63u8,
                             ],
                         )
                     }
@@ -26030,10 +26034,10 @@ pub mod api {
                                 max_weight,
                             },
                             [
-                                82u8, 73u8, 105u8, 150u8, 226u8, 119u8, 32u8, 159u8, 34u8, 28u8,
-                                100u8, 20u8, 22u8, 59u8, 226u8, 82u8, 17u8, 35u8, 63u8, 11u8, 18u8,
-                                54u8, 56u8, 99u8, 180u8, 34u8, 36u8, 120u8, 208u8, 169u8, 18u8,
-                                90u8,
+                                60u8, 157u8, 167u8, 123u8, 238u8, 203u8, 202u8, 165u8, 134u8, 76u8,
+                                142u8, 96u8, 108u8, 241u8, 144u8, 198u8, 90u8, 113u8, 139u8, 9u8,
+                                239u8, 34u8, 204u8, 173u8, 149u8, 3u8, 127u8, 229u8, 19u8, 161u8,
+                                255u8, 89u8,
                             ],
                         )
                     }
@@ -31950,10 +31954,10 @@ pub mod api {
                         "NisCounterpartBalances",
                         "Freezes",
                         [
-                            41u8, 196u8, 69u8, 26u8, 201u8, 141u8, 252u8, 255u8, 78u8, 216u8,
-                            102u8, 207u8, 133u8, 185u8, 86u8, 18u8, 79u8, 137u8, 132u8, 92u8,
-                            228u8, 237u8, 91u8, 125u8, 25u8, 111u8, 127u8, 212u8, 215u8, 114u8,
-                            219u8, 72u8,
+                            103u8, 248u8, 73u8, 236u8, 239u8, 124u8, 250u8, 210u8, 106u8, 200u8,
+                            122u8, 101u8, 229u8, 47u8, 253u8, 152u8, 20u8, 59u8, 6u8, 172u8, 157u8,
+                            83u8, 244u8, 197u8, 179u8, 15u8, 20u8, 168u8, 227u8, 104u8, 210u8,
+                            76u8,
                         ],
                     )
                 }
@@ -32033,7 +32037,7 @@ pub mod api {
                 }
                 pub type Output = runtime_types::bounded_collections::bounded_vec::BoundedVec<
                     runtime_types::frame_support::traits::tokens::misc::IdAmount<
-                        (),
+                        runtime_types::rococo_runtime::RuntimeFreezeReason,
                         ::core::primitive::u128,
                     >,
                 >;
@@ -32091,21 +32095,6 @@ pub mod api {
                     ::subxt::constants::StaticAddress::new_static(
                         "NisCounterpartBalances",
                         "MaxReserves",
-                        [
-                            98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
-                            125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
-                            178u8, 197u8, 113u8, 31u8, 79u8, 200u8, 90u8, 203u8, 100u8, 41u8,
-                            145u8,
-                        ],
-                    )
-                }
-                #[doc = " The maximum number of individual freeze locks that can exist on an account at any time."]
-                pub fn max_freezes(
-                    &self,
-                ) -> ::subxt::constants::StaticAddress<::core::primitive::u32> {
-                    ::subxt::constants::StaticAddress::new_static(
-                        "NisCounterpartBalances",
-                        "MaxFreezes",
                         [
                             98u8, 252u8, 116u8, 72u8, 26u8, 180u8, 225u8, 83u8, 200u8, 157u8,
                             125u8, 151u8, 53u8, 76u8, 168u8, 26u8, 10u8, 9u8, 98u8, 68u8, 9u8,
@@ -39470,6 +39459,59 @@ pub mod api {
                     pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
                 }
             }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "The order queue was unexpectedly full - this indicates a problem with the configuration"]
+            #[doc = "of the on-demand pallet on the Coretime chain. `dropped` indicates how many orders were"]
+            #[doc = "dropped because they couldn't be queued."]
+            pub struct UnexpectedQueueFull {
+                pub dropped: unexpected_queue_full::Dropped,
+            }
+            pub mod unexpected_queue_full {
+                use super::runtime_types;
+                pub type Dropped = ::core::primitive::u32;
+            }
+            impl UnexpectedQueueFull {
+                const PALLET_NAME: &'static str = "OnDemandAssignmentProvider";
+                const EVENT_NAME: &'static str = "UnexpectedQueueFull";
+            }
+            impl ::subxt::events::DecodeAsEvent for UnexpectedQueueFull {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
+            }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "A batch of on-demand orders from the broker chain has been queued."]
+            pub struct BatchQueued {
+                pub batch: batch_queued::Batch,
+            }
+            pub mod batch_queued {
+                use super::runtime_types;
+                pub type Batch = ::subxt::alloc::vec::Vec<(
+                    runtime_types::polkadot_parachain_primitives::primitives::Id,
+                    ::core::primitive::u32,
+                )>;
+            }
+            impl BatchQueued {
+                const PALLET_NAME: &'static str = "OnDemandAssignmentProvider";
+                const EVENT_NAME: &'static str = "BatchQueued";
+            }
+            impl ::subxt::events::DecodeAsEvent for BatchQueued {
+                fn is_event(pallet_name: &str, event_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && event_name == Self::EVENT_NAME
+                }
+            }
         }
         pub mod storage {
             use super::root_mod;
@@ -42439,6 +42481,37 @@ pub mod api {
                     pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
                 }
             }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            #[doc = "Receive on-demand coretime orders from the `ExternalBrokerOrigin`."]
+            #[doc = ""]
+            #[doc = "Parameters:"]
+            #[doc = "-`origin`: The `ExternalBrokerOrigin`, assumed to be the coretime chain."]
+            #[doc = "-`batch`: The batch of on-demand orders."]
+            pub struct QueueOnDemandBatch {
+                pub batch: queue_on_demand_batch::Batch,
+            }
+            pub mod queue_on_demand_batch {
+                use super::runtime_types;
+                pub type Batch = ::subxt::alloc::vec::Vec<(
+                    runtime_types::polkadot_parachain_primitives::primitives::Id,
+                    ::core::primitive::u32,
+                )>;
+            }
+            impl QueueOnDemandBatch {
+                const PALLET_NAME: &'static str = "Coretime";
+                const CALL_NAME: &'static str = "queue_on_demand_batch";
+            }
+            impl ::subxt::extrinsics::DecodeAsExtrinsic for QueueOnDemandBatch {
+                fn is_extrinsic(pallet_name: &str, call_name: &str) -> bool {
+                    pallet_name == Self::PALLET_NAME && call_name == Self::CALL_NAME
+                }
+            }
             pub mod api {
                 pub struct TransactionApi;
                 impl TransactionApi {
@@ -42535,6 +42608,28 @@ pub mod api {
                                 232u8, 170u8, 35u8, 63u8, 87u8, 5u8, 108u8, 188u8, 55u8, 111u8,
                                 55u8, 22u8, 1u8, 190u8, 216u8, 233u8, 185u8, 135u8, 172u8, 15u8,
                                 254u8, 91u8, 92u8,
+                            ],
+                        )
+                    }
+                    #[doc = "Receive on-demand coretime orders from the `ExternalBrokerOrigin`."]
+                    #[doc = ""]
+                    #[doc = "Parameters:"]
+                    #[doc = "-`origin`: The `ExternalBrokerOrigin`, assumed to be the coretime chain."]
+                    #[doc = "-`batch`: The batch of on-demand orders."]
+                    pub fn queue_on_demand_batch(
+                        &self,
+                        batch: super::queue_on_demand_batch::Batch,
+                    ) -> ::subxt::transactions::StaticPayload<super::QueueOnDemandBatch>
+                    {
+                        ::subxt::transactions::StaticPayload::new_static(
+                            "Coretime",
+                            "queue_on_demand_batch",
+                            super::QueueOnDemandBatch { batch },
+                            [
+                                52u8, 207u8, 30u8, 64u8, 133u8, 28u8, 85u8, 236u8, 0u8, 227u8,
+                                101u8, 90u8, 92u8, 249u8, 22u8, 128u8, 153u8, 174u8, 83u8, 159u8,
+                                142u8, 163u8, 44u8, 107u8, 174u8, 211u8, 250u8, 120u8, 208u8, 94u8,
+                                237u8, 64u8,
                             ],
                         )
                     }
@@ -43684,6 +43779,8 @@ pub mod api {
             #[doc = "- `assets`: The exact assets that were trapped. Use the version to specify what version"]
             #[doc = "was the latest when they were trapped."]
             #[doc = "- `beneficiary`: The location/account where the claimed assets will be deposited."]
+            #[doc = ""]
+            #[doc = "The weight of this call is linear in the number of assets claimed."]
             pub struct ClaimAssets {
                 pub assets: ::subxt::alloc::boxed::Box<claim_assets::Assets>,
                 pub beneficiary: ::subxt::alloc::boxed::Box<claim_assets::Beneficiary>,
@@ -44309,6 +44406,8 @@ pub mod api {
                     #[doc = "- `assets`: The exact assets that were trapped. Use the version to specify what version"]
                     #[doc = "was the latest when they were trapped."]
                     #[doc = "- `beneficiary`: The location/account where the claimed assets will be deposited."]
+                    #[doc = ""]
+                    #[doc = "The weight of this call is linear in the number of assets claimed."]
                     pub fn claim_assets(
                         &self,
                         assets: super::claim_assets::Assets,
@@ -48827,10 +48926,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                219u8, 200u8, 139u8, 130u8, 3u8, 104u8, 216u8, 103u8, 115u8, 45u8,
-                                68u8, 185u8, 101u8, 42u8, 189u8, 248u8, 95u8, 207u8, 227u8, 82u8,
-                                186u8, 198u8, 43u8, 100u8, 70u8, 194u8, 133u8, 211u8, 101u8, 235u8,
-                                240u8, 106u8,
+                                238u8, 150u8, 198u8, 246u8, 213u8, 194u8, 128u8, 63u8, 165u8, 30u8,
+                                128u8, 73u8, 164u8, 221u8, 51u8, 142u8, 9u8, 89u8, 70u8, 84u8,
+                                96u8, 213u8, 229u8, 41u8, 166u8, 70u8, 184u8, 190u8, 38u8, 174u8,
+                                221u8, 20u8,
                             ],
                         )
                     }
@@ -48853,10 +48952,10 @@ pub mod api {
                                 weight,
                             },
                             [
-                                223u8, 216u8, 176u8, 108u8, 117u8, 231u8, 187u8, 42u8, 176u8,
-                                220u8, 120u8, 178u8, 127u8, 178u8, 63u8, 153u8, 117u8, 100u8, 48u8,
-                                249u8, 143u8, 20u8, 132u8, 187u8, 169u8, 81u8, 251u8, 161u8, 76u8,
-                                183u8, 135u8, 91u8,
+                                93u8, 154u8, 7u8, 113u8, 248u8, 26u8, 14u8, 153u8, 97u8, 170u8,
+                                244u8, 139u8, 119u8, 0u8, 217u8, 102u8, 35u8, 42u8, 32u8, 60u8,
+                                233u8, 34u8, 246u8, 15u8, 183u8, 170u8, 21u8, 232u8, 165u8, 157u8,
+                                132u8, 88u8,
                             ],
                         )
                     }
@@ -48895,10 +48994,10 @@ pub mod api {
                                 call: ::subxt::alloc::boxed::Box::new(call),
                             },
                             [
-                                166u8, 140u8, 254u8, 79u8, 29u8, 102u8, 192u8, 175u8, 158u8, 203u8,
-                                245u8, 232u8, 29u8, 140u8, 78u8, 137u8, 163u8, 26u8, 213u8, 246u8,
-                                189u8, 247u8, 144u8, 107u8, 248u8, 151u8, 213u8, 85u8, 216u8, 68u8,
-                                217u8, 255u8,
+                                166u8, 47u8, 231u8, 94u8, 50u8, 57u8, 198u8, 188u8, 222u8, 254u8,
+                                99u8, 165u8, 12u8, 169u8, 232u8, 51u8, 245u8, 147u8, 7u8, 131u8,
+                                62u8, 25u8, 176u8, 255u8, 207u8, 75u8, 17u8, 62u8, 45u8, 247u8,
+                                32u8, 10u8,
                             ],
                         )
                     }
@@ -50133,7 +50232,7 @@ pub mod api {
                     #[doc = "Number of holds exceed `VariantCountOf<T::RuntimeHoldReason>`."]
                     TooManyHolds,
                     #[codec(index = 9)]
-                    #[doc = "Number of freezes exceed `MaxFreezes`."]
+                    #[doc = "Number of freezes exceed `VariantCountOf<T::RuntimeFreezeReason>`."]
                     TooManyFreezes,
                     #[codec(index = 10)]
                     #[doc = "The issuance cannot be modified since it is already deactivated."]
@@ -55407,7 +55506,8 @@ pub mod api {
                     #[doc = "original task's configuration, but will have a lower value for `remaining` than the"]
                     #[doc = "original `total_retries`."]
                     #[doc = ""]
-                    #[doc = "This call **cannot** be used to set a retry configuration for a named task."]
+                    #[doc = "This call **cannot** be used to set a retry configuration for a named task; it fails"]
+                    #[doc = "with [`Error::Named`]. Use [`Pallet::set_retry_named`] for those."]
                     set_retry {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                         retries: ::core::primitive::u8,
@@ -55435,6 +55535,10 @@ pub mod api {
                     },
                     #[codec(index = 8)]
                     #[doc = "Removes the retry configuration of a task."]
+                    #[doc = ""]
+                    #[doc = "Unlike [`Pallet::set_retry`], this accepts named tasks too: dropping a retry"]
+                    #[doc = "configuration is always safe, and configurations left by older runtimes still need a"]
+                    #[doc = "way out. The `RetryCancelled` event therefore carries `id: None` even for a named task."]
                     cancel_retry {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                     },
@@ -57518,6 +57622,10 @@ pub mod api {
                     #[codec(index = 0)]
                     whitelist_call { call_hash: ::subxt::utils::H256 },
                     #[codec(index = 1)]
+                    #[doc = "Remove a call hash from the whitelist."]
+                    #[doc = ""]
+                    #[doc = "Leaves any live [`DeferredDispatch`] entry in place, so re-whitelisting the hash before"]
+                    #[doc = "it expires re-enables relayed execution."]
                     remove_whitelisted_call { call_hash: ::subxt::utils::H256 },
                     #[codec(index = 2)]
                     dispatch_whitelisted_call {
@@ -57719,7 +57827,7 @@ pub mod api {
                 #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                 #[doc = "Contains a variant per dispatchable extrinsic that this pallet has."]
                 pub enum Call {
-                    # [codec (index = 0)] send { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , message : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , } , # [codec (index = 1)] # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_teleport_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] teleport_assets { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [codec (index = 2)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_reserve_transfer_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] reserve_transfer_assets { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Execute an XCM message from a local, signed, origin."] # [doc = ""] # [doc = "An event is deposited indicating whether `msg` could be executed completely or only"] # [doc = "partially."] # [doc = ""] # [doc = "No more than `max_weight` will be used in its attempted execution. If this is less than"] # [doc = "the maximum amount of weight that the message could take to be executed, then no"] # [doc = "execution attempt will be made."] execute { message : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , max_weight : runtime_types :: sp_weights :: weight_v2 :: Weight , } , # [codec (index = 4)] # [doc = "Extoll that a particular destination can be communicated with through a particular"] # [doc = "version of XCM."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The destination that is being described."] # [doc = "- `xcm_version`: The latest version of XCM that `location` supports."] force_xcm_version { location : :: subxt :: alloc :: boxed :: Box < runtime_types :: staging_xcm :: v5 :: location :: Location > , version : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Set a safe XCM version (the version that XCM should be encoded with if the most recent"] # [doc = "version a destination can accept is unknown)."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `maybe_xcm_version`: The default XCM encoding version, or `None` to disable."] force_default_xcm_version { maybe_xcm_version : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 6)] # [doc = "Ask a location to notify us regarding their XCM version and any changes to it."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we should subscribe for XCM version notifications."] force_subscribe_version_notify { location : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 7)] # [doc = "Require that a particular destination should no longer notify us regarding any XCM"] # [doc = "version changes."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we are currently subscribed for XCM version"] # [doc = "  notifications which we no longer desire."] force_unsubscribe_version_notify { location : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 8)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_reserve_transfer_assets { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 9)] # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_teleport_assets { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 10)] # [doc = "Set or unset the global suspension state of the XCM executor."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `suspended`: `true` to suspend, `false` to resume."] force_suspension { suspended : :: core :: primitive :: bool , } , # [codec (index = 11)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve, or through teleports."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item` (hence referred to as `fees`), up to enough to pay for"] # [doc = "`weight_limit` of weight. If more weight is needed than `weight_limit`, then the"] # [doc = "operation will fail and the sent assets may be at risk."] # [doc = ""] # [doc = "`assets` (excluding `fees`) must have same reserve location or otherwise be teleportable"] # [doc = "to `dest`, no limitations imposed on `fees`."] # [doc = " - for local reserve: transfer assets to sovereign account of destination chain and"] # [doc = "   forward a notification XCM to `dest` to mint and deposit reserve-based assets to"] # [doc = "   `beneficiary`."] # [doc = " - for destination reserve: burn local assets and forward a notification to `dest` chain"] # [doc = "   to withdraw the reserve assets from this chain's sovereign account and deposit them"] # [doc = "   to `beneficiary`."] # [doc = " - for remote reserve: burn local assets, forward XCM to reserve chain to move reserves"] # [doc = "   from this chain's SA to `dest` chain's SA, and forward another XCM to `dest` to mint"] # [doc = "   and deposit reserve-based assets to `beneficiary`."] # [doc = " - for teleports: burn local assets and forward XCM to `dest` chain to mint/teleport"] # [doc = "   assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `X2(Parent,"] # [doc = "  Parachain(..))` to send from parachain to parachain, or `X1(Parachain(..))` to send"] # [doc = "  from relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 12)] # [doc = "Claims assets trapped on this pallet because of leftover assets during XCM execution."] # [doc = ""] # [doc = "- `origin`: Anyone can call this extrinsic."] # [doc = "- `assets`: The exact assets that were trapped. Use the version to specify what version"] # [doc = "was the latest when they were trapped."] # [doc = "- `beneficiary`: The location/account where the claimed assets will be deposited."] claim_assets { assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 13)] # [doc = "Transfer assets from the local chain to the destination chain using explicit transfer"] # [doc = "types for assets and fees."] # [doc = ""] # [doc = "`assets` must have same reserve location or may be teleportable to `dest`. Caller must"] # [doc = "provide the `assets_transfer_type` to be used for `assets`:"] # [doc = " - `TransferType::LocalReserve`: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `TransferType::DestinationReserve`: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `TransferType::RemoteReserve(reserve)`: burn local assets, forward XCM to `reserve`"] # [doc = "   chain to move reserves from this chain's SA to `dest` chain's SA, and forward another"] # [doc = "   XCM to `dest` to mint and deposit reserve-based assets to `beneficiary`. Typically"] # [doc = "   the remote `reserve` is Asset Hub."] # [doc = " - `TransferType::Teleport`: burn local assets and forward XCM to `dest` chain to"] # [doc = "   mint/teleport assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "On the destination chain, as well as any intermediary hops, `BuyExecution` is used to"] # [doc = "buy execution using transferred `assets` identified by `remote_fees_id`."] # [doc = "Make sure enough of the specified `remote_fees_id` asset is included in the given list"] # [doc = "of `assets`. `remote_fees_id` should be enough to pay for `weight_limit`. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "`remote_fees_id` may use different transfer type than rest of `assets` and can be"] # [doc = "specified through `fees_transfer_type`."] # [doc = ""] # [doc = "The caller needs to specify what should happen to the transferred assets once they reach"] # [doc = "the `dest` chain. This is done through the `custom_xcm_on_dest` parameter, which"] # [doc = "contains the instructions to execute on `dest` as a final step."] # [doc = "  This is usually as simple as:"] # [doc = "  `Xcm(vec![DepositAsset { assets: Wild(AllCounted(assets.len())), beneficiary }])`,"] # [doc = "  but could be something more exotic like sending the `assets` even further."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain, or `(parents: 2, (GlobalConsensus(..), ..))` to send from"] # [doc = "  parachain across a bridge to another ecosystem destination."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `assets_transfer_type`: The XCM `TransferType` used to transfer the `assets`."] # [doc = "- `remote_fees_id`: One of the included `assets` to be used to pay fees."] # [doc = "- `fees_transfer_type`: The XCM `TransferType` used to transfer the `fees` assets."] # [doc = "- `custom_xcm_on_dest`: The XCM to be executed on `dest` chain as the last step of the"] # [doc = "  transfer, which also determines what happens to the assets on the destination chain."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets_using_type_and_then { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , assets_transfer_type : :: subxt :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , remote_fees_id : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssetId > , fees_transfer_type : :: subxt :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , custom_xcm_on_dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 14)] # [doc = "Authorize another `aliaser` location to alias into the local `origin` making this call."] # [doc = "The `aliaser` is only authorized until the provided `expiry` block number."] # [doc = "The call can also be used for a previously authorized alias in order to update its"] # [doc = "`expiry` block number."] # [doc = ""] # [doc = "Usually useful to allow your local account to be aliased into from a remote location"] # [doc = "also under your control (like your account on another chain)."] # [doc = ""] # [doc = "WARNING: make sure the caller `origin` (you) trusts the `aliaser` location to act in"] # [doc = "their/your name. Once authorized using this call, the `aliaser` can freely impersonate"] # [doc = "`origin` in XCM programs executed on the local chain."] add_authorized_alias { aliaser : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , expires : :: core :: option :: Option < :: core :: primitive :: u64 > , } , # [codec (index = 15)] # [doc = "Remove a previously authorized `aliaser` from the list of locations that can alias into"] # [doc = "the local `origin` making this call."] remove_authorized_alias { aliaser : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 16)] # [doc = "Remove all previously authorized `aliaser`s that can alias into the local `origin`"] # [doc = "making this call."] remove_all_authorized_aliases , }
+                    # [codec (index = 0)] send { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , message : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , } , # [codec (index = 1)] # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_teleport_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] teleport_assets { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [codec (index = 2)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "**This function is deprecated: Use `limited_reserve_transfer_assets` instead.**"] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"] # [doc = "with all fees taken as needed from the asset."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] reserve_transfer_assets { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Execute an XCM message from a local, signed, origin."] # [doc = ""] # [doc = "An event is deposited indicating whether `msg` could be executed completely or only"] # [doc = "partially."] # [doc = ""] # [doc = "No more than `max_weight` will be used in its attempted execution. If this is less than"] # [doc = "the maximum amount of weight that the message could take to be executed, then no"] # [doc = "execution attempt will be made."] execute { message : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , max_weight : runtime_types :: sp_weights :: weight_v2 :: Weight , } , # [codec (index = 4)] # [doc = "Extoll that a particular destination can be communicated with through a particular"] # [doc = "version of XCM."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The destination that is being described."] # [doc = "- `xcm_version`: The latest version of XCM that `location` supports."] force_xcm_version { location : :: subxt :: alloc :: boxed :: Box < runtime_types :: staging_xcm :: v5 :: location :: Location > , version : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Set a safe XCM version (the version that XCM should be encoded with if the most recent"] # [doc = "version a destination can accept is unknown)."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `maybe_xcm_version`: The default XCM encoding version, or `None` to disable."] force_default_xcm_version { maybe_xcm_version : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 6)] # [doc = "Ask a location to notify us regarding their XCM version and any changes to it."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we should subscribe for XCM version notifications."] force_subscribe_version_notify { location : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 7)] # [doc = "Require that a particular destination should no longer notify us regarding any XCM"] # [doc = "version changes."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `location`: The location to which we are currently subscribed for XCM version"] # [doc = "  notifications which we no longer desire."] force_unsubscribe_version_notify { location : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 8)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve."] # [doc = ""] # [doc = "`assets` must have same reserve location and may not be teleportable to `dest`."] # [doc = " - `assets` have local reserve: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `assets` have destination reserve: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `assets` have remote reserve: burn local assets, forward XCM to reserve chain to move"] # [doc = "   reserves from this chain's SA to `dest` chain's SA, and forward another XCM to `dest`"] # [doc = "   to mint and deposit reserve-based assets to `beneficiary`."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_reserve_transfer_assets { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 9)] # [doc = "Teleport some assets from the local chain to some destination chain."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` chain."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] limited_teleport_assets { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 10)] # [doc = "Set or unset the global suspension state of the XCM executor."] # [doc = ""] # [doc = "- `origin`: Must be an origin specified by AdminOrigin."] # [doc = "- `suspended`: `true` to suspend, `false` to resume."] force_suspension { suspended : :: core :: primitive :: bool , } , # [codec (index = 11)] # [doc = "Transfer some assets from the local chain to the destination chain through their local,"] # [doc = "destination or remote reserve, or through teleports."] # [doc = ""] # [doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"] # [doc = "index `fee_asset_item` (hence referred to as `fees`), up to enough to pay for"] # [doc = "`weight_limit` of weight. If more weight is needed than `weight_limit`, then the"] # [doc = "operation will fail and the sent assets may be at risk."] # [doc = ""] # [doc = "`assets` (excluding `fees`) must have same reserve location or otherwise be teleportable"] # [doc = "to `dest`, no limitations imposed on `fees`."] # [doc = " - for local reserve: transfer assets to sovereign account of destination chain and"] # [doc = "   forward a notification XCM to `dest` to mint and deposit reserve-based assets to"] # [doc = "   `beneficiary`."] # [doc = " - for destination reserve: burn local assets and forward a notification to `dest` chain"] # [doc = "   to withdraw the reserve assets from this chain's sovereign account and deposit them"] # [doc = "   to `beneficiary`."] # [doc = " - for remote reserve: burn local assets, forward XCM to reserve chain to move reserves"] # [doc = "   from this chain's SA to `dest` chain's SA, and forward another XCM to `dest` to mint"] # [doc = "   and deposit reserve-based assets to `beneficiary`."] # [doc = " - for teleports: burn local assets and forward XCM to `dest` chain to mint/teleport"] # [doc = "   assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `X2(Parent,"] # [doc = "  Parachain(..))` to send from parachain to parachain, or `X1(Parachain(..))` to send"] # [doc = "  from relay to parachain."] # [doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will"] # [doc = "  generally be an `AccountId32` value."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"] # [doc = "  fees."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , fee_asset_item : :: core :: primitive :: u32 , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 12)] # [doc = "Claims assets trapped on this pallet because of leftover assets during XCM execution."] # [doc = ""] # [doc = "- `origin`: Anyone can call this extrinsic."] # [doc = "- `assets`: The exact assets that were trapped. Use the version to specify what version"] # [doc = "was the latest when they were trapped."] # [doc = "- `beneficiary`: The location/account where the claimed assets will be deposited."] # [doc = ""] # [doc = "The weight of this call is linear in the number of assets claimed."] claim_assets { assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , beneficiary : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 13)] # [doc = "Transfer assets from the local chain to the destination chain using explicit transfer"] # [doc = "types for assets and fees."] # [doc = ""] # [doc = "`assets` must have same reserve location or may be teleportable to `dest`. Caller must"] # [doc = "provide the `assets_transfer_type` to be used for `assets`:"] # [doc = " - `TransferType::LocalReserve`: transfer assets to sovereign account of destination"] # [doc = "   chain and forward a notification XCM to `dest` to mint and deposit reserve-based"] # [doc = "   assets to `beneficiary`."] # [doc = " - `TransferType::DestinationReserve`: burn local assets and forward a notification to"] # [doc = "   `dest` chain to withdraw the reserve assets from this chain's sovereign account and"] # [doc = "   deposit them to `beneficiary`."] # [doc = " - `TransferType::RemoteReserve(reserve)`: burn local assets, forward XCM to `reserve`"] # [doc = "   chain to move reserves from this chain's SA to `dest` chain's SA, and forward another"] # [doc = "   XCM to `dest` to mint and deposit reserve-based assets to `beneficiary`. Typically"] # [doc = "   the remote `reserve` is Asset Hub."] # [doc = " - `TransferType::Teleport`: burn local assets and forward XCM to `dest` chain to"] # [doc = "   mint/teleport assets and deposit them to `beneficiary`."] # [doc = ""] # [doc = "On the destination chain, as well as any intermediary hops, `BuyExecution` is used to"] # [doc = "buy execution using transferred `assets` identified by `remote_fees_id`."] # [doc = "Make sure enough of the specified `remote_fees_id` asset is included in the given list"] # [doc = "of `assets`. `remote_fees_id` should be enough to pay for `weight_limit`. If more weight"] # [doc = "is needed than `weight_limit`, then the operation will fail and the sent assets may be"] # [doc = "at risk."] # [doc = ""] # [doc = "`remote_fees_id` may use different transfer type than rest of `assets` and can be"] # [doc = "specified through `fees_transfer_type`."] # [doc = ""] # [doc = "The caller needs to specify what should happen to the transferred assets once they reach"] # [doc = "the `dest` chain. This is done through the `custom_xcm_on_dest` parameter, which"] # [doc = "contains the instructions to execute on `dest` as a final step."] # [doc = "  This is usually as simple as:"] # [doc = "  `Xcm(vec![DepositAsset { assets: Wild(AllCounted(assets.len())), beneficiary }])`,"] # [doc = "  but could be something more exotic like sending the `assets` even further."] # [doc = ""] # [doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."] # [doc = "- `dest`: Destination context for the assets. Will typically be `[Parent,"] # [doc = "  Parachain(..)]` to send from parachain to parachain, or `[Parachain(..)]` to send from"] # [doc = "  relay to parachain, or `(parents: 2, (GlobalConsensus(..), ..))` to send from"] # [doc = "  parachain across a bridge to another ecosystem destination."] # [doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the"] # [doc = "  fee on the `dest` (and possibly reserve) chains."] # [doc = "- `assets_transfer_type`: The XCM `TransferType` used to transfer the `assets`."] # [doc = "- `remote_fees_id`: One of the included `assets` to be used to pay fees."] # [doc = "- `fees_transfer_type`: The XCM `TransferType` used to transfer the `fees` assets."] # [doc = "- `custom_xcm_on_dest`: The XCM to be executed on `dest` chain as the last step of the"] # [doc = "  transfer, which also determines what happens to the assets on the destination chain."] # [doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."] transfer_assets_using_type_and_then { dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , assets : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssets > , assets_transfer_type : :: subxt :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , remote_fees_id : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedAssetId > , fees_transfer_type : :: subxt :: alloc :: boxed :: Box < runtime_types :: staging_xcm_executor :: traits :: asset_transfer :: TransferType > , custom_xcm_on_dest : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedXcm > , weight_limit : runtime_types :: xcm :: v3 :: WeightLimit , } , # [codec (index = 14)] # [doc = "Authorize another `aliaser` location to alias into the local `origin` making this call."] # [doc = "The `aliaser` is only authorized until the provided `expiry` block number."] # [doc = "The call can also be used for a previously authorized alias in order to update its"] # [doc = "`expiry` block number."] # [doc = ""] # [doc = "Usually useful to allow your local account to be aliased into from a remote location"] # [doc = "also under your control (like your account on another chain)."] # [doc = ""] # [doc = "WARNING: make sure the caller `origin` (you) trusts the `aliaser` location to act in"] # [doc = "their/your name. Once authorized using this call, the `aliaser` can freely impersonate"] # [doc = "`origin` in XCM programs executed on the local chain."] add_authorized_alias { aliaser : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , expires : :: core :: option :: Option < :: core :: primitive :: u64 > , } , # [codec (index = 15)] # [doc = "Remove a previously authorized `aliaser` from the list of locations that can alias into"] # [doc = "the local `origin` making this call."] remove_authorized_alias { aliaser : :: subxt :: alloc :: boxed :: Box < runtime_types :: xcm :: VersionedLocation > , } , # [codec (index = 16)] # [doc = "Remove all previously authorized `aliaser`s that can alias into the local `origin`"] # [doc = "making this call."] remove_all_authorized_aliases , }
                 #[derive(
                     :: subxt :: ext :: scale_decode :: DecodeAsType,
                     :: subxt :: ext :: scale_encode :: EncodeAsType,
@@ -59997,6 +60105,9 @@ pub mod api {
                         #[doc = "Cannot perform a parachain slot / lifecycle swap. Check that the state of both paras"]
                         #[doc = "are correct for the swap to work."]
                         CannotSwap,
+                        #[codec(index = 14)]
+                        #[doc = "The operation is scaffolded but not implemented yet."]
+                        NotImplemented,
                     }
                     #[derive(
                         :: subxt :: ext :: scale_decode :: DecodeAsType,
@@ -60333,7 +60444,7 @@ pub mod api {
                     #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
                     #[doc = "Extrinsics to be called by the Coretime chain."]
                     pub enum Call {
-                        # [codec (index = 1)] # [doc = "Request the configuration to be updated with the specified number of cores. Warning:"] # [doc = "Since this only schedules a configuration update, it takes two sessions to come into"] # [doc = "effect."] # [doc = ""] # [doc = "- `origin`: Root or the Coretime Chain"] # [doc = "- `count`: total number of cores"] request_core_count { count : :: core :: primitive :: u16 , } , # [codec (index = 2)] # [doc = "Request to claim the instantaneous coretime sales revenue starting from the block it was"] # [doc = "last claimed until and up to the block specified. The claimed amount value is sent back"] # [doc = "to the Coretime chain in a `notify_revenue` message. At the same time, the amount is"] # [doc = "teleported to the Coretime chain."] request_revenue_at { when : :: core :: primitive :: u32 , } , # [codec (index = 3)] credit_account { who : :: subxt :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Receive instructions from the `ExternalBrokerOrigin`, detailing how a specific core is"] # [doc = "to be used."] # [doc = ""] # [doc = "Parameters:"] # [doc = "-`origin`: The `ExternalBrokerOrigin`, assumed to be the coretime chain."] # [doc = "-`core`: The core that should be scheduled."] # [doc = "-`begin`: The starting blockheight of the instruction."] # [doc = "-`assignment`: How the blockspace should be utilised."] # [doc = "-`end_hint`: An optional hint as to when this particular set of instructions will end."] assign_core { core : :: core :: primitive :: u16 , begin : :: core :: primitive :: u32 , assignment : :: subxt :: alloc :: vec :: Vec < (runtime_types :: pallet_broker :: coretime_interface :: CoreAssignment , runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: PartsOf57600 ,) > , end_hint : :: core :: option :: Option < :: core :: primitive :: u32 > , } , }
+                        # [codec (index = 1)] # [doc = "Request the configuration to be updated with the specified number of cores. Warning:"] # [doc = "Since this only schedules a configuration update, it takes two sessions to come into"] # [doc = "effect."] # [doc = ""] # [doc = "- `origin`: Root or the Coretime Chain"] # [doc = "- `count`: total number of cores"] request_core_count { count : :: core :: primitive :: u16 , } , # [codec (index = 2)] # [doc = "Request to claim the instantaneous coretime sales revenue starting from the block it was"] # [doc = "last claimed until and up to the block specified. The claimed amount value is sent back"] # [doc = "to the Coretime chain in a `notify_revenue` message. At the same time, the amount is"] # [doc = "teleported to the Coretime chain."] request_revenue_at { when : :: core :: primitive :: u32 , } , # [codec (index = 3)] credit_account { who : :: subxt :: utils :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Receive instructions from the `ExternalBrokerOrigin`, detailing how a specific core is"] # [doc = "to be used."] # [doc = ""] # [doc = "Parameters:"] # [doc = "-`origin`: The `ExternalBrokerOrigin`, assumed to be the coretime chain."] # [doc = "-`core`: The core that should be scheduled."] # [doc = "-`begin`: The starting blockheight of the instruction."] # [doc = "-`assignment`: How the blockspace should be utilised."] # [doc = "-`end_hint`: An optional hint as to when this particular set of instructions will end."] assign_core { core : :: core :: primitive :: u16 , begin : :: core :: primitive :: u32 , assignment : :: subxt :: alloc :: vec :: Vec < (runtime_types :: pallet_broker :: coretime_interface :: CoreAssignment , runtime_types :: polkadot_runtime_parachains :: scheduler :: assigner_coretime :: PartsOf57600 ,) > , end_hint : :: core :: option :: Option < :: core :: primitive :: u32 > , } , # [codec (index = 5)] # [doc = "Receive on-demand coretime orders from the `ExternalBrokerOrigin`."] # [doc = ""] # [doc = "Parameters:"] # [doc = "-`origin`: The `ExternalBrokerOrigin`, assumed to be the coretime chain."] # [doc = "-`batch`: The batch of on-demand orders."] queue_on_demand_batch { batch : :: subxt :: alloc :: vec :: Vec < (runtime_types :: polkadot_parachain_primitives :: primitives :: Id , :: core :: primitive :: u32 ,) > , } , }
                     #[derive(
                         :: subxt :: ext :: scale_decode :: DecodeAsType,
                         :: subxt :: ext :: scale_encode :: EncodeAsType,
@@ -61017,6 +61128,19 @@ pub mod api {
                         AccountCredited {
                             who: ::subxt::utils::AccountId32,
                             amount: ::core::primitive::u128,
+                        },
+                        #[codec(index = 3)]
+                        #[doc = "The order queue was unexpectedly full - this indicates a problem with the configuration"]
+                        #[doc = "of the on-demand pallet on the Coretime chain. `dropped` indicates how many orders were"]
+                        #[doc = "dropped because they couldn't be queued."]
+                        UnexpectedQueueFull { dropped: ::core::primitive::u32 },
+                        #[codec(index = 4)]
+                        #[doc = "A batch of on-demand orders from the broker chain has been queued."]
+                        BatchQueued {
+                            batch: ::subxt::alloc::vec::Vec<(
+                                runtime_types::polkadot_parachain_primitives::primitives::Id,
+                                ::core::primitive::u32,
+                            )>,
                         },
                     }
                 }
@@ -62120,6 +62244,14 @@ pub mod api {
                 #[codec(index = 255)]
                 Sudo(runtime_types::pallet_sudo::pallet::Event),
             }
+            #[derive(
+                :: subxt :: ext :: scale_decode :: DecodeAsType,
+                :: subxt :: ext :: scale_encode :: EncodeAsType,
+                Debug,
+            )]
+            #[decode_as_type(crate_path = ":: subxt :: ext :: scale_decode")]
+            #[encode_as_type(crate_path = ":: subxt :: ext :: scale_encode")]
+            pub enum RuntimeFreezeReason {}
             #[derive(
                 :: subxt :: ext :: scale_decode :: DecodeAsType,
                 :: subxt :: ext :: scale_encode :: EncodeAsType,
