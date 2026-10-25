@@ -713,8 +713,27 @@ pub enum ViewFunctionError {
     CouldNotEncodeInputs(frame_decode::view_functions::ViewFunctionInputsEncodeError),
     #[error("Failed to decode View Function: {0}")]
     CouldNotDecodeResponse(frame_decode::view_functions::ViewFunctionDecodeError<u32>),
+    #[error("Failed to decode the result of the View Function Runtime API call: {0}")]
+    CouldNotDecodeDispatchResult(codec::Error),
+    #[error("The runtime could not dispatch the View Function: {0}")]
+    DispatchError(ViewFunctionDispatchError),
     #[error("Cannot call the View Function Runtime API: {0}")]
     CannotCallApi(BackendError),
+}
+
+/// The reason that the runtime gives for failing to dispatch a View Function. This
+/// mirrors `ViewFunctionDispatchError` in `frame_support::view_functions`.
+#[derive(Debug, Clone, PartialEq, Eq, codec::Decode, thiserror::Error)]
+pub enum ViewFunctionDispatchError {
+    /// View Functions are not implemented for this runtime.
+    #[error("View Functions are not implemented for this runtime")]
+    NotImplemented,
+    /// No View Function with the given query ID was found.
+    #[error("View Function with query ID 0x{} not found", Hex::from(.0))]
+    NotFound([u8; 32]),
+    /// The runtime failed to decode the View Function inputs.
+    #[error("The runtime failed to decode the View Function inputs")]
+    Codec,
 }
 
 impl ViewFunctionError {
