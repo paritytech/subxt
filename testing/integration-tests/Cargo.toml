@@ -27,7 +27,10 @@ legacy-backend = []
 
 [dev-dependencies]
 assert_matches = { workspace = true }
-codec = { package = "parity-scale-codec", workspace = true, features = ["derive", "bit-vec"] }
+codec = { package = "parity-scale-codec", workspace = true, features = [
+    "derive",
+    "bit-vec",
+] }
 frame-decode = { workspace = true }
 frame-metadata = { workspace = true }
 futures = { workspace = true }
@@ -38,7 +41,12 @@ scale-info = { workspace = true, features = ["bit-vec"] }
 scale-value = { workspace = true }
 sp-core = { workspace = true, features = ["std"] }
 syn = { workspace = true }
-subxt = { workspace = true, features = ["unstable-metadata", "native", "jsonrpsee", "reconnecting-rpc-client"] }
+subxt = { workspace = true, features = [
+    "unstable-metadata",
+    "native",
+    "jsonrpsee",
+    "reconnecting-rpc-client",
+] }
 subxt-signer = { workspace = true, features = ["default", "subxt"] }
 subxt-codegen = { workspace = true }
 subxt-metadata = { workspace = true }
@@ -52,4 +60,4 @@ substrate-runner = { workspace = true }
 subxt-test-macro = { path = "subxt-test-macro" }
 
 [build-dependencies]
-cfg_aliases = "0.2.1"
+cfg_aliases = "0.2.2"
