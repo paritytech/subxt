@@ -28,6 +28,24 @@ pub trait TransactionExtensions<T: Config>:
 
     /// Set the signature and account ID for any transaction extensions that care.
     fn inject_signature(&mut self, account_id: &T::AccountId, signature: &T::Signature);
+
+    /// Whether the transaction extension with the given name wants its inherited
+    /// implication injected via [`TransactionExtensions::inject_implication`] when a
+    /// V5 general transaction is built. Defaults to `false`.
+    fn needs_implication(&self, _name: &str) -> bool {
+        false
+    }
+
+    /// Hand the transaction extension with the given name its inherited implication: the
+    /// SCALE encoded bytes the runtime passes to it in `validate`, before any hashing.
+    /// Defaults to doing nothing.
+    fn inject_implication(
+        &mut self,
+        _name: &str,
+        _implication: &[u8],
+    ) -> Result<(), TransactionExtensionError> {
+        Ok(())
+    }
 }
 
 /// A single transaction extension.
@@ -52,6 +70,27 @@ pub trait TransactionExtension<T: Config>:
 
     /// Set the signature and accountID for this transaction extension. Defaults to doing nothing.
     fn inject_signature(&mut self, _account_id: &T::AccountId, _signature: &T::Signature) {}
+
+    /// Whether this transaction extension wants its inherited implication injected via
+    /// [`TransactionExtension::inject_implication`] when a V5 general transaction is built.
+    /// Defaults to `false`.
+    ///
+    /// Extensions that authorize a transaction by proving over its implication (for
+    /// example by signing it) return `true` here.
+    fn needs_implication(&self) -> bool {
+        false
+    }
+
+    /// Hand this transaction extension its inherited implication: the SCALE encoded bytes
+    /// the runtime passes to it in `validate`, before any hashing. This is the transaction
+    /// extension version, the call, and then the explicit and implicit data of every
+    /// extension that comes after this one.
+    ///
+    /// Implications are injected from the last extension to the first, so the value of
+    /// every later extension is already final when this is called. Defaults to doing nothing.
+    fn inject_implication(&mut self, _implication: &[u8]) -> Result<(), TransactionExtensionError> {
+        Ok(())
+    }
 }
 
 /// This provides access to some relevant client state in transaction extensions,
@@ -144,6 +183,24 @@ macro_rules! impl_extensions_tuple {
 
             fn inject_signature(&mut self, account_id: &Conf::AccountId, signature: &Conf::Signature) {
                 $(self.$index.inject_signature(account_id, signature);)+
+            }
+
+            fn needs_implication(&self, name: &str) -> bool {
+                $(
+                    if <$ident as frame_decode::extrinsics::TransactionExtension<PortableRegistry>>::NAME == name {
+                        return self.$index.needs_implication();
+                    }
+                )+
+                false
+            }
+
+            fn inject_implication(&mut self, name: &str, implication: &[u8]) -> Result<(), TransactionExtensionError> {
+                $(
+                    if <$ident as frame_decode::extrinsics::TransactionExtension<PortableRegistry>>::NAME == name {
+                        return self.$index.inject_implication(implication);
+                    }
+                )+
+                Ok(())
             }
         }
     }

@@ -176,6 +176,18 @@ impl<T: Config> TransactionExtensions<T> for DefaultTransactionExtensions<T> {
     fn inject_signature(&mut self, account_id: &T::AccountId, signature: &T::Signature) {
         self.known.inject_signature(account_id, signature);
     }
+
+    fn needs_implication(&self, name: &str) -> bool {
+        self.known.needs_implication(name)
+    }
+
+    fn inject_implication(
+        &mut self,
+        name: &str,
+        implication: &[u8],
+    ) -> Result<(), TransactionExtensionError> {
+        self.known.inject_implication(name, implication)
+    }
 }
 
 /// Whether a type encodes to zero bytes; mirrors the check frame-decode uses to skip
