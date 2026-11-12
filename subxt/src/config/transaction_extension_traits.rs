@@ -13,6 +13,7 @@ use scale_info::PortableRegistry;
 ///   can be encoded to value or implicit bytes.
 /// - Accepts custom params on construction, allowing user configuration to be provided.
 /// - Can have an account ID and signature injected (useful for V5 transaction extensions).
+/// - Can have inherited implications injected, for V5 extensions that prove over them.
 pub trait TransactionExtensions<T: Config>:
     frame_decode::extrinsics::TransactionExtensions<PortableRegistry> + Sized
 {
@@ -32,6 +33,10 @@ pub trait TransactionExtensions<T: Config>:
     /// Whether the transaction extension with the given name wants its inherited
     /// implication injected via [`TransactionExtensions::inject_implication`] when a
     /// V5 general transaction is built. Defaults to `false`.
+    ///
+    /// Implementations that wrap other extensions must forward this and
+    /// [`TransactionExtensions::inject_implication`] to them, or those extensions are
+    /// never given their implications.
     fn needs_implication(&self, _name: &str) -> bool {
         false
     }
@@ -86,8 +91,10 @@ pub trait TransactionExtension<T: Config>:
     /// extension version, the call, and then the explicit and implicit data of every
     /// extension that comes after this one.
     ///
-    /// Implications are injected from the last extension to the first, so the value of
-    /// every later extension is already final when this is called. Defaults to doing nothing.
+    /// Implications are injected from the last extension to the first, when the transaction
+    /// is created and again after a signature is injected, so the implication always covers
+    /// the values that end up in the transaction. This may therefore be called more than
+    /// once, and each call replaces the last. Defaults to doing nothing.
     fn inject_implication(&mut self, _implication: &[u8]) -> Result<(), TransactionExtensionError> {
         Ok(())
     }

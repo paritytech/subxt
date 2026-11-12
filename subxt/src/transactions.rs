@@ -328,34 +328,14 @@ impl<T: Config, Client: OfflineClientAtBlockT<T>> TransactionsClient<T, Client> 
             }
         };
 
-        // 4. Hand each V5 extension that asks for it its inherited implication. This goes
-        // from the last extension to the first, since an implication covers the values of
-        // every extension after it.
+        // 4. Hand each V5 extension that asks for it its inherited implication.
         if let Some(version) = tx_extension_version {
-            let metadata = self.client.metadata_ref();
-            let names: Vec<&str> = metadata
-                .extrinsic()
-                .transaction_extensions_by_version(version)
-                .into_iter()
-                .flatten()
-                .map(|extension| extension.identifier())
-                .collect();
-            for name in names.into_iter().rev() {
-                if !tx_extensions.needs_implication(name) {
-                    continue;
-                }
-                let implication = frame_decode::extrinsics::encode_v5_implication(
-                    call.pallet_name(),
-                    call.call_name(),
-                    call.call_data(),
-                    version,
-                    name,
-                    &tx_extensions,
-                    metadata,
-                    metadata.types(),
-                )?;
-                tx_extensions.inject_implication(name, &implication)?;
-            }
+            inject_implications(
+                &mut tx_extensions,
+                call,
+                version,
+                self.client.metadata_ref(),
+            )?;
         }
 
         // Return these details, ready to construct a signed extrinsic from.
@@ -628,8 +608,15 @@ impl<'call, T: Config, Client: OfflineClientAtBlockT<T>, Call: Payload>
         signature: &T::Signature,
     ) -> Result<SubmittableTransaction<T, Client>, ExtrinsicError> {
         let encoded = if let Some(transaction_extension_version) = self.tx_extension_version {
-            // Pass account and signature to extensions to be added.
+            // Pass account and signature to extensions to be added, then refresh any
+            // implications that cover the values the signature just changed.
             self.tx_extensions.inject_signature(account_id, signature);
+            inject_implications(
+                &mut self.tx_extensions,
+                self.call,
+                transaction_extension_version,
+                self.client.metadata_ref(),
+            )?;
 
             frame_decode::extrinsics::encode_v5_general(
                 self.call.pallet_name(),
@@ -811,6 +798,46 @@ impl<T: Config, Client: OnlineClientAtBlockT<T>> SubmittableTransaction<T, Clien
 
         Ok(partial_fee)
     }
+}
+
+/// Hand each extension in the given V5 transaction extension version that asks for it its
+/// inherited implication. This goes from the last extension to the first, since an
+/// implication covers the values of every extension after it.
+fn inject_implications<T, Exts, Call>(
+    tx_extensions: &mut Exts,
+    call: &Call,
+    version: u8,
+    metadata: &crate::metadata::Metadata,
+) -> Result<(), ExtrinsicError>
+where
+    T: Config,
+    Exts: TransactionExtensions<T>,
+    Call: Payload,
+{
+    let names: Vec<&str> = metadata
+        .extrinsic()
+        .transaction_extensions_by_version(version)
+        .into_iter()
+        .flatten()
+        .map(|extension| extension.identifier())
+        .collect();
+    for name in names.into_iter().rev() {
+        if !tx_extensions.needs_implication(name) {
+            continue;
+        }
+        let implication = frame_decode::extrinsics::encode_v5_implication(
+            call.pallet_name(),
+            call.call_name(),
+            call.call_data(),
+            version,
+            name,
+            tx_extensions,
+            metadata,
+            metadata.types(),
+        )?;
+        tx_extensions.inject_implication(name, &implication)?;
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -1137,7 +1164,7 @@ mod test {
         #[derive(Debug, Clone)]
         struct ProvingConfig(SubstrateConfig);
 
-        type ProvingExtensions = (Prover<0>, Prover<1>, VerifySignature<ProvingConfig>, Plain);
+        type ProvingExtensions = (Prover<0>, Prover<1>, Plain, VerifySignature<ProvingConfig>);
 
         impl Config for ProvingConfig {
             type AccountId = <SubstrateConfig as Config>::AccountId;
@@ -1266,13 +1293,16 @@ mod test {
         }
 
         #[allow(dead_code)]
-        #[derive(scale_info::TypeInfo)]
+        #[derive(scale_info::TypeInfo, Encode)]
         enum VerifyMultiSignatureValue {
-            Signed,
+            Signed {
+                signature: crate::utils::MultiSignature,
+                account: crate::utils::AccountId32,
+            },
             Disabled,
         }
 
-        /// Metadata declaring version 0 as `ProverA`, `ProverB`, `VerifyMultiSignature`, `Plain`.
+        /// Metadata declaring version 0 as `ProverA`, `ProverB`, `Plain`, `VerifyMultiSignature`.
         fn proving_metadata() -> Metadata {
             use frame_metadata::v16;
             use scale_info::meta_type;
@@ -1322,14 +1352,14 @@ mod test {
                             implicit: meta_type::<()>(),
                         },
                         v16::TransactionExtensionMetadata {
-                            identifier: "VerifyMultiSignature",
-                            ty: meta_type::<VerifyMultiSignatureValue>(),
-                            implicit: meta_type::<()>(),
-                        },
-                        v16::TransactionExtensionMetadata {
                             identifier: "Plain",
                             ty: meta_type::<u32>(),
                             implicit: meta_type::<u64>(),
+                        },
+                        v16::TransactionExtensionMetadata {
+                            identifier: "VerifyMultiSignature",
+                            ty: meta_type::<VerifyMultiSignatureValue>(),
+                            implicit: meta_type::<()>(),
                         },
                     ],
                 },
@@ -1362,6 +1392,18 @@ mod test {
                 .unwrap()
         }
 
+        /// The implication a prover sees: version, call, the values of the extensions
+        /// after it, then their implicits (only `Plain` has a non empty one).
+        fn implication_with(call_data: &[u8], values: &[&[u8]]) -> Vec<u8> {
+            let mut out = vec![0u8];
+            out.extend(call_data);
+            for value in values {
+                out.extend(*value);
+            }
+            out.extend(9u64.encode());
+            out
+        }
+
         #[test]
         fn v5_signable_injects_implications_from_last_to_first() {
             let client = proving_client();
@@ -1374,23 +1416,58 @@ mod test {
                 .unwrap();
             let (prover_a, prover_b, _, _) = &signable.tx_extensions;
 
-            // Version, call, the values after ProverB (VerifyMultiSignature is `Disabled`,
-            // then Plain), then the implicits after it (only Plain's is non empty).
-            let mut expected_b = vec![0u8];
-            expected_b.extend(&call_data);
-            expected_b.push(1);
-            expected_b.extend(7u32.encode());
-            expected_b.extend(9u64.encode());
+            // `Plain`'s value, then `VerifyMultiSignature` as `Disabled`, then `Plain`'s implicit.
+            let disabled = VerifyMultiSignatureValue::Disabled.encode();
+            let expected_b = implication_with(&call_data, &[&7u32.encode(), &disabled]);
             assert_eq!(prover_b.seen.as_deref(), Some(&*expected_b));
 
             // ProverA's implication covers ProverB's final value, so ProverB went first.
-            let mut expected_a = vec![0u8];
-            expected_a.extend(&call_data);
-            expected_a.extend(sp_crypto_hashing::blake2_256(&expected_b));
-            expected_a.push(1);
-            expected_a.extend(7u32.encode());
-            expected_a.extend(9u64.encode());
+            let proof_b = sp_crypto_hashing::blake2_256(&expected_b);
+            let expected_a = implication_with(&call_data, &[&proof_b, &7u32.encode(), &disabled]);
             assert_eq!(prover_a.seen.as_deref(), Some(&*expected_a));
+        }
+
+        #[test]
+        fn v5_signing_refreshes_implications_that_cover_the_signature() {
+            let client = proving_client();
+            let tx = client.tx();
+            let call = dynamic("Test", "call", ());
+            let call_data = tx.call_data(&call).unwrap();
+
+            let account = crate::utils::AccountId32::from([3u8; 32]);
+            let signature = crate::utils::MultiSignature::Sr25519([5u8; 64]);
+            let mut signable = tx
+                .create_v5_signable_offline(&call, ((), (), (), ()))
+                .unwrap();
+            let submittable = signable
+                .sign_with_account_and_signature(&account, &signature)
+                .unwrap();
+
+            let signed = VerifyMultiSignatureValue::Signed {
+                signature: signature.clone(),
+                account,
+            }
+            .encode();
+            let expected_b = implication_with(&call_data, &[&7u32.encode(), &signed]);
+            let proof_b = sp_crypto_hashing::blake2_256(&expected_b);
+            let expected_a = implication_with(&call_data, &[&proof_b, &7u32.encode(), &signed]);
+            let proof_a = sp_crypto_hashing::blake2_256(&expected_a);
+
+            let (prover_a, prover_b, _, _) = &signable.tx_extensions;
+            assert_eq!(prover_b.seen.as_deref(), Some(&*expected_b));
+            assert_eq!(prover_a.seen.as_deref(), Some(&*expected_a));
+
+            // The transaction carries both refreshed proofs ahead of the signed details.
+            let mut extensions = proof_a.to_vec();
+            extensions.extend(proof_b);
+            extensions.extend(7u32.encode());
+            extensions.extend(&signed);
+            let encoded = submittable.encoded();
+            assert!(
+                encoded
+                    .windows(extensions.len())
+                    .any(|window| window == extensions.as_slice())
+            );
         }
     }
 }

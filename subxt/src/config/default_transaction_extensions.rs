@@ -177,6 +177,8 @@ impl<T: Config> TransactionExtensions<T> for DefaultTransactionExtensions<T> {
         self.known.inject_signature(account_id, signature);
     }
 
+    // Custom extensions are fixed values that cannot prove anything, so only the known
+    // extensions are asked.
     fn needs_implication(&self, name: &str) -> bool {
         self.known.needs_implication(name)
     }
