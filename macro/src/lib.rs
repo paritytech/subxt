@@ -38,11 +38,11 @@ struct RuntimeMetadataArgs {
     derive_for_all_types: Option<Punctuated<syn::Path, syn::Token![,]>>,
     #[darling(default)]
     attributes_for_all_types: Option<Punctuated<OuterAttribute, syn::Token![,]>>,
-    #[darling(multiple)]
+    #[darling(multiple, default)]
     derive_for_type: Vec<DeriveForType>,
-    #[darling(multiple)]
+    #[darling(multiple, default)]
     attributes_for_type: Vec<AttributesForType>,
-    #[darling(multiple)]
+    #[darling(multiple, default)]
     substitute_type: Vec<SubstituteType>,
     #[darling(default, rename = "crate")]
     crate_path: Option<syn::Path>,
