@@ -57,49 +57,34 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
 9.  Once the branch has been reviewed and passes CI, merge it.
 
-10. Now, we're ready to publish the release to crates.io.
+10. Publish the release. Crates are published by
+    [paritytech/crates_publish_automation](https://github.com/paritytech/crates_publish_automation) as
+    `parity-crate-owner`; the `Release` workflow in this repository only packages them and hands them over.
 
-    1.  Checkout `master`, ensuring we're looking at that latest merge (`git pull`).
+    1.  On the latest `master`, check that the crates package:
 
         ```
         git checkout master && git pull
+        cargo package --locked --exclude-lockfile --no-verify \
+          $(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.publish == null) | "-p \(.name)"')
         ```
 
-    2.  Perform a final sanity check that everything looks ok.
+    2.  Tag the commit and push the tag:
 
         ```
-        cargo test --all-targets
+        git tag -s v0.17.0 # use the version you are releasing, not this one
+        git push origin v0.17.0
         ```
 
-    3.  Run the following command to publish each crate in the required order.
+    3.  On [the releases page](https://github.com/paritytech/subxt/releases), publish a release from that
+        tag with the changelog section as description. Tick "Set as a pre-release" for a `-beta`.
 
-        Prior to running this, you'll need to remove the dev dependencies in `subxt-metadata` and `subxt` to
-        avoid circular dependencies and commit those _or_ append `--allow-dirty` to each of the following.
+    Publishing the release runs the `Release` workflow: it packages the crates and dispatches the
+    publisher, which publishes whatever crates.io does not have yet, in dependency order. Follow the run
+    here, then the `Publish paritytech/subxt` run in `crates_publish_automation`, then check crates.io.
 
-        ```
-        (cd utils/strip-metadata && cargo publish) && \
-        (cd utils/fetch-metadata && cargo publish) && \
-        (cd utils/accountid32 && cargo publish) && \
-        (cd lightclient && cargo publish) && \
-        (cd metadata && cargo publish) && \
-        (cd codegen && cargo publish) && \
-        (cd macro && cargo publish) && \
-        (cd rpcs && cargo publish) && \
-        (cd subxt && cargo publish) && \
-        (cd signer && cargo publish) && \
-        (cd cli && cargo publish);
-        ```
+11. If it fails, the `Release` run is red (nothing was published) or the publisher opens an issue labelled
+    `failure` here. Fix the cause and re-run the `Release` workflow; already published versions are skipped.
+    Never move a pushed tag: if code has to change, release the next patch version.
 
-        You **MUST** remember to `git reset HEAD~1` after this to avoid committing the dev dependency removal.
-
-11. If the release was successful, tag the commit that we released in the `master` branch with the
-    version that we just released, for example:
-
-    ```
-    git tag -s v0.17.0 # use the version number you've just published to crates.io, not this one
-    git push --tags
-    ```
-
-    Once this is pushed, go along to [the releases page on GitHub](https://github.com/paritytech/subxt/releases)
-    and draft a new release which points to the tag you just pushed to `master` above. Copy the changelog comments
-    for the current release into the release description.
+    Backports use the same flow from a `v0.N.x` branch, with "Set as the latest release" unticked.
