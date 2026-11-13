@@ -5,11 +5,11 @@ use subxt::{
 use subxt_signer::sr25519::dev::{self};
 
 #[subxt::subxt(runtime_metadata_path = "statemint_metadata.scale")]
-pub mod statemint {}
+pub mod asset_hub {}
 
 // PolkadotConfig or SubstrateConfig will suffice for this example at the moment,
 // but PolkadotConfig is a little more correct, having the right `Address` type.
-type StatemintConfig = PolkadotConfig;
+type AssetHubConfig = PolkadotConfig;
 
 #[tokio::main]
 pub async fn main() {
@@ -20,7 +20,7 @@ pub async fn main() {
 
 async fn run() -> Result<(), Box<dyn std::error::Error>> {
     // (the port 42069 is specified in the asset-hub-zombienet.toml)
-    let api = OnlineClient::<StatemintConfig>::from_url("ws://127.0.0.1:42069").await?;
+    let api = OnlineClient::<AssetHubConfig>::from_url("ws://127.0.0.1:42069").await?;
     println!("Connection with parachain established.");
 
     let alice: MultiAddress<AccountId32, ()> = dev::alice().public_key().into();
@@ -30,7 +30,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     const NTF_ID: u32 = 234;
 
     // create a collection with id `12`
-    let collection_creation_tx = statemint::tx()
+    let collection_creation_tx = asset_hub::tx()
         .uniques()
         .create(COLLECTION_ID, alice.clone());
     let _collection_creation_events = api
@@ -47,7 +47,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     println!("Collection created.");
 
     // create an nft in that collection with id `234`
-    let nft_creation_tx = statemint::tx()
+    let nft_creation_tx = asset_hub::tx()
         .uniques()
         .mint(COLLECTION_ID, NTF_ID, alice.clone());
     let _nft_creation_events = api
@@ -64,7 +64,7 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     println!("NFT created.");
 
     // check in storage, that alice is the official owner of the NFT:
-    let nft_owner_storage_query = statemint::storage().uniques().asset();
+    let nft_owner_storage_query = asset_hub::storage().uniques().asset();
     let nft_storage_details = api
         .at_current_block()
         .await?
