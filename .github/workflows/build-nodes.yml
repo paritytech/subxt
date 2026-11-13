@@ -18,7 +18,26 @@ jobs:
           repository: paritytech/polkadot-sdk
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler curl gcc make clang cmake llvm-dev libclang-dev
+        run: |
+          set -euo pipefail
+
+          apt_get() {
+            sudo apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 "$@"
+          }
+
+          attempts=3
+          for attempt in $(seq "$attempts"); do
+            if apt_get -o APT::Update::Error-Mode=any update && apt_get install -y protobuf-compiler curl gcc make clang cmake llvm-dev libclang-dev; then
+              exit 0
+            fi
+
+            if [ "$attempt" -lt "$attempts" ]; then
+              sleep $((attempt * 10))
+            fi
+          done
+
+          echo "::error::apt-get update/install failed after $attempts attempts"
+          exit 1
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
