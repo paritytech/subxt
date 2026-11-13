@@ -6412,9 +6412,9 @@ dependencies = [
 
 [[package]]
 name = "trie-db"
-version = "0.30.0"
+version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c0670ab45a6b7002c7df369fee950a27cf29ae0474343fd3a15aa15f691e7a6"
+checksum = "8768a658aaeca3b992933ee361e32f9e555f8056e7071d2a33e83c77b4db2df6"
 dependencies = [
  "hash-db",
  "log",
