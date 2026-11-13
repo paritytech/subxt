@@ -191,7 +191,7 @@ impl<T: Config> Stream for StorageFetchDescendantValuesStream<T> {
                     Poll::Ready(Ok(None)) => {
                         // Clear keys once result comes back.
                         this.keys = Vec::new();
-                        // But no results back for these keys we we just skip them.
+                        // But no results back for these keys we just skip them.
                         continue;
                     }
                     Poll::Ready(Err(e)) => {
