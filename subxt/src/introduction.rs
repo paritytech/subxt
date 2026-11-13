@@ -79,9 +79,9 @@
 //!    Read the [`crate::config`] docs for more.
 //! 2. Create a _client_ for interacting with the chain, which consumes this configuration.
 //!    Read the [`crate::client`] docs for more.
-//! 3. Pick a block to work at. To work at the current block at the time of calling, you'd use
-//!    [`crate::client::OnlineClient::at_current_block()`]. To stream blocks, you can use
-//!    [`crate::client::OnlineClient::stream_blocks()`] and similar.
+//! 3. Pick a block to work at. To work at the current finalized block at the time of calling, you'd use
+//!    [`crate::client::OnlineClient::at_current_block()`], or [`crate::client::OnlineClient::at_current_best_block()`]
+//!    for the best block. To stream blocks, you can use [`crate::client::OnlineClient::stream_blocks()`] and similar.
 //! 4. Do things in the context of this block. See the examples for more, or explore the documentation starting at
 //!    [`crate::client::ClientAtBlock`] to dig into the various things you can do at a given block.
 //!

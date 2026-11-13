@@ -105,6 +105,23 @@ async fn non_finalized_headers_subscription(api: &Client) -> Result<(), subxt::E
     Ok(())
 }
 
+// Check that the best block can be fetched and is not behind the finalized block.
+async fn best_block_lookup(api: &Client) -> Result<(), subxt::Error> {
+    tracing::trace!("Check best_block_lookup");
+
+    let finalized = api.at_current_block().await?;
+    let best = api.at_current_best_block().await?;
+
+    assert!(
+        best.block_number() >= finalized.block_number(),
+        "best block {} is behind finalized block {}",
+        best.block_number(),
+        finalized.block_number()
+    );
+
+    Ok(())
+}
+
 // Check that we can subscribe to finalized blocks.
 async fn finalized_headers_subscription(api: &Client) -> Result<(), subxt::Error> {
     let now = std::time::Instant::now();
@@ -256,6 +273,7 @@ async fn light_client_tests() {
         finalized_headers_subscription(&api),
     )
     .await;
+    run_check("best_block_lookup", best_block_lookup(&api)).await;
     run_check("runtime_api_call", runtime_api_call(&api)).await;
     run_check("storage_plain_lookup", storage_plain_lookup(&api)).await;
     run_check("dynamic_constant_query", dynamic_constant_query(&api)).await;

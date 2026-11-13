@@ -359,6 +359,18 @@ impl<T: Config> Backend<T> for CombinedBackend<T> {
         .await
     }
 
+    async fn latest_best_block_ref(&self) -> Result<BlockRef<HashFor<T>>, BackendError> {
+        try_backends(
+            &[
+                // Ignore archive backend; it doesn't support this.
+                self.chainhead(),
+                self.legacy(),
+            ],
+            async |b: &dyn Backend<T>| b.latest_best_block_ref().await,
+        )
+        .await
+    }
+
     async fn stream_all_block_headers(
         &self,
         hasher: T::Hasher,

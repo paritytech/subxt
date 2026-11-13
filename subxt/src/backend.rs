@@ -85,6 +85,9 @@ pub trait Backend<T: Config>: sealed::Sealed + Send + Sync + 'static {
     /// Note: needed only in blocks client for finalized block stream; can prolly be removed.
     async fn latest_finalized_block_ref(&self) -> Result<BlockRef<HashFor<T>>, BackendError>;
 
+    /// Get the current best block hash. It is not finalized and may be reorged or pruned.
+    async fn latest_best_block_ref(&self) -> Result<BlockRef<HashFor<T>>, BackendError>;
+
     /// A stream of all new block headers as they arrive.
     async fn stream_all_block_headers(
         &self,

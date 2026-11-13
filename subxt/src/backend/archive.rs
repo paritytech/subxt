@@ -180,6 +180,12 @@ impl<T: Config> Backend<T> for ArchiveBackend<T> {
         .await
     }
 
+    async fn latest_best_block_ref(&self) -> Result<BlockRef<HashFor<T>>, BackendError> {
+        Err(BackendError::Other(
+            "The archive backend cannot report the best block".into(),
+        ))
+    }
+
     async fn stream_all_block_headers(
         &self,
         _hasher: T::Hasher,

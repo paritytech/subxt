@@ -281,6 +281,21 @@ impl<T: Config> OnlineClient<T> {
         self.at_block(latest_block).await
     }
 
+    /// Instantiate a client to work at the current best block _at the time of instantiation_.
+    /// This does not track new blocks. The best block is not finalized and may be reorged or pruned.
+    pub async fn at_current_best_block(
+        &self,
+    ) -> Result<ClientAtBlock<T, OnlineClientAtBlockImpl<T>>, OnlineClientAtBlockError> {
+        let best_block = self
+            .inner
+            .backend
+            .latest_best_block_ref()
+            .await
+            .map_err(|e| OnlineClientAtBlockError::CannotGetCurrentBlock { reason: e })?;
+
+        self.at_block(best_block).await
+    }
+
     /// Instantiate a client for working at a specific block.
     pub async fn at_block(
         &self,
