@@ -254,6 +254,7 @@ impl<T: Config> CombinedBackend<T> {
     }
 }
 
+#[cfg(not(feature = "custom-backend"))]
 impl<T: Config> super::sealed::Sealed for CombinedBackend<T> {}
 
 // Our default behaviour:

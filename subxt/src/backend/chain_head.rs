@@ -261,6 +261,7 @@ impl<H: Hash + 'static> From<follow_stream_unpin::BlockRef<H>> for BlockRef<H> {
     }
 }
 
+#[cfg(not(feature = "custom-backend"))]
 impl<T: Config> super::sealed::Sealed for ChainHeadBackend<T> {}
 
 #[async_trait]
