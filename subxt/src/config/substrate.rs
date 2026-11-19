@@ -310,8 +310,14 @@ where
     H: Hash,
     SubstrateHeader<H>: Encode + Decode,
 {
+    type Hash = H;
+
     fn number(&self) -> u64 {
         self.number
+    }
+
+    fn parent_hash(&self) -> Self::Hash {
+        self.parent_hash
     }
 }
 
@@ -525,6 +531,24 @@ impl From<U256> for NumberOrHex {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn parent_hash_is_accessible_through_header_trait() {
+        fn parent<H: Header>(header: &H) -> H::Hash {
+            header.parent_hash()
+        }
+
+        let expected = H256::from([42; 32]);
+        let header = SubstrateHeader {
+            parent_hash: expected,
+            number: 1,
+            state_root: H256::zero(),
+            extrinsics_root: H256::zero(),
+            digest: Digest { logs: Vec::new() },
+        };
+
+        assert_eq!(parent(&header), expected);
+    }
 
     // Smoldot returns numeric block numbers in the header at the time of writing;
     // ensure we can deserialize them properly.

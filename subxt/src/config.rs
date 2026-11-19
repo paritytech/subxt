@@ -217,6 +217,12 @@ pub trait Hasher: Debug + Clone + Send + Sync + 'static {
 
 /// This represents the block header type used by a node.
 pub trait Header: Sized + Encode + Decode + Debug + Sync + Send + DeserializeOwned + Clone {
+    /// The hash type used within this header (e.g. for the parent hash).
+    type Hash: Hash;
+
     /// Return the block number of this header.
     fn number(&self) -> u64;
+
+    /// Return the hash of this header's parent block.
+    fn parent_hash(&self) -> Self::Hash;
 }
