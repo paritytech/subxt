@@ -56,15 +56,38 @@ impl From<[u8; 32]> for AccountId32 {
 }
 
 impl AccountId32 {
-    // Return the ss58-check string for this key. Adapted from `sp_core::crypto`. We need this to
-    // serialize our account appropriately but otherwise don't care.
+    // Display and serde retain the default Substrate prefix.
     fn ss58(&self) -> String {
-        // For serializing to a string to obtain the account nonce, we use the default substrate
-        // prefix (since we have no way to otherwise pick one). It doesn't really matter, since when
-        // it's deserialized back in system_accountNextIndex, we ignore this (so long as it's valid).
-        const SUBSTRATE_SS58_PREFIX: u8 = 42;
-        // prefix <= 63 just take up one byte at the start:
-        let mut v = vec![SUBSTRATE_SS58_PREFIX];
+        self.to_ss58check_with_prefix(42)
+            .expect("42 is a valid SS58 prefix")
+    }
+
+    /// Encode this account as an SS58 address with the given network prefix.
+    ///
+    /// Prefixes `0..=63` occupy one byte and `64..=16383` occupy two bytes.
+    /// Prefixes `46` and `47` are reserved and are rejected, as are values above
+    /// `16383`. This does not change the prefix used by [`Display`](core::fmt::Display)
+    /// or serde, which remains `42`.
+    ///
+    /// ```
+    /// use subxt_utils_accountid32::AccountId32;
+    ///
+    /// let account = AccountId32([1; 32]);
+    /// let address = account.to_ss58check_with_prefix(0).unwrap();
+    /// assert_eq!(address.parse::<AccountId32>().unwrap(), account);
+    /// ```
+    pub fn to_ss58check_with_prefix(&self, prefix: u16) -> Result<String, InvalidSs58Prefix> {
+        if prefix > 16383 || matches!(prefix, 46 | 47) {
+            return Err(InvalidSs58Prefix);
+        }
+        let mut v = if prefix <= 63 {
+            vec![prefix as u8]
+        } else {
+            vec![
+                0b0100_0000 | ((prefix & 0x00fc) >> 2) as u8,
+                (prefix >> 8) as u8 | ((prefix & 0x0003) << 6) as u8,
+            ]
+        };
         // then push the account ID bytes.
         v.extend(self.0);
         // then push a 2 byte checksum of what we have so far.
@@ -72,7 +95,7 @@ impl AccountId32 {
         v.extend(&r[0..2]);
         // then encode to base58.
         use base58::ToBase58;
-        v.to_base58()
+        Ok(v.to_base58())
     }
 
     // This isn't strictly needed, but to give our AccountId32 a little more usefulness, we also
@@ -108,6 +131,11 @@ impl AccountId32 {
         Ok(AccountId32(result))
     }
 }
+
+/// An invalid SS58 network prefix: greater than `16383`, or reserved (`46` or `47`).
+#[derive(Clone, Copy, Eq, PartialEq, Debug, DeriveError)]
+#[error("Invalid SS58 network prefix: expected 0..=16383, excluding 46 and 47")]
+pub struct InvalidSs58Prefix;
 
 /// An error obtained from trying to interpret an SS58 encoded string into an AccountId32
 #[derive(Clone, Copy, Eq, PartialEq, Debug, DeriveError)]
@@ -170,6 +198,42 @@ mod test {
     use super::*;
     use sp_core::{self, crypto::Ss58Codec};
     use sp_keyring::sr25519::Keyring;
+
+    #[test]
+    fn ss58_prefixes_match_substrate_and_round_trip() {
+        for keyring in [Keyring::Alice, Keyring::Bob, Keyring::Charlie] {
+            let substrate_account = keyring.to_account_id();
+            let account = AccountId32(substrate_account.clone().into());
+            for prefix in [0, 2, 42, 63, 64, 65, 255, 256, 1000, 16383] {
+                let address = account.to_ss58check_with_prefix(prefix).unwrap();
+                assert_eq!(
+                    address,
+                    substrate_account.to_ss58check_with_version(prefix.into()),
+                    "prefix {prefix}"
+                );
+                assert_eq!(address.parse::<AccountId32>().unwrap(), account);
+                let (decoded, format) =
+                    sp_core::crypto::AccountId32::from_ss58check_with_version(&address).unwrap();
+                assert_eq!(decoded, substrate_account);
+                assert_eq!(u16::from(format), prefix);
+            }
+            assert_eq!(
+                format!("{account}"),
+                account.to_ss58check_with_prefix(42).unwrap()
+            );
+        }
+    }
+
+    #[test]
+    fn ss58_rejects_reserved_and_out_of_range_prefixes() {
+        let account = AccountId32([0; 32]);
+        for prefix in [46, 47, 16384, u16::MAX] {
+            assert_eq!(
+                account.to_ss58check_with_prefix(prefix),
+                Err(InvalidSs58Prefix)
+            );
+        }
+    }
 
     #[test]
     fn ss58_is_compatible_with_substrate_impl() {
