@@ -20,7 +20,10 @@ workspace = true
 [features]
 # For dev and documentation reasons we enable more features than are often desired.
 # it's recommended to use `--no-default-features` and then select what you need.
-default = ["jsonrpsee", "native"]
+default = ["jsonrpsee", "native", "polkadot-legacy-types"]
+
+# Include the bundled type registry for historic Polkadot Relay Chain blocks.
+polkadot-legacy-types = ["frame-decode/legacy-types"]
 
 # Features that we expect to be enabled for documentation.
 docs = [
@@ -102,7 +105,7 @@ sp-crypto-hashing = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
 frame-metadata = { workspace = true }
-frame-decode = { workspace = true, features = ["legacy-types"] }
+frame-decode = { workspace = true }
 either = { workspace = true }
 web-time = { workspace = true }
 

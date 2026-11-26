@@ -8,7 +8,7 @@ use super::{Config, DefaultExtrinsicParamsBuilder, DefaultTransactionExtensions}
 
 use crate::config::substrate::{SubstrateConfig, SubstrateConfigBuilder};
 use crate::metadata::ArcMetadata;
-use scale_info_legacy::TypeRegistrySet;
+use scale_info_legacy::{ChainTypeRegistry, TypeRegistrySet};
 
 pub use crate::config::substrate::{SpecVersionForRange, SubstrateHeader};
 pub use crate::utils::{AccountId32, MultiAddress, MultiSignature};
@@ -36,9 +36,10 @@ impl PolkadotConfigBuilder {
         }
     }
 
-    /// Use historic types. These are enabled by default, but can be disabled to avoid
-    /// loading them in if they are not needed (ie you do not need to access any block
-    /// using a runtime which has V14 metadata).
+    /// Use the bundled historic types for Polkadot blocks that predate V14 metadata.
+    ///
+    /// These types are used by default when the `polkadot-legacy-types` Cargo
+    /// feature is enabled. This setting has no effect without that feature.
     pub fn use_historic_types(mut self, b: bool) -> Self {
         self.use_historic_types = b;
         self
@@ -76,13 +77,22 @@ impl PolkadotConfigBuilder {
 
     /// Construct the [`PolkadotConfig`] from this builder.
     pub fn build(mut self) -> PolkadotConfig {
-        if self.use_historic_types {
-            self.inner = self
-                .inner
-                .set_legacy_types(frame_decode::legacy_types::polkadot::relay_chain());
+        if let Some(types) = self.use_historic_types.then(bundled_legacy_types).flatten() {
+            self.inner = self.inner.set_legacy_types(types);
         }
 
         PolkadotConfig(self.inner.build())
+    }
+}
+
+fn bundled_legacy_types() -> Option<ChainTypeRegistry> {
+    #[cfg(feature = "polkadot-legacy-types")]
+    {
+        Some(frame_decode::legacy_types::polkadot::relay_chain())
+    }
+    #[cfg(not(feature = "polkadot-legacy-types"))]
+    {
+        None
     }
 }
 
@@ -153,6 +163,28 @@ impl Config for PolkadotConfig {
 /// A struct representing the signed extra and additional parameters required
 /// to construct a transaction for a polkadot node.
 pub type PolkadotExtrinsicParams<T> = DefaultTransactionExtensions<T>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn historic_types_follow_the_cargo_feature() {
+        assert_eq!(
+            PolkadotConfig::new()
+                .legacy_types_for_spec_version(1)
+                .is_some(),
+            cfg!(feature = "polkadot-legacy-types")
+        );
+        assert!(
+            PolkadotConfig::builder()
+                .use_historic_types(false)
+                .build()
+                .legacy_types_for_spec_version(1)
+                .is_none()
+        );
+    }
+}
 
 /// A builder which leads to [`PolkadotExtrinsicParams`] being constructed.
 /// This is what you provide to methods like `sign_and_submit()`.
